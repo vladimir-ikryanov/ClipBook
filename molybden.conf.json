@@ -1,0 +1,90 @@
+{
+  "app": {
+    "name": "Clipboard",
+    "version": {
+      "major": "1",
+      "minor": "0",
+      "patch": "0"
+    },
+    "author": "",
+    "copyright": "",
+    "description": "",
+    "bundle": {
+      "macOS": {
+        "icon": "src-cpp/assets/app.icns",
+        "bundleID": "",
+        "codesignIdentity": "",
+        "codesignEntitlements": "src-cpp/assets/entitlements.plist",
+        "teamID": "",
+        "appleID": "",
+        "password": "",
+        "installer": {
+          "dmg": {
+            "name": "",
+            "volumeName": "",
+            "volumeIcon": "src-cpp/assets/app.icns",
+            "eula": "",
+            "window": {
+              "textSize": 14,
+              "skipPrettifying": false,
+              "backgroundImage": "",
+              "position": {
+                "x": 500,
+                "y": 400
+              },
+              "size": {
+                "width": 600,
+                "height": 400
+              },
+              "icon": {
+                "size": 150,
+                "position": {
+                  "x": 160,
+                  "y": 160
+                }
+              },
+              "appDropLink": {
+                "x": 430,
+                "y": 160
+              }
+            }
+          }
+        }
+      },
+      "Windows": {
+        "icon": "src-cpp/assets/app.ico",
+        "certFile": "",
+        "certPassword": "",
+        "digestAlgorithm": "",
+        "timestampServerURL": "",
+        "installer": {
+          "exe": {
+            "name": "",
+            "icon": "src-cpp/assets/app.ico",
+            "loadingGif": "",
+            "releasesRepo": "",
+            "remoteToken": ""
+          }
+        }
+      },
+      "Linux": {
+        "icon": "src-cpp/assets/app128.png"
+      }
+    },
+    "configurations": {
+      "development": {
+        "server": {
+          "script": "npm run dev -- --port=6136"
+        },
+        "url": "http://localhost:6136"
+      },
+      "production": {
+        "build": {
+          "script": "npm run build",
+          "dir": "dist"
+        },
+        "url": "molybden://app/index.html"
+      }
+    }
+  }
+}

@@ -1,0 +1,82 @@
+:root {
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  height: 100%;
+  color: #1f1f1f;
+  background: radial-gradient(circle, #ffffff 0%, #e3e4e5 80%);
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  padding-top: 128px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.logo {
+  height: 128px;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+}
+
+h1 {
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+input,
+button {
+  outline: none;
+  font-size: 14px;
+  border-radius: 6px;
+}
+
+input {
+  border: 1px solid #cccccc;
+  padding: 10px;
+  color: black;
+  background-color: white;
+}
+
+button {
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  color: white;
+  background-color: black;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+button:hover {
+  background-color: #2e2e2e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #e6e6e6;
+    background: #202020;
+    background: radial-gradient(circle, #2e2e2e 0%, #202020 80%);
+  }
+
+  input {
+    color: white;
+    background-color: #202020;
+    border-color: #757575;
+  }
+
+  button {
+    color: black;
+    background-color: #e6e6e6;
+  }
+
+  button:hover {
+    background-color: #cccccc;
+  }
+}
