@@ -1,13 +1,11 @@
-import Sidebar from "@/Sidebar";
-import ClipboardItems from "@/ClipboardItems";
+import Sidebar from "@/components/Sidebar";
+import History from "@/components/History";
 
-function App() {
+export default function App() {
     return (
         <div className="flex h-screen">
             <Sidebar/>
-            <ClipboardItems/>
+            <History/>
         </div>
     )
 }
-
-export default App;
