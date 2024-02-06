@@ -1,13 +1,12 @@
 import '../App.css';
-import { TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import {TabsTrigger} from "@/components/ui/tabs";
 
 type HistoryItemProps = {
     index: number
     text: string
 }
 
-export default function HistoryItem({ index, text }: HistoryItemProps) {
+export default function HistoryItem({index, text}: HistoryItemProps) {
     return (
         <TabsTrigger
             value={index.toString()}
