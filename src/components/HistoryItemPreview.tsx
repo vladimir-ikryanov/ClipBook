@@ -13,8 +13,7 @@ export default function HistoryItemPreview({ index, text }: HistoryItemPreviewPr
                 <div className="mt-4">{text}</div>
                 <div className="grow"></div>
                 <div className="mb-5 text-gray-400">
-                    <p>Press <code>Enter</code> to paste in front application</p>
-                    <p>Press <code>Shift+Enter</code> to paste as plain text in front application</p>
+                    <p>Press <code>Enter</code> to paste as plain text in front application</p>
                     <p>Press <code>Delete</code> to remove from history</p>
                 </div>
             </div>
