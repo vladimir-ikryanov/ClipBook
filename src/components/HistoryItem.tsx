@@ -32,7 +32,7 @@ export default function HistoryItem({index, text, onUpdateHistory}: HistoryItemP
             value={index.toString()}
             className="flex flex-row data-[state=active]:bg-accent p-2 whitespace-nowrap overflow-hidden overflow-ellipsis"
             onKeyDown={keyDown}>
-            <div className="flex mr-2"><File className="h-4 w-4"/></div>
+            <div className="flex mr-3"><File className="h-4 w-4"/></div>
             <div
                 className="flex-grow text-base text-justify font-normal whitespace-nowrap overflow-hidden overflow-ellipsis">{text}</div>
         </TabsTrigger>
