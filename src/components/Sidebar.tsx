@@ -1,6 +1,6 @@
 import '../App.css';
 import {Button} from "@/components/ui/button"
-import {File, FileCode, Image, Link, Settings} from "lucide-react"
+import {Code, Code2, CodeIcon, File, FileCode, Image, Link, Settings} from "lucide-react"
 
 export default function Sidebar() {
     return (
@@ -12,7 +12,7 @@ export default function Sidebar() {
                 <Link className="h-4 w-4"/>
             </Button>
             <Button variant="ghost">
-                <FileCode className="h-4 w-4"/>
+                <Code className="h-4 w-4"/>
             </Button>
             <Button variant="ghost">
                 <Image className="h-4 w-4"/>

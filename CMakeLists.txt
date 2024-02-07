@@ -83,6 +83,10 @@ add_compile_definitions(APP_DESCRIPTION="${APP_DESCRIPTION}")
 
 add_library(${LIB_NAME} SHARED
         src-cpp/src/main.cc
+        src-cpp/src/main_app.h
+        src-cpp/src/main_app.cc
+        src-cpp/src/main_app_mac.h
+        src-cpp/src/main_app_mac.mm
         src-cpp/src/clipboard_manager.h
         src-cpp/src/clipboard_manager.cc
         ${MOLYBDEN_SDK_ASSETS_DIR}/app/toolkit.cc)
