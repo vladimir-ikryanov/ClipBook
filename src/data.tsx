@@ -1,7 +1,4 @@
 let historyItems: Set<string> = new Set();
-historyItems.add("Hello, World!")
-historyItems.add("Hello, World 1!")
-historyItems.add("Hello, World 2!")
 
 loadHistoryItems()
 
