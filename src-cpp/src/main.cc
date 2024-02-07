@@ -1,5 +1,7 @@
 #include "molybden.hpp"
 
+#include "clipboard_manager.h"
+
 using namespace molybden;
 
 void launch() {
@@ -37,5 +39,7 @@ void launch() {
         browser->hide();
       }
     });
+
+    ClipboardManager::create(browser)->start();
   });
 }

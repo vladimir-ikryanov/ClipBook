@@ -19,15 +19,15 @@ export default function History(props: HistoryProps) {
     return (
         <Tabs defaultValue="0" orientation="vertical" className="w-full p-0 m-0">
             <ResizablePanelGroup direction="horizontal">
-                <ResizablePanel defaultSize={30}>
-                    <ScrollArea className="h-full">
-                        <TabsList className="grid h-full grid-rows-3 justify-normal p-2">
+                <ResizablePanel defaultSize={40}>
+                    <ScrollArea className="h-full border-r border-gray-100">
+                        <TabsList className="grid h-full grid-rows-3 justify-normal p-2 pr-4 pl-4">
                             {items}
                         </TabsList>
                     </ScrollArea>
                 </ResizablePanel>
                 <ResizableHandle/>
-                <ResizablePanel defaultSize={70}>{previews}</ResizablePanel>
+                <ResizablePanel defaultSize={60}>{previews}</ResizablePanel>
             </ResizablePanelGroup>
         </Tabs>
     )

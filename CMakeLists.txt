@@ -81,7 +81,11 @@ add_compile_definitions(APP_VERSION="${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}.$
 add_compile_definitions(APP_COPYRIGHT="${APP_COPYRIGHT}")
 add_compile_definitions(APP_DESCRIPTION="${APP_DESCRIPTION}")
 
-add_library(${LIB_NAME} SHARED src-cpp/src/main.cc ${MOLYBDEN_SDK_ASSETS_DIR}/app/toolkit.cc)
+add_library(${LIB_NAME} SHARED
+        src-cpp/src/main.cc
+        src-cpp/src/clipboard_manager.h
+        src-cpp/src/clipboard_manager.cc
+        ${MOLYBDEN_SDK_ASSETS_DIR}/app/toolkit.cc)
 set_property(TARGET ${LIB_NAME} PROPERTY CXX_STANDARD 20)
 
 target_include_directories(${LIB_NAME} PRIVATE ${MOLYBDEN_SDK_DIR}/include)
