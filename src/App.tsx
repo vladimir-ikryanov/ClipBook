@@ -11,13 +11,17 @@ export default function App() {
         setHistory([...addHistoryItem(data)])
     }
 
+    function handleUpdateHistory() {
+        setHistory(getHistoryItems())
+    }
+
     // Attach the function to the window object
     (window as any).addClipboardData = addClipboardData;
 
     return (
         <div className="flex h-screen">
             <Sidebar/>
-            <History items={history}/>
+            <History items={history} onUpdateHistory={handleUpdateHistory}/>
         </div>
     )
 }

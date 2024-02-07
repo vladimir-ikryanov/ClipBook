@@ -16,3 +16,8 @@ export function addHistoryItem(item: string) {
     historyItems.add(item)
     return getHistoryItems()
 }
+
+export function deleteHistoryItem(item: string) {
+    historyItems.delete(item)
+    return getHistoryItems()
+}

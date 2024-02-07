@@ -14,7 +14,7 @@ ClipboardManager::ClipboardManager(const std::shared_ptr<Browser> &browser) : br
 void ClipboardManager::start() {
   std::thread t([this]() {
     while (!browser_->isClosed()) {
-      std::this_thread::sleep_for(std::chrono::seconds(3));
+      std::this_thread::sleep_for(std::chrono::seconds(1));
       auto data = readClipboardData(ClipboardDataType::plainText());
       if (data) {
         std::string data_str(reinterpret_cast<const char *>(data->data()), data->size());

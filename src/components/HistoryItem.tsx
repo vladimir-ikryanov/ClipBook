@@ -2,20 +2,27 @@ import '../App.css';
 import {TabsTrigger} from "@/components/ui/tabs";
 import {Link, File} from "lucide-react";
 import React, {KeyboardEvent} from 'react';
+import {deleteHistoryItem} from "@/data"
 
 type HistoryItemProps = {
     index: number
     text: string
+    onUpdateHistory: () => void
 }
 
 declare const pasteInFrontApp: (text: string) => void;
 
-export default function HistoryItem({index, text}: HistoryItemProps) {
+export default function HistoryItem({index, text, onUpdateHistory}: HistoryItemProps) {
 
     const keyDown = (e: KeyboardEvent) => {
         if (e.key === "Enter") {
             e.preventDefault()
             pasteInFrontApp(text)
+        }
+        if (e.key === "Delete") {
+            e.preventDefault()
+            deleteHistoryItem(text)
+            onUpdateHistory()
         }
     }
 
