@@ -20,6 +20,9 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
     args.window->putProperty("pasteInFrontApp", [this](std::string text) {
       paste(text);
     });
+    args.window->putProperty("hideAppWindow", [this]() {
+      hide();
+    });
     action.proceed();
   };
 

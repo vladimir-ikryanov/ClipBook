@@ -13,12 +13,6 @@ MainAppMac::MainAppMac(const std::shared_ptr<App> &app) : MainApp(app), active_a
   global_shortcuts->registerShortcut(shortcut_show, [this](const Shortcut &) {
     show();
   });
-
-  // Register a global shortcut to hide the browser window.
-  auto shortcut_hide = Shortcut(KeyCode::ESC);
-  global_shortcuts->registerShortcut(shortcut_hide, [this](const Shortcut &) {
-    hide();
-  });
 }
 
 void MainAppMac::show() {
