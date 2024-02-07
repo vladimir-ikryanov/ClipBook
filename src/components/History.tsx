@@ -11,7 +11,7 @@ type HistoryProps = {
 }
 
 export default function History(props: HistoryProps) {
-    let items = props.items.toReversed();
+    let items = props.items.reverse();
     const historyItems = items.map((item, index) =>
         <HistoryItem key={index} index={index} text={item} onUpdateHistory={props.onUpdateHistory}/>
     );
