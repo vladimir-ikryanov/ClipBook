@@ -13,6 +13,7 @@ class MainApp {
 
   virtual void show();
   virtual void hide();
+  virtual void paste(const std::string& text) = 0;
 
  private:
   std::shared_ptr<molybden::App> app_;

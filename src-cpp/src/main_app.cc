@@ -1,12 +1,18 @@
 #include "main_app.h"
 
-#include "clipboard_manager.h"
+using namespace molybden;
 
-MainApp::MainApp(const std::shared_ptr<molybden::App>& app) : app_(app) {
+MainApp::MainApp(const std::shared_ptr<App>& app) : app_(app) {
 // Hide the dock icon and make the app a background app.
   app_->dock()->hide();
 
   browser_ = Browser::create(app);
+  browser_->onInjectJs = [this](const InjectJsArgs& args, InjectJsAction action) {
+    args.window->putProperty("pasteInFrontApp", [this](std::string text) {
+      paste(text);
+    });
+    action.proceed();
+  };
 
   // Hide all standard window buttons.
   browser_->setWindowButtonVisible(WindowButtonType::kMinimize, false);

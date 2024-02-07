@@ -7,18 +7,17 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
-using namespace molybden;
-
 class MainAppMac : public MainApp {
  public:
-  explicit MainAppMac(const std::shared_ptr<App>& app);
+  explicit MainAppMac(const std::shared_ptr<molybden::App> &app);
 
   void show() override;
   void hide() override;
+  void paste(const std::string &text) override;
 
  private:
 #ifdef __OBJC__
-  NSRunningApplication *active_app_;
+  NSRunningApplication *active_app_{};
 #endif
 };
 

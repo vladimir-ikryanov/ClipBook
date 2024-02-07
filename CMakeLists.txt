@@ -113,7 +113,6 @@ else ()
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES Darwin)
-    # Link with Cocoa.framework
     target_link_libraries(${LIB_NAME} PRIVATE ${Molybden_LIBRARIES} "-framework Cocoa")
 else ()
     target_link_libraries(${LIB_NAME} ${Molybden_LIBRARIES})
