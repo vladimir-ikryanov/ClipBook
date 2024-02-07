@@ -1,7 +1,7 @@
 import '../App.css';
 import {Tabs, TabsList} from "@/components/ui/tabs";
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/components/ui/resizable";
-import {ScrollArea} from "@/components/ui/scroll-area"
+import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area"
 import HistoryItem from "@/components/HistoryItem"
 import HistoryItemPreview from "@/components/HistoryItemPreview"
 
@@ -10,10 +10,11 @@ type HistoryProps = {
 }
 
 export default function History(props: HistoryProps) {
-    const items = props.items.map((item, index) =>
+    let items = props.items.toReversed();
+    const historyItems = items.map((item, index) =>
         <HistoryItem key={index} index={index} text={item}/>
     );
-    const previews = props.items.map((item, index) =>
+    const historyItemPreviews = items.map((item, index) =>
         <HistoryItemPreview key={index} index={index} text={item}/>
     );
     return (
@@ -22,12 +23,13 @@ export default function History(props: HistoryProps) {
                 <ResizablePanel defaultSize={40}>
                     <ScrollArea className="h-full border-r border-gray-100">
                         <TabsList className="grid h-full grid-rows-3 justify-normal p-2 pr-4 pl-4">
-                            {items}
+                            {historyItems}
                         </TabsList>
+                        <ScrollBar orientation="vertical" />
                     </ScrollArea>
                 </ResizablePanel>
                 <ResizableHandle/>
-                <ResizablePanel defaultSize={60}>{previews}</ResizablePanel>
+                <ResizablePanel defaultSize={60}>{historyItemPreviews}</ResizablePanel>
             </ResizablePanelGroup>
         </Tabs>
     )
