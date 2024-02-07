@@ -8,12 +8,12 @@ import {useState} from "react";
 export default function App() {
     const [history, setHistory] = useState(getHistoryItems())
 
-    function greet(name: string): void {
-        setHistory([...addHistoryItem("New history item")])
+    function addClipboardData(data: string): void {
+        setHistory([...addHistoryItem(data)])
     }
 
     // Attach the function to the window object
-    (window as any).greet = greet;
+    (window as any).addClipboardData = addClipboardData;
 
     let sumOfNumbers = (
         firstnum : number,

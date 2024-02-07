@@ -12,15 +12,29 @@ ClipboardManager::ClipboardManager(const std::shared_ptr<Browser> &browser) : br
     browser) {}
 
 void ClipboardManager::start() {
-  // Create a thread for the periodic function
   std::thread t([this]() {
     while (!browser_->isClosed()) {
       std::this_thread::sleep_for(std::chrono::seconds(3));
-      // Get clipboard content
-      // Compare it with the previous content
-      // If it's different, send it to the web app
-      browser_->mainFrame()->executeJavaScript("greet()");
+      auto data = readClipboardData(ClipboardDataType::plainText());
+      if (data) {
+        std::string data_str(reinterpret_cast<const char *>(data->data()), data->size());
+        browser_->mainFrame()->executeJavaScript("addClipboardData(\"" + data_str + "\")");
+      }
     }
   });
   t.join();
+}
+
+std::shared_ptr<ClipboardData> ClipboardManager::readClipboardData(
+    const std::shared_ptr<ClipboardDataType> &type) {
+  auto clipboard_data = browser_->app()->clipboard()->read();
+  for (const auto &data : clipboard_data) {
+    if (data->type()->mimeType() == type->mimeType()) {
+      if (clipboard_data_ == nullptr || clipboard_data_->size() != data->size()) {
+        clipboard_data_ = data;
+        return clipboard_data_;
+      }
+    }
+  }
+  return {};
 }
