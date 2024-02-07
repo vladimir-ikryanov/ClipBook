@@ -2,7 +2,7 @@
 
 #include "clipboard_manager.h"
 
-MainApp::MainApp(const std::shared_ptr<App>& app) : app_(app) {
+MainApp::MainApp(const std::shared_ptr<molybden::App>& app) : app_(app) {
 // Hide the dock icon and make the app a background app.
   app_->dock()->hide();
 
@@ -21,21 +21,6 @@ MainApp::MainApp(const std::shared_ptr<App>& app) : app_(app) {
   browser_->setAlwaysOnTop(true);
 
   browser_->loadUrl(app->baseUrl());
-
-  // Register a global shortcut to show the browser window.
-  auto global_shortcuts = app->globalShortcuts();
-  auto shortcut_show = Shortcut(KeyCode::V, KeyModifier::COMMAND_OR_CTRL | KeyModifier::SHIFT);
-  global_shortcuts->registerShortcut(shortcut_show, [this](const Shortcut &) {
-    show();
-  });
-
-  // Register a global shortcut to hide the browser window.
-  auto shortcut_hide = Shortcut(KeyCode::ESC);
-  global_shortcuts->registerShortcut(shortcut_hide, [this](const Shortcut &) {
-    hide();
-  });
-
-  ClipboardManager::create(browser_)->start();
 }
 
 void MainApp::show() {
@@ -46,4 +31,7 @@ void MainApp::hide() {
   if (browser_->isActive()) {
     browser_->hide();
   }
+}
+std::shared_ptr<molybden::Browser> MainApp::browser() const {
+  return browser_;
 }

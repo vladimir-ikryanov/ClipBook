@@ -112,7 +112,12 @@ else ()
     file(GLOB Molybden_LIBRARIES ${LIBRARIES_OUTPUT_DIR}/*)
 endif ()
 
-target_link_libraries(${LIB_NAME} ${Molybden_LIBRARIES})
+if (${CMAKE_SYSTEM_NAME} MATCHES Darwin)
+    # Link with Cocoa.framework
+    target_link_libraries(${LIB_NAME} PRIVATE ${Molybden_LIBRARIES} "-framework Cocoa")
+else ()
+    target_link_libraries(${LIB_NAME} ${Molybden_LIBRARIES})
+endif ()
 
 set_target_properties(${LIB_NAME}
         PROPERTIES
