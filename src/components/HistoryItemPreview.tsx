@@ -1,5 +1,6 @@
 import '../App.css';
-import { TabsContent } from "@/components/ui/tabs";
+import {TabsContent} from "@/components/ui/tabs";
+import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area";
 
 type HistoryItemPreviewProps = {
     index: number
@@ -10,7 +11,9 @@ export default function HistoryItemPreview({ index, text }: HistoryItemPreviewPr
     return (
         <TabsContent value={index.toString()} className="m-0">
             <div className="flex flex-col h-screen m-0 p-0 ml-5 mr-5">
-                <div className="mt-4">{text}</div>
+                <div className="mt-4">
+                        <pre>{text}</pre>
+                </div>
                 <div className="grow"></div>
                 <div className="mb-5 text-gray-400">
                     <p>Press <code>Enter</code> to paste as plain text in front application</p>
