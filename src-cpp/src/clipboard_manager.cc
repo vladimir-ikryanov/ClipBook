@@ -18,7 +18,8 @@ void ClipboardManager::start() {
       auto data = readClipboardData(ClipboardDataType::plainText());
       if (data) {
         std::string data_str(reinterpret_cast<const char *>(data->data()), data->size());
-        browser_->mainFrame()->executeJavaScript("addClipboardData(\"" + data_str + "\")");
+        const JsValue &js_window = browser_->mainFrame()->executeJavaScript("window");
+        js_window.asJsObject()->call("addClipboardData", data_str);
       }
     }
   });
