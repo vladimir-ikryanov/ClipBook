@@ -14,7 +14,6 @@ export default function App() {
         const down = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
                 e.preventDefault()
-                console.log("Hiding app window")
                 hideAppWindow()
             }
         }
