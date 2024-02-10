@@ -50,6 +50,7 @@ void MainApp::hide() {
     browser_->hide();
   }
 }
+
 std::shared_ptr<molybden::Browser> MainApp::browser() const {
   return browser_;
 }
