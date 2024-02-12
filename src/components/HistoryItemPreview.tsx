@@ -11,7 +11,7 @@ export default function HistoryItemPreview({index, text}: HistoryItemPreviewProp
         <TabsContent value={index.toString()} className="m-0">
             <div className="flex flex-col h-screen m-0 p-0 ml-5 mr-5">
                 <div className="mt-4">
-                    <pre>{text}</pre>
+                    <pre className="text-wrap">{text}</pre>
                 </div>
                 <div className="grow"></div>
                 <div className="mb-5 text-gray-400">
