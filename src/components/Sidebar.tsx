@@ -1,6 +1,7 @@
 import '../App.css';
 import {Button} from "@/components/ui/button"
 import {Code, Code2, CodeIcon, File, FileCode, Image, Link, Settings} from "lucide-react"
+import Preferences from "@/components/Preferences";
 
 export default function Sidebar() {
     return (
@@ -18,9 +19,7 @@ export default function Sidebar() {
                 <Image className="h-4 w-4"/>
             </Button>
             <div className="grow draggable"></div>
-            <Button variant="ghost">
-                <Settings className="h-4 w-4"/>
-            </Button>
+            <Preferences/>
         </div>
     )
 }

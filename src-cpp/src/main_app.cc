@@ -7,6 +7,14 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
   tray->setImage(app->getPath(PathKey::kAppResources) + "/imageTemplate.png");
   tray->setMenu(CustomMenu::create(
       {
+          menu::Item("Open " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
+            show();
+          }),
+          menu::Separator(),
+          menu::Item("Settings...", [app](const CustomMenuItemActionArgs &args) {
+            // Open the settings window.
+          }),
+          menu::Separator(),
           menu::Item("Quit", [app](const CustomMenuItemActionArgs &args) {
             app->quit();
           })
@@ -16,6 +24,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
   app_->dock()->hide();
 
   browser_ = Browser::create(app);
+  browser_->settings()->disableOverscrollHistoryNavigation();
   browser_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
     args.window->putProperty("pasteInFrontApp", [this](std::string text) {
       paste(text);
@@ -25,6 +34,15 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
     });
     action.proceed();
   };
+
+  browser_->onCanExecuteCommand =
+      [this](const CanExecuteCommandArgs &args, CanExecuteCommandAction action) {
+        if (app_->isProduction()) {
+          action.cannot();
+        } else {
+          action.can();
+        }
+      };
 
   // Hide all standard window buttons.
   browser_->setWindowButtonVisible(WindowButtonType::kMinimize, false);
