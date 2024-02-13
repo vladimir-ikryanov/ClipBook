@@ -26,13 +26,23 @@ export default function HistoryItem({index, text, onUpdateHistory}: HistoryItemP
         }
     }
 
+    function isUrl(url: string) {
+        const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+        return urlRegex.test(url);
+    }
+
     return (
         <TabsTrigger
-            autoFocus={index == 0}
             value={index.toString()}
             className="flex flex-row data-[state=active]:bg-accent pt-2 pb-2 pl-3 pr-3 whitespace-nowrap overflow-hidden overflow-ellipsis"
             onKeyDown={keyDown}>
-            <div className="flex mr-3"><File className="h-4 w-4"/></div>
+            <div className="flex mr-3">
+                {
+                    isUrl(text) ?
+                        <Link className="h-4 w-4"/> :
+                        <File className="h-4 w-4"/>
+                }
+            </div>
             <div
                 className="flex-grow text-base text-justify font-normal whitespace-nowrap overflow-hidden overflow-ellipsis">{text}</div>
         </TabsTrigger>

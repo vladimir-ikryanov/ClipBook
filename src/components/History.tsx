@@ -4,7 +4,6 @@ import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/components
 import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area"
 import HistoryItem from "@/components/HistoryItem"
 import HistoryItemPreview from "@/components/HistoryItemPreview"
-import {useState} from "react";
 
 type HistoryProps = {
     items: string[]
@@ -12,27 +11,15 @@ type HistoryProps = {
 }
 
 export default function History(props: HistoryProps) {
-    const [tab, setTab] = useState("0");
-
-    const onHistoryUpdated = () => {
-        props.onUpdateHistory()
-    }
-
-    let items = props.items.reverse();
+    let items = props.items.reverse()
     const historyItems = items.map((item, index) =>
-        <HistoryItem key={index} index={index} text={item} onUpdateHistory={onHistoryUpdated}/>
-    );
+        <HistoryItem key={index} index={index} text={item} onUpdateHistory={props.onUpdateHistory}/>
+    )
     const historyItemPreviews = items.map((item, index) =>
         <HistoryItemPreview key={index} index={index} text={item}/>
-    );
-
-    const onTabChange = (value: string) => {
-        setTab(value);
-    }
-
+    )
     return (
-        <Tabs value={tab} onValueChange={onTabChange} orientation="vertical"
-              className="w-full p-0 m-0">
+        <Tabs defaultValue="0" orientation="vertical" className="w-full p-0 m-0">
             <ResizablePanelGroup direction="horizontal">
                 <ResizablePanel defaultSize={40}>
                     <ScrollArea className="h-full border-r border-gray-100">
