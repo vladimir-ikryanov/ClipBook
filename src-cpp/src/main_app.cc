@@ -61,6 +61,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
 
 void MainApp::show() {
   browser_->show();
+  browser_->mainFrame()->executeJavaScript("focusHistory()");
 }
 
 void MainApp::hide() {

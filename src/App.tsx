@@ -26,7 +26,7 @@ export default function App() {
         setHistory([...addHistoryItem(data)])
     }
 
-    function handleUpdateHistory() {
+    function handleUpdateHistory() : void {
         setHistory(getHistoryItems())
     }
 

@@ -13,7 +13,6 @@ type HistoryItemProps = {
 declare const pasteInFrontApp: (text: string) => void;
 
 export default function HistoryItem({index, text, onUpdateHistory}: HistoryItemProps) {
-
     const keyDown = (e: KeyboardEvent) => {
         if (e.key === "Enter") {
             e.preventDefault()
@@ -33,6 +32,7 @@ export default function HistoryItem({index, text, onUpdateHistory}: HistoryItemP
 
     return (
         <TabsTrigger
+            autoFocus={index === 0}
             value={index.toString()}
             className="flex flex-row data-[state=active]:bg-accent pt-2 pb-2 pl-3 pr-3 whitespace-nowrap overflow-hidden overflow-ellipsis"
             onKeyDown={keyDown}>
