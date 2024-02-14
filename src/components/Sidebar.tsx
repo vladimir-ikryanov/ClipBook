@@ -1,6 +1,6 @@
 import '../App.css';
 import {Button} from "@/components/ui/button"
-import {Text, Code2, CodeIcon, File, FileCode, Image, Link, Settings} from "lucide-react"
+import {File, Link} from "lucide-react"
 import Preferences from "@/components/Preferences";
 
 export default function Sidebar() {

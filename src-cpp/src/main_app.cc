@@ -73,3 +73,7 @@ void MainApp::hide() {
 std::shared_ptr<molybden::Browser> MainApp::browser() const {
   return browser_;
 }
+
+void MainApp::setActiveAppName(const std::string &app_name) {
+  browser_->mainFrame()->executeJavaScript("setActiveAppName(\"" + app_name + "\")");
+}

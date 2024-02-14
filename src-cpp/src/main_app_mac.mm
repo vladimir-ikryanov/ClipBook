@@ -17,6 +17,8 @@ MainAppMac::MainAppMac(const std::shared_ptr<App> &app) : MainApp(app), active_a
 
 void MainAppMac::show() {
   active_app_ = [[NSWorkspace sharedWorkspace] frontmostApplication];
+  NSString *app_name = [active_app_ localizedName];
+  MainApp::setActiveAppName([app_name UTF8String]);
   MainApp::show();
 }
 

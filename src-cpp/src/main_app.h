@@ -15,6 +15,9 @@ class MainApp {
   virtual void hide();
   virtual void paste(const std::string& text) = 0;
 
+ protected:
+  void setActiveAppName(const std::string& app_name);
+
  private:
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Browser> browser_;

@@ -8,6 +8,7 @@ import {useRef} from "react";
 
 type HistoryProps = {
   items: string[]
+  appName: string
   onUpdateHistory: () => void
 }
 
@@ -17,7 +18,7 @@ export default function History(props: HistoryProps) {
       <HistoryItem key={index} index={index} text={item} onUpdateHistory={props.onUpdateHistory}/>
   )
   const historyItemPreviews = items.map((item, index) =>
-      <HistoryItemPreview key={index} index={index} text={item}/>
+      <HistoryItemPreview key={index} index={index} text={item} appName={props.appName}/>
   )
 
   const tabsListRef = useRef<HTMLInputElement>(null);
