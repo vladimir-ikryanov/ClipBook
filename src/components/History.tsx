@@ -21,6 +21,7 @@ export default function History(props: HistoryProps) {
   )
 
   const tabsListRef = useRef<HTMLInputElement>(null);
+
   function focusHistory(): void {
     if (tabsListRef.current) {
       tabsListRef.current.focus();
