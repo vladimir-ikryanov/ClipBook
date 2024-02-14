@@ -1,7 +1,7 @@
 import '../App.css';
 import {TabsTrigger} from "@/components/ui/tabs";
 import {Link, File} from "lucide-react";
-import React, {KeyboardEvent} from 'react';
+import React, {KeyboardEvent, MouseEvent} from 'react';
 import {deleteHistoryItem} from "@/data"
 
 type HistoryItemProps = {
@@ -24,6 +24,11 @@ export default function HistoryItem({index, text, onUpdateHistory}: HistoryItemP
             onUpdateHistory()
         }
     }
+  
+    const doubleClick = (e: MouseEvent) => {
+        e.preventDefault()
+        pasteInFrontApp(text)
+    }
 
     function isUrl(url: string) {
         const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
@@ -35,7 +40,8 @@ export default function HistoryItem({index, text, onUpdateHistory}: HistoryItemP
             autoFocus={index === 0}
             value={index.toString()}
             className="flex flex-row data-[state=active]:bg-accent pt-2 pb-2 pl-3 pr-3 whitespace-nowrap overflow-hidden overflow-ellipsis"
-            onKeyDown={keyDown}>
+            onKeyDown={keyDown}
+            onDoubleClick={doubleClick}>
             <div className="flex mr-3">
                 {
                     isUrl(text) ?
