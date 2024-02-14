@@ -18,7 +18,7 @@ export default function HistoryItem({index, text, onUpdateHistory}: HistoryItemP
             e.preventDefault()
             pasteInFrontApp(text)
         }
-        if (e.key === "Delete") {
+        if (e.key === "Delete" || (e.key === "Backspace" && e.metaKey)) {
             e.preventDefault()
             deleteHistoryItem(text)
             onUpdateHistory()
