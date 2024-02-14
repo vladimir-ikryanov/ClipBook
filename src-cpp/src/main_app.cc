@@ -11,10 +11,6 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
             show();
           }),
           menu::Separator(),
-          menu::Item("Settings...", [app](const CustomMenuItemActionArgs &args) {
-            // Open the settings window.
-          }),
-          menu::Separator(),
           menu::Item("Quit", [app](const CustomMenuItemActionArgs &args) {
             app->quit();
           })
