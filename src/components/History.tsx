@@ -5,6 +5,7 @@ import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area"
 import HistoryItem from "@/components/HistoryItem"
 import HistoryItemPreview from "@/components/HistoryItemPreview"
 import {useRef} from "react";
+import {Clipboard} from "lucide-react";
 
 type HistoryProps = {
   items: string[]
@@ -31,6 +32,19 @@ export default function History(props: HistoryProps) {
 
   (window as any).focusHistory = focusHistory;
 
+  if (historyItems.length === 0) {
+    return (
+        <div className="flex flex-col w-full">
+          <div className="draggable"></div>
+          <div className="flex flex-col w-full text-center m-auto">
+            <Clipboard className="h-24 w-24 m-auto text-neutral-500"/>
+            <p className="text-center pt-8 text-2xl font-semibold text-neutral-700">Your clipboard
+              is empty</p>
+            <p className="text-center pt-2">Start copying items to build your history.</p>
+          </div>
+        </div>
+    )
+  }
   return (
       <Tabs defaultValue="0" orientation="vertical" className="w-full p-0 m-0">
         <ResizablePanelGroup direction="horizontal">
