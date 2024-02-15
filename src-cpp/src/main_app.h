@@ -7,16 +7,16 @@
 
 class MainApp {
  public:
-  explicit MainApp(const std::shared_ptr<molybden::App>& app);
+  explicit MainApp(const std::shared_ptr<molybden::App> &app);
 
   std::shared_ptr<molybden::Browser> browser() const;
 
   virtual void show();
   virtual void hide();
-  virtual void paste(const std::string& text) = 0;
+  virtual void paste(const std::string &text) = 0;
 
  protected:
-  void setActiveAppName(const std::string& app_name);
+  void setActiveAppName(const std::string &app_name);
 
  private:
   std::shared_ptr<molybden::App> app_;

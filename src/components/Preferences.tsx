@@ -1,8 +1,8 @@
 import '../App.css';
 import {Button} from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import {CaseSensitive, Settings} from "lucide-react"
+import {Checkbox} from "@/components/ui/checkbox"
+import {ToggleGroup, ToggleGroupItem} from "@/components/ui/toggle-group"
+import {Settings} from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -62,22 +62,6 @@ export default function Preferences() {
                       <ToggleGroupItem value="a">Light</ToggleGroupItem>
                       <ToggleGroupItem value="b">Dark</ToggleGroupItem>
                       <ToggleGroupItem value="c">System</ToggleGroupItem>
-                    </ToggleGroup>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-6 justify-center mt-6">
-                  <div className="text-right col-span-2 mt-auto mb-auto mr-8">
-                    <p>Text size</p>
-                  </div>
-                  <div className="col-span-4">
-                    <ToggleGroup type="single" defaultValue="a" size={"lg"}>
-                      <ToggleGroupItem value="a">
-                        <CaseSensitive className="h-6 w-6"/>
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="b">
-                        <CaseSensitive className="h-8 w-8"/>
-                      </ToggleGroupItem>
                     </ToggleGroup>
                   </div>
                 </div>
