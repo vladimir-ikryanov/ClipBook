@@ -41,7 +41,6 @@ export default function App() {
 
   return (
       <div className="flex h-screen">
-        <Sidebar/>
         <History items={history} appName={appName} onUpdateHistory={handleUpdateHistory}/>
       </div>
   )
