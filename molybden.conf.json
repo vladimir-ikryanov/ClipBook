@@ -4,7 +4,7 @@
     "version": {
       "major": "1",
       "minor": "0",
-      "patch": "0"
+      "patch": "1"
     },
     "author": "",
     "copyright": "",
@@ -12,16 +12,16 @@
     "bundle": {
       "macOS": {
         "icon": "src-cpp/assets/app.icns",
-        "bundleID": "",
-        "codesignIdentity": "",
+        "bundleID": "com.molybden.clipboard",
+        "codesignIdentity": "Developer ID Application: TeamDev Ltd. (K436KHQ6D5)",
         "codesignEntitlements": "src-cpp/assets/entitlements.plist",
-        "teamID": "",
-        "appleID": "",
-        "password": "",
+        "teamID": "K436KHQ6D5",
+        "appleID": "vladimir.ikryanov@gmail.com",
+        "password": "uxpj-xjvd-wybo-remi",
         "installer": {
           "dmg": {
             "name": "",
-            "volumeName": "",
+            "volumeName": "Clipboard App",
             "volumeIcon": "src-cpp/assets/app.icns",
             "eula": "",
             "window": {
