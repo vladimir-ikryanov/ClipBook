@@ -1,4 +1,3 @@
-import Sidebar from "@/components/Sidebar";
 import History from "@/components/History";
 
 import {addHistoryItem, getHistoryItems} from "@/data"
