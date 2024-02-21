@@ -16,16 +16,6 @@ type HistoryProps = {
 export default function History(props: HistoryProps) {
   const firstItemRef = useRef<HTMLButtonElement>(null);
 
-  let items = props.items.reverse()
-  const historyItems = items.map((item, index) => {
-    return <HistoryItem key={index} index={index} text={item}
-                        onUpdateHistory={props.onUpdateHistory}
-                        tabsTriggerRef={index == 0 ? firstItemRef : null}/>
-  })
-  const historyItemPreviews = items.map((item, index) =>
-      <HistoryItemPreview key={index} index={index} text={item} appName={props.appName}/>
-  )
-
   function focusHistory(): void {
     if (firstItemRef.current) {
       firstItemRef.current.focus();
@@ -33,6 +23,23 @@ export default function History(props: HistoryProps) {
   }
 
   (window as any).focusHistory = focusHistory;
+
+  function handleDeleteHistoryItem(lastItem: boolean): void {
+    props.onUpdateHistory()
+    if (lastItem) {
+      focusHistory()
+    }
+  }
+
+  let items = props.items.reverse()
+  const historyItems = items.map((item, index) => {
+    return <HistoryItem key={index} index={index} historySize={items.length} text={item}
+                        onDeleteHistoryItem={handleDeleteHistoryItem}
+                        tabsTriggerRef={index == 0 ? firstItemRef : null}/>
+  })
+  const historyItemPreviews = items.map((item, index) =>
+      <HistoryItemPreview key={index} index={index} text={item} appName={props.appName}/>
+  )
 
   if (historyItems.length === 0) {
     return (

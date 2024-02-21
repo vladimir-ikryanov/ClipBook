@@ -6,14 +6,15 @@ import {deleteHistoryItem} from "@/data"
 
 type HistoryItemProps = {
   index: number
+  historySize: number
   text: string
-  onUpdateHistory: () => void
+  onDeleteHistoryItem: (isLastItem: boolean) => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>
 }
 
 declare const pasteInFrontApp: (text: string) => void;
 
-export default function HistoryItem({index, text, onUpdateHistory, tabsTriggerRef}: HistoryItemProps) {
+export default function HistoryItem({index, historySize, text, onDeleteHistoryItem, tabsTriggerRef}: HistoryItemProps) {
   const keyDown = (e: KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault()
@@ -22,7 +23,7 @@ export default function HistoryItem({index, text, onUpdateHistory, tabsTriggerRe
     if (e.key === "Delete" || (e.key === "Backspace" && e.metaKey)) {
       e.preventDefault()
       deleteHistoryItem(text)
-      onUpdateHistory()
+      onDeleteHistoryItem(index === historySize - 1)
     }
   }
 
