@@ -49,7 +49,7 @@ export default function History(props: HistoryProps) {
             <Clipboard className="h-24 w-24 m-auto text-neutral-500"/>
             <p className="text-center pt-8 text-2xl font-semibold text-neutral-700">Your clipboard
               is empty</p>
-            <p className="text-center pt-2">Start copying items to build your history.</p>
+            <p className="text-center pt-2">Start copying text or links to build your history.</p>
           </div>
         </div>
     )
