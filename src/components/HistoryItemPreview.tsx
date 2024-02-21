@@ -39,9 +39,9 @@ export default function HistoryItemPreview({index, text, appName}: HistoryItemPr
                 <Delete className="h-4 w-4 text-foreground"/>
               </Button>
 
-              <p className="pr-2">Close window</p>
+              <p className="pr-2">Close</p>
               <Button disabled={true} className="btn p-2 h-6 rounded-sm bg-neutral-200 text-foreground">
-                <span className="text-xs font-mono">Escape</span>
+                <span className="text-xs font-mono">Esc</span>
               </Button>
             </div>
           </div>
