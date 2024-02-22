@@ -1,4 +1,5 @@
 import History from "@/components/History";
+import {ThemeProvider} from "@/components/theme-provider"
 
 import {addHistoryItem, getHistoryItems} from "@/data"
 import {useState} from "react";
@@ -39,8 +40,10 @@ export default function App() {
   (window as any).setActiveAppName = setActiveAppName;
 
   return (
-      <div className="flex h-screen">
-        <History items={history} appName={appName} onUpdateHistory={handleUpdateHistory}/>
-      </div>
+      <ThemeProvider defaultTheme="system">
+        <div className="flex h-screen">
+          <History items={history} appName={appName} onUpdateHistory={handleUpdateHistory}/>
+        </div>
+      </ThemeProvider>
   )
 }

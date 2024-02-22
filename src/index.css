@@ -27,8 +27,10 @@
 
     font-size: 14px;
   }
+}
 
-  .dark {
+@media (prefers-color-scheme: dark) {
+  :root {
     --background: #000000;
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
