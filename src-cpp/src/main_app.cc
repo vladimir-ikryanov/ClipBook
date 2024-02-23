@@ -40,6 +40,11 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
         }
       };
 
+  // Hide the window when the focus is lost.
+  browser_->onFocusLost += [](const FocusLost& event) {
+    event.browser->hide();
+  };
+
   // Hide all standard window buttons.
   browser_->setWindowButtonVisible(WindowButtonType::kMinimize, false);
   browser_->setWindowButtonVisible(WindowButtonType::kZoom, false);
@@ -49,6 +54,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
   browser_->setWindowTitleVisible(false);
   browser_->setWindowTitlebarVisible(false);
 
+  // Move the window to the active desktop when the app is activated.
   browser_->setWindowDisplayPolicy(WindowDisplayPolicy::kMoveToActiveDesktop);
 
   // Display the window always on top of other windows.
