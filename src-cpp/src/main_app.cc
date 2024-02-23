@@ -49,6 +49,8 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
   browser_->setWindowTitleVisible(false);
   browser_->setWindowTitlebarVisible(false);
 
+  browser_->setWindowDisplayPolicy(WindowDisplayPolicy::kMoveToActiveDesktop);
+
   // Display the window always on top of other windows.
   browser_->setAlwaysOnTop(true);
 
