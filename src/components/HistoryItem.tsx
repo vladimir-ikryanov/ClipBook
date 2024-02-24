@@ -45,11 +45,11 @@ export default function HistoryItem({index, historySize, text, onDeleteHistoryIt
           className="flex flex-row data-[state=active]:bg-accent pt-2 pb-2 pl-3 pr-3 whitespace-nowrap overflow-hidden overflow-ellipsis"
           onKeyDown={keyDown}
           onDoubleClick={doubleClick}>
-        <div className="flex mr-3">
+        <div className="flex mr-3 text-primary-foreground">
           {
             isUrl(text) ?
-                <Link className="h-4 w-4"/> :
-                <File className="h-4 w-4"/>
+                <Link className="h-5 w-5"/> :
+                <File className="h-5 w-5"/>
           }
         </div>
         <div

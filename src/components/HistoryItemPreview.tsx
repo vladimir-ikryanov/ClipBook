@@ -19,29 +19,29 @@ export default function HistoryItemPreview({index, text, appName}: HistoryItemPr
             <pre className="text-wrap text-sm mt-2.5 mr-2">{text}</pre>
           </ScrollArea>
           <div className="grow"></div>
-          <div className="flex flex-row justify-end m-4 mt-2 text-neutral-600 text-sm">
+          <div className="flex flex-row justify-end m-4 mt-2 text-sm text-primary-foreground">
             <div className="flex flex-row">
               <p className="pr-2">Navigate</p>
               <Button disabled={true} className="btn p-2 mr-1 h-6 rounded-sm bg-neutral-200">
-                <ArrowUp className="h-4 w-4 text-foreground"/>
+                <ArrowUp className="h-4 w-4 text-secondary-foreground"/>
               </Button>
               <Button disabled={true} className="btn p-2 mr-3 h-6 rounded-sm bg-neutral-200">
-                <ArrowDown className="h-4 w-4 text-foreground"/>
+                <ArrowDown className="h-4 w-4 text-secondary-foreground"/>
               </Button>
 
               <p className="pr-2">Paste to {appName}</p>
               <Button disabled={true} className="btn p-2 mr-3 h-6 rounded-sm bg-neutral-200">
-                <CornerDownLeft className="h-4 w-4 text-foreground"/>
+                <CornerDownLeft className="h-4 w-4 text-secondary-foreground"/>
               </Button>
 
               <p className="pr-2">Delete</p>
               <Button disabled={true} className="btn p-2 h-6 mr-3 rounded-sm bg-neutral-200">
-                <Delete className="h-4 w-4 text-foreground"/>
+                <Delete className="h-4 w-4 text-secondary-foreground"/>
               </Button>
 
               <p className="pr-2">Close</p>
-              <Button disabled={true} className="btn p-2 h-6 rounded-sm bg-neutral-200 text-foreground">
-                <span className="text-xs font-mono">Esc</span>
+              <Button disabled={true} className="btn p-2 h-6 rounded-sm bg-neutral-200">
+                <span className="text-xs font-mono text-secondary-foreground">Esc</span>
               </Button>
             </div>
           </div>
