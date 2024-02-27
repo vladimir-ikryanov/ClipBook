@@ -11,6 +11,18 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
             show();
           }),
           menu::Separator(),
+          menu::Menu("Appearance", {
+              menu::Item("Dark", [this](const CustomMenuItemActionArgs &args) {
+                app_->setTheme(AppTheme::kDark);
+              }),
+              menu::Item("Light", [this](const CustomMenuItemActionArgs &args) {
+                app_->setTheme(AppTheme::kLight);
+              }),
+              menu::Item("System", [this](const CustomMenuItemActionArgs &args) {
+                app_->setTheme(AppTheme::kSystem);
+              }),
+          }),
+          menu::Separator(),
           menu::Item("Quit", [app](const CustomMenuItemActionArgs &args) {
             app->quit();
           })

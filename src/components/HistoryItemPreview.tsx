@@ -2,7 +2,7 @@ import '../App.css';
 import {TabsContent} from "@/components/ui/tabs";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {Button} from "@/components/ui/button"
-import {ArrowDown, ArrowUp, CornerDownLeft, Delete} from "lucide-react";
+import {ArrowBigDown, ArrowBigUp, ArrowDown, ArrowUp, CornerDownLeft, Delete} from "lucide-react";
 
 type HistoryItemPreviewProps = {
   index: number
@@ -22,25 +22,25 @@ export default function HistoryItemPreview({index, text, appName}: HistoryItemPr
           <div className="flex flex-row justify-end m-4 mt-2 text-sm text-primary-foreground">
             <div className="flex flex-row">
               <p className="pr-2">Navigate</p>
-              <Button disabled={true} className="btn p-2 mr-1 h-6 rounded-sm bg-neutral-200">
-                <ArrowUp className="h-4 w-4 text-secondary-foreground"/>
+              <Button disabled={true} className="btn p-1 mr-1 h-6 rounded-sm bg-neutral-300">
+                <ArrowBigUp className="h-4 w-4 text-secondary-foreground"/>
               </Button>
-              <Button disabled={true} className="btn p-2 mr-3 h-6 rounded-sm bg-neutral-200">
-                <ArrowDown className="h-4 w-4 text-secondary-foreground"/>
+              <Button disabled={true} className="btn p-1 mr-3 h-6 rounded-sm bg-neutral-300">
+                <ArrowBigDown className="h-4 w-4 text-secondary-foreground"/>
               </Button>
 
               <p className="pr-2">Paste to {appName}</p>
-              <Button disabled={true} className="btn p-2 mr-3 h-6 rounded-sm bg-neutral-200">
+              <Button disabled={true} className="btn p-1 mr-3 h-6 rounded-sm bg-neutral-300">
                 <CornerDownLeft className="h-4 w-4 text-secondary-foreground"/>
               </Button>
 
               <p className="pr-2">Delete</p>
-              <Button disabled={true} className="btn p-2 h-6 mr-3 rounded-sm bg-neutral-200">
+              <Button disabled={true} className="btn p-1 h-6 mr-3 rounded-sm bg-neutral-300">
                 <Delete className="h-4 w-4 text-secondary-foreground"/>
               </Button>
 
               <p className="pr-2">Close</p>
-              <Button disabled={true} className="btn p-2 h-6 rounded-sm bg-neutral-200">
+              <Button disabled={true} className="btn p-1 h-6 rounded-sm bg-neutral-300">
                 <span className="text-xs font-mono text-secondary-foreground">Esc</span>
               </Button>
             </div>

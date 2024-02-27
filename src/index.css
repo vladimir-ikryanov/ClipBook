@@ -31,25 +31,25 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #1c1c1c;
+    --background: #2b2d30;
     --foreground: #f5f5f5;
-    --card: #1c1c1c;
+    --card: #3e4144;
     --card-foreground: black;
-    --popover: #1c1c1c;
+    --popover: #3e4144;
     --popover-foreground: black;
     --primary: black;
-    --primary-foreground: #939393;
-    --secondary: #1c1c1c;
-    --secondary-foreground: #333333;
-    --muted: #1c1c1c;
+    --primary-foreground: #8a8a8a;
+    --secondary: #2b2d30;
+    --secondary-foreground: #3e4144;
+    --muted: #2b2d30;
     --muted-foreground: #f5f5f5;
-    --accent: #333333;
-    --accent-foreground: black;
-    --destructive: #1c1c1c;
-    --destructive-foreground: #1c1c1c;
-    --border: #333333;
-    --input: #1c1c1c;
-    --ring: #1c1c1c;
+    --accent: #3e4144;
+    --accent-foreground: f5f5f5;
+    --destructive: #2b2d30;
+    --destructive-foreground: #2b2d30;
+    --border: #3e4144;
+    --input: #2b2d30;
+    --ring: #2b2d30;
   }
 }
 
