@@ -53,9 +53,11 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
       };
 
   // Hide the window when the focus is lost.
-  browser_->onFocusLost += [](const FocusLost& event) {
-    event.browser->hide();
-  };
+  if (app_->isProduction()) {
+    browser_->onFocusLost += [](const FocusLost &event) {
+      event.browser->hide();
+    };
+  }
 
   // Hide all standard window buttons.
   browser_->setWindowButtonVisible(WindowButtonType::kMinimize, false);
@@ -77,6 +79,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
 
 void MainApp::show() {
   browser_->show();
+  browser_->mainFrame()->executeJavaScript("forceRerender()");
   browser_->mainFrame()->executeJavaScript("focusHistory()");
 }
 

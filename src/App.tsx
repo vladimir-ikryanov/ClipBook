@@ -10,6 +10,12 @@ declare const hideAppWindow: () => void;
 export default function App() {
   const [history, setHistory] = useState(getHistoryItems())
   const [appName, setAppName] = useState("")
+  const [isVisible, setIsVisible] = useState(false);
+
+  const forceRerender = () => {
+    // Toggle the state to trigger re-render
+    setIsVisible(prev => !prev);
+  };
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -40,6 +46,7 @@ export default function App() {
   }
 
   // Attach the function to the window object
+  (window as any).forceRerender = forceRerender;
   (window as any).addClipboardData = addClipboardData;
   (window as any).setActiveAppName = setActiveAppName;
 
