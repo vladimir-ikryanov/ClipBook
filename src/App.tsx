@@ -13,6 +13,10 @@ export default function App() {
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      // Prevent leaving the history items with the tab key.
+      if (e.key === "Tab") {
+        e.preventDefault()
+      }
       if (e.key === "Escape") {
         e.preventDefault()
         hideAppWindow()
