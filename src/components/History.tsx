@@ -31,7 +31,7 @@ export default function History(props: HistoryProps) {
     }
   }
 
-  let items = props.items.reverse()
+  let items = props.items
   const historyItems = items.map((item, index) => {
     return <HistoryItem key={index} index={index} historySize={items.length} text={item}
                         onDeleteHistoryItem={handleDeleteHistoryItem}

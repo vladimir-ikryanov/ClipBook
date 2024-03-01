@@ -1,15 +1,21 @@
-let historyItems: Set<string> = new Set();
+let historyItems: string[];
 
 loadHistoryItems()
 
 function loadHistoryItems() {
   if (localStorage.getItem("historyItems")) {
-    historyItems = new Set(JSON.parse(localStorage.getItem("historyItems")!))
+    historyItems = JSON.parse(localStorage.getItem("historyItems")!)
   }
 }
 
 function saveHistoryItems() {
-  localStorage.setItem("historyItems", JSON.stringify(Array.from(historyItems)))
+  localStorage.setItem("historyItems", JSON.stringify(historyItems))
+}
+
+function deleteItem(item: string) {
+  if (historyItems.includes(item)) {
+    historyItems.splice(historyItems.indexOf(item), 1)
+  }
 }
 
 export function getHistoryItems() {
@@ -17,16 +23,16 @@ export function getHistoryItems() {
 }
 
 export function addHistoryItem(item: string) {
-  if (historyItems.has(item)) {
-    historyItems.delete(item)
+  if (historyItems.includes(item)) {
+    deleteItem(item)
   }
-  historyItems.add(item)
+  historyItems.unshift(item)
   saveHistoryItems()
   return getHistoryItems()
 }
 
 export function deleteHistoryItem(item: string) {
-  historyItems.delete(item)
+  deleteItem(item)
   saveHistoryItems()
   return getHistoryItems()
 }
