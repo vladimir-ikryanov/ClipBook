@@ -43,8 +43,7 @@ export default function History(props: HistoryProps) {
 
   if (historyItems.length === 0) {
     return (
-        <div className="flex flex-col w-full">
-          <div className="draggable"></div>
+        <div className="flex flex-col w-full draggable">
           <div className="flex flex-col w-full text-center m-auto">
             <Clipboard className="h-24 w-24 m-auto text-neutral-500"/>
             <p className="text-center pt-8 text-2xl font-semibold text-neutral-700">Your clipboard

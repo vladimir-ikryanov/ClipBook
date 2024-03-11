@@ -3,6 +3,7 @@ let historyItems: string[];
 loadHistoryItems()
 
 function loadHistoryItems() {
+  historyItems = []
   if (localStorage.getItem("historyItems")) {
     historyItems = JSON.parse(localStorage.getItem("historyItems")!)
   }
