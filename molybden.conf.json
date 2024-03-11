@@ -1,27 +1,27 @@
 {
   "app": {
-    "name": "Clipboard",
+    "name": "ClipBook",
     "version": {
       "major": "1",
       "minor": "0",
-      "patch": "1"
+      "patch": "2"
     },
-    "author": "",
-    "copyright": "",
-    "description": "",
+    "author": "Vladimir Ikryanov",
+    "copyright": "Copyright © 2024 ClipBook. All rights reserved.",
+    "description": "Clipboard history application",
     "bundle": {
       "macOS": {
         "icon": "src-cpp/assets/app.icns",
-        "bundleID": "com.molybden.clipboard",
-        "codesignIdentity": "Developer ID Application: TeamDev Ltd. (K436KHQ6D5)",
+        "bundleID": "com.ikryanov.clipbook",
+        "codesignIdentity": "Developer ID Application: Vladimir Ikryanov (96B3X7S47C)",
         "codesignEntitlements": "src-cpp/assets/entitlements.plist",
-        "teamID": "K436KHQ6D5",
+        "teamID": "96B3X7S47C",
         "appleID": "vladimir.ikryanov@gmail.com",
         "password": "uxpj-xjvd-wybo-remi",
         "installer": {
           "dmg": {
             "name": "",
-            "volumeName": "Clipboard App",
+            "volumeName": "ClipBook App",
             "volumeIcon": "src-cpp/assets/app.icns",
             "eula": "",
             "window": {
