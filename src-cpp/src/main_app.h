@@ -17,6 +17,7 @@ class MainApp {
 
  protected:
   void setActiveAppName(const std::string &app_name);
+  void clearHistory();
 
  private:
   std::shared_ptr<molybden::App> app_;

@@ -1,7 +1,7 @@
 import History from "@/components/History";
 import {ThemeProvider} from "@/components/theme-provider"
 
-import {addHistoryItem, getHistoryItems} from "@/data"
+import {addHistoryItem, clear, getHistoryItems} from "@/data"
 import {useState} from "react";
 import * as React from "react";
 
@@ -45,10 +45,15 @@ export default function App() {
     setAppName(appName)
   }
 
+  function clearHistory(): void {
+    setHistory(clear())
+  }
+
   // Attach the function to the window object
   (window as any).forceRerender = forceRerender;
   (window as any).addClipboardData = addClipboardData;
   (window as any).setActiveAppName = setActiveAppName;
+  (window as any).clearHistory = clearHistory;
 
   return (
       <ThemeProvider defaultTheme="system">

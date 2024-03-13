@@ -3,12 +3,12 @@
     "name": "ClipBook",
     "version": {
       "major": "1",
-      "minor": "0",
-      "patch": "2"
+      "minor": "1",
+      "patch": "0"
     },
     "author": "Vladimir Ikryanov",
-    "copyright": "Copyright © 2024 ClipBook. All rights reserved.",
-    "description": "Clipboard history application",
+    "copyright": "© 2024 ClipBook. All rights reserved.",
+    "description": "",
     "bundle": {
       "macOS": {
         "icon": "src-cpp/assets/app.icns",

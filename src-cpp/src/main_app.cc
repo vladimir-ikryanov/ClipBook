@@ -22,7 +22,11 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
                 app_->setTheme(AppTheme::kSystem);
               }),
           }),
+          menu::Item("Clear all", [this](const CustomMenuItemActionArgs &args) {
+            clearHistory();
+          }),
           menu::Separator(),
+          menu::About(app_),
           menu::Item("Quit", [app](const CustomMenuItemActionArgs &args) {
             app->quit();
           })
@@ -95,4 +99,8 @@ std::shared_ptr<molybden::Browser> MainApp::browser() const {
 
 void MainApp::setActiveAppName(const std::string &app_name) {
   browser_->mainFrame()->executeJavaScript("setActiveAppName(\"" + app_name + "\")");
+}
+
+void MainApp::clearHistory() {
+  browser_->mainFrame()->executeJavaScript("clearHistory()");
 }

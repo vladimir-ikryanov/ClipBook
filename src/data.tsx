@@ -37,3 +37,9 @@ export function deleteHistoryItem(item: string) {
   saveHistoryItems()
   return getHistoryItems()
 }
+
+export function clear() {
+  historyItems = []
+  saveHistoryItems()
+  return getHistoryItems()
+}
