@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 # Configures your project.
-project(Clipboard LANGUAGES CXX)
+project(ClipBook LANGUAGES CXX)
 
 # Imports the Molybden app configuration and setups the auxiliary targets, resources, etc.
 # Important: Do not move this include above the project declaration.
