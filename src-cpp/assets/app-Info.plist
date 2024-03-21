@@ -215,5 +215,7 @@
     <string>banner</string>
     <key>GPUEjectPolicy</key>
     <string>wait</string>
+    <key>SUPublicEDKey</key>
+    <string>${APP_PUBLIC_ED_KEY}</string>
   </dict>
 </plist>

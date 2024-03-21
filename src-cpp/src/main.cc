@@ -6,7 +6,10 @@
 using namespace molybden;
 
 void launch() {
-  App::init([](std::shared_ptr<App> app) {
+  AppOptions options;
+  options.logging.enabled = true;
+  options.logging.log_level = LogLevel::kInfo;
+  App::init(options, [](std::shared_ptr<App> app) {
     MainAppMac main_app(app);
     ClipboardManager::create(main_app.browser())->start();
   });
