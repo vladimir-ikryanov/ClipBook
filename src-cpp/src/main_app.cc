@@ -73,7 +73,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
   browser_->setWindowTitlebarVisible(false);
 
   // Move the window to the active desktop when the app is activated.
-//  browser_->setWindowDisplayPolicy(WindowDisplayPolicy::kMoveToActiveDesktop);
+  browser_->setWindowDisplayPolicy(WindowDisplayPolicy::kMoveToActiveDesktop);
 
   // Display the window always on top of other windows.
   browser_->setAlwaysOnTop(true);
