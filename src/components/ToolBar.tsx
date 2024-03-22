@@ -1,11 +1,12 @@
 import '../App.css';
 import {Input} from "@/components/ui/input"
-import React, {MouseEventHandler} from "react";
-import {PanelRightClose} from "lucide-react";
+import React from "react";
+import {PanelRightClose, PanelRightOpen} from "lucide-react";
 import {Button} from "@/components/ui/button";
 
 type ToolbarProps = {
   onFilterHistory: (searchQuery: string) => void
+  isPreviewVisible: boolean
   onShowHidePreview: () => void
 }
 
@@ -36,7 +37,8 @@ export default function ToolBar(props: ToolbarProps) {
         </div>
         <div className="ml-3">
           <Button variant="ghost" className="p-2" onClick={handleShowHidePreview}>
-            <PanelRightClose className="h-5 w-5 text-neutral-600"/>
+            {props.isPreviewVisible ? <PanelRightClose className="h-5 w-5 text-neutral-600"/> :
+                <PanelRightOpen className="h-5 w-5 text-neutral-600"/>}
           </Button>
         </div>
       </div>
