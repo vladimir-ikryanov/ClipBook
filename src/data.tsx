@@ -2,6 +2,14 @@ let historyItems: string[];
 
 loadHistoryItems()
 
+addHistoryItem("Hello, world! Hello, world! Hello, world! Hello, world! Hello, world! Hello, world! Hello, world! Hello, world! Hello, world! Hello, world! Hello, world! Hello, world!")
+addHistoryItem("Hello, world 2!")
+addHistoryItem("Hello, world 3!")
+addHistoryItem("Hello, world 4!")
+addHistoryItem("Hello, world 5!")
+addHistoryItem("Hello, world 6!")
+addHistoryItem("Hello, world 7!")
+
 function loadHistoryItems() {
   historyItems = []
   if (localStorage.getItem("historyItems")) {

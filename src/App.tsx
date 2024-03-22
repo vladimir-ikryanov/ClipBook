@@ -41,6 +41,10 @@ export default function App() {
     setHistory(getHistoryItems())
   }
 
+  function handleFilterHistory(searchQuery: string): void {
+    setHistory(getHistoryItems().filter((item) => item.toLowerCase().includes(searchQuery.toLowerCase())))
+  }
+
   function setActiveAppName(appName: string): void {
     setAppName(appName)
   }
@@ -57,9 +61,8 @@ export default function App() {
 
   return (
       <ThemeProvider defaultTheme="system">
-        <div className="flex h-screen">
-          <History items={history} appName={appName} onUpdateHistory={handleUpdateHistory}/>
-        </div>
+        <History items={history} appName={appName} onUpdateHistory={handleUpdateHistory}
+                 onFilterHistory={handleFilterHistory}/>
       </ThemeProvider>
   )
 }
