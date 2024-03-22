@@ -11,6 +11,7 @@ type HistoryItemListProps = {
   appName: string
   onUpdateHistory: () => void
   onFilterHistory: (searchQuery: string) => void
+  onShowHidePreview: () => void
 }
 
 export default function HistoryItemList(props: HistoryItemListProps) {
@@ -33,7 +34,8 @@ export default function HistoryItemList(props: HistoryItemListProps) {
 
   return (
       <div className="flex flex-col h-screen">
-        <ToolBar onFilterHistory={props.onFilterHistory}/>
+        <ToolBar onFilterHistory={props.onFilterHistory}
+                 onShowHidePreview={props.onShowHidePreview}/>
         <ScrollArea className="my-2">
           <TabsList loop={false}
                     className="grid h-full justify-normal py-1 px-0">{

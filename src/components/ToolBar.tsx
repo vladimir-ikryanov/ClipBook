@@ -1,17 +1,21 @@
 import '../App.css';
 import {Input} from "@/components/ui/input"
-import {Toggle} from "@/components/ui/toggle"
-import React from "react";
+import React, {MouseEventHandler} from "react";
 import {PanelRightClose} from "lucide-react";
 import {Button} from "@/components/ui/button";
 
 type ToolbarProps = {
   onFilterHistory: (searchQuery: string) => void
+  onShowHidePreview: () => void
 }
 
 export default function ToolBar(props: ToolbarProps) {
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     props.onFilterHistory(e.target.value)
+  }
+
+  const handleShowHidePreview = () => {
+    props.onShowHidePreview()
   }
 
   return (
@@ -26,11 +30,12 @@ export default function ToolBar(props: ToolbarProps) {
               <path d="m21 21-4.3-4.3"/>
             </svg>
           </div>
-          <Input placeholder="Type to search" className="w-full pl-11 text-lg placeholder:text-neutral-400"
+          <Input placeholder="Type to search"
+                 className="w-full pl-11 text-lg placeholder:text-neutral-400"
                  onChange={handleOnChange}/>
         </div>
         <div className="ml-3">
-          <Button variant="ghost" className="p-2">
+          <Button variant="ghost" className="p-2" onClick={handleShowHidePreview}>
             <PanelRightClose className="h-5 w-5 text-neutral-600"/>
           </Button>
         </div>
