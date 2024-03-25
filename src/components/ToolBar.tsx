@@ -1,6 +1,6 @@
 import '../App.css';
 import {Input} from "@/components/ui/input"
-import React from "react";
+import React, {useState} from "react";
 import {PanelRightClose, PanelRightOpen} from "lucide-react";
 import {Button} from "@/components/ui/button";
 
@@ -11,8 +11,19 @@ type ToolbarProps = {
 }
 
 export default function ToolBar(props: ToolbarProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
     props.onFilterHistory(e.target.value)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Escape" && searchQuery.length > 0) {
+      setSearchQuery("")
+      props.onFilterHistory("")
+      e.stopPropagation()
+    }
   }
 
   const handleShowHidePreview = () => {
@@ -32,8 +43,9 @@ export default function ToolBar(props: ToolbarProps) {
             </svg>
           </div>
           <Input placeholder="Type to search"
+                 value={searchQuery}
                  className="w-full pl-11 text-lg placeholder:text-neutral-400"
-                 onChange={handleOnChange}/>
+                 onChange={handleOnChange} onKeyDown={handleKeyDown}/>
         </div>
         <div className="ml-3">
           <Button variant="ghost" className="p-2" onClick={handleShowHidePreview}

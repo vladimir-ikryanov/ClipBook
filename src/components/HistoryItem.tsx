@@ -42,7 +42,7 @@ export default function HistoryItem({index, historySize, text, onDeleteHistoryIt
           ref={tabsTriggerRef}
           autoFocus={index === 0}
           value={index.toString()}
-          className="flex flex-row data-[state=active]:bg-accent ml-3 mr-2 py-2.5 px-3 whitespace-nowrap overflow-hidden overflow-ellipsis"
+          className="flex flex-row data-[state=active]:bg-accent ml-3 mr-2 py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis"
           onKeyDown={keyDown}
           onDoubleClick={doubleClick}>
         <div className="flex mr-3 text-primary-foreground">
