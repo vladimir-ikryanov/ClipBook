@@ -65,7 +65,6 @@ export function clear() {
 
 export function setVisibleActiveHistoryItemIndex(index: number) {
   visibleActiveHistoryItemIndex = index
-  console.log("visibleActiveHistoryItemIndex", visibleActiveHistoryItemIndex)
 }
 
 export function getVisibleActiveHistoryItemIndex() {

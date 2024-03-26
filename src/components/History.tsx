@@ -73,7 +73,7 @@ export default function History(props: HistoryProps) {
       activeTabIndex = activeTabIndex + 1
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
-      document.getElementById("tab-" + activeTabIndex)?.scrollIntoView(false)
+      document.getElementById("tab-" + activeTabIndex)?.scrollIntoView({ block: "nearest" })
     }
   }
 
@@ -83,7 +83,7 @@ export default function History(props: HistoryProps) {
       activeTabIndex = activeTabIndex - 1
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
-      document.getElementById("tab-" + activeTabIndex)?.scrollIntoView(true)
+      document.getElementById("tab-" + activeTabIndex)?.scrollIntoView({ block: "nearest" })
     }
   }
 

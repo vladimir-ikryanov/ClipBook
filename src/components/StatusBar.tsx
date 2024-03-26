@@ -15,7 +15,7 @@ type StatusBarProps = {
 
 export default function StatusBar(props: StatusBarProps) {
   return (
-      <div className="flex flex-row p-3 text-sm text-primary-foreground border-t-solid border-t-neutral-200 border-t">
+      <div className="flex flex-row p-3 text-sm text-primary-foreground border-t-solid border-t-neutral-200 border-t draggable">
         <div className="flex flex-row">
           <Button disabled={true} className="btn p-0 mr-1 h-6 w-6 rounded bg-neutral-300">
             <ChevronUp className="h-5 w-5 text-secondary-foreground"/>
