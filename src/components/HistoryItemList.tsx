@@ -13,24 +13,16 @@ type HistoryItemListProps = {
   onFilterHistory: (searchQuery: string) => void
   isPreviewVisible: boolean
   onShowHidePreview: () => void
+  onMouseDoubleClick: (tabIndex: number) => void
 }
 
 export default function HistoryItemList(props: HistoryItemListProps) {
-  const firstItemRef = useRef<HTMLButtonElement>(null);
-
-  function focusHistory(): void {
-    if (firstItemRef.current) {
-      firstItemRef.current.focus();
-    }
-  }
-
-  (window as any).focusHistory = focusHistory;
-
   function handleDeleteHistoryItem(lastItem: boolean): void {
     props.onUpdateHistory()
-    if (lastItem) {
-      focusHistory()
-    }
+  }
+
+  function handleMouseDoubleClick(tabIndex: number) {
+    props.onMouseDoubleClick(tabIndex)
   }
 
   return (
@@ -43,10 +35,13 @@ export default function HistoryItemList(props: HistoryItemListProps) {
           <TabsList loop={false}
                     className="grid h-full justify-normal py-1 px-0">{
             props.items.map((item, index) => {
-              return <HistoryItem key={index} index={index} historySize={props.items.length}
+              return <HistoryItem key={index}
+                                  index={index}
                                   text={item}
+                                  historySize={props.items.length}
                                   onDeleteHistoryItem={handleDeleteHistoryItem}
-                                  tabsTriggerRef={index == 0 ? firstItemRef : null}/>
+                                  onMouseDoubleClick={handleMouseDoubleClick}
+              />
             })
           }
           </TabsList>

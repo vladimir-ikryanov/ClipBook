@@ -10,12 +10,12 @@ type HistoryItemPreviewProps = {
   appName: string
 }
 
-export default function HistoryItemPreview({index, text, appName}: HistoryItemPreviewProps) {
+export default function HistoryItemPreview(props: HistoryItemPreviewProps) {
   return (
-      <TabsContent value={index.toString()} className="m-0">
+      <TabsContent value={props.index.toString()} className="m-0">
         <div className="flex flex-col h-screen p-0 m-0 border-l-neutral-200 border-l-solid border-l">
           <ScrollArea className="h-screen m-2">
-            <pre className="text-wrap text-sm m-4">{text}</pre>
+            <pre className="text-wrap text-sm m-4">{props.text}</pre>
           </ScrollArea>
         </div>
       </TabsContent>

@@ -2,34 +2,27 @@ import '../App.css';
 import {TabsTrigger} from "@/components/ui/tabs";
 import {Link, File} from "lucide-react";
 import React, {KeyboardEvent, MouseEvent} from 'react';
-import {deleteHistoryItem} from "@/data"
+import {deleteHistoryItem, getActiveHistoryItem} from "@/data"
 
 type HistoryItemProps = {
   index: number
   historySize: number
   text: string
   onDeleteHistoryItem: (isLastItem: boolean) => void
+  onMouseDoubleClick: (tabIndex: number) => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>
 }
 
-declare const pasteInFrontApp: (text: string) => void;
-
-export default function HistoryItem({index, historySize, text, onDeleteHistoryItem, tabsTriggerRef}: HistoryItemProps) {
+export default function HistoryItem(props: HistoryItemProps) {
   const keyDown = (e: KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      pasteInFrontApp(text)
-    }
-    if (e.key === "Delete" || (e.key === "Backspace" && e.metaKey)) {
-      e.preventDefault()
-      deleteHistoryItem(text)
-      onDeleteHistoryItem(index === historySize - 1)
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      e.stopPropagation()
     }
   }
 
-  const doubleClick = (e: MouseEvent) => {
+  const handleMouseDoubleClick = (e: MouseEvent) => {
+    props.onMouseDoubleClick(props.index)
     e.preventDefault()
-    pasteInFrontApp(text)
   }
 
   function isUrl(url: string) {
@@ -39,21 +32,20 @@ export default function HistoryItem({index, historySize, text, onDeleteHistoryIt
 
   return (
       <TabsTrigger
-          ref={tabsTriggerRef}
-          autoFocus={index === 0}
-          value={index.toString()}
+          ref={props.tabsTriggerRef}
+          value={props.index.toString()}
           className="flex flex-row data-[state=active]:bg-accent ml-3 mr-2 py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis"
           onKeyDown={keyDown}
-          onDoubleClick={doubleClick}>
+          onDoubleClick={handleMouseDoubleClick}>
         <div className="flex mr-3 text-primary-foreground">
           {
-            isUrl(text) ?
+            isUrl(props.text) ?
                 <Link className="h-5 w-5"/> :
                 <File className="h-5 w-5"/>
           }
         </div>
         <div
-            className="flex-grow text-base text-justify font-normal whitespace-nowrap overflow-hidden overflow-ellipsis">{text}</div>
+            className="flex-grow text-base text-justify font-normal whitespace-nowrap overflow-hidden overflow-ellipsis">{props.text}</div>
       </TabsTrigger>
   )
 }

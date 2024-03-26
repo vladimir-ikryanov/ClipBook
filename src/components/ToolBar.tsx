@@ -24,6 +24,9 @@ export default function ToolBar(props: ToolbarProps) {
       props.onFilterHistory("")
       e.stopPropagation()
     }
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      e.preventDefault()
+    }
   }
 
   const handleShowHidePreview = () => {
@@ -45,7 +48,10 @@ export default function ToolBar(props: ToolbarProps) {
           <Input placeholder="Type to search"
                  value={searchQuery}
                  className="w-full pl-11 text-lg placeholder:text-neutral-400"
-                 onChange={handleOnChange} onKeyDown={handleKeyDown}/>
+                 onChange={handleOnChange}
+                 onKeyDown={handleKeyDown}
+                 id={"search"}
+          />
         </div>
         <div className="ml-3">
           <Button variant="ghost" className="p-2" onClick={handleShowHidePreview}

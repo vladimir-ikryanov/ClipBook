@@ -1,8 +1,8 @@
 import History from "@/components/History";
 import {ThemeProvider} from "@/components/theme-provider"
 
-import {addHistoryItem, clear, getHistoryItems} from "@/data"
-import {useState} from "react";
+import {addHistoryItem, clear, getHistoryItems, setFilterQuery} from "@/data"
+import {useEffect, useState} from "react";
 import * as React from "react";
 
 declare const hideAppWindow: () => void;
@@ -17,7 +17,7 @@ export default function App() {
     setIsVisible(prev => !prev);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const down = (e: KeyboardEvent) => {
       // Prevent leaving the history items with the tab key.
       if (e.key === "Tab") {
@@ -42,7 +42,8 @@ export default function App() {
   }
 
   function handleFilterHistory(searchQuery: string): void {
-    setHistory(getHistoryItems().filter((item) => item.toLowerCase().includes(searchQuery.toLowerCase())))
+    setFilterQuery(searchQuery)
+    setHistory(getHistoryItems())
   }
 
   function setActiveAppName(appName: string): void {
