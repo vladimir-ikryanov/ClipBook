@@ -8,6 +8,7 @@ type ToolbarProps = {
   onFilterHistory: (searchQuery: string) => void
   isPreviewVisible: boolean
   onShowHidePreview: () => void
+  searchFieldRef?: React.Ref<HTMLInputElement>
 }
 
 export default function ToolBar(props: ToolbarProps) {
@@ -50,7 +51,7 @@ export default function ToolBar(props: ToolbarProps) {
                  className="w-full pl-11 text-lg placeholder:text-neutral-400"
                  onChange={handleOnChange}
                  onKeyDown={handleKeyDown}
-                 id={"search"}
+                 ref={props.searchFieldRef}
           />
         </div>
         <div className="ml-3">

@@ -24,6 +24,7 @@ type HistoryProps = {
 
 export default function History(props: HistoryProps) {
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
+  const searchFieldRef = useRef<HTMLInputElement>(null);
   const [previewVisible, setPreviewVisible] = useState(true);
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
 
@@ -53,6 +54,12 @@ export default function History(props: HistoryProps) {
         deleteHistoryItem(getActiveHistoryItem())
         e.preventDefault()
         props.onUpdateHistory()
+      }
+      if (e.key === "f" && e.metaKey) {
+        if (searchFieldRef.current) {
+          searchFieldRef.current.focus()
+        }
+        e.preventDefault()
       }
     }
 
@@ -108,7 +115,8 @@ export default function History(props: HistoryProps) {
   }
 
   return (
-      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={onTabChange} orientation="vertical"
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={onTabChange}
+            orientation="vertical"
             className="w-full p-0 m-0">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel className="flex flex-col">
@@ -118,6 +126,7 @@ export default function History(props: HistoryProps) {
                              onShowHidePreview={handleShowHidePreview}
                              onMouseDoubleClick={handleMouseDoubleClick}
                              isPreviewVisible={previewVisible}
+                             searchFieldRef={searchFieldRef}
             />
           </ResizablePanel>
           <ResizableHandle className="border-neutral-200"/>

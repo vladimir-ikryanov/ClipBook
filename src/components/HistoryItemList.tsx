@@ -2,7 +2,7 @@ import '../App.css';
 import {TabsList} from "@/components/ui/tabs";
 import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area"
 import HistoryItem from "@/components/HistoryItem"
-import {useRef} from "react";
+import React, {useRef} from "react";
 import ToolBar from "@/components/ToolBar";
 import StatusBar from "@/components/StatusBar";
 
@@ -14,6 +14,7 @@ type HistoryItemListProps = {
   isPreviewVisible: boolean
   onShowHidePreview: () => void
   onMouseDoubleClick: (tabIndex: number) => void
+  searchFieldRef?: React.Ref<HTMLInputElement>
 }
 
 export default function HistoryItemList(props: HistoryItemListProps) {
@@ -30,6 +31,7 @@ export default function HistoryItemList(props: HistoryItemListProps) {
         <ToolBar onFilterHistory={props.onFilterHistory}
                  onShowHidePreview={props.onShowHidePreview}
                  isPreviewVisible={props.isPreviewVisible}
+                 searchFieldRef={props.searchFieldRef}
         />
         <ScrollArea className="my-2">
           <TabsList loop={false}
