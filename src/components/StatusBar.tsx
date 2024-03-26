@@ -4,7 +4,7 @@ import {
   ArrowBigDown,
   ArrowBigUp,
   ChevronDown,
-  ChevronUp,
+  ChevronUp, Command,
   CornerDownLeft,
   Delete
 } from "lucide-react";
@@ -34,6 +34,9 @@ export default function StatusBar(props: StatusBarProps) {
             <p className="pl-2 pr-4">Paste to {props.appName}</p>
           </div>
 
+          <Button disabled={true} className="btn p-0 mr-1 h-6 w-7 rounded bg-neutral-300">
+            <Command className="h-4 w-6 text-secondary-foreground"/>
+          </Button>
           <Button disabled={true} className="btn p-0 h-6 w-7 rounded bg-neutral-300">
             <Delete className="h-4 w-6 text-secondary-foreground"/>
           </Button>
