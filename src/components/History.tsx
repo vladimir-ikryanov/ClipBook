@@ -131,9 +131,9 @@ export default function History(props: HistoryProps) {
                              searchFieldRef={searchFieldRef}
             />
           </ResizablePanel>
-          <ResizableHandle className="border-neutral-200"/>
+          <ResizableHandle/>
           <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}
-                          className="transition-all duration-200 ease-out">
+                          className="transition-all duration-200 ease-out border-l-neutral-200 border-l-solid border-l">
             {
               props.items.map((item, index) =>
                   <HistoryItemPreview key={index} index={index} text={item}
