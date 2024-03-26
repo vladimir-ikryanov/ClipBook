@@ -6,17 +6,6 @@ let previewVisible = true;
 
 loadHistoryItems()
 
-addHistoryItem("Hello, world 1!")
-addHistoryItem("Hello, world 2!")
-addHistoryItem("Hello, world 3!")
-addHistoryItem("Hello, world 4!")
-addHistoryItem("Hello, world 5!")
-addHistoryItem("Hello, world 6!")
-addHistoryItem("Hello, world 7!")
-addHistoryItem("John Doe")
-addHistoryItem("John Doe 2")
-addHistoryItem("John Doe 3")
-
 function loadHistoryItems() {
   historyItems = []
   if (localStorage.getItem("historyItems")) {

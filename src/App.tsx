@@ -66,12 +66,13 @@ export default function App() {
         <ThemeProvider defaultTheme="system">
           <div className="flex h-screen draggable">
               <div className="flex flex-col text-center m-auto">
-                <Clipboard className="h-24 w-24 m-auto text-neutral-500"/>
-                <p className="text-center pt-8 text-2xl font-semibold text-neutral-700">Your
-                  clipboard
-                  is empty</p>
-                <p className="text-center pt-2">Start copying text or links to build your
-                  history.</p>
+                <Clipboard className="h-24 w-24 m-auto text-secondary-foreground"/>
+                <p className="text-center pt-8 text-2xl font-semibold text-foreground">
+                  Your clipboard is empty
+                </p>
+                <p className="text-center pt-2">
+                  Start copying text or links to build your history.
+                </p>
               </div>
             </div>
         </ThemeProvider>
