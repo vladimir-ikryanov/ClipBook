@@ -43,15 +43,15 @@ export default function History(props: HistoryProps) {
         e.preventDefault()
       }
       if (e.key === "Delete" || (e.key === "Backspace" && e.metaKey)) {
+        let itemToDelete = getActiveHistoryItem();
         if (getVisibleActiveHistoryItemIndex() === getVisibleHistoryItemsLength() - 1) {
           let activeTabIndex = 0;
           if (activeTabIndex < getVisibleHistoryItemsLength() - 1) {
-            activeTabIndex = activeTabIndex + 1
             setVisibleActiveHistoryItemIndex(activeTabIndex)
             setActiveTab(activeTabIndex.toString())
           }
         }
-        deleteHistoryItem(getActiveHistoryItem())
+        deleteHistoryItem(itemToDelete)
         e.preventDefault()
         props.onUpdateHistory()
       }
