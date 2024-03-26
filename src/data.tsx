@@ -43,6 +43,10 @@ export function getHistoryItems() {
   return Array.from(historyItems)
 }
 
+export function isHistoryEmpty() {
+  return historyItems.length === 0
+}
+
 export function addHistoryItem(item: string) {
   if (historyItems.includes(item)) {
     deleteItem(item)
