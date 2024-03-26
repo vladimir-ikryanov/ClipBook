@@ -2,6 +2,7 @@ let historyItems: string[];
 let filterQuery = "";
 let visibleActiveHistoryItemIndex = 0;
 let visibleHistoryItemsLength = 0;
+let previewVisible = true;
 
 loadHistoryItems()
 
@@ -21,10 +22,18 @@ function loadHistoryItems() {
   if (localStorage.getItem("historyItems")) {
     historyItems = JSON.parse(localStorage.getItem("historyItems")!)
   }
+  if (localStorage.getItem("previewVisible")) {
+    previewVisible = localStorage.getItem("previewVisible") === "true"
+  }
 }
 
 function saveHistoryItems() {
   localStorage.setItem("historyItems", JSON.stringify(historyItems))
+}
+
+function savePreviewVisible(visible: boolean) {
+  previewVisible = visible
+  localStorage.setItem("previewVisible", visible.toString())
 }
 
 function deleteItem(item: string) {
@@ -85,4 +94,12 @@ export function setFilterQuery(query: string) {
 
 export function getActiveHistoryItem() {
   return getHistoryItems()[visibleActiveHistoryItemIndex]
+}
+
+export function setPreviewVisibleState(visible: boolean) {
+  savePreviewVisible(visible)
+}
+
+export function getPreviewVisibleState() {
+  return previewVisible
 }

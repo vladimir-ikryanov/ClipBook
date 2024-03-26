@@ -7,9 +7,9 @@ import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
   deleteHistoryItem,
-  getActiveHistoryItem,
+  getActiveHistoryItem, getPreviewVisibleState,
   getVisibleActiveHistoryItemIndex,
-  getVisibleHistoryItemsLength,
+  getVisibleHistoryItemsLength, setPreviewVisibleState,
   setVisibleActiveHistoryItemIndex
 } from "@/data";
 
@@ -25,7 +25,7 @@ type HistoryProps = {
 export default function History(props: HistoryProps) {
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
   const searchFieldRef = useRef<HTMLInputElement>(null);
-  const [previewVisible, setPreviewVisible] = useState(true);
+  const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function History(props: HistoryProps) {
       activeTabIndex = activeTabIndex + 1
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
-      document.getElementById("tab-" + activeTabIndex)?.scrollIntoView({ block: "nearest" })
+      document.getElementById("tab-" + activeTabIndex)?.scrollIntoView({block: "nearest"})
     }
   }
 
@@ -83,20 +83,20 @@ export default function History(props: HistoryProps) {
       activeTabIndex = activeTabIndex - 1
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
-      document.getElementById("tab-" + activeTabIndex)?.scrollIntoView({ block: "nearest" })
+      document.getElementById("tab-" + activeTabIndex)?.scrollIntoView({block: "nearest"})
     }
   }
 
   function handleShowHidePreview(): void {
     if (previewPanelRef.current) {
-      let size = previewPanelRef.current.getSize()
-      if (size == 0) {
+      let visible = previewPanelRef.current.getSize() == 0
+      if (visible) {
         previewPanelRef.current.resize(50)
-        setPreviewVisible(true)
       } else {
         previewPanelRef.current.resize(0)
-        setPreviewVisible(false)
       }
+      setPreviewVisible(visible)
+      setPreviewVisibleState(visible)
     }
   }
 
