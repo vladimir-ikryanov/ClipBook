@@ -83,8 +83,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
 
 void MainApp::show() {
   browser_->show();
-  browser_->mainFrame()->executeJavaScript("forceRerender()");
-  browser_->mainFrame()->executeJavaScript("focusHistory()");
+  browser_->mainFrame()->executeJavaScript("activateApp()");
 }
 
 void MainApp::hide() {

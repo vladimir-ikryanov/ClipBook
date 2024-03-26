@@ -28,6 +28,17 @@ export default function History(props: HistoryProps) {
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
 
+  const activateApp = () => {
+    if (searchFieldRef.current) {
+      searchFieldRef.current.focus()
+    }
+    if (getVisibleHistoryItemsLength() > 0) {
+      let activeTabIndex = 0;
+      setVisibleActiveHistoryItemIndex(activeTabIndex)
+      setActiveTab(activeTabIndex.toString())
+    }
+  };
+
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "ArrowUp") {
@@ -115,6 +126,8 @@ export default function History(props: HistoryProps) {
     setVisibleActiveHistoryItemIndex(parseInt(tabIndex))
     setActiveTab(tabIndex)
   }
+
+  (window as any).activateApp = activateApp;
 
   return (
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={onTabChange}

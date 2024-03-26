@@ -13,11 +13,6 @@ export default function App() {
   const [appName, setAppName] = useState("")
   const [isVisible, setIsVisible] = useState(false);
 
-  const forceRerender = () => {
-    // Toggle the state to trigger re-render
-    setIsVisible(prev => !prev);
-  };
-
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       // Prevent leaving the history items with the tab key.
@@ -56,7 +51,6 @@ export default function App() {
   }
 
   // Attach the function to the window object
-  (window as any).forceRerender = forceRerender;
   (window as any).addClipboardData = addClipboardData;
   (window as any).setActiveAppName = setActiveAppName;
   (window as any).clearHistory = clearHistory;
