@@ -18,10 +18,6 @@ type HistoryItemListProps = {
 }
 
 export default function HistoryItemList(props: HistoryItemListProps) {
-  function handleDeleteHistoryItem(lastItem: boolean): void {
-    props.onUpdateHistory()
-  }
-
   function handleMouseDoubleClick(tabIndex: number) {
     props.onMouseDoubleClick(tabIndex)
   }
@@ -41,7 +37,6 @@ export default function HistoryItemList(props: HistoryItemListProps) {
                                   index={index}
                                   text={item}
                                   historySize={props.items.length}
-                                  onDeleteHistoryItem={handleDeleteHistoryItem}
                                   onMouseDoubleClick={handleMouseDoubleClick}
               />
             })

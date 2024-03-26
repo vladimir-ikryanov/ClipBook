@@ -8,7 +8,6 @@ type HistoryItemProps = {
   index: number
   historySize: number
   text: string
-  onDeleteHistoryItem: (isLastItem: boolean) => void
   onMouseDoubleClick: (tabIndex: number) => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>
 }
@@ -32,6 +31,7 @@ export default function HistoryItem(props: HistoryItemProps) {
 
   return (
       <TabsTrigger
+          id={`tab-${props.index}`}
           ref={props.tabsTriggerRef}
           value={props.index.toString()}
           className="flex flex-row data-[state=active]:bg-accent ml-3 mr-2 py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis"
