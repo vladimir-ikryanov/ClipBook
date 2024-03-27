@@ -1,3 +1,5 @@
+#include <thread>
+
 #include "main_app.h"
 
 using namespace molybden;
@@ -23,7 +25,22 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
               }),
           }),
           menu::Item("Clear all", [this](const CustomMenuItemActionArgs &args) {
-            clearHistory();
+            activate();
+
+            MessageDialogOptions options;
+            options.message = "Are you sure you want to clear entire history?";
+            options.informative_text = "This action cannot be undone.";
+            options.buttons = {
+                MessageDialogButton("Clear", MessageDialogButtonType::kDefault),
+                MessageDialogButton("Cancel", MessageDialogButtonType::kCancel),
+            };
+            MessageDialog::show(app_, options, [this](const MessageDialogResult &result) {
+              if (result.button.type == MessageDialogButtonType::kDefault) {
+                std::thread([this]() {
+                  clearHistory();
+                }).detach();
+              }
+            });
           }),
           menu::Separator(),
           menu::About(app_),
