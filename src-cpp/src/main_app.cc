@@ -43,7 +43,23 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
             });
           }),
           menu::Separator(),
-          menu::About(app_),
+          menu::Item("About " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
+            activate();
+
+            MessageDialogOptions options;
+            options.message = app_->name();
+            options.informative_text =
+                "Version " + app_->version() + "\n\n© 2024 ClipBook. All rights reserved.";
+            options.buttons = {
+                MessageDialogButton("Visit Website", MessageDialogButtonType::kNone),
+                MessageDialogButton("Close", MessageDialogButtonType::kDefault)
+            };
+            MessageDialog::show(app_, options, [this](const MessageDialogResult &result) {
+              if (result.button.type == MessageDialogButtonType::kNone) {
+                app_->desktop()->openUrl("https://clipbook.app");
+              }
+            });
+          }),
           menu::Item("Quit", [app](const CustomMenuItemActionArgs &args) {
             app->quit();
           })
