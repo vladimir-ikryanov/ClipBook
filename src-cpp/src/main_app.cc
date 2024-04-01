@@ -1,55 +1,10 @@
+#include <thread>
+
 #include "main_app.h"
 
 using namespace molybden;
 
-std::string kUpdatesServerUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUpdate/appcast.xml";
-
 MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
-  app_->onUpdateInstalled += [app](const UpdateInstalled &event) {
-    LOG(INFO) << "Update installed: " << event.version;
-//    MessageDialogOptions options;
-//    options.message = "Update installed";
-//    options.informative_text = event.app->name() + " has been updated to version " + event.version
-//        + ". Restart the app to apply the update.";
-//    options.buttons = {
-//        MessageDialogButton("Restart", MessageDialogButtonType::kDefault),
-//        MessageDialogButton("Cancel", MessageDialogButtonType::kCancel),
-//    };
-//    MessageDialog::show(app, options, [app](const MessageDialogResult &result) {
-//      if (result.button.type == MessageDialogButtonType::kDefault) {
-//        app->restart();
-//      }
-//    });
-  };
-
-  app_->onCheckForUpdate = [](const CheckForUpdateArgs &args, CheckForUpdateAction action) {
-    LOG(INFO) << "Checking for updates...";
-    if (args.update_package.has_value()) {
-      LOG(INFO) << "Update available: " << args.update_package.value().version;
-      action.install(args.update_package.value());
-    } else {
-//      MessageDialogOptions options;
-//      options.message = "You're up to date!";
-//      options.informative_text = args.app->name() + " " + args.app->version()
-//          + " is currently the newest version available.";
-//      MessageDialog::show(args.app, options);
-//      // Dismiss what? I don't have an update package. Dismiss the package I don't have?
-      action.dismiss();
-    }
-  };
-
-  app_->onCheckForUpdateFailed += [app](const CheckForUpdateFailed &event) {
-    LOG(ERROR) << "Update check failed: " << event.message;
-//    MessageDialogOptions options;
-//    options.message = "Update check failed";
-//    options.informative_text = event.message;
-//    MessageDialog::show(app, options);
-  };
-
-  app_->onUpdateProgressChanged += [](const UpdateProgressChanged &event) {
-    LOG(INFO) << "Update progress: " << event.progress;
-  };
-
   auto tray = Tray::create(app);
   tray->setImage(app->getPath(PathKey::kAppResources) + "/imageTemplate.png");
   tray->setMenu(CustomMenu::create(
@@ -70,14 +25,41 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
               }),
           }),
           menu::Item("Clear all", [this](const CustomMenuItemActionArgs &args) {
-            clearHistory();
+            activate();
+
+            MessageDialogOptions options;
+            options.message = "Are you sure you want to clear entire history?";
+            options.informative_text = "This action cannot be undone.";
+            options.buttons = {
+                MessageDialogButton("Clear", MessageDialogButtonType::kDefault),
+                MessageDialogButton("Cancel", MessageDialogButtonType::kCancel),
+            };
+            MessageDialog::show(app_, options, [this](const MessageDialogResult &result) {
+              if (result.button.type == MessageDialogButtonType::kDefault) {
+                std::thread([this]() {
+                  clearHistory();
+                }).detach();
+              }
+            });
           }),
           menu::Separator(),
-          menu::About(app_),
-          menu::Item("Check for Updates...", [this](const CustomMenuItemActionArgs &args) {
-            app_->updateChecker()->checkNow(kUpdatesServerUrl);
+          menu::Item("About " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
+            activate();
+
+            MessageDialogOptions options;
+            options.message = app_->name();
+            options.informative_text =
+                "Version " + app_->version() + "\n\n© 2024 ClipBook. All rights reserved.";
+            options.buttons = {
+                MessageDialogButton("Visit Website", MessageDialogButtonType::kNone),
+                MessageDialogButton("Close", MessageDialogButtonType::kDefault)
+            };
+            MessageDialog::show(app_, options, [this](const MessageDialogResult &result) {
+              if (result.button.type == MessageDialogButtonType::kNone) {
+                app_->desktop()->openUrl("https://clipbook.app");
+              }
+            });
           }),
-          menu::Separator(),
           menu::Item("Quit", [app](const CustomMenuItemActionArgs &args) {
             app->quit();
           })
@@ -124,7 +106,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
   browser_->setWindowTitlebarVisible(false);
 
   // Move the window to the active desktop when the app is activated.
-//  browser_->setWindowDisplayPolicy(WindowDisplayPolicy::kMoveToActiveDesktop);
+  browser_->setWindowDisplayPolicy(WindowDisplayPolicy::kMoveToActiveDesktop);
 
   // Display the window always on top of other windows.
   browser_->setAlwaysOnTop(true);
@@ -134,8 +116,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
 
 void MainApp::show() {
   browser_->show();
-  browser_->mainFrame()->executeJavaScript("forceRerender()");
-  browser_->mainFrame()->executeJavaScript("focusHistory()");
+  browser_->mainFrame()->executeJavaScript("activateApp()");
 }
 
 void MainApp::hide() {

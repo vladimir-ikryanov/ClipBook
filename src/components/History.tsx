@@ -1,73 +1,158 @@
 import '../App.css';
-import {Tabs, TabsList} from "@/components/ui/tabs";
+import {Tabs} from "@/components/ui/tabs";
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/components/ui/resizable";
-import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area"
-import HistoryItem from "@/components/HistoryItem"
 import HistoryItemPreview from "@/components/HistoryItemPreview"
-import {useRef} from "react";
-import {Clipboard} from "lucide-react";
+import HistoryItemList from "@/components/HistoryItemList";
+import {useEffect, useRef, useState} from "react";
+import {ImperativePanelHandle} from "react-resizable-panels";
+import {
+  deleteHistoryItem,
+  getActiveHistoryItem, getPreviewVisibleState,
+  getVisibleActiveHistoryItemIndex,
+  getVisibleHistoryItemsLength, setPreviewVisibleState,
+  setVisibleActiveHistoryItemIndex
+} from "@/data";
+
+declare const pasteInFrontApp: (text: string) => void;
 
 type HistoryProps = {
   items: string[]
   appName: string
   onUpdateHistory: () => void
+  onFilterHistory: (searchQuery: string) => void
 }
 
 export default function History(props: HistoryProps) {
-  const firstItemRef = useRef<HTMLButtonElement>(null);
+  const previewPanelRef = useRef<ImperativePanelHandle>(null);
+  const searchFieldRef = useRef<HTMLInputElement>(null);
+  const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
+  const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
 
-  function focusHistory(): void {
-    if (firstItemRef.current) {
-      firstItemRef.current.focus();
+  const activateApp = () => {
+    if (searchFieldRef.current) {
+      searchFieldRef.current.focus()
+    }
+    if (getVisibleHistoryItemsLength() > 0) {
+      let activeTabIndex = 0;
+      setVisibleActiveHistoryItemIndex(activeTabIndex)
+      setActiveTab(activeTabIndex.toString())
+    }
+  };
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "ArrowUp") {
+        selectPreviousItem()
+        e.preventDefault()
+      }
+      if (e.key === "ArrowDown") {
+        selectNextItem()
+        e.preventDefault()
+      }
+      if (e.key === "Enter") {
+        pasteInFrontApp(getActiveHistoryItem())
+        e.preventDefault()
+      }
+      if (e.key === "Delete" || (e.key === "Backspace" && e.metaKey)) {
+        let itemToDelete = getActiveHistoryItem();
+        if (getVisibleActiveHistoryItemIndex() === getVisibleHistoryItemsLength() - 1) {
+          let activeTabIndex = 0;
+          if (activeTabIndex < getVisibleHistoryItemsLength() - 1) {
+            setVisibleActiveHistoryItemIndex(activeTabIndex)
+            setActiveTab(activeTabIndex.toString())
+          }
+        }
+        deleteHistoryItem(itemToDelete)
+        e.preventDefault()
+        props.onUpdateHistory()
+      }
+      if (e.key === "f" && e.metaKey) {
+        if (searchFieldRef.current) {
+          searchFieldRef.current.focus()
+        }
+        e.preventDefault()
+      }
+    }
+
+    document.addEventListener("keydown", down)
+    return () => document.removeEventListener("keydown", down)
+  }, [])
+
+  function selectNextItem() {
+    let activeTabIndex = getVisibleActiveHistoryItemIndex();
+    if (activeTabIndex < getVisibleHistoryItemsLength() - 1) {
+      activeTabIndex = activeTabIndex + 1
+      setVisibleActiveHistoryItemIndex(activeTabIndex)
+      setActiveTab(activeTabIndex.toString())
+      document.getElementById("tab-" + activeTabIndex)?.scrollIntoView({block: "nearest"})
     }
   }
 
-  (window as any).focusHistory = focusHistory;
-
-  function handleDeleteHistoryItem(lastItem: boolean): void {
-    props.onUpdateHistory()
-    if (lastItem) {
-      focusHistory()
+  function selectPreviousItem() {
+    let activeTabIndex = getVisibleActiveHistoryItemIndex();
+    if (activeTabIndex > 0) {
+      activeTabIndex = activeTabIndex - 1
+      setVisibleActiveHistoryItemIndex(activeTabIndex)
+      setActiveTab(activeTabIndex.toString())
+      document.getElementById("tab-" + activeTabIndex)?.scrollIntoView({block: "nearest"})
     }
   }
 
-  let items = props.items
-  const historyItems = items.map((item, index) => {
-    return <HistoryItem key={index} index={index} historySize={items.length} text={item}
-                        onDeleteHistoryItem={handleDeleteHistoryItem}
-                        tabsTriggerRef={index == 0 ? firstItemRef : null}/>
-  })
-  const historyItemPreviews = items.map((item, index) =>
-      <HistoryItemPreview key={index} index={index} text={item} appName={props.appName}/>
-  )
-
-  if (historyItems.length === 0) {
-    return (
-        <div className="flex flex-col w-full draggable">
-          <div className="flex flex-col w-full text-center m-auto">
-            <Clipboard className="h-24 w-24 m-auto text-neutral-500"/>
-            <p className="text-center pt-8 text-2xl font-semibold text-neutral-700">Your clipboard
-              is empty</p>
-            <p className="text-center pt-2">Start copying text or links to build your history.</p>
-          </div>
-        </div>
-    )
+  function handleShowHidePreview(): void {
+    if (previewPanelRef.current) {
+      let visible = previewPanelRef.current.getSize() == 0
+      if (visible) {
+        previewPanelRef.current.resize(50)
+      } else {
+        previewPanelRef.current.resize(0)
+      }
+      setPreviewVisible(visible)
+      setPreviewVisibleState(visible)
+    }
   }
+
+  function handleFilterHistory(searchQuery: string): void {
+    props.onFilterHistory(searchQuery)
+    const activeTabIndex = 0
+    setVisibleActiveHistoryItemIndex(activeTabIndex)
+    setActiveTab(activeTabIndex.toString())
+  }
+
+  function handleMouseDoubleClick(tabIndex: number) {
+    pasteInFrontApp(props.items[tabIndex])
+  }
+
+  function onTabChange(tabIndex: string): void {
+    setVisibleActiveHistoryItemIndex(parseInt(tabIndex))
+    setActiveTab(tabIndex)
+  }
+
+  (window as any).activateApp = activateApp;
+
   return (
-      <Tabs defaultValue="0" orientation="vertical" className="w-full p-0 m-0">
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={onTabChange}
+            orientation="vertical"
+            className="w-full p-0 m-0">
         <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel defaultSize={40} className="flex flex-col">
-            <div className="draggable pt-3 pb-2"></div>
-            <ScrollArea className="h-full mt-0 ml-4 mr-3 mb-5">
-              <TabsList loop={false}
-                        className="grid h-full justify-normal pr-3 pt-0 pb-0 pl-1">
-                {historyItems}
-              </TabsList>
-              <ScrollBar orientation="vertical"/>
-            </ScrollArea>
+          <ResizablePanel className="flex flex-col">
+            <HistoryItemList items={props.items} appName={props.appName}
+                             onUpdateHistory={props.onUpdateHistory}
+                             onFilterHistory={handleFilterHistory}
+                             onShowHidePreview={handleShowHidePreview}
+                             onMouseDoubleClick={handleMouseDoubleClick}
+                             isPreviewVisible={previewVisible}
+                             searchFieldRef={searchFieldRef}
+            />
           </ResizablePanel>
-          <ResizableHandle className="border-neutral-200"/>
-          <ResizablePanel defaultSize={60}>{historyItemPreviews}</ResizablePanel>
+          <ResizableHandle/>
+          <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}
+                          className="transition-all duration-200 ease-out bg-secondary">
+            {
+              props.items.map((item, index) =>
+                  <HistoryItemPreview key={index} index={index} text={item}
+                                      appName={props.appName}/>)
+            }
+          </ResizablePanel>
         </ResizablePanelGroup>
       </Tabs>
   )

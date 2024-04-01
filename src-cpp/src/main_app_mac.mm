@@ -15,6 +15,14 @@ MainAppMac::MainAppMac(const std::shared_ptr<App> &app) : MainApp(app), active_a
   });
 }
 
+void MainAppMac::activate() {
+  // Get a reference to your NSApplication instance
+  NSApplication *app = [NSApplication sharedApplication];
+
+  // Activate your application, bringing it to the front
+  [app activateIgnoringOtherApps:YES];
+}
+
 void MainAppMac::show() {
   active_app_ = [[NSWorkspace sharedWorkspace] frontmostApplication];
   NSString *app_name = [active_app_ localizedName];
