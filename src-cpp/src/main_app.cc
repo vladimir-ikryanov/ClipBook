@@ -5,7 +5,7 @@
 using namespace molybden;
 
 #if OS_MAC
-std::string kAppUpdatesUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUpdate/appcast.xml";
+std::string kAppUpdatesUrl = "https://storage.googleapis.com/clipbook.app/downloads/appcast.xml";
 #endif
 
 MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
@@ -205,7 +205,7 @@ void MainApp::showAboutDialog() {
   };
   MessageDialog::show(app_, options, [this](const MessageDialogResult &result) {
     if (result.button.type == MessageDialogButtonType::kNone) {
-      app_->desktop()->openUrl("https://clipbook.app");
+      app_->desktop()->openUrl("https://clipbook.app?utm_source=app&utm_medium=about");
     }
   });
 }
