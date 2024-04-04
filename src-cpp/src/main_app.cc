@@ -6,6 +6,8 @@ using namespace molybden;
 
 #if OS_MAC
 std::string kAppUpdatesUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUpdate/appcast.xml";
+#elif OS_WIN
+std::string kAppUpdatesUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUpdate";
 #endif
 
 MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {

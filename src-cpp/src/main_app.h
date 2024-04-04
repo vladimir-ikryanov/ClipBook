@@ -2,6 +2,7 @@
 #define CLIPBOARD_SRC_CPP_SRC_MAIN_APP_H_
 
 #include <memory>
+#include <string>
 
 #include "molybden.hpp"
 
