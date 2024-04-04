@@ -19,7 +19,7 @@ class MainApp {
  protected:
   void setActiveAppName(const std::string &app_name);
   void clearHistory();
-  void checkForUpdates();
+  void checkForUpdates(const std::function<void()>& complete);
   void showAboutDialog();
 
  private:
