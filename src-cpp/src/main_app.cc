@@ -4,6 +4,9 @@
 
 using namespace molybden;
 
+std::string kKeyboardShortcutsUrl = "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=app&utm_medium=help";
+std::string kContactSupportUrl = "mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
+
 #if OS_MAC
 std::string kAppUpdatesUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUpdate/appcast.xml";
 #elif OS_WIN
@@ -32,6 +35,15 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
           }),
           menu::Item("Clear all", [this](const CustomMenuItemActionArgs &args) {
             clearHistory();
+          }),
+          menu::Separator(),
+          menu::Menu("Help", {
+            menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
+              app_->desktop()->openUrl(kKeyboardShortcutsUrl);
+            }),
+            menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
+              app_->desktop()->openUrl(kContactSupportUrl);
+            }),
           }),
           menu::Separator(),
           menu::Item("About " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
@@ -210,6 +222,7 @@ void MainApp::checkForUpdates(const std::function<void()>& complete) {
 void MainApp::showAboutDialog() {
   activate();
   MessageDialogOptions options;
+  options.title = "About " + app_->name();
   options.message = app_->name();
   options.informative_text =
       "Version " + app_->version() + "\n\n© 2024 ClipBook. All rights reserved.";
