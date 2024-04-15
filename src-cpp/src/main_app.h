@@ -10,7 +10,7 @@ class MainApp {
  public:
   explicit MainApp(const std::shared_ptr<molybden::App> &app);
 
-  std::shared_ptr<molybden::Browser> browser() const;
+  [[nodiscard]] std::shared_ptr<molybden::Browser> browser() const;
 
   virtual void show();
   virtual void hide();
@@ -24,6 +24,7 @@ class MainApp {
   void showAboutDialog();
 
  private:
+  bool first_run_;
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Browser> browser_;
 };

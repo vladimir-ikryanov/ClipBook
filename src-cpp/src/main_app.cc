@@ -1,11 +1,18 @@
 #include <thread>
+#include <iostream>
+#include <fstream>
+#include <filesystem>
 
 #include "main_app.h"
 
 using namespace molybden;
 
-std::string kKeyboardShortcutsUrl = "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=app&utm_medium=help";
-std::string kContactSupportUrl = "mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
+namespace fs = std::filesystem;
+
+std::string kKeyboardShortcutsUrl =
+    "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=app&utm_medium=help";
+std::string kContactSupportUrl =
+    "mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
 
 #if OS_MAC
 std::string kAppUpdatesUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUpdate/appcast.xml";
@@ -14,6 +21,19 @@ std::string kAppUpdatesUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUp
 #endif
 
 MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
+  std::string userHomeDir = std::getenv("HOME");
+  std::string filePath = userHomeDir + "/Library/Application Support/" + app_->name() + "/run.txt";
+  if (!fs::exists(filePath)) {
+    std::ofstream outputFile(filePath);
+    if (outputFile.is_open()) {
+      outputFile << app_->version() << std::endl;
+      outputFile.close();
+    }
+    first_run_ = true;
+  } else {
+    first_run_ = false;
+  }
+
   auto tray = Tray::create(app);
   tray->setImage(app->getPath(PathKey::kAppResources) + "/imageTemplate.png");
   tray->setMenu(CustomMenu::create(
@@ -105,6 +125,12 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
 
   // Display the window always on top of other windows.
   browser_->setAlwaysOnTop(true);
+
+  // Set the initial window size and position if it's the first run.
+  if (first_run_) {
+    browser_->setSize(1080, 640);
+    browser_->centerWindow();
+  }
 
   browser_->loadUrl(app->baseUrl());
 }

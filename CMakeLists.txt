@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 
+# Configures your project.
+project(ClipBook LANGUAGES CXX)
+
 if (${CMAKE_SYSTEM_NAME} MATCHES Darwin)
     set(OS_MAC TRUE)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES Windows)
@@ -7,9 +10,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES Windows)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES Linux)
     set(OS_LINUX TRUE)
 endif ()
-
-# Configures your project.
-project(ClipBook LANGUAGES CXX)
 
 # Imports the Molybden app configuration and setups the auxiliary targets, resources, etc.
 # Important: Do not move this include above the project declaration.
