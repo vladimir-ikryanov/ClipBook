@@ -12,16 +12,21 @@ class MainApp {
 
   [[nodiscard]] std::shared_ptr<molybden::Browser> browser() const;
 
+  void launch();
+
   virtual void show();
   virtual void hide();
   virtual void activate() = 0;
   virtual void paste(const std::string &text) = 0;
 
  protected:
+  void init();
   void setActiveAppName(const std::string &app_name);
   void clearHistory();
   void checkForUpdates(const std::function<void()>& complete);
   void showAboutDialog();
+
+  virtual std::string getUserDataDir() = 0;
 
  private:
   bool first_run_;

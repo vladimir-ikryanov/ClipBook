@@ -20,6 +20,7 @@ void launch() {
 #elif OS_WIN
       MainAppWin main_app(app);
 #endif
+      main_app.launch();
       ClipboardManager::create(main_app.browser())->start();
   });
 }

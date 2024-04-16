@@ -16,6 +16,9 @@ class MainAppMac : public MainApp {
   void activate() override;
   void paste(const std::string &text) override;
 
+protected:
+  std::string getUserDataDir() override;
+
  private:
 #ifdef __OBJC__
   NSRunningApplication *active_app_{};

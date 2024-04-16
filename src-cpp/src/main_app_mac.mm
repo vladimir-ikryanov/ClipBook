@@ -15,6 +15,11 @@ MainAppMac::MainAppMac(const std::shared_ptr<App> &app) : MainApp(app), active_a
   });
 }
 
+std::string MainAppMac::getUserDataDir() {
+  std::string userHomeDir = std::getenv("HOME");
+  return userHomeDir + "/Library/Application Support/" + app_->name();
+}
+
 void MainAppMac::activate() {
   // Get a reference to your NSApplication instance
   NSApplication *app = [NSApplication sharedApplication];

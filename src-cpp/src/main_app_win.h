@@ -11,6 +11,9 @@ class MainAppWin: public MainApp {
   void hide() override;
   void activate() override;
   void paste(const std::string &text) override;
+
+ protected:
+  std::string getUserDataDir() override;
 };
 
 #endif //CLIPBOARD_SRC_CPP_SRC_MAIN_APP_WIN_H_

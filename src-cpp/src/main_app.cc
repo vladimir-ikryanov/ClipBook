@@ -21,8 +21,10 @@ std::string kAppUpdatesUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUp
 #endif
 
 MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
-  std::string userHomeDir = std::getenv("HOME");
-  std::string filePath = userHomeDir + "/Library/Application Support/" + app_->name() + "/run.txt";
+}
+
+void MainApp::init() {
+  std::string filePath = getUserDataDir() + "/run.txt";
   if (!fs::exists(filePath)) {
     std::ofstream outputFile(filePath);
     if (outputFile.is_open()) {
@@ -33,81 +35,85 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
   } else {
     first_run_ = false;
   }
+}
 
-  auto tray = Tray::create(app);
-  tray->setImage(app->getPath(PathKey::kAppResources) + "/imageTemplate.png");
+void MainApp::launch() {
+  init();
+
+  auto tray = Tray::create(app_);
+  tray->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
   tray->setMenu(CustomMenu::create(
       {
           menu::Item("Open " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
-            show();
+              show();
           }),
           menu::Separator(),
           menu::Menu("Appearance", {
               menu::Item("Dark", [this](const CustomMenuItemActionArgs &args) {
-                app_->setTheme(AppTheme::kDark);
+                  app_->setTheme(AppTheme::kDark);
               }),
               menu::Item("Light", [this](const CustomMenuItemActionArgs &args) {
-                app_->setTheme(AppTheme::kLight);
+                  app_->setTheme(AppTheme::kLight);
               }),
               menu::Item("System", [this](const CustomMenuItemActionArgs &args) {
-                app_->setTheme(AppTheme::kSystem);
+                  app_->setTheme(AppTheme::kSystem);
               }),
           }),
           menu::Item("Clear all", [this](const CustomMenuItemActionArgs &args) {
-            clearHistory();
+              clearHistory();
           }),
           menu::Separator(),
           menu::Menu("Help", {
-            menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
-              app_->desktop()->openUrl(kKeyboardShortcutsUrl);
-            }),
-            menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
-              app_->desktop()->openUrl(kContactSupportUrl);
-            }),
+              menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
+                  app_->desktop()->openUrl(kKeyboardShortcutsUrl);
+              }),
+              menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
+                  app_->desktop()->openUrl(kContactSupportUrl);
+              }),
           }),
           menu::Separator(),
           menu::Item("About " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
-            showAboutDialog();
+              showAboutDialog();
           }),
           menu::Item("Check for Updates...", [this](const CustomMenuItemActionArgs &args) {
-            args.menu_item->setEnabled(false);
-            checkForUpdates([args]() {
-              args.menu_item->setEnabled(true);
-            });
+              args.menu_item->setEnabled(false);
+              checkForUpdates([args]() {
+                  args.menu_item->setEnabled(true);
+              });
           }),
-          menu::Item("Quit", [app](const CustomMenuItemActionArgs &) {
-            app->quit();
+          menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
+              app_->quit();
           })
       }));
 
   // Hide the dock icon and make the app a background app.
   app_->dock()->hide();
 
-  browser_ = Browser::create(app);
+  browser_ = Browser::create(app_);
   browser_->settings()->disableOverscrollHistoryNavigation();
   browser_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
-    args.window->putProperty("pasteInFrontApp", [this](std::string text) {
-      paste(text);
-    });
-    args.window->putProperty("hideAppWindow", [this]() {
-      hide();
-    });
-    action.proceed();
+      args.window->putProperty("pasteInFrontApp", [this](std::string text) {
+          paste(text);
+      });
+      args.window->putProperty("hideAppWindow", [this]() {
+          hide();
+      });
+      action.proceed();
   };
 
   browser_->onCanExecuteCommand =
       [this](const CanExecuteCommandArgs &args, CanExecuteCommandAction action) {
-        if (app_->isProduction()) {
-          action.cannot();
-        } else {
-          action.can();
-        }
+          if (app_->isProduction()) {
+            action.cannot();
+          } else {
+            action.can();
+          }
       };
 
   // Hide the window when the focus is lost.
   if (app_->isProduction()) {
     browser_->onFocusLost += [](const FocusLost &event) {
-      event.browser->hide();
+        event.browser->hide();
     };
   }
 
@@ -132,7 +138,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
     browser_->centerWindow();
   }
 
-  browser_->loadUrl(app->baseUrl());
+  browser_->loadUrl(app_->baseUrl());
 }
 
 void MainApp::show() {
@@ -178,6 +184,7 @@ void MainApp::checkForUpdates(const std::function<void()>& complete) {
     if (!error_msg.empty()) {
       activate();
       MessageDialogOptions options;
+      options.title = "Update Check Failed";
       options.type = MessageDialogType::kError;
       options.message = "Oops! An error occurred while checking for updates :(";
       options.informative_text = error_msg;
@@ -189,6 +196,7 @@ void MainApp::checkForUpdates(const std::function<void()>& complete) {
       if (app_update) {
         activate();
         MessageDialogOptions options;
+        options.title = "Update Available";
         options.message = "A new version of " + app_->name() + " is available.";
         options.informative_text = "Would you like to update?";
         options.buttons = {
@@ -201,6 +209,7 @@ void MainApp::checkForUpdates(const std::function<void()>& complete) {
               activate();
               auto app_version = event.app_update->version();
               MessageDialogOptions options;
+              options.title = "Restart Required";
               options.message = app_->name() + " has been updated to version " + app_version + ".";
               options.informative_text = "Please restart the application to apply the update.";
               options.buttons = {
@@ -210,7 +219,9 @@ void MainApp::checkForUpdates(const std::function<void()>& complete) {
               MessageDialog::show(app_, options, [this, complete](const MessageDialogResult &result) {
                 complete();
                 if (result.button.type == MessageDialogButtonType::kDefault) {
-                  app_->restart();
+                  std::thread([this]() {
+                      app_->restart();
+                  }).detach();
                 }
               });
             };
@@ -218,6 +229,7 @@ void MainApp::checkForUpdates(const std::function<void()>& complete) {
             app_update->onAppUpdateFailed += [this, complete](const AppUpdateFailed &event) {
               activate();
               MessageDialogOptions options;
+              options.title = "Update Failed";
               options.type = MessageDialogType::kError;
               options.message = "An error occurred while installing the update :(";
               options.informative_text = event.message;
@@ -235,6 +247,7 @@ void MainApp::checkForUpdates(const std::function<void()>& complete) {
       } else {
         activate();
         MessageDialogOptions options;
+        options.title = "Up to Date";
         options.message = app_->name() + " is up to date!";
         options.informative_text = "You are using the latest version of " + app_->name() + ".";
         options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
@@ -251,7 +264,7 @@ void MainApp::showAboutDialog() {
   options.title = "About " + app_->name();
   options.message = app_->name();
   options.informative_text =
-      "Version " + app_->version() + "\n\n© 2024 ClipBook. All rights reserved.";
+      "Version " + app_->version() + "\n\n(c) 2024 ClipBook. All rights reserved.";
   options.buttons = {
       MessageDialogButton("Visit Website", MessageDialogButtonType::kNone),
       MessageDialogButton("Close", MessageDialogButtonType::kDefault)

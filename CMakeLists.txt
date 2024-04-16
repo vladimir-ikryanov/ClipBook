@@ -24,14 +24,16 @@ set(APP_SOURCES
         src-cpp/src/clipboard_manager.cc
 )
 
-# Defines the main target of the application.
-add_library(molybden_lib STATIC ${APP_SOURCES})
+if (OS_WIN)
+    set(APP_SOURCES_WIN src-cpp/src/main_app_win.h src-cpp/src/main_app_win.cc)
+endif ()
 
 if (OS_MAC)
-    target_sources(molybden_lib PRIVATE src-cpp/src/main_app_mac.h src-cpp/src/main_app_mac.mm)
-elseif (OS_WIN)
-    target_sources(molybden_lib PRIVATE src-cpp/src/main_app_win.h src-cpp/src/main_app_win.cc)
+    set(APP_SOURCES_MAC src-cpp/src/main_app_mac.h src-cpp/src/main_app_mac.mm)
 endif ()
+
+# Defines the main target of the application.
+add_library(molybden_lib STATIC ${APP_SOURCES} ${APP_SOURCES_WIN} ${APP_SOURCES_MAC})
 
 # The Molybden API requires C++20.
 set_property(TARGET molybden_lib PROPERTY CXX_STANDARD 20)

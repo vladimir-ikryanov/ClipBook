@@ -11,6 +11,10 @@ MainAppWin::MainAppWin(const std::shared_ptr<App> &app) : MainApp(app) {
   });
 }
 
+std::string MainAppWin::getUserDataDir() {
+  return "";
+}
+
 void MainAppWin::activate() {
 }
 
