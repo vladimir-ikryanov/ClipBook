@@ -7,6 +7,9 @@ using namespace molybden;
 
 WelcomeWindow::WelcomeWindow(const std::shared_ptr<App> &app) : app_(app) {
   browser_ = Browser::create(app_);
+  browser_->loadUrl(app->baseUrl() + "/welcome.html");
+  browser_->setSize(400, 600);
+  browser_->centerWindow();
 }
 
 void WelcomeWindow::show() {

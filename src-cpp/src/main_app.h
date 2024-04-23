@@ -32,6 +32,11 @@ class MainApp {
   bool first_run_;
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Browser> browser_;
+
+ private:
+  std::shared_ptr<molybden::CustomCheckboxMenuItem> dark_menu_item_;
+  std::shared_ptr<molybden::CustomCheckboxMenuItem> light_menu_item_;
+  std::shared_ptr<molybden::CustomCheckboxMenuItem> system_menu_item_;
 };
 
 #endif //CLIPBOARD_SRC_CPP_SRC_MAIN_APP_H_

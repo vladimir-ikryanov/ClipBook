@@ -21,6 +21,28 @@ std::string kAppUpdatesUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUp
 #endif
 
 MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app), first_run_(false) {
+  dark_menu_item_ =
+      menu::CheckboxItem("Dark", [this](const CustomCheckboxMenuItemActionArgs &args) {
+        app_->setTheme(AppTheme::kDark);
+        dark_menu_item_->setChecked(true);
+        light_menu_item_->setChecked(false);
+        system_menu_item_->setChecked(false);
+      });
+  light_menu_item_ =
+      menu::CheckboxItem("Light", [this](const CustomCheckboxMenuItemActionArgs &args) {
+        app_->setTheme(AppTheme::kLight);
+        dark_menu_item_->setChecked(false);
+        light_menu_item_->setChecked(true);
+        system_menu_item_->setChecked(false);
+      });
+  system_menu_item_ =
+      menu::CheckboxItem("System", [this](const CustomCheckboxMenuItemActionArgs &args) {
+        app_->setTheme(AppTheme::kSystem);
+        dark_menu_item_->setChecked(false);
+        light_menu_item_->setChecked(false);
+        system_menu_item_->setChecked(true);
+      });
+  system_menu_item_->setChecked(true);
 }
 
 bool MainApp::init() {
@@ -48,15 +70,9 @@ void MainApp::launch() {
           }),
           menu::Separator(),
           menu::Menu("Appearance", {
-              menu::Item("Dark", [this](const CustomMenuItemActionArgs &args) {
-                  app_->setTheme(AppTheme::kDark);
-              }),
-              menu::Item("Light", [this](const CustomMenuItemActionArgs &args) {
-                  app_->setTheme(AppTheme::kLight);
-              }),
-              menu::Item("System", [this](const CustomMenuItemActionArgs &args) {
-                  app_->setTheme(AppTheme::kSystem);
-              }),
+              dark_menu_item_,
+              light_menu_item_,
+              system_menu_item_
           }),
           menu::Item("Clear all", [this](const CustomMenuItemActionArgs &args) {
               clearHistory();

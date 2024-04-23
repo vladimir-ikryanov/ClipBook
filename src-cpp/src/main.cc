@@ -24,7 +24,7 @@ void launch() {
     MainAppWin main_app(app);
 #endif
     bool first_run = main_app.init();
-    if (first_run) {
+    if (first_run || !app->isProduction()) {
       // Show the welcome window if the app is running for the first time.
       WelcomeWindow welcome_window(app);
       welcome_window.show();
