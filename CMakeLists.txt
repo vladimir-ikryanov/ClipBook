@@ -22,6 +22,8 @@ set(APP_SOURCES
         src-cpp/src/main_app.cc
         src-cpp/src/clipboard_manager.h
         src-cpp/src/clipboard_manager.cc
+        src-cpp/src/welcome_window.h
+        src-cpp/src/welcome_window.cc
 )
 
 if (OS_WIN)

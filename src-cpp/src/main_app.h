@@ -12,6 +12,7 @@ class MainApp {
 
   [[nodiscard]] std::shared_ptr<molybden::Browser> browser() const;
 
+  bool init();
   void launch();
 
   virtual void show();
@@ -20,7 +21,6 @@ class MainApp {
   virtual void paste(const std::string &text) = 0;
 
  protected:
-  void init();
   void setActiveAppName(const std::string &app_name);
   void clearHistory();
   void checkForUpdates(const std::function<void()>& complete);
@@ -28,7 +28,7 @@ class MainApp {
 
   virtual std::string getUserDataDir() = 0;
 
- private:
+ protected:
   bool first_run_;
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Browser> browser_;

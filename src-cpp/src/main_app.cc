@@ -20,10 +20,10 @@ std::string kAppUpdatesUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUp
 std::string kAppUpdatesUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUpdate";
 #endif
 
-MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app) {
+MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app), first_run_(false) {
 }
 
-void MainApp::init() {
+bool MainApp::init() {
   std::string filePath = getUserDataDir() + "/run.txt";
   if (!fs::exists(filePath)) {
     std::ofstream outputFile(filePath);
@@ -35,11 +35,10 @@ void MainApp::init() {
   } else {
     first_run_ = false;
   }
+  return first_run_;
 }
 
 void MainApp::launch() {
-  init();
-
   auto tray = Tray::create(app_);
   tray->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
   tray->setMenu(CustomMenu::create(
@@ -86,9 +85,6 @@ void MainApp::launch() {
           })
       }));
 
-  // Hide the dock icon and make the app a background app.
-  app_->dock()->hide();
-
   browser_ = Browser::create(app_);
   browser_->settings()->disableOverscrollHistoryNavigation();
   browser_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
@@ -133,7 +129,7 @@ void MainApp::launch() {
   browser_->setAlwaysOnTop(true);
 
   // Set the initial window size and position if it's the first run.
-  if (first_run_) {
+  if (first_run_ || !app_->isProduction()) {
     browser_->setSize(1080, 640);
     browser_->centerWindow();
   }
