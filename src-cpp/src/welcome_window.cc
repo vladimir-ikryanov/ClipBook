@@ -9,7 +9,7 @@ WelcomeWindow::WelcomeWindow(const std::shared_ptr<MainApp> &app) : app_(app) {
   browser_ = Browser::create(app_->app());
   browser_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
     args.window->putProperty("enableAccessibilityAccess", [this]() {
-      app_->paste("");
+      app_->paste();
       browser_->loadUrl(app_->app()->baseUrl() + "/enjoy");
     });
     args.window->putProperty("openHistory", [this]() {

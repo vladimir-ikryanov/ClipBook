@@ -14,6 +14,7 @@ class MainAppMac : public MainApp {
   void show() override;
   void hide() override;
   void activate() override;
+  void paste() override;
   void paste(const std::string &text) override;
 
 protected:

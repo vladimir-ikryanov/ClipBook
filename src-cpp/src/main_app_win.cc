@@ -26,6 +26,9 @@ void MainAppWin::hide() {
   MainApp::hide();
 }
 
+void MainAppWin::paste() {
+}
+
 void MainAppWin::paste(const std::string &text) {
   // Hide the browser window and activate the previously active app.
   hide();

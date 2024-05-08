@@ -19,6 +19,7 @@ class MainApp {
   virtual void show();
   virtual void hide();
   virtual void activate() = 0;
+  virtual void paste() = 0;
   virtual void paste(const std::string &text) = 0;
 
  protected:
