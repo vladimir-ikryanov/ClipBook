@@ -10,6 +10,7 @@ class MainApp {
  public:
   explicit MainApp(const std::shared_ptr<molybden::App> &app);
 
+  [[nodiscard]] std::shared_ptr<molybden::App> app() const;
   [[nodiscard]] std::shared_ptr<molybden::Browser> browser() const;
 
   bool init();

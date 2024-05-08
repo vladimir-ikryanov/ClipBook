@@ -13,23 +13,22 @@ using namespace molybden;
 
 void launch() {
   AppOptions options;
-  options.logging.enabled = true;
-  options.logging.log_level = LogLevel::kInfo;
   App::init(options, [](std::shared_ptr<App> app) {
+    std::shared_ptr<MainApp> main_app;
 #if OS_MAC
-    MainAppMac main_app(app);
+    main_app = std::make_shared<MainAppMac>(app);
     // Hide the dock icon and make the app a background app.
     app->dock()->hide();
 #elif OS_WIN
-    MainAppWin main_app(app);
+    main_app = std::make_shared<MainAppWin>(app);
 #endif
-    bool first_run = main_app.init();
+    bool first_run = main_app->init();
     if (first_run || !app->isProduction()) {
       // Show the welcome window if the app is running for the first time.
-      WelcomeWindow welcome_window(app);
-      welcome_window.show();
+      auto* welcome_window = new WelcomeWindow(main_app);
+      welcome_window->show();
     }
-    main_app.launch();
-    ClipboardManager::create(main_app.browser())->start();
+    main_app->launch();
+    ClipboardManager::create(main_app->browser())->start();
   });
 }

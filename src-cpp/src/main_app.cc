@@ -9,16 +9,11 @@ using namespace molybden;
 
 namespace fs = std::filesystem;
 
+std::string kUpdateServerUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUpdate";
 std::string kKeyboardShortcutsUrl =
     "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=app&utm_medium=help";
 std::string kContactSupportUrl =
     "mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
-
-#if OS_MAC
-std::string kAppUpdatesUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUpdate/appcast.xml";
-#elif OS_WIN
-std::string kAppUpdatesUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUpdate";
-#endif
 
 MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app), first_run_(false) {
   dark_menu_item_ =
@@ -97,7 +92,9 @@ void MainApp::launch() {
               });
           }),
           menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
+            std::thread([this]() {
               app_->quit();
+            }).detach();
           })
       }));
 
@@ -164,6 +161,10 @@ void MainApp::hide() {
   }
 }
 
+std::shared_ptr<molybden::App> MainApp::app() const {
+  return app_;
+}
+
 std::shared_ptr<molybden::Browser> MainApp::browser() const {
   return browser_;
 }
@@ -191,7 +192,7 @@ void MainApp::clearHistory() {
 }
 
 void MainApp::checkForUpdates(const std::function<void()>& complete) {
-  app_->checkForUpdate(kAppUpdatesUrl, [this, complete](const CheckForUpdateResult &result) {
+  app_->checkForUpdate(kUpdateServerUrl, [this, complete](const CheckForUpdateResult &result) {
     std::string error_msg = result.error_message;
     if (!error_msg.empty()) {
       activate();

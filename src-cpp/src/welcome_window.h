@@ -5,18 +5,17 @@
 #include <string>
 
 #include "molybden.hpp"
+#include "main_app.h"
 
 class WelcomeWindow {
  public:
-  explicit WelcomeWindow(const std::shared_ptr<molybden::App> &app);
-
-  [[nodiscard]] std::shared_ptr<molybden::Browser> browser() const;
+  explicit WelcomeWindow(const std::shared_ptr<MainApp> &app);
 
   virtual void show();
   virtual void hide();
 
  private:
-  std::shared_ptr<molybden::App> app_;
+  std::shared_ptr<MainApp> app_;
   std::shared_ptr<molybden::Browser> browser_;
 };
 
