@@ -25,7 +25,7 @@ WelcomeWindow::WelcomeWindow(const std::shared_ptr<MainApp> &app) : app_(app) {
   browser_->setWindowButtonVisible(WindowButtonType::kMinimize, false);
   browser_->setWindowButtonVisible(WindowButtonType::kRestore, false);
   browser_->setWindowButtonVisible(WindowButtonType::kZoom, false);
-  browser_->setSize(500, 750);
+  browser_->setSize(500, 650);
   browser_->centerWindow();
 }
 
