@@ -61,7 +61,7 @@ void MainApp::launch() {
       {
           menu::Item("Open " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
               show();
-          }),
+          }, Shortcut(KeyCode::V, KeyModifier::COMMAND_OR_CTRL | KeyModifier::SHIFT)),
           menu::Separator(),
           menu::Menu("Appearance", {
               dark_menu_item_,
