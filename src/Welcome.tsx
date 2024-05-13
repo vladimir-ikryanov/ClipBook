@@ -4,8 +4,9 @@ import {Button} from "@/components/ui/button";
 export default function Welcome() {
   return (
       <div className="flex h-screen bg-neutral-100">
-        <div className="flex flex-col text-center m-auto">
-          <img src="assets/logo.svg" className="h-44 w-44 m-auto text-secondary-foreground" alt=""/>
+        <div className="flex flex-col text-center mx-auto">
+          <div className="flex p-10 justify-center draggable"></div>
+          <img src="assets/logo.svg" className="h-44 w-44 mt-20 mx-auto text-secondary-foreground" alt=""/>
           <p className="text-center pt-8 text-3xl font-bold text-foreground">
             Welcome to ClipBook
           </p>

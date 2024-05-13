@@ -12,8 +12,10 @@ export default function Enjoy() {
 
   return (
       <div className="flex h-screen bg-neutral-100">
-        <div className="flex flex-col text-center m-auto">
-          <img src="assets/success.svg" className="h-24 w-24 m-auto text-secondary-foreground" alt=""/>
+        <div className="flex flex-col text-center mx-auto">
+          <div className="flex p-10 justify-center draggable"></div>
+          <img src="assets/success.svg" className="h-24 w-24 mx-auto text-secondary-foreground"
+               alt=""/>
           <p className="text-center pt-4 text-2xl font-bold text-foreground">
             ClipBook is Ready
           </p>
@@ -25,7 +27,7 @@ export default function Enjoy() {
           <img src="assets/tray.png" alt="" className="mx-20 my-10 rounded-xl"/>
           <div className="items-center">
             <Button onClick={openClipBook}
-                className="bg-gradient-to-b from-blue-500 to-blue-600 text-white p-5 hover:from-blue-600 hover:to-blue-700 m-2">Open
+                    className="bg-gradient-to-b from-blue-500 to-blue-600 text-white p-5 hover:from-blue-600 hover:to-blue-700 m-2">Open
               ClipBook</Button>
           </div>
         </div>
