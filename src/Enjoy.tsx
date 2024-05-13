@@ -11,7 +11,7 @@ export default function Enjoy() {
   }
 
   return (
-      <div className="flex h-screen draggable bg-neutral-100">
+      <div className="flex h-screen bg-neutral-100">
         <div className="flex flex-col text-center m-auto">
           <img src="assets/success.svg" className="h-24 w-24 m-auto text-secondary-foreground" alt=""/>
           <p className="text-center pt-4 text-2xl font-bold text-foreground">

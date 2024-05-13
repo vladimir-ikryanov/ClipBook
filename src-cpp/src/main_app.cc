@@ -9,7 +9,6 @@ using namespace molybden;
 
 namespace fs = std::filesystem;
 
-std::string kUpdateServerUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUpdate";
 std::string kKeyboardShortcutsUrl =
     "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=app&utm_medium=help";
 std::string kContactSupportUrl =
@@ -84,12 +83,6 @@ void MainApp::launch() {
           menu::Separator(),
           menu::Item("About " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
               showAboutDialog();
-          }),
-          menu::Item("Check for Updates...", [this](const CustomMenuItemActionArgs &args) {
-              args.menu_item->setEnabled(false);
-              checkForUpdates([args]() {
-                  args.menu_item->setEnabled(true);
-              });
           }),
           menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
             std::thread([this]() {
@@ -187,86 +180,6 @@ void MainApp::clearHistory() {
       std::thread([this]() {
         browser_->mainFrame()->executeJavaScript("clearHistory()");
       }).detach();
-    }
-  });
-}
-
-void MainApp::checkForUpdates(const std::function<void()>& complete) {
-  app_->checkForUpdate(kUpdateServerUrl, [this, complete](const CheckForUpdateResult &result) {
-    std::string error_msg = result.error_message;
-    if (!error_msg.empty()) {
-      activate();
-      MessageDialogOptions options;
-      options.title = "Update Check Failed";
-      options.type = MessageDialogType::kError;
-      options.message = "Oops! An error occurred while checking for updates :(";
-      options.informative_text = error_msg;
-      options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
-      MessageDialog::show(app_, options);
-      complete();
-    } else {
-      auto app_update = result.app_update;
-      if (app_update) {
-        activate();
-        MessageDialogOptions options;
-        options.title = "Update Available";
-        options.message = "A new version of " + app_->name() + " is available.";
-        options.informative_text = "Would you like to update?";
-        options.buttons = {
-            MessageDialogButton("Update", MessageDialogButtonType::kDefault),
-            MessageDialogButton("Later", MessageDialogButtonType::kCancel),
-        };
-        MessageDialog::show(app_, options, [this, complete, app_update](const MessageDialogResult &result) {
-          if (result.button.type == MessageDialogButtonType::kDefault) {
-            app_update->onAppUpdateInstalled += [this, complete](const AppUpdateInstalled &event) {
-              activate();
-              auto app_version = event.app_update->version();
-              MessageDialogOptions options;
-              options.title = "Restart Required";
-              options.message = app_->name() + " has been updated to version " + app_version + ".";
-              options.informative_text = "Please restart the application to apply the update.";
-              options.buttons = {
-                  MessageDialogButton("Restart", MessageDialogButtonType::kDefault),
-                  MessageDialogButton("Later", MessageDialogButtonType::kCancel),
-              };
-              MessageDialog::show(app_, options, [this, complete](const MessageDialogResult &result) {
-                complete();
-                if (result.button.type == MessageDialogButtonType::kDefault) {
-                  std::thread([this]() {
-                      app_->restart();
-                  }).detach();
-                }
-              });
-            };
-
-            app_update->onAppUpdateFailed += [this, complete](const AppUpdateFailed &event) {
-              activate();
-              MessageDialogOptions options;
-              options.title = "Update Failed";
-              options.type = MessageDialogType::kError;
-              options.message = "An error occurred while installing the update :(";
-              options.informative_text = event.message;
-              options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
-              MessageDialog::show(app_, options);
-              complete();
-            };
-
-            app_update->install();
-          } else {
-            app_update->dismiss();
-            complete();
-          }
-        });
-      } else {
-        activate();
-        MessageDialogOptions options;
-        options.title = "Up to Date";
-        options.message = app_->name() + " is up to date!";
-        options.informative_text = "You are using the latest version of " + app_->name() + ".";
-        options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
-        MessageDialog::show(app_, options);
-        complete();
-      }
     }
   });
 }
