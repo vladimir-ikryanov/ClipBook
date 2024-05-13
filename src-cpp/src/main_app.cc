@@ -40,7 +40,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app), first_run_(false)
 }
 
 bool MainApp::init() {
-  std::string filePath = getUserDataDir() + "/run.txt";
+  std::string filePath = getUserDataDir() + "/version.txt";
   if (!fs::exists(filePath)) {
     std::ofstream outputFile(filePath);
     if (outputFile.is_open()) {
