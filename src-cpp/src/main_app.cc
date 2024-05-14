@@ -37,9 +37,15 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app), first_run_(false)
         system_menu_item_->setChecked(true);
       });
   system_menu_item_->setChecked(true);
+  request_interceptor_ = std::make_shared<UrlRequestInterceptor>();
 }
 
 bool MainApp::init() {
+  app_->profile()->network()->onInterceptUrlRequest = [this](const InterceptUrlRequestArgs &args,
+                                                             InterceptUrlRequestAction action) {
+    request_interceptor_->intercept(args, std::move(action));
+  };
+
   std::string filePath = getUserDataDir() + "/version.txt";
   if (!fs::exists(filePath)) {
     std::ofstream outputFile(filePath);
@@ -60,7 +66,7 @@ void MainApp::launch() {
   tray->setMenu(CustomMenu::create(
       {
           menu::Item("Open " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
-              show();
+            show();
           }, Shortcut(KeyCode::V, KeyModifier::COMMAND_OR_CTRL | KeyModifier::SHIFT)),
           menu::Separator(),
           menu::Menu("Appearance", {
@@ -69,20 +75,20 @@ void MainApp::launch() {
               system_menu_item_
           }),
           menu::Item("Clear all", [this](const CustomMenuItemActionArgs &args) {
-              clearHistory();
+            clearHistory();
           }),
           menu::Separator(),
           menu::Menu("Help", {
               menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
-                  app_->desktop()->openUrl(kKeyboardShortcutsUrl);
+                app_->desktop()->openUrl(kKeyboardShortcutsUrl);
               }),
               menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
-                  app_->desktop()->openUrl(kContactSupportUrl);
+                app_->desktop()->openUrl(kContactSupportUrl);
               }),
           }),
           menu::Separator(),
           menu::Item("About " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
-              showAboutDialog();
+            showAboutDialog();
           }),
           menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
             std::thread([this]() {
@@ -94,28 +100,28 @@ void MainApp::launch() {
   browser_ = Browser::create(app_);
   browser_->settings()->disableOverscrollHistoryNavigation();
   browser_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
-      args.window->putProperty("pasteInFrontApp", [this](std::string text) {
-          paste(text);
-      });
-      args.window->putProperty("hideAppWindow", [this]() {
-          hide();
-      });
-      action.proceed();
+    args.window->putProperty("pasteInFrontApp", [this](std::string text) {
+      paste(text);
+    });
+    args.window->putProperty("hideAppWindow", [this]() {
+      hide();
+    });
+    action.proceed();
   };
 
   browser_->onCanExecuteCommand =
       [this](const CanExecuteCommandArgs &args, CanExecuteCommandAction action) {
-          if (app_->isProduction()) {
-            action.cannot();
-          } else {
-            action.can();
-          }
+        if (app_->isProduction()) {
+          action.cannot();
+        } else {
+          action.can();
+        }
       };
 
   // Hide the window when the focus is lost.
   if (app_->isProduction()) {
     browser_->onFocusLost += [](const FocusLost &event) {
-        event.browser->hide();
+      event.browser->hide();
     };
   }
 

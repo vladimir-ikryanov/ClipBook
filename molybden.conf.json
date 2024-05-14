@@ -83,7 +83,7 @@
           "script": "npm run build",
           "dir": "dist"
         },
-        "url": "molybden://app/index.html"
+        "url": "clipbook://app"
       }
     }
   }

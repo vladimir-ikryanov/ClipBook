@@ -20,8 +20,12 @@ set(APP_SOURCES
         src-cpp/src/main.cc
         src-cpp/src/main_app.h
         src-cpp/src/main_app.cc
-        src-cpp/src/clipboard_manager.h
-        src-cpp/src/clipboard_manager.cc
+        src-cpp/src/clipboard_reader.h
+        src-cpp/src/clipboard_reader.cc
+        src-cpp/src/url.h
+        src-cpp/src/url.cc
+        src-cpp/src/url_request_interceptor.h
+        src-cpp/src/url_request_interceptor.cc
         src-cpp/src/welcome_window.h
         src-cpp/src/welcome_window.cc
 )

@@ -1,17 +1,17 @@
-#include "clipboard_manager.h"
+#include "clipboard_reader.h"
 
 #include <memory>
 #include <thread>
 
-std::shared_ptr<ClipboardManager>
-ClipboardManager::create(const std::shared_ptr<Browser> &browser) {
-  std::shared_ptr<ClipboardManager> manager(new ClipboardManager(browser));
+std::shared_ptr<ClipboardReader>
+ClipboardReader::create(const std::shared_ptr<Browser> &browser) {
+  std::shared_ptr<ClipboardReader> manager(new ClipboardReader(browser));
   return manager;
 }
 
-ClipboardManager::ClipboardManager(const std::shared_ptr<Browser> &browser) : browser_(browser) {}
+ClipboardReader::ClipboardReader(const std::shared_ptr<Browser> &browser) : browser_(browser) {}
 
-void ClipboardManager::start() {
+void ClipboardReader::start() {
   std::thread t([this]() {
       while (!browser_->isClosed()) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -26,7 +26,7 @@ void ClipboardManager::start() {
   t.join();
 }
 
-std::shared_ptr<ClipboardData> ClipboardManager::readClipboardData(
+std::shared_ptr<ClipboardData> ClipboardReader::readClipboardData(
     const std::shared_ptr<ClipboardDataType> &type) {
   auto clipboard_data = browser_->app()->clipboard()->read();
   for (const auto &data: clipboard_data) {

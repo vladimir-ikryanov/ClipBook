@@ -1,10 +1,11 @@
-#ifndef CLIPBOARD_SRC_CPP_SRC_MAIN_APP_H_
-#define CLIPBOARD_SRC_CPP_SRC_MAIN_APP_H_
+#ifndef CLIPBOOK_MAIN_APP_H_
+#define CLIPBOOK_MAIN_APP_H_
 
 #include <memory>
 #include <string>
 
 #include "molybden.hpp"
+#include "url_request_interceptor.h"
 
 class MainApp {
  public:
@@ -35,9 +36,10 @@ class MainApp {
   std::shared_ptr<molybden::Browser> browser_;
 
  private:
+  std::shared_ptr<UrlRequestInterceptor> request_interceptor_;
   std::shared_ptr<molybden::CustomCheckboxMenuItem> dark_menu_item_;
   std::shared_ptr<molybden::CustomCheckboxMenuItem> light_menu_item_;
   std::shared_ptr<molybden::CustomCheckboxMenuItem> system_menu_item_;
 };
 
-#endif //CLIPBOARD_SRC_CPP_SRC_MAIN_APP_H_
+#endif // CLIPBOOK_MAIN_APP_H_

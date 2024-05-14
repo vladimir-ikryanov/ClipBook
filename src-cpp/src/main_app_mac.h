@@ -1,5 +1,5 @@
-#ifndef CLIPBOARD_SRC_CPP_SRC_MAIN_APP_MAC_H_
-#define CLIPBOARD_SRC_CPP_SRC_MAIN_APP_MAC_H_
+#ifndef CLIPBOOK_MAIN_APP_MAC_H_
+#define CLIPBOOK_MAIN_APP_MAC_H_
 
 #include "main_app.h"
 
@@ -26,4 +26,4 @@ protected:
 #endif
 };
 
-#endif //CLIPBOARD_SRC_CPP_SRC_MAIN_APP_MAC_H_
+#endif // CLIPBOOK_MAIN_APP_MAC_H_

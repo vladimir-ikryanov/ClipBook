@@ -1,5 +1,5 @@
-#ifndef CLIPBOARD_SRC_CPP_SRC_WELCOME_WINDOW_H_
-#define CLIPBOARD_SRC_CPP_SRC_WELCOME_WINDOW_H_
+#ifndef CLIPBOOK_WELCOME_WINDOW_H_
+#define CLIPBOOK_WELCOME_WINDOW_H_
 
 #include <memory>
 #include <string>
@@ -19,4 +19,4 @@ class WelcomeWindow {
   std::shared_ptr<molybden::Browser> browser_;
 };
 
-#endif //CLIPBOARD_SRC_CPP_SRC_WELCOME_WINDOW_H_
+#endif // CLIPBOOK_WELCOME_WINDOW_H_
