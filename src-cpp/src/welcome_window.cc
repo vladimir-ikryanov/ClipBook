@@ -16,6 +16,9 @@ WelcomeWindow::WelcomeWindow(const std::shared_ptr<MainApp> &app) : app_(app) {
       hide();
       app_->show();
     });
+    args.window->putProperty("openUrl", [this](std::string url) {
+      app_->app()->desktop()->openUrl(url);
+    });
     action.proceed();
   };
   browser_->loadUrl(app_->app()->baseUrl() + "/welcome");
