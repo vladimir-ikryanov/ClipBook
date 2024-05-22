@@ -12,6 +12,8 @@ namespace fs = std::filesystem;
 std::string kUpdateServerUrl = "https://clipbook.app/downloads";
 std::string kKeyboardShortcutsUrl =
     "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=app&utm_medium=help";
+std::string kProductUpdatesUrl =
+    "https://clipbook.app/tags/updates/?utm_source=app&utm_medium=help";
 std::string kContactSupportUrl =
     "mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
 
@@ -82,6 +84,9 @@ void MainApp::launch() {
           menu::Menu("Help", {
               menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
                 app_->desktop()->openUrl(kKeyboardShortcutsUrl);
+              }),
+              menu::Item("Product Updates", [this](const CustomMenuItemActionArgs &args) {
+                app_->desktop()->openUrl(kProductUpdatesUrl);
               }),
               menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
                 app_->desktop()->openUrl(kContactSupportUrl);
