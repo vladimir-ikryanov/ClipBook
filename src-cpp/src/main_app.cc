@@ -9,7 +9,7 @@ using namespace molybden;
 
 namespace fs = std::filesystem;
 
-std::string kUpdateServerUrl = "https://vladimir-ikryanov.github.io/Molybden-AppUpdate";
+std::string kUpdateServerUrl = "https://clipbook.app/downloads";
 std::string kKeyboardShortcutsUrl =
     "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=app&utm_medium=help";
 std::string kContactSupportUrl =
