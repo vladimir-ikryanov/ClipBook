@@ -30,6 +30,7 @@ class MainApp {
   void showAboutDialog();
 
   virtual std::string getUserDataDir() = 0;
+  virtual std::string getUpdateServerUrl() = 0;
 
  protected:
   bool first_run_;

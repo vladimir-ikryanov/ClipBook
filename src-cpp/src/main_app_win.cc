@@ -15,6 +15,10 @@ std::string MainAppWin::getUserDataDir() {
   return "";
 }
 
+std::string MainAppWin::getUpdateServerUrl() {
+  return "";
+}
+
 void MainAppWin::activate() {
 }
 

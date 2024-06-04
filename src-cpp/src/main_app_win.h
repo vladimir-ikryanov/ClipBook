@@ -15,6 +15,7 @@ class MainAppWin: public MainApp {
 
  protected:
   std::string getUserDataDir() override;
+  std::string getUpdateServerUrl() override;
 };
 
 #endif // CLIPBOOK_MAIN_APP_WIN_H_

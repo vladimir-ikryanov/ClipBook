@@ -19,6 +19,7 @@ class MainAppMac : public MainApp {
 
 protected:
   std::string getUserDataDir() override;
+  std::string getUpdateServerUrl() override;
 
  private:
 #ifdef __OBJC__

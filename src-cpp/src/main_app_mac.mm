@@ -69,3 +69,7 @@ void MainAppMac::paste(const std::string &text) {
   // Simulate the key press of Command + V to paste the text into the active app.
   paste();
 }
+
+std::string MainAppMac::getUpdateServerUrl() {
+  return "https://clipbook.app/downloads/mac/x64";
+}

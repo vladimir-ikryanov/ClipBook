@@ -9,7 +9,6 @@ using namespace molybden;
 
 namespace fs = std::filesystem;
 
-std::string kUpdateServerUrl = "https://clipbook.app/downloads";
 std::string kKeyboardShortcutsUrl =
     "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=app&utm_medium=help";
 std::string kProductUpdatesUrl =
@@ -203,7 +202,7 @@ void MainApp::clearHistory() {
 }
 
 void MainApp::checkForUpdates(const std::function<void()>& complete) {
-  app_->checkForUpdate(kUpdateServerUrl, [this, complete](const CheckForUpdateResult &result) {
+  app_->checkForUpdate(getUpdateServerUrl(), [this, complete](const CheckForUpdateResult &result) {
     std::string error_msg = result.error_message;
     if (!error_msg.empty()) {
       activate();
