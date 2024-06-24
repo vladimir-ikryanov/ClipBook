@@ -20,14 +20,24 @@ set(APP_SOURCES
         src-cpp/src/url_request_interceptor.cc
         src-cpp/src/welcome_window.h
         src-cpp/src/welcome_window.cc
+        src-cpp/src/app_settings.h
+        src-cpp/src/app_settings.cc
 )
 
 if (OS_WIN)
-    set(APP_SOURCES_WIN src-cpp/src/main_app_win.h src-cpp/src/main_app_win.cc)
+    set(APP_SOURCES_WIN
+            src-cpp/src/main_app_win.h
+            src-cpp/src/main_app_win.cc
+    )
 endif ()
 
 if (OS_MAC)
-    set(APP_SOURCES_MAC src-cpp/src/main_app_mac.h src-cpp/src/main_app_mac.mm)
+    set(APP_SOURCES_MAC
+            src-cpp/src/main_app_mac.h
+            src-cpp/src/main_app_mac.mm
+            src-cpp/src/app_settings_mac.h
+            src-cpp/src/app_settings_mac.mm
+    )
 endif ()
 
 # Defines the main target of the application.

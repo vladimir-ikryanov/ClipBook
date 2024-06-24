@@ -34,7 +34,7 @@ void launch() {
   App::init(options, [](std::shared_ptr<App> app) {
     std::shared_ptr<MainApp> main_app;
 #if OS_MAC
-    main_app = std::make_shared<MainAppMac>(app);
+    main_app = std::make_shared<MainAppMac>(app, AppSettings::create());
     // Hide the dock icon and make the app a background app.
     app->dock()->hide();
 #elif OS_WIN

@@ -6,7 +6,9 @@
 
 using namespace molybden;
 
-MainAppMac::MainAppMac(const std::shared_ptr<App> &app) : MainApp(app), active_app_(nullptr) {
+MainAppMac::MainAppMac(const std::shared_ptr<App> &app,
+                       const std::shared_ptr<AppSettings> &settings)
+    : MainApp(app, settings), active_app_(nullptr) {
   // Register a global shortcut to show the browser window.
   auto global_shortcuts = app->globalShortcuts();
   auto shortcut_show = Shortcut(KeyCode::V, KeyModifier::COMMAND_OR_CTRL | KeyModifier::SHIFT);
@@ -83,14 +85,9 @@ std::string MainAppMac::getUpdateServerUrl() {
 void MainAppMac::restoreWindowBounds() {
   NSScreen *mainScreen = [NSScreen mainScreen];
   NSNumber *screenNumber = [[mainScreen deviceDescription] objectForKey:@"NSScreenNumber"];
-  NSString *key = [NSString stringWithFormat:@"screen_%@", screenNumber];
-  NSDictionary *prefValue = [[NSUserDefaults standardUserDefaults] objectForKey:key];
-  if (prefValue) {
-    auto x = [[prefValue objectForKey:@"window.bounds.x"] intValue];
-    auto y = [[prefValue objectForKey:@"window.bounds.y"] intValue];
-    auto width = [[prefValue objectForKey:@"window.bounds.width"] unsignedIntValue];
-    auto height = [[prefValue objectForKey:@"window.bounds.height"] unsignedIntValue];
-    browser_->setBounds(molybden::Rect(molybden::Point(x, y), molybden::Size(width, height)));
+  if (settings_->hasWindowBoundsForScreen([screenNumber intValue])) {
+    auto bounds = settings_->getWindowBoundsForScreen([screenNumber intValue]);
+    browser_->setBounds(bounds);
   } else {
     auto screen_x = static_cast<int32_t>([mainScreen frame].origin.x);
     auto screen_y = static_cast<int32_t>([mainScreen frame].origin.y);
@@ -102,15 +99,5 @@ void MainAppMac::restoreWindowBounds() {
 void MainAppMac::saveWindowBounds() {
   NSScreen *mainScreen = [NSScreen mainScreen];
   NSNumber *screenNumber = [[mainScreen deviceDescription] objectForKey:@"NSScreenNumber"];
-  auto window_bounds = browser_->bounds();
-  NSMutableDictionary *prefValue = [[NSMutableDictionary alloc] init];
-  prefValue[@"window.bounds.x"] = [NSNumber numberWithInt:window_bounds.origin.x];
-  prefValue[@"window.bounds.y"] = [NSNumber numberWithInt:window_bounds.origin.y];
-  prefValue[@"window.bounds.width"] = [NSNumber numberWithUnsignedInt:window_bounds.size.width];
-  prefValue[@"window.bounds.height"] = [NSNumber numberWithUnsignedInt:window_bounds.size.height];
-
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  NSString *key = [NSString stringWithFormat:@"screen_%@", screenNumber];
-  [defaults setObject:prefValue forKey:key];
-  [defaults synchronize];
+  settings_->saveWindowBoundsForScreen([screenNumber intValue], browser_->bounds());
 }

@@ -2,7 +2,8 @@
 
 using namespace molybden;
 
-MainAppWin::MainAppWin(const std::shared_ptr<App> &app) : MainApp(app) {
+MainAppWin::MainAppWin(const std::shared_ptr<App> &app,
+                       const std::shared_ptr<AppSettings> &settings) : MainApp(app, settings) {
   // Register a global shortcut to show the browser window.
   auto global_shortcuts = app->globalShortcuts();
   auto shortcut_show = Shortcut(KeyCode::V, KeyModifier::COMMAND_OR_CTRL | KeyModifier::SHIFT);

@@ -9,7 +9,8 @@
 
 class MainAppMac : public MainApp {
  public:
-  explicit MainAppMac(const std::shared_ptr<molybden::App> &app);
+  explicit MainAppMac(const std::shared_ptr<molybden::App> &app,
+                      const std::shared_ptr<AppSettings> &settings);
 
   void show() override;
   void hide() override;

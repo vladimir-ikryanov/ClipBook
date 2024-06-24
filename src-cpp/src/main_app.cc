@@ -16,10 +16,12 @@ std::string kProductUpdatesUrl =
 std::string kContactSupportUrl =
     "mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
 
-MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app), first_run_(false) {
+MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSettings> &settings)
+    : app_(app), first_run_(false), settings_(settings) {
   dark_menu_item_ =
       menu::CheckboxItem("Dark", [this](const CustomCheckboxMenuItemActionArgs &args) {
         app_->setTheme(AppTheme::kDark);
+        settings_->saveTheme(AppTheme::kDark);
         dark_menu_item_->setChecked(true);
         light_menu_item_->setChecked(false);
         system_menu_item_->setChecked(false);
@@ -27,6 +29,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app), first_run_(false)
   light_menu_item_ =
       menu::CheckboxItem("Light", [this](const CustomCheckboxMenuItemActionArgs &args) {
         app_->setTheme(AppTheme::kLight);
+        settings_->saveTheme(AppTheme::kLight);
         dark_menu_item_->setChecked(false);
         light_menu_item_->setChecked(true);
         system_menu_item_->setChecked(false);
@@ -34,11 +37,26 @@ MainApp::MainApp(const std::shared_ptr<App> &app) : app_(app), first_run_(false)
   system_menu_item_ =
       menu::CheckboxItem("System", [this](const CustomCheckboxMenuItemActionArgs &args) {
         app_->setTheme(AppTheme::kSystem);
+        settings_->saveTheme(AppTheme::kSystem);
         dark_menu_item_->setChecked(false);
         light_menu_item_->setChecked(false);
         system_menu_item_->setChecked(true);
       });
-  system_menu_item_->setChecked(true);
+  // Restore the app theme from the settings.
+  if (settings->hasTheme()) {
+    switch (settings->getTheme()) {
+      case AppTheme::kDark:
+        dark_menu_item_->setChecked(true);
+        break;
+      case AppTheme::kLight:
+        light_menu_item_->setChecked(true);
+        break;
+      default:
+        system_menu_item_->setChecked(true);
+    }
+  } else {
+    system_menu_item_->setChecked(true);
+  }
   request_interceptor_ = std::make_shared<UrlRequestInterceptor>();
 }
 

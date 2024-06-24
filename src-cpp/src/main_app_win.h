@@ -5,7 +5,8 @@
 
 class MainAppWin: public MainApp {
  public:
-  explicit MainAppWin(const std::shared_ptr<molybden::App> &app);
+  explicit MainAppWin(const std::shared_ptr<molybden::App> &app,
+                      const std::shared_ptr<AppSettings> &settings);
 
   void show() override;
   void hide() override;

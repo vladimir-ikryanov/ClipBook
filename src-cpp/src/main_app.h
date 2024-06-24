@@ -5,11 +5,13 @@
 #include <string>
 
 #include "molybden.hpp"
+#include "app_settings.h"
 #include "url_request_interceptor.h"
 
 class MainApp {
  public:
-  explicit MainApp(const std::shared_ptr<molybden::App> &app);
+  explicit MainApp(const std::shared_ptr<molybden::App> &app,
+                   const std::shared_ptr<AppSettings> &settings);
 
   [[nodiscard]] std::shared_ptr<molybden::App> app() const;
   [[nodiscard]] std::shared_ptr<molybden::Browser> browser() const;
@@ -36,6 +38,7 @@ class MainApp {
   bool first_run_;
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Browser> browser_;
+  std::shared_ptr<AppSettings> settings_;
 
  private:
   std::shared_ptr<UrlRequestInterceptor> request_interceptor_;
