@@ -6,7 +6,7 @@ import HistoryItemList from "@/components/HistoryItemList";
 import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
-  deleteHistoryItem,
+  deleteHistoryItem, editHistoryItem,
   getActiveHistoryItem, getPreviewVisibleState,
   getVisibleActiveHistoryItemIndex,
   getVisibleHistoryItemsLength, setPreviewVisibleState,
@@ -122,6 +122,17 @@ export default function History(props: HistoryProps) {
     pasteInFrontApp(props.items[tabIndex])
   }
 
+  function handleFinishEditing() {
+    if (searchFieldRef.current) {
+      searchFieldRef.current.focus()
+    }
+  }
+
+  function handleEditHistoryItem(index: number, item: string) {
+    editHistoryItem(index, item)
+    props.onUpdateHistory()
+  }
+
   function onTabChange(tabIndex: string): void {
     setVisibleActiveHistoryItemIndex(parseInt(tabIndex))
     setActiveTab(tabIndex)
@@ -150,7 +161,9 @@ export default function History(props: HistoryProps) {
             {
               props.items.map((item, index) =>
                   <HistoryItemPreview key={index} index={index} text={item}
-                                      appName={props.appName}/>)
+                                      appName={props.appName}
+                                      onEditHistoryItem={handleEditHistoryItem}
+                                      onFinishEditing={handleFinishEditing}/>)
             }
           </ResizablePanel>
         </ResizablePanelGroup>

@@ -59,6 +59,11 @@ export function deleteHistoryItem(item: string) {
   saveHistoryItems()
 }
 
+export function editHistoryItem(index: number, item: string) {
+  historyItems[index] = item
+  saveHistoryItems()
+}
+
 export function clear() {
   historyItems = []
   saveHistoryItems()
