@@ -17,9 +17,13 @@ class MainAppMac : public MainApp {
   void paste() override;
   void paste(const std::string &text) override;
 
-protected:
+ protected:
   std::string getUserDataDir() override;
   std::string getUpdateServerUrl() override;
+
+ private:
+  void restoreWindowBounds();
+  void saveWindowBounds();
 
  private:
 #ifdef __OBJC__
