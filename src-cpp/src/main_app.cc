@@ -197,6 +197,10 @@ std::shared_ptr<molybden::Browser> MainApp::browser() const {
   return browser_;
 }
 
+std::shared_ptr<AppSettings> MainApp::settings() const {
+  return settings_;
+}
+
 void MainApp::setActiveAppName(const std::string &app_name) {
   browser_->mainFrame()->executeJavaScript("setActiveAppName(\"" + app_name + "\")");
 }

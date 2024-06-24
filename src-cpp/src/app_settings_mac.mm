@@ -2,9 +2,7 @@
 
 #include <Foundation/Foundation.h>
 
-AppSettingsMac::AppSettingsMac() {
-
-}
+AppSettingsMac::AppSettingsMac() = default;
 
 void AppSettingsMac::saveWindowBoundsForScreen(int screen_id, molybden::Rect bounds) {
   NSMutableDictionary *prefValue = [[NSMutableDictionary alloc] init];
@@ -71,4 +69,20 @@ molybden::AppTheme AppSettingsMac::getTheme() {
 bool AppSettingsMac::hasTheme() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   return [defaults objectForKey:@"app.theme"] != nil;
+}
+
+void AppSettingsMac::saveIgnoreConfidentialContent(bool ignore) {
+
+}
+
+bool AppSettingsMac::getIgnoreConfidentialContent() {
+  return false;
+}
+
+void AppSettingsMac::saveIgnoreTransientContent(bool ignore) {
+
+}
+
+bool AppSettingsMac::getIgnoreTransientContent() {
+  return false;
 }

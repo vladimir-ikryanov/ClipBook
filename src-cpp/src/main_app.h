@@ -15,6 +15,7 @@ class MainApp {
 
   [[nodiscard]] std::shared_ptr<molybden::App> app() const;
   [[nodiscard]] std::shared_ptr<molybden::Browser> browser() const;
+  [[nodiscard]] std::shared_ptr<AppSettings> settings() const;
 
   bool init();
   void launch();
