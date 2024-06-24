@@ -1,5 +1,5 @@
-#ifndef CLIPBOOK_CLIPBOARD_MANAGER_H_
-#define CLIPBOOK_CLIPBOARD_MANAGER_H_
+#ifndef CLIPBOOK_CLIPBOARD_READER_H_
+#define CLIPBOOK_CLIPBOARD_READER_H_
 
 #include "molybden.hpp"
 
@@ -20,4 +20,4 @@ class ClipboardReader {
   std::shared_ptr<ClipboardData> clipboard_data_;
 };
 
-#endif // CLIPBOOK_CLIPBOARD_MANAGER_H_
+#endif // CLIPBOOK_CLIPBOARD_READER_H_
