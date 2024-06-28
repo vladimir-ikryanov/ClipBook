@@ -8,12 +8,13 @@ export default function Settings() {
   return (
       <div className="flex h-screen">
         <div className="flex bg-neutral-100">
-          <div className="flex flex-col w-48 my-12 mx-4 gap-y-1">
-            <div className="flex flex-row gap-x-2 py-2 px-2 bg-neutral-200 rounded-sm">
+          <div className="flex flex-col w-48 gap-y-1">
+            <div className="flex draggable p-6"></div>
+            <div className="flex flex-row gap-x-2 py-2 px-2 mx-4 bg-neutral-200 rounded-sm">
               <SettingsIcon className="h-5 w-5 mt-0.5"/>
               <span className="">General</span>
             </div>
-            <div className="flex flex-row py-2 px-2 hover:bg-neutral-200 hover:rounded-sm">
+            <div className="flex flex-row py-2 px-2 mx-4 hover:bg-neutral-200 hover:rounded-sm">
               <a href="/settings/privacy" className="flex flex-row gap-x-2">
                 <ShieldCheckIcon className="h-5 w-5 mt-0.5"/>
                 <span className="">Privacy</span>
@@ -28,7 +29,7 @@ export default function Settings() {
             </div>
 
             <div className="flex justify-between space-x-10">
-              <Label htmlFor="necessary" className="flex flex-col text-base">
+              <Label className="flex flex-col text-base">
                 <span className="">Appearance</span>
                 <span className="text-neutral-500 font-normal">Change how ClipBook looks on your&nbsp;device.</span>
               </Label>
@@ -75,23 +76,23 @@ export default function Settings() {
             <hr/>
 
             <div className="flex items-center justify-between space-x-20 mt-2">
-              <Label htmlFor="necessary" className="flex flex-col text-base">
+              <Label htmlFor="editContent" className="flex flex-col text-base">
                 <span className="">Edit content of a clipboard history item</span>
                 <span className="text-neutral-500 font-normal">
 Allow editing content of the currently selected clipboard history item in the&nbsp;Preview&nbsp;pane.
             </span>
               </Label>
-              <Switch id="necessary" defaultChecked/>
+              <Switch id="editContent" defaultChecked/>
             </div>
 
             <div className="flex items-center justify-between space-x-20">
-              <Label htmlFor="necessary" className="flex flex-col text-base">
+              <Label htmlFor="warnOnClearAll" className="flex flex-col text-base">
                 <span className="">Display warning when clearing all history</span>
                 <span className="text-neutral-500 font-normal">
 Display a confirmation dialog when clearing all clipboard&nbsp;history.
             </span>
               </Label>
-              <Switch id="necessary" defaultChecked/>
+              <Switch id="warnOnClearAll" defaultChecked/>
             </div>
           </div>
         </div>
