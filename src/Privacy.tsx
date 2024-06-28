@@ -23,22 +23,22 @@ export default function Privacy() {
         <div className="flex flex-col flex-grow">
           <div className="grid gap-6 p-10 pt-0">
             <div className="flex pt-10 border-b border-b-neutral-200">
-              <span className="text-2xl pb-4">Privacy</span>
+              <span className="text-2xl pb-4">Privacy settings</span>
             </div>
-            <div className="flex items-center justify-between space-x-10">
+            <div className="flex items-center justify-between space-x-20">
               <Label htmlFor="necessary" className="flex flex-col text-base">
                 <span className="">Ignore confidential content</span>
                 <span className="text-neutral-500 font-normal">
-              Do not save passwords and other sensitive data copied to the clipboard.
+              Do not save passwords and other sensitive data copied to the&nbsp;clipboard.
             </span>
               </Label>
               <Switch id="necessary" defaultChecked/>
             </div>
-            <div className="flex items-center justify-between space-x-10">
+            <div className="flex items-center justify-between space-x-20">
               <Label htmlFor="functional" className="flex flex-col text-base">
                 <span className="">Ignore transient content</span>
                 <span className="text-neutral-500 font-normal">
-              Do not save data temporarily placed to the clipboard.
+              Do not save data temporarily placed to the&nbsp;clipboard.
             </span>
               </Label>
               <Switch id="functional" defaultChecked/>
