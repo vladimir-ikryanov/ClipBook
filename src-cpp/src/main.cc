@@ -47,6 +47,6 @@ void launch() {
       welcome_window->show();
     }
     main_app->launch();
-    ClipboardReader::create(main_app->browser())->start();
+    ClipboardReader::create(main_app)->start();
   });
 }

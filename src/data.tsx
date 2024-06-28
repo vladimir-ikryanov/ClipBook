@@ -6,7 +6,26 @@ let previewVisible = true;
 
 loadHistoryItems()
 
+function generateRandomWord(length: number): string {
+  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
+  let result = ''
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length)
+    result += characters.charAt(randomIndex)
+  }
+  return result
+}
+
+function fillArrayWithRandomWords(size: number, wordLength: number): string[] {
+  const array: string[] = []
+  for (let i = 0; i < size; i++) {
+    array.push(generateRandomWord(wordLength))
+  }
+  return array
+}
+
 function loadHistoryItems() {
+  // historyItems = fillArrayWithRandomWords(10024, 32)
   historyItems = []
   if (localStorage.getItem("historyItems")) {
     historyItems = JSON.parse(localStorage.getItem("historyItems")!)

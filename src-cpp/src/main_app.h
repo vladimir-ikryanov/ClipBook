@@ -8,7 +8,7 @@
 #include "app_settings.h"
 #include "url_request_interceptor.h"
 
-class MainApp {
+class MainApp : public std::enable_shared_from_this<MainApp> {
  public:
   explicit MainApp(const std::shared_ptr<molybden::App> &app,
                    const std::shared_ptr<AppSettings> &settings);
@@ -31,6 +31,7 @@ class MainApp {
   void clearHistory();
   void checkForUpdates(const std::function<void()>& complete);
   void showAboutDialog();
+  void showSettingsWindow();
 
   virtual std::string getUserDataDir() = 0;
   virtual std::string getUpdateServerUrl() = 0;
@@ -39,13 +40,11 @@ class MainApp {
   bool first_run_;
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Browser> browser_;
+  std::shared_ptr<molybden::Browser> settings_window_;
   std::shared_ptr<AppSettings> settings_;
 
  private:
   std::shared_ptr<UrlRequestInterceptor> request_interceptor_;
-  std::shared_ptr<molybden::CustomCheckboxMenuItem> dark_menu_item_;
-  std::shared_ptr<molybden::CustomCheckboxMenuItem> light_menu_item_;
-  std::shared_ptr<molybden::CustomCheckboxMenuItem> system_menu_item_;
 };
 
 #endif // CLIPBOOK_MAIN_APP_H_

@@ -10,7 +10,7 @@
     --card-foreground: #000000;
     --popover: #fafafa;
     --popover-foreground: black;
-    --primary: #fafafa;
+    --primary: black;
     --primary-foreground: #414141;
     --secondary: #eeeeee;
     --secondary-foreground: #888888;
@@ -21,7 +21,7 @@
     --destructive: #fafafa;
     --destructive-foreground: #fafafa;
     --border: #e7e7e7;
-    --input: #fafafa;
+    --input: #d0d0d0;
     --ring: #fafafa;
     --radius: 0.75rem;
 

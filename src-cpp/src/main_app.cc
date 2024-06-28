@@ -18,45 +18,6 @@ std::string kContactSupportUrl =
 
 MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSettings> &settings)
     : app_(app), first_run_(false), settings_(settings) {
-  dark_menu_item_ =
-      menu::CheckboxItem("Dark", [this](const CustomCheckboxMenuItemActionArgs &args) {
-        app_->setTheme(AppTheme::kDark);
-        settings_->saveTheme(AppTheme::kDark);
-        dark_menu_item_->setChecked(true);
-        light_menu_item_->setChecked(false);
-        system_menu_item_->setChecked(false);
-      });
-  light_menu_item_ =
-      menu::CheckboxItem("Light", [this](const CustomCheckboxMenuItemActionArgs &args) {
-        app_->setTheme(AppTheme::kLight);
-        settings_->saveTheme(AppTheme::kLight);
-        dark_menu_item_->setChecked(false);
-        light_menu_item_->setChecked(true);
-        system_menu_item_->setChecked(false);
-      });
-  system_menu_item_ =
-      menu::CheckboxItem("System", [this](const CustomCheckboxMenuItemActionArgs &args) {
-        app_->setTheme(AppTheme::kSystem);
-        settings_->saveTheme(AppTheme::kSystem);
-        dark_menu_item_->setChecked(false);
-        light_menu_item_->setChecked(false);
-        system_menu_item_->setChecked(true);
-      });
-  // Restore the app theme from the settings.
-  if (settings->hasTheme()) {
-    switch (settings->getTheme()) {
-      case AppTheme::kDark:
-        dark_menu_item_->setChecked(true);
-        break;
-      case AppTheme::kLight:
-        light_menu_item_->setChecked(true);
-        break;
-      default:
-        system_menu_item_->setChecked(true);
-    }
-  } else {
-    system_menu_item_->setChecked(true);
-  }
   request_interceptor_ = std::make_shared<UrlRequestInterceptor>();
 }
 
@@ -89,11 +50,10 @@ void MainApp::launch() {
             show();
           }, Shortcut(KeyCode::V, KeyModifier::COMMAND_OR_CTRL | KeyModifier::SHIFT)),
           menu::Separator(),
-          menu::Menu("Appearance", {
-              dark_menu_item_,
-              light_menu_item_,
-              system_menu_item_
+          menu::Item("Settings...", [this](const CustomMenuItemActionArgs &args) {
+            showSettingsWindow();
           }),
+          menu::Separator(),
           menu::Item("Clear all", [this](const CustomMenuItemActionArgs &args) {
             clearHistory();
           }),
@@ -176,6 +136,8 @@ void MainApp::launch() {
   }
 
   browser_->loadUrl(app_->baseUrl());
+
+  app_->setTheme(settings_->getTheme());
 }
 
 void MainApp::show() {
@@ -319,4 +281,25 @@ void MainApp::showAboutDialog() {
       app_->desktop()->openUrl("https://clipbook.app?utm_source=app&utm_medium=about");
     }
   });
+}
+
+void MainApp::showSettingsWindow() {
+  if (settings_window_ && !settings_window_->isClosed()) {
+    settings_window_->show();
+    return;
+  }
+
+  settings_window_ = Browser::create(app_);
+  settings_window_->onInjectJs = [](const InjectJsArgs &args, InjectJsAction action) {
+    action.proceed();
+  };
+  settings_window_->loadUrl(app_->baseUrl() + "/settings");
+  settings_window_->setWindowTitleVisible(false);
+  settings_window_->setWindowTitlebarVisible(false);
+  settings_window_->setWindowButtonVisible(WindowButtonType::kMaximize, false);
+  settings_window_->setWindowButtonVisible(WindowButtonType::kRestore, false);
+  settings_window_->setWindowButtonVisible(WindowButtonType::kZoom, false);
+  settings_window_->setSize(700, 500);
+  settings_window_->centerWindow();
+  settings_window_->show();
 }
