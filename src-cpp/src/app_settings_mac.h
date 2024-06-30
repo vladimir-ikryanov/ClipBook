@@ -23,6 +23,9 @@ class AppSettingsMac : public AppSettings {
 
   void saveOpenAtLogin(bool open) override;
   bool shouldOpenAtLogin() override;
+
+  void saveWarnOnClearHistory(bool warn) override;
+  bool shouldWarnOnClearHistory() override;
 };
 
 

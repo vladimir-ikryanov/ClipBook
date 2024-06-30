@@ -9,10 +9,13 @@ declare const saveTheme: (theme: string) => void;
 declare const getTheme: () => string;
 declare const saveOpenAtLogin: (openAtLogin: boolean) => void;
 declare const shouldOpenAtLogin: () => boolean;
+declare const saveWarnOnClearHistory: (warn: boolean) => void;
+declare const shouldWarnOnClearHistory: () => boolean;
 
 export default function Settings() {
   const [theme, setTheme] = useState(getTheme());
   const [openAtLogin, setOpenAtLogin] = useState(shouldOpenAtLogin());
+  const [warnOnClearHistory, setWarnOnClearHistory] = useState(shouldWarnOnClearHistory());
 
   function handleThemeChange(theme: string) {
     setTheme(theme)
@@ -22,6 +25,11 @@ export default function Settings() {
   function handleOpenAtLoginChange(openAtLogin: boolean) {
     setOpenAtLogin(openAtLogin)
     saveOpenAtLogin(openAtLogin)
+  }
+
+  function handleWarnOnClearHistoryChange(warnOnClearHistory: boolean) {
+    setWarnOnClearHistory(warnOnClearHistory)
+    saveWarnOnClearHistory(warnOnClearHistory)
   }
 
   return (
@@ -112,7 +120,8 @@ Launch ClipBook automatically at&nbsp;login
 Display a confirmation dialog when clearing all clipboard&nbsp;history
             </span>
               </Label>
-              <Switch id="warnOnClearAll" defaultChecked/>
+              <Switch id="warnOnClearAll" checked={warnOnClearHistory}
+                      onCheckedChange={handleWarnOnClearHistoryChange}/>
             </div>
           </div>
         </div>

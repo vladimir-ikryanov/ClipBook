@@ -175,21 +175,26 @@ void MainApp::setActiveAppName(const std::string &app_name) {
 }
 
 void MainApp::clearHistory() {
-  activate();
-  MessageDialogOptions options;
-  options.message = "Are you sure you want to clear entire history?";
-  options.informative_text = "This action cannot be undone.";
-  options.buttons = {
-      MessageDialogButton("Clear", MessageDialogButtonType::kDefault),
-      MessageDialogButton("Cancel", MessageDialogButtonType::kCancel),
-  };
-  MessageDialog::show(app_, options, [this](const MessageDialogResult &result) {
-    if (result.button.type == MessageDialogButtonType::kDefault) {
-      std::thread([this]() {
-        browser_->mainFrame()->executeJavaScript("clearHistory()");
-      }).detach();
-    }
-  });
+  if (settings_->shouldWarnOnClearHistory()) {
+    hide();
+    activate();
+    MessageDialogOptions options;
+    options.message = "Are you sure you want to clear entire history?";
+    options.informative_text = "This action cannot be undone.";
+    options.buttons = {
+        MessageDialogButton("Clear", MessageDialogButtonType::kDefault),
+        MessageDialogButton("Cancel", MessageDialogButtonType::kCancel),
+    };
+    MessageDialog::show(app_, options, [this](const MessageDialogResult &result) {
+      if (result.button.type == MessageDialogButtonType::kDefault) {
+        std::thread([this]() {
+          browser_->mainFrame()->executeJavaScript("clearHistory()");
+        }).detach();
+      }
+    });
+  } else {
+    browser_->mainFrame()->executeJavaScript("clearHistory()");
+  }
 }
 
 void MainApp::checkForUpdates(const std::function<void()> &complete) {
@@ -345,6 +350,12 @@ void MainApp::showSettingsWindow() {
     });
     args.window->putProperty("shouldOpenAtLogin", [this]() -> bool {
       return settings_->shouldOpenAtLogin();
+    });
+    args.window->putProperty("saveWarnOnClearHistory", [this](bool warn) -> void {
+      settings_->saveWarnOnClearHistory(warn);
+    });
+    args.window->putProperty("shouldWarnOnClearHistory", [this]() -> bool {
+      return settings_->shouldWarnOnClearHistory();
     });
     action.proceed();
   };
