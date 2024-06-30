@@ -41,7 +41,7 @@ void launch() {
     main_app = std::make_shared<MainAppWin>(app);
 #endif
     bool first_run = main_app->init();
-    if (first_run) {
+    if (first_run || !app->isProduction()) {
       // Show the welcome window if the app is running for the first time.
       auto* welcome_window = new WelcomeWindow(main_app);
       welcome_window->show();

@@ -31,25 +31,31 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #2b2d30;
-    --foreground: #e3e3e3;
+    --background: #282828;
+    --foreground: #d6d6d6;
     --card: #3e4144;
     --card-foreground: #e3e3e3;
     --popover: #3e4144;
     --popover-foreground: black;
     --primary: #f6f6f6;
-    --primary-foreground: #e3e3e3;
-    --secondary: #35383a;
+    /* History item icon */
+    --primary-foreground: #808081;
+    /* Preview pane background */
+    --secondary: #212121;
+    /* Search field placeholder text */
     --secondary-foreground: #8a8a8a;
-    --muted: #2b2d30;
-    --muted-foreground: #e3e3e3;
-    --accent: #3e4144;
+    /* History item background */
+    --muted: #282828;
+    /* History item text */
+    --muted-foreground: #d5d5d5;
+    /* History item selected background */
+    --accent: #3a3a3a;
     --accent-foreground: #f5f5f5;
-    --destructive: #2b2d30;
+    --destructive: #282828;
     --destructive-foreground: #2b2d30;
     --border: #3e4144;
     --input: #707070;
-    --ring: #2b2d30;
+    --ring: #282828;
   }
 }
 
