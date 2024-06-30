@@ -7,13 +7,21 @@ import {useState} from "react";
 
 declare const saveTheme: (theme: string) => void;
 declare const getTheme: () => string;
+declare const saveOpenAtLogin: (openAtLogin: boolean) => void;
+declare const shouldOpenAtLogin: () => boolean;
 
 export default function Settings() {
   const [theme, setTheme] = useState(getTheme());
+  const [openAtLogin, setOpenAtLogin] = useState(shouldOpenAtLogin());
 
   function handleThemeChange(theme: string) {
     setTheme(theme)
     saveTheme(theme)
+  }
+
+  function handleOpenAtLoginChange(openAtLogin: boolean) {
+    setOpenAtLogin(openAtLogin)
+    saveOpenAtLogin(openAtLogin)
   }
 
   return (
@@ -85,6 +93,17 @@ export default function Settings() {
             </div>
 
             <hr/>
+
+            <div className="flex items-center justify-between space-x-20">
+              <Label htmlFor="openAtLogin" className="flex flex-col text-base">
+                <span className="">Launch at login</span>
+                <span className="text-neutral-500 font-normal text-sm">
+Launch ClipBook automatically at&nbsp;login
+            </span>
+              </Label>
+              <Switch id="openAtLogin" checked={openAtLogin}
+                      onCheckedChange={handleOpenAtLoginChange}/>
+            </div>
 
             <div className="flex items-center justify-between space-x-20">
               <Label htmlFor="warnOnClearAll" className="flex flex-col text-base">

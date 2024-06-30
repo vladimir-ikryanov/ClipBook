@@ -79,3 +79,14 @@ bool AppSettingsMac::shouldIgnoreTransientContent() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   return [defaults boolForKey:@"privacy.ignore_transient_content"];
 }
+
+void AppSettingsMac::saveOpenAtLogin(bool open) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:open forKey:@"app.open_at_login"];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldOpenAtLogin() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  return [defaults boolForKey:@"app.open_at_login"];
+}

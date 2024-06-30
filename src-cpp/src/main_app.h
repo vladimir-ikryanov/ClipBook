@@ -17,14 +17,15 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   [[nodiscard]] std::shared_ptr<molybden::Browser> browser() const;
   [[nodiscard]] std::shared_ptr<AppSettings> settings() const;
 
-  bool init();
-  void launch();
+  virtual bool init();
+  virtual void launch();
 
   virtual void show();
   virtual void hide();
   virtual void activate() = 0;
   virtual void paste() = 0;
   virtual void paste(const std::string &text) = 0;
+  virtual void setOpenAtLogin(bool open) = 0;
 
  protected:
   void setActiveAppName(const std::string &app_name);

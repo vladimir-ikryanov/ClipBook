@@ -12,11 +12,14 @@ class MainAppMac : public MainApp {
   explicit MainAppMac(const std::shared_ptr<molybden::App> &app,
                       const std::shared_ptr<AppSettings> &settings);
 
+  bool init() override;
+
   void show() override;
   void hide() override;
   void activate() override;
   void paste() override;
   void paste(const std::string &text) override;
+  void setOpenAtLogin(bool open) override;
 
  protected:
   std::string getUserDataDir() override;
@@ -25,6 +28,9 @@ class MainAppMac : public MainApp {
  private:
   void restoreWindowBounds();
   void saveWindowBounds();
+  void addAppToLoginItems();
+  void removeAppFromLoginItems();
+  bool isAppInLoginItems();
 
  private:
 #ifdef __OBJC__

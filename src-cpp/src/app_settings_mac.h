@@ -20,6 +20,9 @@ class AppSettingsMac : public AppSettings {
 
   void saveIgnoreTransientContent(bool ignore) override;
   bool shouldIgnoreTransientContent() override;
+
+  void saveOpenAtLogin(bool open) override;
+  bool shouldOpenAtLogin() override;
 };
 
 

@@ -27,6 +27,9 @@ bool MainApp::init() {
     request_interceptor_->intercept(args, std::move(action));
   };
 
+  // Restore the application theme.
+  setTheme(settings_->getTheme());
+
   std::string filePath = getUserDataDir() + "/version.txt";
   if (!fs::exists(filePath)) {
     std::ofstream outputFile(filePath);
@@ -142,8 +145,6 @@ void MainApp::launch() {
   }
 
   browser_->loadUrl(app_->baseUrl());
-
-  setTheme(settings_->getTheme());
 }
 
 void MainApp::show() {
@@ -337,6 +338,13 @@ void MainApp::showSettingsWindow() {
     });
     args.window->putProperty("shouldIgnoreTransientContent", [this]() -> bool {
       return settings_->shouldIgnoreTransientContent();
+    });
+    args.window->putProperty("saveOpenAtLogin", [this](bool open) -> void {
+      setOpenAtLogin(open);
+      settings_->saveOpenAtLogin(open);
+    });
+    args.window->putProperty("shouldOpenAtLogin", [this]() -> bool {
+      return settings_->shouldOpenAtLogin();
     });
     action.proceed();
   };

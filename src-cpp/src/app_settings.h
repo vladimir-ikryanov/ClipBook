@@ -20,6 +20,9 @@ class AppSettings {
 
   virtual void saveIgnoreTransientContent(bool ignore) = 0;
   virtual bool shouldIgnoreTransientContent() = 0;
+
+  virtual void saveOpenAtLogin(bool open) = 0;
+  virtual bool shouldOpenAtLogin() = 0;
 };
 
 
