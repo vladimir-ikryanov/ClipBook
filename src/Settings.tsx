@@ -3,12 +3,23 @@ import {Label} from "@/components/ui/label";
 import {SettingsIcon, ShieldCheckIcon} from "lucide-react";
 import {Switch} from "@/components/ui/switch";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
+import {useState} from "react";
+
+declare const saveTheme: (theme: string) => void;
+declare const getTheme: () => string;
 
 export default function Settings() {
+  const [theme, setTheme] = useState(getTheme());
+
+  function handleThemeChange(theme: string) {
+    setTheme(theme)
+    saveTheme(theme)
+  }
+
   return (
       <div className="flex h-screen">
         <div className="flex bg-neutral-100">
-          <div className="flex flex-col w-48 gap-y-1">
+          <div className="flex flex-col w-52 gap-y-1">
             <div className="flex draggable p-6"></div>
             <div className="flex flex-row gap-x-2 py-2 px-2 mx-4 bg-neutral-200 rounded-sm">
               <SettingsIcon className="h-5 w-5 mt-0.5"/>
@@ -31,10 +42,10 @@ export default function Settings() {
             <div className="flex justify-between space-x-10">
               <Label className="flex flex-col text-base">
                 <span className="">Appearance</span>
-                <span className="text-neutral-500 font-normal">Change how ClipBook looks on your&nbsp;device.</span>
+                <span className="text-neutral-500 font-normal text-sm">Change how ClipBook looks on your&nbsp;device</span>
               </Label>
 
-              <RadioGroup defaultValue="system">
+              <RadioGroup value={theme} onValueChange={handleThemeChange}>
                 <div className="flex flex-row gap-x-6">
                   <div className="">
                     <Label htmlFor="r1" className="[&:has([data-state=checked])>div>img]:outline">
@@ -75,21 +86,11 @@ export default function Settings() {
 
             <hr/>
 
-            <div className="flex items-center justify-between space-x-20 mt-2">
-              <Label htmlFor="editContent" className="flex flex-col text-base">
-                <span className="">Edit content of a clipboard history item</span>
-                <span className="text-neutral-500 font-normal">
-Allow editing content of the currently selected clipboard history item in the&nbsp;Preview&nbsp;pane.
-            </span>
-              </Label>
-              <Switch id="editContent" defaultChecked/>
-            </div>
-
             <div className="flex items-center justify-between space-x-20">
               <Label htmlFor="warnOnClearAll" className="flex flex-col text-base">
-                <span className="">Display warning when clearing all history</span>
-                <span className="text-neutral-500 font-normal">
-Display a confirmation dialog when clearing all clipboard&nbsp;history.
+                <span className="">Warn when clearing all history</span>
+                <span className="text-neutral-500 font-normal text-sm">
+Display a confirmation dialog when clearing all clipboard&nbsp;history
             </span>
               </Label>
               <Switch id="warnOnClearAll" defaultChecked/>

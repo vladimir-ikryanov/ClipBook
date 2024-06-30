@@ -74,10 +74,10 @@ void MainApp::launch() {
             showAboutDialog();
           }),
           menu::Item("Check for Updates...", [this](const CustomMenuItemActionArgs &args) {
-              args.menu_item->setEnabled(false);
-              checkForUpdates([args]() {
-                  args.menu_item->setEnabled(true);
-              });
+            args.menu_item->setEnabled(false);
+            checkForUpdates([args]() {
+              args.menu_item->setEnabled(true);
+            });
           }),
           menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
             std::thread([this]() {
@@ -137,7 +137,7 @@ void MainApp::launch() {
 
   browser_->loadUrl(app_->baseUrl());
 
-  app_->setTheme(settings_->getTheme());
+  setTheme(settings_->getTheme());
 }
 
 void MainApp::show() {
@@ -185,7 +185,7 @@ void MainApp::clearHistory() {
   });
 }
 
-void MainApp::checkForUpdates(const std::function<void()>& complete) {
+void MainApp::checkForUpdates(const std::function<void()> &complete) {
   app_->checkForUpdate(getUpdateServerUrl(), [this, complete](const CheckForUpdateResult &result) {
     std::string error_msg = result.error_message;
     if (!error_msg.empty()) {
@@ -210,47 +210,57 @@ void MainApp::checkForUpdates(const std::function<void()>& complete) {
             MessageDialogButton("Update", MessageDialogButtonType::kDefault),
             MessageDialogButton("Later", MessageDialogButtonType::kCancel),
         };
-        MessageDialog::show(app_, options, [this, complete, app_update](const MessageDialogResult &result) {
-          if (result.button.type == MessageDialogButtonType::kDefault) {
-            app_update->onAppUpdateInstalled += [this, complete](const AppUpdateInstalled &event) {
-              activate();
-              auto app_version = event.app_update->version();
-              MessageDialogOptions options;
-              options.title = "Restart Required";
-              options.message = app_->name() + " has been updated to version " + app_version + ".";
-              options.informative_text = "Please restart the application to apply the update.";
-              options.buttons = {
-                  MessageDialogButton("Restart", MessageDialogButtonType::kDefault),
-                  MessageDialogButton("Later", MessageDialogButtonType::kCancel),
-              };
-              MessageDialog::show(app_, options, [this, complete](const MessageDialogResult &result) {
-                complete();
-                if (result.button.type == MessageDialogButtonType::kDefault) {
-                  std::thread([this]() {
-                      app_->restart();
-                  }).detach();
-                }
-              });
-            };
+        MessageDialog::show(app_,
+                            options,
+                            [this, complete, app_update](const MessageDialogResult &result) {
+                              if (result.button.type == MessageDialogButtonType::kDefault) {
+                                app_update->onAppUpdateInstalled += [this, complete](const AppUpdateInstalled &event) {
+                                  activate();
+                                  auto app_version = event.app_update->version();
+                                  MessageDialogOptions options;
+                                  options.title = "Restart Required";
+                                  options.message =
+                                      app_->name() + " has been updated to version " + app_version +
+                                      ".";
+                                  options.informative_text = "Please restart the application to apply the update.";
+                                  options.buttons = {
+                                      MessageDialogButton("Restart",
+                                                          MessageDialogButtonType::kDefault),
+                                      MessageDialogButton("Later",
+                                                          MessageDialogButtonType::kCancel),
+                                  };
+                                  MessageDialog::show(app_,
+                                                      options,
+                                                      [this, complete](const MessageDialogResult &result) {
+                                                        complete();
+                                                        if (result.button.type ==
+                                                            MessageDialogButtonType::kDefault) {
+                                                          std::thread([this]() {
+                                                            app_->restart();
+                                                          }).detach();
+                                                        }
+                                                      });
+                                };
 
-            app_update->onAppUpdateFailed += [this, complete](const AppUpdateFailed &event) {
-              activate();
-              MessageDialogOptions options;
-              options.title = "Update Failed";
-              options.type = MessageDialogType::kError;
-              options.message = "An error occurred while installing the update :(";
-              options.informative_text = event.message;
-              options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
-              MessageDialog::show(app_, options);
-              complete();
-            };
+                                app_update->onAppUpdateFailed += [this, complete](const AppUpdateFailed &event) {
+                                  activate();
+                                  MessageDialogOptions options;
+                                  options.title = "Update Failed";
+                                  options.type = MessageDialogType::kError;
+                                  options.message = "An error occurred while installing the update :(";
+                                  options.informative_text = event.message;
+                                  options.buttons.emplace_back("Close",
+                                                               MessageDialogButtonType::kDefault);
+                                  MessageDialog::show(app_, options);
+                                  complete();
+                                };
 
-            app_update->install();
-          } else {
-            app_update->dismiss();
-            complete();
-          }
-        });
+                                app_update->install();
+                              } else {
+                                app_update->dismiss();
+                                complete();
+                              }
+                            });
       } else {
         activate();
         MessageDialogOptions options;
@@ -283,6 +293,18 @@ void MainApp::showAboutDialog() {
   });
 }
 
+void MainApp::setTheme(const std::string &theme) {
+  if (theme == "dark") {
+    app_->setTheme(AppTheme::kDark);
+  }
+  if (theme == "light") {
+    app_->setTheme(AppTheme::kLight);
+  }
+  if (theme == "system") {
+    app_->setTheme(AppTheme::kSystem);
+  }
+}
+
 void MainApp::showSettingsWindow() {
   if (settings_window_ && !settings_window_->isClosed()) {
     settings_window_->show();
@@ -290,7 +312,26 @@ void MainApp::showSettingsWindow() {
   }
 
   settings_window_ = Browser::create(app_);
-  settings_window_->onInjectJs = [](const InjectJsArgs &args, InjectJsAction action) {
+  settings_window_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
+    args.window->putProperty("saveTheme", [this](std::string theme) -> void {
+      setTheme(theme);
+      settings_->saveTheme(theme);
+    });
+    args.window->putProperty("getTheme", [this]() -> std::string {
+      return settings_->getTheme();
+    });
+    args.window->putProperty("saveIgnoreConfidentialContent", [this](bool ignore) -> void {
+      settings_->saveIgnoreConfidentialContent(ignore);
+    });
+    args.window->putProperty("saveIgnoreTransientContent", [this](bool ignore) -> void {
+      settings_->saveIgnoreTransientContent(ignore);
+    });
+    args.window->putProperty("shouldIgnoreConfidentialContent", [this]() -> bool {
+      return settings_->shouldIgnoreConfidentialContent();
+    });
+    args.window->putProperty("shouldIgnoreTransientContent", [this]() -> bool {
+      return settings_->shouldIgnoreTransientContent();
+    });
     action.proceed();
   };
   settings_window_->loadUrl(app_->baseUrl() + "/settings");

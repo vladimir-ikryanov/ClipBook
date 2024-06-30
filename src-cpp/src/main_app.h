@@ -32,6 +32,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void checkForUpdates(const std::function<void()>& complete);
   void showAboutDialog();
   void showSettingsWindow();
+  void setTheme(const std::string &theme);
 
   virtual std::string getUserDataDir() = 0;
   virtual std::string getUpdateServerUrl() = 0;

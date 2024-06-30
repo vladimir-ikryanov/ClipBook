@@ -3,26 +3,23 @@
 
 #include <memory>
 
-#include "molybden/ui/geometry.hpp"
-#include "molybden/app/app_theme.hpp"
+#include "molybden.hpp"
 
 class AppSettings {
  public:
   static std::shared_ptr<AppSettings> create();
 
-  virtual void saveTheme(molybden::AppTheme theme) = 0;
-  virtual molybden::AppTheme getTheme() = 0;
-  virtual bool hasTheme() = 0;
+  virtual void saveTheme(std::string theme) = 0;
+  virtual std::string getTheme() = 0;
 
   virtual void saveWindowBoundsForScreen(int screen_id, molybden::Rect bounds) = 0;
   virtual molybden::Rect getWindowBoundsForScreen(int screen_id) = 0;
-  virtual bool hasWindowBoundsForScreen(int screen_id) = 0;
 
   virtual void saveIgnoreConfidentialContent(bool ignore) = 0;
-  virtual bool getIgnoreConfidentialContent() = 0;
+  virtual bool shouldIgnoreConfidentialContent() = 0;
 
   virtual void saveIgnoreTransientContent(bool ignore) = 0;
-  virtual bool getIgnoreTransientContent() = 0;
+  virtual bool shouldIgnoreTransientContent() = 0;
 };
 
 

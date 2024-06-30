@@ -9,19 +9,17 @@ class AppSettingsMac : public AppSettings {
  public:
   AppSettingsMac();
 
-  void saveTheme(molybden::AppTheme theme) override;
-  molybden::AppTheme getTheme() override;
-  bool hasTheme() override;
+  void saveTheme(std::string theme) override;
+  std::string getTheme() override;
 
   void saveWindowBoundsForScreen(int screen_id, molybden::Rect bounds) override;
   molybden::Rect getWindowBoundsForScreen(int screen_id) override;
-  bool hasWindowBoundsForScreen(int screen_id) override;
 
   void saveIgnoreConfidentialContent(bool ignore) override;
-  bool getIgnoreConfidentialContent() override;
+  bool shouldIgnoreConfidentialContent() override;
 
   void saveIgnoreTransientContent(bool ignore) override;
-  bool getIgnoreTransientContent() override;
+  bool shouldIgnoreTransientContent() override;
 };
 
 

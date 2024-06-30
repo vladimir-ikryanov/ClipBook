@@ -28,7 +28,19 @@ void ClipboardReader::start() {
 
 std::shared_ptr<ClipboardData> ClipboardReader::readClipboardData(
     const std::shared_ptr<ClipboardDataType> &type) {
+  auto settings = app_->settings();
+  bool ignore_transient_content = settings->shouldIgnoreTransientContent();
+  bool ignore_confidential_content = settings->shouldIgnoreConfidentialContent();
   auto clipboard_data = app_->browser()->app()->clipboard()->read();
+  for (const auto &data: clipboard_data) {
+    auto mime_type = data->type()->mimeType();
+    if (ignore_transient_content && mime_type == "org.nspasteboard.TransientType") {
+      return {};
+    }
+    if (ignore_confidential_content && mime_type == "org.nspasteboard.ConcealedType") {
+      return {};
+    }
+  }
   for (const auto &data: clipboard_data) {
     if (data->type()->mimeType() == type->mimeType()) {
       if (clipboard_data_ == nullptr || clipboard_data_->size() != data->size()) {

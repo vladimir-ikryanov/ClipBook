@@ -85,14 +85,14 @@ std::string MainAppMac::getUpdateServerUrl() {
 void MainAppMac::restoreWindowBounds() {
   NSScreen *mainScreen = [NSScreen mainScreen];
   NSNumber *screenNumber = [[mainScreen deviceDescription] objectForKey:@"NSScreenNumber"];
-  if (settings_->hasWindowBoundsForScreen([screenNumber intValue])) {
-    auto bounds = settings_->getWindowBoundsForScreen([screenNumber intValue]);
-    browser_->setBounds(bounds);
-  } else {
+  auto bounds = settings_->getWindowBoundsForScreen([screenNumber intValue]);
+  if (bounds.size.isEmpty()) {
     auto screen_x = static_cast<int32_t>([mainScreen frame].origin.x);
     auto screen_y = static_cast<int32_t>([mainScreen frame].origin.y);
     browser_->setPosition(screen_x, screen_y);
     browser_->centerWindow();
+  } else {
+    browser_->setBounds(bounds);
   }
 }
 

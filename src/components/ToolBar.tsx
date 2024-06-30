@@ -48,7 +48,7 @@ export default function ToolBar(props: ToolbarProps) {
           </div>
           <Input placeholder="Type to search"
                  value={searchQuery}
-                 className="w-full pl-11 text-lg placeholder:text-secondary-foreground"
+                 className="w-full pl-11 text-lg placeholder:text-secondary-foreground border-none"
                  onChange={handleOnChange}
                  onKeyDown={handleKeyDown}
                  ref={props.searchFieldRef}

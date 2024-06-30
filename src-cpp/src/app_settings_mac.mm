@@ -30,59 +30,52 @@ molybden::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id) {
   return {molybden::Point(x, y), molybden::Size(width, height)};
 }
 
-bool AppSettingsMac::hasWindowBoundsForScreen(int screen_id) {
-  NSString *key = [NSString stringWithFormat:@"screen_%@", [NSNumber numberWithInt:screen_id]];
-  NSDictionary *value = [[NSUserDefaults standardUserDefaults] objectForKey:key];
-  return value != nil;
-}
-
-void AppSettingsMac::saveTheme(molybden::AppTheme theme) {
+void AppSettingsMac::saveTheme(std::string theme) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if (theme == molybden::AppTheme::kLight) {
+  if (theme == "light") {
     [defaults setObject:@"light" forKey:@"app.theme"];
   }
-  if (theme == molybden::AppTheme::kDark) {
+  if (theme == "dark") {
     [defaults setObject:@"dark" forKey:@"app.theme"];
   }
-  if (theme == molybden::AppTheme::kSystem) {
+  if (theme == "system") {
     [defaults setObject:@"system" forKey:@"app.theme"];
   }
   [defaults synchronize];
 }
 
-molybden::AppTheme AppSettingsMac::getTheme() {
+std::string AppSettingsMac::getTheme() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   NSString *theme = [defaults objectForKey:@"app.theme"];
-  if (theme == nil) {
-    return molybden::AppTheme::kSystem;
+  if (theme != nil) {
+    if ([theme isEqualToString:@"light"]) {
+      return "light";
+    }
+    if ([theme isEqualToString:@"dark"]) {
+      return "dark";
+    }
   }
-
-  if ([theme isEqualToString:@"light"]) {
-    return molybden::AppTheme::kLight;
-  }
-  if ([theme isEqualToString:@"dark"]) {
-    return molybden::AppTheme::kDark;
-  }
-  return molybden::AppTheme::kSystem;
-}
-
-bool AppSettingsMac::hasTheme() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  return [defaults objectForKey:@"app.theme"] != nil;
+  return "system";
 }
 
 void AppSettingsMac::saveIgnoreConfidentialContent(bool ignore) {
-
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:ignore forKey:@"privacy.ignore_confidential_content"];
+  [defaults synchronize];
 }
 
-bool AppSettingsMac::getIgnoreConfidentialContent() {
-  return false;
+bool AppSettingsMac::shouldIgnoreConfidentialContent() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  return [defaults boolForKey:@"privacy.ignore_confidential_content"];
 }
 
 void AppSettingsMac::saveIgnoreTransientContent(bool ignore) {
-
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:ignore forKey:@"privacy.ignore_transient_content"];
+  [defaults synchronize];
 }
 
-bool AppSettingsMac::getIgnoreTransientContent() {
-  return false;
+bool AppSettingsMac::shouldIgnoreTransientContent() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  return [defaults boolForKey:@"privacy.ignore_transient_content"];
 }
