@@ -101,7 +101,13 @@ void MainApp::launch() {
   browser_->onCanExecuteCommand =
       [this](const CanExecuteCommandArgs &args, CanExecuteCommandAction action) {
         if (app_->isProduction()) {
-          action.cannot();
+          if (args.command_id == BrowserCommandId::kZoomPlus ||
+              args.command_id == BrowserCommandId::kZoomMinus ||
+              args.command_id == BrowserCommandId::kZoomNormal) {
+            action.can();
+          } else {
+            action.cannot();
+          }
         } else {
           action.can();
         }
