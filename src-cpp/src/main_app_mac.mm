@@ -93,7 +93,7 @@ void MainAppMac::paste(const std::string &text) {
 }
 
 std::string MainAppMac::getUpdateServerUrl() {
-  return "";
+  return "https://clipbook.app/downloads/mac/universal";
 }
 
 void MainAppMac::restoreWindowBounds() {
