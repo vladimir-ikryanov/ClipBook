@@ -5,7 +5,6 @@ import Welcome from './Welcome'
 import Accessibility from './Accessibility'
 import Enjoy from './Enjoy'
 import Settings from './Settings'
-import Privacy from "@/Privacy";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -33,10 +32,6 @@ const router = createBrowserRouter([
   {
     path: "/settings",
     element: <Settings/>,
-  },
-  {
-    path: "/settings/privacy",
-    element: <Privacy/>,
   },
 ]);
 
