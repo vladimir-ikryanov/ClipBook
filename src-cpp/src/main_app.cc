@@ -144,7 +144,7 @@ void MainApp::launch() {
     browser_->centerWindow();
   }
 
-  browser_->loadUrl(app_->baseUrl());
+  browser_->navigation()->loadUrlAndWait(app_->baseUrl());
 }
 
 void MainApp::show() {
