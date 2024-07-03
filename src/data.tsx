@@ -25,7 +25,7 @@ function fillArrayWithRandomWords(size: number, wordLength: number): string[] {
 }
 
 function loadHistoryItems() {
-  // historyItems = fillArrayWithRandomWords(10024, 32)
+  // historyItems = fillArrayWithRandomWords(10024, 128)
   historyItems = []
   if (localStorage.getItem("historyItems")) {
     historyItems = JSON.parse(localStorage.getItem("historyItems")!)
@@ -78,9 +78,12 @@ export function deleteHistoryItem(item: string) {
   saveHistoryItems()
 }
 
-export function editHistoryItem(index: number, item: string) {
-  historyItems[index] = item
-  saveHistoryItems()
+export function updateHistoryItem(oldValue: string, newValue: string) {
+  let index = historyItems.indexOf(oldValue);
+  if (index !== -1) {
+    historyItems[index] = newValue
+    saveHistoryItems()
+  }
 }
 
 export function clear() {
