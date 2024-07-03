@@ -359,7 +359,7 @@ void MainApp::showSettingsWindow() {
     });
     action.proceed();
   };
-  settings_window_->loadUrl(app_->baseUrl() + "/settings");
+  settings_window_->navigation()->loadUrlAndWait(app_->baseUrl() + "/settings");
   settings_window_->setWindowTitleVisible(false);
   settings_window_->setWindowTitlebarVisible(false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kMaximize, false);

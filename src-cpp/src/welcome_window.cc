@@ -21,7 +21,7 @@ WelcomeWindow::WelcomeWindow(const std::shared_ptr<MainApp> &app) : app_(app) {
     });
     action.proceed();
   };
-  browser_->loadUrl(app_->app()->baseUrl() + "/welcome");
+  browser_->navigation()->loadUrlAndWait(app_->app()->baseUrl() + "/welcome");
   browser_->setWindowTitleVisible(false);
   browser_->setWindowTitlebarVisible(false);
   browser_->setWindowButtonVisible(WindowButtonType::kMaximize, false);
