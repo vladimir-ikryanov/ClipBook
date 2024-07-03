@@ -7,7 +7,7 @@ import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
   deleteHistoryItem, editHistoryItem,
-  getActiveHistoryItem, getPreviewVisibleState,
+  getActiveHistoryItem, getHistoryItems, getPreviewVisibleState,
   getVisibleActiveHistoryItemIndex,
   getVisibleHistoryItemsLength, setPreviewVisibleState,
   setVisibleActiveHistoryItemIndex
@@ -37,6 +37,7 @@ export default function History(props: HistoryProps) {
       let activeTabIndex = 0;
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
+      setPreviewText(props.items[activeTabIndex])
     }
   };
 
@@ -77,7 +78,7 @@ export default function History(props: HistoryProps) {
 
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
-  }, [])
+  }, [props.items])
 
   function selectNextItem() {
     let activeTabIndex = getVisibleActiveHistoryItemIndex();
@@ -116,9 +117,11 @@ export default function History(props: HistoryProps) {
 
   function handleFilterHistory(searchQuery: string): void {
     props.onFilterHistory(searchQuery)
-    const activeTabIndex = 0
-    setVisibleActiveHistoryItemIndex(activeTabIndex)
-    setActiveTab(activeTabIndex.toString())
+    setVisibleActiveHistoryItemIndex(0)
+    setActiveTab("0")
+    // The props.items array won't be updated until the next render, so we need to get the updated
+    // items right now to update the preview text.
+    setPreviewText(getHistoryItems()[0])
   }
 
   function handleMouseDoubleClick(tabIndex: number) {
@@ -139,9 +142,9 @@ export default function History(props: HistoryProps) {
 
   function onTabChange(tabIndex: string): void {
     let index = parseInt(tabIndex);
-    setPreviewText(props.items[index])
     setVisibleActiveHistoryItemIndex(index)
     setActiveTab(tabIndex)
+    setPreviewText(props.items[index])
   }
 
   (window as any).activateApp = activateApp;
