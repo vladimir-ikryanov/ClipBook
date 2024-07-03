@@ -70,8 +70,7 @@ export default function App() {
             </div>
           </div>
         </ThemeProvider>
-  )
-  }
+  )}
 
   return (
     <ThemeProvider defaultTheme="system">

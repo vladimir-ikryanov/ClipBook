@@ -10,7 +10,6 @@ import AutoSizer, {Size} from "react-virtualized-auto-sizer";
 type HistoryItemListProps = {
   items: string[]
   appName: string
-  onUpdateHistory: () => void
   onFilterHistory: (searchQuery: string) => void
   isPreviewVisible: boolean
   onShowHidePreview: () => void

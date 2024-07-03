@@ -65,6 +65,11 @@ export default function History(props: HistoryProps) {
           }
         }
         deleteHistoryItem(itemToDelete)
+        // If the history is not empty, update the preview text to the new active item.
+        let items = getHistoryItems();
+        if (items.length > 0) {
+          setPreviewText(items[getVisibleActiveHistoryItemIndex()])
+        }
         e.preventDefault()
         props.onUpdateHistory()
       }
@@ -156,7 +161,6 @@ export default function History(props: HistoryProps) {
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel className="flex flex-col">
             <HistoryItemList items={props.items} appName={props.appName}
-                             onUpdateHistory={props.onUpdateHistory}
                              onFilterHistory={handleFilterHistory}
                              onShowHidePreview={handleShowHidePreview}
                              onMouseDoubleClick={handleMouseDoubleClick}
@@ -169,7 +173,7 @@ export default function History(props: HistoryProps) {
                           className="transition-all duration-200 ease-out bg-secondary">
             <HistoryItemPreview text={previewText}
                                 onEditHistoryItem={handleEditHistoryItem}
-                                onFinishEditing={handleFinishEditing}/>)
+                                onFinishEditing={handleFinishEditing}/>
           </ResizablePanel>
         </ResizablePanelGroup>
       </Tabs>
