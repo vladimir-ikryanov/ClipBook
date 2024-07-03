@@ -6,11 +6,11 @@ import HistoryItemList from "@/components/HistoryItemList";
 import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
-  deleteHistoryItem, editHistoryItem,
+  deleteHistoryItem,
   getActiveHistoryItem, getHistoryItems, getPreviewVisibleState,
   getVisibleActiveHistoryItemIndex,
   getVisibleHistoryItemsLength, setPreviewVisibleState,
-  setVisibleActiveHistoryItemIndex
+  setVisibleActiveHistoryItemIndex, updateHistoryItem
 } from "@/data";
 
 declare const pasteInFrontApp: (text: string) => void;
@@ -139,9 +139,10 @@ export default function History(props: HistoryProps) {
     }
   }
 
-  function handleEditHistoryItem(index: number, text: string) {
-    editHistoryItem(index, text)
-    setPreviewText(text)
+  function handleEditHistoryItem(newText: string) {
+    let oldText = getActiveHistoryItem();
+    updateHistoryItem(oldText, newText)
+    setPreviewText(newText)
     props.onUpdateHistory()
   }
 
@@ -165,8 +166,7 @@ export default function History(props: HistoryProps) {
                              onShowHidePreview={handleShowHidePreview}
                              onMouseDoubleClick={handleMouseDoubleClick}
                              isPreviewVisible={previewVisible}
-                             searchFieldRef={searchFieldRef}
-            />
+                             searchFieldRef={searchFieldRef}/>
           </ResizablePanel>
           <ResizableHandle/>
           <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}

@@ -3,7 +3,7 @@ import React from "react";
 
 type HistoryItemPreviewProps = {
   text: string
-  onEditHistoryItem: (index: number, item: string) => void
+  onEditHistoryItem: (item: string) => void
   onFinishEditing: () => void
 }
 
@@ -16,7 +16,7 @@ export default function HistoryItemPreview(props: HistoryItemPreviewProps) {
   }
 
   function handleOnChange() {
-    props.onEditHistoryItem(0, (document.getElementById('preview') as HTMLTextAreaElement).value)
+    props.onEditHistoryItem((document.getElementById('preview') as HTMLTextAreaElement).value)
   }
 
   return (
