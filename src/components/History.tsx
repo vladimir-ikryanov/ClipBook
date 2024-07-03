@@ -27,6 +27,7 @@ export default function History(props: HistoryProps) {
   const searchFieldRef = useRef<HTMLInputElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
+  const [previewText, setPreviewText] = useState(props.items[getVisibleActiveHistoryItemIndex()]);
 
   const activateApp = () => {
     if (searchFieldRef.current) {
@@ -84,6 +85,7 @@ export default function History(props: HistoryProps) {
       activeTabIndex = activeTabIndex + 1
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
+      setPreviewText(props.items[activeTabIndex])
       document.getElementById("tab-" + activeTabIndex)?.scrollIntoView({block: "nearest"})
     }
   }
@@ -94,6 +96,7 @@ export default function History(props: HistoryProps) {
       activeTabIndex = activeTabIndex - 1
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
+      setPreviewText(props.items[activeTabIndex])
       document.getElementById("tab-" + activeTabIndex)?.scrollIntoView({block: "nearest"})
     }
   }
@@ -128,13 +131,16 @@ export default function History(props: HistoryProps) {
     }
   }
 
-  function handleEditHistoryItem(index: number, item: string) {
-    editHistoryItem(index, item)
+  function handleEditHistoryItem(index: number, text: string) {
+    editHistoryItem(index, text)
+    setPreviewText(text)
     props.onUpdateHistory()
   }
 
   function onTabChange(tabIndex: string): void {
-    setVisibleActiveHistoryItemIndex(parseInt(tabIndex))
+    let index = parseInt(tabIndex);
+    setPreviewText(props.items[index])
+    setVisibleActiveHistoryItemIndex(index)
     setActiveTab(tabIndex)
   }
 
@@ -158,13 +164,9 @@ export default function History(props: HistoryProps) {
           <ResizableHandle/>
           <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}
                           className="transition-all duration-200 ease-out bg-secondary">
-            {
-              props.items.map((item, index) =>
-                  <HistoryItemPreview key={index} index={index} text={item}
-                                      appName={props.appName}
-                                      onEditHistoryItem={handleEditHistoryItem}
-                                      onFinishEditing={handleFinishEditing}/>)
-            }
+            <HistoryItemPreview text={previewText}
+                                onEditHistoryItem={handleEditHistoryItem}
+                                onFinishEditing={handleFinishEditing}/>)
           </ResizablePanel>
         </ResizablePanelGroup>
       </Tabs>

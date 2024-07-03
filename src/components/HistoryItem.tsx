@@ -1,8 +1,7 @@
 import '../App.css';
 import {TabsTrigger} from "@/components/ui/tabs";
 import {Link, File} from "lucide-react";
-import React, {KeyboardEvent, MouseEvent} from 'react';
-import {deleteHistoryItem, getActiveHistoryItem} from "@/data"
+import React, {CSSProperties, KeyboardEvent, MouseEvent} from 'react';
 
 type HistoryItemProps = {
   index: number
@@ -10,9 +9,10 @@ type HistoryItemProps = {
   text: string
   onMouseDoubleClick: (tabIndex: number) => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>
+  style: CSSProperties
 }
 
-export default function HistoryItem(props: HistoryItemProps) {
+const HistoryItem = (props: HistoryItemProps) => {
   const keyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.stopPropagation()
@@ -32,9 +32,10 @@ export default function HistoryItem(props: HistoryItemProps) {
   return (
       <TabsTrigger
           id={`tab-${props.index}`}
+          style={props.style}
           ref={props.tabsTriggerRef}
           value={props.index.toString()}
-          className="flex flex-row data-[state=active]:bg-accent ml-3 mr-2 py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis"
+          className="flex flex-row data-[state=active]:bg-accent py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis"
           onKeyDown={keyDown}
           onDoubleClick={handleMouseDoubleClick}>
         <div className="flex mr-3 text-primary-foreground">
@@ -49,3 +50,5 @@ export default function HistoryItem(props: HistoryItemProps) {
       </TabsTrigger>
   )
 }
+
+export default HistoryItem;

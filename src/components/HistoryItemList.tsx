@@ -1,10 +1,11 @@
 import '../App.css';
 import {TabsList} from "@/components/ui/tabs";
-import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area"
 import HistoryItem from "@/components/HistoryItem"
-import React, {useRef} from "react";
+import React from "react";
 import ToolBar from "@/components/ToolBar";
 import StatusBar from "@/components/StatusBar";
+import {FixedSizeList as List} from "react-window";
+import AutoSizer, {Size} from "react-virtualized-auto-sizer";
 
 type HistoryItemListProps = {
   items: string[]
@@ -17,7 +18,7 @@ type HistoryItemListProps = {
   searchFieldRef?: React.Ref<HTMLInputElement>
 }
 
-export default function HistoryItemList(props: HistoryItemListProps) {
+const HistoryItemList = (props: HistoryItemListProps) => {
   function handleMouseDoubleClick(tabIndex: number) {
     props.onMouseDoubleClick(tabIndex)
   }
@@ -29,23 +30,40 @@ export default function HistoryItemList(props: HistoryItemListProps) {
                  isPreviewVisible={props.isPreviewVisible}
                  searchFieldRef={props.searchFieldRef}
         />
-        <ScrollArea className="my-2">
-          <TabsList loop={false}
-                    className="grid h-full justify-normal py-1 px-0">{
-            props.items.map((item, index) => {
-              return <HistoryItem key={index}
-                                  index={index}
-                                  text={item}
-                                  historySize={props.items.length}
-                                  onMouseDoubleClick={handleMouseDoubleClick}
-              />
-            })
-          }
-          </TabsList>
-          <ScrollBar orientation="vertical"/>
-        </ScrollArea>
+        <TabsList loop={false} className="flex h-full p-2">
+          <div className="grid h-full w-full">
+            <AutoSizer>
+              {(sizeProps: Size) => {
+                return (
+                    <List
+                        className=""
+                        style={{}}
+                        height={sizeProps.height}
+                        itemCount={props.items.length}
+                        itemSize={36}
+                        layout={"vertical"}
+                        width={sizeProps.width}>{
+                      ({index, style}) => {
+                        return (
+                            <HistoryItem index={index}
+                                         historySize={props.items.length}
+                                         text={props.items[index]}
+                                         onMouseDoubleClick={handleMouseDoubleClick}
+                                         style={style}
+                            />
+                        )
+                      }
+                    }
+                    </List>
+                )
+              }}
+            </AutoSizer>
+          </div>
+        </TabsList>
         <div className="grow"></div>
         <StatusBar appName={props.appName}/>
       </div>
   )
 }
+
+export default HistoryItemList;
