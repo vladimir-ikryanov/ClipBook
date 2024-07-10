@@ -60,7 +60,6 @@ export default function Actions(props: ActionsProps) {
                 <span>Delete all...</span>
                 <CommandShortcut>⌘⌫</CommandShortcut>
               </CommandItem>
-              <CommandSeparator/>
               <CommandEmpty>No results found.</CommandEmpty>
             </CommandList>
             <CommandInput placeholder="Type a command or search..." autoFocus={true}/>
