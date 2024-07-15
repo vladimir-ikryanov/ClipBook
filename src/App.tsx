@@ -19,7 +19,7 @@ export default function App() {
       if (e.key === "Tab") {
         e.preventDefault()
       }
-      if (e.key === "Escape") {
+      if (e.key === "Escape" || (e.key === "w" && e.metaKey)) {
         e.preventDefault()
         hideAppWindow()
       }
