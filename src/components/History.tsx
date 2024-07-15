@@ -159,6 +159,13 @@ export default function History(props: HistoryProps) {
     }
   }
 
+  function handleHideActions() {
+    console.log("Hide actions...")
+    if (searchFieldRef.current) {
+      searchFieldRef.current.focus()
+    }
+  }
+
   function handleFilterHistory(searchQuery: string): void {
     props.onFilterHistory(searchQuery)
     setVisibleActiveHistoryItemIndex(0)
@@ -206,7 +213,7 @@ export default function History(props: HistoryProps) {
                              onMouseDoubleClick={handleMouseDoubleClick}
                              isPreviewVisible={previewVisible}
                              searchFieldRef={searchFieldRef}
-                             moreActionsButtonRef={moreActionsButtonRef}/>
+                             onHideActions={handleHideActions}/>
           </ResizablePanel>
           <ResizableHandle/>
           <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}

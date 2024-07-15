@@ -13,9 +13,9 @@ type HistoryItemListProps = {
   onFilterHistory: (searchQuery: string) => void
   isPreviewVisible: boolean
   onShowHidePreview: () => void
+  onHideActions: () => void
   onMouseDoubleClick: (tabIndex: number) => void
   searchFieldRef?: React.Ref<HTMLInputElement>
-  moreActionsButtonRef?: React.Ref<HTMLButtonElement>
 }
 
 const HistoryItemList = (props: HistoryItemListProps) => {
@@ -61,7 +61,7 @@ const HistoryItemList = (props: HistoryItemListProps) => {
           </div>
         </TabsList>
         <div className="grow"></div>
-        <StatusBar appName={props.appName} moreActionsButtonRef={props.moreActionsButtonRef}/>
+        <StatusBar appName={props.appName} onHideActions={props.onHideActions}/>
       </div>
   )
 }

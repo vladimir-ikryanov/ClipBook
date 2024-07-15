@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {useEffect} from "react";
 import {
-  prefGetClearHistoryShortcut, prefGetCloseAppShortcut,
+  prefGetClearHistoryShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetSearchHistoryShortcut,
@@ -36,7 +36,7 @@ import {isShortcutMatch} from "@/lib/shortcuts";
 import {deleteAllHistoryItems} from "@/components/History";
 
 type ActionsProps = {
-  moreActionsButtonRef?: React.Ref<HTMLButtonElement>
+  onHideActions: () => void
 }
 
 export default function Actions(props: ActionsProps) {
@@ -61,39 +61,39 @@ export default function Actions(props: ActionsProps) {
   function handleOpenChange(open: boolean) {
     setOpen(open)
     if (!open) {
-
+      props.onHideActions()
     }
   }
 
   function handleEditContent() {
     console.log("Edit content...");
-    setOpen(false)
+    handleOpenChange(false)
   }
 
   function handleSearchHistory() {
     console.log("Search...");
-    setOpen(false)
+    handleOpenChange(false)
   }
 
   function handleTogglePreview() {
     console.log("Show/Hide Preview");
-    setOpen(false)
+    handleOpenChange(false)
   }
 
   function handleDeleteItem() {
     console.log("Delete");
-    setOpen(false)
+    handleOpenChange(false)
   }
 
   function handleDeleteAllItems() {
     deleteAllHistoryItems()
-    setOpen(false)
+    handleOpenChange(false)
   }
 
   return (
       <DropdownMenu open={open} onOpenChange={handleOpenChange}>
         <DropdownMenuTrigger asChild>
-          <Button id="more-actions-btn" variant="ghost" className="p-1 h-8" ref={props.moreActionsButtonRef}>
+          <Button variant="ghost" className="p-1 h-8 rounded-sm">
             <p className="px-2">Actions</p>
             <ShortcutLabel shortcut={prefGetShowMoreActionsShortcut()}/>
           </Button>

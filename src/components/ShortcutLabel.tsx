@@ -4,6 +4,7 @@ import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 
 type ShortcutLabelProps = {
   shortcut: string
+  orientation?: "left" | "right"
 }
 
 export default function ShortcutLabel(props: ShortcutLabelProps) {
@@ -11,7 +12,9 @@ export default function ShortcutLabel(props: ShortcutLabelProps) {
       <div className="flex">
         {
           props.shortcut.split(" + ").map((key, index) => (
-              <div key={key + index} className="flex h-6 px-2 rounded bg-card justify-center items-center mx-0.5">
+              <div key={key + index} className={index === 0 ?
+                  "flex h-6 px-2 rounded bg-card justify-center items-center" :
+                  "flex h-6 px-2 rounded bg-card justify-center items-center ml-1"}>
                 <span
                     className="text-sm text-card-foreground">{shortcutToDisplayShortcut(key)}</span>
               </div>
