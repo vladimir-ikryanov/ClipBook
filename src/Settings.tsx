@@ -34,6 +34,7 @@ import {
   prefSetTheme, prefSetTogglePreviewShortcut,
   prefSetWarnOnClearHistory, prefSetZoomUIInShortcut, prefSetZoomUIOutShortcut
 } from "@/pref";
+import {Button} from "@/components/ui/button";
 
 export default function Settings() {
   const [theme, setTheme] = useState(prefGetTheme());
@@ -263,40 +264,49 @@ Display a confirmation dialog when clearing all clipboard&nbsp;history
               </div>
               <div className="flex items-center justify-between space-x-20">
                 <span className="">Select next history item</span>
-                <ShortcutInput shortcut={selectNextItemShortcut} onSave={handleSelectNextItemShortcutChange}/>
+                <ShortcutInput shortcut={selectNextItemShortcut}
+                               onSave={handleSelectNextItemShortcutChange}/>
               </div>
               <div className="flex items-center justify-between space-x-20">
                 <span className="">Select previous history item</span>
-                <ShortcutInput shortcut={selectPreviousItemShortcut} onSave={handleSelectPreviousItemShortcutChange}/>
+                <ShortcutInput shortcut={selectPreviousItemShortcut}
+                               onSave={handleSelectPreviousItemShortcutChange}/>
               </div>
               <div className="flex items-center justify-between space-x-20">
                 <span className="">Paste selected item to active app</span>
-                <ShortcutInput shortcut={pasteSelectedItemToActiveAppShortcut} onSave={handlePasteSelectedItemToActiveAppShortcutChange}/>
+                <ShortcutInput shortcut={pasteSelectedItemToActiveAppShortcut}
+                               onSave={handlePasteSelectedItemToActiveAppShortcutChange}/>
               </div>
               <div className="flex items-center justify-between space-x-20">
                 <span className="">Edit history item</span>
-                <ShortcutInput shortcut={editHistoryItemShortcut} onSave={handleEditHistoryItemShortcutChange}/>
+                <ShortcutInput shortcut={editHistoryItemShortcut}
+                               onSave={handleEditHistoryItemShortcutChange}/>
               </div>
               <div className="flex items-center justify-between space-x-20">
                 <span className="">Delete history item</span>
-                <ShortcutInput shortcut={deleteHistoryItemShortcut} onSave={handleDeleteHistoryItemShortcutChange}/>
+                <ShortcutInput shortcut={deleteHistoryItemShortcut}
+                               onSave={handleDeleteHistoryItemShortcutChange}/>
               </div>
               <div className="flex items-center justify-between space-x-20">
                 <span className="">Delete all history item</span>
-                <ShortcutInput shortcut={clearHistoryShortcut} onSave={handleClearHistoryShortcutChange}/>
+                <ShortcutInput shortcut={clearHistoryShortcut}
+                               onSave={handleClearHistoryShortcutChange}/>
               </div>
 
               <div className="flex items-center justify-between space-x-20">
                 <span className="">Search</span>
-                <ShortcutInput shortcut={searchHistoryShortcut} onSave={handleSearchHistoryShortcutChange}/>
+                <ShortcutInput shortcut={searchHistoryShortcut}
+                               onSave={handleSearchHistoryShortcutChange}/>
               </div>
               <div className="flex items-center justify-between space-x-20">
                 <span className="">Show/hide preview</span>
-                <ShortcutInput shortcut={togglePreviewShortcut} onSave={handleTogglePreviewShortcutChange}/>
+                <ShortcutInput shortcut={togglePreviewShortcut}
+                               onSave={handleTogglePreviewShortcutChange}/>
               </div>
               <div className="flex items-center justify-between space-x-20">
                 <span className="">Show more actions</span>
-                <ShortcutInput shortcut={showMoreActionsShortcut} onSave={handleShowMoreActionsShortcutChange}/>
+                <ShortcutInput shortcut={showMoreActionsShortcut}
+                               onSave={handleShowMoreActionsShortcutChange}/>
               </div>
               <div className="flex items-center justify-between space-x-20">
                 <span className="">Zoom app UI in</span>

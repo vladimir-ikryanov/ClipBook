@@ -3,6 +3,8 @@ import {Input} from "@/components/ui/input"
 import React, {useState} from "react";
 import {PanelRightClose, PanelRightOpen} from "lucide-react";
 import {Button} from "@/components/ui/button";
+import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
+import {prefGetTogglePreviewShortcut} from "@/pref";
 
 type ToolbarProps = {
   onFilterHistory: (searchQuery: string) => void
@@ -58,7 +60,9 @@ export default function ToolBar(props: ToolbarProps) {
           </div>
           <div className="ml-3">
             <Button variant="ghost" className="p-2" onClick={handleShowHidePreview}
-                    title={props.isPreviewVisible ? "Hide preview panel (⌘P)" : "Show preview panel (⌘P)"}>
+                    title={props.isPreviewVisible ? "Hide preview panel (" +
+                        shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")" :
+                        "Show preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
               {props.isPreviewVisible ?
                   <PanelRightClose className="h-5 w-5 text-primary-foreground"/> :
                   <PanelRightOpen className="h-5 w-5 text-primary-foreground"/>}

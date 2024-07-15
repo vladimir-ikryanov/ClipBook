@@ -57,10 +57,6 @@ void MainApp::launch() {
             showSettingsWindow();
           }),
           menu::Separator(),
-          menu::Item("Clear all", [this](const CustomMenuItemActionArgs &args) {
-            clearHistory();
-          }),
-          menu::Separator(),
           menu::Menu("Help", {
               menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
                 app_->desktop()->openUrl(kKeyboardShortcutsUrl);
@@ -171,7 +167,6 @@ void MainApp::setActiveAppName(const std::string &app_name) {
 
 void MainApp::clearHistory() {
   if (settings_->shouldWarnOnClearHistory()) {
-    hide();
     activate();
     MessageDialogOptions options;
     options.message = "Are you sure you want to clear entire history?";
@@ -180,7 +175,7 @@ void MainApp::clearHistory() {
         MessageDialogButton("Clear", MessageDialogButtonType::kDefault),
         MessageDialogButton("Cancel", MessageDialogButtonType::kCancel),
     };
-    MessageDialog::show(app_, options, [this](const MessageDialogResult &result) {
+    MessageDialog::show(browser_, options, [this](const MessageDialogResult &result) {
       if (result.button.type == MessageDialogButtonType::kDefault) {
         std::thread([this]() {
           browser_->mainFrame()->executeJavaScript("clearHistory()");
@@ -340,6 +335,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject>& windo
   });
   window->putProperty("hideAppWindow", [this]() {
     hide();
+  });
+  window->putProperty("clearEntireHistory", [this]() {
+    clearHistory();
   });
 
   window->putProperty("saveTheme", [this](std::string theme) -> void {

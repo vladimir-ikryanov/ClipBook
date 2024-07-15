@@ -14,13 +14,22 @@ import {
 } from "@/data";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {
+  prefGetClearHistoryShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
-  prefGetSearchHistoryShortcut, prefGetSelectNextItemShortcut, prefGetSelectPreviousItemShortcut,
+  prefGetSearchHistoryShortcut,
+  prefGetSelectNextItemShortcut,
+  prefGetSelectPreviousItemShortcut,
+  prefGetShowMoreActionsShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
 
 declare const pasteInFrontApp: (text: string) => void;
+declare const clearEntireHistory: () => void;
+
+export function deleteAllHistoryItems() {
+  clearEntireHistory()
+}
 
 type HistoryProps = {
   items: string[]
@@ -32,6 +41,7 @@ type HistoryProps = {
 export default function History(props: HistoryProps) {
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
   const searchFieldRef = useRef<HTMLInputElement>(null);
+  const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
   const [previewText, setPreviewText] = useState(props.items[getVisibleActiveHistoryItemIndex()]);
@@ -94,6 +104,18 @@ export default function History(props: HistoryProps) {
       // Show or hide the preview panel when the preview shortcut is pressed.
       if (isShortcutMatch(prefGetTogglePreviewShortcut(), e)) {
         handleShowHidePreview()
+        e.preventDefault()
+      }
+      // Clear the history when the clear history shortcut is pressed.
+      if (isShortcutMatch(prefGetClearHistoryShortcut(), e)) {
+        clearEntireHistory()
+        e.preventDefault()
+      }
+      // Show more actions when the show more actions shortcut is pressed.
+      if (isShortcutMatch(prefGetShowMoreActionsShortcut(), e)) {
+        if (moreActionsButtonRef.current) {
+          moreActionsButtonRef.current.click()
+        }
         e.preventDefault()
       }
     }
@@ -183,7 +205,8 @@ export default function History(props: HistoryProps) {
                              onShowHidePreview={handleShowHidePreview}
                              onMouseDoubleClick={handleMouseDoubleClick}
                              isPreviewVisible={previewVisible}
-                             searchFieldRef={searchFieldRef}/>
+                             searchFieldRef={searchFieldRef}
+                             moreActionsButtonRef={moreActionsButtonRef}/>
           </ResizablePanel>
           <ResizableHandle/>
           <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}
