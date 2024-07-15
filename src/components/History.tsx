@@ -12,6 +12,13 @@ import {
   getVisibleHistoryItemsLength, setPreviewVisibleState,
   setVisibleActiveHistoryItemIndex, updateHistoryItem
 } from "@/data";
+import {isShortcutMatch} from "@/lib/shortcuts";
+import {
+  prefGetDeleteHistoryItemShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetSearchHistoryShortcut, prefGetSelectNextItemShortcut, prefGetSelectPreviousItemShortcut,
+  prefGetTogglePreviewShortcut
+} from "@/pref";
 
 declare const pasteInFrontApp: (text: string) => void;
 
@@ -43,19 +50,23 @@ export default function History(props: HistoryProps) {
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.key === "ArrowUp") {
+      // Select the previous item when the select previous item shortcut is pressed.
+      if (isShortcutMatch(prefGetSelectPreviousItemShortcut(), e)) {
         selectPreviousItem()
         e.preventDefault()
       }
-      if (e.key === "ArrowDown") {
+      // Select the next item when the select next item shortcut is pressed.
+      if (isShortcutMatch(prefGetSelectNextItemShortcut(), e)) {
         selectNextItem()
         e.preventDefault()
       }
-      if (e.key === "Enter") {
+      // Paste the selected item to the active app when the paste shortcut is pressed.
+      if (isShortcutMatch(prefGetPasteSelectedItemToActiveAppShortcut(), e)) {
         pasteInFrontApp(getActiveHistoryItem())
         e.preventDefault()
       }
-      if (e.key === "Delete" || (e.key === "Backspace" && e.metaKey)) {
+      // Delete the active item when the delete shortcut is pressed.
+      if (isShortcutMatch(prefGetDeleteHistoryItemShortcut(), e)) {
         let itemToDelete = getActiveHistoryItem();
         if (getVisibleActiveHistoryItemIndex() === getVisibleHistoryItemsLength() - 1) {
           let activeTabIndex = 0;
@@ -73,13 +84,15 @@ export default function History(props: HistoryProps) {
         e.preventDefault()
         props.onUpdateHistory()
       }
-      if (e.key === "f" && e.metaKey) {
+      // Focus the search field when the search history shortcut is pressed.
+      if (isShortcutMatch(prefGetSearchHistoryShortcut(), e)) {
         if (searchFieldRef.current) {
           searchFieldRef.current.focus()
         }
         e.preventDefault()
       }
-      if (e.key === "p" && e.metaKey) {
+      // Show or hide the preview panel when the preview shortcut is pressed.
+      if (isShortcutMatch(prefGetTogglePreviewShortcut(), e)) {
         handleShowHidePreview()
         e.preventDefault()
       }

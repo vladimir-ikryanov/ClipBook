@@ -1,10 +1,5 @@
 import '../App.css';
 import {Button} from "@/components/ui/button";
-import {
-  ChevronDown,
-  ChevronUp,
-  CornerDownLeft
-} from "lucide-react";
 import React from "react";
 import Actions from "@/components/Actions";
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
@@ -13,7 +8,7 @@ import {
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut
-} from "@/components/pref";
+} from "@/pref";
 
 type StatusBarProps = {
   appName: string

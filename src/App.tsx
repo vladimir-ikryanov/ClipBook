@@ -5,6 +5,8 @@ import {addHistoryItem, clear, getHistoryItems, isHistoryEmpty, setFilterQuery} 
 import {useEffect, useState} from "react";
 import * as React from "react";
 import {Clipboard} from "lucide-react";
+import {prefGetCloseAppShortcut} from "@/pref";
+import {isShortcutMatch} from "@/lib/shortcuts";
 
 declare const hideAppWindow: () => void;
 
@@ -19,7 +21,8 @@ export default function App() {
       if (e.key === "Tab") {
         e.preventDefault()
       }
-      if (e.key === "Escape" || (e.key === "w" && e.metaKey)) {
+      // Close the app window with the close app shortcut.
+      if (isShortcutMatch(prefGetCloseAppShortcut(), e)) {
         e.preventDefault()
         hideAppWindow()
       }

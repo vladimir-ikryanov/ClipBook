@@ -33,7 +33,7 @@ import {
   prefSetSelectPreviousItemShortcut, prefSetShowMoreActionsShortcut,
   prefSetTheme, prefSetTogglePreviewShortcut,
   prefSetWarnOnClearHistory, prefSetZoomUIInShortcut, prefSetZoomUIOutShortcut
-} from "@/components/pref";
+} from "@/pref";
 
 export default function Settings() {
   const [theme, setTheme] = useState(prefGetTheme());
