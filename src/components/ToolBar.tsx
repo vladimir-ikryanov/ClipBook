@@ -58,7 +58,7 @@ export default function ToolBar(props: ToolbarProps) {
           </div>
           <div className="ml-3">
             <Button variant="ghost" className="p-2" onClick={handleShowHidePreview}
-                    title={props.isPreviewVisible ? "Hide preview panel" : "Show preview panel"}>
+                    title={props.isPreviewVisible ? "Hide preview panel (⌘P)" : "Show preview panel (⌘P)"}>
               {props.isPreviewVisible ?
                   <PanelRightClose className="h-5 w-5 text-primary-foreground"/> :
                   <PanelRightOpen className="h-5 w-5 text-primary-foreground"/>}

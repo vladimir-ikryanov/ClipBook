@@ -79,6 +79,10 @@ export default function History(props: HistoryProps) {
         }
         e.preventDefault()
       }
+      if (e.key === "p" && e.metaKey) {
+        handleShowHidePreview()
+        e.preventDefault()
+      }
     }
 
     document.addEventListener("keydown", down)
