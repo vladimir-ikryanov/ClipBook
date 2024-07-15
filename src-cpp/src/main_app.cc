@@ -92,12 +92,7 @@ void MainApp::launch() {
   browser_ = Browser::create(app_);
   browser_->settings()->disableOverscrollHistoryNavigation();
   browser_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
-    args.window->putProperty("pasteInFrontApp", [this](std::string text) {
-      paste(text);
-    });
-    args.window->putProperty("hideAppWindow", [this]() {
-      hide();
-    });
+    initJavaScriptApi(args.window);
     action.proceed();
   };
 
@@ -325,38 +320,7 @@ void MainApp::showSettingsWindow() {
 
   settings_window_ = Browser::create(app_);
   settings_window_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
-    args.window->putProperty("saveTheme", [this](std::string theme) -> void {
-      setTheme(theme);
-      settings_->saveTheme(theme);
-    });
-    args.window->putProperty("getTheme", [this]() -> std::string {
-      return settings_->getTheme();
-    });
-    args.window->putProperty("saveIgnoreConfidentialContent", [this](bool ignore) -> void {
-      settings_->saveIgnoreConfidentialContent(ignore);
-    });
-    args.window->putProperty("saveIgnoreTransientContent", [this](bool ignore) -> void {
-      settings_->saveIgnoreTransientContent(ignore);
-    });
-    args.window->putProperty("shouldIgnoreConfidentialContent", [this]() -> bool {
-      return settings_->shouldIgnoreConfidentialContent();
-    });
-    args.window->putProperty("shouldIgnoreTransientContent", [this]() -> bool {
-      return settings_->shouldIgnoreTransientContent();
-    });
-    args.window->putProperty("saveOpenAtLogin", [this](bool open) -> void {
-      setOpenAtLogin(open);
-      settings_->saveOpenAtLogin(open);
-    });
-    args.window->putProperty("shouldOpenAtLogin", [this]() -> bool {
-      return settings_->shouldOpenAtLogin();
-    });
-    args.window->putProperty("saveWarnOnClearHistory", [this](bool warn) -> void {
-      settings_->saveWarnOnClearHistory(warn);
-    });
-    args.window->putProperty("shouldWarnOnClearHistory", [this]() -> bool {
-      return settings_->shouldWarnOnClearHistory();
-    });
+    initJavaScriptApi(args.window);
     action.proceed();
   };
   settings_window_->navigation()->loadUrlAndWait(app_->baseUrl() + "/settings");
@@ -368,4 +332,125 @@ void MainApp::showSettingsWindow() {
   settings_window_->setSize(600, 660);
   settings_window_->centerWindow();
   settings_window_->show();
+}
+
+void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject>& window) {
+  window->putProperty("pasteInFrontApp", [this](std::string text) {
+    paste(text);
+  });
+  window->putProperty("hideAppWindow", [this]() {
+    hide();
+  });
+
+  window->putProperty("saveTheme", [this](std::string theme) -> void {
+    setTheme(theme);
+    settings_->saveTheme(theme);
+  });
+  window->putProperty("getTheme", [this]() -> std::string {
+    return settings_->getTheme();
+  });
+  window->putProperty("saveIgnoreConfidentialContent", [this](bool ignore) -> void {
+    settings_->saveIgnoreConfidentialContent(ignore);
+  });
+  window->putProperty("saveIgnoreTransientContent", [this](bool ignore) -> void {
+    settings_->saveIgnoreTransientContent(ignore);
+  });
+  window->putProperty("shouldIgnoreConfidentialContent", [this]() -> bool {
+    return settings_->shouldIgnoreConfidentialContent();
+  });
+  window->putProperty("shouldIgnoreTransientContent", [this]() -> bool {
+    return settings_->shouldIgnoreTransientContent();
+  });
+  window->putProperty("saveOpenAtLogin", [this](bool open) -> void {
+    setOpenAtLogin(open);
+    settings_->saveOpenAtLogin(open);
+  });
+  window->putProperty("shouldOpenAtLogin", [this]() -> bool {
+    return settings_->shouldOpenAtLogin();
+  });
+  window->putProperty("saveWarnOnClearHistory", [this](bool warn) -> void {
+    settings_->saveWarnOnClearHistory(warn);
+  });
+  window->putProperty("shouldWarnOnClearHistory", [this]() -> bool {
+    return settings_->shouldWarnOnClearHistory();
+  });
+  window->putProperty("saveOpenAppShortcut", [this](std::string shortcut) -> void {
+    settings_->saveOpenAppShortcut(shortcut);
+  });
+  window->putProperty("getOpenAppShortcut", [this]() -> std::string {
+    return settings_->getOpenAppShortcut();
+  });
+  window->putProperty("saveCloseAppShortcut", [this](std::string shortcut) -> void {
+    settings_->saveCloseAppShortcut(shortcut);
+  });
+  window->putProperty("getCloseAppShortcut", [this]() -> std::string {
+    return settings_->getCloseAppShortcut();
+  });
+  window->putProperty("saveSelectNextItemShortcut", [this](std::string shortcut) -> void {
+    settings_->saveSelectNextItemShortcut(shortcut);
+  });
+  window->putProperty("getSelectNextItemShortcut", [this]() -> std::string {
+    return settings_->getSelectNextItemShortcut();
+  });
+  window->putProperty("saveSelectPreviousItemShortcut", [this](std::string shortcut) -> void {
+    settings_->saveSelectPreviousItemShortcut(shortcut);
+  });
+  window->putProperty("getSelectPreviousItemShortcut", [this]() -> std::string {
+    return settings_->getSelectPreviousItemShortcut();
+  });
+  window->putProperty("savePasteSelectedItemToActiveAppShortcut",
+                           [this](std::string shortcut) -> void {
+                             settings_->savePasteSelectedItemToActiveAppShortcut(shortcut);
+                           });
+  window->putProperty("getPasteSelectedItemToActiveAppShortcut", [this]() -> std::string {
+    return settings_->getPasteSelectedItemToActiveAppShortcut();
+  });
+  window->putProperty("saveEditHistoryItemShortcut", [this](std::string shortcut) -> void {
+    settings_->saveEditHistoryItemShortcut(shortcut);
+  });
+  window->putProperty("getEditHistoryItemShortcut", [this]() -> std::string {
+    return settings_->getEditHistoryItemShortcut();
+  });
+  window->putProperty("saveDeleteHistoryItemShortcut", [this](std::string shortcut) -> void {
+    settings_->saveDeleteHistoryItemShortcut(shortcut);
+  });
+  window->putProperty("getDeleteHistoryItemShortcut", [this]() -> std::string {
+    return settings_->getDeleteHistoryItemShortcut();
+  });
+  window->putProperty("saveClearHistoryShortcut", [this](std::string shortcut) -> void {
+    settings_->saveClearHistoryShortcut(shortcut);
+  });
+  window->putProperty("getClearHistoryShortcut", [this]() -> std::string {
+    return settings_->getClearHistoryShortcut();
+  });
+  window->putProperty("saveSearchHistoryShortcut", [this](std::string shortcut) -> void {
+    settings_->saveSearchHistoryShortcut(shortcut);
+  });
+  window->putProperty("getSearchHistoryShortcut", [this]() -> std::string {
+    return settings_->getSearchHistoryShortcut();
+  });
+  window->putProperty("saveTogglePreviewShortcut", [this](std::string shortcut) -> void {
+    settings_->saveTogglePreviewShortcut(shortcut);
+  });
+  window->putProperty("getTogglePreviewShortcut", [this]() -> std::string {
+    return settings_->getTogglePreviewShortcut();
+  });
+  window->putProperty("saveShowMoreActionsShortcut", [this](std::string shortcut) -> void {
+    settings_->saveShowMoreActionsShortcut(shortcut);
+  });
+  window->putProperty("getShowMoreActionsShortcut", [this]() -> std::string {
+    return settings_->getShowMoreActionsShortcut();
+  });
+  window->putProperty("saveZoomUIInShortcut", [this](std::string shortcut) -> void {
+    settings_->saveZoomUIInShortcut(shortcut);
+  });
+  window->putProperty("getZoomUIInShortcut", [this]() -> std::string {
+    return settings_->getZoomUIInShortcut();
+  });
+  window->putProperty("saveZoomUIOutShortcut", [this](std::string shortcut) -> void {
+    settings_->saveZoomUIOutShortcut(shortcut);
+  });
+  window->putProperty("getZoomUIOutShortcut", [this]() -> std::string {
+    return settings_->getZoomUIOutShortcut();
+  });
 }

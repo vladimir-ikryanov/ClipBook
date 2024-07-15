@@ -16,6 +16,19 @@ NSString *prefIgnoreConfidentialContent = @"privacy.ignore_confidential_content"
 NSString *prefIgnoreTransientContent = @"privacy.ignore_transient_content";
 NSString *prefOpenAtLogin = @"app.open_at_login";
 NSString *prefWarnOnClearHistory = @"app.warn_on_clear_history";
+NSString *prefOpenAppShortcut = @"app.open_app_shortcut";
+NSString *prefCloseAppShortcut = @"app.close_app_shortcut";
+NSString *prefSelectNextItemShortcut = @"app.select_next_item_shortcut";
+NSString *prefSelectPreviousItemShortcut = @"app.select_previous_item_shortcut";
+NSString *prefPasteSelectedItemToActiveAppShortcut = @"app.paste_selected_item_to_active_app_shortcut";
+NSString *prefEditHistoryItemShortcut = @"app.edit_history_item_shortcut";
+NSString *prefDeleteHistoryItemShortcut = @"app.delete_history_item_shortcut";
+NSString *prefClearHistoryShortcut = @"app.clear_history_shortcut";
+NSString *prefSearchHistoryShortcut = @"app.search_history_shortcut";
+NSString *prefTogglePreviewShortcut = @"app.toggle_preview_shortcut";
+NSString *prefShowMoreActionsShortcut = @"app.show_more_actions_shortcut";
+NSString *prefZoomUIInShortcut = @"app.zoom_ui_in_shortcut";
+NSString *prefZoomUIOutShortcut = @"app.zoom_ui_out_shortcut";
 
 AppSettingsMac::AppSettingsMac() = default;
 
@@ -124,4 +137,199 @@ bool AppSettingsMac::shouldWarnOnClearHistory() {
     return [defaults boolForKey:prefWarnOnClearHistory];
   }
   return true;
+}
+
+void AppSettingsMac::saveOpenAppShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefOpenAppShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getOpenAppShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefOpenAppShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Shift + Meta + V";
+}
+
+void AppSettingsMac::saveCloseAppShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefCloseAppShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getCloseAppShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefCloseAppShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Escape";
+}
+
+void AppSettingsMac::saveSelectNextItemShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefSelectNextItemShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getSelectNextItemShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefSelectNextItemShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ArrowDown";
+}
+
+void AppSettingsMac::saveSelectPreviousItemShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefSelectPreviousItemShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getSelectPreviousItemShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefSelectPreviousItemShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ArrowUp";
+}
+
+void AppSettingsMac::savePasteSelectedItemToActiveAppShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefPasteSelectedItemToActiveAppShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getPasteSelectedItemToActiveAppShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefPasteSelectedItemToActiveAppShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Enter";
+}
+
+void AppSettingsMac::saveEditHistoryItemShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefEditHistoryItemShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getEditHistoryItemShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefEditHistoryItemShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Meta + E";
+}
+
+void AppSettingsMac::saveDeleteHistoryItemShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefDeleteHistoryItemShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getDeleteHistoryItemShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefDeleteHistoryItemShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Meta + Backspace";
+}
+
+void AppSettingsMac::saveClearHistoryShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefClearHistoryShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getClearHistoryShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefClearHistoryShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Shift + Meta + Backspace";
+}
+
+void AppSettingsMac::saveSearchHistoryShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefSearchHistoryShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getSearchHistoryShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefSearchHistoryShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Meta + F";
+}
+
+void AppSettingsMac::saveTogglePreviewShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefTogglePreviewShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getTogglePreviewShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefTogglePreviewShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Meta + P";
+}
+
+void AppSettingsMac::saveShowMoreActionsShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefShowMoreActionsShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getShowMoreActionsShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefShowMoreActionsShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Meta + A";
+}
+
+void AppSettingsMac::saveZoomUIInShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefZoomUIInShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getZoomUIInShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefZoomUIInShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Meta + =";
+}
+
+void AppSettingsMac::saveZoomUIOutShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefZoomUIOutShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getZoomUIOutShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefZoomUIOutShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Meta + -";
 }

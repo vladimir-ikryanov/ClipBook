@@ -26,6 +26,45 @@ class AppSettings {
 
   virtual void saveWarnOnClearHistory(bool warn) = 0;
   virtual bool shouldWarnOnClearHistory() = 0;
+
+  virtual void saveOpenAppShortcut(std::string shortcut) = 0;
+  virtual std::string getOpenAppShortcut() = 0;
+
+  virtual void saveCloseAppShortcut(std::string shortcut) = 0;
+  virtual std::string getCloseAppShortcut() = 0;
+
+  virtual void saveSelectNextItemShortcut(std::string shortcut) = 0;
+  virtual std::string getSelectNextItemShortcut() = 0;
+
+  virtual void saveSelectPreviousItemShortcut(std::string shortcut) = 0;
+  virtual std::string getSelectPreviousItemShortcut() = 0;
+
+  virtual void savePasteSelectedItemToActiveAppShortcut(std::string shortcut) = 0;
+  virtual std::string getPasteSelectedItemToActiveAppShortcut() = 0;
+
+  virtual void saveEditHistoryItemShortcut(std::string shortcut) = 0;
+  virtual std::string getEditHistoryItemShortcut() = 0;
+
+  virtual void saveDeleteHistoryItemShortcut(std::string shortcut) = 0;
+  virtual std::string getDeleteHistoryItemShortcut() = 0;
+
+  virtual void saveClearHistoryShortcut(std::string shortcut) = 0;
+  virtual std::string getClearHistoryShortcut() = 0;
+
+  virtual void saveSearchHistoryShortcut(std::string shortcut) = 0;
+  virtual std::string getSearchHistoryShortcut() = 0;
+
+  virtual void saveTogglePreviewShortcut(std::string shortcut) = 0;
+  virtual std::string getTogglePreviewShortcut() = 0;
+
+  virtual void saveShowMoreActionsShortcut(std::string shortcut) = 0;
+  virtual std::string getShowMoreActionsShortcut() = 0;
+
+  virtual void saveZoomUIInShortcut(std::string shortcut) = 0;
+  virtual std::string getZoomUIInShortcut() = 0;
+
+  virtual void saveZoomUIOutShortcut(std::string shortcut) = 0;
+  virtual std::string getZoomUIOutShortcut() = 0;
 };
 
 

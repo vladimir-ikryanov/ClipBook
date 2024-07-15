@@ -26,6 +26,33 @@ class AppSettingsMac : public AppSettings {
 
   void saveWarnOnClearHistory(bool warn) override;
   bool shouldWarnOnClearHistory() override;
+
+  void saveOpenAppShortcut(std::string shortcut) override;
+  std::string getOpenAppShortcut() override;
+  void saveCloseAppShortcut(std::string shortcut) override;
+  std::string getCloseAppShortcut() override;
+  void saveSelectNextItemShortcut(std::string shortcut) override;
+  std::string getSelectNextItemShortcut() override;
+  void saveSelectPreviousItemShortcut(std::string shortcut) override;
+  std::string getSelectPreviousItemShortcut() override;
+  void savePasteSelectedItemToActiveAppShortcut(std::string shortcut) override;
+  std::string getPasteSelectedItemToActiveAppShortcut() override;
+  void saveEditHistoryItemShortcut(std::string shortcut) override;
+  std::string getEditHistoryItemShortcut() override;
+  void saveDeleteHistoryItemShortcut(std::string shortcut) override;
+  std::string getDeleteHistoryItemShortcut() override;
+  void saveClearHistoryShortcut(std::string shortcut) override;
+  std::string getClearHistoryShortcut() override;
+  void saveSearchHistoryShortcut(std::string shortcut) override;
+  std::string getSearchHistoryShortcut() override;
+  void saveTogglePreviewShortcut(std::string shortcut) override;
+  std::string getTogglePreviewShortcut() override;
+  void saveShowMoreActionsShortcut(std::string shortcut) override;
+  std::string getShowMoreActionsShortcut() override;
+  void saveZoomUIInShortcut(std::string shortcut) override;
+  std::string getZoomUIInShortcut() override;
+  void saveZoomUIOutShortcut(std::string shortcut) override;
+  std::string getZoomUIOutShortcut() override;
 };
 
 

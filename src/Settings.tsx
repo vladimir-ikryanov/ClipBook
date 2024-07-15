@@ -1,51 +1,148 @@
 import * as React from "react";
 import {Label} from "@/components/ui/label";
-import {SettingsIcon, ShieldCheckIcon} from "lucide-react";
 import {Switch} from "@/components/ui/switch";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {useState} from "react";
-
-declare const saveTheme: (theme: string) => void;
-declare const getTheme: () => string;
-declare const saveOpenAtLogin: (openAtLogin: boolean) => void;
-declare const shouldOpenAtLogin: () => boolean;
-declare const saveWarnOnClearHistory: (warn: boolean) => void;
-declare const shouldWarnOnClearHistory: () => boolean;
-declare const saveIgnoreTransientContent: (ignore: boolean) => void;
-declare const saveIgnoreConfidentialContent: (ignore: boolean) => void;
-declare const shouldIgnoreTransientContent: () => boolean;
-declare const shouldIgnoreConfidentialContent: () => boolean;
+import ShortcutInput from "@/components/ShortcutInput";
+import {
+  prefGetClearHistoryShortcut,
+  prefGetCloseAppShortcut,
+  prefGetDeleteHistoryItemShortcut,
+  prefGetEditHistoryItemShortcut,
+  prefGetIgnoreConfidentialContent,
+  prefGetIgnoreTransientContent,
+  prefGetOpenAppShortcut,
+  prefGetOpenAtLogin,
+  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetSearchHistoryShortcut,
+  prefGetSelectNextItemShortcut,
+  prefGetSelectPreviousItemShortcut,
+  prefGetShowMoreActionsShortcut,
+  prefGetTheme,
+  prefGetTogglePreviewShortcut,
+  prefGetWarnOnClearHistory,
+  prefGetZoomUIInShortcut,
+  prefGetZoomUIOutShortcut, prefSetClearHistoryShortcut,
+  prefSetCloseAppShortcut, prefSetDeleteHistoryItemShortcut, prefSetEditHistoryItemShortcut,
+  prefSetIgnoreConfidentialContent,
+  prefSetIgnoreTransientContent,
+  prefSetOpenAppShortcut,
+  prefSetOpenAtLogin,
+  prefSetPasteSelectedItemToActiveAppShortcut, prefSetSearchHistoryShortcut,
+  prefSetSelectNextItemShortcut,
+  prefSetSelectPreviousItemShortcut, prefSetShowMoreActionsShortcut,
+  prefSetTheme, prefSetTogglePreviewShortcut,
+  prefSetWarnOnClearHistory, prefSetZoomUIInShortcut, prefSetZoomUIOutShortcut
+} from "@/components/pref";
 
 export default function Settings() {
-  const [theme, setTheme] = useState(getTheme());
-  const [openAtLogin, setOpenAtLogin] = useState(shouldOpenAtLogin());
-  const [warnOnClearHistory, setWarnOnClearHistory] = useState(shouldWarnOnClearHistory());
-  const [ignoreTransientContent, setIgnoreTransientContent] = useState(shouldIgnoreTransientContent());
-  const [ignoreConfidentialContent, setIgnoreConfidentialContent] = useState(shouldIgnoreConfidentialContent());
+  const [theme, setTheme] = useState(prefGetTheme());
+  const [openAtLogin, setOpenAtLogin] = useState(prefGetOpenAtLogin());
+  const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory());
+  const [ignoreTransientContent, setIgnoreTransientContent] = useState(prefGetIgnoreTransientContent());
+  const [ignoreConfidentialContent, setIgnoreConfidentialContent] = useState(prefGetIgnoreConfidentialContent());
+  const [openAppShortcut, setOpenAppShortcut] = useState(prefGetOpenAppShortcut());
+  const [closeAppShortcut, setCloseAppShortcut] = useState(prefGetCloseAppShortcut());
+  const [selectNextItemShortcut, setSelectNextItemShortcut] = useState(prefGetSelectNextItemShortcut());
+  const [selectPreviousItemShortcut, setSelectPreviousItemShortcut] = useState(prefGetSelectPreviousItemShortcut());
+  const [pasteSelectedItemToActiveAppShortcut, setPasteSelectedItemToActiveAppShortcut] = useState(prefGetPasteSelectedItemToActiveAppShortcut());
+  const [editHistoryItemShortcut, setEditHistoryItemShortcut] = useState(prefGetEditHistoryItemShortcut());
+  const [deleteHistoryItemShortcut, setDeleteHistoryItemShortcut] = useState(prefGetDeleteHistoryItemShortcut());
+  const [clearHistoryShortcut, setClearHistoryShortcut] = useState(prefGetClearHistoryShortcut());
+  const [searchHistoryShortcut, setSearchHistoryShortcut] = useState(prefGetSearchHistoryShortcut());
+  const [togglePreviewShortcut, setTogglePreviewShortcut] = useState(prefGetTogglePreviewShortcut());
+  const [showMoreActionsShortcut, setShowMoreActionsShortcut] = useState(prefGetShowMoreActionsShortcut());
+  const [zoomUIInShortcut, setZoomUIInShortcut] = useState(prefGetZoomUIInShortcut());
+  const [zoomUIOutShortcut, setZoomUIOutShortcut] = useState(prefGetZoomUIOutShortcut());
 
   function handleThemeChange(theme: string) {
     setTheme(theme)
-    saveTheme(theme)
+    prefSetTheme(theme)
   }
 
   function handleOpenAtLoginChange(openAtLogin: boolean) {
     setOpenAtLogin(openAtLogin)
-    saveOpenAtLogin(openAtLogin)
+    prefSetOpenAtLogin(openAtLogin)
   }
 
   function handleWarnOnClearHistoryChange(warnOnClearHistory: boolean) {
     setWarnOnClearHistory(warnOnClearHistory)
-    saveWarnOnClearHistory(warnOnClearHistory)
+    prefSetWarnOnClearHistory(warnOnClearHistory)
   }
 
   function handleIgnoreTransientContentChange(checked: boolean) {
     setIgnoreTransientContent(checked)
-    saveIgnoreTransientContent(checked)
+    prefSetIgnoreTransientContent(checked)
   }
 
   function handleIgnoreConfidentialContentChange(checked: boolean) {
     setIgnoreConfidentialContent(checked)
-    saveIgnoreConfidentialContent(checked)
+    prefSetIgnoreConfidentialContent(checked)
+  }
+
+  function handleOpenAppShortcutChange(shortcut: string) {
+    setOpenAppShortcut(shortcut)
+    prefSetOpenAppShortcut(shortcut)
+  }
+
+  function handleCloseAppShortcutChange(shortcut: string) {
+    setCloseAppShortcut(shortcut)
+    prefSetCloseAppShortcut(shortcut)
+  }
+
+  function handleSelectNextItemShortcutChange(shortcut: string) {
+    setSelectNextItemShortcut(shortcut)
+    prefSetSelectNextItemShortcut(shortcut)
+  }
+
+  function handleSelectPreviousItemShortcutChange(shortcut: string) {
+    setSelectPreviousItemShortcut(shortcut)
+    prefSetSelectPreviousItemShortcut(shortcut)
+  }
+
+  function handlePasteSelectedItemToActiveAppShortcutChange(shortcut: string) {
+    setPasteSelectedItemToActiveAppShortcut(shortcut)
+    prefSetPasteSelectedItemToActiveAppShortcut(shortcut)
+  }
+
+  function handleEditHistoryItemShortcutChange(shortcut: string) {
+    setEditHistoryItemShortcut(shortcut)
+    prefSetEditHistoryItemShortcut(shortcut)
+  }
+
+  function handleDeleteHistoryItemShortcutChange(shortcut: string) {
+    setDeleteHistoryItemShortcut(shortcut)
+    prefSetDeleteHistoryItemShortcut(shortcut)
+  }
+
+  function handleClearHistoryShortcutChange(shortcut: string) {
+    setClearHistoryShortcut(shortcut)
+    prefSetClearHistoryShortcut(shortcut)
+  }
+
+  function handleSearchHistoryShortcutChange(shortcut: string) {
+    setSearchHistoryShortcut(shortcut)
+    prefSetSearchHistoryShortcut(shortcut)
+  }
+
+  function handleTogglePreviewShortcutChange(shortcut: string) {
+    setTogglePreviewShortcut(shortcut)
+    prefSetTogglePreviewShortcut(shortcut)
+  }
+
+  function handleShowMoreActionsShortcutChange(shortcut: string) {
+    setShowMoreActionsShortcut(shortcut)
+    prefSetShowMoreActionsShortcut(shortcut)
+  }
+
+  function handleZoomUIInShortcutChange(shortcut: string) {
+    setZoomUIInShortcut(shortcut)
+    prefSetZoomUIInShortcut(shortcut)
+  }
+
+  function handleZoomUIOutShortcutChange(shortcut: string) {
+    setZoomUIOutShortcut(shortcut)
+    prefSetZoomUIOutShortcut(shortcut)
   }
 
   return (
@@ -149,6 +246,66 @@ Display a confirmation dialog when clearing all clipboard&nbsp;history
               </Label>
               <Switch id="ignoreTransient" checked={ignoreTransientContent}
                       onCheckedChange={handleIgnoreTransientContentChange}/>
+            </div>
+
+            <div className="grid gap-4">
+              <div className="flex pt-12 border-b border-b-border">
+                <span className="text-2xl pb-3 font-semibold">Shortcuts</span>
+              </div>
+
+              <div className="flex items-center justify-between space-x-20 pt-6">
+                <span className="">Open ClipBook</span>
+                <ShortcutInput shortcut={openAppShortcut} onSave={handleOpenAppShortcutChange}/>
+              </div>
+              <div className="flex items-center justify-between space-x-20">
+                <span className="">Close ClipBook</span>
+                <ShortcutInput shortcut={closeAppShortcut} onSave={handleCloseAppShortcutChange}/>
+              </div>
+              <div className="flex items-center justify-between space-x-20">
+                <span className="">Select next history item</span>
+                <ShortcutInput shortcut={selectNextItemShortcut} onSave={handleSelectNextItemShortcutChange}/>
+              </div>
+              <div className="flex items-center justify-between space-x-20">
+                <span className="">Select previous history item</span>
+                <ShortcutInput shortcut={selectPreviousItemShortcut} onSave={handleSelectPreviousItemShortcutChange}/>
+              </div>
+              <div className="flex items-center justify-between space-x-20">
+                <span className="">Paste selected item to active app</span>
+                <ShortcutInput shortcut={pasteSelectedItemToActiveAppShortcut} onSave={handlePasteSelectedItemToActiveAppShortcutChange}/>
+              </div>
+              <div className="flex items-center justify-between space-x-20">
+                <span className="">Edit history item</span>
+                <ShortcutInput shortcut={editHistoryItemShortcut} onSave={handleEditHistoryItemShortcutChange}/>
+              </div>
+              <div className="flex items-center justify-between space-x-20">
+                <span className="">Delete history item</span>
+                <ShortcutInput shortcut={deleteHistoryItemShortcut} onSave={handleDeleteHistoryItemShortcutChange}/>
+              </div>
+              <div className="flex items-center justify-between space-x-20">
+                <span className="">Delete all history item</span>
+                <ShortcutInput shortcut={clearHistoryShortcut} onSave={handleClearHistoryShortcutChange}/>
+              </div>
+
+              <div className="flex items-center justify-between space-x-20">
+                <span className="">Search</span>
+                <ShortcutInput shortcut={searchHistoryShortcut} onSave={handleSearchHistoryShortcutChange}/>
+              </div>
+              <div className="flex items-center justify-between space-x-20">
+                <span className="">Show/hide preview</span>
+                <ShortcutInput shortcut={togglePreviewShortcut} onSave={handleTogglePreviewShortcutChange}/>
+              </div>
+              <div className="flex items-center justify-between space-x-20">
+                <span className="">Show more actions</span>
+                <ShortcutInput shortcut={showMoreActionsShortcut} onSave={handleShowMoreActionsShortcutChange}/>
+              </div>
+              <div className="flex items-center justify-between space-x-20">
+                <span className="">Zoom app UI in</span>
+                <ShortcutInput shortcut={zoomUIInShortcut} onSave={handleZoomUIInShortcutChange}/>
+              </div>
+              <div className="flex items-center justify-between space-x-20">
+                <span className="">Zoom app UI out</span>
+                <ShortcutInput shortcut={zoomUIOutShortcut} onSave={handleZoomUIOutShortcutChange}/>
+              </div>
             </div>
           </div>
         </div>

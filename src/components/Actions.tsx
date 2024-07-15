@@ -62,7 +62,7 @@ export default function Actions(props: ActionsProps) {
                     <CommandIcon className="h-3 w-3 text-card-foreground"/>
                   </div>
                   <div className="flex h-6 w-6 ml-1 rounded bg-card justify-center items-center">
-                    <span className="font-mono text-sm text-card-foreground">E</span>
+                    <span className="text-sm text-card-foreground">E</span>
                   </div>
                 </CommandShortcut>
               </CommandItem>
@@ -74,19 +74,19 @@ export default function Actions(props: ActionsProps) {
                     <CommandIcon className="h-3 w-3 text-card-foreground"/>
                   </div>
                   <div className="flex h-6 w-6 ml-1 rounded bg-card justify-center items-center">
-                    <span className="font-mono text-sm text-card-foreground">F</span>
+                    <span className="text-sm text-card-foreground">F</span>
                   </div>
                 </CommandShortcut>
               </CommandItem>
               <CommandItem>
                 <PanelRightClose className="mr-2 h-4 w-4"/>
-                <span>Hide Preview panel</span>
+                <span>Show/Hide Preview</span>
                 <CommandShortcut className="flex flex-row">
                   <div className="flex h-6 w-6 p-1.5 rounded bg-card">
                     <CommandIcon className="h-3 w-3 text-card-foreground"/>
                   </div>
                   <div className="flex h-6 w-6 ml-1 rounded bg-card justify-center items-center">
-                    <span className="font-mono text-sm text-card-foreground">P</span>
+                    <span className="text-sm text-card-foreground">P</span>
                   </div>
                 </CommandShortcut>
               </CommandItem>
@@ -97,8 +97,8 @@ export default function Actions(props: ActionsProps) {
                   <div className="flex h-6 w-6 p-1.5 rounded bg-card">
                     <CommandIcon className="h-3 w-3 text-card-foreground"/>
                   </div>
-                  <div className="flex h-6 w-6 pt-0.5 ml-1 rounded bg-card justify-center items-center">
-                    <DeleteIcon className="h-4 w-4 text-card-foreground"/>
+                  <div className="flex h-6 w-6 ml-1 rounded bg-card justify-center items-center">
+                    <span className="text-sm text-card-foreground">⌫</span>
                   </div>
                 </CommandShortcut>
               </CommandItem>
@@ -106,16 +106,15 @@ export default function Actions(props: ActionsProps) {
                 <TrashIcon className="mr-2 h-4 w-4"/>
                 <span>Delete all...</span>
                 <CommandShortcut className="flex flex-row">
-                  <div className="flex h-6 w-6 p-1.5 rounded bg-card">
+                  <div
+                      className="flex h-6 w-6 rounded bg-card justify-center items-center">
+                    <span className="text-card-foreground">⇧</span>
+                  </div>
+                  <div className="flex h-6 w-6 ml-1 p-1.5 rounded bg-card">
                     <CommandIcon className="h-3 w-3 text-card-foreground"/>
                   </div>
-                  <div
-                      className="flex h-6 w-6 pt-0.5 ml-1 rounded bg-card justify-center items-center">
-                    <ArrowBigUp className="h-4 w-4 text-card-foreground"/>
-                  </div>
-                  <div
-                      className="flex h-6 w-6 pt-0.5 ml-1 rounded bg-card justify-center items-center">
-                    <DeleteIcon className="h-4 w-4 text-card-foreground"/>
+                  <div className="flex h-6 w-6 ml-1 rounded bg-card justify-center items-center">
+                    <span className="text-sm text-card-foreground">⌫</span>
                   </div>
                 </CommandShortcut>
               </CommandItem>
