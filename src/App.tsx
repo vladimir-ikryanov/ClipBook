@@ -5,10 +5,12 @@ import {addHistoryItem, clear, getHistoryItems, isHistoryEmpty, setFilterQuery} 
 import {useEffect, useState} from "react";
 import * as React from "react";
 import {Clipboard} from "lucide-react";
-import {prefGetCloseAppShortcut} from "@/pref";
+import {prefGetCloseAppShortcut, prefGetZoomUIInShortcut, prefGetZoomUIOutShortcut} from "@/pref";
 import {isShortcutMatch} from "@/lib/shortcuts";
 
 declare const hideAppWindow: () => void;
+declare const zoomIn: () => void;
+declare const zoomOut: () => void;
 
 export default function App() {
   const [history, setHistory] = useState(getHistoryItems())
@@ -23,8 +25,18 @@ export default function App() {
       }
       // Close the app window with the close app shortcut.
       if (isShortcutMatch(prefGetCloseAppShortcut(), e)) {
-        e.preventDefault()
         hideAppWindow()
+        e.preventDefault()
+      }
+      // Zoom in the UI with the zoom in shortcut.
+      if (isShortcutMatch(prefGetZoomUIInShortcut(), e)) {
+        zoomIn()
+        e.preventDefault()
+      }
+      // Zoom out the UI with the zoom out shortcut.
+      if (isShortcutMatch(prefGetZoomUIOutShortcut(), e)) {
+        zoomOut()
+        e.preventDefault()
       }
     }
 

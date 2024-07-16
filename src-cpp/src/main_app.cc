@@ -95,13 +95,7 @@ void MainApp::launch() {
   browser_->onCanExecuteCommand =
       [this](const CanExecuteCommandArgs &args, CanExecuteCommandAction action) {
         if (app_->isProduction()) {
-          if (args.command_id == BrowserCommandId::kZoomPlus ||
-              args.command_id == BrowserCommandId::kZoomMinus ||
-              args.command_id == BrowserCommandId::kZoomNormal) {
-            action.can();
-          } else {
-            action.cannot();
-          }
+          action.cannot();
         } else {
           action.can();
         }
@@ -329,7 +323,7 @@ void MainApp::showSettingsWindow() {
   settings_window_->show();
 }
 
-void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject>& window) {
+void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &window) {
   window->putProperty("pasteInFrontApp", [this](std::string text) {
     paste(text);
   });
@@ -338,6 +332,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject>& windo
   });
   window->putProperty("clearEntireHistory", [this]() {
     clearHistory();
+  });
+  window->putProperty("zoomIn", [window]() {
+    window->frame()->browser()->zoom()->in();
+  });
+  window->putProperty("zoomOut", [window]() {
+    window->frame()->browser()->zoom()->out();
   });
 
   window->putProperty("saveTheme", [this](std::string theme) -> void {
@@ -397,9 +397,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject>& windo
     return settings_->getSelectPreviousItemShortcut();
   });
   window->putProperty("savePasteSelectedItemToActiveAppShortcut",
-                           [this](std::string shortcut) -> void {
-                             settings_->savePasteSelectedItemToActiveAppShortcut(shortcut);
-                           });
+                      [this](std::string shortcut) -> void {
+                        settings_->savePasteSelectedItemToActiveAppShortcut(shortcut);
+                      });
   window->putProperty("getPasteSelectedItemToActiveAppShortcut", [this]() -> std::string {
     return settings_->getPasteSelectedItemToActiveAppShortcut();
   });
