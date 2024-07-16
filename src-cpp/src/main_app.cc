@@ -315,6 +315,14 @@ void MainApp::showSettingsWindow() {
     initJavaScriptApi(args.window);
     action.proceed();
   };
+  settings_window_->onCanExecuteCommand =
+      [this](const CanExecuteCommandArgs &args, CanExecuteCommandAction action) {
+        if (app_->isProduction()) {
+          action.cannot();
+        } else {
+          action.can();
+        }
+      };
   settings_window_->navigation()->loadUrlAndWait(app_->baseUrl() + "/settings");
   settings_window_->setWindowTitleVisible(false);
   settings_window_->setWindowTitlebarVisible(false);
