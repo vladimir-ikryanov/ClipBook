@@ -60,11 +60,11 @@ export default function Settings() {
         </div>
 
         <div className="flex flex-col flex-grow">
-          <div className="flex pt-12 px-12 border-b border-b-border draggable sticky">
+          <div className="flex pt-8 px-8 border-b border-b-border draggable sticky">
             <span className="text-2xl pb-3 font-semibold">General</span>
           </div>
 
-          <div className="flex flex-col px-12 pb-6 gap-4 flex-grow overflow-y-auto">
+          <div className="flex flex-col px-8 pb-6 gap-4 flex-grow overflow-y-auto">
             <div className="flex items-center justify-between space-x-20 pt-6">
               <Label htmlFor="openAtLogin" className="flex flex-col text-base">
                 <span className="">Launch at login</span>

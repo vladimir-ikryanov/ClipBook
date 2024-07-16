@@ -3,7 +3,7 @@ import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {keysToDisplayShortcut, shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {Button} from "@/components/ui/button";
-import {Undo2Icon, UndoIcon} from "lucide-react";
+import {Undo2Icon} from "lucide-react";
 
 type ShortcutProps = {
   shortcut: string
@@ -73,10 +73,10 @@ export default function ShortcutInput(props: ShortcutProps) {
     return shortcutToDisplayShortcut(shortcut)
   }
 
-  let style: string = "w-40 h-8 pl-10 text-base text-center caret-transparent border-none bg-neutral-100";
+  let style: string = "w-40 h-8 pl-10 text-base text-center caret-transparent border-none bg-neutral-100 dark:bg-neutral-700";
 
   return (
-      <div className="flex flex-row bg-neutral-100 shadow hover:shadow-md rounded-md">
+      <div className="flex flex-row bg-neutral-100 dark:bg-neutral-700 shadow hover:shadow-md rounded-md">
         <Input
             className={isEditing ? style + "" : style}
             title="Click to edit shortcut"
