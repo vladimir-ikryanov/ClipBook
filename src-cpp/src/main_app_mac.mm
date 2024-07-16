@@ -37,36 +37,36 @@ MainAppMac::MainAppMac(const std::shared_ptr<App> &app,
     : MainApp(app, settings), active_app_(nullptr) {
 }
 
-molybden::Shortcut *MainAppMac::createShortcut(const std::string &shortcut_text) {
-  auto parts = split(shortcut_text, " + ");
-  // Extract key modifiers.
-  int32_t key_modifiers = 0;
-  for (const auto &part : parts) {
-    if (part == "Meta") {
-      key_modifiers |= KeyModifier::COMMAND_OR_CTRL;
-    } else if (part == "Control") {
-      key_modifiers |= KeyModifier::CTRL;
-    } else if (part == "Alt") {
-      key_modifiers |= KeyModifier::ALT;
-    } else if (part == "Shift") {
-      key_modifiers |= KeyModifier::SHIFT;
-    }
-  }
+molybden::Shortcut MainAppMac::createShortcut(const std::string &shortcut_text) {
+//  auto parts = split(shortcut_text, " + ");
+//  // Extract key modifiers.
+//  int32_t key_modifiers = 0;
+//  for (const auto &part : parts) {
+//    if (part == "Meta") {
+//      key_modifiers |= KeyModifier::COMMAND_OR_CTRL;
+//    } else if (part == "Control") {
+//      key_modifiers |= KeyModifier::CTRL;
+//    } else if (part == "Alt") {
+//      key_modifiers |= KeyModifier::ALT;
+//    } else if (part == "Shift") {
+//      key_modifiers |= KeyModifier::SHIFT;
+//    }
+//  }
   // Extract key code.
 
-  return new Shortcut(KeyCode::V, key_modifiers);
+  return molybden::Shortcut(KeyCode::V, KeyModifier::COMMAND_OR_CTRL | KeyModifier::SHIFT);
 }
 
 void MainAppMac::enableOpenAppShortcut() {
   auto shortcut_str = settings_->getOpenAppShortcut();
   open_app_shortcut_ = createShortcut(shortcut_str);
-  app()->globalShortcuts()->registerShortcut(*open_app_shortcut_, [this](const Shortcut &) {
+  app()->globalShortcuts()->registerShortcut(open_app_shortcut_, [this](const Shortcut &) {
     show();
   });
 }
 
 void MainAppMac::disableOpenAppShortcut() {
-  app()->globalShortcuts()->unregisterShortcut(*open_app_shortcut_);
+  app()->globalShortcuts()->unregisterShortcut(open_app_shortcut_);
 }
 
 std::string MainAppMac::getUserDataDir() {

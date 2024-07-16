@@ -2,9 +2,12 @@ import '../App.css';
 import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {keysToDisplayShortcut, shortcutToDisplayShortcut} from "@/lib/shortcuts";
+import {Button} from "@/components/ui/button";
+import {Undo2Icon, UndoIcon} from "lucide-react";
 
 type ShortcutProps = {
   shortcut: string
+  defaultShortcut?: string
   onStartEditing?: () => void
   onSave: (shortcut: string) => void
 }
@@ -19,6 +22,14 @@ export default function ShortcutInput(props: ShortcutProps) {
     setIsEditing(true)
     if (props.onStartEditing) {
       props.onStartEditing()
+    }
+  }
+
+  function handleBlur() {
+    setIsEditing(false)
+    if (currentKeys.length == 0) {
+      setShortcut(props.shortcut)
+      props.onSave(props.shortcut)
     }
   }
 
@@ -45,13 +56,42 @@ export default function ShortcutInput(props: ShortcutProps) {
     }
   }
 
+  function handleReset() {
+    if (props.defaultShortcut) {
+      setShortcut(props.defaultShortcut)
+      props.onSave(props.defaultShortcut)
+    }
+  }
+
+  function getInputValue() {
+    if (isEditing) {
+      if (currentKeys.length === 0) {
+        return 'Recording...'
+      }
+      return keysToDisplayShortcut(currentKeys)
+    }
+    return shortcutToDisplayShortcut(shortcut)
+  }
+
+  let style: string = "w-40 h-8 pl-10 text-base text-center caret-transparent border-none bg-neutral-100";
+
   return (
-      <Input
-          className={isEditing ? "w-40 h-8 text-base text-center caret-transparent focus:border-neutral-500" : "w-40 h-8 text-base text-center caret-transparent"}
-          readOnly={true}
-          value={isEditing ? keysToDisplayShortcut(currentKeys) : shortcutToDisplayShortcut(shortcut)}
-          onClick={handleClick}
-          onKeyDown={handleKeyDown}
-          onKeyUp={handleKeyUp}/>
+      <div className="flex flex-row bg-neutral-100 shadow hover:shadow-md rounded-md">
+        <Input
+            className={isEditing ? style + "" : style}
+            title="Click to edit shortcut"
+            readOnly={true}
+            value={getInputValue()}
+            onBlur={handleBlur}
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
+            onKeyUp={handleKeyUp}/>
+        <Button variant="ghost" onClick={handleReset}
+                className="text-xs my-auto h-5 w-5 p-0 mr-2 text-neutral-400"
+                title="Reset to default" disabled={props.shortcut === props.defaultShortcut}>
+          <Undo2Icon
+              className={props.shortcut !== props.defaultShortcut ? "w-4 h-4" : "invisible"}/>
+        </Button>
+      </div>
   )
 }

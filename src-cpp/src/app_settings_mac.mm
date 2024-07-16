@@ -151,7 +151,7 @@ std::string AppSettingsMac::getOpenAppShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Shift + Meta + V";
+  return "Shift + Meta + v";
 }
 
 void AppSettingsMac::saveCloseAppShortcut(std::string shortcut) {
@@ -226,7 +226,7 @@ std::string AppSettingsMac::getEditHistoryItemShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + E";
+  return "Meta + e";
 }
 
 void AppSettingsMac::saveDeleteHistoryItemShortcut(std::string shortcut) {
@@ -271,7 +271,7 @@ std::string AppSettingsMac::getSearchHistoryShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + F";
+  return "Meta + f";
 }
 
 void AppSettingsMac::saveTogglePreviewShortcut(std::string shortcut) {
@@ -286,7 +286,7 @@ std::string AppSettingsMac::getTogglePreviewShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + P";
+  return "Meta + p";
 }
 
 void AppSettingsMac::saveShowMoreActionsShortcut(std::string shortcut) {
@@ -301,7 +301,7 @@ std::string AppSettingsMac::getShowMoreActionsShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + A";
+  return "Meta + a";
 }
 
 void AppSettingsMac::saveZoomUIInShortcut(std::string shortcut) {

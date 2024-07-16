@@ -148,66 +148,80 @@ export default function Shortcuts() {
           <div className="flex flex-col px-12 pb-6 gap-4 flex-grow overflow-y-auto">
             <div className="flex items-center justify-between space-x-20 pt-6">
               <span className="">Open ClipBook</span>
-              <ShortcutInput shortcut={openAppShortcut} onSave={handleOpenAppShortcutChange}
+              <ShortcutInput shortcut={openAppShortcut}
+                             defaultShortcut="Meta + Shift + v"
+                             onSave={handleOpenAppShortcutChange}
                              onStartEditing={disableOpenAppShortcut}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Close ClipBook</span>
-              <ShortcutInput shortcut={closeAppShortcut} onSave={handleCloseAppShortcutChange}/>
+              <ShortcutInput shortcut={closeAppShortcut} defaultShortcut="Escape"
+                             onSave={handleCloseAppShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Select next history item</span>
               <ShortcutInput shortcut={selectNextItemShortcut}
+                             defaultShortcut="ArrowDown"
                              onSave={handleSelectNextItemShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Select previous history item</span>
               <ShortcutInput shortcut={selectPreviousItemShortcut}
+                             defaultShortcut="ArrowUp"
                              onSave={handleSelectPreviousItemShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Paste selected item to active app</span>
               <ShortcutInput shortcut={pasteSelectedItemToActiveAppShortcut}
+                             defaultShortcut="Enter"
                              onSave={handlePasteSelectedItemToActiveAppShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Edit history item</span>
               <ShortcutInput shortcut={editHistoryItemShortcut}
+                             defaultShortcut="Meta + e"
                              onSave={handleEditHistoryItemShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Delete history item</span>
               <ShortcutInput shortcut={deleteHistoryItemShortcut}
+                             defaultShortcut="Meta + Backspace"
                              onSave={handleDeleteHistoryItemShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Delete all history item</span>
               <ShortcutInput shortcut={clearHistoryShortcut}
+                             defaultShortcut="Shift + Meta + Backspace"
                              onSave={handleClearHistoryShortcutChange}/>
             </div>
 
             <div className="flex items-center justify-between space-x-20">
               <span className="">Search</span>
               <ShortcutInput shortcut={searchHistoryShortcut}
+                             defaultShortcut="Meta + f"
                              onSave={handleSearchHistoryShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Show/hide preview</span>
               <ShortcutInput shortcut={togglePreviewShortcut}
+                             defaultShortcut="Meta + p"
                              onSave={handleTogglePreviewShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Show more actions</span>
               <ShortcutInput shortcut={showMoreActionsShortcut}
+                             defaultShortcut="Meta + a"
                              onSave={handleShowMoreActionsShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Zoom app UI in</span>
-              <ShortcutInput shortcut={zoomUIInShortcut} onSave={handleZoomUIInShortcutChange}/>
+              <ShortcutInput shortcut={zoomUIInShortcut} defaultShortcut="Meta + ="
+                             onSave={handleZoomUIInShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Zoom app UI out</span>
               <ShortcutInput shortcut={zoomUIOutShortcut}
+                             defaultShortcut="Meta + -"
                              onSave={handleZoomUIOutShortcutChange}/>
             </div>
             <div className="grow"></div>
