@@ -1,7 +1,7 @@
 import '../App.css';
 import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
-import {keysToDisplayShortcut, shortcutToDisplayShortcut} from "@/lib/shortcuts";
+import {isModifierKey, keysToDisplayShortcut, shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {Button} from "@/components/ui/button";
 import {Undo2Icon} from "lucide-react";
 
@@ -37,10 +37,19 @@ export default function ShortcutInput(props: ShortcutProps) {
     if (isEditing) {
       e.preventDefault()
       const key = e.key === ' ' ? 'Space' : e.key;
-
+      let keys: string[] = currentKeys;
       // Add the key to the current keys if it's not already there
       if (!currentKeys.includes(key)) {
-        setCurrentKeys([...currentKeys, key])
+        keys = [...currentKeys, key]
+        setCurrentKeys(keys)
+      }
+
+      if (!isModifierKey(key)) {
+        const newShortcut = keys.join(' + ')
+        setShortcut(newShortcut)
+        setCurrentKeys([])
+        setIsEditing(false)
+        props.onSave(newShortcut)
       }
     }
   }
@@ -48,11 +57,8 @@ export default function ShortcutInput(props: ShortcutProps) {
   function handleKeyUp(e: React.KeyboardEvent<HTMLInputElement>) {
     if (isEditing) {
       // Save the new shortcut when the user stops typing
-      const newShortcut = currentKeys.join(' + ')
-      setShortcut(newShortcut)
       setCurrentKeys([])
-      setIsEditing(false)
-      props.onSave(newShortcut)
+      e.preventDefault()
     }
   }
 
@@ -78,7 +84,7 @@ export default function ShortcutInput(props: ShortcutProps) {
   return (
       <div className="flex flex-row bg-neutral-100 dark:bg-neutral-700 shadow hover:shadow-md rounded-md">
         <Input
-            className={isEditing ? style + "" : style}
+            className={isEditing ? style + " text-neutral-400" : style}
             title="Click to edit shortcut"
             readOnly={true}
             value={getInputValue()}

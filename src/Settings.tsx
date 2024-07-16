@@ -44,14 +44,14 @@ export default function Settings() {
             </div>
             <div
                 className="flex flex-row py-2 px-2 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings/shortcuts" className="flex flex-row gap-x-2">
+              <a href="/settings/shortcuts" className="flex flex-row gap-x-2 w-full">
                 <KeyboardIcon className="h-5 w-5 mt-0.5"/>
                 <span className="">Shortcuts</span>
               </a>
             </div>
             <div
                 className="flex flex-row py-2 px-2 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings/privacy" className="flex flex-row gap-x-2">
+              <a href="/settings/privacy" className="flex flex-row gap-x-2 w-full">
                 <ShieldCheckIcon className="h-5 w-5 mt-0.5"/>
                 <span className="">Privacy</span>
               </a>

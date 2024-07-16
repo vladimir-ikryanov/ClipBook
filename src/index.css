@@ -8,8 +8,8 @@
     --foreground: #000000;
     --card: #d0d0d0;
     --card-foreground: #616161;
-    --popover: #fafafa;
-    --popover-foreground: black;
+    --popover: #eeeeee;
+    --popover-foreground: #000000;
     --primary: #000000;
     --primary-foreground: #414141;
     --secondary: #eeeeee;
@@ -35,8 +35,9 @@
     --foreground: #d6d6d6;
     --card: #3e4144;
     --card-foreground: #e3e3e3;
-    --popover: #3e4144;
-    --popover-foreground: black;
+    /* History item hover background */
+    --popover: #2e2e2e;
+    --popover-foreground: #d6d6d6;
     --primary: #f6f6f6;
     /* History item icon */
     --primary-foreground: #808081;

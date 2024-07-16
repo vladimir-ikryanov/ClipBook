@@ -11,6 +11,7 @@ const keySymbolMap: { [key: string]: string } = {
   Enter: '↵',
   Escape: 'Esc',
   Space: '␣',
+  Tab: '⇥',
 };
 
 export function keysToDisplayShortcut(keys: string[]): string {
@@ -66,3 +67,7 @@ export const isShortcutMatch = (shortcut: string, event: KeyboardEvent): boolean
 
   return allModifiersMatch && event.key.toLowerCase() === key.toLowerCase();
 };
+
+export const isModifierKey = (key: string): boolean => {
+  return ['Meta', 'Alt', 'Control', 'Shift'].includes(key);
+}

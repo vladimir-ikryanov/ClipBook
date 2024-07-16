@@ -31,14 +31,14 @@ export default function Privacy() {
             <div className="flex draggable p-6"></div>
             <div
                 className="flex flex-row gap-x-2 py-2 px-2 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings" className="flex flex-row gap-x-2">
+              <a href="/settings" className="flex flex-row gap-x-2 w-full cursor-default">
                 <SettingsIcon className="h-5 w-5 mt-0.5"/>
                 <span className="">General</span>
               </a>
             </div>
             <div
                 className="flex flex-row py-2 px-2 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings/shortcuts" className="flex flex-row gap-x-2">
+              <a href="/settings/shortcuts" className="flex flex-row gap-x-2 w-full">
                 <KeyboardIcon className="h-5 w-5 mt-0.5"/>
                 <span className="">Shortcuts</span>
               </a>

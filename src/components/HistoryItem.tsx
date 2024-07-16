@@ -35,7 +35,7 @@ const HistoryItem = (props: HistoryItemProps) => {
           style={props.style}
           ref={props.tabsTriggerRef}
           value={props.index.toString()}
-          className="flex flex-row data-[state=active]:bg-accent py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis"
+          className="flex flex-row cursor-default data-[state=active]:bg-accent py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis hover:bg-popover"
           onKeyDown={keyDown}
           onDoubleClick={handleMouseDoubleClick}>
         <div className="flex mr-3 text-primary-foreground">
