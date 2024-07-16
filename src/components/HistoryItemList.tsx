@@ -6,6 +6,7 @@ import ToolBar from "@/components/ToolBar";
 import StatusBar from "@/components/StatusBar";
 import {FixedSizeList as List} from "react-window";
 import AutoSizer, {Size} from "react-virtualized-auto-sizer";
+import {HideActionsReason} from "@/components/Actions";
 
 type HistoryItemListProps = {
   items: string[]
@@ -13,7 +14,7 @@ type HistoryItemListProps = {
   onFilterHistory: (searchQuery: string) => void
   isPreviewVisible: boolean
   onShowHidePreview: () => void
-  onHideActions: () => void
+  onHideActions: (reason: HideActionsReason) => void
   onTogglePreview: () => void
   onSearchHistory: () => void
   onEditContent: () => void

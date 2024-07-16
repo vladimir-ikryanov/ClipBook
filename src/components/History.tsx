@@ -15,7 +15,7 @@ import {
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {
   prefGetClearHistoryShortcut,
-  prefGetDeleteHistoryItemShortcut,
+  prefGetDeleteHistoryItemShortcut, prefGetEditHistoryItemShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
@@ -23,6 +23,7 @@ import {
   prefGetShowMoreActionsShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
+import {HideActionsReason} from "@/components/Actions";
 
 declare const pasteInFrontApp: (text: string) => void;
 declare const clearEntireHistory: () => void;
@@ -87,6 +88,11 @@ export default function History(props: HistoryProps) {
         handleTogglePreview()
         e.preventDefault()
       }
+      // Edit the active item when the edit history item shortcut is pressed.
+      if (isShortcutMatch(prefGetEditHistoryItemShortcut(), e)) {
+        handleEditContent()
+        e.preventDefault()
+      }
       // Clear the history when the clear history shortcut is pressed.
       if (isShortcutMatch(prefGetClearHistoryShortcut(), e)) {
         handleDeleteAllItems()
@@ -127,6 +133,10 @@ export default function History(props: HistoryProps) {
     }
   }
 
+  function isPreviewVisible(): boolean {
+    return previewPanelRef.current ? previewPanelRef.current.getSize() > 0 : false
+  }
+
   function handleTogglePreview(): void {
     if (previewPanelRef.current) {
       let visible = previewPanelRef.current.getSize() == 0
@@ -140,11 +150,16 @@ export default function History(props: HistoryProps) {
     }
   }
 
-  function handleHideActions() {
-    handleSearchHistory()
+  function handleHideActions(reason: HideActionsReason) {
+    if (reason !== "editContent") {
+      handleSearchHistory()
+    }
   }
 
   function handleEditContent() {
+    if (!isPreviewVisible()) {
+      handleTogglePreview()
+    }
     if (previewTextareaRef.current) {
       previewTextareaRef.current.focus()
     }

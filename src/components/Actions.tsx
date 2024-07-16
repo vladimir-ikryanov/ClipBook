@@ -30,8 +30,16 @@ import ShortcutLabel from "@/components/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 
+export type HideActionsReason =
+    "cancel"
+    | "togglePreview"
+    | "searchHistory"
+    | "editContent"
+    | "deleteItem"
+    | "deleteAllItems"
+
 type ActionsProps = {
-  onHideActions: () => void
+  onHideActions: (reason: HideActionsReason) => void
   onTogglePreview: () => void
   onSearchHistory: () => void
   onEditContent: () => void
@@ -58,34 +66,41 @@ export default function Actions(props: ActionsProps) {
     e.stopPropagation()
   }
 
+  let closeReason: HideActionsReason = "cancel"
+
   function handleOpenChange(open: boolean) {
     setOpen(open)
     if (!open) {
-      props.onHideActions()
+      props.onHideActions(closeReason)
     }
   }
 
   function handleEditContent() {
+    closeReason = "editContent"
     handleOpenChange(false)
     props.onEditContent()
   }
 
   function handleSearchHistory() {
+    closeReason = "searchHistory"
     handleOpenChange(false)
     props.onSearchHistory()
   }
 
   function handleTogglePreview() {
+    closeReason = "togglePreview"
     handleOpenChange(false)
     props.onTogglePreview()
   }
 
   function handleDeleteItem() {
+    closeReason = "deleteItem"
     handleOpenChange(false)
     props.onDeleteItem()
   }
 
   function handleDeleteAllItems() {
+    closeReason = "deleteAllItems"
     handleOpenChange(false)
     props.onDeleteAllItems()
   }

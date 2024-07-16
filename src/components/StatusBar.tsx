@@ -1,7 +1,7 @@
 import '../App.css';
 import {Button} from "@/components/ui/button";
 import React from "react";
-import Actions from "@/components/Actions";
+import Actions, {HideActionsReason} from "@/components/Actions";
 import {
   prefGetCloseAppShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
@@ -12,7 +12,7 @@ import ShortcutLabel from "@/components/ShortcutLabel";
 
 type StatusBarProps = {
   appName: string
-  onHideActions: () => void
+  onHideActions: (reason: HideActionsReason) => void
   onTogglePreview: () => void
   onSearchHistory: () => void
   onEditContent: () => void
