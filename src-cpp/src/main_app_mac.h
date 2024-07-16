@@ -22,6 +22,8 @@ class MainAppMac : public MainApp {
   void setOpenAtLogin(bool open) override;
 
  protected:
+  void enableOpenAppShortcut() override;
+  void disableOpenAppShortcut() override;
   std::string getUserDataDir() override;
   std::string getUpdateServerUrl() override;
 
@@ -31,8 +33,10 @@ class MainAppMac : public MainApp {
   void addAppToLoginItems();
   void removeAppFromLoginItems();
   bool isAppInLoginItems();
+  molybden::Shortcut* createShortcut(const std::string &shortcut_text);
 
  private:
+  molybden::Shortcut *open_app_shortcut_{};
 #ifdef __OBJC__
   NSRunningApplication *active_app_{};
 #endif

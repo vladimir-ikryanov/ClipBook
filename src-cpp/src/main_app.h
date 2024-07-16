@@ -36,6 +36,8 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void setTheme(const std::string &theme);
   void initJavaScriptApi(const std::shared_ptr<molybden::JsObject>& window);
 
+  virtual void enableOpenAppShortcut() = 0;
+  virtual void disableOpenAppShortcut() = 0;
   virtual std::string getUserDataDir() = 0;
   virtual std::string getUpdateServerUrl() = 0;
 

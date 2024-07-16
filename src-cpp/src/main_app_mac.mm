@@ -20,15 +20,53 @@ using namespace molybden;
  */
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
+std::vector<std::string> split(const std::string &str, const std::string &delimiter) {
+  std::vector<std::string> result;
+  size_t pos = 0;
+  size_t start = 0;
+  while ((pos = str.find(delimiter, start)) != std::string::npos) {
+    result.push_back(str.substr(start, pos - start));
+    start = pos + delimiter.length();
+  }
+  result.push_back(str.substr(start));
+  return result;
+}
+
 MainAppMac::MainAppMac(const std::shared_ptr<App> &app,
                        const std::shared_ptr<AppSettings> &settings)
     : MainApp(app, settings), active_app_(nullptr) {
-  // Register a global shortcut to show the browser window.
-  auto global_shortcuts = app->globalShortcuts();
-  auto shortcut_show = Shortcut(KeyCode::V, KeyModifier::COMMAND_OR_CTRL | KeyModifier::SHIFT);
-  global_shortcuts->registerShortcut(shortcut_show, [this](const Shortcut &) {
+}
+
+molybden::Shortcut *MainAppMac::createShortcut(const std::string &shortcut_text) {
+  auto parts = split(shortcut_text, " + ");
+  // Extract key modifiers.
+  int32_t key_modifiers = 0;
+  for (const auto &part : parts) {
+    if (part == "Meta") {
+      key_modifiers |= KeyModifier::COMMAND_OR_CTRL;
+    } else if (part == "Control") {
+      key_modifiers |= KeyModifier::CTRL;
+    } else if (part == "Alt") {
+      key_modifiers |= KeyModifier::ALT;
+    } else if (part == "Shift") {
+      key_modifiers |= KeyModifier::SHIFT;
+    }
+  }
+  // Extract key code.
+
+  return new Shortcut(KeyCode::V, key_modifiers);
+}
+
+void MainAppMac::enableOpenAppShortcut() {
+  auto shortcut_str = settings_->getOpenAppShortcut();
+  open_app_shortcut_ = createShortcut(shortcut_str);
+  app()->globalShortcuts()->registerShortcut(*open_app_shortcut_, [this](const Shortcut &) {
     show();
   });
+}
+
+void MainAppMac::disableOpenAppShortcut() {
+  app()->globalShortcuts()->unregisterShortcut(*open_app_shortcut_);
 }
 
 std::string MainAppMac::getUserDataDir() {

@@ -30,6 +30,9 @@ bool MainApp::init() {
   // Restore the application theme.
   setTheme(settings_->getTheme());
 
+  // Register a global shortcut to show the app.
+  enableOpenAppShortcut();
+
   std::string filePath = getUserDataDir() + "/version.txt";
   if (!fs::exists(filePath)) {
     std::ofstream outputFile(filePath);
@@ -338,6 +341,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("zoomOut", [window]() {
     window->frame()->browser()->zoom()->out();
+  });
+  window->putProperty("enableOpenAppShortcut", [this]() {
+    enableOpenAppShortcut();
+  });
+  window->putProperty("disableOpenAppShortcut", [this]() {
+    disableOpenAppShortcut();
   });
 
   window->putProperty("saveTheme", [this](std::string theme) -> void {

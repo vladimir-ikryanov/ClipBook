@@ -5,6 +5,7 @@ import {keysToDisplayShortcut, shortcutToDisplayShortcut} from "@/lib/shortcuts"
 
 type ShortcutProps = {
   shortcut: string
+  onStartEditing?: () => void
   onSave: (shortcut: string) => void
 }
 
@@ -15,31 +16,32 @@ export default function ShortcutInput(props: ShortcutProps) {
 
   function handleClick() {
     setShortcut('')
-    setIsEditing(true);
+    setIsEditing(true)
+    if (props.onStartEditing) {
+      props.onStartEditing()
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    console.log(e.key)
     if (isEditing) {
-      e.preventDefault();
+      e.preventDefault()
       const key = e.key === ' ' ? 'Space' : e.key;
 
       // Add the key to the current keys if it's not already there
       if (!currentKeys.includes(key)) {
-        setCurrentKeys([...currentKeys, key]);
+        setCurrentKeys([...currentKeys, key])
       }
     }
   }
 
   function handleKeyUp(e: React.KeyboardEvent<HTMLInputElement>) {
-    console.log(e.key)
     if (isEditing) {
       // Save the new shortcut when the user stops typing
-      const newShortcut = currentKeys.join(' + ');
-      setShortcut(newShortcut);
-      setCurrentKeys([]);
-      setIsEditing(false);
-      props.onSave(newShortcut);
+      const newShortcut = currentKeys.join(' + ')
+      setShortcut(newShortcut)
+      setCurrentKeys([])
+      setIsEditing(false)
+      props.onSave(newShortcut)
     }
   }
 
