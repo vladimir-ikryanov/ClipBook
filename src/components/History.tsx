@@ -27,10 +27,6 @@ import {
 declare const pasteInFrontApp: (text: string) => void;
 declare const clearEntireHistory: () => void;
 
-export function deleteAllHistoryItems() {
-  clearEntireHistory()
-}
-
 type HistoryProps = {
   items: string[]
   appName: string
@@ -40,6 +36,7 @@ type HistoryProps = {
 
 export default function History(props: HistoryProps) {
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
+  const previewTextareaRef = useRef<HTMLTextAreaElement>(null);
   const searchFieldRef = useRef<HTMLInputElement>(null);
   const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
@@ -77,38 +74,22 @@ export default function History(props: HistoryProps) {
       }
       // Delete the active item when the delete shortcut is pressed.
       if (isShortcutMatch(prefGetDeleteHistoryItemShortcut(), e)) {
-        let itemToDelete = getActiveHistoryItem();
-        if (getVisibleActiveHistoryItemIndex() === getVisibleHistoryItemsLength() - 1) {
-          let activeTabIndex = 0;
-          if (activeTabIndex < getVisibleHistoryItemsLength() - 1) {
-            setVisibleActiveHistoryItemIndex(activeTabIndex)
-            setActiveTab(activeTabIndex.toString())
-          }
-        }
-        deleteHistoryItem(itemToDelete)
-        // If the history is not empty, update the preview text to the new active item.
-        let items = getHistoryItems();
-        if (items.length > 0) {
-          setPreviewText(items[getVisibleActiveHistoryItemIndex()])
-        }
+        handleDeleteItem()
         e.preventDefault()
-        props.onUpdateHistory()
       }
       // Focus the search field when the search history shortcut is pressed.
       if (isShortcutMatch(prefGetSearchHistoryShortcut(), e)) {
-        if (searchFieldRef.current) {
-          searchFieldRef.current.focus()
-        }
+        handleSearchHistory()
         e.preventDefault()
       }
       // Show or hide the preview panel when the preview shortcut is pressed.
       if (isShortcutMatch(prefGetTogglePreviewShortcut(), e)) {
-        handleShowHidePreview()
+        handleTogglePreview()
         e.preventDefault()
       }
       // Clear the history when the clear history shortcut is pressed.
       if (isShortcutMatch(prefGetClearHistoryShortcut(), e)) {
-        clearEntireHistory()
+        handleDeleteAllItems()
         e.preventDefault()
       }
       // Show more actions when the show more actions shortcut is pressed.
@@ -146,7 +127,7 @@ export default function History(props: HistoryProps) {
     }
   }
 
-  function handleShowHidePreview(): void {
+  function handleTogglePreview(): void {
     if (previewPanelRef.current) {
       let visible = previewPanelRef.current.getSize() == 0
       if (visible) {
@@ -160,10 +141,41 @@ export default function History(props: HistoryProps) {
   }
 
   function handleHideActions() {
-    console.log("Hide actions...")
+    handleSearchHistory()
+  }
+
+  function handleEditContent() {
+    if (previewTextareaRef.current) {
+      previewTextareaRef.current.focus()
+    }
+  }
+
+  function handleSearchHistory() {
     if (searchFieldRef.current) {
       searchFieldRef.current.focus()
     }
+  }
+
+  function handleDeleteItem() {
+    let itemToDelete = getActiveHistoryItem();
+    if (getVisibleActiveHistoryItemIndex() === getVisibleHistoryItemsLength() - 1) {
+      let activeTabIndex = 0;
+      if (activeTabIndex < getVisibleHistoryItemsLength() - 1) {
+        setVisibleActiveHistoryItemIndex(activeTabIndex)
+        setActiveTab(activeTabIndex.toString())
+      }
+    }
+    deleteHistoryItem(itemToDelete)
+    // If the history is not empty, update the preview text to the new active item.
+    let items = getHistoryItems();
+    if (items.length > 0) {
+      setPreviewText(items[getVisibleActiveHistoryItemIndex()])
+    }
+    props.onUpdateHistory()
+  }
+
+  function handleDeleteAllItems() {
+    clearEntireHistory()
   }
 
   function handleFilterHistory(searchQuery: string): void {
@@ -209,18 +221,25 @@ export default function History(props: HistoryProps) {
           <ResizablePanel className="flex flex-col">
             <HistoryItemList items={props.items} appName={props.appName}
                              onFilterHistory={handleFilterHistory}
-                             onShowHidePreview={handleShowHidePreview}
+                             onShowHidePreview={handleTogglePreview}
                              onMouseDoubleClick={handleMouseDoubleClick}
                              isPreviewVisible={previewVisible}
                              searchFieldRef={searchFieldRef}
-                             onHideActions={handleHideActions}/>
+                             onHideActions={handleHideActions}
+                             onEditContent={handleEditContent}
+                             onSearchHistory={handleSearchHistory}
+                             onTogglePreview={handleTogglePreview}
+                             onDeleteItem={handleDeleteItem}
+                             onDeleteAllItems={handleDeleteAllItems}
+            />
           </ResizablePanel>
           <ResizableHandle/>
           <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}
                           className="transition-all duration-200 ease-out bg-secondary">
             <HistoryItemPreview text={previewText}
                                 onEditHistoryItem={handleEditHistoryItem}
-                                onFinishEditing={handleFinishEditing}/>
+                                onFinishEditing={handleFinishEditing}
+                                previewTextareaRef={previewTextareaRef}/>
           </ResizablePanel>
         </ResizablePanelGroup>
       </Tabs>

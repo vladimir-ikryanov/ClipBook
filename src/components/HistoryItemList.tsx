@@ -14,6 +14,11 @@ type HistoryItemListProps = {
   isPreviewVisible: boolean
   onShowHidePreview: () => void
   onHideActions: () => void
+  onTogglePreview: () => void
+  onSearchHistory: () => void
+  onEditContent: () => void
+  onDeleteItem: () => void
+  onDeleteAllItems: () => void
   onMouseDoubleClick: (tabIndex: number) => void
   searchFieldRef?: React.Ref<HTMLInputElement>
 }
@@ -61,7 +66,13 @@ const HistoryItemList = (props: HistoryItemListProps) => {
           </div>
         </TabsList>
         <div className="grow"></div>
-        <StatusBar appName={props.appName} onHideActions={props.onHideActions}/>
+        <StatusBar appName={props.appName}
+                   onHideActions={props.onHideActions}
+                   onEditContent={props.onEditContent}
+                   onSearchHistory={props.onSearchHistory}
+                   onTogglePreview={props.onTogglePreview}
+                   onDeleteItem={props.onDeleteItem}
+                   onDeleteAllItems={props.onDeleteAllItems}/>
       </div>
   )
 }

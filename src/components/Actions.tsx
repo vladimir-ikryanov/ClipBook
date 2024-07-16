@@ -17,11 +17,6 @@ import {
   CommandList,
   CommandShortcut,
 } from "@/components/ui/command"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {useEffect} from "react";
 import {
   prefGetClearHistoryShortcut,
@@ -33,10 +28,15 @@ import {
 } from "@/pref";
 import ShortcutLabel from "@/components/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
-import {deleteAllHistoryItems} from "@/components/History";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 
 type ActionsProps = {
   onHideActions: () => void
+  onTogglePreview: () => void
+  onSearchHistory: () => void
+  onEditContent: () => void
+  onDeleteItem: () => void
+  onDeleteAllItems: () => void
 }
 
 export default function Actions(props: ActionsProps) {
@@ -66,39 +66,39 @@ export default function Actions(props: ActionsProps) {
   }
 
   function handleEditContent() {
-    console.log("Edit content...");
     handleOpenChange(false)
+    props.onEditContent()
   }
 
   function handleSearchHistory() {
-    console.log("Search...");
     handleOpenChange(false)
+    props.onSearchHistory()
   }
 
   function handleTogglePreview() {
-    console.log("Show/Hide Preview");
     handleOpenChange(false)
+    props.onTogglePreview()
   }
 
   function handleDeleteItem() {
-    console.log("Delete");
     handleOpenChange(false)
+    props.onDeleteItem()
   }
 
   function handleDeleteAllItems() {
-    deleteAllHistoryItems()
     handleOpenChange(false)
+    props.onDeleteAllItems()
   }
 
   return (
-      <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-        <DropdownMenuTrigger asChild>
+      <Popover open={open} onOpenChange={handleOpenChange}>
+        <PopoverTrigger asChild>
           <Button variant="ghost" className="p-1 h-8 rounded-sm">
             <p className="px-2">Actions</p>
             <ShortcutLabel shortcut={prefGetShowMoreActionsShortcut()}/>
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[300px]" onKeyDown={handleKeyDown}>
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-[300px] pt-2 pb-0 px-0" onKeyDown={handleKeyDown}>
           <Command>
             <CommandList>
               <CommandItem onSelect={handleEditContent}>
@@ -140,7 +140,7 @@ export default function Actions(props: ActionsProps) {
             </CommandList>
             <CommandInput placeholder="Type a command or search..." autoFocus={true}/>
           </Command>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </PopoverContent>
+      </Popover>
   )
 }

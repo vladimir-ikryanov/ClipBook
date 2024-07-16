@@ -13,6 +13,11 @@ import ShortcutLabel from "@/components/ShortcutLabel";
 type StatusBarProps = {
   appName: string
   onHideActions: () => void
+  onTogglePreview: () => void
+  onSearchHistory: () => void
+  onEditContent: () => void
+  onDeleteItem: () => void
+  onDeleteAllItems: () => void
 }
 
 export default function StatusBar(props: StatusBarProps) {
@@ -39,7 +44,12 @@ export default function StatusBar(props: StatusBarProps) {
         </div>
 
         <div className="flex space-x-2">
-          <Actions onHideActions={props.onHideActions}/>
+          <Actions onHideActions={props.onHideActions}
+                   onEditContent={props.onEditContent}
+                   onSearchHistory={props.onSearchHistory}
+                   onTogglePreview={props.onTogglePreview}
+                   onDeleteItem={props.onDeleteItem}
+                   onDeleteAllItems={props.onDeleteAllItems}/>
         </div>
       </div>
   )
