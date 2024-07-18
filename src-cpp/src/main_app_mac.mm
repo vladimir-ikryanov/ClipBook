@@ -20,6 +20,104 @@ using namespace molybden;
  */
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
+static std::string kShortcutSeparator = " + ";
+static std::string kMeta = "Meta";
+static std::string kControl = "Control";
+static std::string kAlt = "Alt";
+static std::string kShift = "Shift";
+static std::map<std::string, KeyCode> kKeyCodes = {
+    {"a", KeyCode::A},
+    {"b", KeyCode::B},
+    {"c", KeyCode::C},
+    {"d", KeyCode::D},
+    {"e", KeyCode::E},
+    {"f", KeyCode::F},
+    {"g", KeyCode::G},
+    {"h", KeyCode::H},
+    {"i", KeyCode::I},
+    {"j", KeyCode::J},
+    {"k", KeyCode::K},
+    {"l", KeyCode::L},
+    {"m", KeyCode::M},
+    {"n", KeyCode::N},
+    {"o", KeyCode::O},
+    {"p", KeyCode::P},
+    {"q", KeyCode::Q},
+    {"r", KeyCode::R},
+    {"s", KeyCode::S},
+    {"t", KeyCode::T},
+    {"u", KeyCode::U},
+    {"v", KeyCode::V},
+    {"w", KeyCode::W},
+    {"x", KeyCode::X},
+    {"y", KeyCode::Y},
+    {"z", KeyCode::Z},
+    {"0", KeyCode::DIGIT0},
+    {"1", KeyCode::DIGIT1},
+    {"2", KeyCode::DIGIT2},
+    {"3", KeyCode::DIGIT3},
+    {"4", KeyCode::DIGIT4},
+    {"5", KeyCode::DIGIT5},
+    {"6", KeyCode::DIGIT6},
+    {"7", KeyCode::DIGIT7},
+    {"8", KeyCode::DIGIT8},
+    {"9", KeyCode::DIGIT9},
+    {"F1", KeyCode::F1},
+    {"F2", KeyCode::F2},
+    {"F3", KeyCode::F3},
+    {"F4", KeyCode::F4},
+    {"F5", KeyCode::F5},
+    {"F6", KeyCode::F6},
+    {"F7", KeyCode::F7},
+    {"F8", KeyCode::F8},
+    {"F9", KeyCode::F9},
+    {"F10", KeyCode::F10},
+    {"F11", KeyCode::F11},
+    {"F12", KeyCode::F12},
+    {"F13", KeyCode::F13},
+    {"F14", KeyCode::F14},
+    {"F15", KeyCode::F15},
+    {"F16", KeyCode::F16},
+    {"F17", KeyCode::F17},
+    {"F18", KeyCode::F18},
+    {"F19", KeyCode::F19},
+    {"F20", KeyCode::F20},
+    {"F21", KeyCode::F21},
+    {"F22", KeyCode::F22},
+    {"F23", KeyCode::F23},
+    {"F24", KeyCode::F24},
+    {"Escape", KeyCode::ESC},
+    {"Backspace", KeyCode::BACKSPACE},
+    {"Tab", KeyCode::TAB},
+    {"Space", KeyCode::SPACE},
+    {"Enter", KeyCode::ENTER},
+    {"MENU", KeyCode::MENU},
+    {"Delete", KeyCode::DEL},
+    {"Home", KeyCode::HOME},
+    {"End", KeyCode::END},
+    {"PageUp", KeyCode::PAGE_UP},
+    {"PageDown", KeyCode::PAGE_DOWN},
+    {"ArrowUp", KeyCode::UP},
+    {"ArrowDown", KeyCode::DOWN},
+    {"ArrowLeft", KeyCode::LEFT},
+    {"ArrowRight", KeyCode::RIGHT},
+    {"CapsLock", KeyCode::CAPSLOCK},
+    {"NumLock", KeyCode::NUM_LOCK},
+    {"ScrollLock", KeyCode::SCROLL_LOCK},
+    {"Insert", KeyCode::INSERT},
+    {";", KeyCode::SEMICOLON},
+    {"=", KeyCode::EQUALS},
+    {",", KeyCode::COMMA},
+    {"-", KeyCode::MINUS},
+    {".", KeyCode::PERIOD},
+    {"/", KeyCode::SLASH},
+    {"\\", KeyCode::BACKSLASH},
+    {"`", KeyCode::BACK_QUOTE},
+    {"'", KeyCode::QUOTE},
+    {"[", KeyCode::OPEN_BRACE},
+    {"]", KeyCode::CLOSE_BRACE},
+};
+
 std::vector<std::string> split(const std::string &str, const std::string &delimiter) {
   std::vector<std::string> result;
   size_t pos = 0;
@@ -32,41 +130,65 @@ std::vector<std::string> split(const std::string &str, const std::string &delimi
   return result;
 }
 
+int32_t extractKeyModifiers(const std::string &shortcut) {
+  auto parts = split(shortcut, kShortcutSeparator);
+  int32_t key_modifiers = 0;
+  for (const auto &part : parts) {
+    if (part == kMeta) {
+      key_modifiers |= KeyModifier::COMMAND_OR_CTRL;
+    } else if (part == kControl) {
+      key_modifiers |= KeyModifier::CTRL;
+    } else if (part == kAlt) {
+      key_modifiers |= KeyModifier::ALT;
+    } else if (part == kShift) {
+      key_modifiers |= KeyModifier::SHIFT;
+    }
+  }
+  return key_modifiers;
+}
+
+KeyCode extractKeyCode(const std::string &shortcut) {
+  auto parts = split(shortcut, kShortcutSeparator);
+  for (const auto &part : parts) {
+    if (part == kMeta || part == kControl || part == kAlt || part == kShift) {
+      continue;
+    }
+    auto it = kKeyCodes.find(part);
+    if (it != kKeyCodes.end()) {
+      return it->second;
+    }
+  }
+  return KeyCode::UNKNOWN;
+}
+
 MainAppMac::MainAppMac(const std::shared_ptr<App> &app,
                        const std::shared_ptr<AppSettings> &settings)
     : MainApp(app, settings), active_app_(nullptr) {
 }
 
-molybden::Shortcut MainAppMac::createShortcut(const std::string &shortcut_text) {
-//  auto parts = split(shortcut_text, " + ");
-//  // Extract key modifiers.
-//  int32_t key_modifiers = 0;
-//  for (const auto &part : parts) {
-//    if (part == "Meta") {
-//      key_modifiers |= KeyModifier::COMMAND_OR_CTRL;
-//    } else if (part == "Control") {
-//      key_modifiers |= KeyModifier::CTRL;
-//    } else if (part == "Alt") {
-//      key_modifiers |= KeyModifier::ALT;
-//    } else if (part == "Shift") {
-//      key_modifiers |= KeyModifier::SHIFT;
-//    }
-//  }
-  // Extract key code.
-
-  return molybden::Shortcut(KeyCode::V, KeyModifier::COMMAND_OR_CTRL | KeyModifier::SHIFT);
+molybden::Shortcut MainAppMac::createShortcut(const std::string &shortcut) {
+  int32_t key_modifiers = extractKeyModifiers(shortcut);
+  KeyCode key_code = extractKeyCode(shortcut);
+  return molybden::Shortcut(key_code, key_modifiers);
 }
 
 void MainAppMac::enableOpenAppShortcut() {
+  disableOpenAppShortcut();
   auto shortcut_str = settings_->getOpenAppShortcut();
   open_app_shortcut_ = createShortcut(shortcut_str);
+  if (open_app_shortcut_.key == KeyCode::UNKNOWN) {
+    return;
+  }
   app()->globalShortcuts()->registerShortcut(open_app_shortcut_, [this](const Shortcut &) {
     show();
   });
 }
 
 void MainAppMac::disableOpenAppShortcut() {
-  app()->globalShortcuts()->unregisterShortcut(open_app_shortcut_);
+  if (open_app_shortcut_.key != KeyCode::UNKNOWN) {
+    app()->globalShortcuts()->unregisterShortcut(open_app_shortcut_);
+    open_app_shortcut_.key = KeyCode::UNKNOWN;
+  }
 }
 
 std::string MainAppMac::getUserDataDir() {

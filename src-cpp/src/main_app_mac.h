@@ -33,7 +33,7 @@ class MainAppMac : public MainApp {
   void addAppToLoginItems();
   void removeAppFromLoginItems();
   bool isAppInLoginItems();
-  molybden::Shortcut createShortcut(const std::string &shortcut_text);
+  molybden::Shortcut createShortcut(const std::string &shortcut);
 
  private:
   molybden::Shortcut open_app_shortcut_;
