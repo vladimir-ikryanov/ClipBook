@@ -100,7 +100,11 @@ void MainApp::launch() {
         if (app_->isProduction()) {
           action.cannot();
         } else {
-          action.can();
+          if (args.command_id == BrowserCommandId::kDevTools) {
+            action.can();
+          } else {
+            action.cannot();
+          }
         }
       };
 

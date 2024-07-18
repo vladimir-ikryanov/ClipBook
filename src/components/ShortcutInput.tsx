@@ -28,8 +28,8 @@ export default function ShortcutInput(props: ShortcutProps) {
   function handleBlur() {
     setIsEditing(false)
     if (currentKeys.length == 0) {
-      setShortcut(props.shortcut)
-      props.onSave(props.shortcut)
+      setShortcut('')
+      props.onSave('')
     }
   }
 
