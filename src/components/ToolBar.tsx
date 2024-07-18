@@ -38,9 +38,8 @@ export default function ToolBar(props: ToolbarProps) {
 
   return (
       <div className="flex flex-col border-b-solid border-b-border border-b">
-        <div className="flex-auto draggable p-1"></div>
-        <div className="flex ml-2 mr-2 mb-2">
-          <div className="flex-auto relative">
+        <div className="flex m-2">
+          <div className={searchQuery.length == 0 ? "flex-none relative" : "flex-auto relative"}>
             <div className="flex text-primary-foreground">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
@@ -50,7 +49,7 @@ export default function ToolBar(props: ToolbarProps) {
                 <path d="m21 21-4.3-4.3"/>
               </svg>
             </div>
-            <Input placeholder="Type to search"
+            <Input placeholder="Type to search..."
                    value={searchQuery}
                    className="w-full pl-11 text-lg placeholder:text-secondary-foreground border-none"
                    onChange={handleOnChange}
@@ -58,6 +57,7 @@ export default function ToolBar(props: ToolbarProps) {
                    ref={props.searchFieldRef}
             />
           </div>
+          <div className={searchQuery.length == 0 ? "flex-auto draggable" : "flex-none"}></div>
           <div className="ml-3">
             <Button variant="ghost" className="p-2" onClick={handleShowHidePreview}
                     title={props.isPreviewVisible ? "Hide preview panel (" +
