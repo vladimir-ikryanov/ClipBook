@@ -1002,7 +1002,7 @@ std::map<std::string, std::string> kMimeTypes = {
     {"zmm", "application/vnd.handheld-entertainment+xml"}};
 
 std::vector<std::string> kRoutingPages = {
-    "/welcome", "/accessibility", "/enjoy", "/settings", "/settings/privacy"
+    "/welcome", "/accessibility", "/enjoy", "/settings", "/settings/shortcuts", "/settings/privacy"
 };
 
 std::string getFileExtension(const std::string& file_path) {
