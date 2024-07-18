@@ -5,3 +5,12 @@
 a, button {
   cursor: default;
 }
+
+.preview {
+  background-color: var(--secondary);
+}
+
+.preview:focus {
+  background-color: var(--background);
+  transition: background-color 250ms linear;
+}

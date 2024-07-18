@@ -21,10 +21,10 @@ export default function HistoryItemPreview(props: HistoryItemPreviewProps) {
   }
 
   return (
-      <div className="flex flex-col h-screen p-0 m-0">
+      <div className="flex flex-col h-screen p-0 m-0 border-l border-l-border">
           <textarea id='preview'
                     ref={props.previewTextareaRef}
-                    className="h-full p-2 mt-2 mb-2 ml-2 mr-1 bg-secondary border-none outline-none resize-none font-mono text-sm"
+                    className="preview h-full p-4 m-0 bg-secondary border-none outline-none resize-none font-mono text-sm"
                     value={props.text} onChange={handleOnChange} onKeyDown={handleKeyDown}/>
       </div>
   )
