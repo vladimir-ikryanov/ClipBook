@@ -121,8 +121,8 @@ export default function Shortcuts() {
           <div className="flex flex-col w-52 gap-y-1">
             <div className="flex draggable p-6"></div>
             <div
-                className="flex flex-row gap-x-2 py-2 px-2 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings" className="flex flex-row gap-x-2 w-full">
+                className="flex flex-row gap-x-2 p-0 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
+              <a href="/settings" className="flex flex-row py-2 px-2 gap-x-2 w-full">
                 <SettingsIcon className="h-5 w-5 mt-0.5"/>
                 <span className="">General</span>
               </a>
@@ -132,8 +132,8 @@ export default function Shortcuts() {
               <span className="">Shortcuts</span>
             </div>
             <div
-                className="flex flex-row py-2 px-2 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings/privacy" className="flex flex-row gap-x-2 w-full">
+                className="flex flex-row p-0 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
+              <a href="/settings/privacy" className="flex flex-row py-2 px-2 gap-x-2 w-full">
                 <ShieldCheckIcon className="h-5 w-5 mt-0.5"/>
                 <span className="">Privacy</span>
               </a>
