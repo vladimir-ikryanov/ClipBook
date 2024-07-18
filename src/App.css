@@ -8,6 +8,7 @@ a, button {
 
 .preview {
   background-color: var(--secondary);
+  transition: background-color 150ms linear;
 }
 
 .preview:focus {
