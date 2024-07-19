@@ -130,6 +130,9 @@ void MainApp::launch() {
   // Display the window always on top of other windows.
   browser_->setAlwaysOnTop(true);
 
+  // Disable window animation to make the app feel faster.
+  browser_->setWindowAnimationEnabled(false);
+
   // Set the initial window size and position if it's the first run.
   if (first_run_ || !app_->isProduction()) {
     browser_->setSize(1080, 640);
