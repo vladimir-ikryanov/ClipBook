@@ -43,6 +43,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
 
  protected:
   bool first_run_;
+  bool auto_hide_disabled_;
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Browser> browser_;
   std::shared_ptr<molybden::Browser> settings_window_;

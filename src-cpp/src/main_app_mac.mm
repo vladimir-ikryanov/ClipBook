@@ -199,6 +199,13 @@ std::string MainAppMac::getUserDataDir() {
 }
 
 void MainAppMac::activate() {
+  // The app is activated to display a modal message dialog. The app window is
+  // always on top, so it will be displayed above the message dialog. In this case
+  // users will not see the message dialog and will not be able to close
+  // the app window because the message dialog is modal. To fix this, we need to
+  // hide the app window before displaying the message dialog.
+  hide();
+
   // Get a reference to your NSApplication instance
   NSApplication *app = [NSApplication sharedApplication];
 
@@ -217,6 +224,10 @@ void MainAppMac::show() {
 }
 
 void MainAppMac::hide() {
+  // Do not hide the window at some conditions.
+  if (auto_hide_disabled_) {
+    return;
+  }
   // Save the window bounds before hiding the window.
   saveWindowBounds();
   // Hide the window.

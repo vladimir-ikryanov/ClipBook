@@ -17,7 +17,7 @@ std::string kContactSupportUrl =
     "mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
 
 MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSettings> &settings)
-    : app_(app), first_run_(false), settings_(settings) {
+    : app_(app), first_run_(false), auto_hide_disabled_(false), settings_(settings) {
   request_interceptor_ = std::make_shared<UrlRequestInterceptor>();
 }
 
@@ -112,8 +112,8 @@ void MainApp::launch() {
       };
 
   // Hide the window when the focus is lost.
-  browser_->onFocusLost += [](const FocusLost &event) {
-    event.browser->hide();
+  browser_->onFocusLost += [this](const FocusLost &event) {
+    hide();
   };
 
   // Hide all standard window buttons.
@@ -149,9 +149,7 @@ void MainApp::show() {
 }
 
 void MainApp::hide() {
-  if (browser_->isActive()) {
-    browser_->hide();
-  }
+  browser_->hide();
 }
 
 std::shared_ptr<molybden::App> MainApp::app() const {
@@ -172,6 +170,7 @@ void MainApp::setActiveAppName(const std::string &app_name) {
 
 void MainApp::clearHistory() {
   if (settings_->shouldWarnOnClearHistory()) {
+    auto_hide_disabled_ = true;
     activate();
     MessageDialogOptions options;
     options.message = "Are you sure you want to clear entire history?";
@@ -186,6 +185,7 @@ void MainApp::clearHistory() {
           browser_->mainFrame()->executeJavaScript("clearHistory()");
         }).detach();
       }
+      auto_hide_disabled_ = false;
     });
   } else {
     browser_->mainFrame()->executeJavaScript("clearHistory()");
