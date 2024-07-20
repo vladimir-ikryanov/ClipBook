@@ -27,6 +27,11 @@ bool MainApp::init() {
     request_interceptor_->intercept(args, std::move(action));
   };
 
+  const auto label = "Open " + app_->name();
+  open_menu_item_ = menu::Item(label, [this](const CustomMenuItemActionArgs &args) {
+    show();
+  });
+
   // Restore the application theme.
   setTheme(settings_->getTheme());
 
@@ -52,9 +57,7 @@ void MainApp::launch() {
   tray->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
   tray->setMenu(CustomMenu::create(
       {
-          menu::Item("Open " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
-            show();
-          }, Shortcut(KeyCode::V, KeyModifier::COMMAND_OR_CTRL | KeyModifier::SHIFT)),
+          open_menu_item_,
           menu::Separator(),
           menu::Item("Settings...", [this](const CustomMenuItemActionArgs &args) {
             showSettingsWindow();
@@ -109,11 +112,9 @@ void MainApp::launch() {
       };
 
   // Hide the window when the focus is lost.
-  if (app_->isProduction()) {
-    browser_->onFocusLost += [](const FocusLost &event) {
-      event.browser->hide();
-    };
-  }
+  browser_->onFocusLost += [](const FocusLost &event) {
+    event.browser->hide();
+  };
 
   // Hide all standard window buttons.
   browser_->setWindowButtonVisible(WindowButtonType::kMinimize, false);

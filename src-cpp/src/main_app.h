@@ -46,6 +46,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Browser> browser_;
   std::shared_ptr<molybden::Browser> settings_window_;
+  std::shared_ptr<molybden::CustomMenuItem> open_menu_item_;
   std::shared_ptr<AppSettings> settings_;
 
  private:

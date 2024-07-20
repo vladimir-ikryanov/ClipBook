@@ -176,6 +176,7 @@ void MainAppMac::enableOpenAppShortcut() {
   disableOpenAppShortcut();
   auto shortcut_str = settings_->getOpenAppShortcut();
   open_app_shortcut_ = createShortcut(shortcut_str);
+  open_menu_item_->setShortcut(open_app_shortcut_);
   if (open_app_shortcut_.key == KeyCode::UNKNOWN) {
     return;
   }
@@ -188,6 +189,7 @@ void MainAppMac::disableOpenAppShortcut() {
   if (open_app_shortcut_.key != KeyCode::UNKNOWN) {
     app()->globalShortcuts()->unregisterShortcut(open_app_shortcut_);
     open_app_shortcut_.key = KeyCode::UNKNOWN;
+    open_menu_item_->setShortcut(open_app_shortcut_);
   }
 }
 
