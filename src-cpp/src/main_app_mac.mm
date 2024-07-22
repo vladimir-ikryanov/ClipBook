@@ -199,21 +199,13 @@ std::string MainAppMac::getUserDataDir() {
 }
 
 void MainAppMac::activate() {
-  // The app is activated to display a modal message dialog. The app window is
-  // always on top, so it will be displayed above the message dialog. In this case
-  // users will not see the message dialog and will not be able to close
-  // the app window because the message dialog is modal. To fix this, we need to
-  // hide the app window before displaying the message dialog.
-  hide();
-
-  // Get a reference to your NSApplication instance
+  // Activate the app to bring it to the front.
   NSApplication *app = [NSApplication sharedApplication];
-
-  // Activate your application, bringing it to the front
   [app activateIgnoringOtherApps:YES];
 }
 
 void MainAppMac::show() {
+  // Remember the active app to activate it after hiding the browser window.
   active_app_ = [[NSWorkspace sharedWorkspace] frontmostApplication];
   NSString *app_name = [active_app_ localizedName];
   MainApp::setActiveAppName([app_name UTF8String]);
@@ -232,6 +224,7 @@ void MainAppMac::hide() {
   saveWindowBounds();
   // Hide the window.
   MainApp::hide();
+  // Activate the previously active app.
   if (active_app_) {
     [active_app_ activateWithOptions:NSApplicationActivateIgnoringOtherApps];
   }
@@ -266,7 +259,7 @@ void MainAppMac::paste(const std::string &text) {
 }
 
 std::string MainAppMac::getUpdateServerUrl() {
-  return "https://clipbook.app/downloads/mac/universal";
+  return "https://clipbook.app/downloads/mac/arm64";
 }
 
 void MainAppMac::restoreWindowBounds() {
@@ -276,17 +269,17 @@ void MainAppMac::restoreWindowBounds() {
   if (bounds.size.isEmpty()) {
     auto screen_x = static_cast<int32_t>([mainScreen frame].origin.x);
     auto screen_y = static_cast<int32_t>([mainScreen frame].origin.y);
-    browser_->setPosition(screen_x, screen_y);
-    browser_->centerWindow();
+    app_window_->setPosition(screen_x, screen_y);
+    app_window_->centerWindow();
   } else {
-    browser_->setBounds(bounds);
+    app_window_->setBounds(bounds);
   }
 }
 
 void MainAppMac::saveWindowBounds() {
   NSScreen *mainScreen = [NSScreen mainScreen];
   NSNumber *screenNumber = [[mainScreen deviceDescription] objectForKey:@"NSScreenNumber"];
-  settings_->saveWindowBoundsForScreen([screenNumber intValue], browser_->bounds());
+  settings_->saveWindowBoundsForScreen([screenNumber intValue], app_window_->bounds());
 }
 
 void MainAppMac::setOpenAtLogin(bool open) {

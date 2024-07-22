@@ -30,11 +30,19 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
  protected:
   void setActiveAppName(const std::string &app_name);
   void clearHistory();
-  void checkForUpdates(const std::function<void()>& complete);
+  void checkForUpdates(const std::function<void()> &complete);
   void showAboutDialog();
+  void showUpToDateDialog(const std::function<void()> &complete);
+  void showRestartRequiredDialog(const std::string &app_version,
+                                 const std::function<void()> &complete);
+  void showUpdateFailedDialog(const std::string &text, const std::function<void()> &complete);
+  void showUpdateCheckFailedDialog(const std::string &error_msg,
+                                   const std::function<void()> &complete);
+  void showUpdateAvailableDialog(const std::shared_ptr<molybden::AppUpdate> &app_update,
+                                 const std::function<void()> &complete);
   void showSettingsWindow();
   void setTheme(const std::string &theme);
-  void initJavaScriptApi(const std::shared_ptr<molybden::JsObject>& window);
+  void initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &window);
 
   virtual void enableOpenAppShortcut() = 0;
   virtual void disableOpenAppShortcut() = 0;
@@ -45,7 +53,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   bool first_run_;
   bool auto_hide_disabled_;
   std::shared_ptr<molybden::App> app_;
-  std::shared_ptr<molybden::Browser> browser_;
+  std::shared_ptr<molybden::Browser> app_window_;
   std::shared_ptr<molybden::Browser> settings_window_;
   std::shared_ptr<molybden::CustomMenuItem> open_menu_item_;
   std::shared_ptr<AppSettings> settings_;

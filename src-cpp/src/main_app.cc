@@ -91,14 +91,14 @@ void MainApp::launch() {
           })
       }));
 
-  browser_ = Browser::create(app_);
-  browser_->settings()->disableOverscrollHistoryNavigation();
-  browser_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
+  app_window_ = Browser::create(app_);
+  app_window_->settings()->disableOverscrollHistoryNavigation();
+  app_window_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
     initJavaScriptApi(args.window);
     action.proceed();
   };
 
-  browser_->onCanExecuteCommand =
+  app_window_->onCanExecuteCommand =
       [this](const CanExecuteCommandArgs &args, CanExecuteCommandAction action) {
         if (app_->isProduction()) {
           action.cannot();
@@ -112,44 +112,46 @@ void MainApp::launch() {
       };
 
   // Hide the window when the focus is lost.
-  browser_->onFocusLost += [this](const FocusLost &event) {
+  app_window_->onFocusLost += [this](const FocusLost &event) {
     hide();
   };
 
   // Hide all standard window buttons.
-  browser_->setWindowButtonVisible(WindowButtonType::kMinimize, false);
-  browser_->setWindowButtonVisible(WindowButtonType::kZoom, false);
-  browser_->setWindowButtonVisible(WindowButtonType::kClose, false);
+  app_window_->setWindowButtonVisible(WindowButtonType::kMinimize, false);
+  app_window_->setWindowButtonVisible(WindowButtonType::kZoom, false);
+  app_window_->setWindowButtonVisible(WindowButtonType::kClose, false);
 
   // Hide window title and title bar.
-  browser_->setWindowTitleVisible(false);
-  browser_->setWindowTitlebarVisible(false);
+  app_window_->setWindowTitleVisible(false);
+  app_window_->setWindowTitlebarVisible(false);
 
   // Move the window to the active desktop when the app is activated.
-  browser_->setWindowDisplayPolicy(WindowDisplayPolicy::kMoveToActiveDesktop);
+  app_window_->setWindowDisplayPolicy(WindowDisplayPolicy::kMoveToActiveDesktop);
 
   // Display the window always on top of other windows.
-  browser_->setAlwaysOnTop(true);
+  app_window_->setAlwaysOnTop(true);
 
   // Disable window animation to make the app feel faster.
-  browser_->setWindowAnimationEnabled(false);
+  app_window_->setWindowAnimationEnabled(false);
 
   // Set the initial window size and position if it's the first run.
   if (first_run_ || !app_->isProduction()) {
-    browser_->setSize(1080, 640);
-    browser_->centerWindow();
+    app_window_->setSize(1080, 640);
+    app_window_->centerWindow();
   }
 
-  browser_->navigation()->loadUrlAndWait(app_->baseUrl());
+  app_window_->navigation()->loadUrlAndWait(app_->baseUrl());
 }
 
 void MainApp::show() {
-  browser_->show();
-  browser_->mainFrame()->executeJavaScript("activateApp()");
+  app_window_->show();
+  app_window_->mainFrame()->executeJavaScript("activateApp()");
 }
 
 void MainApp::hide() {
-  browser_->hide();
+  if (!auto_hide_disabled_) {
+    app_window_->hide();
+  }
 }
 
 std::shared_ptr<molybden::App> MainApp::app() const {
@@ -157,7 +159,7 @@ std::shared_ptr<molybden::App> MainApp::app() const {
 }
 
 std::shared_ptr<molybden::Browser> MainApp::browser() const {
-  return browser_;
+  return app_window_;
 }
 
 std::shared_ptr<AppSettings> MainApp::settings() const {
@@ -165,7 +167,7 @@ std::shared_ptr<AppSettings> MainApp::settings() const {
 }
 
 void MainApp::setActiveAppName(const std::string &app_name) {
-  browser_->mainFrame()->executeJavaScript("setActiveAppName(\"" + app_name + "\")");
+  app_window_->mainFrame()->executeJavaScript("setActiveAppName(\"" + app_name + "\")");
 }
 
 void MainApp::clearHistory() {
@@ -179,16 +181,16 @@ void MainApp::clearHistory() {
         MessageDialogButton("Clear", MessageDialogButtonType::kDefault),
         MessageDialogButton("Cancel", MessageDialogButtonType::kCancel),
     };
-    MessageDialog::show(browser_, options, [this](const MessageDialogResult &result) {
+    MessageDialog::show(app_window_, options, [this](const MessageDialogResult &result) {
       if (result.button.type == MessageDialogButtonType::kDefault) {
         std::thread([this]() {
-          browser_->mainFrame()->executeJavaScript("clearHistory()");
+          app_window_->mainFrame()->executeJavaScript("clearHistory()");
         }).detach();
       }
       auto_hide_disabled_ = false;
     });
   } else {
-    browser_->mainFrame()->executeJavaScript("clearHistory()");
+    app_window_->mainFrame()->executeJavaScript("clearHistory()");
   }
 }
 
@@ -196,94 +198,143 @@ void MainApp::checkForUpdates(const std::function<void()> &complete) {
   app_->checkForUpdate(getUpdateServerUrl(), [this, complete](const CheckForUpdateResult &result) {
     std::string error_msg = result.error_message;
     if (!error_msg.empty()) {
-      activate();
-      MessageDialogOptions options;
-      options.title = "Update Check Failed";
-      options.type = MessageDialogType::kError;
-      options.message = "Oops! An error occurred while checking for updates :(";
-      options.informative_text = error_msg;
-      options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
-      MessageDialog::show(app_, options);
-      complete();
+      showUpdateCheckFailedDialog(error_msg, complete);
     } else {
       auto app_update = result.app_update;
       if (app_update) {
-        activate();
-        MessageDialogOptions options;
-        options.title = "Update Available";
-        options.message = "A new version of " + app_->name() + " is available.";
-        options.informative_text = "Would you like to update?";
-        options.buttons = {
-            MessageDialogButton("Update", MessageDialogButtonType::kDefault),
-            MessageDialogButton("Later", MessageDialogButtonType::kCancel),
-        };
-        MessageDialog::show(app_,
-                            options,
-                            [this, complete, app_update](const MessageDialogResult &result) {
-                              if (result.button.type == MessageDialogButtonType::kDefault) {
-                                app_update->onAppUpdateInstalled += [this, complete](const AppUpdateInstalled &event) {
-                                  activate();
-                                  auto app_version = event.app_update->version();
-                                  MessageDialogOptions options;
-                                  options.title = "Restart Required";
-                                  options.message =
-                                      app_->name() + " has been updated to version " + app_version +
-                                      ".";
-                                  options.informative_text = "Please restart the application to apply the update.";
-                                  options.buttons = {
-                                      MessageDialogButton("Restart",
-                                                          MessageDialogButtonType::kDefault),
-                                      MessageDialogButton("Later",
-                                                          MessageDialogButtonType::kCancel),
-                                  };
-                                  MessageDialog::show(app_,
-                                                      options,
-                                                      [this, complete](const MessageDialogResult &result) {
-                                                        complete();
-                                                        if (result.button.type ==
-                                                            MessageDialogButtonType::kDefault) {
-                                                          std::thread([this]() {
-                                                            app_->restart();
-                                                          }).detach();
-                                                        }
-                                                      });
-                                };
-
-                                app_update->onAppUpdateFailed += [this, complete](const AppUpdateFailed &event) {
-                                  activate();
-                                  MessageDialogOptions options;
-                                  options.title = "Update Failed";
-                                  options.type = MessageDialogType::kError;
-                                  options.message = "An error occurred while installing the update :(";
-                                  options.informative_text = event.message;
-                                  options.buttons.emplace_back("Close",
-                                                               MessageDialogButtonType::kDefault);
-                                  MessageDialog::show(app_, options);
-                                  complete();
-                                };
-
-                                app_update->install();
-                              } else {
-                                app_update->dismiss();
-                                complete();
-                              }
-                            });
+        showUpdateAvailableDialog(app_update, complete);
       } else {
-        activate();
-        MessageDialogOptions options;
-        options.title = "Up to Date";
-        options.message = app_->name() + " is up to date!";
-        options.informative_text = "You are using the latest version of " + app_->name() + ".";
-        options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
-        MessageDialog::show(app_, options);
-        complete();
+        showUpToDateDialog(complete);
       }
     }
   });
 }
 
+void MainApp::showUpdateAvailableDialog(const std::shared_ptr<molybden::AppUpdate> &app_update,
+                                        const std::function<void()> &complete) {
+  MessageDialogOptions options;
+  options.title = "Update Available";
+  options.message = "A new version of " + app_->name() + " is available.";
+  options.informative_text = "Would you like to update?";
+  options.buttons = {
+      MessageDialogButton("Update", MessageDialogButtonType::kDefault),
+      MessageDialogButton("Later", MessageDialogButtonType::kCancel),
+  };
+  auto callback = [this, complete, app_update](const MessageDialogResult &result) {
+    if (result.button.type == MessageDialogButtonType::kDefault) {
+      app_update->onAppUpdateInstalled += [this, complete](const AppUpdateInstalled &event) {
+        showRestartRequiredDialog(event.app_update->version(), complete);
+      };
+      app_update->onAppUpdateFailed += [this, complete](const AppUpdateFailed &event) {
+        showUpdateFailedDialog(event.message, complete);
+      };
+      app_update->install();
+    } else {
+      app_update->dismiss();
+      complete();
+    }
+  };
+  if (app_window_->isVisible()) {
+    auto_hide_disabled_ = true;
+    MessageDialog::show(app_window_, options, [this, callback](const MessageDialogResult &result) {
+      callback(result);
+      auto_hide_disabled_ = false;
+    });
+  } else {
+    activate();
+    MessageDialog::show(app_, options, callback);
+  }
+}
+
+void MainApp::showRestartRequiredDialog(const std::string &app_version,
+                                        const std::function<void()> &complete) {
+  MessageDialogOptions options;
+  options.title = "Restart Required";
+  options.message = app_->name() + " has been updated to version " + app_version + ".";
+  options.informative_text = "Please restart the application to apply the update.";
+  options.buttons = {
+      MessageDialogButton("Restart", MessageDialogButtonType::kDefault),
+      MessageDialogButton("Later", MessageDialogButtonType::kCancel),
+  };
+  auto callback = [this, complete](const MessageDialogResult &result) {
+    complete();
+    if (result.button.type == MessageDialogButtonType::kDefault) {
+      std::thread([this]() {
+        app_->restart();
+      }).detach();
+    }
+  };
+  if (app_window_->isVisible()) {
+    auto_hide_disabled_ = true;
+    MessageDialog::show(app_window_, options, [this, callback](const MessageDialogResult &result) {
+      callback(result);
+      auto_hide_disabled_ = false;
+    });
+  } else {
+    activate();
+    MessageDialog::show(app_, options, callback);
+  }
+}
+
+void MainApp::showUpdateFailedDialog(const std::string &text,
+                                     const std::function<void()> &complete) {
+  MessageDialogOptions options;
+  options.title = "Update Failed";
+  options.type = MessageDialogType::kError;
+  options.message = "An error occurred while installing the update :(";
+  options.informative_text = text;
+  options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
+  if (app_window_->isVisible()) {
+    auto_hide_disabled_ = true;
+    MessageDialog::show(app_window_, options, [this](const MessageDialogResult &) {
+      auto_hide_disabled_ = false;
+    });
+  } else {
+    activate();
+    MessageDialog::show(app_, options);
+  }
+  complete();
+}
+
+void MainApp::showUpdateCheckFailedDialog(const std::string &error_msg,
+                                          const std::function<void()> &complete) {
+  MessageDialogOptions options;
+  options.title = "Update Check Failed";
+  options.type = MessageDialogType::kError;
+  options.message = "Oops! An error occurred while checking for updates :(";
+  options.informative_text = error_msg;
+  options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
+  if (app_window_->isVisible()) {
+    auto_hide_disabled_ = true;
+    MessageDialog::show(app_window_, options, [this](const MessageDialogResult &) {
+      auto_hide_disabled_ = false;
+    });
+  } else {
+    activate();
+    MessageDialog::show(app_, options);
+  }
+  complete();
+}
+
+void MainApp::showUpToDateDialog(const std::function<void()> &complete) {
+  MessageDialogOptions options;
+  options.title = "Up to Date";
+  options.message = app_->name() + " is up to date!";
+  options.informative_text = "You are using the latest version of " + app_->name() + ".";
+  options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
+  if (app_window_->isVisible()) {
+    auto_hide_disabled_ = true;
+    MessageDialog::show(app_window_, options, [this](const MessageDialogResult &) {
+      auto_hide_disabled_ = false;
+    });
+  } else {
+    activate();
+    MessageDialog::show(app_, options);
+  }
+  complete();
+}
+
 void MainApp::showAboutDialog() {
-  activate();
   MessageDialogOptions options;
   options.title = "About " + app_->name();
   options.message = app_->name();
@@ -293,11 +344,18 @@ void MainApp::showAboutDialog() {
       MessageDialogButton("Visit Website", MessageDialogButtonType::kNone),
       MessageDialogButton("Close", MessageDialogButtonType::kDefault)
   };
-  MessageDialog::show(app_, options, [this](const MessageDialogResult &result) {
-    if (result.button.type == MessageDialogButtonType::kNone) {
-      app_->desktop()->openUrl("https://clipbook.app?utm_source=app&utm_medium=about");
-    }
-  });
+  if (app_window_->isVisible()) {
+    auto_hide_disabled_ = true;
+    MessageDialog::show(app_window_, options, [this](const MessageDialogResult &result) {
+      if (result.button.type == MessageDialogButtonType::kNone) {
+        app_->desktop()->openUrl("https://clipbook.app?utm_source=app&utm_medium=about");
+      }
+      auto_hide_disabled_ = false;
+    });
+  } else {
+    activate();
+    MessageDialog::show(app_, options);
+  }
 }
 
 void MainApp::setTheme(const std::string &theme) {
