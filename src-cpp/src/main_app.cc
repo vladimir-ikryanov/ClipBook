@@ -401,7 +401,7 @@ void MainApp::showSettingsWindow() {
   settings_window_->setWindowButtonVisible(WindowButtonType::kMaximize, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kRestore, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kZoom, false);
-  settings_window_->setSize(700, 520);
+  settings_window_->setSize(700, 650);
   settings_window_->centerWindow();
   settings_window_->show();
 }
@@ -412,6 +412,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("hideAppWindow", [this]() {
     hide();
+  });
+  window->putProperty("closeSettingsWindow", [this]() {
+    if (settings_window_) {
+      settings_window_->hide();
+      settings_window_->close();
+    }
   });
   window->putProperty("clearEntireHistory", [this]() {
     clearHistory();

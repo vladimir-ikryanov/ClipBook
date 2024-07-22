@@ -2,7 +2,7 @@ import * as React from "react";
 import {Switch} from "@/components/ui/switch";
 import {Label} from "@/components/ui/label";
 import {KeyboardIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {
   prefGetIgnoreConfidentialContent,
   prefGetIgnoreTransientContent,
@@ -10,9 +10,23 @@ import {
   prefSetIgnoreTransientContent,
 } from "@/pref";
 
+declare const closeSettingsWindow: () => void;
+
 export default function Privacy() {
   const [ignoreTransientContent, setIgnoreTransientContent] = useState(prefGetIgnoreTransientContent());
   const [ignoreConfidentialContent, setIgnoreConfidentialContent] = useState(prefGetIgnoreConfidentialContent());
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeSettingsWindow()
+        e.preventDefault()
+      }
+    }
+
+    document.addEventListener("keydown", down)
+    return () => document.removeEventListener("keydown", down)
+  }, [])
 
   function handleIgnoreTransientContentChange(checked: boolean) {
     setIgnoreTransientContent(checked)

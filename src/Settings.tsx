@@ -2,7 +2,7 @@ import * as React from "react";
 import {Label} from "@/components/ui/label";
 import {Switch} from "@/components/ui/switch";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {
   prefGetOpenAtLogin,
   prefGetTheme,
@@ -13,10 +13,24 @@ import {
 } from "@/pref";
 import {KeyboardIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 
+declare const closeSettingsWindow: () => void;
+
 export default function Settings() {
   const [theme, setTheme] = useState(prefGetTheme());
   const [openAtLogin, setOpenAtLogin] = useState(prefGetOpenAtLogin());
   const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory());
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeSettingsWindow()
+        e.preventDefault()
+      }
+    }
+
+    document.addEventListener("keydown", down)
+    return () => document.removeEventListener("keydown", down)
+  }, [])
 
   function handleThemeChange(theme: string) {
     setTheme(theme)

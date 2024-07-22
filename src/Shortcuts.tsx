@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import ShortcutInput from "@/components/ShortcutInput";
 import {
   prefGetClearHistoryShortcut,
@@ -33,6 +33,7 @@ import {KeyboardIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 
 declare const enableOpenAppShortcut: () => void;
 declare const disableOpenAppShortcut: () => void;
+declare const closeSettingsWindow: () => void;
 
 export default function Shortcuts() {
   const [openAppShortcut, setOpenAppShortcut] = useState(prefGetOpenAppShortcut());
@@ -48,6 +49,18 @@ export default function Shortcuts() {
   const [showMoreActionsShortcut, setShowMoreActionsShortcut] = useState(prefGetShowMoreActionsShortcut());
   const [zoomUIInShortcut, setZoomUIInShortcut] = useState(prefGetZoomUIInShortcut());
   const [zoomUIOutShortcut, setZoomUIOutShortcut] = useState(prefGetZoomUIOutShortcut());
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeSettingsWindow()
+        e.preventDefault()
+      }
+    }
+
+    document.addEventListener("keydown", down)
+    return () => document.removeEventListener("keydown", down)
+  }, [])
 
   function handleOpenAppShortcutChange(shortcut: string) {
     setOpenAppShortcut(shortcut)
@@ -145,7 +158,7 @@ export default function Shortcuts() {
             <span className="text-2xl pb-3 font-semibold">Shortcuts</span>
           </div>
 
-          <div className="flex flex-col px-8 pb-6 gap-4 flex-grow overflow-y-auto">
+          <div className="flex flex-col px-8 pb-4 gap-4 flex-grow overflow-y-auto">
             <div className="flex items-center justify-between space-x-20 pt-6">
               <span className="">Open ClipBook</span>
               <ShortcutInput shortcut={openAppShortcut}
