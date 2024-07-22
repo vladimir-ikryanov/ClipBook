@@ -14,6 +14,8 @@ type HistoryItemListProps = {
   onFilterHistory: (searchQuery: string) => void
   isPreviewVisible: boolean
   onShowHidePreview: () => void
+  onPaste: () => void
+  onClose: () => void
   onHideActions: (reason: HideActionsReason) => void
   onTogglePreview: () => void
   onSearchHistory: () => void
@@ -68,6 +70,8 @@ const HistoryItemList = (props: HistoryItemListProps) => {
         </TabsList>
         <div className="grow"></div>
         <StatusBar appName={props.appName}
+                   onPaste={props.onPaste}
+                   onClose={props.onClose}
                    onHideActions={props.onHideActions}
                    onEditContent={props.onEditContent}
                    onSearchHistory={props.onSearchHistory}

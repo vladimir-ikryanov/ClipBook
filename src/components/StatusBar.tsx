@@ -12,6 +12,8 @@ import ShortcutLabel from "@/components/ShortcutLabel";
 
 type StatusBarProps = {
   appName: string
+  onPaste: () => void
+  onClose: () => void
   onHideActions: (reason: HideActionsReason) => void
   onTogglePreview: () => void
   onSearchHistory: () => void
@@ -31,13 +33,13 @@ export default function StatusBar(props: StatusBarProps) {
             <p className="px-2">Navigate</p>
           </Button>
 
-          <Button variant="ghost" className="p-1 h-8 rounded-sm">
+          <Button variant="ghost" className="p-1 h-8 rounded-sm" onClick={props.onPaste}>
             <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
             <p className="px-2 text-">Paste to {props.appName}</p>
           </Button>
 
           <Button variant="ghost" className="p-1 h-8 rounded-sm"
-                  title="Close window (Escape or ⌘W)">
+                  title="Close window (Escape or ⌘W)" onClick={props.onClose}>
             <ShortcutLabel shortcut={prefGetCloseAppShortcut()}/>
             <p className="px-2">Close</p>
           </Button>

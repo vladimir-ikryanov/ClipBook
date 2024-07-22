@@ -27,6 +27,7 @@ import {HideActionsReason} from "@/components/Actions";
 
 declare const pasteInFrontApp: (text: string) => void;
 declare const clearEntireHistory: () => void;
+declare const hideAppWindow: () => void;
 
 type HistoryProps = {
   items: string[]
@@ -70,7 +71,7 @@ export default function History(props: HistoryProps) {
       }
       // Paste the selected item to the active app when the paste shortcut is pressed.
       if (isShortcutMatch(prefGetPasteSelectedItemToActiveAppShortcut(), e)) {
-        pasteInFrontApp(getActiveHistoryItem())
+        handlePaste()
         e.preventDefault()
       }
       // Delete the active item when the delete shortcut is pressed.
@@ -135,6 +136,14 @@ export default function History(props: HistoryProps) {
 
   function isPreviewVisible(): boolean {
     return previewPanelRef.current ? previewPanelRef.current.getSize() > 0 : false
+  }
+
+  function handlePaste(): void {
+    pasteInFrontApp(getActiveHistoryItem())
+  }
+
+  function handleClose(): void {
+    hideAppWindow()
   }
 
   function handleTogglePreview(): void {
@@ -240,6 +249,8 @@ export default function History(props: HistoryProps) {
                              onMouseDoubleClick={handleMouseDoubleClick}
                              isPreviewVisible={previewVisible}
                              searchFieldRef={searchFieldRef}
+                             onPaste={handlePaste}
+                             onClose={handleClose}
                              onHideActions={handleHideActions}
                              onEditContent={handleEditContent}
                              onSearchHistory={handleSearchHistory}
