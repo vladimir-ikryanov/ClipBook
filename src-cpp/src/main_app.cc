@@ -339,7 +339,7 @@ void MainApp::showAboutDialog() {
   options.title = "About " + app_->name();
   options.message = app_->name();
   options.informative_text =
-      "Version " + app_->version() + "\n\n(c) 2024 ClipBook. All rights reserved.";
+      "Version " + app_->version() + "\n\n© 2024 ClipBook. All rights reserved.";
   options.buttons = {
       MessageDialogButton("Visit Website", MessageDialogButtonType::kNone),
       MessageDialogButton("Close", MessageDialogButtonType::kDefault)
