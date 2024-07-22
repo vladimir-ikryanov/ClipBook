@@ -17,7 +17,11 @@ std::string kContactSupportUrl =
     "mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
 
 MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSettings> &settings)
-    : app_(app), first_run_(false), auto_hide_disabled_(false), settings_(settings) {
+    : app_(app),
+      first_run_(false),
+      auto_hide_disabled_(false),
+      app_window_visible_(false),
+      settings_(settings) {
   request_interceptor_ = std::make_shared<UrlRequestInterceptor>();
 }
 
@@ -146,11 +150,13 @@ void MainApp::launch() {
 void MainApp::show() {
   app_window_->show();
   app_window_->mainFrame()->executeJavaScript("activateApp()");
+  app_window_visible_ = true;
 }
 
 void MainApp::hide() {
   if (!auto_hide_disabled_) {
     app_window_->hide();
+    app_window_visible_ = false;
   }
 }
 
@@ -234,7 +240,7 @@ void MainApp::showUpdateAvailableDialog(const std::shared_ptr<molybden::AppUpdat
       complete();
     }
   };
-  if (app_window_->isVisible()) {
+  if (app_window_visible_) {
     auto_hide_disabled_ = true;
     MessageDialog::show(app_window_, options, [this, callback](const MessageDialogResult &result) {
       callback(result);
@@ -264,7 +270,7 @@ void MainApp::showRestartRequiredDialog(const std::string &app_version,
       }).detach();
     }
   };
-  if (app_window_->isVisible()) {
+  if (app_window_visible_) {
     auto_hide_disabled_ = true;
     MessageDialog::show(app_window_, options, [this, callback](const MessageDialogResult &result) {
       callback(result);
@@ -284,7 +290,7 @@ void MainApp::showUpdateFailedDialog(const std::string &text,
   options.message = "An error occurred while installing the update :(";
   options.informative_text = text;
   options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
-  if (app_window_->isVisible()) {
+  if (app_window_visible_) {
     auto_hide_disabled_ = true;
     MessageDialog::show(app_window_, options, [this](const MessageDialogResult &) {
       auto_hide_disabled_ = false;
@@ -304,7 +310,7 @@ void MainApp::showUpdateCheckFailedDialog(const std::string &error_msg,
   options.message = "Oops! An error occurred while checking for updates :(";
   options.informative_text = error_msg;
   options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
-  if (app_window_->isVisible()) {
+  if (app_window_visible_) {
     auto_hide_disabled_ = true;
     MessageDialog::show(app_window_, options, [this](const MessageDialogResult &) {
       auto_hide_disabled_ = false;
@@ -322,7 +328,7 @@ void MainApp::showUpToDateDialog(const std::function<void()> &complete) {
   options.message = app_->name() + " is up to date!";
   options.informative_text = "You are using the latest version of " + app_->name() + ".";
   options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
-  if (app_window_->isVisible()) {
+  if (app_window_visible_) {
     auto_hide_disabled_ = true;
     MessageDialog::show(app_window_, options, [this](const MessageDialogResult &) {
       auto_hide_disabled_ = false;
@@ -344,7 +350,7 @@ void MainApp::showAboutDialog() {
       MessageDialogButton("Visit Website", MessageDialogButtonType::kNone),
       MessageDialogButton("Close", MessageDialogButtonType::kDefault)
   };
-  if (app_window_->isVisible()) {
+  if (app_window_visible_) {
     auto_hide_disabled_ = true;
     MessageDialog::show(app_window_, options, [this](const MessageDialogResult &result) {
       if (result.button.type == MessageDialogButtonType::kNone) {
