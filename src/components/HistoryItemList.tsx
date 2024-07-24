@@ -24,6 +24,7 @@ type HistoryItemListProps = {
   onDeleteAllItems: () => void
   onMouseDoubleClick: (tabIndex: number) => void
   searchFieldRef?: React.Ref<HTMLInputElement>
+  listRef?: React.Ref<List>
 }
 
 const HistoryItemList = (props: HistoryItemListProps) => {
@@ -40,11 +41,12 @@ const HistoryItemList = (props: HistoryItemListProps) => {
         />
         <TabsList loop={false} className="flex h-full p-2">
           <div className="grid h-full w-full">
-            <AutoSizer>
+            <AutoSizer style={{}}>
               {(sizeProps: Size) => {
                 return (
                     <List
                         className=""
+                        ref={props.listRef}
                         style={{}}
                         height={sizeProps.height}
                         itemCount={props.items.length}

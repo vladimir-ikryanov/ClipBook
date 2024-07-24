@@ -24,6 +24,7 @@ import {
   prefGetTogglePreviewShortcut
 } from "@/pref";
 import {HideActionsReason} from "@/components/Actions";
+import {FixedSizeList as List} from "react-window";
 
 declare const pasteInFrontApp: (text: string) => void;
 declare const clearEntireHistory: () => void;
@@ -40,6 +41,7 @@ export default function History(props: HistoryProps) {
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
   const previewTextareaRef = useRef<HTMLTextAreaElement>(null);
   const searchFieldRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<List>(null);
   const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
@@ -54,6 +56,9 @@ export default function History(props: HistoryProps) {
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
       setPreviewText(props.items[activeTabIndex])
+      if (listRef.current) {
+        listRef.current.scrollToItem(activeTabIndex, "start")
+      }
     }
   };
 
@@ -119,7 +124,9 @@ export default function History(props: HistoryProps) {
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
       setPreviewText(props.items[activeTabIndex])
-      document.getElementById("tab-" + activeTabIndex)?.scrollIntoView({block: "nearest"})
+      if (listRef.current) {
+        listRef.current.scrollToItem(activeTabIndex, "auto")
+      }
     }
   }
 
@@ -130,7 +137,9 @@ export default function History(props: HistoryProps) {
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
       setPreviewText(props.items[activeTabIndex])
-      document.getElementById("tab-" + activeTabIndex)?.scrollIntoView({block: "nearest"})
+      if (listRef.current) {
+        listRef.current.scrollToItem(activeTabIndex, "auto")
+      }
     }
   }
 
@@ -249,6 +258,7 @@ export default function History(props: HistoryProps) {
                              onMouseDoubleClick={handleMouseDoubleClick}
                              isPreviewVisible={previewVisible}
                              searchFieldRef={searchFieldRef}
+                             listRef={listRef}
                              onPaste={handlePaste}
                              onClose={handleClose}
                              onHideActions={handleHideActions}
