@@ -15,12 +15,14 @@ std::string kProductUpdatesUrl =
     "https://clipbook.app/tags/updates/?utm_source=app&utm_medium=help";
 std::string kContactSupportUrl =
     "mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
+int32_t kUpdateCheckIntervalInHours = 4;
 
 MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSettings> &settings)
     : app_(app),
       first_run_(false),
       auto_hide_disabled_(false),
       app_window_visible_(false),
+      checking_for_updates_(false),
       settings_(settings) {
   request_interceptor_ = std::make_shared<UrlRequestInterceptor>();
 }
@@ -36,11 +38,19 @@ bool MainApp::init() {
     show();
   });
 
+  check_for_updates_item_ =
+      menu::Item("Check for Updates...", [this](const CustomMenuItemActionArgs &args) {
+        checkForUpdates(true);
+      });
+
   // Restore the application theme.
   setTheme(settings_->getTheme());
 
   // Register a global shortcut to show the app.
   enableOpenAppShortcut();
+
+  // Run the update checker.
+  runUpdateChecker();
 
   std::string filePath = getUserDataDir() + "/version.txt";
   if (!fs::exists(filePath)) {
@@ -82,12 +92,7 @@ void MainApp::launch() {
           menu::Item("About " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
             showAboutDialog();
           }),
-          menu::Item("Check for Updates...", [this](const CustomMenuItemActionArgs &args) {
-            args.menu_item->setEnabled(false);
-            checkForUpdates([args]() {
-              args.menu_item->setEnabled(true);
-            });
-          }),
+          check_for_updates_item_,
           menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
             std::thread([this]() {
               app_->quit();
@@ -200,17 +205,54 @@ void MainApp::clearHistory() {
   }
 }
 
-void MainApp::checkForUpdates(const std::function<void()> &complete) {
-  app_->checkForUpdate(getUpdateServerUrl(), [this, complete](const CheckForUpdateResult &result) {
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
+void MainApp::runUpdateChecker() {
+  std::thread t([this]() {
+    while (true) {
+      std::this_thread::sleep_for(std::chrono::hours(kUpdateCheckIntervalInHours));
+      if (settings_->shouldCheckForUpdatesAutomatically() && !checking_for_updates_) {
+        checkForUpdates();
+      }
+    }
+  });
+  t.detach();
+}
+#pragma clang diagnostic pop
+
+void MainApp::checkForUpdates(bool user_initiated) {
+  checking_for_updates_ = true;
+  if (user_initiated) {
+    check_for_updates_item_->setEnabled(false);
+  }
+  checkForUpdates([this, user_initiated]() {
+    checking_for_updates_ = false;
+    if (user_initiated) {
+      check_for_updates_item_->setEnabled(true);
+    }
+  }, user_initiated);
+}
+
+void MainApp::checkForUpdates(const std::function<void()> &complete, bool user_initiated) {
+  auto url = getUpdateServerUrl();
+  app_->checkForUpdate(url, [this, complete, user_initiated](const CheckForUpdateResult &result) {
     std::string error_msg = result.error_message;
     if (!error_msg.empty()) {
-      showUpdateCheckFailedDialog(error_msg, complete);
+      if (user_initiated) {
+        showUpdateCheckFailedDialog(error_msg, complete);
+      } else {
+        complete();
+      }
     } else {
       auto app_update = result.app_update;
       if (app_update) {
         showUpdateAvailableDialog(app_update, complete);
       } else {
-        showUpToDateDialog(complete);
+        if (user_initiated) {
+          showUpToDateDialog(complete);
+        } else {
+          complete();
+        }
       }
     }
   });
@@ -460,6 +502,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("shouldOpenAtLogin", [this]() -> bool {
     return settings_->shouldOpenAtLogin();
+  });
+  window->putProperty("saveCheckForUpdatesAutomatically", [this](bool value) -> void {
+    settings_->saveCheckForUpdatesAutomatically(value);
+  });
+  window->putProperty("shouldCheckForUpdatesAutomatically", [this]() -> bool {
+    return settings_->shouldCheckForUpdatesAutomatically();
   });
   window->putProperty("saveWarnOnClearHistory", [this](bool warn) -> void {
     settings_->saveWarnOnClearHistory(warn);

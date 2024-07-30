@@ -15,6 +15,7 @@ NSString *prefAppTheme = @"app.theme";
 NSString *prefIgnoreConfidentialContent = @"privacy.ignore_confidential_content";
 NSString *prefIgnoreTransientContent = @"privacy.ignore_transient_content";
 NSString *prefOpenAtLogin = @"app.open_at_login";
+NSString *prefCheckForUpdatesAutomatically = @"app.check_for_updates_automatically";
 NSString *prefWarnOnClearHistory = @"app.warn_on_clear_history";
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut";
 NSString *prefCloseAppShortcut = @"app.close_app_shortcut";
@@ -123,6 +124,20 @@ void AppSettingsMac::saveOpenAtLogin(bool open) {
 bool AppSettingsMac::shouldOpenAtLogin() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   return [defaults boolForKey:prefOpenAtLogin];
+}
+
+void AppSettingsMac::saveCheckForUpdatesAutomatically(bool open) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:open forKey:prefCheckForUpdatesAutomatically];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldCheckForUpdatesAutomatically() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefCheckForUpdatesAutomatically] != nil) {
+    return [defaults boolForKey:prefCheckForUpdatesAutomatically];
+  }
+  return true;
 }
 
 void AppSettingsMac::saveWarnOnClearHistory(bool warn) {

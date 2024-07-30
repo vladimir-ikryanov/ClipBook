@@ -4,9 +4,10 @@ import {Switch} from "@/components/ui/switch";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {useEffect, useState} from "react";
 import {
+  prefGetCheckForUpdatesAutomatically,
   prefGetOpenAtLogin,
   prefGetTheme,
-  prefGetWarnOnClearHistory,
+  prefGetWarnOnClearHistory, prefSetCheckForUpdatesAutomatically,
   prefSetOpenAtLogin,
   prefSetTheme,
   prefSetWarnOnClearHistory,
@@ -19,6 +20,7 @@ export default function Settings() {
   const [theme, setTheme] = useState(prefGetTheme());
   const [openAtLogin, setOpenAtLogin] = useState(prefGetOpenAtLogin());
   const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory());
+  const [checkForUpdatesAutomatically, setCheckForUpdatesAutomatically] = useState(prefGetCheckForUpdatesAutomatically());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -40,6 +42,11 @@ export default function Settings() {
   function handleOpenAtLoginChange(openAtLogin: boolean) {
     setOpenAtLogin(openAtLogin)
     prefSetOpenAtLogin(openAtLogin)
+  }
+
+  function handleCheckForUpdatesAutomaticallyChange(checkForUpdatesAutomatically: boolean) {
+    setCheckForUpdatesAutomatically(checkForUpdatesAutomatically)
+    prefSetCheckForUpdatesAutomatically(checkForUpdatesAutomatically)
   }
 
   function handleWarnOnClearHistoryChange(warnOnClearHistory: boolean) {
@@ -79,7 +86,7 @@ export default function Settings() {
           </div>
 
           <div className="flex flex-col px-8 pb-6 gap-4 flex-grow overflow-y-auto">
-            <div className="flex items-center justify-between space-x-20 pt-6">
+            <div className="flex items-center justify-between space-x-20 pt-6 pb-1">
               <Label htmlFor="openAtLogin" className="flex flex-col text-base">
                 <span className="">Launch at login</span>
                 <span className="text-neutral-500 font-normal text-sm">
@@ -90,9 +97,20 @@ Launch ClipBook automatically at&nbsp;login
                       onCheckedChange={handleOpenAtLoginChange}/>
             </div>
 
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label htmlFor="openAtLogin" className="flex flex-col text-base">
+                <span className="">Check for updates automatically</span>
+                <span className="text-neutral-500 font-normal text-sm">
+ClipBook will check for updates automatically and notify you when a new version is&nbsp;available
+            </span>
+              </Label>
+              <Switch id="openAtLogin" checked={checkForUpdatesAutomatically}
+                      onCheckedChange={handleCheckForUpdatesAutomaticallyChange}/>
+            </div>
+
             <hr/>
 
-            <div className="flex justify-between space-x-10">
+            <div className="flex justify-between space-x-10 py-1">
               <Label className="flex flex-col text-base">
                 <span className="">Appearance</span>
                 <span className="text-neutral-500 font-normal text-sm">Change how ClipBook looks on your&nbsp;device</span>
@@ -139,7 +157,7 @@ Launch ClipBook automatically at&nbsp;login
 
             <hr/>
 
-            <div className="flex items-center justify-between space-x-20">
+            <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="warnOnClearAll" className="flex flex-col text-base">
                 <span className="">Warn when clearing all history</span>
                 <span className="text-neutral-500 font-normal text-sm">

@@ -70,7 +70,7 @@ export default function Privacy() {
           </div>
 
           <div className="flex flex-col px-8 pb-6 gap-4 flex-grow overflow-y-auto">
-            <div className="flex items-center justify-between space-x-20  pt-6">
+            <div className="flex items-center justify-between space-x-20 pt-6 pb-1">
               <Label htmlFor="ignoreConfidential" className="flex flex-col text-base">
                 <span className="">Ignore confidential content</span>
                 <span className="text-neutral-500 font-normal text-sm">
@@ -80,7 +80,7 @@ export default function Privacy() {
               <Switch id="ignoreConfidential" checked={ignoreConfidentialContent}
                       onCheckedChange={handleIgnoreConfidentialContentChange}/>
             </div>
-            <div className="flex items-center justify-between space-x-20">
+            <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="ignoreTransient" className="flex flex-col text-base">
                 <span className="">Ignore transient content</span>
                 <span className="text-neutral-500 font-normal text-sm">

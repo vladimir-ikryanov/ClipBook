@@ -2,6 +2,8 @@ declare const saveTheme: (theme: string) => void;
 declare const getTheme: () => string;
 declare const saveOpenAtLogin: (openAtLogin: boolean) => void;
 declare const shouldOpenAtLogin: () => boolean;
+declare const saveCheckForUpdatesAutomatically: (value: boolean) => void;
+declare const shouldCheckForUpdatesAutomatically: () => boolean;
 declare const saveWarnOnClearHistory: (warn: boolean) => void;
 declare const shouldWarnOnClearHistory: () => boolean;
 declare const saveIgnoreTransientContent: (ignore: boolean) => void;
@@ -49,6 +51,14 @@ export function prefGetOpenAtLogin() {
 
 export function prefSetOpenAtLogin(openAtLogin: boolean) {
   saveOpenAtLogin(openAtLogin)
+}
+
+export function prefGetCheckForUpdatesAutomatically() {
+  return shouldCheckForUpdatesAutomatically()
+}
+
+export function prefSetCheckForUpdatesAutomatically(checkForUpdatesAutomatically: boolean) {
+  saveCheckForUpdatesAutomatically(checkForUpdatesAutomatically)
 }
 
 export function prefGetWarnOnClearHistory() {

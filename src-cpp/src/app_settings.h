@@ -24,6 +24,9 @@ class AppSettings {
   virtual void saveOpenAtLogin(bool open) = 0;
   virtual bool shouldOpenAtLogin() = 0;
 
+  virtual void saveCheckForUpdatesAutomatically(bool value) = 0;
+  virtual bool shouldCheckForUpdatesAutomatically() = 0;
+
   virtual void saveWarnOnClearHistory(bool warn) = 0;
   virtual bool shouldWarnOnClearHistory() = 0;
 

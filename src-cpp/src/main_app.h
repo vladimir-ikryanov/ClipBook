@@ -30,7 +30,9 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
  protected:
   void setActiveAppName(const std::string &app_name);
   void clearHistory();
-  void checkForUpdates(const std::function<void()> &complete);
+  void checkForUpdates(bool user_initiated = false);
+  void checkForUpdates(const std::function<void()> &complete, bool user_initiated);
+  void runUpdateChecker();
   void showAboutDialog();
   void showUpToDateDialog(const std::function<void()> &complete);
   void showRestartRequiredDialog(const std::string &app_version,
@@ -53,10 +55,12 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   bool first_run_;
   bool auto_hide_disabled_;
   bool app_window_visible_;
+  bool checking_for_updates_;
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Browser> app_window_;
   std::shared_ptr<molybden::Browser> settings_window_;
   std::shared_ptr<molybden::CustomMenuItem> open_menu_item_;
+  std::shared_ptr<molybden::CustomMenuItem> check_for_updates_item_;
   std::shared_ptr<AppSettings> settings_;
 
  private:
