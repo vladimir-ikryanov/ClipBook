@@ -30,10 +30,11 @@ class MainAppMac : public MainApp {
  private:
   void restoreWindowBounds();
   void saveWindowBounds();
-  void addAppToLoginItems();
-  void removeAppFromLoginItems();
-  bool isAppInLoginItems();
   molybden::Shortcut createShortcut(const std::string &shortcut);
+
+  static void addAppToLoginItems();
+  static void removeAppFromLoginItems();
+  static bool isAppInLoginItems();
 
  private:
   molybden::Shortcut open_app_shortcut_;

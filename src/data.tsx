@@ -6,6 +6,7 @@ let previewVisible = true;
 
 loadHistoryItems()
 
+// For testing purposes only!
 function generateRandomWord(length: number): string {
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
   let result = ''
@@ -16,6 +17,7 @@ function generateRandomWord(length: number): string {
   return result
 }
 
+// For testing purposes only!
 function fillArrayWithRandomWords(size: number, wordLength: number): string[] {
   const array: string[] = []
   for (let i = 0; i < size; i++) {
@@ -25,6 +27,7 @@ function fillArrayWithRandomWords(size: number, wordLength: number): string[] {
 }
 
 function loadHistoryItems() {
+  // For testing purposes only! Uncomment the following line to generate random history items.
   // historyItems = fillArrayWithRandomWords(10024, 128)
   historyItems = []
   if (localStorage.getItem("historyItems")) {

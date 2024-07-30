@@ -8,15 +8,8 @@
 using namespace molybden;
 
 /*
- * LaunchServices functions for managing login items are deprecated,
- * but there's actually no viable alternative.
- * SystemManagement functions are not viable, because they require a separate
- * helper tool (complete app bundle) to be running constantly, for the sole
- * purpose of launching the main application.
- * Also, using SystemManagement, there's no way for the user to control the
- * login item, as it does not appear in the System Preferences, meaning there's
- * no way to delete the login item without the original app...
- * Common Apple, I think you can do better...
+ * I have to use the deprecated LaunchServices functions for managing login items,
+ * because there is no working alternative.
  */
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
@@ -233,15 +226,15 @@ void MainAppMac::hide() {
 void MainAppMac::paste() {
   CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
 
-  CGEventRef keyDown = CGEventCreateKeyboardEvent(source, KEY_CODE_V, TRUE);
-  CGEventSetFlags(keyDown, kCGEventFlagMaskCommand);
-  CGEventRef keyUp = CGEventCreateKeyboardEvent(source, KEY_CODE_V, FALSE);
+  CGEventRef key_down = CGEventCreateKeyboardEvent(source, KEY_CODE_V, TRUE);
+  CGEventSetFlags(key_down, kCGEventFlagMaskCommand);
+  CGEventRef key_up = CGEventCreateKeyboardEvent(source, KEY_CODE_V, FALSE);
 
-  CGEventPost(kCGAnnotatedSessionEventTap, keyDown);
-  CGEventPost(kCGAnnotatedSessionEventTap, keyUp);
+  CGEventPost(kCGAnnotatedSessionEventTap, key_down);
+  CGEventPost(kCGAnnotatedSessionEventTap, key_up);
 
-  CFRelease(keyUp);
-  CFRelease(keyDown);
+  CFRelease(key_up);
+  CFRelease(key_down);
   CFRelease(source);
 }
 
@@ -263,12 +256,12 @@ std::string MainAppMac::getUpdateServerUrl() {
 }
 
 void MainAppMac::restoreWindowBounds() {
-  NSScreen *mainScreen = [NSScreen mainScreen];
-  NSNumber *screenNumber = [[mainScreen deviceDescription] objectForKey:@"NSScreenNumber"];
-  auto bounds = settings_->getWindowBoundsForScreen([screenNumber intValue]);
+  NSScreen *main_screen = [NSScreen mainScreen];
+  NSNumber *screen_number = [[main_screen deviceDescription] objectForKey:@"NSScreenNumber"];
+  auto bounds = settings_->getWindowBoundsForScreen([screen_number intValue]);
   if (bounds.size.isEmpty()) {
-    auto screen_x = static_cast<int32_t>([mainScreen frame].origin.x);
-    auto screen_y = static_cast<int32_t>([mainScreen frame].origin.y);
+    auto screen_x = static_cast<int32_t>([main_screen frame].origin.x);
+    auto screen_y = static_cast<int32_t>([main_screen frame].origin.y);
     app_window_->setPosition(screen_x, screen_y);
     app_window_->centerWindow();
   } else {
@@ -277,9 +270,9 @@ void MainAppMac::restoreWindowBounds() {
 }
 
 void MainAppMac::saveWindowBounds() {
-  NSScreen *mainScreen = [NSScreen mainScreen];
-  NSNumber *screenNumber = [[mainScreen deviceDescription] objectForKey:@"NSScreenNumber"];
-  settings_->saveWindowBoundsForScreen([screenNumber intValue], app_window_->bounds());
+  NSScreen *main_screen = [NSScreen mainScreen];
+  NSNumber *screen_number = [[main_screen deviceDescription] objectForKey:@"NSScreenNumber"];
+  settings_->saveWindowBoundsForScreen([screen_number intValue], app_window_->bounds());
 }
 
 void MainAppMac::setOpenAtLogin(bool open) {
@@ -291,17 +284,15 @@ void MainAppMac::setOpenAtLogin(bool open) {
 }
 
 void MainAppMac::addAppToLoginItems() {
-  NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]];
-
-  LSSharedFileListRef loginItemsRef;
-  LSSharedFileListItemRef loginItemRef;
-  loginItemsRef = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
-  if (!loginItemsRef) {
+  LSSharedFileListRef items =
+      LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
+  if (!items) {
     return;
   }
 
-  loginItemRef = LSSharedFileListInsertItemURL(
-      loginItemsRef,
+  NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]];
+  LSSharedFileListItemRef item = LSSharedFileListInsertItemURL(
+      items,
       kLSSharedFileListItemLast,
       NULL,
       NULL,
@@ -310,41 +301,35 @@ void MainAppMac::addAppToLoginItems() {
       NULL
   );
 
-  if (loginItemRef) {
-    CFRelease(loginItemRef);
+  if (item) {
+    CFRelease(item);
   }
 }
 
 void MainAppMac::removeAppFromLoginItems() {
-  NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]];
-
-  UInt32 seedValue;
-  CFURLRef path;
-  CFArrayRef loginItems;
-  LSSharedFileListRef loginItemsRef;
-  id loginItem;
-  LSSharedFileListItemRef loginItemRef;
-
-  path = NULL;
-  seedValue = 0;
-  loginItemsRef = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
-  if (!loginItemsRef) {
+  LSSharedFileListRef login_items_ref =
+      LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
+  if (!login_items_ref) {
     return;
   }
 
-  loginItems = LSSharedFileListCopySnapshot(loginItemsRef, &seedValue);
-  for (loginItem in ( __bridge NSArray *) loginItems) {
-    loginItemRef = ( __bridge LSSharedFileListItemRef) loginItem;
-    if (LSSharedFileListItemResolve(loginItemRef, 0, (CFURLRef *) &path, NULL) == noErr) {
+  NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]];
+
+  id login_item;
+  CFURLRef path = NULL;
+  UInt32 seed_value = 0;
+  CFArrayRef login_items = LSSharedFileListCopySnapshot(login_items_ref, &seed_value);
+  for (login_item in ( __bridge NSArray *) login_items) {
+    LSSharedFileListItemRef login_item_ref = ( __bridge LSSharedFileListItemRef) login_item;
+    if (LSSharedFileListItemResolve(login_item_ref, 0, (CFURLRef *) &path, NULL) == noErr) {
       {
-        NSString *s;
-        s = url.path;
-        if (s == nil) {
+        NSString *url_path = url.path;
+        if (url_path == nil) {
           continue;
         }
-        if ([(( __bridge NSURL *) path).path hasPrefix:s]) {
+        if ([(( __bridge NSURL *) path).path hasPrefix:url_path]) {
           CFRelease(path);
-          LSSharedFileListItemRemove(loginItemsRef, loginItemRef);
+          LSSharedFileListItemRemove(login_items_ref, login_item_ref);
           break;
         }
         if (path != NULL) {
@@ -354,57 +339,51 @@ void MainAppMac::removeAppFromLoginItems() {
     }
   }
 
-  if (loginItems != NULL) {
-    CFRelease(loginItems);
+  if (login_items != NULL) {
+    CFRelease(login_items);
   }
 }
 
 bool MainAppMac::init() {
-  bool openAtLogin = settings_->shouldOpenAtLogin();
-  bool appInLoginItems = isAppInLoginItems();
-  if (openAtLogin && !appInLoginItems) {
+  bool open_at_login = settings_->shouldOpenAtLogin();
+  bool app_in_login_items = isAppInLoginItems();
+  if (open_at_login && !app_in_login_items) {
     setOpenAtLogin(true);
   }
-  if (!openAtLogin && appInLoginItems) {
+  if (!open_at_login && app_in_login_items) {
     setOpenAtLogin(false);
   }
   return MainApp::init();
 }
 
 bool MainAppMac::isAppInLoginItems() {
-  NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]];
-
-  BOOL found = NO;
-  UInt32 seedValue = 0;
-  CFURLRef path = NULL;
-  LSSharedFileListRef loginItemsRef;
-  CFArrayRef loginItems;
-  id loginItem;
-  LSSharedFileListItemRef loginItemRef;
-
-  loginItemsRef = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
-  if (loginItemsRef == NULL) {
+  LSSharedFileListRef login_items_ref =
+      LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
+  if (login_items_ref == NULL) {
     return NO;
   }
 
-  loginItems = LSSharedFileListCopySnapshot(loginItemsRef, &seedValue);
-  for (loginItem in ( __bridge NSArray *) loginItems) {
-    loginItemRef = ( __bridge LSSharedFileListItemRef) loginItem;
+  NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]];
 
-    if (LSSharedFileListItemResolve(loginItemRef, 0, (CFURLRef *) &path, NULL) == noErr) {
+  BOOL found = NO;
+
+  id login_item;
+  CFURLRef path = NULL;
+  UInt32 seed_value = 0;
+  CFArrayRef login_items = LSSharedFileListCopySnapshot(login_items_ref, &seed_value);
+  for (login_item in ( __bridge NSArray *) login_items) {
+    LSSharedFileListItemRef login_item_ref = ( __bridge LSSharedFileListItemRef) login_item;
+    if (LSSharedFileListItemResolve(login_item_ref, 0, (CFURLRef *) &path, NULL) == noErr) {
       {
-        NSString *s;
-        s = url.path;
-        if (s == nil) {
+        NSString *url_path = url.path;
+        if (url_path == nil) {
           continue;
         }
-
-        if ([(( __bridge NSURL *) path).path hasPrefix:s]) {
+        if ([(( __bridge NSURL *) path).path hasPrefix:url_path]) {
           CFRelease(path);
           found = YES;
           break;
         }
-
         if (path != NULL) {
           CFRelease(path);
         }
@@ -412,10 +391,10 @@ bool MainAppMac::isAppInLoginItems() {
     }
   }
 
-  if (loginItems != NULL) {
-    CFRelease(loginItems);
+  if (login_items != NULL) {
+    CFRelease(login_items);
   }
 
-  CFRelease(loginItemsRef);
+  CFRelease(login_items_ref);
   return found;
 }
