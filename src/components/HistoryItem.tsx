@@ -2,6 +2,7 @@ import '../App.css';
 import {TabsTrigger} from "@/components/ui/tabs";
 import {Link, File} from "lucide-react";
 import React, {CSSProperties, KeyboardEvent, MouseEvent} from 'react';
+import {getFilterQuery} from "@/data";
 
 type HistoryItemProps = {
   index: number
@@ -29,6 +30,26 @@ const HistoryItem = (props: HistoryItemProps) => {
     return urlRegex.test(url);
   }
 
+  function highlightAllMatches(text: string, query: string) {
+    if (!query) {
+      return text;
+    }
+
+    const regex = new RegExp(`(${query})`, 'gi');
+    const parts = text.split(regex);
+
+    return (
+        <span>
+      {
+        parts.map((part, index) =>
+            part.toLowerCase() === query.toLowerCase() ? (
+                <span key={index} className="text-cyan-500 font-bold">{part}</span>) : (part)
+        )
+      }
+    </span>
+    );
+  }
+
   return (
       <TabsTrigger
           id={`tab-${props.index}`}
@@ -46,7 +67,11 @@ const HistoryItem = (props: HistoryItemProps) => {
           }
         </div>
         <div
-            className="flex-grow text-base text-justify font-normal whitespace-nowrap overflow-hidden overflow-ellipsis">{props.text}</div>
+            className="flex-grow text-base text-justify font-normal whitespace-nowrap overflow-hidden overflow-ellipsis">
+          {
+            highlightAllMatches(props.text, getFilterQuery())
+          }
+        </div>
       </TabsTrigger>
   )
 }

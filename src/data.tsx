@@ -111,6 +111,10 @@ export function setFilterQuery(query: string) {
   filterQuery = query
 }
 
+export function getFilterQuery() {
+  return filterQuery
+}
+
 export function getActiveHistoryItem() {
   return getHistoryItems()[visibleActiveHistoryItemIndex]
 }
