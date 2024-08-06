@@ -31,6 +31,7 @@ import {
 import ShortcutLabel from "@/components/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {getPreviewVisibleState} from "@/data";
 
 export type HideActionsReason =
     "cancel"
@@ -128,7 +129,7 @@ export default function Actions(props: ActionsProps) {
             <CommandList>
               <CommandItem onSelect={handleEditContent}>
                 <Edit3Icon className="mr-2 h-4 w-4"/>
-                <span>Edit content...</span>
+                <span>Edit Content...</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
                 </CommandShortcut>
@@ -150,7 +151,7 @@ export default function Actions(props: ActionsProps) {
               </CommandItem>
               <CommandItem onSelect={handleTogglePreview}>
                 <PanelRightClose className="mr-2 h-4 w-4"/>
-                <span>Show/Hide Preview</span>
+                <span>{getPreviewVisibleState() ? "Hide Preview" : "Show Preview"}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
                 </CommandShortcut>
@@ -165,7 +166,7 @@ export default function Actions(props: ActionsProps) {
               </CommandItem>
               <CommandItem onSelect={handleDeleteAllItems}>
                 <TrashIcon className="mr-2 h-4 w-4"/>
-                <span>Delete all...</span>
+                <span>Delete All...</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetClearHistoryShortcut()}/>
                 </CommandShortcut>
