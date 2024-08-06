@@ -15,7 +15,7 @@ import {
   CommandEmpty,
   CommandInput,
   CommandItem,
-  CommandList,
+  CommandList, CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command"
 import {useEffect} from "react";
@@ -140,6 +140,7 @@ export default function Actions(props: ActionsProps) {
                   <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
                 </CommandShortcut>
               </CommandItem>
+              <CommandSeparator/>
               <CommandItem onSelect={handleSearchHistory}>
                 <SearchIcon className="mr-2 h-4 w-4"/>
                 <span>Search...</span>
@@ -154,6 +155,7 @@ export default function Actions(props: ActionsProps) {
                   <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
                 </CommandShortcut>
               </CommandItem>
+              <CommandSeparator/>
               <CommandItem onSelect={handleDeleteItem}>
                 <TrashIcon className="mr-2 h-4 w-4"/>
                 <span>Delete</span>
