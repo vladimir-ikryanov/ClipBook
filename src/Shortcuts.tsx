@@ -4,6 +4,7 @@ import ShortcutInput from "@/components/ShortcutInput";
 import {
   prefGetClearHistoryShortcut,
   prefGetCloseAppShortcut,
+  prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetOpenAppShortcut,
@@ -16,7 +17,7 @@ import {
   prefGetZoomUIInShortcut,
   prefGetZoomUIOutShortcut,
   prefSetClearHistoryShortcut,
-  prefSetCloseAppShortcut,
+  prefSetCloseAppShortcut, prefSetCopyToClipboardShortcut,
   prefSetDeleteHistoryItemShortcut,
   prefSetEditHistoryItemShortcut,
   prefSetOpenAppShortcut,
@@ -42,6 +43,7 @@ export default function Shortcuts() {
   const [selectPreviousItemShortcut, setSelectPreviousItemShortcut] = useState(prefGetSelectPreviousItemShortcut());
   const [pasteSelectedItemToActiveAppShortcut, setPasteSelectedItemToActiveAppShortcut] = useState(prefGetPasteSelectedItemToActiveAppShortcut());
   const [editHistoryItemShortcut, setEditHistoryItemShortcut] = useState(prefGetEditHistoryItemShortcut());
+  const [copyToClipboardShortcut, setCopyToClipboardShortcut] = useState(prefGetCopyToClipboardShortcut());
   const [deleteHistoryItemShortcut, setDeleteHistoryItemShortcut] = useState(prefGetDeleteHistoryItemShortcut());
   const [clearHistoryShortcut, setClearHistoryShortcut] = useState(prefGetClearHistoryShortcut());
   const [searchHistoryShortcut, setSearchHistoryShortcut] = useState(prefGetSearchHistoryShortcut());
@@ -91,6 +93,11 @@ export default function Shortcuts() {
   function handleEditHistoryItemShortcutChange(shortcut: string) {
     setEditHistoryItemShortcut(shortcut)
     prefSetEditHistoryItemShortcut(shortcut)
+  }
+
+  function handleCopyToClipboardShortcutChange(shortcut: string) {
+    setCopyToClipboardShortcut(shortcut)
+    prefSetCopyToClipboardShortcut(shortcut)
   }
 
   function handleDeleteHistoryItemShortcutChange(shortcut: string) {
@@ -188,6 +195,12 @@ export default function Shortcuts() {
               <ShortcutInput shortcut={pasteSelectedItemToActiveAppShortcut}
                              defaultShortcut="Enter"
                              onSave={handlePasteSelectedItemToActiveAppShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Copy to Clipboard</span>
+              <ShortcutInput shortcut={copyToClipboardShortcut}
+                             defaultShortcut="Meta + c"
+                             onSave={handleCopyToClipboardShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Edit history item</span>

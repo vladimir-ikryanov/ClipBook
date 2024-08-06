@@ -22,6 +22,8 @@ declare const savePasteSelectedItemToActiveAppShortcut: (shortcut: string) => vo
 declare const getPasteSelectedItemToActiveAppShortcut: () => string;
 declare const saveEditHistoryItemShortcut: (shortcut: string) => void;
 declare const getEditHistoryItemShortcut: () => string;
+declare const saveCopyToClipboardShortcut: (shortcut: string) => void;
+declare const getCopyToClipboardShortcut: () => string;
 declare const saveDeleteHistoryItemShortcut: (shortcut: string) => void;
 declare const getDeleteHistoryItemShortcut: () => string;
 declare const saveClearHistoryShortcut: (shortcut: string) => void;
@@ -131,6 +133,14 @@ export function prefGetEditHistoryItemShortcut() {
 
 export function prefSetEditHistoryItemShortcut(shortcut: string) {
   saveEditHistoryItemShortcut(shortcut)
+}
+
+export function prefGetCopyToClipboardShortcut() {
+  return getCopyToClipboardShortcut()
+}
+
+export function prefSetCopyToClipboardShortcut(shortcut: string) {
+  saveCopyToClipboardShortcut(shortcut)
 }
 
 export function prefGetDeleteHistoryItemShortcut() {

@@ -14,7 +14,7 @@ import {
 } from "@/data";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {
-  prefGetClearHistoryShortcut,
+  prefGetClearHistoryShortcut, prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut, prefGetEditHistoryItemShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSearchHistoryShortcut,
@@ -27,6 +27,7 @@ import {HideActionsReason} from "@/components/Actions";
 import {FixedSizeList as List} from "react-window";
 
 declare const pasteInFrontApp: (text: string) => void;
+declare const copyToClipboard: (text: string) => void;
 declare const clearEntireHistory: () => void;
 declare const hideAppWindow: () => void;
 
@@ -97,6 +98,11 @@ export default function History(props: HistoryProps) {
       // Edit the active item when the edit history item shortcut is pressed.
       if (isShortcutMatch(prefGetEditHistoryItemShortcut(), e)) {
         handleEditContent()
+        e.preventDefault()
+      }
+      // Copy the active item to the clipboard when the copy to clipboard shortcut is pressed.
+      if (isShortcutMatch(prefGetCopyToClipboardShortcut(), e)) {
+        handleCopyToClipboard()
         e.preventDefault()
       }
       // Clear the history when the clear history shortcut is pressed.
@@ -183,6 +189,11 @@ export default function History(props: HistoryProps) {
     }
   }
 
+  function handleCopyToClipboard() {
+    copyToClipboard(getActiveHistoryItem())
+    hideAppWindow()
+  }
+
   function handleSearchHistory() {
     if (searchFieldRef.current) {
       searchFieldRef.current.focus()
@@ -263,6 +274,7 @@ export default function History(props: HistoryProps) {
                              onClose={handleClose}
                              onHideActions={handleHideActions}
                              onEditContent={handleEditContent}
+                             onCopyToClipboard={handleCopyToClipboard}
                              onSearchHistory={handleSearchHistory}
                              onTogglePreview={handleTogglePreview}
                              onDeleteItem={handleDeleteItem}

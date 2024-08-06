@@ -18,6 +18,7 @@ type StatusBarProps = {
   onTogglePreview: () => void
   onSearchHistory: () => void
   onEditContent: () => void
+  onCopyToClipboard: () => void
   onDeleteItem: () => void
   onDeleteAllItems: () => void
 }
@@ -48,6 +49,7 @@ export default function StatusBar(props: StatusBarProps) {
         <div className="flex space-x-2">
           <Actions onHideActions={props.onHideActions}
                    onEditContent={props.onEditContent}
+                   onCopyToClipboard={props.onCopyToClipboard}
                    onSearchHistory={props.onSearchHistory}
                    onTogglePreview={props.onTogglePreview}
                    onDeleteItem={props.onDeleteItem}

@@ -42,6 +42,8 @@ class AppSettingsMac : public AppSettings {
   std::string getPasteSelectedItemToActiveAppShortcut() override;
   void saveEditHistoryItemShortcut(std::string shortcut) override;
   std::string getEditHistoryItemShortcut() override;
+  void saveCopyToClipboardShortcut(std::string shortcut) override;
+  std::string getCopyToClipboardShortcut() override;
   void saveDeleteHistoryItemShortcut(std::string shortcut) override;
   std::string getDeleteHistoryItemShortcut() override;
   void saveClearHistoryShortcut(std::string shortcut) override;

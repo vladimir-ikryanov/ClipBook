@@ -20,6 +20,7 @@ type HistoryItemListProps = {
   onTogglePreview: () => void
   onSearchHistory: () => void
   onEditContent: () => void
+  onCopyToClipboard: () => void
   onDeleteItem: () => void
   onDeleteAllItems: () => void
   onMouseDoubleClick: (tabIndex: number) => void
@@ -76,6 +77,7 @@ const HistoryItemList = (props: HistoryItemListProps) => {
                    onClose={props.onClose}
                    onHideActions={props.onHideActions}
                    onEditContent={props.onEditContent}
+                   onCopyToClipboard={props.onCopyToClipboard}
                    onSearchHistory={props.onSearchHistory}
                    onTogglePreview={props.onTogglePreview}
                    onDeleteItem={props.onDeleteItem}

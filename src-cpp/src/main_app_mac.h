@@ -19,6 +19,7 @@ class MainAppMac : public MainApp {
   void activate() override;
   void paste() override;
   void paste(const std::string &text) override;
+  void copyToClipboard(const std::string &text) override;
   void setOpenAtLogin(bool open) override;
 
  protected:

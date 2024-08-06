@@ -224,6 +224,7 @@ void MainAppMac::hide() {
 }
 
 void MainAppMac::paste() {
+  // Simulate the key press of Command + V to paste the text into the active app.
   CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
 
   CGEventRef key_down = CGEventCreateKeyboardEvent(source, KEY_CODE_V, TRUE);
@@ -241,14 +242,15 @@ void MainAppMac::paste() {
 void MainAppMac::paste(const std::string &text) {
   // Hide the browser window and activate the previously active app.
   hide();
+  copyToClipboard(text);
+  paste();
+}
 
+void MainAppMac::copyToClipboard(const std::string &text) {
   // Clear the pasteboard and set the new text.
   auto pasteboard = [NSPasteboard generalPasteboard];
   [pasteboard clearContents];
   [pasteboard setString:[NSString stringWithUTF8String:text.c_str()] forType:NSPasteboardTypeString];
-
-  // Simulate the key press of Command + V to paste the text into the active app.
-  paste();
 }
 
 std::string MainAppMac::getUpdateServerUrl() {

@@ -3,6 +3,7 @@ import {Button} from "@/components/ui/button";
 
 import * as React from "react"
 import {
+  CopyIcon,
   Edit3Icon,
   PanelRightClose,
   SearchIcon,
@@ -20,6 +21,7 @@ import {
 import {useEffect} from "react";
 import {
   prefGetClearHistoryShortcut,
+  prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetSearchHistoryShortcut,
@@ -35,6 +37,7 @@ export type HideActionsReason =
     | "togglePreview"
     | "searchHistory"
     | "editContent"
+    | "copyToClipboard"
     | "deleteItem"
     | "deleteAllItems"
 
@@ -43,6 +46,7 @@ type ActionsProps = {
   onTogglePreview: () => void
   onSearchHistory: () => void
   onEditContent: () => void
+  onCopyToClipboard: () => void
   onDeleteItem: () => void
   onDeleteAllItems: () => void
 }
@@ -79,6 +83,12 @@ export default function Actions(props: ActionsProps) {
     closeReason = "editContent"
     handleOpenChange(false)
     props.onEditContent()
+  }
+
+  function handleCopyToClipboard() {
+    closeReason = "copyToClipboard"
+    handleOpenChange(false)
+    props.onCopyToClipboard()
   }
 
   function handleSearchHistory() {
@@ -121,6 +131,13 @@ export default function Actions(props: ActionsProps) {
                 <span>Edit content...</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
+                </CommandShortcut>
+              </CommandItem>
+              <CommandItem onSelect={handleCopyToClipboard}>
+                <CopyIcon className="mr-2 h-4 w-4"/>
+                <span>Copy to Clipboard</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
                 </CommandShortcut>
               </CommandItem>
               <CommandItem onSelect={handleSearchHistory}>

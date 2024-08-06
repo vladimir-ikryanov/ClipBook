@@ -452,6 +452,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("pasteInFrontApp", [this](std::string text) {
     paste(text);
   });
+  window->putProperty("copyToClipboard", [this](std::string text) {
+    copyToClipboard(text);
+  });
   window->putProperty("hideAppWindow", [this]() {
     hide();
   });
@@ -551,6 +554,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("getEditHistoryItemShortcut", [this]() -> std::string {
     return settings_->getEditHistoryItemShortcut();
+  });
+  window->putProperty("saveCopyToClipboardShortcut", [this](std::string shortcut) -> void {
+    settings_->saveCopyToClipboardShortcut(shortcut);
+  });
+  window->putProperty("getCopyToClipboardShortcut", [this]() -> std::string {
+    return settings_->getCopyToClipboardShortcut();
   });
   window->putProperty("saveDeleteHistoryItemShortcut", [this](std::string shortcut) -> void {
     settings_->saveDeleteHistoryItemShortcut(shortcut);

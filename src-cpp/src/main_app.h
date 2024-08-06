@@ -25,6 +25,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   virtual void activate() = 0;
   virtual void paste() = 0;
   virtual void paste(const std::string &text) = 0;
+  virtual void copyToClipboard(const std::string &text) = 0;
   virtual void setOpenAtLogin(bool open) = 0;
 
  protected:
