@@ -25,8 +25,8 @@ export default function ShortcutInput(props: ShortcutProps) {
   }
 
   function stopEditing() {
-    enableOpenAppShortcut()
     setIsEditing(false)
+    enableOpenAppShortcut()
   }
 
   function handleClick() {

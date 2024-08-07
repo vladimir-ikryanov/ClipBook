@@ -174,7 +174,16 @@ void MainAppMac::enableOpenAppShortcut() {
     return;
   }
   app()->globalShortcuts()->registerShortcut(open_app_shortcut_, [this](const Shortcut &) {
-    show();
+    // Users can set the same shortcut for opening and closing the app.
+    if (settings_->getCloseAppShortcut() == settings_->getOpenAppShortcut()) {
+      if (app_window_visible_) {
+        hide();
+      } else {
+        show();
+      }
+    } else {
+      show();
+    }
   });
 }
 
