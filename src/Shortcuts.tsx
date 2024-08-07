@@ -32,8 +32,6 @@ import {
 } from "@/pref";
 import {KeyboardIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 
-declare const enableOpenAppShortcut: () => void;
-declare const disableOpenAppShortcut: () => void;
 declare const closeSettingsWindow: () => void;
 
 export default function Shortcuts() {
@@ -67,7 +65,6 @@ export default function Shortcuts() {
   function handleOpenAppShortcutChange(shortcut: string) {
     setOpenAppShortcut(shortcut)
     prefSetOpenAppShortcut(shortcut)
-    enableOpenAppShortcut()
   }
 
   function handleCloseAppShortcutChange(shortcut: string) {
@@ -170,8 +167,7 @@ export default function Shortcuts() {
               <span className="">Open ClipBook</span>
               <ShortcutInput shortcut={openAppShortcut}
                              defaultShortcut="Meta + Shift + v"
-                             onSave={handleOpenAppShortcutChange}
-                             onStartEditing={disableOpenAppShortcut}/>
+                             onSave={handleOpenAppShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Close ClipBook</span>

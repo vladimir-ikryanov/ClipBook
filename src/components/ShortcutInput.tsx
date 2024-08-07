@@ -5,10 +5,12 @@ import {isModifierKey, keysToDisplayShortcut, shortcutToDisplayShortcut} from "@
 import {Button} from "@/components/ui/button";
 import {Undo2Icon} from "lucide-react";
 
+declare const enableOpenAppShortcut: () => void;
+declare const disableOpenAppShortcut: () => void;
+
 type ShortcutProps = {
   shortcut: string
   defaultShortcut?: string
-  onStartEditing?: () => void
   onSave: (shortcut: string) => void
 }
 
@@ -17,19 +19,26 @@ export default function ShortcutInput(props: ShortcutProps) {
   const [currentKeys, setCurrentKeys] = useState<string[]>([]);
   const [shortcut, setShortcut] = useState(props.shortcut);
 
+  function startEditing() {
+    setIsEditing(true)
+    disableOpenAppShortcut()
+  }
+
+  function stopEditing() {
+    enableOpenAppShortcut()
+    setIsEditing(false)
+  }
+
   function handleClick() {
     setShortcut('')
-    setIsEditing(true)
-    if (props.onStartEditing) {
-      props.onStartEditing()
-    }
+    startEditing()
   }
 
   function handleBlur() {
     if (!isEditing) {
       return
     }
-    setIsEditing(false)
+    stopEditing()
     if (currentKeys.length == 0) {
       setShortcut('')
       setCurrentKeys([])
@@ -40,6 +49,7 @@ export default function ShortcutInput(props: ShortcutProps) {
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (isEditing) {
       e.preventDefault()
+      e.stopPropagation()
       const key = e.key === ' ' ? 'Space' : e.key;
       let keys: string[] = currentKeys;
       // Add the key to the current keys if it's not already there
@@ -52,7 +62,7 @@ export default function ShortcutInput(props: ShortcutProps) {
         const newShortcut = keys.join(' + ')
         setShortcut(newShortcut)
         setCurrentKeys([])
-        setIsEditing(false)
+        stopEditing()
         props.onSave(newShortcut)
       }
     }
@@ -63,6 +73,7 @@ export default function ShortcutInput(props: ShortcutProps) {
       // Save the new shortcut when the user stops typing
       setCurrentKeys([])
       e.preventDefault()
+      e.stopPropagation()
     }
   }
 
