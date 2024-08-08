@@ -17,6 +17,10 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   [[nodiscard]] std::shared_ptr<molybden::Browser> browser() const;
   [[nodiscard]] std::shared_ptr<AppSettings> settings() const;
 
+  void pause();
+  void resume();
+  bool isPaused() const;
+
   virtual bool init();
   virtual void launch();
 
@@ -57,10 +61,13 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   bool auto_hide_disabled_;
   bool app_window_visible_;
   bool checking_for_updates_;
+  bool app_paused_;
   std::shared_ptr<molybden::App> app_;
+  std::shared_ptr<molybden::Tray> tray_;
   std::shared_ptr<molybden::Browser> app_window_;
   std::shared_ptr<molybden::Browser> settings_window_;
-  std::shared_ptr<molybden::CustomMenuItem> open_menu_item_;
+  std::shared_ptr<molybden::CustomMenuItem> open_app_item_;
+  std::shared_ptr<molybden::CustomMenuItem> pause_resume_item_;
   std::shared_ptr<molybden::CustomMenuItem> check_for_updates_item_;
   std::shared_ptr<AppSettings> settings_;
 

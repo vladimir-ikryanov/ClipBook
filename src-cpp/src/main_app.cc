@@ -23,6 +23,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSetti
       auto_hide_disabled_(false),
       app_window_visible_(false),
       checking_for_updates_(false),
+      app_paused_(false),
       settings_(settings) {
   request_interceptor_ = std::make_shared<UrlRequestInterceptor>();
 }
@@ -34,8 +35,16 @@ bool MainApp::init() {
   };
 
   const auto label = "Open " + app_->name();
-  open_menu_item_ = menu::Item(label, [this](const CustomMenuItemActionArgs &args) {
+  open_app_item_ = menu::Item(label, [this](const CustomMenuItemActionArgs &args) {
     show();
+  });
+
+  pause_resume_item_ = menu::Item("Pause", [this](const CustomMenuItemActionArgs &args) {
+    if (isPaused()) {
+      resume();
+    } else {
+      pause();
+    }
   });
 
   check_for_updates_item_ =
@@ -67,15 +76,17 @@ bool MainApp::init() {
 }
 
 void MainApp::launch() {
-  auto tray = Tray::create(app_);
-  tray->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
-  tray->setMenu(CustomMenu::create(
+  tray_ = Tray::create(app_);
+  tray_->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
+  tray_->setMenu(CustomMenu::create(
       {
-          open_menu_item_,
+          open_app_item_,
           menu::Separator(),
           menu::Item("Settings...", [this](const CustomMenuItemActionArgs &args) {
             showSettingsWindow();
           }),
+          menu::Separator(),
+          pause_resume_item_,
           menu::Separator(),
           menu::Menu("Help", {
               menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
@@ -603,4 +614,18 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getZoomUIOutShortcut", [this]() -> std::string {
     return settings_->getZoomUIOutShortcut();
   });
+}
+
+bool MainApp::isPaused() const {
+  return app_paused_;
+}
+
+void MainApp::pause() {
+  tray_->setImage(app_->getPath(PathKey::kAppResources) + "/pausedTemplate.png");
+  app_paused_ = true;
+}
+
+void MainApp::resume() {
+  tray_->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
+  app_paused_ = false;
 }
