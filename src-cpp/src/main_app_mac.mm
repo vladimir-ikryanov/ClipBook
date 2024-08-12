@@ -263,7 +263,15 @@ void MainAppMac::copyToClipboard(const std::string &text) {
 }
 
 std::string MainAppMac::getUpdateServerUrl() {
+#ifdef ARCH_MAC_X64
+  return "https://clipbook.app/downloads/mac/x64";
+#endif
+#ifdef ARCH_MAC_ARM64
   return "https://clipbook.app/downloads/mac/arm64";
+#endif
+#ifdef ARCH_MAC_UNIVERSAL
+  return "https://clipbook.app/downloads/mac/universal";
+#endif
 }
 
 void MainAppMac::restoreWindowBounds() {
