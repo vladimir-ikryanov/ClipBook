@@ -15,6 +15,8 @@ std::string kProductUpdatesUrl =
     "https://clipbook.app/tags/updates/?utm_source=app&utm_medium=help";
 std::string kContactSupportUrl =
     "mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
+std::string kFeatureRequestUrl =
+    "https://clipbook.app/roadmap/?utm_source=app&utm_medium=help";
 int32_t kUpdateCheckIntervalInHours = 4;
 
 MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSettings> &settings)
@@ -39,7 +41,8 @@ bool MainApp::init() {
     show();
   });
 
-  pause_resume_item_ = menu::Item("Pause", [this](const CustomMenuItemActionArgs &args) {
+  auto pause_label = "Pause " + app_->name();
+  pause_resume_item_ = menu::Item(pause_label, [this](const CustomMenuItemActionArgs &args) {
     if (isPaused()) {
       resume();
     } else {
@@ -82,19 +85,18 @@ void MainApp::launch() {
       {
           open_app_item_,
           menu::Separator(),
-          menu::Item("Settings...", [this](const CustomMenuItemActionArgs &args) {
-            showSettingsWindow();
-          }),
-          menu::Separator(),
-          pause_resume_item_,
-          menu::Separator(),
           menu::Menu("Help", {
               menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
                 app_->desktop()->openUrl(kKeyboardShortcutsUrl);
               }),
+              menu::Separator(),
               menu::Item("Product Updates", [this](const CustomMenuItemActionArgs &args) {
                 app_->desktop()->openUrl(kProductUpdatesUrl);
               }),
+              menu::Item("Feature Request", [this](const CustomMenuItemActionArgs &args) {
+                app_->desktop()->openUrl(kFeatureRequestUrl);
+              }),
+              menu::Separator(),
               menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
                 app_->desktop()->openUrl(kContactSupportUrl);
               }),
@@ -104,6 +106,11 @@ void MainApp::launch() {
             showAboutDialog();
           }),
           check_for_updates_item_,
+          menu::Item("Settings...", [this](const CustomMenuItemActionArgs &args) {
+            showSettingsWindow();
+          }),
+          menu::Separator(),
+          pause_resume_item_,
           menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
             std::thread([this]() {
               app_->quit();
@@ -631,10 +638,12 @@ bool MainApp::isPaused() const {
 
 void MainApp::pause() {
   tray_->setImage(app_->getPath(PathKey::kAppResources) + "/pausedTemplate.png");
+  pause_resume_item_->setTitle("Resume " + app_->name());
   app_paused_ = true;
 }
 
 void MainApp::resume() {
   tray_->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
+  pause_resume_item_->setTitle("Pause " + app_->name());
   app_paused_ = false;
 }
