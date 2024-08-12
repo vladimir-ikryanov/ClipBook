@@ -126,3 +126,8 @@ export function setPreviewVisibleState(visible: boolean) {
 export function getPreviewVisibleState() {
   return previewVisible
 }
+
+export function isUrl(text: string) {
+  const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+  return urlRegex.test(text);
+}

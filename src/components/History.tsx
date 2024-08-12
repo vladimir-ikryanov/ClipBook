@@ -15,7 +15,7 @@ import {
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {
   prefGetClearHistoryShortcut, prefGetCopyToClipboardShortcut,
-  prefGetDeleteHistoryItemShortcut, prefGetEditHistoryItemShortcut,
+  prefGetDeleteHistoryItemShortcut, prefGetEditHistoryItemShortcut, prefGetOpenInBrowserShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
@@ -30,6 +30,7 @@ declare const pasteInFrontApp: (text: string) => void;
 declare const copyToClipboard: (text: string) => void;
 declare const clearEntireHistory: () => void;
 declare const hideAppWindow: () => void;
+declare const openInBrowser: (url: string) => void;
 
 type HistoryProps = {
   items: string[]
@@ -98,6 +99,11 @@ export default function History(props: HistoryProps) {
       // Edit the active item when the edit history item shortcut is pressed.
       if (isShortcutMatch(prefGetEditHistoryItemShortcut(), e)) {
         handleEditContent()
+        e.preventDefault()
+      }
+      // Open the active item in the browser when the open in browser shortcut is pressed.
+      if (isShortcutMatch(prefGetOpenInBrowserShortcut(), e)) {
+        handleOpenInBrowser()
         e.preventDefault()
       }
       // Copy the active item to the clipboard when the copy to clipboard shortcut is pressed.
@@ -194,6 +200,10 @@ export default function History(props: HistoryProps) {
     hideAppWindow()
   }
 
+  function handleOpenInBrowser() {
+    openInBrowser(getActiveHistoryItem())
+  }
+
   function handleSearchHistory() {
     if (searchFieldRef.current) {
       searchFieldRef.current.focus()
@@ -275,6 +285,7 @@ export default function History(props: HistoryProps) {
                              onHideActions={handleHideActions}
                              onEditContent={handleEditContent}
                              onCopyToClipboard={handleCopyToClipboard}
+                             onOpenInBrowser={handleOpenInBrowser}
                              onSearchHistory={handleSearchHistory}
                              onTogglePreview={handleTogglePreview}
                              onDeleteItem={handleDeleteItem}

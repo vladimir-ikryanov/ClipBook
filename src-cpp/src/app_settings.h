@@ -48,6 +48,9 @@ class AppSettings {
   virtual void saveEditHistoryItemShortcut(std::string shortcut) = 0;
   virtual std::string getEditHistoryItemShortcut() = 0;
 
+  virtual void saveOpenInBrowserShortcut(std::string shortcut) = 0;
+  virtual std::string getOpenInBrowserShortcut() = 0;
+
   virtual void saveCopyToClipboardShortcut(std::string shortcut) = 0;
   virtual std::string getCopyToClipboardShortcut() = 0;
 

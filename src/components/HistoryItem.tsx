@@ -2,7 +2,7 @@ import '../App.css';
 import {TabsTrigger} from "@/components/ui/tabs";
 import {Link, File} from "lucide-react";
 import React, {CSSProperties, KeyboardEvent, MouseEvent} from 'react';
-import {getFilterQuery} from "@/data";
+import {getFilterQuery, isUrl} from "@/data";
 
 type HistoryItemProps = {
   index: number
@@ -23,11 +23,6 @@ const HistoryItem = (props: HistoryItemProps) => {
   const handleMouseDoubleClick = (e: MouseEvent) => {
     props.onMouseDoubleClick(props.index)
     e.preventDefault()
-  }
-
-  function isUrl(url: string) {
-    const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
-    return urlRegex.test(url);
   }
 
   function highlightAllMatches(text: string, query: string) {

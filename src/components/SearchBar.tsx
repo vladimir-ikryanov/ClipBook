@@ -6,14 +6,14 @@ import {Button} from "@/components/ui/button";
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {prefGetTogglePreviewShortcut} from "@/pref";
 
-type ToolbarProps = {
+type SearchBarProps = {
   onFilterHistory: (searchQuery: string) => void
   isPreviewVisible: boolean
   onShowHidePreview: () => void
   searchFieldRef?: React.Ref<HTMLInputElement>
 }
 
-export default function ToolBar(props: ToolbarProps) {
+export default function SearchBar(props: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {

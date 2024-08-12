@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import * as React from "react"
 import {
   CopyIcon,
-  Edit3Icon,
+  Edit3Icon, Globe2Icon, GlobeIcon,
   PanelRightClose,
   SearchIcon,
   TrashIcon
@@ -24,6 +24,7 @@ import {
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
+  prefGetOpenInBrowserShortcut,
   prefGetSearchHistoryShortcut,
   prefGetShowMoreActionsShortcut,
   prefGetTogglePreviewShortcut
@@ -31,7 +32,7 @@ import {
 import ShortcutLabel from "@/components/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {getPreviewVisibleState} from "@/data";
+import {getActiveHistoryItem, getPreviewVisibleState, isUrl} from "@/data";
 
 export type HideActionsReason =
     "cancel"
@@ -39,6 +40,7 @@ export type HideActionsReason =
     | "searchHistory"
     | "editContent"
     | "copyToClipboard"
+    | "openInBrowser"
     | "deleteItem"
     | "deleteAllItems"
 
@@ -48,6 +50,7 @@ type ActionsProps = {
   onSearchHistory: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
+  onOpenInBrowser: () => void
   onDeleteItem: () => void
   onDeleteAllItems: () => void
 }
@@ -116,6 +119,16 @@ export default function Actions(props: ActionsProps) {
     props.onDeleteAllItems()
   }
 
+  function handleOpenInBrowser() {
+    closeReason = "openInBrowser"
+    handleOpenChange(false)
+    props.onOpenInBrowser()
+  }
+
+  function isActiveHistoryItemIsUrl() {
+    return isUrl(getActiveHistoryItem())
+  }
+
   return (
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
@@ -127,6 +140,16 @@ export default function Actions(props: ActionsProps) {
         <PopoverContent align="end" className="w-[300px] pt-2 pb-0 px-0" onKeyDown={handleKeyDown}>
           <Command>
             <CommandList>
+              {
+                  isActiveHistoryItemIsUrl() &&
+                  <CommandItem onSelect={handleOpenInBrowser}>
+                    <GlobeIcon className="mr-2 h-4 w-4"/>
+                    <span>Open in Browser</span>
+                    <CommandShortcut className="flex flex-row">
+                      <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
+                    </CommandShortcut>
+                  </CommandItem>
+              }
               <CommandItem onSelect={handleEditContent}>
                 <Edit3Icon className="mr-2 h-4 w-4"/>
                 <span>Edit Content...</span>

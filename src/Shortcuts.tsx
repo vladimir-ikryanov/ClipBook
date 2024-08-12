@@ -8,6 +8,7 @@ import {
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetOpenAppShortcut,
+  prefGetOpenInBrowserShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
@@ -17,10 +18,12 @@ import {
   prefGetZoomUIInShortcut,
   prefGetZoomUIOutShortcut,
   prefSetClearHistoryShortcut,
-  prefSetCloseAppShortcut, prefSetCopyToClipboardShortcut,
+  prefSetCloseAppShortcut,
+  prefSetCopyToClipboardShortcut,
   prefSetDeleteHistoryItemShortcut,
   prefSetEditHistoryItemShortcut,
   prefSetOpenAppShortcut,
+  prefSetOpenInBrowserShortcut,
   prefSetPasteSelectedItemToActiveAppShortcut,
   prefSetSearchHistoryShortcut,
   prefSetSelectNextItemShortcut,
@@ -42,6 +45,7 @@ export default function Shortcuts() {
   const [selectPreviousItemShortcut, setSelectPreviousItemShortcut] = useState(prefGetSelectPreviousItemShortcut());
   const [pasteSelectedItemToActiveAppShortcut, setPasteSelectedItemToActiveAppShortcut] = useState(prefGetPasteSelectedItemToActiveAppShortcut());
   const [editHistoryItemShortcut, setEditHistoryItemShortcut] = useState(prefGetEditHistoryItemShortcut());
+  const [openInBrowserShortcut, setOpenInBrowserShortcut] = useState(prefGetOpenInBrowserShortcut());
   const [copyToClipboardShortcut, setCopyToClipboardShortcut] = useState(prefGetCopyToClipboardShortcut());
   const [deleteHistoryItemShortcut, setDeleteHistoryItemShortcut] = useState(prefGetDeleteHistoryItemShortcut());
   const [clearHistoryShortcut, setClearHistoryShortcut] = useState(prefGetClearHistoryShortcut());
@@ -92,6 +96,11 @@ export default function Shortcuts() {
   function handleEditHistoryItemShortcutChange(shortcut: string) {
     setEditHistoryItemShortcut(shortcut)
     prefSetEditHistoryItemShortcut(shortcut)
+  }
+
+  function handleOpenInBrowserShortcutChange(shortcut: string) {
+    setOpenInBrowserShortcut(shortcut)
+    prefSetOpenInBrowserShortcut(shortcut)
   }
 
   function handleCopyToClipboardShortcutChange(shortcut: string) {
@@ -199,6 +208,12 @@ export default function Shortcuts() {
               <ShortcutInput shortcut={copyToClipboardShortcut}
                              defaultShortcut="Meta + c"
                              onSave={handleCopyToClipboardShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Open in browser</span>
+              <ShortcutInput shortcut={openInBrowserShortcut}
+                             defaultShortcut="Meta + b"
+                             onSave={handleOpenInBrowserShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Edit history item</span>

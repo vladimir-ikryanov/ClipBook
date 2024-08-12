@@ -2,8 +2,8 @@ import '../App.css';
 import {TabsList} from "@/components/ui/tabs";
 import HistoryItem from "@/components/HistoryItem"
 import React from "react";
-import ToolBar from "@/components/ToolBar";
-import StatusBar from "@/components/StatusBar";
+import SearchBar from "@/components/SearchBar";
+import ActionsBar from "@/components/ActionsBar";
 import {FixedSizeList as List} from "react-window";
 import AutoSizer, {Size} from "react-virtualized-auto-sizer";
 import {HideActionsReason} from "@/components/Actions";
@@ -21,6 +21,7 @@ type HistoryItemListProps = {
   onSearchHistory: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
+  onOpenInBrowser: () => void
   onDeleteItem: () => void
   onDeleteAllItems: () => void
   onMouseDoubleClick: (tabIndex: number) => void
@@ -35,10 +36,10 @@ const HistoryItemList = (props: HistoryItemListProps) => {
 
   return (
       <div className="flex flex-col h-screen">
-        <ToolBar onFilterHistory={props.onFilterHistory}
-                 onShowHidePreview={props.onShowHidePreview}
-                 isPreviewVisible={props.isPreviewVisible}
-                 searchFieldRef={props.searchFieldRef}
+        <SearchBar onFilterHistory={props.onFilterHistory}
+                   onShowHidePreview={props.onShowHidePreview}
+                   isPreviewVisible={props.isPreviewVisible}
+                   searchFieldRef={props.searchFieldRef}
         />
         <TabsList loop={false} className="flex h-full p-2">
           <div className="grid h-full w-full">
@@ -72,16 +73,17 @@ const HistoryItemList = (props: HistoryItemListProps) => {
           </div>
         </TabsList>
         <div className="grow"></div>
-        <StatusBar appName={props.appName}
-                   onPaste={props.onPaste}
-                   onClose={props.onClose}
-                   onHideActions={props.onHideActions}
-                   onEditContent={props.onEditContent}
-                   onCopyToClipboard={props.onCopyToClipboard}
-                   onSearchHistory={props.onSearchHistory}
-                   onTogglePreview={props.onTogglePreview}
-                   onDeleteItem={props.onDeleteItem}
-                   onDeleteAllItems={props.onDeleteAllItems}/>
+        <ActionsBar appName={props.appName}
+                    onPaste={props.onPaste}
+                    onClose={props.onClose}
+                    onHideActions={props.onHideActions}
+                    onEditContent={props.onEditContent}
+                    onCopyToClipboard={props.onCopyToClipboard}
+                    onOpenInBrowser={props.onOpenInBrowser}
+                    onSearchHistory={props.onSearchHistory}
+                    onTogglePreview={props.onTogglePreview}
+                    onDeleteItem={props.onDeleteItem}
+                    onDeleteAllItems={props.onDeleteAllItems}/>
       </div>
   )
 }

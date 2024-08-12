@@ -23,6 +23,7 @@ NSString *prefSelectNextItemShortcut = @"app.select_next_item_shortcut";
 NSString *prefSelectPreviousItemShortcut = @"app.select_previous_item_shortcut";
 NSString *prefPasteSelectedItemToActiveAppShortcut = @"app.paste_selected_item_to_active_app_shortcut";
 NSString *prefEditHistoryItemShortcut = @"app.edit_history_item_shortcut";
+NSString *prefOpenInBrowserShortcut = @"app.open_in_browser_shortcut";
 NSString *prefCopyToClipboardShortcut = @"app.copy_to_clipboard_shortcut";
 NSString *prefDeleteHistoryItemShortcut = @"app.delete_history_item_shortcut";
 NSString *prefClearHistoryShortcut = @"app.clear_history_shortcut";
@@ -243,6 +244,21 @@ std::string AppSettingsMac::getEditHistoryItemShortcut() {
     return {[shortcut UTF8String]};
   }
   return "Meta + e";
+}
+
+void AppSettingsMac::saveOpenInBrowserShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefOpenInBrowserShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getOpenInBrowserShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefOpenInBrowserShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Meta + b";
 }
 
 void AppSettingsMac::saveCopyToClipboardShortcut(std::string shortcut) {

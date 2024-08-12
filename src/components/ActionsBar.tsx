@@ -10,7 +10,7 @@ import {
 } from "@/pref";
 import ShortcutLabel from "@/components/ShortcutLabel";
 
-type StatusBarProps = {
+type ActionsBarProps = {
   appName: string
   onPaste: () => void
   onClose: () => void
@@ -19,11 +19,12 @@ type StatusBarProps = {
   onSearchHistory: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
+  onOpenInBrowser: () => void
   onDeleteItem: () => void
   onDeleteAllItems: () => void
 }
 
-export default function StatusBar(props: StatusBarProps) {
+export default function ActionsBar(props: ActionsBarProps) {
   return (
       <div
           className="flex items-center justify-between p-2 border-t-solid border-t-border border-t">
@@ -50,6 +51,7 @@ export default function StatusBar(props: StatusBarProps) {
           <Actions onHideActions={props.onHideActions}
                    onEditContent={props.onEditContent}
                    onCopyToClipboard={props.onCopyToClipboard}
+                   onOpenInBrowser={props.onOpenInBrowser}
                    onSearchHistory={props.onSearchHistory}
                    onTogglePreview={props.onTogglePreview}
                    onDeleteItem={props.onDeleteItem}
