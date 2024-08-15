@@ -36,7 +36,8 @@ type HistoryProps = {
   items: string[]
   appName: string
   onUpdateHistory: () => void
-  onFilterHistory: (searchQuery: string) => void
+  searchQuery: string
+  onSearchQueryChange: (searchQuery: string) => void
 }
 
 export default function History(props: HistoryProps) {
@@ -161,6 +162,8 @@ export default function History(props: HistoryProps) {
 
   function handlePaste(): void {
     pasteInFrontApp(getActiveHistoryItem())
+    // Clear the search query in the search field after paste.
+    handleSearchQueryChange("")
   }
 
   function handleClose(): void {
@@ -232,8 +235,8 @@ export default function History(props: HistoryProps) {
     clearEntireHistory()
   }
 
-  function handleFilterHistory(searchQuery: string): void {
-    props.onFilterHistory(searchQuery)
+  function handleSearchQueryChange(searchQuery: string): void {
+    props.onSearchQueryChange(searchQuery)
     setVisibleActiveHistoryItemIndex(0)
     setActiveTab("0")
     // The props.items array won't be updated until the next render, so we need to get the updated
@@ -273,8 +276,10 @@ export default function History(props: HistoryProps) {
             className="w-full p-0 m-0">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel className="flex flex-col">
-            <HistoryItemList items={props.items} appName={props.appName}
-                             onFilterHistory={handleFilterHistory}
+            <HistoryItemList items={props.items}
+                             appName={props.appName}
+                             searchQuery={props.searchQuery}
+                             onSearchQueryChange={handleSearchQueryChange}
                              onShowHidePreview={handleTogglePreview}
                              onMouseDoubleClick={handleMouseDoubleClick}
                              isPreviewVisible={previewVisible}

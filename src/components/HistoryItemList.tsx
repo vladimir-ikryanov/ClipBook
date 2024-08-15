@@ -11,7 +11,8 @@ import {HideActionsReason} from "@/components/Actions";
 type HistoryItemListProps = {
   items: string[]
   appName: string
-  onFilterHistory: (searchQuery: string) => void
+  searchQuery: string
+  onSearchQueryChange: (searchQuery: string) => void
   isPreviewVisible: boolean
   onShowHidePreview: () => void
   onPaste: () => void
@@ -36,7 +37,8 @@ const HistoryItemList = (props: HistoryItemListProps) => {
 
   return (
       <div className="flex flex-col h-screen">
-        <SearchBar onFilterHistory={props.onFilterHistory}
+        <SearchBar searchQuery={props.searchQuery}
+                   onSearchQueryChange={props.onSearchQueryChange}
                    onShowHidePreview={props.onShowHidePreview}
                    isPreviewVisible={props.isPreviewVisible}
                    searchFieldRef={props.searchFieldRef}

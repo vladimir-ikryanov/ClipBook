@@ -15,7 +15,7 @@ declare const zoomOut: () => void;
 export default function App() {
   const [history, setHistory] = useState(getHistoryItems())
   const [appName, setAppName] = useState("")
-  const [isVisible, setIsVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -52,7 +52,8 @@ export default function App() {
     setHistory(getHistoryItems())
   }
 
-  function handleFilterHistory(searchQuery: string): void {
+  function handleSearchQueryChange(searchQuery: string): void {
+    setSearchQuery(searchQuery)
     setFilterQuery(searchQuery)
     setHistory(getHistoryItems())
   }
@@ -89,8 +90,8 @@ export default function App() {
 
   return (
     <ThemeProvider defaultTheme="system">
-        <History items={history} appName={appName} onUpdateHistory={handleUpdateHistory}
-                 onFilterHistory={handleFilterHistory}/>
+        <History items={history} appName={appName} searchQuery={searchQuery} onUpdateHistory={handleUpdateHistory}
+                 onSearchQueryChange={handleSearchQueryChange}/>
       </ThemeProvider>
   )
 }
