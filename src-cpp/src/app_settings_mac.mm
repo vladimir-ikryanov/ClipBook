@@ -258,7 +258,7 @@ std::string AppSettingsMac::getOpenInBrowserShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + b";
+  return "Alt + Enter";
 }
 
 void AppSettingsMac::saveCopyToClipboardShortcut(std::string shortcut) {

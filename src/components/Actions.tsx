@@ -150,6 +150,9 @@ export default function Actions(props: ActionsProps) {
                     </CommandShortcut>
                   </CommandItem>
               }
+              {
+                  isActiveHistoryItemIsUrl() && <CommandSeparator/>
+              }
               <CommandItem onSelect={handleEditContent}>
                 <Edit3Icon className="mr-2 h-4 w-4"/>
                 <span>Edit Content...</span>

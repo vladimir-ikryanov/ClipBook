@@ -9,7 +9,7 @@ import {
   deleteHistoryItem,
   getActiveHistoryItem, getHistoryItems, getPreviewVisibleState,
   getVisibleActiveHistoryItemIndex,
-  getVisibleHistoryItemsLength, setPreviewVisibleState,
+  getVisibleHistoryItemsLength, isUrl, setPreviewVisibleState,
   setVisibleActiveHistoryItemIndex, updateHistoryItem
 } from "@/data";
 import {isShortcutMatch} from "@/lib/shortcuts";
@@ -204,7 +204,10 @@ export default function History(props: HistoryProps) {
   }
 
   function handleOpenInBrowser() {
-    openInBrowser(getActiveHistoryItem())
+    let item = getActiveHistoryItem()
+    if (isUrl(item)) {
+      openInBrowser(item)
+    }
   }
 
   function handleSearchHistory() {
