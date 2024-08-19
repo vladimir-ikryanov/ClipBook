@@ -404,8 +404,20 @@ void MainApp::showAboutDialog() {
   MessageDialogOptions options;
   options.title = "About " + app_->name();
   options.message = app_->name();
+
+  std::string arch = "";
+#ifdef ARCH_MAC_X64
+  arch = "(Intel)";
+#endif
+#ifdef ARCH_MAC_ARM64
+  arch = "(Apple Silicon)";
+#endif
+#ifdef ARCH_MAC_UNIVERSAL
+  arch = "(Universal)";
+#endif
+
   options.informative_text =
-      "Version " + app_->version() + "\n\n© 2024 ClipBook. All rights reserved.";
+      "Version " + app_->version() + " " + arch + "\n\n© 2024 ClipBook. All rights reserved.";
   options.buttons = {
       MessageDialogButton("Visit Website", MessageDialogButtonType::kNone),
       MessageDialogButton("Close", MessageDialogButtonType::kDefault)
