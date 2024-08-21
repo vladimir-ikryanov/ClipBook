@@ -40,6 +40,8 @@ declare const saveZoomUIInShortcut: (shortcut: string) => void;
 declare const getZoomUIInShortcut: () => string;
 declare const saveZoomUIOutShortcut: (shortcut: string) => void;
 declare const getZoomUIOutShortcut: () => string;
+declare const saveOpenSettingsShortcut: (shortcut: string) => void;
+declare const getOpenSettingsShortcut: () => string;
 
 export function prefGetTheme() {
   return getTheme()
@@ -207,4 +209,12 @@ export function prefGetZoomUIOutShortcut() {
 
 export function prefSetZoomUIOutShortcut(shortcut: string) {
   saveZoomUIOutShortcut(shortcut)
+}
+
+export function prefGetOpenSettingsShortcut() {
+  return getOpenSettingsShortcut()
+}
+
+export function prefSetOpenSettingsShortcut(shortcut: string) {
+  saveOpenSettingsShortcut(shortcut)
 }

@@ -9,6 +9,7 @@ import {
   prefGetEditHistoryItemShortcut,
   prefGetOpenAppShortcut,
   prefGetOpenInBrowserShortcut,
+  prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
@@ -24,6 +25,7 @@ import {
   prefSetEditHistoryItemShortcut,
   prefSetOpenAppShortcut,
   prefSetOpenInBrowserShortcut,
+  prefSetOpenSettingsShortcut,
   prefSetPasteSelectedItemToActiveAppShortcut,
   prefSetSearchHistoryShortcut,
   prefSetSelectNextItemShortcut,
@@ -54,6 +56,7 @@ export default function Shortcuts() {
   const [showMoreActionsShortcut, setShowMoreActionsShortcut] = useState(prefGetShowMoreActionsShortcut());
   const [zoomUIInShortcut, setZoomUIInShortcut] = useState(prefGetZoomUIInShortcut());
   const [zoomUIOutShortcut, setZoomUIOutShortcut] = useState(prefGetZoomUIOutShortcut());
+  const [openSettingsShortcut, setOpenSettingsShortcut] = useState(prefGetOpenSettingsShortcut());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -141,6 +144,11 @@ export default function Shortcuts() {
   function handleZoomUIOutShortcutChange(shortcut: string) {
     setZoomUIOutShortcut(shortcut)
     prefSetZoomUIOutShortcut(shortcut)
+  }
+
+  function handleOpenSettingsShortcutChange(shortcut: string) {
+    setOpenSettingsShortcut(shortcut)
+    prefSetOpenSettingsShortcut(shortcut)
   }
 
   return (
@@ -262,6 +270,12 @@ export default function Shortcuts() {
               <ShortcutInput shortcut={zoomUIOutShortcut}
                              defaultShortcut="Meta + -"
                              onSave={handleZoomUIOutShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Open Settings</span>
+              <ShortcutInput shortcut={openSettingsShortcut}
+                             defaultShortcut="Meta + ,"
+                             onSave={handleOpenSettingsShortcutChange}/>
             </div>
             <div className="grow"></div>
           </div>

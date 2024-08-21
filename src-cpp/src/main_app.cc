@@ -497,6 +497,11 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
       settings_window_->close();
     }
   });
+  window->putProperty("openSettingsWindow", [this]() {
+    hide();
+    activate();
+    showSettingsWindow();
+  });
   window->putProperty("clearEntireHistory", [this]() {
     clearHistory();
   });
@@ -641,6 +646,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("getZoomUIOutShortcut", [this]() -> std::string {
     return settings_->getZoomUIOutShortcut();
+  });
+  window->putProperty("saveOpenSettingsShortcut", [this](std::string shortcut) -> void {
+    settings_->saveOpenSettingsShortcut(shortcut);
+  });
+  window->putProperty("getOpenSettingsShortcut", [this]() -> std::string {
+    return settings_->getOpenSettingsShortcut();
   });
 }
 
