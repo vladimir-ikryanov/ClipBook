@@ -74,7 +74,7 @@ export default function Privacy() {
               <Label htmlFor="ignoreConfidential" className="flex flex-col text-base">
                 <span className="">Ignore confidential content</span>
                 <span className="text-neutral-500 font-normal text-sm">
-              Do not save passwords and other sensitive data copied to the&nbsp;clipboard
+              Do not save passwords and other sensitive data copied to the&nbsp;clipboard.
             </span>
               </Label>
               <Switch id="ignoreConfidential" checked={ignoreConfidentialContent}
@@ -84,7 +84,7 @@ export default function Privacy() {
               <Label htmlFor="ignoreTransient" className="flex flex-col text-base">
                 <span className="">Ignore transient content</span>
                 <span className="text-neutral-500 font-normal text-sm">
-              Do not save data temporarily placed to the&nbsp;clipboard
+              Do not save data temporarily placed to the&nbsp;clipboard.
             </span>
               </Label>
               <Switch id="ignoreTransient" checked={ignoreTransientContent}

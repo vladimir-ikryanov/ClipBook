@@ -49,6 +49,9 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
                                  const std::function<void()> &complete);
   void showSettingsWindow();
   void setTheme(const std::string &theme);
+  void setShowIconInMenuBar(bool show);
+  void createTray();
+  void destroyTray();
   void initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &window);
 
   virtual void enableOpenAppShortcut() = 0;

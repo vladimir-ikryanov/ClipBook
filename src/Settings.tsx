@@ -5,10 +5,11 @@ import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {useEffect, useState} from "react";
 import {
   prefGetCheckForUpdatesAutomatically,
-  prefGetOpenAtLogin,
+  prefGetOpenAtLogin, prefGetShowIconInMenuBar,
   prefGetTheme,
-  prefGetWarnOnClearHistory, prefSetCheckForUpdatesAutomatically,
-  prefSetOpenAtLogin,
+  prefGetWarnOnClearHistory,
+  prefSetCheckForUpdatesAutomatically,
+  prefSetOpenAtLogin, prefSetShowIconInMenuBar,
   prefSetTheme,
   prefSetWarnOnClearHistory,
 } from "@/pref";
@@ -21,6 +22,7 @@ export default function Settings() {
   const [openAtLogin, setOpenAtLogin] = useState(prefGetOpenAtLogin());
   const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory());
   const [checkForUpdatesAutomatically, setCheckForUpdatesAutomatically] = useState(prefGetCheckForUpdatesAutomatically());
+  const [showIconInMenuBar, setShowIconInMenuBar] = useState(prefGetShowIconInMenuBar());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -52,6 +54,11 @@ export default function Settings() {
   function handleWarnOnClearHistoryChange(warnOnClearHistory: boolean) {
     setWarnOnClearHistory(warnOnClearHistory)
     prefSetWarnOnClearHistory(warnOnClearHistory)
+  }
+
+  function handleShowIconChange(showIcon: boolean) {
+    setShowIconInMenuBar(showIcon)
+    prefSetShowIconInMenuBar(showIcon)
   }
 
   return (
@@ -90,7 +97,7 @@ export default function Settings() {
               <Label htmlFor="openAtLogin" className="flex flex-col text-base">
                 <span className="">Launch at login</span>
                 <span className="text-neutral-500 font-normal text-sm">
-Launch ClipBook automatically at&nbsp;login
+Launch ClipBook automatically at&nbsp;login.
             </span>
               </Label>
               <Switch id="openAtLogin" checked={openAtLogin}
@@ -101,11 +108,22 @@ Launch ClipBook automatically at&nbsp;login
               <Label htmlFor="openAtLogin" className="flex flex-col text-base">
                 <span className="">Check for updates automatically</span>
                 <span className="text-neutral-500 font-normal text-sm">
-ClipBook will check for updates automatically and notify you when a new version is&nbsp;available
+ClipBook will check for updates automatically and notify you when a new version is&nbsp;available.
             </span>
               </Label>
               <Switch id="openAtLogin" checked={checkForUpdatesAutomatically}
                       onCheckedChange={handleCheckForUpdatesAutomaticallyChange}/>
+            </div>
+
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label htmlFor="showIcon" className="flex flex-col text-base">
+                <span className="">Show icon in menu bar</span>
+                <span className="text-neutral-500 font-normal text-sm">
+                  Display the ClipBook app icon in the menu&nbsp;bar.
+                </span>
+              </Label>
+              <Switch id="showIcon" checked={showIconInMenuBar}
+                      onCheckedChange={handleShowIconChange}/>
             </div>
 
             <hr/>
@@ -113,7 +131,7 @@ ClipBook will check for updates automatically and notify you when a new version 
             <div className="flex justify-between space-x-10 py-1">
               <Label className="flex flex-col text-base">
                 <span className="">Appearance</span>
-                <span className="text-neutral-500 font-normal text-sm">Change how ClipBook looks on your&nbsp;device</span>
+                <span className="text-neutral-500 font-normal text-sm">Change how ClipBook looks on your&nbsp;device.</span>
               </Label>
 
               <RadioGroup value={theme} onValueChange={handleThemeChange}>
@@ -161,7 +179,7 @@ ClipBook will check for updates automatically and notify you when a new version 
               <Label htmlFor="warnOnClearAll" className="flex flex-col text-base">
                 <span className="">Warn when clearing all history</span>
                 <span className="text-neutral-500 font-normal text-sm">
-Display a confirmation dialog when clearing all clipboard&nbsp;history
+Display a confirmation dialog when clearing all clipboard&nbsp;history.
             </span>
               </Label>
               <Switch id="warnOnClearAll" checked={warnOnClearHistory}

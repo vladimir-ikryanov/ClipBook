@@ -17,6 +17,7 @@ NSString *prefIgnoreTransientContent = @"privacy.ignore_transient_content";
 NSString *prefOpenAtLogin = @"app.open_at_login";
 NSString *prefCheckForUpdatesAutomatically = @"app.check_for_updates_automatically";
 NSString *prefWarnOnClearHistory = @"app.warn_on_clear_history";
+NSString *prefShowIconInMenuBar = @"app.show_icon_in_menu_bar";
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut";
 NSString *prefCloseAppShortcut = @"app.close_app_shortcut";
 NSString *prefSelectNextItemShortcut = @"app.select_next_item_shortcut";
@@ -153,6 +154,20 @@ bool AppSettingsMac::shouldWarnOnClearHistory() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:prefWarnOnClearHistory] != nil) {
     return [defaults boolForKey:prefWarnOnClearHistory];
+  }
+  return true;
+}
+
+void AppSettingsMac::saveShowIconInMenuBar(bool show) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:show forKey:prefShowIconInMenuBar];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldShowIconInMenuBar() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefShowIconInMenuBar] != nil) {
+    return [defaults boolForKey:prefShowIconInMenuBar];
   }
   return true;
 }
@@ -384,8 +399,8 @@ std::string AppSettingsMac::getZoomUIOutShortcut() {
 
 void AppSettingsMac::saveOpenSettingsShortcut(std::string shortcut) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefOpenSettingsShortcut];
-    [defaults synchronize];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefOpenSettingsShortcut];
+  [defaults synchronize];
 }
 
 std::string AppSettingsMac::getOpenSettingsShortcut() {

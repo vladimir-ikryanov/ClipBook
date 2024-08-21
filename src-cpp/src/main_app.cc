@@ -86,42 +86,9 @@ bool MainApp::init() {
 }
 
 void MainApp::launch() {
-  tray_ = Tray::create(app_);
-  tray_->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
-  tray_->setMenu(CustomMenu::create(
-      {
-          open_app_item_,
-          menu::Separator(),
-          menu::Menu("Help", {
-              menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
-                app_->desktop()->openUrl(kKeyboardShortcutsUrl);
-              }),
-              menu::Separator(),
-              menu::Item("Product Updates", [this](const CustomMenuItemActionArgs &args) {
-                app_->desktop()->openUrl(kProductUpdatesUrl);
-              }),
-              menu::Item("Feature Request", [this](const CustomMenuItemActionArgs &args) {
-                app_->desktop()->openUrl(kFeatureRequestUrl);
-              }),
-              menu::Separator(),
-              menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
-                app_->desktop()->openUrl(kContactSupportUrl);
-              }),
-          }),
-          menu::Separator(),
-          menu::Item("About " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
-            showAboutDialog();
-          }),
-          check_for_updates_item_,
-          open_settings_item_,
-          menu::Separator(),
-          pause_resume_item_,
-          menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
-            std::thread([this]() {
-              app_->quit();
-            }).detach();
-          })
-      }));
+  if (settings_->shouldShowIconInMenuBar()) {
+    createTray();
+  }
 
   app_window_ = Browser::create(app_);
   app_window_->settings()->disableOverscrollHistoryNavigation();
@@ -564,6 +531,14 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("shouldWarnOnClearHistory", [this]() -> bool {
     return settings_->shouldWarnOnClearHistory();
   });
+  window->putProperty("saveShowIconInMenuBar", [this](bool show) -> void {
+    setShowIconInMenuBar(show);
+    settings_->saveShowIconInMenuBar(show);
+  });
+  window->putProperty("shouldShowIconInMenuBar", [this]() -> bool {
+    return settings_->shouldShowIconInMenuBar();
+  });
+
   window->putProperty("saveOpenAppShortcut", [this](std::string shortcut) -> void {
     settings_->saveOpenAppShortcut(shortcut);
   });
@@ -677,4 +652,61 @@ void MainApp::resume() {
   tray_->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
   pause_resume_item_->setTitle("Pause " + app_->name());
   app_paused_ = false;
+}
+
+void MainApp::setShowIconInMenuBar(bool show) {
+  if (show) {
+    createTray();
+  } else {
+    destroyTray();
+  }
+}
+
+void MainApp::createTray() {
+  if (tray_ && !tray_->isDestroyed()) {
+    return;
+  }
+
+  tray_ = Tray::create(app_);
+  tray_->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
+  tray_->setMenu(CustomMenu::create(
+      {
+          open_app_item_,
+          menu::Separator(),
+          menu::Menu("Help", {
+              menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
+                app_->desktop()->openUrl(kKeyboardShortcutsUrl);
+              }),
+              menu::Separator(),
+              menu::Item("Product Updates", [this](const CustomMenuItemActionArgs &args) {
+                app_->desktop()->openUrl(kProductUpdatesUrl);
+              }),
+              menu::Item("Feature Request", [this](const CustomMenuItemActionArgs &args) {
+                app_->desktop()->openUrl(kFeatureRequestUrl);
+              }),
+              menu::Separator(),
+              menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
+                app_->desktop()->openUrl(kContactSupportUrl);
+              }),
+          }),
+          menu::Separator(),
+          menu::Item("About " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
+            showAboutDialog();
+          }),
+          check_for_updates_item_,
+          open_settings_item_,
+          menu::Separator(),
+          pause_resume_item_,
+          menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
+            std::thread([this]() {
+              app_->quit();
+            }).detach();
+          })
+      }));
+}
+
+void MainApp::destroyTray() {
+  if (tray_ && !tray_->isDestroyed()) {
+    tray_->destroy();
+  }
 }

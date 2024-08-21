@@ -10,6 +10,9 @@ declare const saveIgnoreTransientContent: (ignore: boolean) => void;
 declare const saveIgnoreConfidentialContent: (ignore: boolean) => void;
 declare const shouldIgnoreTransientContent: () => boolean;
 declare const shouldIgnoreConfidentialContent: () => boolean;
+declare const saveShowIconInMenuBar: (showIcon: boolean) => void;
+declare const shouldShowIconInMenuBar: () => boolean;
+
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
 declare const saveCloseAppShortcut: (shortcut: string) => void;
@@ -217,4 +220,12 @@ export function prefGetOpenSettingsShortcut() {
 
 export function prefSetOpenSettingsShortcut(shortcut: string) {
   saveOpenSettingsShortcut(shortcut)
+}
+
+export function prefSetShowIconInMenuBar(showIcon: boolean) {
+  saveShowIconInMenuBar(showIcon)
+}
+
+export function prefGetShowIconInMenuBar() {
+  return shouldShowIconInMenuBar()
 }

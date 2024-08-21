@@ -30,6 +30,9 @@ class AppSettings {
   virtual void saveWarnOnClearHistory(bool warn) = 0;
   virtual bool shouldWarnOnClearHistory() = 0;
 
+  virtual void saveShowIconInMenuBar(bool show) = 0;
+  virtual bool shouldShowIconInMenuBar() = 0;
+
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;
   virtual std::string getOpenAppShortcut() = 0;
 

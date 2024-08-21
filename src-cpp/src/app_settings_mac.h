@@ -30,6 +30,9 @@ class AppSettingsMac : public AppSettings {
   void saveWarnOnClearHistory(bool warn) override;
   bool shouldWarnOnClearHistory() override;
 
+  void saveShowIconInMenuBar(bool show) override;
+  bool shouldShowIconInMenuBar() override;
+
   void saveOpenAppShortcut(std::string shortcut) override;
   std::string getOpenAppShortcut() override;
 
