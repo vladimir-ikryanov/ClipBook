@@ -16,10 +16,10 @@ class ClipboardReader {
  private:
   explicit ClipboardReader(const std::shared_ptr<MainApp> &app);
 
-  std::shared_ptr<ClipboardData> readClipboardData(const std::shared_ptr<ClipboardDataType> &type);
+  bool readClipboardData(const std::shared_ptr<ClipboardDataType> &type);
 
   std::shared_ptr<MainApp> app_;
-  std::shared_ptr<ClipboardData> clipboard_data_;
+  std::string data_;
 };
 
 #endif // CLIPBOOK_CLIPBOARD_READER_H_

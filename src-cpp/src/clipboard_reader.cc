@@ -3,6 +3,8 @@
 #include <memory>
 #include <thread>
 
+static int kCheckIntervalInSeconds = 1;
+
 std::shared_ptr<ClipboardReader>
 ClipboardReader::create(const std::shared_ptr<MainApp> &app) {
   std::shared_ptr<ClipboardReader> manager(new ClipboardReader(app));
@@ -16,15 +18,13 @@ ClipboardReader::ClipboardReader(const std::shared_ptr<MainApp> &app) : app_(app
 void ClipboardReader::start() {
   std::thread t([this]() {
     while (true) {
-      std::this_thread::sleep_for(std::chrono::seconds(1));
+      std::this_thread::sleep_for(std::chrono::seconds(kCheckIntervalInSeconds));
       if (app_->isPaused()) {
         continue;
       }
-      auto data = readClipboardData(ClipboardDataType::plainText());
-      if (data) {
-        std::string data_str(reinterpret_cast<const char *>(data->data()), data->size());
+      if (readClipboardData(ClipboardDataType::plainText())) {
         const JsValue &js_window = app_->browser()->mainFrame()->executeJavaScript("window");
-        js_window.asJsObject()->call("addClipboardData", data_str);
+        js_window.asJsObject()->call("addClipboardData", data_);
       }
     }
   });
@@ -32,8 +32,7 @@ void ClipboardReader::start() {
 }
 #pragma clang diagnostic pop
 
-std::shared_ptr<ClipboardData> ClipboardReader::readClipboardData(
-    const std::shared_ptr<ClipboardDataType> &type) {
+bool ClipboardReader::readClipboardData(const std::shared_ptr<ClipboardDataType> &type) {
   auto settings = app_->settings();
   bool ignore_transient_content = settings->shouldIgnoreTransientContent();
   bool ignore_confidential_content = settings->shouldIgnoreConfidentialContent();
@@ -41,19 +40,20 @@ std::shared_ptr<ClipboardData> ClipboardReader::readClipboardData(
   for (const auto &data : clipboard_data) {
     auto mime_type = data->type()->mimeType();
     if (ignore_transient_content && mime_type == "org.nspasteboard.TransientType") {
-      return {};
+      return false;
     }
     if (ignore_confidential_content && mime_type == "org.nspasteboard.ConcealedType") {
-      return {};
+      return false;
     }
   }
   for (const auto &data : clipboard_data) {
     if (data->type()->mimeType() == type->mimeType()) {
-      if (clipboard_data_ == nullptr || clipboard_data_->size() != data->size()) {
-        clipboard_data_ = data;
-        return clipboard_data_;
+      std::string data_str(reinterpret_cast<const char *>(data->data()), data->size());
+      if (data_ != data_str) {
+        data_ = std::move(data_str);
+        return true;
       }
     }
   }
-  return {};
+  return false;
 }
