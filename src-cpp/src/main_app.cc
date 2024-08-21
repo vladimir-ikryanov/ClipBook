@@ -668,7 +668,11 @@ void MainApp::createTray() {
   }
 
   tray_ = Tray::create(app_);
-  tray_->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
+  if (app_paused_) {
+    tray_->setImage(app_->getPath(PathKey::kAppResources) + "/pausedTemplate.png");
+  } else {
+    tray_->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
+  }
   tray_->setMenu(CustomMenu::create(
       {
           open_app_item_,
