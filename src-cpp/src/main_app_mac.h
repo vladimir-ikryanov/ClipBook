@@ -25,6 +25,7 @@ class MainAppMac : public MainApp {
  protected:
   void enableOpenAppShortcut() override;
   void disableOpenAppShortcut() override;
+  void updateOpenSettingsShortcut() override;
   std::string getUserDataDir() override;
   std::string getUpdateServerUrl() override;
 
@@ -39,6 +40,7 @@ class MainAppMac : public MainApp {
 
  private:
   molybden::Shortcut open_app_shortcut_;
+  molybden::Shortcut open_settings_shortcut_;
 #ifdef __OBJC__
   NSRunningApplication *active_app_{};
 #endif

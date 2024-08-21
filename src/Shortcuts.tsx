@@ -39,6 +39,7 @@ import {KeyboardIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 
 declare const enableOpenAppShortcut: () => void;
 declare const closeSettingsWindow: () => void;
+declare const updateOpenSettingsShortcut: () => void;
 
 export default function Shortcuts() {
   const [openAppShortcut, setOpenAppShortcut] = useState(prefGetOpenAppShortcut());
@@ -149,6 +150,7 @@ export default function Shortcuts() {
   function handleOpenSettingsShortcutChange(shortcut: string) {
     setOpenSettingsShortcut(shortcut)
     prefSetOpenSettingsShortcut(shortcut)
+    updateOpenSettingsShortcut()
   }
 
   return (

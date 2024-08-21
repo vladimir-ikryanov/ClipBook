@@ -195,6 +195,12 @@ void MainAppMac::disableOpenAppShortcut() {
   }
 }
 
+void MainAppMac::updateOpenSettingsShortcut() {
+  auto shortcut_str = settings_->getOpenSettingsShortcut();
+  open_settings_shortcut_ = createShortcut(shortcut_str);
+  open_settings_item_->setShortcut(open_settings_shortcut_);
+}
+
 std::string MainAppMac::getUserDataDir() {
   std::string user_home_dir = std::getenv("HOME");
   return user_home_dir + "/Library/Application Support/" + app_->name();

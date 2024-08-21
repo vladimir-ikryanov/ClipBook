@@ -53,6 +53,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
 
   virtual void enableOpenAppShortcut() = 0;
   virtual void disableOpenAppShortcut() = 0;
+  virtual void updateOpenSettingsShortcut() = 0;
   virtual std::string getUserDataDir() = 0;
   virtual std::string getUpdateServerUrl() = 0;
 
@@ -67,6 +68,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   std::shared_ptr<molybden::Browser> app_window_;
   std::shared_ptr<molybden::Browser> settings_window_;
   std::shared_ptr<molybden::CustomMenuItem> open_app_item_;
+  std::shared_ptr<molybden::CustomMenuItem> open_settings_item_;
   std::shared_ptr<molybden::CustomMenuItem> pause_resume_item_;
   std::shared_ptr<molybden::CustomMenuItem> check_for_updates_item_;
   std::shared_ptr<AppSettings> settings_;

@@ -41,6 +41,10 @@ bool MainApp::init() {
     show();
   });
 
+  open_settings_item_ = menu::Item("Settings...", [this](const CustomMenuItemActionArgs &args) {
+    showSettingsWindow();
+  });
+
   auto pause_label = "Pause " + app_->name();
   pause_resume_item_ = menu::Item(pause_label, [this](const CustomMenuItemActionArgs &args) {
     if (isPaused()) {
@@ -60,6 +64,9 @@ bool MainApp::init() {
 
   // Register a global shortcut to show the app.
   enableOpenAppShortcut();
+
+  // Update the open settings shortcut.
+  updateOpenSettingsShortcut();
 
   // Run the update checker.
   runUpdateChecker();
@@ -106,9 +113,7 @@ void MainApp::launch() {
             showAboutDialog();
           }),
           check_for_updates_item_,
-          menu::Item("Settings...", [this](const CustomMenuItemActionArgs &args) {
-            showSettingsWindow();
-          }),
+          open_settings_item_,
           menu::Separator(),
           pause_resume_item_,
           menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
@@ -516,6 +521,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("disableOpenAppShortcut", [this]() {
     disableOpenAppShortcut();
+  });
+  window->putProperty("updateOpenSettingsShortcut", [this]() {
+    updateOpenSettingsShortcut();
   });
 
   window->putProperty("saveTheme", [this](std::string theme) -> void {
