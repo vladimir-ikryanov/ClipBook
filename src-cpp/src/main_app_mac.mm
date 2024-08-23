@@ -2,6 +2,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
+#import <ApplicationServices/ApplicationServices.h>
 
 #define KEY_CODE_V ((CGKeyCode)9)
 
@@ -255,6 +256,10 @@ void MainAppMac::paste() {
 }
 
 void MainAppMac::paste(const std::string &text) {
+  if (!isAccessibilityAccessGranted()) {
+    showAccessibilityAccessDialog(text);
+    return;
+  }
   // Hide the browser window and activate the previously active app.
   hide();
   copyToClipboard(text);
@@ -422,4 +427,35 @@ bool MainAppMac::isAppInLoginItems() {
 
   CFRelease(login_items_ref);
   return found;
+}
+
+bool MainAppMac::isAccessibilityAccessGranted() {
+  return AXIsProcessTrusted();
+}
+
+void MainAppMac::showAccessibilityAccessDialog(const std::string &text) {
+  MessageDialogOptions options;
+  options.message = "Accessibility access required";
+  options.informative_text = "ClipBook needs accessibility access to paste directly into other apps.";
+  options.buttons = {
+      MessageDialogButton("Enable Accessibility Access", MessageDialogButtonType::kDefault),
+      MessageDialogButton("Copy to Clipboard"),
+      MessageDialogButton("Cancel", MessageDialogButtonType::kCancel)
+  };
+  auto_hide_disabled_ = true;
+  MessageDialog::show(app_window_, options, [this, text](const MessageDialogResult &result) {
+    auto_hide_disabled_ = false;
+    if (result.button.type == MessageDialogButtonType::kDefault) {
+      hide();
+      showSystemAccessibilityPreferencesDialog();
+    }
+    if (result.button.type == MessageDialogButtonType::kNone) {
+      hide();
+      copyToClipboard(text);
+    }
+  });
+}
+
+void MainAppMac::showSystemAccessibilityPreferencesDialog() {
+  [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"]];
 }

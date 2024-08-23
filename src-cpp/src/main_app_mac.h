@@ -29,6 +29,10 @@ class MainAppMac : public MainApp {
   std::string getUserDataDir() override;
   std::string getUpdateServerUrl() override;
 
+  bool isAccessibilityAccessGranted();
+  void showAccessibilityAccessDialog(const std::string &text);
+  void showSystemAccessibilityPreferencesDialog();
+
  private:
   void restoreWindowBounds();
   void saveWindowBounds();
