@@ -1,5 +1,5 @@
-import History from "@/components/History";
-import {ThemeProvider} from "@/components/theme-provider"
+import HistoryPane from "@/components/HistoryPane";
+import {ThemeProvider} from "@/components/ThemeProvider"
 
 import {addHistoryItem, clear, getHistoryItems, isHistoryEmpty, setFilterQuery} from "@/data"
 import {useEffect, useState} from "react";
@@ -55,8 +55,11 @@ export default function App() {
     return () => document.removeEventListener("keydown", down)
   }, [])
 
-  function addClipboardData(data: string): void {
-    setHistory([...addHistoryItem(data)])
+  function addClipboardData(content: string, sourceAppId: string, sourceAppName: string): void {
+    setHistory([...addHistoryItem({
+      content: content,
+      sourceApp: {id: sourceAppId, name: sourceAppName}
+    })])
   }
 
   function handleUpdateHistory(): void {
@@ -97,12 +100,16 @@ export default function App() {
             </div>
           </div>
         </ThemeProvider>
-  )}
+    )
+  }
 
   return (
-    <ThemeProvider defaultTheme="system">
-        <History items={history} appName={appName} searchQuery={searchQuery} onUpdateHistory={handleUpdateHistory}
-                 onSearchQueryChange={handleSearchQueryChange}/>
+      <ThemeProvider defaultTheme="system">
+        <HistoryPane history={history}
+                     appName={appName}
+                     searchQuery={searchQuery}
+                     onUpdateHistory={handleUpdateHistory}
+                     onSearchQueryChange={handleSearchQueryChange}/>
       </ThemeProvider>
   )
 }

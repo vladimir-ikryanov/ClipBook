@@ -8,6 +8,11 @@
 #include "app_settings.h"
 #include "url_request_interceptor.h"
 
+struct AppInfo {
+  std::string id;
+  std::string name;
+};
+
 class MainApp : public std::enable_shared_from_this<MainApp> {
  public:
   explicit MainApp(const std::shared_ptr<molybden::App> &app,
@@ -31,6 +36,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   virtual void paste(const std::string &text) = 0;
   virtual void copyToClipboard(const std::string &text) = 0;
   virtual void setOpenAtLogin(bool open) = 0;
+  virtual AppInfo getActiveAppInfo() = 0;
 
  protected:
   void setActiveAppName(const std::string &app_name);

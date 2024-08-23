@@ -2,18 +2,18 @@ import '../App.css';
 import {TabsTrigger} from "@/components/ui/tabs";
 import {Link, File} from "lucide-react";
 import React, {CSSProperties, KeyboardEvent, MouseEvent} from 'react';
-import {getFilterQuery, isUrl} from "@/data";
+import {getFilterQuery, HistoryItem, isUrl} from "@/data";
 
-type HistoryItemProps = {
+type HistoryItemPaneProps = {
   index: number
   historySize: number
-  text: string
+  item: HistoryItem
   onMouseDoubleClick: (tabIndex: number) => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>
   style: CSSProperties
 }
 
-const HistoryItem = (props: HistoryItemProps) => {
+const HistoryItemPane = (props: HistoryItemPaneProps) => {
   const keyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.stopPropagation()
@@ -56,7 +56,7 @@ const HistoryItem = (props: HistoryItemProps) => {
           onDoubleClick={handleMouseDoubleClick}>
         <div className="flex mr-3 text-primary-foreground">
           {
-            isUrl(props.text) ?
+            isUrl(props.item.content) ?
                 <Link className="h-5 w-5"/> :
                 <File className="h-5 w-5"/>
           }
@@ -64,11 +64,11 @@ const HistoryItem = (props: HistoryItemProps) => {
         <div
             className="flex-grow text-base text-justify font-normal whitespace-nowrap overflow-hidden overflow-ellipsis">
           {
-            highlightAllMatches(props.text, getFilterQuery())
+            highlightAllMatches(props.item.content, getFilterQuery())
           }
         </div>
       </TabsTrigger>
   )
 }
 
-export default HistoryItem;
+export default HistoryItemPane;

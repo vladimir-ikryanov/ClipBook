@@ -10,7 +10,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import './index.css'
-import {ThemeProvider} from "@/components/theme-provider";
+import {ThemeProvider} from "@/components/ThemeProvider";
 import Privacy from "@/Privacy";
 import Shortcuts from "@/Shortcuts";
 

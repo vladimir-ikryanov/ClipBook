@@ -1,15 +1,15 @@
 import '../App.css';
 import {Tabs} from "@/components/ui/tabs";
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/components/ui/resizable";
-import HistoryItemPreview from "@/components/HistoryItemPreview"
-import HistoryItemList from "@/components/HistoryItemList";
+import HistoryItemPreviewPane from "@/components/HistoryItemPreviewPane"
+import HistoryItemListPane from "@/components/HistoryItemListPane";
 import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
   deleteHistoryItem,
   getActiveHistoryItem, getHistoryItems, getPreviewVisibleState,
   getVisibleActiveHistoryItemIndex,
-  getVisibleHistoryItemsLength, isUrl, setPreviewVisibleState,
+  getVisibleHistoryItemsLength, HistoryItem, isUrl, setPreviewVisibleState,
   setVisibleActiveHistoryItemIndex, updateHistoryItem
 } from "@/data";
 import {isShortcutMatch} from "@/lib/shortcuts";
@@ -32,15 +32,15 @@ declare const clearEntireHistory: () => void;
 declare const hideAppWindow: () => void;
 declare const openInBrowser: (url: string) => void;
 
-type HistoryProps = {
-  items: string[]
+type HistoryPaneProps = {
+  history: HistoryItem[]
   appName: string
   onUpdateHistory: () => void
   searchQuery: string
   onSearchQueryChange: (searchQuery: string) => void
 }
 
-export default function History(props: HistoryProps) {
+export default function HistoryPane(props: HistoryPaneProps) {
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
   const previewTextareaRef = useRef<HTMLTextAreaElement>(null);
   const searchFieldRef = useRef<HTMLInputElement>(null);
@@ -48,7 +48,7 @@ export default function History(props: HistoryProps) {
   const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
-  const [previewText, setPreviewText] = useState(props.items[getVisibleActiveHistoryItemIndex()]);
+  const [historyItem, setHistoryItem] = useState(props.history[getVisibleActiveHistoryItemIndex()]);
 
   const activateApp = () => {
     if (searchFieldRef.current) {
@@ -58,7 +58,7 @@ export default function History(props: HistoryProps) {
       let activeTabIndex = 0;
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
-      setPreviewText(props.items[activeTabIndex])
+      setHistoryItem(props.history[activeTabIndex])
       if (listRef.current) {
         listRef.current.scrollToItem(activeTabIndex, "start")
       }
@@ -128,7 +128,7 @@ export default function History(props: HistoryProps) {
 
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
-  }, [props.items])
+  }, [props.history])
 
   function selectNextItem() {
     let activeTabIndex = getVisibleActiveHistoryItemIndex();
@@ -136,7 +136,7 @@ export default function History(props: HistoryProps) {
       activeTabIndex = activeTabIndex + 1
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
-      setPreviewText(props.items[activeTabIndex])
+      setHistoryItem(props.history[activeTabIndex])
       if (listRef.current) {
         listRef.current.scrollToItem(activeTabIndex, "auto")
       }
@@ -149,7 +149,7 @@ export default function History(props: HistoryProps) {
       activeTabIndex = activeTabIndex - 1
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
-      setPreviewText(props.items[activeTabIndex])
+      setHistoryItem(props.history[activeTabIndex])
       if (listRef.current) {
         listRef.current.scrollToItem(activeTabIndex, "auto")
       }
@@ -161,7 +161,7 @@ export default function History(props: HistoryProps) {
   }
 
   function handlePaste(): void {
-    pasteInFrontApp(getActiveHistoryItem())
+    pasteInFrontApp(getActiveHistoryItem().content)
     // Clear the search query in the search field after paste.
     handleSearchQueryChange("")
   }
@@ -199,14 +199,14 @@ export default function History(props: HistoryProps) {
   }
 
   function handleCopyToClipboard() {
-    copyToClipboard(getActiveHistoryItem())
+    copyToClipboard(getActiveHistoryItem().content)
     hideAppWindow()
   }
 
   function handleOpenInBrowser() {
     let item = getActiveHistoryItem()
-    if (isUrl(item)) {
-      openInBrowser(item)
+    if (isUrl(item.content)) {
+      openInBrowser(item.content)
     }
   }
 
@@ -229,7 +229,7 @@ export default function History(props: HistoryProps) {
     // If the history is not empty, update the preview text to the new active item.
     let items = getHistoryItems();
     if (items.length > 0) {
-      setPreviewText(items[getVisibleActiveHistoryItemIndex()])
+      setHistoryItem(items[getVisibleActiveHistoryItemIndex()])
     }
     props.onUpdateHistory()
   }
@@ -244,11 +244,11 @@ export default function History(props: HistoryProps) {
     setActiveTab("0")
     // The props.items array won't be updated until the next render, so we need to get the updated
     // items right now to update the preview text.
-    setPreviewText(getHistoryItems()[0])
+    setHistoryItem(getHistoryItems()[0])
   }
 
   function handleMouseDoubleClick(tabIndex: number) {
-    pasteInFrontApp(props.items[tabIndex])
+    pasteInFrontApp(props.history[tabIndex].content)
   }
 
   function handleFinishEditing() {
@@ -257,10 +257,10 @@ export default function History(props: HistoryProps) {
     }
   }
 
-  function handleEditHistoryItem(newText: string) {
+  function handleEditHistoryItem(newText: HistoryItem) {
     let oldText = getActiveHistoryItem();
     updateHistoryItem(oldText, newText)
-    setPreviewText(newText)
+    setHistoryItem(newText)
     props.onUpdateHistory()
   }
 
@@ -268,7 +268,7 @@ export default function History(props: HistoryProps) {
     let index = parseInt(tabIndex);
     setVisibleActiveHistoryItemIndex(index)
     setActiveTab(tabIndex)
-    setPreviewText(props.items[index])
+    setHistoryItem(props.history[index])
   }
 
   (window as any).activateApp = activateApp;
@@ -279,34 +279,34 @@ export default function History(props: HistoryProps) {
             className="w-full p-0 m-0">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel className="flex flex-col">
-            <HistoryItemList items={props.items}
-                             appName={props.appName}
-                             searchQuery={props.searchQuery}
-                             onSearchQueryChange={handleSearchQueryChange}
-                             onShowHidePreview={handleTogglePreview}
-                             onMouseDoubleClick={handleMouseDoubleClick}
-                             isPreviewVisible={previewVisible}
-                             searchFieldRef={searchFieldRef}
-                             listRef={listRef}
-                             onPaste={handlePaste}
-                             onClose={handleClose}
-                             onHideActions={handleHideActions}
-                             onEditContent={handleEditContent}
-                             onCopyToClipboard={handleCopyToClipboard}
-                             onOpenInBrowser={handleOpenInBrowser}
-                             onSearchHistory={handleSearchHistory}
-                             onTogglePreview={handleTogglePreview}
-                             onDeleteItem={handleDeleteItem}
-                             onDeleteAllItems={handleDeleteAllItems}
+            <HistoryItemListPane history={props.history}
+                                 appName={props.appName}
+                                 searchQuery={props.searchQuery}
+                                 onSearchQueryChange={handleSearchQueryChange}
+                                 onShowHidePreview={handleTogglePreview}
+                                 onMouseDoubleClick={handleMouseDoubleClick}
+                                 isPreviewVisible={previewVisible}
+                                 searchFieldRef={searchFieldRef}
+                                 listRef={listRef}
+                                 onPaste={handlePaste}
+                                 onClose={handleClose}
+                                 onHideActions={handleHideActions}
+                                 onEditContent={handleEditContent}
+                                 onCopyToClipboard={handleCopyToClipboard}
+                                 onOpenInBrowser={handleOpenInBrowser}
+                                 onSearchHistory={handleSearchHistory}
+                                 onTogglePreview={handleTogglePreview}
+                                 onDeleteItem={handleDeleteItem}
+                                 onDeleteAllItems={handleDeleteAllItems}
             />
           </ResizablePanel>
           <ResizableHandle/>
           <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}
                           className="transition-all duration-200 ease-out bg-secondary">
-            <HistoryItemPreview text={previewText}
-                                onEditHistoryItem={handleEditHistoryItem}
-                                onFinishEditing={handleFinishEditing}
-                                previewTextareaRef={previewTextareaRef}/>
+            <HistoryItemPreviewPane item={historyItem}
+                                    onEditHistoryItem={handleEditHistoryItem}
+                                    onFinishEditing={handleFinishEditing}
+                                    previewTextareaRef={previewTextareaRef}/>
           </ResizablePanel>
         </ResizablePanelGroup>
       </Tabs>

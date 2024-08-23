@@ -1,10 +1,18 @@
-let historyItems: string[];
+export type HistoryItem = {
+  content: string;
+  sourceApp: {
+    id: string;
+    name: string;
+  };
+}
+
+let history: HistoryItem[];
 let filterQuery = "";
 let visibleActiveHistoryItemIndex = 0;
 let visibleHistoryItemsLength = 0;
 let previewVisible = true;
 
-loadHistoryItems()
+loadHistory()
 
 // For testing purposes only!
 function generateRandomWord(length: number): string {
@@ -17,29 +25,39 @@ function generateRandomWord(length: number): string {
   return result
 }
 
-// For testing purposes only!
-function fillArrayWithRandomWords(size: number, wordLength: number): string[] {
-  const array: string[] = []
+// noinspection JSUnusedLocalSymbols
+function generateHistoryForTesting(size: number, wordLength: number): HistoryItem[] {
+  const array: HistoryItem[] = []
   for (let i = 0; i < size; i++) {
-    array.push(generateRandomWord(wordLength))
+    array.push({ content: generateRandomWord(wordLength), sourceApp: {id: "", name: ""} })
   }
   return array
 }
 
-function loadHistoryItems() {
-  // For testing purposes only! Uncomment the following line to generate random history items.
-  // historyItems = fillArrayWithRandomWords(10024, 128)
-  historyItems = []
-  if (localStorage.getItem("historyItems")) {
-    historyItems = JSON.parse(localStorage.getItem("historyItems")!)
+function loadHistory() {
+  // history = generateHistoryForTesting(10024, 128)
+  history = []
+  if (localStorage.getItem("history")) {
+    history = JSON.parse(localStorage.getItem("history")!)
+  } else {
+    if (localStorage.getItem("historyItems")) {
+      let oldFormatHistory = JSON.parse(localStorage.getItem("historyItems")!);
+      // Convert old format history items to new format.
+      for (let i = 0; i < oldFormatHistory.length; i++) {
+        history.push({ content: oldFormatHistory[i], sourceApp: {id: "", name: ""} })
+      }
+      // Remove history items in the old format after migration.
+      localStorage.removeItem("historyItems")
+    }
   }
+
   if (localStorage.getItem("previewVisible")) {
     previewVisible = localStorage.getItem("previewVisible") === "true"
   }
 }
 
-function saveHistoryItems() {
-  localStorage.setItem("historyItems", JSON.stringify(historyItems))
+function saveHistory() {
+  localStorage.setItem("history", JSON.stringify(history))
 }
 
 function savePreviewVisible(visible: boolean) {
@@ -47,51 +65,59 @@ function savePreviewVisible(visible: boolean) {
   localStorage.setItem("previewVisible", visible.toString())
 }
 
-function deleteItem(item: string) {
-  if (historyItems.includes(item)) {
-    historyItems.splice(historyItems.indexOf(item), 1)
+function hasItem(item: HistoryItem) : number {
+  for (let i = 0; i < history.length; i++) {
+    if (history[i].content === item.content) {
+      return i
+    }
+  }
+  return -1
+}
+
+function deleteItem(item: HistoryItem) {
+  let index = hasItem(item);
+  if (index !== -1) {
+    history.splice(index, 1)
   }
 }
 
-export function getHistoryItems() {
-  visibleHistoryItemsLength = historyItems.length
+export function getHistoryItems() : HistoryItem[] {
+  visibleHistoryItemsLength = history.length
   if (filterQuery.length > 0) {
-    let result = Array.from(historyItems.filter(item => item.toLowerCase().includes(filterQuery.toLowerCase())));
-    visibleHistoryItemsLength = result.length
-    return result
+    let filteredHistory = Array.from(history.filter(item => item.content.toLowerCase().includes(filterQuery.toLowerCase())));
+    visibleHistoryItemsLength = filteredHistory.length
+    return filteredHistory
   }
-  return Array.from(historyItems)
+  return Array.from(history)
 }
 
 export function isHistoryEmpty() {
-  return historyItems.length === 0
+  return history.length === 0
 }
 
-export function addHistoryItem(item: string) {
-  if (historyItems.includes(item)) {
-    deleteItem(item)
-  }
-  historyItems.unshift(item)
-  saveHistoryItems()
+export function addHistoryItem(item: HistoryItem) : HistoryItem[] {
+  deleteItem(item)
+  history.unshift(item)
+  saveHistory()
   return getHistoryItems()
 }
 
-export function deleteHistoryItem(item: string) {
+export function deleteHistoryItem(item: HistoryItem) {
   deleteItem(item)
-  saveHistoryItems()
+  saveHistory()
 }
 
-export function updateHistoryItem(oldValue: string, newValue: string) {
-  let index = historyItems.indexOf(oldValue);
+export function updateHistoryItem(oldItem: HistoryItem, newItem: HistoryItem) {
+  let index = hasItem(oldItem)
   if (index !== -1) {
-    historyItems[index] = newValue
-    saveHistoryItems()
+    history[index] = newItem
+    saveHistory()
   }
 }
 
-export function clear() {
-  historyItems = []
-  saveHistoryItems()
+export function clear() : HistoryItem[] {
+  history = []
+  saveHistory()
   return getHistoryItems()
 }
 
@@ -111,11 +137,11 @@ export function setFilterQuery(query: string) {
   filterQuery = query
 }
 
-export function getFilterQuery() {
+export function getFilterQuery() : string {
   return filterQuery
 }
 
-export function getActiveHistoryItem() {
+export function getActiveHistoryItem() : HistoryItem {
   return getHistoryItems()[visibleActiveHistoryItemIndex]
 }
 

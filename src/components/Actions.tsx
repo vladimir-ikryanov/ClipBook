@@ -4,7 +4,8 @@ import {Button} from "@/components/ui/button";
 import * as React from "react"
 import {
   CopyIcon,
-  Edit3Icon, Globe2Icon, GlobeIcon,
+  Edit3Icon,
+  GlobeIcon,
   PanelRightClose,
   SearchIcon,
   TrashIcon
@@ -126,7 +127,7 @@ export default function Actions(props: ActionsProps) {
   }
 
   function isActiveHistoryItemIsUrl() {
-    return isUrl(getActiveHistoryItem())
+    return isUrl(getActiveHistoryItem().content)
   }
 
   return (

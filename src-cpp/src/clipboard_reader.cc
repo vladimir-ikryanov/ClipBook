@@ -23,8 +23,12 @@ void ClipboardReader::start() {
         continue;
       }
       if (readClipboardData(ClipboardDataType::plainText())) {
+        auto source_app_info = app_->getActiveAppInfo();
         const JsValue &js_window = app_->browser()->mainFrame()->executeJavaScript("window");
-        js_window.asJsObject()->call("addClipboardData", data_);
+        js_window.asJsObject()->call("addClipboardData",
+                                     data_,
+                                     source_app_info.id,
+                                     source_app_info.name);
       }
     }
   });

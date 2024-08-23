@@ -313,6 +313,18 @@ void MainAppMac::setOpenAtLogin(bool open) {
   }
 }
 
+AppInfo MainAppMac::getActiveAppInfo() {
+  NSRunningApplication *app = [[NSWorkspace sharedWorkspace] frontmostApplication];
+  if (app) {
+    NSString *bundleId = [app bundleIdentifier];
+    AppInfo app_info;
+    app_info.id = [bundleId UTF8String];
+    app_info.name = [[app localizedName] UTF8String];
+    return app_info;
+  }
+  return {};
+}
+
 void MainAppMac::addAppToLoginItems() {
   LSSharedFileListRef items =
       LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);

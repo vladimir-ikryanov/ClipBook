@@ -1,15 +1,16 @@
 import '../App.css';
 import {TabsList} from "@/components/ui/tabs";
-import HistoryItem from "@/components/HistoryItem"
+import {HistoryItem} from "@/data";
 import React from "react";
 import SearchBar from "@/components/SearchBar";
 import ActionsBar from "@/components/ActionsBar";
 import {FixedSizeList as List} from "react-window";
 import AutoSizer, {Size} from "react-virtualized-auto-sizer";
 import {HideActionsReason} from "@/components/Actions";
+import HistoryItemPane from "@/components/HistoryItemPane";
 
-type HistoryItemListProps = {
-  items: string[]
+type HistoryItemListPaneProps = {
+  history: HistoryItem[]
   appName: string
   searchQuery: string
   onSearchQueryChange: (searchQuery: string) => void
@@ -30,7 +31,7 @@ type HistoryItemListProps = {
   listRef?: React.Ref<List>
 }
 
-const HistoryItemList = (props: HistoryItemListProps) => {
+const HistoryItemListPane = (props: HistoryItemListPaneProps) => {
   function handleMouseDoubleClick(tabIndex: number) {
     props.onMouseDoubleClick(tabIndex)
   }
@@ -53,17 +54,17 @@ const HistoryItemList = (props: HistoryItemListProps) => {
                         ref={props.listRef}
                         style={{}}
                         height={sizeProps.height}
-                        itemCount={props.items.length}
+                        itemCount={props.history.length}
                         itemSize={36}
                         layout={"vertical"}
                         width={sizeProps.width}>{
                       ({index, style}) => {
                         return (
-                            <HistoryItem index={index}
-                                         historySize={props.items.length}
-                                         text={props.items[index]}
-                                         onMouseDoubleClick={handleMouseDoubleClick}
-                                         style={style}
+                            <HistoryItemPane index={index}
+                                             historySize={props.history.length}
+                                             item={props.history[index]}
+                                             onMouseDoubleClick={handleMouseDoubleClick}
+                                             style={style}
                             />
                         )
                       }
@@ -90,4 +91,4 @@ const HistoryItemList = (props: HistoryItemListProps) => {
   )
 }
 
-export default HistoryItemList;
+export default HistoryItemListPane;
