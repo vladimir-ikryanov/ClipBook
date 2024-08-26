@@ -156,3 +156,19 @@ export function isUrl(text: string) {
   const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
   return urlRegex.test(text);
 }
+
+export function toCSSColor(str: string): string {
+  // If the given string is longer than 20 characters, it's not a color.
+  if (str.length > 20) {
+    return "";
+  }
+
+  // If the string is a valid 3, 4, 6, or 8 character hex code without '#', add the '#' prefix
+  if (/^[A-Fa-f0-9]{3}$/.test(str) || /^[A-Fa-f0-9]{4}$/.test(str) || /^[A-Fa-f0-9]{6}$/.test(str) || /^[A-Fa-f0-9]{8}$/.test(str)) {
+    str = `#${str}`;
+  }
+
+  const s = new Option().style;
+  s.color = str;
+  return s.color;
+}

@@ -2,7 +2,7 @@ import '../App.css';
 import {TabsTrigger} from "@/components/ui/tabs";
 import {Link, File} from "lucide-react";
 import React, {CSSProperties, KeyboardEvent, MouseEvent} from 'react';
-import {getFilterQuery, HistoryItem, isUrl} from "@/data";
+import {getFilterQuery, HistoryItem, isUrl, toCSSColor} from "@/data";
 
 type HistoryItemPaneProps = {
   index: number
@@ -14,6 +14,8 @@ type HistoryItemPaneProps = {
 }
 
 const HistoryItemPane = (props: HistoryItemPaneProps) => {
+  const cssColor = toCSSColor(props.item.content)
+
   const keyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.stopPropagation()
@@ -56,9 +58,11 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
           onDoubleClick={handleMouseDoubleClick}>
         <div className="flex mr-3 text-primary-foreground">
           {
-            isUrl(props.item.content) ?
-                <Link className="h-5 w-5"/> :
-                <File className="h-5 w-5"/>
+            cssColor !== '' ?
+                <div className="h-5 w-5 rounded-full" style={{backgroundColor: cssColor}}/> :
+                isUrl(props.item.content) ?
+                    <Link className="h-5 w-5"/> :
+                    <File className="h-5 w-5"/>
           }
         </div>
         <div
