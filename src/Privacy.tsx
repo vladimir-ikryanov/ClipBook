@@ -4,17 +4,21 @@ import {Label} from "@/components/ui/label";
 import {KeyboardIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 import {useEffect, useState} from "react";
 import {
+  prefGetAppsToIgnore,
   prefGetIgnoreConfidentialContent,
-  prefGetIgnoreTransientContent,
+  prefGetIgnoreTransientContent, prefSetAppsToIgnore,
   prefSetIgnoreConfidentialContent,
   prefSetIgnoreTransientContent,
 } from "@/pref";
+import IgnoreAppsPane from "@/components/IgnoreAppsPane";
 
 declare const closeSettingsWindow: () => void;
+declare const selectAppsToIgnore: () => string[];
 
 export default function Privacy() {
   const [ignoreTransientContent, setIgnoreTransientContent] = useState(prefGetIgnoreTransientContent());
   const [ignoreConfidentialContent, setIgnoreConfidentialContent] = useState(prefGetIgnoreConfidentialContent());
+  const [appsToIgnore, setAppsToIgnore] = useState(prefGetAppsToIgnore());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -38,8 +42,27 @@ export default function Privacy() {
     prefSetIgnoreConfidentialContent(checked)
   }
 
+  function handleSelectApps() {
+    selectAppsToIgnore()
+  }
+
+  function handleRemoveApps(apps: string[]) {
+    let updatedApps = appsToIgnore.filter((app) => !apps.includes(app));
+    setAppsToIgnore(updatedApps)
+    prefSetAppsToIgnore(updatedApps)
+  }
+
+  function addAppToIgnore(app: string) {
+    let apps = [...appsToIgnore, app];
+    setAppsToIgnore(apps)
+    prefSetAppsToIgnore(apps)
+  }
+
+  // Attach the function to the window object
+  (window as any).addAppToIgnore = addAppToIgnore;
+
   return (
-      <div className="flex h-screen">
+      <div className="flex h-screen select-none">
         <div className="flex bg-secondary">
           <div className="flex flex-col w-52 gap-y-1">
             <div className="flex draggable p-6"></div>
@@ -69,7 +92,7 @@ export default function Privacy() {
             <span className="text-2xl pb-3 font-semibold">Privacy</span>
           </div>
 
-          <div className="flex flex-col px-8 pb-6 gap-4 flex-grow overflow-y-auto">
+          <div className="flex flex-col px-8 pb-8 gap-4 flex-grow overflow-y-auto">
             <div className="flex items-center justify-between space-x-20 pt-6 pb-1">
               <Label htmlFor="ignoreConfidential" className="flex flex-col text-base">
                 <span className="">Ignore confidential content</span>
@@ -89,6 +112,18 @@ export default function Privacy() {
               </Label>
               <Switch id="ignoreTransient" checked={ignoreTransientContent}
                       onCheckedChange={handleIgnoreTransientContentChange}/>
+            </div>
+
+            <hr/>
+
+            <div className="flex flex-col">
+              <Label className="flex flex-col text-base">
+                <span className="">Ignore applications</span>
+                <span className="text-neutral-500 font-normal text-sm">
+                  Do not save content copied from the following&nbsp;applications.
+                </span>
+              </Label>
+              <IgnoreAppsPane apps={appsToIgnore} onSelectApps={handleSelectApps} onRemoveApps={handleRemoveApps}/>
             </div>
           </div>
         </div>

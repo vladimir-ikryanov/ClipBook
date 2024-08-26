@@ -22,6 +22,8 @@ class MainAppMac : public MainApp {
   void copyToClipboard(const std::string &text) override;
   void setOpenAtLogin(bool open) override;
   AppInfo getActiveAppInfo() override;
+  std::string getAppIconAsBase64(const std::string& app_path) override;
+  std::string getAppNameFromPath(const std::string &app_path) override;
 
  protected:
   void enableOpenAppShortcut() override;

@@ -51,6 +51,13 @@ module.exports = {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",
         },
+        settings: {
+          DEFAULT: "var(--settings)",
+          border: "var(--settings-border)",
+          selection: "var(--settings-selection)",
+          tableRow: "var(--settings-table-row)",
+          tableRow2: "var(--settings-table-row2)",
+        }
       },
       borderRadius: {
         lg: "var(--radius)",

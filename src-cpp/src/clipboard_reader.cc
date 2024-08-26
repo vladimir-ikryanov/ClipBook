@@ -23,12 +23,10 @@ void ClipboardReader::start() {
         continue;
       }
       if (readClipboardData(ClipboardDataType::plainText())) {
-        auto source_app_info = app_->getActiveAppInfo();
         const JsValue &js_window = app_->browser()->mainFrame()->executeJavaScript("window");
         js_window.asJsObject()->call("addClipboardData",
                                      data_,
-                                     source_app_info.id,
-                                     source_app_info.name);
+                                     active_app_info_.path);
       }
     }
   });
@@ -55,6 +53,12 @@ bool ClipboardReader::readClipboardData(const std::shared_ptr<ClipboardDataType>
       std::string data_str(reinterpret_cast<const char *>(data->data()), data->size());
       if (data_ != data_str) {
         data_ = std::move(data_str);
+        // Check if the active app is in the ignore list and ignore the data if it is.
+        active_app_info_ = app_->getActiveAppInfo();
+        auto apps_to_ignore = settings->getAppsToIgnore();
+        if (apps_to_ignore.find(active_app_info_.path) != std::string::npos) {
+          return false;
+        }
         return true;
       }
     }

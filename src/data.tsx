@@ -1,8 +1,7 @@
 export type HistoryItem = {
   content: string;
   sourceApp: {
-    id: string;
-    name: string;
+    path: string;
   };
 }
 
@@ -29,7 +28,7 @@ function generateRandomWord(length: number): string {
 function generateHistoryForTesting(size: number, wordLength: number): HistoryItem[] {
   const array: HistoryItem[] = []
   for (let i = 0; i < size; i++) {
-    array.push({ content: generateRandomWord(wordLength), sourceApp: {id: "", name: ""} })
+    array.push({ content: generateRandomWord(wordLength), sourceApp: {path: ""} })
   }
   return array
 }
@@ -44,7 +43,7 @@ function loadHistory() {
       let oldFormatHistory = JSON.parse(localStorage.getItem("historyItems")!);
       // Convert old format history items to new format.
       for (let i = 0; i < oldFormatHistory.length; i++) {
-        history.push({ content: oldFormatHistory[i], sourceApp: {id: "", name: ""} })
+        history.push({ content: oldFormatHistory[i], sourceApp: {path: ""} })
       }
       // Remove history items in the old format after migration.
       localStorage.removeItem("historyItems")

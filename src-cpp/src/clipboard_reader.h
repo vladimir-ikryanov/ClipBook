@@ -20,6 +20,7 @@ class ClipboardReader {
 
   std::shared_ptr<MainApp> app_;
   std::string data_;
+  AppInfo active_app_info_;
 };
 
 #endif // CLIPBOOK_CLIPBOARD_READER_H_

@@ -5,6 +5,10 @@
 
 #include "molybden.hpp"
 
+struct AppInfo {
+  std::string path;
+};
+
 class AppSettings {
  public:
   static std::shared_ptr<AppSettings> create();
@@ -32,6 +36,11 @@ class AppSettings {
 
   virtual void saveShowIconInMenuBar(bool show) = 0;
   virtual bool shouldShowIconInMenuBar() = 0;
+
+  virtual void saveAppsToIgnore(std::string apps) = 0;
+  virtual std::string getAppsToIgnore() = 0;
+
+  // Shortcuts.
 
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;
   virtual std::string getOpenAppShortcut() = 0;

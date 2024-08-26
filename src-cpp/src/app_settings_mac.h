@@ -33,6 +33,11 @@ class AppSettingsMac : public AppSettings {
   void saveShowIconInMenuBar(bool show) override;
   bool shouldShowIconInMenuBar() override;
 
+  void saveAppsToIgnore(std::string apps) override;
+  std::string getAppsToIgnore() override;
+
+  // Shortcuts.
+
   void saveOpenAppShortcut(std::string shortcut) override;
   std::string getOpenAppShortcut() override;
 

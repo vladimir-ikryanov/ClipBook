@@ -18,6 +18,9 @@ NSString *prefOpenAtLogin = @"app.open_at_login";
 NSString *prefCheckForUpdatesAutomatically = @"app.check_for_updates_automatically";
 NSString *prefWarnOnClearHistory = @"app.warn_on_clear_history";
 NSString *prefShowIconInMenuBar = @"app.show_icon_in_menu_bar";
+NSString *prefIgnoreApps = @"privacy.ignore_apps";
+
+// Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut";
 NSString *prefCloseAppShortcut = @"app.close_app_shortcut";
 NSString *prefSelectNextItemShortcut = @"app.select_next_item_shortcut";
@@ -410,4 +413,19 @@ std::string AppSettingsMac::getOpenSettingsShortcut() {
     return {[shortcut UTF8String]};
   }
   return "Meta + ,";
+}
+
+void AppSettingsMac::saveAppsToIgnore(std::string apps) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:apps.c_str()] forKey:prefIgnoreApps];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getAppsToIgnore() {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *apps = [defaults objectForKey:prefIgnoreApps];
+    if (apps != nil) {
+        return [apps UTF8String];
+    }
+    return "";
 }

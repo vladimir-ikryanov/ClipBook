@@ -316,10 +316,8 @@ void MainAppMac::setOpenAtLogin(bool open) {
 AppInfo MainAppMac::getActiveAppInfo() {
   NSRunningApplication *app = [[NSWorkspace sharedWorkspace] frontmostApplication];
   if (app) {
-    NSString *bundleId = [app bundleIdentifier];
     AppInfo app_info;
-    app_info.id = [bundleId UTF8String];
-    app_info.name = [[app localizedName] UTF8String];
+    app_info.path = [[app bundleURL] fileSystemRepresentation];
     return app_info;
   }
   return {};
@@ -470,4 +468,28 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text) {
 
 void MainAppMac::showSystemAccessibilityPreferencesDialog() {
   [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"]];
+}
+
+std::string MainAppMac::getAppIconAsBase64(const std::string &app_path) {
+  NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
+  NSImage *image = [workspace iconForFile:[NSString stringWithUTF8String:app_path.c_str()]];
+  // Convert NSImage to NSData (using PNG format in this example).
+  CGImageRef cgRef = [image CGImageForProposedRect:NULL context:nil hints:nil];
+  NSBitmapImageRep *newRep = [[NSBitmapImageRep alloc] initWithCGImage:cgRef];
+  [newRep setSize:[image size]];   // Ensure correct size
+
+  NSData *imageData = [newRep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+
+  // Base64 encode the data
+  NSString *base64String = [imageData base64EncodedStringWithOptions:0];
+  return [base64String UTF8String];
+}
+
+std::string MainAppMac::getAppNameFromPath(const std::string &app_path) {
+  NSBundle *appBundle = [NSBundle bundleWithPath:[NSString stringWithUTF8String:app_path.c_str()]];
+  if (appBundle) {
+    NSString *appName = [[appBundle infoDictionary] objectForKey:@"CFBundleName"];
+    return [appName UTF8String];
+  }
+  return {};
 }

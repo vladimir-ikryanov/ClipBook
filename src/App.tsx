@@ -55,10 +55,10 @@ export default function App() {
     return () => document.removeEventListener("keydown", down)
   }, [])
 
-  function addClipboardData(content: string, sourceAppId: string, sourceAppName: string): void {
+  function addClipboardData(content: string, sourceAppPath: string): void {
     setHistory([...addHistoryItem({
       content: content,
-      sourceApp: {id: sourceAppId, name: sourceAppName}
+      sourceApp: {path: sourceAppPath}
     })])
   }
 

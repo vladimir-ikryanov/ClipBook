@@ -154,7 +154,7 @@ export default function Shortcuts() {
   }
 
   return (
-      <div className="flex h-screen">
+      <div className="flex h-screen select-none">
         <div className="flex bg-secondary">
           <div className="flex flex-col w-52 gap-y-1">
             <div className="flex draggable p-6"></div>

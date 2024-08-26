@@ -12,6 +12,8 @@ declare const shouldIgnoreTransientContent: () => boolean;
 declare const shouldIgnoreConfidentialContent: () => boolean;
 declare const saveShowIconInMenuBar: (showIcon: boolean) => void;
 declare const shouldShowIconInMenuBar: () => boolean;
+declare const setAppsToIgnore: (apps: string) => void;
+declare const getAppsToIgnore: () => string;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -228,4 +230,16 @@ export function prefSetShowIconInMenuBar(showIcon: boolean) {
 
 export function prefGetShowIconInMenuBar() {
   return shouldShowIconInMenuBar()
+}
+
+export function prefGetAppsToIgnore(): string[] {
+  let apps = getAppsToIgnore();
+  if (apps === "") {
+    return []
+  }
+  return apps.split(",")
+}
+
+export function prefSetAppsToIgnore(apps: string[]) {
+  setAppsToIgnore(apps.join(","))
 }

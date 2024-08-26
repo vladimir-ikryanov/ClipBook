@@ -636,6 +636,21 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getOpenSettingsShortcut", [this]() -> std::string {
     return settings_->getOpenSettingsShortcut();
   });
+  window->putProperty("selectAppsToIgnore", [this]() {
+    selectAppsToIgnore();
+  });
+  window->putProperty("getAppsToIgnore", [this]() -> std::string {
+    return settings_->getAppsToIgnore();
+  });
+  window->putProperty("setAppsToIgnore", [this](std::string apps) -> void {
+    settings_->saveAppsToIgnore(apps);
+  });
+  window->putProperty("getAppIconAsBase64", [this](std::string app_path) -> std::string {
+    return getAppIconAsBase64(app_path);
+  });
+  window->putProperty("getAppNameFromPath", [this](std::string app_path) -> std::string {
+    return getAppNameFromPath(app_path);
+  });
 }
 
 bool MainApp::isPaused() const {
@@ -713,4 +728,23 @@ void MainApp::destroyTray() {
   if (tray_ && !tray_->isDestroyed()) {
     tray_->destroy();
   }
+}
+
+void MainApp::selectAppsToIgnore() {
+  molybden::OpenDialogOptions options;
+  options.default_path = "/Applications";
+  options.button_label = "Choose";
+  options.features.allow_multiple_selections = true;
+  options.filters = {{"Applications", {"app"}}};
+  molybden::OpenDialog::show(settings_window_, options, [this](molybden::OpenDialogResult result) {
+    if (result.canceled) {
+      return;
+    }
+    auto apps_to_ignore = settings_->getAppsToIgnore();
+    for (const auto &path : result.paths) {
+      if (apps_to_ignore.find(path) == std::string::npos) {
+        settings_window_->mainFrame()->executeJavaScript("addAppToIgnore(\"" + path + "\")");
+      }
+    }
+  });
 }
