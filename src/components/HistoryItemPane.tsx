@@ -40,7 +40,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
       {
         parts.map((part, index) =>
             part.toLowerCase() === query.toLowerCase() ? (
-                <span key={index} className="text-cyan-500 font-bold">{part}</span>) : (part)
+                <span key={index} className="text-searchHighlight font-bold">{part}</span>) : (part)
         )
       }
     </span>
