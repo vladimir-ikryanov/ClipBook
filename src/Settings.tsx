@@ -115,17 +115,6 @@ ClipBook will check for updates automatically and notify you when a new version 
                       onCheckedChange={handleCheckForUpdatesAutomaticallyChange}/>
             </div>
 
-            <div className="flex items-center justify-between space-x-20 py-1">
-              <Label htmlFor="showIcon" className="flex flex-col text-base">
-                <span className="">Show icon in menu bar</span>
-                <span className="text-neutral-500 font-normal text-sm">
-                  Display the ClipBook app icon in the menu&nbsp;bar.
-                </span>
-              </Label>
-              <Switch id="showIcon" checked={showIconInMenuBar}
-                      onCheckedChange={handleShowIconChange}/>
-            </div>
-
             <hr/>
 
             <div className="flex justify-between space-x-10 py-1">
@@ -171,6 +160,17 @@ ClipBook will check for updates automatically and notify you when a new version 
                   </div>
                 </div>
               </RadioGroup>
+            </div>
+
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label htmlFor="showIcon" className="flex flex-col text-base">
+                <span className="">Show icon in menu bar</span>
+                <span className="text-neutral-500 font-normal text-sm">
+                  Display the ClipBook app icon in the menu&nbsp;bar.
+                </span>
+              </Label>
+              <Switch id="showIcon" checked={showIconInMenuBar}
+                      onCheckedChange={handleShowIconChange}/>
             </div>
 
             <hr/>
