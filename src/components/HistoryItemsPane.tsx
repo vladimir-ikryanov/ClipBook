@@ -31,7 +31,7 @@ type HistoryItemListPaneProps = {
   listRef?: React.Ref<List>
 }
 
-const HistoryItemListPane = (props: HistoryItemListPaneProps) => {
+const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
   function handleMouseDoubleClick(tabIndex: number) {
     props.onMouseDoubleClick(tabIndex)
   }
@@ -91,4 +91,4 @@ const HistoryItemListPane = (props: HistoryItemListPaneProps) => {
   )
 }
 
-export default HistoryItemListPane;
+export default HistoryItemsPane;

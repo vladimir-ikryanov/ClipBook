@@ -2,7 +2,7 @@ import '../App.css';
 import {Tabs} from "@/components/ui/tabs";
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/components/ui/resizable";
 import HistoryItemPreviewPane from "@/components/HistoryItemPreviewPane"
-import HistoryItemListPane from "@/components/HistoryItemListPane";
+import HistoryItemsPane from "@/components/HistoryItemsPane";
 import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
@@ -279,25 +279,25 @@ export default function HistoryPane(props: HistoryPaneProps) {
             className="w-full p-0 m-0">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel className="flex flex-col">
-            <HistoryItemListPane history={props.history}
-                                 appName={props.appName}
-                                 searchQuery={props.searchQuery}
-                                 onSearchQueryChange={handleSearchQueryChange}
-                                 onShowHidePreview={handleTogglePreview}
-                                 onMouseDoubleClick={handleMouseDoubleClick}
-                                 isPreviewVisible={previewVisible}
-                                 searchFieldRef={searchFieldRef}
-                                 listRef={listRef}
-                                 onPaste={handlePaste}
-                                 onClose={handleClose}
-                                 onHideActions={handleHideActions}
-                                 onEditContent={handleEditContent}
-                                 onCopyToClipboard={handleCopyToClipboard}
-                                 onOpenInBrowser={handleOpenInBrowser}
-                                 onSearchHistory={handleSearchHistory}
-                                 onTogglePreview={handleTogglePreview}
-                                 onDeleteItem={handleDeleteItem}
-                                 onDeleteAllItems={handleDeleteAllItems}
+            <HistoryItemsPane history={props.history}
+                              appName={props.appName}
+                              searchQuery={props.searchQuery}
+                              onSearchQueryChange={handleSearchQueryChange}
+                              onShowHidePreview={handleTogglePreview}
+                              onMouseDoubleClick={handleMouseDoubleClick}
+                              isPreviewVisible={previewVisible}
+                              searchFieldRef={searchFieldRef}
+                              listRef={listRef}
+                              onPaste={handlePaste}
+                              onClose={handleClose}
+                              onHideActions={handleHideActions}
+                              onEditContent={handleEditContent}
+                              onCopyToClipboard={handleCopyToClipboard}
+                              onOpenInBrowser={handleOpenInBrowser}
+                              onSearchHistory={handleSearchHistory}
+                              onTogglePreview={handleTogglePreview}
+                              onDeleteItem={handleDeleteItem}
+                              onDeleteAllItems={handleDeleteAllItems}
             />
           </ResizablePanel>
           <ResizableHandle/>
