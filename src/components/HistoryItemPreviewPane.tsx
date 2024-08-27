@@ -27,7 +27,7 @@ export default function HistoryItemPreviewPane(props: HistoryItemPreviewPaneProp
         <textarea id='preview'
                   ref={props.previewTextareaRef}
                   className="preview h-full p-4 m-0 bg-secondary border-none outline-none resize-none font-mono text-sm"
-                  value={props.item.content} onChange={handleOnChange} onKeyDown={handleKeyDown}/>
+                  value={props.item?.content} onChange={handleOnChange} onKeyDown={handleKeyDown}/>
       </div>
   )
 }

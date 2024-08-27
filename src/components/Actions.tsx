@@ -127,7 +127,7 @@ export default function Actions(props: ActionsProps) {
   }
 
   function isActiveHistoryItemIsUrl() {
-    return isUrl(getActiveHistoryItem().content)
+    return isUrl(getActiveHistoryItem()?.content)
   }
 
   return (

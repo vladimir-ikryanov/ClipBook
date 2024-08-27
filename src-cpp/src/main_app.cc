@@ -17,7 +17,7 @@ std::string kContactSupportUrl =
     "mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
 std::string kFeatureRequestUrl =
     "https://clipbook.app/roadmap/?utm_source=app&utm_medium=help";
-int32_t kUpdateCheckIntervalInHours = 4;
+int32_t kUpdateCheckIntervalInHours = 2;
 
 MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSettings> &settings)
     : app_(app),
