@@ -1,8 +1,13 @@
 export type HistoryItem = {
-  content: string;
+  content: string
   sourceApp: {
-    path: string;
-  };
+    path: string
+  }
+  // copied: {
+  //   fistTime: Date
+  //   lastTime: Date
+  //   times: number
+  // }
 }
 
 let history: HistoryItem[];
@@ -171,4 +176,11 @@ export function toCSSColor(str: string): string {
   const s = new Option().style;
   s.color = str;
   return s.color;
+}
+
+export function toBase64Icon(base64IconData: string): string {
+  if (!base64IconData) {
+    return '';
+  }
+  return "data:image/png;base64," + base64IconData;
 }

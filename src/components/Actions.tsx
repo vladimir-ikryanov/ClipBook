@@ -7,7 +7,6 @@ import {
   Edit3Icon,
   GlobeIcon,
   PanelRightClose,
-  SearchIcon,
   TrashIcon
 } from "lucide-react"
 
@@ -16,7 +15,8 @@ import {
   CommandEmpty,
   CommandInput,
   CommandItem,
-  CommandList, CommandSeparator,
+  CommandList,
+  CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command"
 import {useEffect} from "react";
@@ -26,19 +26,19 @@ import {
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetOpenInBrowserShortcut,
-  prefGetSearchHistoryShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetShowMoreActionsShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
 import ShortcutLabel from "@/components/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {getActiveHistoryItem, getPreviewVisibleState, isUrl} from "@/data";
+import {getActiveHistoryItem, getPreviewVisibleState, isUrl, toBase64Icon} from "@/data";
 
 export type HideActionsReason =
     "cancel"
     | "togglePreview"
-    | "searchHistory"
+    | "paste"
     | "editContent"
     | "copyToClipboard"
     | "openInBrowser"
@@ -46,9 +46,11 @@ export type HideActionsReason =
     | "deleteAllItems"
 
 type ActionsProps = {
+  appName: string
+  appIcon: string
   onHideActions: (reason: HideActionsReason) => void
   onTogglePreview: () => void
-  onSearchHistory: () => void
+  onPaste: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
   onOpenInBrowser: () => void
@@ -96,10 +98,10 @@ export default function Actions(props: ActionsProps) {
     props.onCopyToClipboard()
   }
 
-  function handleSearchHistory() {
-    closeReason = "searchHistory"
+  function handlePaste() {
+    closeReason = "paste"
     handleOpenChange(false)
-    props.onSearchHistory()
+    props.onPaste()
   }
 
   function handleTogglePreview() {
@@ -141,24 +143,12 @@ export default function Actions(props: ActionsProps) {
         <PopoverContent align="end" className="w-[300px] pt-2 pb-0 px-0" onKeyDown={handleKeyDown}>
           <Command>
             <CommandList>
-              {
-                  isActiveHistoryItemIsUrl() &&
-                  <CommandItem onSelect={handleOpenInBrowser}>
-                    <GlobeIcon className="mr-2 h-4 w-4"/>
-                    <span>Open in Browser</span>
-                    <CommandShortcut className="flex flex-row">
-                      <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
-                    </CommandShortcut>
-                  </CommandItem>
-              }
-              {
-                  isActiveHistoryItemIsUrl() && <CommandSeparator/>
-              }
-              <CommandItem onSelect={handleEditContent}>
-                <Edit3Icon className="mr-2 h-4 w-4"/>
-                <span>Edit Content...</span>
+              <CommandItem onSelect={handlePaste}>
+                <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
+                     alt="Application icon"/>
+                <span>Paste to {props.appName}</span>
                 <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
+                  <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
                 </CommandShortcut>
               </CommandItem>
               <CommandItem onSelect={handleCopyToClipboard}>
@@ -169,11 +159,21 @@ export default function Actions(props: ActionsProps) {
                 </CommandShortcut>
               </CommandItem>
               <CommandSeparator/>
-              <CommandItem onSelect={handleSearchHistory}>
-                <SearchIcon className="mr-2 h-4 w-4"/>
-                <span>Search...</span>
+              {
+                  isActiveHistoryItemIsUrl() &&
+                  <CommandItem onSelect={handleOpenInBrowser}>
+                    <GlobeIcon className="mr-2 h-4 w-4"/>
+                    <span>Open in Browser</span>
+                    <CommandShortcut className="flex flex-row">
+                      <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
+                    </CommandShortcut>
+                  </CommandItem>
+              }
+              <CommandItem onSelect={handleEditContent}>
+                <Edit3Icon className="mr-2 h-4 w-4"/>
+                <span>Edit Content...</span>
                 <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetSearchHistoryShortcut()}/>
+                  <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
                 </CommandShortcut>
               </CommandItem>
               <CommandItem onSelect={handleTogglePreview}>

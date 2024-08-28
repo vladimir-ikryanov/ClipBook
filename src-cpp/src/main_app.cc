@@ -167,8 +167,9 @@ std::shared_ptr<AppSettings> MainApp::settings() const {
   return settings_;
 }
 
-void MainApp::setActiveAppName(const std::string &app_name) {
-  app_window_->mainFrame()->executeJavaScript("setActiveAppName(\"" + app_name + "\")");
+void MainApp::setActiveAppInfo(const std::string &app_name, const std::string& app_icon) {
+  app_window_->mainFrame()->executeJavaScript(
+      "setActiveAppInfo(\"" + app_name + "\", \"" + app_icon + "\")");
 }
 
 void MainApp::clearHistory() {

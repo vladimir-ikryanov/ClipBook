@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {Button} from "@/components/ui/button";
 import {MinusIcon, PlusIcon} from "lucide-react";
+import {toBase64Icon} from "@/data";
 
 interface IgnoreAppsPaneProps {
   apps: string[];
@@ -96,11 +97,7 @@ export default function IgnoreAppsPane(props: IgnoreAppsPaneProps) {
   }
 
   function getAppIcon(appPath: string): string {
-    let base64 = getAppIconAsBase64(appPath);
-    if (!base64) {
-      return '';
-    }
-    return "data:image/png;base64," + base64;
+    return toBase64Icon(getAppIconAsBase64(appPath))
   }
 
   function getAppName(appPath: string): string {

@@ -12,6 +12,7 @@ import HistoryItemPane from "@/components/HistoryItemPane";
 type HistoryItemListPaneProps = {
   history: HistoryItem[]
   appName: string
+  appIcon: string
   searchQuery: string
   onSearchQueryChange: (searchQuery: string) => void
   isPreviewVisible: boolean
@@ -77,6 +78,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
         </TabsList>
         <div className="grow"></div>
         <ActionsBar appName={props.appName}
+                    appIcon={props.appIcon}
                     onPaste={props.onPaste}
                     onClose={props.onClose}
                     onHideActions={props.onHideActions}

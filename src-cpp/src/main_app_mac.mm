@@ -216,8 +216,15 @@ void MainAppMac::activate() {
 void MainAppMac::show() {
   // Remember the active app to activate it after hiding the browser window.
   active_app_ = [[NSWorkspace sharedWorkspace] frontmostApplication];
-  NSString *app_name = [active_app_ localizedName];
-  MainApp::setActiveAppName([app_name UTF8String]);
+  std::string app_name;
+  std::string app_icon;
+  if (active_app_) {
+    auto app_path = [[active_app_ bundleURL] fileSystemRepresentation];
+    app_name = getAppNameFromPath(app_path);
+    app_icon = getAppIconAsBase64(app_path);
+  }
+  MainApp::setActiveAppInfo(app_name, app_icon);
+
   // Restore the window bounds before showing the window.
   restoreWindowBounds();
   // Show the browser window.

@@ -3,7 +3,6 @@ import {Button} from "@/components/ui/button";
 import React from "react";
 import Actions, {HideActionsReason} from "@/components/Actions";
 import {
-  prefGetCloseAppShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut
@@ -12,6 +11,7 @@ import ShortcutLabel from "@/components/ShortcutLabel";
 
 type ActionsBarProps = {
   appName: string
+  appIcon: string
   onPaste: () => void
   onClose: () => void
   onHideActions: (reason: HideActionsReason) => void
@@ -39,20 +39,16 @@ export default function ActionsBar(props: ActionsBarProps) {
             <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
             <p className="px-2 text-">Paste to {props.appName}</p>
           </Button>
-
-          <Button variant="ghost" className="p-1 h-8 rounded-sm"
-                  title="Close window (Escape or ⌘W)" onClick={props.onClose}>
-            <ShortcutLabel shortcut={prefGetCloseAppShortcut()}/>
-            <p className="px-2">Close</p>
-          </Button>
         </div>
 
         <div className="flex space-x-2">
-          <Actions onHideActions={props.onHideActions}
+          <Actions appName={props.appName}
+                   appIcon={props.appIcon}
+                   onHideActions={props.onHideActions}
                    onEditContent={props.onEditContent}
                    onCopyToClipboard={props.onCopyToClipboard}
                    onOpenInBrowser={props.onOpenInBrowser}
-                   onSearchHistory={props.onSearchHistory}
+                   onPaste={props.onPaste}
                    onTogglePreview={props.onTogglePreview}
                    onDeleteItem={props.onDeleteItem}
                    onDeleteAllItems={props.onDeleteAllItems}/>

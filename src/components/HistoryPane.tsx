@@ -35,6 +35,7 @@ declare const openInBrowser: (url: string) => void;
 type HistoryPaneProps = {
   history: HistoryItem[]
   appName: string
+  appIcon: string
   onUpdateHistory: () => void
   searchQuery: string
   onSearchQueryChange: (searchQuery: string) => void
@@ -281,6 +282,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
           <ResizablePanel className="flex flex-col">
             <HistoryItemsPane history={props.history}
                               appName={props.appName}
+                              appIcon={props.appIcon}
                               searchQuery={props.searchQuery}
                               onSearchQueryChange={handleSearchQueryChange}
                               onShowHidePreview={handleTogglePreview}

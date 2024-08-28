@@ -21,6 +21,7 @@ declare const zoomOut: () => void;
 export default function App() {
   const [history, setHistory] = useState(getHistoryItems())
   const [appName, setAppName] = useState("")
+  const [appIcon, setAppIcon] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
@@ -72,8 +73,9 @@ export default function App() {
     setHistory(getHistoryItems())
   }
 
-  function setActiveAppName(appName: string): void {
+  function setActiveAppInfo(appName: string, appIcon: string): void {
     setAppName(appName)
+    setAppIcon(appIcon)
   }
 
   function clearHistory(): void {
@@ -82,7 +84,7 @@ export default function App() {
 
   // Attach the function to the window object
   (window as any).addClipboardData = addClipboardData;
-  (window as any).setActiveAppName = setActiveAppName;
+  (window as any).setActiveAppInfo = setActiveAppInfo;
   (window as any).clearHistory = clearHistory;
 
   if (isHistoryEmpty()) {
@@ -107,6 +109,7 @@ export default function App() {
       <ThemeProvider defaultTheme="system">
         <HistoryPane history={history}
                      appName={appName}
+                     appIcon={appIcon}
                      searchQuery={searchQuery}
                      onUpdateHistory={handleUpdateHistory}
                      onSearchQueryChange={handleSearchQueryChange}/>

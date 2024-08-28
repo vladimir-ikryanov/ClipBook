@@ -36,7 +36,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   virtual std::string getAppNameFromPath(const std::string &app_path) = 0;
 
  protected:
-  void setActiveAppName(const std::string &app_name);
+  void setActiveAppInfo(const std::string &app_name, const std::string& app_icon);
   void clearHistory();
   void checkForUpdates(bool user_initiated = false);
   void checkForUpdates(const std::function<void()> &complete, bool user_initiated);
