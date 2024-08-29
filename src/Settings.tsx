@@ -66,7 +66,7 @@ export default function Settings() {
         <div className="flex bg-secondary">
           <div className="flex flex-col w-52 gap-y-1">
             <div className="flex draggable p-6"></div>
-            <div className="flex flex-row gap-x-2 py-2 px-2 mx-4 bg-background rounded-sm shadow">
+            <div className="flex flex-row gap-x-2 py-2 px-2 mx-4 bg-settings-sidebarSelection rounded-sm shadow">
               <SettingsIcon className="h-5 w-5 mt-0.5"/>
               <span className="">General</span>
             </div>

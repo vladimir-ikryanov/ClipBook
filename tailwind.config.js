@@ -56,6 +56,7 @@ module.exports = {
           DEFAULT: "var(--settings)",
           border: "var(--settings-border)",
           selection: "var(--settings-selection)",
+          sidebarSelection: "var(--settings-sidebar-selection)",
           tableRow: "var(--settings-table-row)",
           tableRow2: "var(--settings-table-row2)",
         }

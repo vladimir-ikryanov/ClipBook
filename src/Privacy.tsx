@@ -80,7 +80,7 @@ export default function Privacy() {
                 <span className="">Shortcuts</span>
               </a>
             </div>
-            <div className="flex flex-row gap-x-2 py-2 px-2 mx-4 bg-background rounded-sm shadow">
+            <div className="flex flex-row gap-x-2 py-2 px-2 mx-4 bg-settings-sidebarSelection rounded-sm shadow">
               <ShieldCheckIcon className="h-5 w-5 mt-0.5"/>
               <span className="">Privacy</span>
             </div>
