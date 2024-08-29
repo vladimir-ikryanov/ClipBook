@@ -5,6 +5,13 @@
 
 static int kCheckIntervalInSeconds = 1;
 
+bool isEmptyOrSpaces(const std::string &str) {
+  // Check if the string is empty or contains only spaces
+  return str.empty() || std::all_of(str.begin(), str.end(), [](char c) {
+    return std::isspace(static_cast<unsigned char>(c));
+  });
+}
+
 std::shared_ptr<ClipboardReader>
 ClipboardReader::create(const std::shared_ptr<MainApp> &app) {
   std::shared_ptr<ClipboardReader> manager(new ClipboardReader(app));
@@ -15,6 +22,7 @@ ClipboardReader::ClipboardReader(const std::shared_ptr<MainApp> &app) : app_(app
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
+
 void ClipboardReader::start() {
   std::thread t([this]() {
     while (true) {
@@ -23,15 +31,18 @@ void ClipboardReader::start() {
         continue;
       }
       if (readClipboardData(ClipboardDataType::plainText())) {
+        // Do not save empty or whitespace data.
+        if (isEmptyOrSpaces(data_)) {
+          continue;
+        }
         const JsValue &js_window = app_->browser()->mainFrame()->executeJavaScript("window");
-        js_window.asJsObject()->call("addClipboardData",
-                                     data_,
-                                     active_app_info_.path);
+        js_window.asJsObject()->call("addClipboardData", data_, active_app_info_.path);
       }
     }
   });
   t.join();
 }
+
 #pragma clang diagnostic pop
 
 bool ClipboardReader::readClipboardData(const std::shared_ptr<ClipboardDataType> &type) {
