@@ -7,15 +7,24 @@ import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
   deleteHistoryItem,
-  getActiveHistoryItem, getHistoryItems, getPreviewVisibleState,
+  getActiveHistoryItem,
+  getHistoryItems,
+  getPreviewVisibleState,
   getVisibleActiveHistoryItemIndex,
-  getVisibleHistoryItemsLength, HistoryItem, isUrl, setPreviewVisibleState,
-  setVisibleActiveHistoryItemIndex, updateHistoryItem
+  getVisibleHistoryItemsLength,
+  HistoryItem,
+  isUrl,
+  setPreviewVisibleState,
+  setVisibleActiveHistoryItemIndex,
+  updateHistoryItem
 } from "@/data";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {
-  prefGetClearHistoryShortcut, prefGetCopyToClipboardShortcut,
-  prefGetDeleteHistoryItemShortcut, prefGetEditHistoryItemShortcut, prefGetOpenInBrowserShortcut,
+  prefGetClearHistoryShortcut,
+  prefGetCopyToClipboardShortcut,
+  prefGetDeleteHistoryItemShortcut,
+  prefGetEditHistoryItemShortcut,
+  prefGetOpenInBrowserShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
@@ -51,10 +60,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
   const [historyItem, setHistoryItem] = useState(props.history[getVisibleActiveHistoryItemIndex()]);
 
-  const activateApp = () => {
+  function focusSearchField() {
     if (searchFieldRef.current) {
       searchFieldRef.current.focus()
     }
+  }
+
+  function activateApp() {
+    focusSearchField()
     if (getVisibleHistoryItemsLength() > 0) {
       let activeTabIndex = 0;
       setVisibleActiveHistoryItemIndex(activeTabIndex)
@@ -64,7 +77,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
         listRef.current.scrollToItem(activeTabIndex, "start")
       }
     }
-  };
+  }
+
+  useEffect(() => {
+    setTimeout(() => {
+      focusSearchField()
+    }, 0);
+  }, [activeTab])
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
