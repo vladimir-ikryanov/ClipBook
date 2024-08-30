@@ -201,6 +201,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       setPreviewVisible(visible)
       setPreviewVisibleState(visible)
     }
+    focusSearchField()
   }
 
   function handleHideActions(reason: HideActionsReason) {
@@ -265,6 +266,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
     // The props.items array won't be updated until the next render, so we need to get the updated
     // items right now to update the preview text.
     setHistoryItem(getHistoryItems()[0])
+    if (searchQuery == "") {
+      focusSearchField()
+    }
   }
 
   function handleMouseDoubleClick(tabIndex: number) {

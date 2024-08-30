@@ -1,6 +1,6 @@
 import '../App.css';
 import {Input} from "@/components/ui/input"
-import React, {useState} from "react";
+import React from "react";
 import {PanelRightClose, PanelRightOpen} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
@@ -21,7 +21,7 @@ export default function SearchBar(props: SearchBarProps) {
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Escape" && props.searchQuery.length > 0) {
-      props.onSearchQueryChange("")
+      handleClearSearch()
       e.stopPropagation()
     }
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
@@ -33,10 +33,15 @@ export default function SearchBar(props: SearchBarProps) {
     props.onShowHidePreview()
   }
 
+  function handleClearSearch() {
+    props.onSearchQueryChange("")
+  }
+
   return (
       <div className="flex flex-col border-b-solid border-b-border border-b">
         <div className="flex m-2">
-          <div className={props.searchQuery.length == 0 ? "flex-none relative" : "flex-auto relative"}>
+          <div
+              className={props.searchQuery.length == 0 ? "flex-none relative" : "flex-auto relative"}>
             <div className="flex text-primary-foreground">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
@@ -55,7 +60,18 @@ export default function SearchBar(props: SearchBarProps) {
             />
           </div>
           <div className={props.searchQuery.length == 0 ? "flex-auto draggable" : "flex-none"}></div>
-          <div className="ml-3">
+          <div className={props.searchQuery.length == 0 ? "hidden" : ""}>
+            <Button variant="ghost" className="p-2" onClick={handleClearSearch} title={"Clear search (Esc)"}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                   stroke-linejoin="round" className="lucide lucide-circle-x h-5 w-5 text-primary-foreground">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="m15 9-6 6"/>
+                <path d="m9 9 6 6"/>
+              </svg>
+            </Button>
+          </div>
+          <div className="">
             <Button variant="ghost" className="p-2" onClick={handleShowHidePreview}
                     title={props.isPreviewVisible ? "Hide preview panel (" +
                         shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")" :
