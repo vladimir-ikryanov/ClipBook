@@ -52,6 +52,11 @@ module.exports = {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",
         },
+        actions: {
+          DEFAULT: "var(--actions-background)",
+          background: "var(--actions-background)",
+          selection: "var(--actions-selection)",
+        },
         settings: {
           DEFAULT: "var(--settings)",
           border: "var(--settings-border)",
