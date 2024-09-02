@@ -1,4 +1,4 @@
-import '../App.css';
+import '../app.css';
 import {Button} from "@/components/ui/button";
 
 import * as React from "react"
@@ -30,7 +30,7 @@ import {
   prefGetShowMoreActionsShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
-import ShortcutLabel from "@/components/ShortcutLabel";
+import ShortcutLabel from "@/app/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {getActiveHistoryItem, getPreviewVisibleState, isUrl, toBase64Icon} from "@/data";

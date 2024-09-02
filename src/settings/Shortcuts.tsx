@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import ShortcutInput from "@/components/ShortcutInput";
+import ShortcutInput from "@/settings/ShortcutInput";
 import {
   prefGetClearHistoryShortcut,
   prefGetCloseAppShortcut,

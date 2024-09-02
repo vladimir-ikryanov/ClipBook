@@ -1,18 +1,18 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App'
-import Welcome from './Welcome'
-import Accessibility from './Accessibility'
-import Enjoy from './Enjoy'
-import Settings from './Settings'
+import App from './app/App'
+import Welcome from './welcome/Welcome'
+import Accessibility from './welcome/Accessibility'
+import Enjoy from './welcome/Enjoy'
+import Settings from './settings/Settings'
 import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
 import './index.css'
-import {ThemeProvider} from "@/components/ThemeProvider";
-import Privacy from "@/Privacy";
-import Shortcuts from "@/Shortcuts";
+import {ThemeProvider} from "@/app/ThemeProvider";
+import Privacy from "@/settings/Privacy";
+import Shortcuts from "@/settings/Shortcuts";
 
 const router = createBrowserRouter([
   {

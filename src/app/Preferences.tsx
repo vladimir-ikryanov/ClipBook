@@ -1,4 +1,4 @@
-import '../App.css';
+import '../app.css';
 import {Button} from "@/components/ui/button"
 import {Checkbox} from "@/components/ui/checkbox"
 import {ToggleGroup, ToggleGroupItem} from "@/components/ui/toggle-group"

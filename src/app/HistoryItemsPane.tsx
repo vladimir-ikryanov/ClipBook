@@ -1,13 +1,13 @@
-import '../App.css';
+import '../app.css';
 import {TabsList} from "@/components/ui/tabs";
 import {HistoryItem} from "@/data";
 import React from "react";
-import SearchBar from "@/components/SearchBar";
-import ActionsBar from "@/components/ActionsBar";
+import SearchBar from "@/app/SearchBar";
+import ActionsBar from "@/app/ActionsBar";
 import {FixedSizeList as List} from "react-window";
 import AutoSizer, {Size} from "react-virtualized-auto-sizer";
-import {HideActionsReason} from "@/components/Actions";
-import HistoryItemPane from "@/components/HistoryItemPane";
+import {HideActionsReason} from "@/app/Actions";
+import HistoryItemPane from "@/app/HistoryItemPane";
 
 type HistoryItemListPaneProps = {
   history: HistoryItem[]

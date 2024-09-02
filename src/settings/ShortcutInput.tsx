@@ -1,4 +1,4 @@
-import '../App.css';
+import '../app.css';
 import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {isModifierKey, keysToDisplayShortcut, shortcutToDisplayShortcut} from "@/lib/shortcuts";

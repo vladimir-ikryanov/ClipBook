@@ -1,8 +1,8 @@
-import '../App.css';
+import '../app.css';
 import {Tabs} from "@/components/ui/tabs";
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/components/ui/resizable";
-import HistoryItemPreviewPane from "@/components/HistoryItemPreviewPane"
-import HistoryItemsPane from "@/components/HistoryItemsPane";
+import HistoryItemPreviewPane from "@/app/HistoryItemPreviewPane"
+import HistoryItemsPane from "@/app/HistoryItemsPane";
 import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
@@ -32,7 +32,7 @@ import {
   prefGetShowMoreActionsShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
-import {HideActionsReason} from "@/components/Actions";
+import {HideActionsReason} from "@/app/Actions";
 import {FixedSizeList as List} from "react-window";
 
 declare const pasteInFrontApp: (text: string) => void;

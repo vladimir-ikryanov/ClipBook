@@ -1,5 +1,5 @@
-import HistoryPane from "@/components/HistoryPane";
-import {ThemeProvider} from "@/components/ThemeProvider"
+import HistoryPane from "@/app/HistoryPane";
+import {ThemeProvider} from "@/app/ThemeProvider"
 
 import {addHistoryItem, clear, getHistoryItems, isHistoryEmpty, setFilterQuery} from "@/data"
 import {useEffect, useState} from "react";

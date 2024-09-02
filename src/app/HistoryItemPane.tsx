@@ -1,4 +1,4 @@
-import '../App.css';
+import '../app.css';
 import {TabsTrigger} from "@/components/ui/tabs";
 import {Link, File} from "lucide-react";
 import React, {CSSProperties, KeyboardEvent, MouseEvent} from 'react';

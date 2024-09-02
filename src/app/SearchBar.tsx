@@ -1,4 +1,4 @@
-import '../App.css';
+import '../app.css';
 import {Input} from "@/components/ui/input"
 import React from "react";
 import {PanelRightClose, PanelRightOpen} from "lucide-react";

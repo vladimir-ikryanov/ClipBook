@@ -1,13 +1,13 @@
-import '../App.css';
+import '../app.css';
 import {Button} from "@/components/ui/button";
 import React from "react";
-import Actions, {HideActionsReason} from "@/components/Actions";
+import Actions, {HideActionsReason} from "@/app/Actions";
 import {
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut
 } from "@/pref";
-import ShortcutLabel from "@/components/ShortcutLabel";
+import ShortcutLabel from "@/app/ShortcutLabel";
 
 type ActionsBarProps = {
   appName: string

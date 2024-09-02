@@ -10,7 +10,7 @@ import {
   prefSetIgnoreConfidentialContent,
   prefSetIgnoreTransientContent,
 } from "@/pref";
-import IgnoreAppsPane from "@/components/IgnoreAppsPane";
+import IgnoreAppsPane from "@/settings/IgnoreAppsPane";
 
 declare const closeSettingsWindow: () => void;
 declare const selectAppsToIgnore: () => string[];
