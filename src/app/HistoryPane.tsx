@@ -329,8 +329,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
           <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}
                           className="transition-all duration-200 ease-out bg-secondary">
             <PreviewPane item={historyItem}
+                         appName={props.appName}
+                         appIcon={props.appIcon}
                          onEditHistoryItem={handleEditHistoryItem}
                          onFinishEditing={handleFinishEditing}
+                         onHidePreview={handleTogglePreview}
                          previewTextareaRef={previewTextareaRef}/>
           </ResizablePanel>
         </ResizablePanelGroup>

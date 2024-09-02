@@ -1,7 +1,7 @@
 import '../app.css';
 import {Input} from "@/components/ui/input"
 import React from "react";
-import {PanelRightClose, PanelRightOpen} from "lucide-react";
+import {PanelRightOpen, XIcon} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {prefGetTogglePreviewShortcut} from "@/pref";
@@ -63,22 +63,13 @@ export default function SearchBar(props: SearchBarProps) {
           <div className={props.searchQuery.length == 0 ? "hidden" : ""}>
             <Button variant="ghost" className="p-2" onClick={handleClearSearch}
                     title={"Clear search (Esc)"}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                   fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                   stroke-linejoin="round" className="lucide lucide-x h-5 w-5 text-primary-foreground">
-                <path d="M18 6 6 18"/>
-                <path d="m6 6 12 12"/>
-              </svg>
+              <XIcon className="h-5 w-5 text-primary-foreground"/>
             </Button>
           </div>
-          <div className="">
+          <div className={props.isPreviewVisible ? "hidden" : ""}>
             <Button variant="ghost" className="p-2" onClick={handleShowHidePreview}
-                    title={props.isPreviewVisible ? "Hide preview panel (" +
-                        shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")" :
-                        "Show preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
-              {props.isPreviewVisible ?
-                  <PanelRightClose className="h-5 w-5 text-primary-foreground"/> :
-                  <PanelRightOpen className="h-5 w-5 text-primary-foreground"/>}
+                    title={"Show preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
+              <PanelRightOpen className="h-5 w-5 text-primary-foreground"/>
             </Button>
           </div>
         </div>
