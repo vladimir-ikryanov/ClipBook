@@ -1,7 +1,7 @@
 import '../app.css';
 import {Tabs} from "@/components/ui/tabs";
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/components/ui/resizable";
-import HistoryItemPreviewPane from "@/app/HistoryItemPreviewPane"
+import PreviewPane from "@/app/PreviewPane"
 import HistoryItemsPane from "@/app/HistoryItemsPane";
 import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
@@ -328,10 +328,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
           <ResizableHandle/>
           <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}
                           className="transition-all duration-200 ease-out bg-secondary">
-            <HistoryItemPreviewPane item={historyItem}
-                                    onEditHistoryItem={handleEditHistoryItem}
-                                    onFinishEditing={handleFinishEditing}
-                                    previewTextareaRef={previewTextareaRef}/>
+            <PreviewPane item={historyItem}
+                         onEditHistoryItem={handleEditHistoryItem}
+                         onFinishEditing={handleFinishEditing}
+                         previewTextareaRef={previewTextareaRef}/>
           </ResizablePanel>
         </ResizablePanelGroup>
       </Tabs>
