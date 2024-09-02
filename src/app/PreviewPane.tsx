@@ -2,6 +2,7 @@ import '../app.css';
 import React from "react";
 import {HistoryItem} from "@/data";
 import PreviewToolBar from "@/app/PreviewToolBar";
+import {HidePreviewActionsReason} from "@/app/PreviewActions";
 
 type HistoryItemPreviewPaneProps = {
   item: HistoryItem
@@ -11,6 +12,10 @@ type HistoryItemPreviewPaneProps = {
   onFinishEditing: () => void
   onPaste: () => void
   onHidePreview: () => void
+  onHideActions: (reason: HidePreviewActionsReason) => void
+  onCopyToClipboard: () => void
+  onOpenInBrowser: () => void
+  onDeleteItem: () => void
   previewTextareaRef?: React.Ref<HTMLTextAreaElement>
 }
 
@@ -32,10 +37,14 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
         <PreviewToolBar appName={props.appName}
                         appIcon={props.appIcon}
                         onPaste={props.onPaste}
-                        onHidePreview={props.onHidePreview}/>
+                        onHidePreview={props.onHidePreview}
+                        onHideActions={props.onHideActions}
+                        onCopyToClipboard={props.onCopyToClipboard}
+                        onOpenInBrowser={props.onOpenInBrowser}
+                        onDeleteItem={props.onDeleteItem}/>
         <textarea id='preview'
                   ref={props.previewTextareaRef}
-                  className="preview h-full px-4 py-2 m-0 bg-secondary border-none outline-none resize-none font-mono text-sm"
+                  className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text-sm"
                   value={props.item?.content}
                   onChange={handleOnChange}
                   onKeyDown={handleKeyDown}/>

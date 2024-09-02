@@ -7,11 +7,17 @@ a, button {
 }
 
 .preview {
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: var(--secondary);
   background-color: var(--secondary);
   transition: background-color 150ms linear;
 }
 
 .preview:focus {
-  background-color: var(--background);
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: var(--border);
+  background-color: var(--secondary);
   transition: background-color 250ms linear;
 }
