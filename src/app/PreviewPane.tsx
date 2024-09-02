@@ -9,6 +9,7 @@ type HistoryItemPreviewPaneProps = {
   appIcon: string
   onEditHistoryItem: (item: HistoryItem) => void
   onFinishEditing: () => void
+  onPaste: () => void
   onHidePreview: () => void
   previewTextareaRef?: React.Ref<HTMLTextAreaElement>
 }
@@ -30,6 +31,7 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
       <div className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]">
         <PreviewToolBar appName={props.appName}
                         appIcon={props.appIcon}
+                        onPaste={props.onPaste}
                         onHidePreview={props.onHidePreview}/>
         <textarea id='preview'
                   ref={props.previewTextareaRef}

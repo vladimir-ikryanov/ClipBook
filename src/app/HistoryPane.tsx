@@ -334,6 +334,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          onEditHistoryItem={handleEditHistoryItem}
                          onFinishEditing={handleFinishEditing}
                          onHidePreview={handleTogglePreview}
+                         onPaste={handlePaste}
                          previewTextareaRef={previewTextareaRef}/>
           </ResizablePanel>
         </ResizablePanelGroup>

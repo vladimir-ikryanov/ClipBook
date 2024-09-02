@@ -12,6 +12,7 @@ import {toBase64Icon} from "@/data";
 type PreviewToolBarProps = {
   appName: string
   appIcon: string
+  onPaste: () => void
   onHidePreview: () => void
 }
 
@@ -20,11 +21,16 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     props.onHidePreview()
   }
 
+  function handlePaste() {
+    props.onPaste()
+  }
+
   return (
       <div className="flex flex-col">
         <div className="flex m-2">
           <div className="">
-            <Button variant="ghost" className="px-2" title={"Paste to " + props.appName}>
+            <Button variant="ghost" className="px-2" title={"Paste to " + props.appName}
+                    onClick={handlePaste}>
               <img src={toBase64Icon(props.appIcon)} className="h-6 w-6 mr-2"
                    alt="Application icon"/>
               <span className="text-primary-foreground">Paste to {props.appName}</span>
