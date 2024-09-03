@@ -1,7 +1,7 @@
 import '../app.css';
 import {Input} from "@/components/ui/input"
 import React from "react";
-import {PanelRightOpen, XIcon} from "lucide-react";
+import {PanelRightOpen, SearchIcon, XIcon} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {prefGetTogglePreviewShortcut} from "@/pref";
@@ -43,33 +43,26 @@ export default function SearchBar(props: SearchBarProps) {
           <div
               className={props.searchQuery.length == 0 ? "flex-none relative" : "flex-auto relative"}>
             <div className="flex text-primary-foreground">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                   fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                   strokeLinejoin="round"
-                   className="lucide lucide-search absolute left-2 top-2.5 h-5 w-5 text-secondary-foreground">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.3-4.3"/>
-              </svg>
+              <SearchIcon className="absolute left-2 top-2.5 h-5 w-5 text-secondary-foreground"/>
             </div>
             <Input placeholder="Type to search..."
                    value={props.searchQuery}
-                   className="w-full pl-10 text-lg placeholder:text-secondary-foreground border-none"
+                   className="w-full h-10 pl-10 text-lg placeholder:text-secondary-foreground border-none"
                    onChange={handleOnChange}
                    onKeyDown={handleKeyDown}
-                   ref={props.searchFieldRef}
-            />
+                   ref={props.searchFieldRef}/>
           </div>
           <div className={props.searchQuery.length == 0 ? "flex-auto draggable" : "flex-none"}></div>
           <div className={props.searchQuery.length == 0 ? "hidden" : ""}>
-            <Button variant="ghost" className="p-2" onClick={handleClearSearch}
+            <Button variant="toolbar" size="toolbar" onClick={handleClearSearch}
                     title={"Clear search (Esc)"}>
-              <XIcon className="h-5 w-5 text-primary-foreground"/>
+              <XIcon className="h-6 w-6 text-primary-foreground" strokeWidth={1.5}/>
             </Button>
           </div>
           <div className={props.isPreviewVisible ? "hidden" : ""}>
-            <Button variant="ghost" className="p-2" onClick={handleShowHidePreview}
+            <Button variant="toolbar" size="toolbar" onClick={handleShowHidePreview}
                     title={"Show preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
-              <PanelRightOpen className="h-5 w-5 text-primary-foreground"/>
+              <PanelRightOpen className="h-6 w-6 text-primary-foreground" strokeWidth={1.5}/>
             </Button>
           </div>
         </div>

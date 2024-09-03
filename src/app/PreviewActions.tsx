@@ -6,7 +6,7 @@ import {
   CopyIcon,
   GlobeIcon,
   EllipsisVerticalIcon,
-  TrashIcon
+  TrashIcon, EllipsisIcon
 } from "lucide-react"
 
 import {
@@ -78,8 +78,8 @@ export default function PreviewActions(props: PreviewActionsProps) {
   return (
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" className="p-2" title={"More actions"}>
-            <EllipsisVerticalIcon className="h-5 w-5 text-primary-foreground"/>
+          <Button variant="toolbar" size="toolbar" title={"More actions"}>
+            <EllipsisIcon className="h-6 w-6 text-primary-foreground" strokeWidth={1.5}/>
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-[250px] py-2 px-0 bg-actions-background"

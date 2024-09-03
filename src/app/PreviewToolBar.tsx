@@ -29,9 +29,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
   return (
       <div className="flex flex-col">
-        <div className="flex m-2">
+        <div className="flex m-2 h-10">
           <div className="">
-            <Button variant="ghost" className="px-2" title={"Paste to " + props.appName}
+            <Button variant="toolbar" size="toolbar" title={"Paste to " + props.appName}
                     onClick={handlePaste}>
               <img src={toBase64Icon(props.appIcon)} className="h-6 w-6 mr-2"
                    alt="Application icon"/>
@@ -44,9 +44,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                             onCopyToClipboard={props.onCopyToClipboard}
                             onOpenInBrowser={props.onOpenInBrowser}
                             onDeleteItem={props.onDeleteItem}/>
-            <Button variant="ghost" className="p-2" onClick={handleHidePreview}
+            <Button variant="toolbar" size="toolbar" onClick={handleHidePreview}
                     title={"Hide preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
-              <PanelRightCloseIcon className="h-5 w-5 text-primary-foreground"/>
+              <PanelRightCloseIcon className="h-6 w-6 text-primary-foreground" strokeWidth={1.5}/>
             </Button>
           </div>
         </div>
