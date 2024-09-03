@@ -12,8 +12,6 @@ import {
   getPreviewVisibleState,
   getVisibleActiveHistoryItemIndex,
   getVisibleHistoryItemsLength,
-  HistoryItem,
-  isUrl,
   setPreviewVisibleState,
   setVisibleActiveHistoryItemIndex,
   updateHistoryItem
@@ -34,6 +32,8 @@ import {
 } from "@/pref";
 import {HideActionsReason} from "@/app/Actions";
 import {FixedSizeList as List} from "react-window";
+import {Clip} from "@/db";
+import {isUrl} from "@/lib/utils";
 
 declare const pasteInFrontApp: (text: string) => void;
 declare const copyToClipboard: (text: string) => void;
@@ -42,7 +42,7 @@ declare const hideAppWindow: () => void;
 declare const openInBrowser: (url: string) => void;
 
 type HistoryPaneProps = {
-  history: HistoryItem[]
+  history: Clip[]
   appName: string
   appIcon: string
   onUpdateHistory: () => void
@@ -237,7 +237,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
-  function handleDeleteItem() {
+  async function handleDeleteItem() {
     let itemToDelete = getActiveHistoryItem();
     if (getVisibleActiveHistoryItemIndex() === getVisibleHistoryItemsLength() - 1) {
       let activeTabIndex = 0;
@@ -246,7 +246,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
         setActiveTab(activeTabIndex.toString())
       }
     }
-    deleteHistoryItem(itemToDelete)
+    await deleteHistoryItem(itemToDelete)
     // If the history is not empty, update the preview text to the new active item.
     let items = getHistoryItems();
     if (items.length > 0) {
@@ -281,10 +281,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
-  function handleEditHistoryItem(newText: HistoryItem) {
-    let oldText = getActiveHistoryItem();
-    updateHistoryItem(oldText, newText)
-    setHistoryItem(newText)
+  async function handleEditHistoryItem(newClip: Clip) {
+    let clip = getActiveHistoryItem();
+    await updateHistoryItem(clip, newClip)
+    setHistoryItem(newClip)
     props.onUpdateHistory()
   }
 

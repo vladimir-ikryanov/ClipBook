@@ -1,14 +1,17 @@
 import '../app.css';
 import React from "react";
-import {HistoryItem} from "@/data";
 import PreviewToolBar from "@/app/PreviewToolBar";
 import {HidePreviewActionsReason} from "@/app/PreviewActions";
+import {Clip} from "@/db";
+import {getClipType} from "@/lib/utils";
+import InfoPane from "@/app/InfoPane";
+import {getInfoVisibleState, setInfoVisibleState} from "@/data";
 
 type HistoryItemPreviewPaneProps = {
-  item: HistoryItem
+  item: Clip
   appName: string
   appIcon: string
-  onEditHistoryItem: (item: HistoryItem) => void
+  onEditHistoryItem: (item: Clip) => void
   onFinishEditing: () => void
   onPaste: () => void
   onHidePreview: () => void
@@ -20,6 +23,8 @@ type HistoryItemPreviewPaneProps = {
 }
 
 export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
+  const [displayInfo, setDisplayInfo] = React.useState(getInfoVisibleState())
+
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Escape") {
       props.onFinishEditing()
@@ -29,14 +34,28 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
 
   function handleOnChange() {
     let content = (document.getElementById('preview') as HTMLTextAreaElement).value;
-    props.onEditHistoryItem({content: content, sourceApp: props.item.sourceApp})
+    props.item.content = content
+    props.item.type = getClipType(content)
+    props.onEditHistoryItem(props.item)
+  }
+
+  function handleToggleInfo() {
+    let visible = !displayInfo;
+    setDisplayInfo(visible)
+    setInfoVisibleState(visible)
+  }
+
+  if (!props.item) {
+    return <div className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]"></div>
   }
 
   return (
       <div className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]">
         <PreviewToolBar appName={props.appName}
                         appIcon={props.appIcon}
+                        displayInfo={displayInfo}
                         onPaste={props.onPaste}
+                        onToggleInfo={handleToggleInfo}
                         onHidePreview={props.onHidePreview}
                         onHideActions={props.onHideActions}
                         onCopyToClipboard={props.onCopyToClipboard}
@@ -48,6 +67,7 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
                   value={props.item?.content}
                   onChange={handleOnChange}
                   onKeyDown={handleKeyDown}/>
+        <InfoPane item={props.item} display={displayInfo}/>
       </div>
   )
 }

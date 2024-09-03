@@ -1,21 +1,21 @@
 import '../app.css';
 import {TabsTrigger} from "@/components/ui/tabs";
-import {Link, File} from "lucide-react";
+import {File, Link} from "lucide-react";
 import React, {CSSProperties, KeyboardEvent, MouseEvent} from 'react';
-import {getFilterQuery, HistoryItem, isUrl, toCSSColor} from "@/data";
+import {getFilterQuery} from "@/data";
+import {Clip, ClipType} from "@/db";
+import {isUrl, toCSSColor} from "@/lib/utils";
 
 type HistoryItemPaneProps = {
+  item: Clip
   index: number
   historySize: number
-  item: HistoryItem
   onMouseDoubleClick: (tabIndex: number) => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>
   style: CSSProperties
 }
 
 const HistoryItemPane = (props: HistoryItemPaneProps) => {
-  const cssColor = toCSSColor(props.item.content)
-
   const keyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.stopPropagation()
@@ -25,6 +25,14 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   const handleMouseDoubleClick = (e: MouseEvent) => {
     props.onMouseDoubleClick(props.index)
     e.preventDefault()
+  }
+
+  function isColor(): boolean {
+    return props.item.type === ClipType.Color
+  }
+
+  function isLink(): boolean {
+    return props.item.type === ClipType.Link
   }
 
   function highlightAllMatches(text: string, query: string) {
@@ -58,10 +66,10 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
           onDoubleClick={handleMouseDoubleClick}>
         <div className="flex mr-3 text-primary-foreground">
           {
-            cssColor !== '' ?
-                <div className="h-5 w-5 rounded-full" style={{backgroundColor: cssColor}}/> :
-                isUrl(props.item.content) ?
-                    <Link className="h-5 w-5"/> :
+            isColor() ?
+                <div className="h-5 w-5 rounded-full"
+                     style={{backgroundColor: toCSSColor(props.item.content)}}/> :
+                isUrl(props.item.content) ? <Link className="h-5 w-5"/> :
                     <File className="h-5 w-5"/>
           }
         </div>

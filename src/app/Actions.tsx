@@ -2,13 +2,8 @@ import '../app.css';
 import {Button} from "@/components/ui/button";
 
 import * as React from "react"
-import {
-  CopyIcon,
-  Edit3Icon,
-  GlobeIcon,
-  PanelRightClose,
-  TrashIcon
-} from "lucide-react"
+import {useEffect} from "react"
+import {CopyIcon, Edit3Icon, GlobeIcon, PanelRightClose, TrashIcon} from "lucide-react"
 
 import {
   Command,
@@ -19,7 +14,6 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command"
-import {useEffect} from "react";
 import {
   prefGetClearHistoryShortcut,
   prefGetCopyToClipboardShortcut,
@@ -33,7 +27,8 @@ import {
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {getActiveHistoryItem, getPreviewVisibleState, isUrl, toBase64Icon} from "@/data";
+import {getActiveHistoryItem, getPreviewVisibleState, toBase64Icon} from "@/data";
+import {ClipType} from "@/db";
 
 export type HideActionsReason =
     "cancel"
@@ -129,7 +124,7 @@ export default function Actions(props: ActionsProps) {
   }
 
   function isActiveHistoryItemIsUrl() {
-    return isUrl(getActiveHistoryItem()?.content)
+    return getActiveHistoryItem()?.type === ClipType.Link
   }
 
   return (

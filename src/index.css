@@ -25,6 +25,8 @@
     --ring: #fafafa;
     --radius: 0.75rem;
     --search-highlight: #3b82f6;
+    /* Toolbar */
+    --button-selected: #3b82f6;
     /* Actions */
     --actions-background: #fafafa;
     --actions-selection: #e2e2e2;
@@ -69,6 +71,8 @@
     --input: #707070;
     --ring: #282828;
     --search-highlight: #06b6d4;
+    /* Toolbar */
+    --button-selected: #06b6d4;
     /* Actions */
     --actions-background: #212121;
     --actions-selection: #333333;

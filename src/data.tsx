@@ -1,22 +1,28 @@
+import {addClip, Clip, deleteAllClips, deleteClip, getAllClips, updateClip} from "@/db";
+
 export type HistoryItem = {
   content: string
   sourceApp: {
     path: string
   }
-  // copied: {
-  //   fistTime: Date
-  //   lastTime: Date
-  //   times: number
-  // }
 }
 
-let history: HistoryItem[];
+export enum SortHistoryType {
+  TimeOfFirstCopy,
+  TimeOfLastCopy,
+  NumberOfCopies
+}
+
+let history: Clip[];
 let filterQuery = "";
 let visibleActiveHistoryItemIndex = 0;
 let visibleHistoryItemsLength = 0;
 let previewVisible = true;
+let infoVisible = false;
+let sortType = SortHistoryType.TimeOfLastCopy;
 
-loadHistory()
+loadSettings()
+await loadHistory()
 
 // For testing purposes only!
 function generateRandomWord(length: number): string {
@@ -30,38 +36,48 @@ function generateRandomWord(length: number): string {
 }
 
 // noinspection JSUnusedLocalSymbols
-function generateHistoryForTesting(size: number, wordLength: number): HistoryItem[] {
-  const array: HistoryItem[] = []
+function generateHistoryForTesting(size: number, wordLength: number): Clip[] {
+  const array: Clip[] = []
   for (let i = 0; i < size; i++) {
-    array.push({ content: generateRandomWord(wordLength), sourceApp: {path: ""} })
+    array.push(new Clip(generateRandomWord(wordLength), "ClipBook"))
   }
   return array
 }
 
-function loadHistory() {
+async function loadHistory() {
   // history = generateHistoryForTesting(10024, 128)
-  history = []
+  history = await getAllClips()
   if (localStorage.getItem("history")) {
-    history = JSON.parse(localStorage.getItem("history")!)
-  } else {
-    if (localStorage.getItem("historyItems")) {
-      let oldFormatHistory = JSON.parse(localStorage.getItem("historyItems")!);
-      // Convert old format history items to new format.
-      for (let i = 0; i < oldFormatHistory.length; i++) {
-        history.push({ content: oldFormatHistory[i], sourceApp: {path: ""} })
-      }
-      // Remove history items in the old format after migration.
-      localStorage.removeItem("historyItems")
+    let items: HistoryItem[] = JSON.parse(localStorage.getItem("history")!)
+    for (let i = 0; i < items.length; i++) {
+      await addClip(new Clip(items[i].content, items[i].sourceApp.path))
     }
+    localStorage.removeItem("history")
+  }
+  // Migrate old format history items to new format.
+  if (localStorage.getItem("historyItems")) {
+    let items: string[] = JSON.parse(localStorage.getItem("historyItems")!);
+    // Convert old format history items to new format.
+    for (let i = 0; i < items.length; i++) {
+      await addClip(new Clip(items[i], ""))
+    }
+    history = await getAllClips()
+    localStorage.removeItem("historyItems")
   }
 
+  sortHistory(sortType, history)
+}
+
+function loadSettings() {
   if (localStorage.getItem("previewVisible")) {
     previewVisible = localStorage.getItem("previewVisible") === "true"
   }
-}
-
-function saveHistory() {
-  localStorage.setItem("history", JSON.stringify(history))
+  if (localStorage.getItem("infoVisible")) {
+    infoVisible = localStorage.getItem("infoVisible") === "true"
+  }
+  if (localStorage.getItem("sortType")) {
+    sortType = parseInt(localStorage.getItem("sortType")!)
+  }
 }
 
 function savePreviewVisible(visible: boolean) {
@@ -69,29 +85,47 @@ function savePreviewVisible(visible: boolean) {
   localStorage.setItem("previewVisible", visible.toString())
 }
 
-function hasItem(item: HistoryItem) : number {
+function saveInfoVisible(visible: boolean) {
+  infoVisible = visible
+  localStorage.setItem("infoVisible", visible.toString())
+}
+
+function hasItem(item: Clip): number {
   for (let i = 0; i < history.length; i++) {
-    if (history[i].content === item.content) {
+    if (history[i].id === item.id) {
       return i
     }
   }
-  return -1
+  return -1;
 }
 
-function deleteItem(item: HistoryItem) {
+function findItemByContent(content: string): Clip | undefined {
+  for (let i = 0; i < history.length; i++) {
+    if (history[i].content === content) {
+      return history[i]
+    }
+  }
+  return undefined
+}
+
+async function deleteItem(item: Clip) {
   let index = hasItem(item);
   if (index !== -1) {
     history.splice(index, 1)
+    await deleteClip(item.id!)
   }
 }
 
-export function getHistoryItems() : HistoryItem[] {
+export function getHistoryItems(): Clip[] {
   visibleHistoryItemsLength = history.length
   if (filterQuery.length > 0) {
-    let filteredHistory = Array.from(history.filter(item => item.content.toLowerCase().includes(filterQuery.toLowerCase())));
+    let filteredHistory = Array.from(history.filter(item =>
+        item.content.toLowerCase().includes(filterQuery.toLowerCase())));
     visibleHistoryItemsLength = filteredHistory.length
+    sortHistory(sortType, filteredHistory)
     return filteredHistory
   }
+  sortHistory(sortType, history)
   return Array.from(history)
 }
 
@@ -99,30 +133,50 @@ export function isHistoryEmpty() {
   return history.length === 0
 }
 
-export function addHistoryItem(item: HistoryItem) : HistoryItem[] {
-  deleteItem(item)
-  history.unshift(item)
-  saveHistory()
+export async function addHistoryItem(content: string, sourceAppPath: string): Promise<Clip[]> {
+  let item = findItemByContent(content);
+  if (item) {
+    item.numberOfCopies++
+    item.lastTimeCopy = new Date()
+    await updateClip(item.id!, item)
+  } else {
+    item = new Clip(content, sourceAppPath)
+    await addClip(item)
+    history.push(item)
+  }
   return getHistoryItems()
 }
 
-export function deleteHistoryItem(item: HistoryItem) {
-  deleteItem(item)
-  saveHistory()
+export async function deleteHistoryItem(item: Clip) {
+  await deleteItem(item)
 }
 
-export function updateHistoryItem(oldItem: HistoryItem, newItem: HistoryItem) {
+export async function updateHistoryItem(oldItem: Clip, newItem: Clip) {
   let index = hasItem(oldItem)
   if (index !== -1) {
     history[index] = newItem
-    saveHistory()
   }
+  await updateClip(oldItem.id!, newItem)
 }
 
-export function clear() : HistoryItem[] {
+export async function clear(): Promise<Clip[]> {
   history = []
-  saveHistory()
+  await deleteAllClips()
   return getHistoryItems()
+}
+
+export function sortHistory(type: SortHistoryType, history: Clip[]) {
+  switch (type) {
+    case SortHistoryType.TimeOfFirstCopy:
+      history.sort((a, b) => b.firstTimeCopy.getTime() - a.firstTimeCopy.getTime())
+      break
+    case SortHistoryType.TimeOfLastCopy:
+      history.sort((a, b) => b.lastTimeCopy.getTime() - a.lastTimeCopy.getTime())
+      break
+    case SortHistoryType.NumberOfCopies:
+      history.sort((a, b) => b.numberOfCopies - a.numberOfCopies)
+      break
+  }
 }
 
 export function setVisibleActiveHistoryItemIndex(index: number) {
@@ -141,11 +195,11 @@ export function setFilterQuery(query: string) {
   filterQuery = query
 }
 
-export function getFilterQuery() : string {
+export function getFilterQuery(): string {
   return filterQuery
 }
 
-export function getActiveHistoryItem() : HistoryItem {
+export function getActiveHistoryItem(): Clip {
   return getHistoryItems()[visibleActiveHistoryItemIndex]
 }
 
@@ -157,25 +211,12 @@ export function getPreviewVisibleState() {
   return previewVisible
 }
 
-export function isUrl(text: string) {
-  const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
-  return urlRegex.test(text);
+export function setInfoVisibleState(visible: boolean) {
+  saveInfoVisible(visible)
 }
 
-export function toCSSColor(str: string): string {
-  // If the given string is longer than 20 characters, it's not a color.
-  if (str.length > 20) {
-    return "";
-  }
-
-  // If the string is a valid 3, 4, 6, or 8 character hex code without '#', add the '#' prefix
-  if (/^[A-Fa-f0-9]{3}$/.test(str) || /^[A-Fa-f0-9]{4}$/.test(str) || /^[A-Fa-f0-9]{6}$/.test(str) || /^[A-Fa-f0-9]{8}$/.test(str)) {
-    str = `#${str}`;
-  }
-
-  const s = new Option().style;
-  s.color = str;
-  return s.color;
+export function getInfoVisibleState() {
+  return infoVisible
 }
 
 export function toBase64Icon(base64IconData: string): string {

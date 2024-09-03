@@ -1,6 +1,5 @@
 import '../app.css';
 import {TabsList} from "@/components/ui/tabs";
-import {HistoryItem} from "@/data";
 import React from "react";
 import SearchBar from "@/app/SearchBar";
 import ActionsBar from "@/app/ActionsBar";
@@ -8,9 +7,10 @@ import {FixedSizeList as List} from "react-window";
 import AutoSizer, {Size} from "react-virtualized-auto-sizer";
 import {HideActionsReason} from "@/app/Actions";
 import HistoryItemPane from "@/app/HistoryItemPane";
+import {Clip} from "@/db";
 
 type HistoryItemListPaneProps = {
-  history: HistoryItem[]
+  history: Clip[]
   appName: string
   appIcon: string
   searchQuery: string

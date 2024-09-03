@@ -12,6 +12,7 @@ import {
   prefGetZoomUIOutShortcut
 } from "@/pref";
 import {isShortcutMatch} from "@/lib/shortcuts";
+import {Clip} from "@/db";
 
 declare const hideAppWindow: () => void;
 declare const openSettingsWindow: () => void;
@@ -56,11 +57,9 @@ export default function App() {
     return () => document.removeEventListener("keydown", down)
   }, [])
 
-  function addClipboardData(content: string, sourceAppPath: string): void {
-    setHistory([...addHistoryItem({
-      content: content,
-      sourceApp: {path: sourceAppPath}
-    })])
+  async function addClipboardData(content: string, sourceAppPath: string) {
+    let clips = await addHistoryItem(content, sourceAppPath)
+    setHistory([...clips])
   }
 
   function handleUpdateHistory(): void {
@@ -78,8 +77,8 @@ export default function App() {
     setAppIcon(appIcon)
   }
 
-  function clearHistory(): void {
-    setHistory(clear())
+  async function clearHistory() {
+    setHistory(await clear())
   }
 
   // Attach the function to the window object

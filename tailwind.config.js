@@ -64,7 +64,11 @@ module.exports = {
           sidebarSelection: "var(--settings-sidebar-selection)",
           tableRow: "var(--settings-table-row)",
           tableRow2: "var(--settings-table-row2)",
-        }
+        },
+        toolbar: {
+          DEFAULT: "var(--button-selected)",
+          foreground: "var(--button-selected)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
