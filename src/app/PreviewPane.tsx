@@ -24,6 +24,8 @@ type HistoryItemPreviewPaneProps = {
 
 export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
   const [displayInfo, setDisplayInfo] = React.useState(getInfoVisibleState())
+  // I need this state to keep caret position when editing the content.
+  const [content, setContent] = React.useState(props.item?.content)
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Escape") {
@@ -34,6 +36,7 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
 
   function handleOnChange() {
     let content = (document.getElementById('preview') as HTMLTextAreaElement).value;
+    setContent(content)
     props.item.content = content
     props.item.type = getClipType(content)
     props.onEditHistoryItem(props.item)
@@ -53,6 +56,7 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
   return (
       <div className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]">
         <PreviewToolBar item={props.item}
+                        itemPinned={props.item.pinned}
                         appName={props.appName}
                         appIcon={props.appIcon}
                         displayInfo={displayInfo}
@@ -60,13 +64,14 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
                         onToggleInfo={handleToggleInfo}
                         onHidePreview={props.onHidePreview}
                         onHideActions={props.onHideActions}
+                        onEditHistoryItem={props.onEditHistoryItem}
                         onCopyToClipboard={props.onCopyToClipboard}
                         onOpenInBrowser={props.onOpenInBrowser}
                         onDeleteItem={props.onDeleteItem}/>
         <textarea id='preview'
                   ref={props.previewTextareaRef}
                   className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text-sm"
-                  value={props.item?.content}
+                  value={props.item.content}
                   onChange={handleOnChange}
                   onKeyDown={handleKeyDown}/>
         <InfoPane item={props.item} display={displayInfo}/>

@@ -66,8 +66,12 @@ module.exports = {
           tableRow2: "var(--settings-table-row2)",
         },
         toolbar: {
-          DEFAULT: "var(--button-selected)",
-          foreground: "var(--button-selected)",
+          DEFAULT: "var(--toolbar-background)",
+          buttonSelected: "var(--toolbar-button-selected)",
+        },
+        preview: {
+          DEFAULT: "var(--preview-background)",
+          border: "var(--preview-border)",
         },
       },
       borderRadius: {

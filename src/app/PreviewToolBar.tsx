@@ -13,6 +13,7 @@ import {Clip, ClipType} from "@/db";
 
 type PreviewToolBarProps = {
   item: Clip
+  itemPinned: boolean
   appName: string
   appIcon: string
   displayInfo: boolean
@@ -20,6 +21,7 @@ type PreviewToolBarProps = {
   onToggleInfo: () => void
   onHidePreview: () => void
   onHideActions: (reason: HidePreviewActionsReason) => void
+  onEditHistoryItem: (item: Clip) => void
   onCopyToClipboard: () => void
   onOpenInBrowser: () => void
   onDeleteItem: () => void
@@ -34,10 +36,6 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     props.onCopyToClipboard()
   }
 
-  function handlePaste() {
-    props.onPaste()
-  }
-
   function handleToggleInfo() {
     props.onToggleInfo()
   }
@@ -46,30 +44,37 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     props.onOpenInBrowser()
   }
 
+  function handleToggleStar() {
+    props.item.pinned = !props.item.pinned
+    props.onEditHistoryItem(props.item)
+  }
+
   return (
       <div className="flex flex-col">
         <div className="flex m-2 h-10">
           <div className="">
             <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}
                     title={"Copy to Clipboard (" + shortcutToDisplayShortcut(prefGetCopyToClipboardShortcut()) + ")"}>
-              <CopyIcon className="h-5 w-5 text-primary-foreground"/>
+              <CopyIcon className="h-5 w-5 text-primary-foreground" strokeWidth={2.5}/>
             </Button>
             {
                 props.item.type === ClipType.Link &&
                 <Button variant="toolbar" size="toolbar" onClick={handleOpenInBrowser}
                         title={"Open in Browser (" + shortcutToDisplayShortcut(prefGetOpenInBrowserShortcut()) + ")"}>
-                  <GlobeIcon className="h-5 w-5 text-primary-foreground"/>
+                  <GlobeIcon className="h-5 w-5 text-primary-foreground" strokeWidth={2.5}/>
                 </Button>
             }
           </div>
           <div className="flex-auto draggable"></div>
           <div className="">
-            <Button variant="toolbar" size="toolbar">
-              <StarIcon className="h-5 w-5 text-primary-foreground"/>
+            <Button variant="toolbar" size="toolbar" onClick={handleToggleStar}
+                    title={props.itemPinned ? "Remove from favorites" : "Add to favorites"}>
+              <StarIcon className={props.itemPinned ?
+                  "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5 text-primary-foreground"} strokeWidth={2.5}/>
             </Button>
             <Button variant="toolbar" size="toolbar" onClick={handleToggleInfo}>
-              <InfoIcon
-                  className={props.displayInfo ? "h-5 w-5 text-toolbar" : "h-5 w-5 text-primary-foreground"}/>
+              <InfoIcon className={props.displayInfo ?
+                  "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5 text-primary-foreground"} strokeWidth={2.5}/>
             </Button>
             <PreviewActions onHideActions={props.onHideActions}
                             onCopyToClipboard={props.onCopyToClipboard}
@@ -77,7 +82,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                             onDeleteItem={props.onDeleteItem}/>
             <Button variant="toolbar" size="toolbar" onClick={handleHidePreview}
                     title={"Hide preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
-              <PanelRightCloseIcon className="h-5 w-5 text-primary-foreground"/>
+              <PanelRightCloseIcon className="h-5 w-5 text-primary-foreground" strokeWidth={2.5}/>
             </Button>
           </div>
         </div>

@@ -42,7 +42,7 @@ export default function InfoPane(props: InfoPaneProps) {
   }
 
   return (
-      <div className="flex flex-col w-full p-4 border-t-solid border-t-border border-t space-y-2 text-sm">
+      <div className="flex flex-col w-full p-4 border-t-solid border-t-preview-border border-t space-y-2 text-sm">
         <div className="flex w-full border-b border-b-neutral-800 pb-1">
           <div className="flex-none text-primary-foreground font-semibold">Application</div>
           <div className="flex-grow"></div>

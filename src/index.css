@@ -25,8 +25,12 @@
     --ring: #fafafa;
     --radius: 0.75rem;
     --search-highlight: #3b82f6;
+    /* Preview */
+    --preview-background: #eeeeee;
+    --preview-border: #e7e7e7;
     /* Toolbar */
-    --button-selected: #000000;
+    --toolbar-background: #eeeeee;
+    --toolbar-button-selected: #0064e1;
     /* Actions */
     --actions-background: #fafafa;
     --actions-selection: #e2e2e2;
@@ -71,8 +75,12 @@
     --input: #707070;
     --ring: #282828;
     --search-highlight: #06b6d4;
+    /* Preview */
+    --preview-background: #212121;
+    --preview-border: #2d2f32;
     /* Toolbar */
-    --button-selected: #d6d6d6;
+    --toolbar-background: #212121;
+    --toolbar-button-selected: #0064e1;
     /* Actions */
     --actions-background: #212121;
     --actions-selection: #333333;
