@@ -46,12 +46,14 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
   }
 
   if (!props.item) {
-    return <div className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]"></div>
+    return <div
+        className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]"></div>
   }
 
   return (
       <div className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]">
-        <PreviewToolBar appName={props.appName}
+        <PreviewToolBar item={props.item}
+                        appName={props.appName}
                         appIcon={props.appIcon}
                         displayInfo={displayInfo}
                         onPaste={props.onPaste}

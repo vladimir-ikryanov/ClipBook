@@ -1,17 +1,14 @@
 import '../app.css';
 import React from "react";
 import {Button} from "@/components/ui/button";
-import {
-  ClipboardPasteIcon, CopyIcon,
-  InfoIcon,
-  PanelRightCloseIcon,
-  PinIcon, StarIcon,
-} from "lucide-react";
+import {CopyIcon, GlobeIcon, InfoIcon, PanelRightCloseIcon, StarIcon} from "lucide-react";
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {prefGetTogglePreviewShortcut} from "@/pref";
 import PreviewActions, {HidePreviewActionsReason} from "@/app/PreviewActions";
+import {Clip, ClipType} from "@/db";
 
 type PreviewToolBarProps = {
+  item: Clip
   appName: string
   appIcon: string
   displayInfo: boolean
@@ -29,6 +26,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     props.onHidePreview()
   }
 
+  function handleCopyToClipboard() {
+    props.onCopyToClipboard()
+  }
+
   function handlePaste() {
     props.onPaste()
   }
@@ -37,13 +38,23 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     props.onToggleInfo()
   }
 
+  function handleOpenInBrowser() {
+    props.onOpenInBrowser()
+  }
+
   return (
       <div className="flex flex-col">
         <div className="flex m-2 h-10">
           <div className="">
-            <Button variant="toolbar" size="toolbar">
+            <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}>
               <CopyIcon className="h-5 w-5 text-primary-foreground"/>
             </Button>
+            {
+              props.item.type === ClipType.Link &&
+                <Button variant="toolbar" size="toolbar" onClick={handleOpenInBrowser}>
+                  <GlobeIcon className="h-5 w-5 text-primary-foreground"/>
+                </Button>
+            }
             {/*<Button variant="toolbar" size="toolbar" title={"Paste to " + props.appName}*/}
             {/*        onClick={handlePaste}>*/}
             {/*  <img src={toBase64Icon(props.appIcon)} className="h-6 w-6 mr-2"*/}
