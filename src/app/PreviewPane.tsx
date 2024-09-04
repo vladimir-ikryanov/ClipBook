@@ -67,7 +67,7 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
                         onDeleteItem={props.onDeleteItem}/>
         <textarea id='preview'
                   ref={props.previewTextareaRef}
-                  className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text-sm"
+                  className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text"
                   value={props.item.content}
                   onChange={handleOnChange}
                   onKeyDown={handleKeyDown}/>
