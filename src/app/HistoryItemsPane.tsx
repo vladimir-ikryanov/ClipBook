@@ -8,7 +8,7 @@ import AutoSizer, {Size} from "react-virtualized-auto-sizer";
 import {HideActionsReason} from "@/app/Actions";
 import HistoryItemPane from "@/app/HistoryItemPane";
 import {Clip} from "@/db";
-import {ClipboardIcon, FileSearch2Icon, FileSearchIcon, SearchIcon} from "lucide-react";
+import {SearchIcon} from "lucide-react";
 
 type HistoryItemListPaneProps = {
   history: Clip[]
