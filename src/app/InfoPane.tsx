@@ -2,7 +2,6 @@ import '../app.css';
 import React from "react";
 import {Clip, ClipType} from "@/db";
 import {toBase64Icon} from "@/data";
-import {FileQuestionIcon, SquircleIcon} from "lucide-react";
 
 declare const getAppNameFromPath: (appPath: string) => string;
 declare const getAppIconAsBase64: (appPath: string) => string;
