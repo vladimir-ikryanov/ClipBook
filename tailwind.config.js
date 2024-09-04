@@ -56,6 +56,7 @@ module.exports = {
           DEFAULT: "var(--actions-background)",
           background: "var(--actions-background)",
           selection: "var(--actions-selection)",
+          danger: "var(--actions-danger)",
         },
         settings: {
           DEFAULT: "var(--settings)",

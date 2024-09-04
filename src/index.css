@@ -37,6 +37,7 @@
     /* Actions */
     --actions-background: #fafafa;
     --actions-selection: #e2e2e2;
+    --actions-danger: #dc2626;
     /* Settings dialog colors */
     --settings: #fafafa;
     --settings-border: #e5e5e5;
@@ -90,6 +91,7 @@
     /* Actions */
     --actions-background: #212121;
     --actions-selection: #333333;
+    --actions-danger: #ff5b5b;
     /* Settings dialog colors */
     --settings: #282828;
     --settings-border: #3e4144;

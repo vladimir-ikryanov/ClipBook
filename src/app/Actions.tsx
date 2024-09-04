@@ -180,15 +180,15 @@ export default function Actions(props: ActionsProps) {
               </CommandItem>
               <CommandSeparator/>
               <CommandItem onSelect={handleDeleteItem}>
-                <TrashIcon className="mr-2 h-4 w-4"/>
-                <span>Delete</span>
+                <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
+                <span className="text-actions-danger">Delete</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
                 </CommandShortcut>
               </CommandItem>
               <CommandItem onSelect={handleDeleteAllItems}>
-                <TrashIcon className="mr-2 h-4 w-4"/>
-                <span>Delete All...</span>
+                <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
+                <span className="text-actions-danger">Delete All...</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetClearHistoryShortcut()}/>
                 </CommandShortcut>
