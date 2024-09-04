@@ -53,13 +53,13 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
           <div className="">
             <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}
                     title={"Copy to Clipboard (" + shortcutToDisplayShortcut(prefGetCopyToClipboardShortcut()) + ")"}>
-              <CopyIcon className="h-5 w-5 text-primary-foreground" strokeWidth={2.5}/>
+              <CopyIcon className="h-5 w-5 text-toolbar-button" strokeWidth={2}/>
             </Button>
             {
                 props.item.type === ClipType.Link &&
                 <Button variant="toolbar" size="toolbar" onClick={handleOpenInBrowser}
                         title={"Open in Browser (" + shortcutToDisplayShortcut(prefGetOpenInBrowserShortcut()) + ")"}>
-                  <GlobeIcon className="h-5 w-5 text-primary-foreground" strokeWidth={2.5}/>
+                  <GlobeIcon className="h-5 w-5 text-toolbar-button" strokeWidth={2}/>
                 </Button>
             }
           </div>
@@ -68,15 +68,15 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
             <Button variant="toolbar" size="toolbar" onClick={handleToggleStar}
                     title={props.itemPinned ? "Remove from favorites" : "Add to favorites"}>
               <StarIcon className={props.itemPinned ?
-                  "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5 text-primary-foreground"} strokeWidth={2.5}/>
+                  "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5 text-toolbar-button"} strokeWidth={2}/>
             </Button>
             <Button variant="toolbar" size="toolbar" onClick={handleToggleInfo}>
               <InfoIcon className={props.displayInfo ?
-                  "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5 text-primary-foreground"} strokeWidth={2.5}/>
+                  "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5 text-toolbar-button"} strokeWidth={2}/>
             </Button>
             <Button variant="toolbar" size="toolbar" onClick={handleHidePreview}
                     title={"Hide preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
-              <PanelRightCloseIcon className="h-5 w-5 text-primary-foreground" strokeWidth={2.5}/>
+              <PanelRightCloseIcon className="h-5 w-5 text-toolbar-button" strokeWidth={2}/>
             </Button>
           </div>
         </div>

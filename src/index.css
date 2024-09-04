@@ -27,9 +27,12 @@
     --search-highlight: #3b82f6;
     /* Preview */
     --preview-background: #eeeeee;
-    --preview-border: #e7e7e7;
+    --preview-border: #dfdfdf;
+    --preview-info-border: #e7e7e7;
+    --preview-info-label: #737373;
     /* Toolbar */
     --toolbar-background: #eeeeee;
+    --toolbar-button: #616161;
     --toolbar-button-selected: #0064e1;
     /* Actions */
     --actions-background: #fafafa;
@@ -78,8 +81,11 @@
     /* Preview */
     --preview-background: #212121;
     --preview-border: #2d2f32;
+    --preview-info-border: #262626;
+    --preview-info-label: #808081;
     /* Toolbar */
     --toolbar-background: #212121;
+    --toolbar-button: #808081;
     --toolbar-button-selected: #0064e1;
     /* Actions */
     --actions-background: #212121;

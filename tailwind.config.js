@@ -67,11 +67,14 @@ module.exports = {
         },
         toolbar: {
           DEFAULT: "var(--toolbar-background)",
+          button: "var(--toolbar-button)",
           buttonSelected: "var(--toolbar-button-selected)",
         },
         preview: {
           DEFAULT: "var(--preview-background)",
           border: "var(--preview-border)",
+          infoBorder: "var(--preview-info-border)",
+          infoLabel: "var(--preview-info-label)",
         },
       },
       borderRadius: {

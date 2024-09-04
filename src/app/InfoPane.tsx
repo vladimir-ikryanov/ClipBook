@@ -43,8 +43,8 @@ export default function InfoPane(props: InfoPaneProps) {
 
   return (
       <div className="flex flex-col w-full p-4 border-t-solid border-t-preview-border border-t space-y-2 text-sm">
-        <div className="flex w-full border-b border-b-neutral-800 pb-1">
-          <div className="flex-none text-primary-foreground font-semibold">Application</div>
+        <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+          <div className="flex-none text-preview-infoLabel font-semibold">Application</div>
           <div className="flex-grow"></div>
           <div className="flex flex-row items-center">
             {
@@ -56,23 +56,23 @@ export default function InfoPane(props: InfoPaneProps) {
             }
           </div>
         </div>
-        <div className="flex w-full border-b border-b-neutral-800 pb-1">
-          <div className="flex-none text-primary-foreground font-semibold">Type</div>
+        <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+          <div className="flex-none text-preview-infoLabel font-semibold">Type</div>
           <div className="flex-grow"></div>
           <div className="flex-none text-foreground">{getType()}</div>
         </div>
-        <div className="flex w-full border-b border-b-neutral-800 pb-1">
-          <div className="flex-none text-primary-foreground font-semibold">Number of copies</div>
+        <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+          <div className="flex-none text-preview-infoLabel font-semibold">Number of copies</div>
           <div className="flex-grow"></div>
           <div className="flex-none text-foreground">{props.item.numberOfCopies}</div>
         </div>
-        <div className="flex w-full border-b border-b-neutral-800 pb-1">
-          <div className="flex-none text-primary-foreground font-semibold">First copy time</div>
+        <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+          <div className="flex-none text-preview-infoLabel font-semibold">First copy time</div>
           <div className="flex-grow"></div>
           <div className="flex-none text-foreground">{getTimeString(props.item.firstTimeCopy)}</div>
         </div>
         <div className="flex w-full">
-          <div className="flex-none text-primary-foreground font-semibold">Last copy time</div>
+          <div className="flex-none text-preview-infoLabel font-semibold">Last copy time</div>
           <div className="flex-grow"></div>
           <div className="flex-none text-foreground">{getTimeString(props.item.lastTimeCopy)}</div>
         </div>

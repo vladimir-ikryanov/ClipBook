@@ -76,7 +76,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
     return <div className="flex flex-col items-center justify-center h-full">
       <div>
         <SearchIcon className="h-16 w-16 m-auto text-secondary-foreground"/>
-        <p className="text-center pt-4 text-2xl font-semibold text-foreground">
+        <p className="text-center pt-4 text-2xl font-semibold text-primary-foreground">
           No results
         </p>
       </div>
