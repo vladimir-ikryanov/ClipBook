@@ -2,6 +2,7 @@ import '../app.css';
 import React from "react";
 import {Clip, ClipType} from "@/db";
 import {toBase64Icon} from "@/data";
+import {FileQuestionIcon, SquircleIcon} from "lucide-react";
 
 declare const getAppNameFromPath: (appPath: string) => string;
 declare const getAppIconAsBase64: (appPath: string) => string;
@@ -44,7 +45,13 @@ export default function InfoPane(props: InfoPaneProps) {
           <div className="flex-none text-primary-foreground font-semibold">Application</div>
           <div className="flex-grow"></div>
           <div className="flex flex-row items-center">
-            <img src={getSourceAppIcon()} className="h-5 w-5 mr-2" alt="Application icon"/> {getSourceAppName()}
+            {
+              props.item.sourceApp ?
+                  <div className="flex">
+                    <img src={getSourceAppIcon()} className="h-5 w-5 mr-2" alt="Application icon"/>
+                    <span>{getSourceAppName()}</span>
+                  </div> : <span>Unknown</span>
+            }
           </div>
         </div>
         <div className="flex w-full border-b border-b-neutral-800 pb-1">

@@ -2,9 +2,10 @@ import '../app.css';
 import React from "react";
 import {Button} from "@/components/ui/button";
 import {
+  ClipboardPasteIcon, CopyIcon,
   InfoIcon,
   PanelRightCloseIcon,
-  PinIcon,
+  PinIcon, StarIcon,
 } from "lucide-react";
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {prefGetTogglePreviewShortcut} from "@/pref";
@@ -41,7 +42,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
         <div className="flex m-2 h-10">
           <div className="">
             <Button variant="toolbar" size="toolbar">
-              <PinIcon className="h-5 w-5 text-primary-foreground"/>
+              <CopyIcon className="h-5 w-5 text-primary-foreground"/>
             </Button>
             {/*<Button variant="toolbar" size="toolbar" title={"Paste to " + props.appName}*/}
             {/*        onClick={handlePaste}>*/}
@@ -52,6 +53,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
           </div>
           <div className="flex-auto draggable"></div>
           <div className="">
+            <Button variant="toolbar" size="toolbar">
+              <StarIcon className="h-5 w-5 text-primary-foreground"/>
+            </Button>
             <Button variant="toolbar" size="toolbar" onClick={handleToggleInfo}>
               <InfoIcon className={props.displayInfo ? "h-5 w-5 text-toolbar" : "h-5 w-5 text-primary-foreground"}/>
             </Button>
