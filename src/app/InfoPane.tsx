@@ -27,6 +27,9 @@ export default function InfoPane(props: InfoPaneProps) {
     if (props.item.type === ClipType.Color) {
       return "Color"
     }
+    if (props.item.type === ClipType.Email) {
+      return "Email"
+    }
     return "Text"
   }
 

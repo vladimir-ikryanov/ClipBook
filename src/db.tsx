@@ -4,6 +4,7 @@ import {getClipType} from "@/lib/utils";
 export enum ClipType {
   Text,
   Link,
+  Email,
   Color
 }
 
@@ -38,21 +39,21 @@ class AppDatabase extends Dexie {
 const db = new AppDatabase();
 
 export async function getAllClips(): Promise<Clip[]> {
-  return db.history.toArray();
+  return db.history.toArray()
 }
 
 export async function addClip(clip: Clip) {
-  await db.history.add(clip);
+  await db.history.add(clip)
 }
 
 export async function updateClip(id: number, clip: Clip) {
-  await db.history.update(id, clip);
+  await db.history.update(id, clip)
 }
 
 export async function deleteClip(id: number) {
-  await db.history.delete(id);
+  await db.history.delete(id)
 }
 
 export async function deleteAllClips() {
-  await db.history.clear();
+  await db.history.clear()
 }

@@ -3,7 +3,11 @@ import React from "react";
 import {Button} from "@/components/ui/button";
 import {CopyIcon, GlobeIcon, InfoIcon, PanelRightCloseIcon, StarIcon} from "lucide-react";
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
-import {prefGetTogglePreviewShortcut} from "@/pref";
+import {
+  prefGetCopyToClipboardShortcut,
+  prefGetOpenInBrowserShortcut,
+  prefGetTogglePreviewShortcut
+} from "@/pref";
 import PreviewActions, {HidePreviewActionsReason} from "@/app/PreviewActions";
 import {Clip, ClipType} from "@/db";
 
@@ -46,21 +50,17 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
       <div className="flex flex-col">
         <div className="flex m-2 h-10">
           <div className="">
-            <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}>
+            <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}
+                    title={"Copy to Clipboard (" + shortcutToDisplayShortcut(prefGetCopyToClipboardShortcut()) + ")"}>
               <CopyIcon className="h-5 w-5 text-primary-foreground"/>
             </Button>
             {
-              props.item.type === ClipType.Link &&
-                <Button variant="toolbar" size="toolbar" onClick={handleOpenInBrowser}>
+                props.item.type === ClipType.Link &&
+                <Button variant="toolbar" size="toolbar" onClick={handleOpenInBrowser}
+                        title={"Open in Browser (" + shortcutToDisplayShortcut(prefGetOpenInBrowserShortcut()) + ")"}>
                   <GlobeIcon className="h-5 w-5 text-primary-foreground"/>
                 </Button>
             }
-            {/*<Button variant="toolbar" size="toolbar" title={"Paste to " + props.appName}*/}
-            {/*        onClick={handlePaste}>*/}
-            {/*  <img src={toBase64Icon(props.appIcon)} className="h-6 w-6 mr-2"*/}
-            {/*       alt="Application icon"/>*/}
-            {/*  <span className="text-primary-foreground">Paste to {props.appName}</span>*/}
-            {/*</Button>*/}
           </div>
           <div className="flex-auto draggable"></div>
           <div className="">
@@ -68,7 +68,8 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
               <StarIcon className="h-5 w-5 text-primary-foreground"/>
             </Button>
             <Button variant="toolbar" size="toolbar" onClick={handleToggleInfo}>
-              <InfoIcon className={props.displayInfo ? "h-5 w-5 text-toolbar" : "h-5 w-5 text-primary-foreground"}/>
+              <InfoIcon
+                  className={props.displayInfo ? "h-5 w-5 text-toolbar" : "h-5 w-5 text-primary-foreground"}/>
             </Button>
             <PreviewActions onHideActions={props.onHideActions}
                             onCopyToClipboard={props.onCopyToClipboard}

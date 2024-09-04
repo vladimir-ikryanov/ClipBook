@@ -6,19 +6,43 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function isUrl(text: string) {
-  if (!text || text.length == 0) {
+export function isUrl(str: string) {
+  if (!str || str.length == 0) {
     return false
   }
-  if (!text.startsWith("http://") && !text.startsWith("https://")) {
+  if (!str.startsWith("http://") && !str.startsWith("https://")) {
     return false
   }
   const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i
-  return urlRegex.test(text)
+  return urlRegex.test(str)
 }
 
 export function isColor(str: string): boolean {
   return toCSSColor(str) !== ""
+}
+
+export function isEmail(email: string): boolean {
+  if (email.length < 5 || email.length > 320) {
+    return false;
+  }
+
+  let spaceIndex = email.indexOf(' ');
+  if (spaceIndex !== -1) {
+    return false;
+  }
+
+  const atIndex = email.indexOf('@');
+  if (atIndex < 1 || atIndex === email.length - 1) {
+    return false;
+  }
+
+  const dotIndex = email.indexOf('.', atIndex);
+  if (dotIndex <= atIndex + 1 || dotIndex === email.length - 1) {
+    return false;
+  }
+
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
 }
 
 export function getClipType(str: string): ClipType {
@@ -27,6 +51,9 @@ export function getClipType(str: string): ClipType {
   }
   if (isColor(str)) {
     return ClipType.Color
+  }
+  if (isEmail(str)) {
+    return ClipType.Email
   }
   return ClipType.Text
 }
