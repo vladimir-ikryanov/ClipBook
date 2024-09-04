@@ -1,7 +1,6 @@
 import '../app.css';
 import React from "react";
 import PreviewToolBar from "@/app/PreviewToolBar";
-import {HidePreviewActionsReason} from "@/app/PreviewActions";
 import {Clip} from "@/db";
 import {getClipType} from "@/lib/utils";
 import InfoPane from "@/app/InfoPane";
@@ -15,7 +14,6 @@ type HistoryItemPreviewPaneProps = {
   onFinishEditing: () => void
   onPaste: () => void
   onHidePreview: () => void
-  onHideActions: (reason: HidePreviewActionsReason) => void
   onCopyToClipboard: () => void
   onOpenInBrowser: () => void
   onDeleteItem: () => void
@@ -63,7 +61,6 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
                         onPaste={props.onPaste}
                         onToggleInfo={handleToggleInfo}
                         onHidePreview={props.onHidePreview}
-                        onHideActions={props.onHideActions}
                         onEditHistoryItem={props.onEditHistoryItem}
                         onCopyToClipboard={props.onCopyToClipboard}
                         onOpenInBrowser={props.onOpenInBrowser}

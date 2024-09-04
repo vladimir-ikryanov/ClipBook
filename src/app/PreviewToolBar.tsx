@@ -8,7 +8,6 @@ import {
   prefGetOpenInBrowserShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
-import PreviewActions, {HidePreviewActionsReason} from "@/app/PreviewActions";
 import {Clip, ClipType} from "@/db";
 
 type PreviewToolBarProps = {
@@ -20,7 +19,6 @@ type PreviewToolBarProps = {
   onPaste: () => void
   onToggleInfo: () => void
   onHidePreview: () => void
-  onHideActions: (reason: HidePreviewActionsReason) => void
   onEditHistoryItem: (item: Clip) => void
   onCopyToClipboard: () => void
   onOpenInBrowser: () => void
@@ -76,10 +74,6 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
               <InfoIcon className={props.displayInfo ?
                   "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5 text-primary-foreground"} strokeWidth={2.5}/>
             </Button>
-            <PreviewActions onHideActions={props.onHideActions}
-                            onCopyToClipboard={props.onCopyToClipboard}
-                            onOpenInBrowser={props.onOpenInBrowser}
-                            onDeleteItem={props.onDeleteItem}/>
             <Button variant="toolbar" size="toolbar" onClick={handleHidePreview}
                     title={"Hide preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
               <PanelRightCloseIcon className="h-5 w-5 text-primary-foreground" strokeWidth={2.5}/>
