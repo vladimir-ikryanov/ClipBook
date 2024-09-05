@@ -41,6 +41,9 @@ NSString *prefOpenSettingsShortcut = @"app.open_settings_shortcut";
 AppSettingsMac::AppSettingsMac() = default;
 
 void AppSettingsMac::saveWindowBoundsForScreen(int screen_id, molybden::Rect bounds) {
+  if (bounds.size.isEmpty()) {
+    return;
+  }
   NSMutableDictionary *prefValue = [[NSMutableDictionary alloc] init];
   prefValue[prefWindowBoundsX] = [NSNumber numberWithInt:bounds.origin.x];
   prefValue[prefWindowBoundsY] = [NSNumber numberWithInt:bounds.origin.y];
