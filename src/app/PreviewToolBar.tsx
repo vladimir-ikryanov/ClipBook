@@ -1,7 +1,14 @@
 import '../app.css';
 import React from "react";
 import {Button} from "@/components/ui/button";
-import {CopyIcon, GlobeIcon, InfoIcon, PanelRightCloseIcon, StarIcon} from "lucide-react";
+import {
+  CopyIcon,
+  EllipsisVerticalIcon,
+  GlobeIcon,
+  InfoIcon,
+  PanelRightCloseIcon,
+  PinIcon,
+} from "lucide-react";
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {
   prefGetCopyToClipboardShortcut,
@@ -51,32 +58,33 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
       <div className="flex flex-col">
         <div className="flex m-2 h-10">
           <div className="">
-            <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}
-                    title={"Copy to Clipboard (" + shortcutToDisplayShortcut(prefGetCopyToClipboardShortcut()) + ")"}>
-              <CopyIcon className="h-5 w-5 text-toolbar-button" strokeWidth={2}/>
+            <Button variant="toolbar" size="toolbar" onClick={handleToggleStar}
+                    title={props.itemPinned ? "Remove from favorites" : "Add to favorites"}>
+              <PinIcon className={props.itemPinned ?
+                  "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5"}
+                       strokeWidth={2}/>
             </Button>
-            {
-                props.item.type === ClipType.Link &&
-                <Button variant="toolbar" size="toolbar" onClick={handleOpenInBrowser}
-                        title={"Open in Browser (" + shortcutToDisplayShortcut(prefGetOpenInBrowserShortcut()) + ")"}>
-                  <GlobeIcon className="h-5 w-5 text-toolbar-button" strokeWidth={2}/>
-                </Button>
-            }
+            {/*<Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}*/}
+            {/*        title={"Copy to Clipboard (" + shortcutToDisplayShortcut(prefGetCopyToClipboardShortcut()) + ")"}>*/}
+            {/*  <CopyIcon className="h-5 w-5 text-toolbar-button" strokeWidth={2}/>*/}
+            {/*</Button>*/}
+            {/*{*/}
+            {/*    props.item.type === ClipType.Link &&*/}
+            {/*    <Button variant="toolbar" size="toolbar" onClick={handleOpenInBrowser}*/}
+            {/*            title={"Open in Browser (" + shortcutToDisplayShortcut(prefGetOpenInBrowserShortcut()) + ")"}>*/}
+            {/*      <GlobeIcon className="h-5 w-5 text-toolbar-button" strokeWidth={2}/>*/}
+            {/*    </Button>*/}
+            {/*}*/}
           </div>
           <div className="flex-auto draggable"></div>
           <div className="">
-            <Button variant="toolbar" size="toolbar" onClick={handleToggleStar}
-                    title={props.itemPinned ? "Remove from favorites" : "Add to favorites"}>
-              <StarIcon className={props.itemPinned ?
-                  "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5 text-toolbar-button"} strokeWidth={2}/>
-            </Button>
             <Button variant="toolbar" size="toolbar" onClick={handleToggleInfo}>
               <InfoIcon className={props.displayInfo ?
-                  "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5 text-toolbar-button"} strokeWidth={2}/>
+                  "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5"} strokeWidth={2}/>
             </Button>
             <Button variant="toolbar" size="toolbar" onClick={handleHidePreview}
                     title={"Hide preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
-              <PanelRightCloseIcon className="h-5 w-5 text-toolbar-button" strokeWidth={2}/>
+              <PanelRightCloseIcon className="h-5 w-5" strokeWidth={2}/>
             </Button>
           </div>
         </div>
