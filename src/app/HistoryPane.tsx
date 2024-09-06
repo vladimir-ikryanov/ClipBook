@@ -34,6 +34,7 @@ import {HideActionsReason} from "@/app/Actions";
 import {FixedSizeList as List} from "react-window";
 import {Clip} from "@/db";
 import {isUrl} from "@/lib/utils";
+import {HideClipDropdownMenuReason} from "@/app/ClipDropdownMenu";
 
 declare const pasteInFrontApp: (text: string) => void;
 declare const copyToClipboard: (text: string) => void;
@@ -61,9 +62,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [historyItem, setHistoryItem] = useState(props.history[getVisibleActiveHistoryItemIndex()]);
 
   function focusSearchField() {
-    if (searchFieldRef.current) {
-      searchFieldRef.current.focus()
-    }
+    setTimeout(() => {
+      if (searchFieldRef.current) {
+        searchFieldRef.current.focus()
+      }
+    }, 0);
   }
 
   function activateApp() {
@@ -80,9 +83,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   useEffect(() => {
-    setTimeout(() => {
-      focusSearchField()
-    }, 0);
+    focusSearchField()
   }, [activeTab])
 
   useEffect(() => {
@@ -206,7 +207,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function handleHideActions(reason: HideActionsReason) {
     if (reason !== "editContent") {
-      handleSearchHistory()
+      focusSearchField()
+    }
+  }
+
+  function handleHideClipDropdownMenu(reason: HideClipDropdownMenuReason) {
+    if (reason !== "editContent") {
+      focusSearchField()
     }
   }
 
@@ -214,9 +221,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (!isPreviewVisible()) {
       handleTogglePreview()
     }
-    if (previewTextareaRef.current) {
-      previewTextareaRef.current.focus()
-    }
+    setTimeout(() => {
+      if (previewTextareaRef.current) {
+        previewTextareaRef.current.focus()
+      }
+    }, 0);
   }
 
   function handleCopyToClipboard() {
@@ -314,6 +323,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onPaste={handlePaste}
                               onClose={handleClose}
                               onHideActions={handleHideActions}
+                              onHideClipDropdownMenu={handleHideClipDropdownMenu}
                               onEditContent={handleEditContent}
                               onCopyToClipboard={handleCopyToClipboard}
                               onOpenInBrowser={handleOpenInBrowser}
@@ -321,8 +331,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onTogglePreview={handleTogglePreview}
                               onEditHistoryItem={handleEditHistoryItem}
                               onDeleteItem={handleDeleteItem}
-                              onDeleteAllItems={handleDeleteAllItems}
-            />
+                              onDeleteAllItems={handleDeleteAllItems}/>
           </ResizablePanel>
           <ResizableHandle/>
           <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}

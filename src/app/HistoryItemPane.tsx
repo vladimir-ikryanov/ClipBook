@@ -11,12 +11,13 @@ import {
   PinIcon
 } from "lucide-react";
 import {Button} from "@/components/ui/button";
-import ClipDropdownMenu from "@/app/ClipDropdownMenu";
+import ClipDropdownMenu, {HideClipDropdownMenuReason} from "@/app/ClipDropdownMenu";
 
 type HistoryItemPaneProps = {
   item: Clip
   index: number
   historySize: number
+  onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onMouseDoubleClick: (tabIndex: number) => void
   onEditHistoryItem: (item: Clip) => void
   onEditContent: () => void
@@ -72,6 +73,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     if (mouseOver || actionsMenuOpen) {
       return <ClipDropdownMenu item={props.item}
                                onOpenChange={handleDropdownMenuOpenChange}
+                               onHideClipDropdownMenu={props.onHideClipDropdownMenu}
                                onEditHistoryItem={props.onEditHistoryItem}
                                onEditContent={props.onEditContent}
                                onCopyToClipboard={props.onCopyToClipboard}

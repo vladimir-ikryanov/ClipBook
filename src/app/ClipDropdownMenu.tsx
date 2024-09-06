@@ -22,9 +22,17 @@ import {
 import {CommandShortcut} from "@/components/ui/command";
 import {Clip} from "@/db";
 
+export type HideClipDropdownMenuReason =
+    "cancel"
+    | "pin"
+    | "editContent"
+    | "copyToClipboard"
+    | "deleteItem"
+
 type ClipDropdownMenuProps = {
   item: Clip
   onOpenChange: (open: boolean) => void
+  onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onEditHistoryItem: (item: Clip) => void
   onEditContent: () => void
   onCopyToClipboard: () => void
@@ -35,6 +43,8 @@ type ClipDropdownMenuProps = {
 const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
   const [open, setOpen] = useState(false)
 
+  let closeReason: HideClipDropdownMenuReason = "cancel"
+
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
       e.stopPropagation()
@@ -44,11 +54,34 @@ const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
   function handleOpenChange(open: boolean) {
     props.onOpenChange(open)
     setOpen(open)
+    if (!open) {
+      props.onHideClipDropdownMenu(closeReason)
+    }
+  }
+
+  function handleCopyToClipboard() {
+    closeReason = "copyToClipboard"
+    handleOpenChange(false)
+    props.onCopyToClipboard()
   }
 
   function handleTogglePin() {
+    closeReason = "pin"
+    handleOpenChange(false)
     props.item.pinned = !props.item.pinned
     props.onEditHistoryItem(props.item)
+  }
+
+  function handleEditContent() {
+    closeReason = "editContent"
+    handleOpenChange(false)
+    props.onEditContent()
+  }
+
+  function handleDeleteItem() {
+    closeReason = "deleteItem"
+    handleOpenChange(false)
+    props.onDeleteItem()
   }
 
   return (
@@ -59,14 +92,14 @@ const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="p-1 bg-actions-background" align="start"
                                onKeyDown={handleKeyDown}>
-            <DropdownMenuItem onClick={props.onCopyToClipboard}>
+            <DropdownMenuItem onClick={handleCopyToClipboard}>
               <CopyIcon className="mr-2 h-4 w-4"/>
               <span className="mr-12">Copy to Clipboard</span>
               <CommandShortcut className="flex flex-row">
                 <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
               </CommandShortcut>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={props.onEditContent}>
+            <DropdownMenuItem onClick={handleEditContent}>
               <Edit3Icon className="mr-2 h-4 w-4"/>
               <span>Edit Content...</span>
               <CommandShortcut className="flex flex-row">
@@ -78,7 +111,7 @@ const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
               <span>{props.item.pinned ? "Unpin item" : "Pin item"}</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator/>
-            <DropdownMenuItem onClick={props.onDeleteItem}>
+            <DropdownMenuItem onClick={handleDeleteItem}>
               <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
               <span className="text-actions-danger">Delete</span>
               <CommandShortcut className="flex flex-row">

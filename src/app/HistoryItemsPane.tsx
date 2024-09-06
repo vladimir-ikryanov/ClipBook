@@ -9,6 +9,7 @@ import {HideActionsReason} from "@/app/Actions";
 import HistoryItemPane from "@/app/HistoryItemPane";
 import {Clip} from "@/db";
 import {SearchIcon} from "lucide-react";
+import {HideClipDropdownMenuReason} from "@/app/ClipDropdownMenu";
 
 type HistoryItemListPaneProps = {
   history: Clip[]
@@ -22,9 +23,9 @@ type HistoryItemListPaneProps = {
   onClose: () => void
   onEditHistoryItem: (item: Clip) => void
   onHideActions: (reason: HideActionsReason) => void
+  onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onTogglePreview: () => void
   onSearchHistory: () => void
-  onPinItem: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
   onOpenInBrowser: () => void
@@ -61,6 +62,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
                                          index={index}
                                          historySize={props.history.length}
                                          item={props.history[index]}
+                                         onHideClipDropdownMenu={props.onHideClipDropdownMenu}
                                          onEditHistoryItem={props.onEditHistoryItem}
                                          onMouseDoubleClick={handleMouseDoubleClick}
                                          onEditContent={props.onEditContent}
