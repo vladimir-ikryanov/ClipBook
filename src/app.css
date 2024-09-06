@@ -1,3 +1,7 @@
+html, body {
+  -webkit-font-smoothing: antialiased;
+}
+
 .draggable {
   -webkit-app-region: drag;
 }
