@@ -10,6 +10,7 @@ type HistoryItemPreviewPaneProps = {
   item: Clip
   appName: string
   appIcon: string
+  visible: boolean
   onEditHistoryItem: (item: Clip) => void
   onFinishEditing: () => void
   onPaste: () => void
@@ -51,6 +52,10 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
         className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]"></div>
   }
 
+  if (!props.visible) {
+    return null
+  }
+
   return (
       <div className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]">
         <PreviewToolBar item={props.item}
@@ -67,7 +72,7 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
                         onDeleteItem={props.onDeleteItem}/>
         <textarea id='preview'
                   ref={props.previewTextareaRef}
-                  className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text"
+                  className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text-sm"
                   value={props.item.content}
                   onChange={handleOnChange}
                   onKeyDown={handleKeyDown}/>

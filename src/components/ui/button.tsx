@@ -20,7 +20,8 @@ const buttonVariants = cva(
           info: "",
           tool: "focus:outline-none",
           link: "text-primary underline-offset-4 hover:underline",
-          toolbar: "rounded-sm hover:bg-accent hover:text-accent-foreground"
+          toolbar: "rounded-sm text-toolbar-button hover:bg-accent hover:text-accent-foreground",
+          menu: "rounded-sm hover:text-accent-foreground"
         },
         size: {
           default: "h-10 px-4 py-2",
@@ -29,6 +30,7 @@ const buttonVariants = cva(
           icon: "h-10 w-10",
           tool: "h-8 w-8",
           toolbar: "h-10 px-2",
+          menu: "h-6 w-6 p-0 m-0",
         },
       },
       defaultVariants: {

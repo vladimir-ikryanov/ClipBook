@@ -232,9 +232,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleSearchHistory() {
-    if (searchFieldRef.current) {
-      searchFieldRef.current.focus()
-    }
+    focusSearchField()
   }
 
   async function handleDeleteItem() {
@@ -276,9 +274,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleFinishEditing() {
-    if (searchFieldRef.current) {
-      searchFieldRef.current.focus()
-    }
+    focusSearchField()
   }
 
   async function handleEditHistoryItem(newClip: Clip) {
@@ -298,7 +294,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
   (window as any).activateApp = activateApp;
 
   return (
-      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={onTabChange}
+      <Tabs defaultValue={activeTab}
+            value={activeTab}
+            onValueChange={onTabChange}
             orientation="vertical"
             className="w-full p-0 m-0">
         <ResizablePanelGroup direction="horizontal">
@@ -321,6 +319,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onOpenInBrowser={handleOpenInBrowser}
                               onSearchHistory={handleSearchHistory}
                               onTogglePreview={handleTogglePreview}
+                              onEditHistoryItem={handleEditHistoryItem}
                               onDeleteItem={handleDeleteItem}
                               onDeleteAllItems={handleDeleteAllItems}
             />
@@ -331,6 +330,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
             <PreviewPane item={historyItem}
                          appName={props.appName}
                          appIcon={props.appIcon}
+                         visible={previewVisible}
                          onEditHistoryItem={handleEditHistoryItem}
                          onFinishEditing={handleFinishEditing}
                          onHidePreview={handleTogglePreview}

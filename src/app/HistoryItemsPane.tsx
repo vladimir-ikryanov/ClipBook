@@ -20,9 +20,11 @@ type HistoryItemListPaneProps = {
   onShowHidePreview: () => void
   onPaste: () => void
   onClose: () => void
+  onEditHistoryItem: (item: Clip) => void
   onHideActions: (reason: HideActionsReason) => void
   onTogglePreview: () => void
   onSearchHistory: () => void
+  onPinItem: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
   onOpenInBrowser: () => void
@@ -55,12 +57,16 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
                     width={sizeProps.width}>{
                   ({index, style}) => {
                     return (
-                        <HistoryItemPane index={index}
+                        <HistoryItemPane style={style}
+                                         index={index}
                                          historySize={props.history.length}
                                          item={props.history[index]}
+                                         onEditHistoryItem={props.onEditHistoryItem}
                                          onMouseDoubleClick={handleMouseDoubleClick}
-                                         style={style}
-                        />
+                                         onEditContent={props.onEditContent}
+                                         onCopyToClipboard={props.onCopyToClipboard}
+                                         onOpenInBrowser={props.onOpenInBrowser}
+                                         onDeleteItem={props.onDeleteItem}/>
                     )
                   }
                 }

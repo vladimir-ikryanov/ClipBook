@@ -56,13 +56,13 @@ export default function SearchBar(props: SearchBarProps) {
           <div className={props.searchQuery.length == 0 ? "hidden" : ""}>
             <Button variant="toolbar" size="toolbar" onClick={handleClearSearch}
                     title={"Clear search (Esc)"}>
-              <XIcon className="h-5 w-5 text-toolbar-button"/>
+              <XIcon className="h-5 w-5"/>
             </Button>
           </div>
           <div className={props.isPreviewVisible ? "hidden" : ""}>
             <Button variant="toolbar" size="toolbar" onClick={handleShowHidePreview}
                     title={"Show preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
-              <PanelRightOpen className="h-5 w-5 text-toolbar-button"/>
+              <PanelRightOpen className="h-5 w-5"/>
             </Button>
           </div>
         </div>

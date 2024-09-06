@@ -1,23 +1,42 @@
 import '../app.css';
 import {TabsTrigger} from "@/components/ui/tabs";
-import React, {CSSProperties, KeyboardEvent, MouseEvent} from 'react';
+import React, {CSSProperties, KeyboardEvent, MouseEvent, useState} from 'react';
 import {getFilterQuery} from "@/data";
 import {Clip, ClipType} from "@/db";
 import {toCSSColor} from "@/lib/utils";
-import {FileIcon, LinkIcon, MailIcon} from "lucide-react";
+import {
+  FileIcon,
+  LinkIcon,
+  MailIcon,
+  PinIcon
+} from "lucide-react";
+import {Button} from "@/components/ui/button";
+import ClipDropdownMenu from "@/app/ClipDropdownMenu";
 
 type HistoryItemPaneProps = {
   item: Clip
   index: number
   historySize: number
   onMouseDoubleClick: (tabIndex: number) => void
+  onEditHistoryItem: (item: Clip) => void
+  onEditContent: () => void
+  onCopyToClipboard: () => void
+  onOpenInBrowser: () => void
+  onDeleteItem: () => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>
   style: CSSProperties
 }
 
 const HistoryItemPane = (props: HistoryItemPaneProps) => {
-  const keyDown = (e: KeyboardEvent) => {
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+  const [mouseOver, setMouseOver] = useState(false)
+  const [actionsMenuOpen, setActionsMenuOpen] = useState(false)
+
+  function handleDropdownMenuOpenChange(open: boolean) {
+    setActionsMenuOpen(open)
+  }
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
       e.stopPropagation()
     }
   }
@@ -25,6 +44,14 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   const handleMouseDoubleClick = (e: MouseEvent) => {
     props.onMouseDoubleClick(props.index)
     e.preventDefault()
+  }
+
+  function handleMouseEnter() {
+    setMouseOver(true)
+  }
+
+  function handleMouseLeave() {
+    setMouseOver(false)
   }
 
   function renderClipIcon() {
@@ -41,6 +68,30 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     return <FileIcon className="h-5 w-5"/>
   }
 
+  function renderActionsButton() {
+    if (mouseOver || actionsMenuOpen) {
+      return <ClipDropdownMenu item={props.item}
+                               onOpenChange={handleDropdownMenuOpenChange}
+                               onEditHistoryItem={props.onEditHistoryItem}
+                               onEditContent={props.onEditContent}
+                               onCopyToClipboard={props.onCopyToClipboard}
+                               onOpenInBrowser={props.onOpenInBrowser}
+                               onDeleteItem={props.onDeleteItem}/>
+    }
+    return renderPinIcon()
+  }
+
+  function renderPinIcon() {
+    if (!props.item.pinned) {
+      return null
+    }
+    return <div className="flex ml-4 mr-0 text-primary-foreground">
+      <Button variant="menu" size="menu">
+        <PinIcon className="h-4 w-4"/>
+      </Button>
+    </div>
+  }
+
   function highlightAllMatches(text: string, query: string) {
     if (!query) {
       return text;
@@ -48,17 +99,11 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
 
     const regex = new RegExp(`(${query})`, 'gi');
     const parts = text.split(regex);
-
-    return (
-        <span>
-      {
-        parts.map((part, index) =>
-            part.toLowerCase() === query.toLowerCase() ? (
-                <span key={index} className="text-searchHighlight font-bold">{part}</span>) : (part)
-        )
-      }
-    </span>
-    );
+    return <span>{
+      parts.map((part, index) =>
+          part.toLowerCase() === query.toLowerCase() ?
+              <span key={index} className="text-searchHighlight font-bold">{part}</span> : part)
+    }</span>
   }
 
   return (
@@ -68,8 +113,10 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
           ref={props.tabsTriggerRef}
           value={props.index.toString()}
           className="flex flex-row cursor-default data-[state=active]:bg-accent py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis hover:bg-popover"
-          onKeyDown={keyDown}
-          onDoubleClick={handleMouseDoubleClick}>
+          onKeyDown={handleKeyDown}
+          onDoubleClick={handleMouseDoubleClick}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}>
         <div className="flex mr-3 text-primary-foreground">{renderClipIcon()}</div>
         <div
             className="flex-grow text-base text-justify font-normal whitespace-nowrap overflow-hidden overflow-ellipsis">
@@ -77,6 +124,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
             highlightAllMatches(props.item.content, getFilterQuery())
           }
         </div>
+        {renderActionsButton()}
       </TabsTrigger>
   )
 }
