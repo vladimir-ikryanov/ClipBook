@@ -10,7 +10,6 @@ import {
   MailIcon,
   PinIcon
 } from "lucide-react";
-import {Button} from "@/components/ui/button";
 import ClipDropdownMenu, {HideClipDropdownMenuReason} from "@/app/ClipDropdownMenu";
 
 type HistoryItemPaneProps = {
@@ -87,10 +86,8 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     if (!props.item.pinned) {
       return null
     }
-    return <div className="flex ml-4 mr-0 text-primary-foreground">
-      <Button variant="menu" size="menu">
-        <PinIcon className="h-4 w-4"/>
-      </Button>
+    return <div className="ml-4 justify-center items-center text-primary-foreground">
+      <PinIcon className="h-4 w-5"/>
     </div>
   }
 

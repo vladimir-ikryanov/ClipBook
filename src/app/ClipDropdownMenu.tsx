@@ -65,7 +65,7 @@ const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
     props.onCopyToClipboard()
   }
 
-  function handleTogglePin() {
+  function handlePin() {
     closeReason = "pin"
     handleOpenChange(false)
     props.item.pinned = !props.item.pinned
@@ -88,7 +88,7 @@ const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
       <div>
         <DropdownMenu open={open} onOpenChange={handleOpenChange}>
           <DropdownMenuTrigger className="ml-4 text-primary-foreground hover:text-accent-foreground" asChild>
-            <EllipsisVerticalIcon className="h-5 w-6"/>
+            <EllipsisVerticalIcon className="h-5 w-5"/>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="p-1 bg-actions-background" align="start"
                                onKeyDown={handleKeyDown}>
@@ -106,7 +106,7 @@ const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
                 <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
               </CommandShortcut>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleTogglePin}>
+            <DropdownMenuItem onClick={handlePin}>
               <PinIcon className="mr-2 h-4 w-4"/>
               <span>{props.item.pinned ? "Unpin item" : "Pin item"}</span>
             </DropdownMenuItem>

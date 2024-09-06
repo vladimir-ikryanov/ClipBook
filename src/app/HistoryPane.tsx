@@ -76,9 +76,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
       setHistoryItem(props.history[activeTabIndex])
-      if (listRef.current) {
-        listRef.current.scrollToItem(activeTabIndex, "start")
-      }
+      scrollToActiveTab()
+    }
+  }
+
+  function scrollToActiveTab() {
+    let activeTabIndex = getVisibleActiveHistoryItemIndex();
+    if (listRef.current) {
+      listRef.current.scrollToItem(activeTabIndex, "auto")
     }
   }
 
@@ -158,9 +163,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
       setHistoryItem(props.history[activeTabIndex])
-      if (listRef.current) {
-        listRef.current.scrollToItem(activeTabIndex, "auto")
-      }
+      scrollToActiveTab()
     }
   }
 
@@ -171,9 +174,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
       setHistoryItem(props.history[activeTabIndex])
-      if (listRef.current) {
-        listRef.current.scrollToItem(activeTabIndex, "auto")
-      }
+      scrollToActiveTab()
     }
   }
 
@@ -286,11 +287,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
     focusSearchField()
   }
 
-  async function handleEditHistoryItem(newClip: Clip) {
-    let clip = getActiveHistoryItem();
-    await updateHistoryItem(clip, newClip)
-    setHistoryItem(newClip)
+  async function handleEditHistoryItem(item: Clip) {
+    await updateHistoryItem(item.id!, item)
+    setHistoryItem(item)
     props.onUpdateHistory()
+    let index = getHistoryItems().findIndex(i => i.id === item.id)
+    setVisibleActiveHistoryItemIndex(index)
+    setActiveTab(index.toString())
+    scrollToActiveTab()
   }
 
   function onTabChange(tabIndex: string): void {

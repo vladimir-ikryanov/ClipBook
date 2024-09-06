@@ -151,12 +151,8 @@ export async function deleteHistoryItem(item: Clip) {
   await deleteItem(item)
 }
 
-export async function updateHistoryItem(oldItem: Clip, newItem: Clip) {
-  let index = hasItem(oldItem)
-  if (index !== -1) {
-    history[index] = newItem
-  }
-  await updateClip(oldItem.id!, newItem)
+export async function updateHistoryItem(id: number, item: Clip) {
+  await updateClip(id, item)
 }
 
 export async function clear(): Promise<Clip[]> {
@@ -177,6 +173,16 @@ export function sortHistory(type: SortHistoryType, history: Clip[]) {
       history.sort((a, b) => b.numberOfCopies - a.numberOfCopies)
       break
   }
+  // Move pinned items to the top.
+  history.sort((a, b) => {
+    if (a.pinned && !b.pinned) {
+      return -1
+    }
+    if (!a.pinned && b.pinned) {
+      return 1
+    }
+    return 0
+  })
 }
 
 export function setVisibleActiveHistoryItemIndex(index: number) {
