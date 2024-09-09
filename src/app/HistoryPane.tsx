@@ -34,7 +34,7 @@ import {HideActionsReason} from "@/app/Actions";
 import {FixedSizeList as List} from "react-window";
 import {Clip} from "@/db";
 import {isUrl} from "@/lib/utils";
-import {HideClipDropdownMenuReason} from "@/app/ClipDropdownMenu";
+import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 
 declare const pasteInFrontApp: (text: string) => void;
 declare const copyToClipboard: (text: string) => void;
