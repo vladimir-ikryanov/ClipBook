@@ -2,6 +2,7 @@ import '../app.css';
 import React from "react";
 import {Button} from "@/components/ui/button";
 import {
+  ClipboardIcon,
   CopyIcon,
   EllipsisVerticalIcon,
   GlobeIcon,
@@ -12,7 +13,7 @@ import {
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {
   prefGetCopyToClipboardShortcut,
-  prefGetOpenInBrowserShortcut,
+  prefGetOpenInBrowserShortcut, prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
 import {Clip, ClipType} from "@/db";
@@ -37,6 +38,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     props.onHidePreview()
   }
 
+  function handlePaste() {
+    props.onPaste()
+  }
+
   function handleCopyToClipboard() {
     props.onCopyToClipboard()
   }
@@ -58,11 +63,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
       <div className="flex flex-col">
         <div className="flex m-2 h-10">
           <div className="">
-            <Button variant="toolbar" size="toolbar" onClick={handleToggleFavorite}
-                    title={props.favorite ? "Remove from favorites" : "Add to favorites"}>
-              <StarIcon
-                  className={props.favorite ? "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5"}
-                  strokeWidth={2}/>
+            <Button variant="toolbar" size="toolbar" onClick={handlePaste}
+                    title={"Paste to " + props.appName + " (" + shortcutToDisplayShortcut(prefGetPasteSelectedItemToActiveAppShortcut()) + ")"}>
+              <ClipboardIcon className="h-5 w-5 text-toolbar-button" strokeWidth={2}/>
             </Button>
             <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}
                     title={"Copy to Clipboard (" + shortcutToDisplayShortcut(prefGetCopyToClipboardShortcut()) + ")"}>
@@ -78,13 +81,59 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
           </div>
           <div className="flex-auto draggable"></div>
           <div className="">
+            <Button variant="toolbar" size="toolbar" onClick={handleToggleFavorite}
+                    title={props.favorite ? "Remove from favorites" : "Add to favorites"}>
+              <StarIcon
+                  className={props.favorite ? "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5"}
+                  strokeWidth={2}/>
+            </Button>
             <Button variant="toolbar" size="toolbar" onClick={handleToggleInfo}>
-              <InfoIcon className={props.displayInfo ?
-                  "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5"} strokeWidth={2}/>
+              {
+                props.displayInfo ?
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         width="20"
+                         height="20"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         className="h-5 w-5">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/>
+                      <rect fill="currentColor" x="4" y="14" width="16" height="6"/>
+                    </svg>
+                    :
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         width="20"
+                         height="20"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         className="h-5 w-5">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/>
+                      <line x1="4" y1="14" x2="20" y2="14"/>
+                    </svg>
+              }
             </Button>
             <Button variant="toolbar" size="toolbar" onClick={handleHidePreview}
                     title={"Hide preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
-              <PanelRightCloseIcon className="h-5 w-5" strokeWidth={2}/>
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   width="20"
+                   height="20"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2"
+                   stroke-linecap="round"
+                   stroke-linejoin="round"
+                   className="h-5 w-5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <rect fill="currentColor" x="14" y="4" width="6" height="16"/>
+              </svg>
             </Button>
           </div>
         </div>
