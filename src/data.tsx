@@ -209,6 +209,10 @@ export function getActiveHistoryItem(): Clip {
   return getHistoryItems()[visibleActiveHistoryItemIndex]
 }
 
+export function getHistoryItemIndex(item: Clip): number {
+  return getHistoryItems().indexOf(item)
+}
+
 export function setPreviewVisibleState(visible: boolean) {
   savePreviewVisible(visible)
 }

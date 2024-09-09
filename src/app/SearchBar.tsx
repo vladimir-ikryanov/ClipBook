@@ -69,8 +69,8 @@ export default function SearchBar(props: SearchBarProps) {
                    fill="none"
                    stroke="currentColor"
                    stroke-width="2"
-                   stroke-linecap="round"
-                   stroke-linejoin="round"
+                   strokeLinecap="round"
+                   strokeLinejoin="round"
                    className="h-5 w-5">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
                 <line x1="14" y1="4" x2="14" y2="20"/>

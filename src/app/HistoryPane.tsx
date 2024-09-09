@@ -6,12 +6,13 @@ import HistoryItemsPane from "@/app/HistoryItemsPane";
 import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
+  addHistoryItem, clear,
   deleteHistoryItem,
-  getActiveHistoryItem,
+  getActiveHistoryItem, getHistoryItemIndex,
   getHistoryItems,
   getPreviewVisibleState,
   getVisibleActiveHistoryItemIndex,
-  getVisibleHistoryItemsLength,
+  getVisibleHistoryItemsLength, setFilterQuery,
   setPreviewVisibleState,
   setVisibleActiveHistoryItemIndex,
   updateHistoryItem
@@ -43,15 +44,14 @@ declare const hideAppWindow: () => void;
 declare const openInBrowser: (url: string) => void;
 
 type HistoryPaneProps = {
-  history: Clip[]
   appName: string
   appIcon: string
-  onUpdateHistory: () => void
-  searchQuery: string
-  onSearchQueryChange: (searchQuery: string) => void
 }
 
 export default function HistoryPane(props: HistoryPaneProps) {
+  const [history, setHistory] = useState(getHistoryItems())
+  const [searchQuery, setSearchQuery] = useState("")
+
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
   const previewTextareaRef = useRef<HTMLTextAreaElement>(null);
   const searchFieldRef = useRef<HTMLInputElement>(null);
@@ -59,7 +59,24 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
-  const [historyItem, setHistoryItem] = useState(props.history[getVisibleActiveHistoryItemIndex()]);
+  const [historyItem, setHistoryItem] = useState(history[getVisibleActiveHistoryItemIndex()]);
+
+  async function addClipboardData(content: string, sourceAppPath: string) {
+    let selectedItem = getActiveHistoryItem();
+
+    let clips = await addHistoryItem(content, sourceAppPath)
+    setHistory([...clips])
+
+    let selectedItemIndex = getHistoryItemIndex(selectedItem);
+    setVisibleActiveHistoryItemIndex(selectedItemIndex)
+    setActiveTab(selectedItemIndex.toString())
+    setHistoryItem(selectedItem)
+    scrollToActiveTab()
+  }
+
+  async function clearHistory() {
+    setHistory(await clear())
+  }
 
   function focusSearchField() {
     setTimeout(() => {
@@ -75,7 +92,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       let activeTabIndex = 0;
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
-      setHistoryItem(props.history[activeTabIndex])
+      setHistoryItem(history[activeTabIndex])
       scrollToActiveTab()
     }
   }
@@ -159,7 +176,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
-  }, [props.history])
+  }, [history])
 
   function selectNextItem() {
     let activeTabIndex = getVisibleActiveHistoryItemIndex();
@@ -167,7 +184,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       activeTabIndex = activeTabIndex + 1
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
-      setHistoryItem(props.history[activeTabIndex])
+      setHistoryItem(history[activeTabIndex])
       scrollToActiveTab()
     }
   }
@@ -178,7 +195,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       activeTabIndex = activeTabIndex - 1
       setVisibleActiveHistoryItemIndex(activeTabIndex)
       setActiveTab(activeTabIndex.toString())
-      setHistoryItem(props.history[activeTabIndex])
+      setHistoryItem(history[activeTabIndex])
       scrollToActiveTab()
     }
   }
@@ -271,7 +288,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (items.length > 0) {
       setHistoryItem(items[getVisibleActiveHistoryItemIndex()])
     }
-    props.onUpdateHistory()
+    setHistory(getHistoryItems())
   }
 
   function handleDeleteAllItems() {
@@ -279,7 +296,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleSearchQueryChange(searchQuery: string): void {
-    props.onSearchQueryChange(searchQuery)
+    setSearchQuery(searchQuery)
+    setFilterQuery(searchQuery)
+    setHistory(getHistoryItems())
+
     setVisibleActiveHistoryItemIndex(0)
     setActiveTab("0")
     // The props.items array won't be updated until the next render, so we need to get the updated
@@ -291,7 +311,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleMouseDoubleClick(tabIndex: number) {
-    pasteInFrontApp(props.history[tabIndex].content)
+    pasteInFrontApp(history[tabIndex].content)
   }
 
   function handleFinishEditing() {
@@ -301,7 +321,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   async function handleEditHistoryItem(item: Clip) {
     await updateHistoryItem(item.id!, item)
     setHistoryItem(item)
-    props.onUpdateHistory()
+    setHistory(getHistoryItems())
     let index = getHistoryItems().findIndex(i => i.id === item.id)
     setVisibleActiveHistoryItemIndex(index)
     setActiveTab(index.toString())
@@ -312,9 +332,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
     let index = parseInt(tabIndex);
     setVisibleActiveHistoryItemIndex(index)
     setActiveTab(tabIndex)
-    setHistoryItem(props.history[index])
+    setHistoryItem(history[index])
   }
 
+  (window as any).addClipboardData = addClipboardData;
+  (window as any).clearHistory = clearHistory;
   (window as any).activateApp = activateApp;
 
   return (
@@ -325,10 +347,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
             className="w-full p-0 m-0">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel className="flex flex-col">
-            <HistoryItemsPane history={props.history}
+            <HistoryItemsPane history={history}
                               appName={props.appName}
                               appIcon={props.appIcon}
-                              searchQuery={props.searchQuery}
+                              searchQuery={searchQuery}
                               onSearchQueryChange={handleSearchQueryChange}
                               onShowHidePreview={handleTogglePreview}
                               onMouseDoubleClick={handleMouseDoubleClick}

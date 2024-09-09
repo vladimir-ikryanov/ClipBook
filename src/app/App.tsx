@@ -1,7 +1,7 @@
 import HistoryPane from "@/app/HistoryPane";
 import {ThemeProvider} from "@/app/ThemeProvider"
 
-import {addHistoryItem, clear, getHistoryItems, isHistoryEmpty, setFilterQuery} from "@/data"
+import {isHistoryEmpty} from "@/data"
 import {useEffect, useState} from "react";
 import * as React from "react";
 import {Clipboard} from "lucide-react";
@@ -12,7 +12,6 @@ import {
   prefGetZoomUIOutShortcut
 } from "@/pref";
 import {isShortcutMatch} from "@/lib/shortcuts";
-import {Clip} from "@/db";
 
 declare const hideAppWindow: () => void;
 declare const openSettingsWindow: () => void;
@@ -20,10 +19,8 @@ declare const zoomIn: () => void;
 declare const zoomOut: () => void;
 
 export default function App() {
-  const [history, setHistory] = useState(getHistoryItems())
   const [appName, setAppName] = useState("")
   const [appIcon, setAppIcon] = useState("")
-  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -57,34 +54,13 @@ export default function App() {
     return () => document.removeEventListener("keydown", down)
   }, [])
 
-  async function addClipboardData(content: string, sourceAppPath: string) {
-    let clips = await addHistoryItem(content, sourceAppPath)
-    setHistory([...clips])
-  }
-
-  function handleUpdateHistory(): void {
-    setHistory(getHistoryItems())
-  }
-
-  function handleSearchQueryChange(searchQuery: string): void {
-    setSearchQuery(searchQuery)
-    setFilterQuery(searchQuery)
-    setHistory(getHistoryItems())
-  }
-
   function setActiveAppInfo(appName: string, appIcon: string): void {
     setAppName(appName)
     setAppIcon(appIcon)
   }
 
-  async function clearHistory() {
-    setHistory(await clear())
-  }
-
   // Attach the function to the window object
-  (window as any).addClipboardData = addClipboardData;
   (window as any).setActiveAppInfo = setActiveAppInfo;
-  (window as any).clearHistory = clearHistory;
 
   if (isHistoryEmpty()) {
     return (
@@ -106,12 +82,7 @@ export default function App() {
 
   return (
       <ThemeProvider defaultTheme="system">
-        <HistoryPane history={history}
-                     appName={appName}
-                     appIcon={appIcon}
-                     searchQuery={searchQuery}
-                     onUpdateHistory={handleUpdateHistory}
-                     onSearchQueryChange={handleSearchQueryChange}/>
+        <HistoryPane appName={appName} appIcon={appIcon}/>
       </ThemeProvider>
   )
 }
