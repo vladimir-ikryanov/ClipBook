@@ -15,6 +15,7 @@ type ActionsBarProps = {
   onPaste: () => void
   onClose: () => void
   onHideActions: (reason: HideActionsReason) => void
+  onToggleFavorite: () => void
   onTogglePreview: () => void
   onSearchHistory: () => void
   onEditContent: () => void
@@ -49,6 +50,7 @@ export default function ActionsBar(props: ActionsBarProps) {
                    onCopyToClipboard={props.onCopyToClipboard}
                    onOpenInBrowser={props.onOpenInBrowser}
                    onPaste={props.onPaste}
+                   onToggleFavorite={props.onToggleFavorite}
                    onTogglePreview={props.onTogglePreview}
                    onDeleteItem={props.onDeleteItem}
                    onDeleteAllItems={props.onDeleteAllItems}/>

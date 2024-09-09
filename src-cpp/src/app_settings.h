@@ -89,6 +89,9 @@ class AppSettings {
 
   virtual void saveOpenSettingsShortcut(std::string shortcut) = 0;
   virtual std::string getOpenSettingsShortcut() = 0;
+
+  virtual void saveToggleFavoriteShortcut(std::string shortcut) = 0;
+  virtual std::string getToggleFavoriteShortcut() = 0;
 };
 
 

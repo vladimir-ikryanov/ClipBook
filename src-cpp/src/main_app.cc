@@ -112,7 +112,9 @@ void MainApp::launch() {
 
   // Hide the window when the focus is lost.
   app_window_->onFocusLost += [this](const FocusLost &event) {
-    hide();
+    if (app()->isProduction()) {
+      hide();
+    }
   };
 
   // Hide all standard window buttons.
@@ -540,6 +542,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
     return settings_->shouldShowIconInMenuBar();
   });
 
+  // Application shortcuts.
   window->putProperty("saveOpenAppShortcut", [this](std::string shortcut) -> void {
     settings_->saveOpenAppShortcut(shortcut);
   });
@@ -637,9 +640,16 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getOpenSettingsShortcut", [this]() -> std::string {
     return settings_->getOpenSettingsShortcut();
   });
+  window->putProperty("saveToggleFavoriteShortcut", [this](std::string shortcut) -> void {
+    settings_->saveToggleFavoriteShortcut(shortcut);
+  });
+  window->putProperty("getToggleFavoriteShortcut", [this]() -> std::string {
+    return settings_->getToggleFavoriteShortcut();
+  });
   window->putProperty("selectAppsToIgnore", [this]() {
     selectAppsToIgnore();
   });
+
   window->putProperty("getAppsToIgnore", [this]() -> std::string {
     return settings_->getAppsToIgnore();
   });

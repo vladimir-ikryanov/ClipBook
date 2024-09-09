@@ -85,6 +85,9 @@ class AppSettingsMac : public AppSettings {
 
   void saveOpenSettingsShortcut(std::string shortcut) override;
   std::string getOpenSettingsShortcut() override;
+
+  void saveToggleFavoriteShortcut(std::string shortcut) override;
+  std::string getToggleFavoriteShortcut() override;
 };
 
 

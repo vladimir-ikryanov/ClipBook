@@ -3,8 +3,8 @@ import React, {KeyboardEvent, useState} from 'react';
 import {
   CopyIcon,
   Edit3Icon,
-  EllipsisVerticalIcon,
-  PinIcon,
+  EllipsisVerticalIcon, GlobeIcon, StarIcon,
+  StarOffIcon,
   TrashIcon
 } from "lucide-react";
 import {
@@ -18,21 +18,29 @@ import {
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
+  prefGetOpenInBrowserShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetToggleFavoriteShortcut,
 } from "@/pref";
 import {CommandShortcut} from "@/components/ui/command";
-import {Clip} from "@/db";
+import {Clip, ClipType} from "@/db";
+import {toBase64Icon} from "@/data";
 
 export type HideClipDropdownMenuReason =
     "cancel"
+    | "paste"
     | "pin"
     | "editContent"
     | "copyToClipboard"
     | "deleteItem"
 
-type ClipDropdownMenuProps = {
+type HistoryItemMenuProps = {
   item: Clip
+  appName: string
+  appIcon: string
   onOpenChange: (open: boolean) => void
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
+  onPaste: () => void
   onEditHistoryItem: (item: Clip) => void
   onEditContent: () => void
   onCopyToClipboard: () => void
@@ -40,7 +48,7 @@ type ClipDropdownMenuProps = {
   onDeleteItem: () => void
 }
 
-const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
+const HistoryItemMenu = (props: HistoryItemMenuProps) => {
   const [open, setOpen] = useState(false)
 
   let closeReason: HideClipDropdownMenuReason = "cancel"
@@ -59,6 +67,12 @@ const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
     }
   }
 
+  function handlePaste() {
+    closeReason = "paste"
+    handleOpenChange(false)
+    props.onPaste()
+  }
+
   function handleCopyToClipboard() {
     closeReason = "copyToClipboard"
     handleOpenChange(false)
@@ -68,7 +82,7 @@ const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
   function handlePin() {
     closeReason = "pin"
     handleOpenChange(false)
-    props.item.pinned = !props.item.pinned
+    props.item.favorite = !props.item.favorite
     props.onEditHistoryItem(props.item)
   }
 
@@ -92,6 +106,14 @@ const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="p-1 bg-actions-background" align="start"
                                onKeyDown={handleKeyDown}>
+            <DropdownMenuItem onClick={handlePaste}>
+              <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
+                   alt="Application icon"/>
+              <span>Paste to {props.appName}</span>
+              <CommandShortcut className="flex flex-row">
+                <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
+              </CommandShortcut>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleCopyToClipboard}>
               <CopyIcon className="mr-2 h-4 w-4"/>
               <span className="mr-12">Copy to Clipboard</span>
@@ -99,6 +121,17 @@ const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
                 <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
               </CommandShortcut>
             </DropdownMenuItem>
+            <DropdownMenuSeparator/>
+            {
+              props.item.type === ClipType.Link &&
+              <DropdownMenuItem onClick={props.onOpenInBrowser}>
+                <GlobeIcon className="mr-2 h-4 w-4"/>
+                <span>Open in Browser</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
+                </CommandShortcut>
+              </DropdownMenuItem>
+            }
             <DropdownMenuItem onClick={handleEditContent}>
               <Edit3Icon className="mr-2 h-4 w-4"/>
               <span>Edit Content...</span>
@@ -107,8 +140,13 @@ const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
               </CommandShortcut>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handlePin}>
-              <PinIcon className="mr-2 h-4 w-4"/>
-              <span>{props.item.pinned ? "Unpin item" : "Pin item"}</span>
+              {
+                props.item.favorite ? <StarOffIcon className="mr-2 h-4 w-4"/> : <StarIcon className="mr-2 h-4 w-4"/>
+              }
+              <span>{props.item.favorite ? "Remove from Favorites" : "Add to Favorites"}</span>
+              <CommandShortcut className="flex flex-row">
+                <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
+              </CommandShortcut>
             </DropdownMenuItem>
             <DropdownMenuSeparator/>
             <DropdownMenuItem onClick={handleDeleteItem}>
@@ -124,4 +162,4 @@ const ClipDropdownMenu = (props: ClipDropdownMenuProps) => {
   )
 }
 
-export default ClipDropdownMenu;
+export default HistoryItemMenu;

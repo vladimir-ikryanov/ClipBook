@@ -27,7 +27,7 @@ import {
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
-  prefGetShowMoreActionsShortcut,
+  prefGetShowMoreActionsShortcut, prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
 import {HideActionsReason} from "@/app/Actions";
@@ -118,6 +118,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
         handleSearchHistory()
         e.preventDefault()
       }
+      // Toggle the favorite status of the active item when the toggle favorite shortcut is pressed.
+      if (isShortcutMatch(prefGetToggleFavoriteShortcut(), e)) {
+        handleToggleFavorite()
+        e.preventDefault()
+      }
       // Show or hide the preview panel when the preview shortcut is pressed.
       if (isShortcutMatch(prefGetTogglePreviewShortcut(), e)) {
         handleTogglePreview()
@@ -190,6 +195,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function handleClose(): void {
     hideAppWindow()
+  }
+
+  async function handleToggleFavorite() {
+    let item = getActiveHistoryItem()
+    item.favorite = !item.favorite
+    await handleEditHistoryItem(item)
   }
 
   function handleTogglePreview(): void {
@@ -332,6 +343,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onCopyToClipboard={handleCopyToClipboard}
                               onOpenInBrowser={handleOpenInBrowser}
                               onSearchHistory={handleSearchHistory}
+                              onToggleFavorite={handleToggleFavorite}
                               onTogglePreview={handleTogglePreview}
                               onEditHistoryItem={handleEditHistoryItem}
                               onDeleteItem={handleDeleteItem}

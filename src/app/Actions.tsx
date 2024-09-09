@@ -3,7 +3,15 @@ import {Button} from "@/components/ui/button";
 
 import * as React from "react"
 import {useEffect} from "react"
-import {CopyIcon, Edit3Icon, GlobeIcon, PanelRightClose, TrashIcon} from "lucide-react"
+import {
+  CopyIcon,
+  Edit3Icon,
+  GlobeIcon,
+  PanelRightClose,
+  StarIcon,
+  StarOffIcon,
+  TrashIcon
+} from "lucide-react"
 
 import {
   Command,
@@ -21,7 +29,7 @@ import {
   prefGetEditHistoryItemShortcut,
   prefGetOpenInBrowserShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
-  prefGetShowMoreActionsShortcut,
+  prefGetShowMoreActionsShortcut, prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
 import ShortcutLabel from "@/app/ShortcutLabel";
@@ -33,6 +41,7 @@ import {ClipType} from "@/db";
 export type HideActionsReason =
     "cancel"
     | "togglePreview"
+    | "toggleFavorite"
     | "paste"
     | "editContent"
     | "copyToClipboard"
@@ -45,6 +54,7 @@ type ActionsProps = {
   appIcon: string
   onHideActions: (reason: HideActionsReason) => void
   onTogglePreview: () => void
+  onToggleFavorite: () => void
   onPaste: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
@@ -97,6 +107,12 @@ export default function Actions(props: ActionsProps) {
     closeReason = "paste"
     handleOpenChange(false)
     props.onPaste()
+  }
+
+  function handleToggleFavorite() {
+    closeReason = "toggleFavorite"
+    handleOpenChange(false)
+    props.onToggleFavorite()
   }
 
   function handleTogglePreview() {
@@ -169,6 +185,17 @@ export default function Actions(props: ActionsProps) {
                 <span>Edit Content...</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
+                </CommandShortcut>
+              </CommandItem>
+              <CommandItem onSelect={handleToggleFavorite}>
+                {
+                  getActiveHistoryItem().favorite ?
+                      <StarOffIcon className="mr-2 h-4 w-4"/> :
+                      <StarIcon className="mr-2 h-4 w-4"/>
+                }
+                <span>{getActiveHistoryItem().favorite ? "Remove from Favorites" : "Add to Favorites"}</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
                 </CommandShortcut>
               </CommandItem>
               <CommandItem onSelect={handleTogglePreview}>

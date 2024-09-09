@@ -13,7 +13,7 @@ export class Clip {
   content: string;
   type: ClipType = ClipType.Text;
   sourceApp: string;
-  pinned: boolean = false;
+  favorite: boolean = false;
   firstTimeCopy: Date = new Date();
   lastTimeCopy: Date = new Date();
   numberOfCopies: number = 1;
@@ -31,7 +31,7 @@ class AppDatabase extends Dexie {
   constructor() {
     super('ClipBookDB');
     this.version(1).stores({
-      history: '++id, content, type, sourceApp, pinned, firstTimeCopy, lastTimeCopy, numberOfCopies'
+      history: '++id, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies'
     });
   }
 }

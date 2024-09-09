@@ -9,7 +9,7 @@ import {HideActionsReason} from "@/app/Actions";
 import HistoryItemPane from "@/app/HistoryItemPane";
 import {Clip} from "@/db";
 import {SearchIcon} from "lucide-react";
-import {HideClipDropdownMenuReason} from "@/app/ClipDropdownMenu";
+import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 
 type HistoryItemListPaneProps = {
   history: Clip[]
@@ -25,6 +25,7 @@ type HistoryItemListPaneProps = {
   onHideActions: (reason: HideActionsReason) => void
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onTogglePreview: () => void
+  onToggleFavorite: () => void
   onSearchHistory: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
@@ -60,9 +61,12 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
                     return (
                         <HistoryItemPane style={style}
                                          index={index}
-                                         historySize={props.history.length}
                                          item={props.history[index]}
+                                         historySize={props.history.length}
+                                         appName={props.appName}
+                                         appIcon={props.appIcon}
                                          onHideClipDropdownMenu={props.onHideClipDropdownMenu}
+                                         onPaste={props.onPaste}
                                          onEditHistoryItem={props.onEditHistoryItem}
                                          onMouseDoubleClick={handleMouseDoubleClick}
                                          onEditContent={props.onEditContent}
@@ -108,6 +112,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
                   onCopyToClipboard={props.onCopyToClipboard}
                   onOpenInBrowser={props.onOpenInBrowser}
                   onSearchHistory={props.onSearchHistory}
+                  onToggleFavorite={props.onToggleFavorite}
                   onTogglePreview={props.onTogglePreview}
                   onDeleteItem={props.onDeleteItem}
                   onDeleteAllItems={props.onDeleteAllItems}/>

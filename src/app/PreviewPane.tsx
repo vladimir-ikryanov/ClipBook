@@ -59,7 +59,7 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
   return (
       <div className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]">
         <PreviewToolBar item={props.item}
-                        itemPinned={props.item.pinned}
+                        favorite={props.item.favorite}
                         appName={props.appName}
                         appIcon={props.appIcon}
                         displayInfo={displayInfo}

@@ -37,6 +37,7 @@ NSString *prefShowMoreActionsShortcut = @"app.show_more_actions_shortcut";
 NSString *prefZoomUIInShortcut = @"app.zoom_ui_in_shortcut";
 NSString *prefZoomUIOutShortcut = @"app.zoom_ui_out_shortcut";
 NSString *prefOpenSettingsShortcut = @"app.open_settings_shortcut";
+NSString *prefToggleFavoriteShortcut = @"app.toggle_favorite_shortcut";
 
 AppSettingsMac::AppSettingsMac() = default;
 
@@ -425,10 +426,25 @@ void AppSettingsMac::saveAppsToIgnore(std::string apps) {
 }
 
 std::string AppSettingsMac::getAppsToIgnore() {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *apps = [defaults objectForKey:prefIgnoreApps];
-    if (apps != nil) {
-        return [apps UTF8String];
-    }
-    return "";
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *apps = [defaults objectForKey:prefIgnoreApps];
+  if (apps != nil) {
+    return [apps UTF8String];
+  }
+  return "";
+}
+
+void AppSettingsMac::saveToggleFavoriteShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefToggleFavoriteShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getToggleFavoriteShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefToggleFavoriteShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Meta + s";
 }

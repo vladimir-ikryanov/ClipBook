@@ -47,6 +47,8 @@ declare const saveZoomUIOutShortcut: (shortcut: string) => void;
 declare const getZoomUIOutShortcut: () => string;
 declare const saveOpenSettingsShortcut: (shortcut: string) => void;
 declare const getOpenSettingsShortcut: () => string;
+declare const saveToggleFavoriteShortcut: (shortcut: string) => void;
+declare const getToggleFavoriteShortcut: () => string;
 
 export function prefGetTheme() {
   return getTheme()
@@ -222,6 +224,14 @@ export function prefGetOpenSettingsShortcut() {
 
 export function prefSetOpenSettingsShortcut(shortcut: string) {
   saveOpenSettingsShortcut(shortcut)
+}
+
+export function prefGetToggleFavoriteShortcut() {
+  return getToggleFavoriteShortcut()
+}
+
+export function prefSetToggleFavoriteShortcut(shortcut: string) {
+  saveToggleFavoriteShortcut(shortcut)
 }
 
 export function prefSetShowIconInMenuBar(showIcon: boolean) {

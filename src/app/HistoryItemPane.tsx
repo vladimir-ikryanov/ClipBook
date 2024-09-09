@@ -8,16 +8,19 @@ import {
   FileIcon,
   LinkIcon,
   MailIcon,
-  PinIcon
+  StarIcon
 } from "lucide-react";
-import ClipDropdownMenu, {HideClipDropdownMenuReason} from "@/app/ClipDropdownMenu";
+import HistoryItemMenu, {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 
 type HistoryItemPaneProps = {
   item: Clip
   index: number
   historySize: number
+  appName: string
+  appIcon: string
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onMouseDoubleClick: (tabIndex: number) => void
+  onPaste: () => void
   onEditHistoryItem: (item: Clip) => void
   onEditContent: () => void
   onCopyToClipboard: () => void
@@ -70,24 +73,27 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
 
   function renderActionsButton() {
     if (mouseOver || actionsMenuOpen) {
-      return <ClipDropdownMenu item={props.item}
-                               onOpenChange={handleDropdownMenuOpenChange}
-                               onHideClipDropdownMenu={props.onHideClipDropdownMenu}
-                               onEditHistoryItem={props.onEditHistoryItem}
-                               onEditContent={props.onEditContent}
-                               onCopyToClipboard={props.onCopyToClipboard}
-                               onOpenInBrowser={props.onOpenInBrowser}
-                               onDeleteItem={props.onDeleteItem}/>
+      return <HistoryItemMenu item={props.item}
+                              appName={props.appName}
+                              appIcon={props.appIcon}
+                              onOpenChange={handleDropdownMenuOpenChange}
+                              onHideClipDropdownMenu={props.onHideClipDropdownMenu}
+                              onPaste={props.onPaste}
+                              onEditHistoryItem={props.onEditHistoryItem}
+                              onEditContent={props.onEditContent}
+                              onCopyToClipboard={props.onCopyToClipboard}
+                              onOpenInBrowser={props.onOpenInBrowser}
+                              onDeleteItem={props.onDeleteItem}/>
     }
-    return renderPinIcon()
+    return renderStarIcon()
   }
 
-  function renderPinIcon() {
-    if (!props.item.pinned) {
+  function renderStarIcon() {
+    if (!props.item.favorite) {
       return null
     }
     return <div className="ml-4 justify-center items-center text-primary-foreground">
-      <PinIcon className="h-4 w-5"/>
+      <StarIcon className="h-4 w-5"/>
     </div>
   }
 

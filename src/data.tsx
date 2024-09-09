@@ -175,10 +175,10 @@ export function sortHistory(type: SortHistoryType, history: Clip[]) {
   }
   // Move pinned items to the top.
   history.sort((a, b) => {
-    if (a.pinned && !b.pinned) {
+    if (a.favorite && !b.favorite) {
       return -1
     }
-    if (!a.pinned && b.pinned) {
+    if (!a.favorite && b.favorite) {
       return 1
     }
     return 0

@@ -14,7 +14,7 @@ import {
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
-  prefGetShowMoreActionsShortcut,
+  prefGetShowMoreActionsShortcut, prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut,
   prefGetZoomUIInShortcut,
   prefGetZoomUIOutShortcut,
@@ -30,7 +30,7 @@ import {
   prefSetSearchHistoryShortcut,
   prefSetSelectNextItemShortcut,
   prefSetSelectPreviousItemShortcut,
-  prefSetShowMoreActionsShortcut,
+  prefSetShowMoreActionsShortcut, prefSetToggleFavoriteShortcut,
   prefSetTogglePreviewShortcut,
   prefSetZoomUIInShortcut,
   prefSetZoomUIOutShortcut
@@ -58,6 +58,7 @@ export default function Shortcuts() {
   const [zoomUIInShortcut, setZoomUIInShortcut] = useState(prefGetZoomUIInShortcut());
   const [zoomUIOutShortcut, setZoomUIOutShortcut] = useState(prefGetZoomUIOutShortcut());
   const [openSettingsShortcut, setOpenSettingsShortcut] = useState(prefGetOpenSettingsShortcut());
+  const [toggleFavoriteShortcut, setToggleFavoriteShortcut] = useState(prefGetToggleFavoriteShortcut());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -153,6 +154,11 @@ export default function Shortcuts() {
     updateOpenSettingsShortcut()
   }
 
+  function handleToggleFavoriteShortcutChange(shortcut: string) {
+    setToggleFavoriteShortcut(shortcut)
+    prefSetToggleFavoriteShortcut(shortcut)
+  }
+
   return (
       <div className="flex h-screen select-none">
         <div className="flex bg-secondary">
@@ -226,6 +232,12 @@ export default function Shortcuts() {
                              onSave={handleOpenInBrowserShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
+              <span className="">Add to favorites</span>
+              <ShortcutInput shortcut={toggleFavoriteShortcut}
+                             defaultShortcut="Meta + s"
+                             onSave={handleToggleFavoriteShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
               <span className="">Edit history item</span>
               <ShortcutInput shortcut={editHistoryItemShortcut}
                              defaultShortcut="Meta + e"
@@ -238,18 +250,12 @@ export default function Shortcuts() {
                              onSave={handleDeleteHistoryItemShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Delete all history item</span>
+              <span className="">Delete all history items</span>
               <ShortcutInput shortcut={clearHistoryShortcut}
                              defaultShortcut="Shift + Meta + Backspace"
                              onSave={handleClearHistoryShortcutChange}/>
             </div>
 
-            <div className="flex items-center justify-between space-x-20">
-              <span className="">Search</span>
-              <ShortcutInput shortcut={searchHistoryShortcut}
-                             defaultShortcut="Meta + f"
-                             onSave={handleSearchHistoryShortcutChange}/>
-            </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Show/hide preview</span>
               <ShortcutInput shortcut={togglePreviewShortcut}
@@ -263,12 +269,12 @@ export default function Shortcuts() {
                              onSave={handleShowMoreActionsShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Zoom app UI in</span>
+              <span className="">Make UI text bigger</span>
               <ShortcutInput shortcut={zoomUIInShortcut} defaultShortcut="Meta + ="
                              onSave={handleZoomUIInShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Zoom app UI out</span>
+              <span className="">Make UI text smaller</span>
               <ShortcutInput shortcut={zoomUIOutShortcut}
                              defaultShortcut="Meta + -"
                              onSave={handleZoomUIOutShortcutChange}/>
