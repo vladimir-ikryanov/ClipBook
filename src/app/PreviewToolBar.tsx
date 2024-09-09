@@ -4,11 +4,8 @@ import {Button} from "@/components/ui/button";
 import {
   ClipboardIcon,
   CopyIcon,
-  EllipsisVerticalIcon,
   GlobeIcon,
-  InfoIcon,
-  PanelRightCloseIcon,
-  PinIcon, StarIcon,
+  StarIcon,
 } from "lucide-react";
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {
