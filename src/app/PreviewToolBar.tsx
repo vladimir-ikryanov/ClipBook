@@ -97,9 +97,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                          viewBox="0 0 24 24"
                          fill="none"
                          stroke="currentColor"
-                         stroke-width="2"
-                         stroke-linecap="round"
-                         stroke-linejoin="round"
+                         strokeWidth="2"
+                         strokeLinecap="round"
+                         strokeLinejoin="round"
                          className="h-5 w-5">
                       <rect x="3" y="3" width="18" height="18" rx="2"/>
                       <rect fill="currentColor" x="4" y="14" width="16" height="6"/>
@@ -111,9 +111,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                          viewBox="0 0 24 24"
                          fill="none"
                          stroke="currentColor"
-                         stroke-width="2"
-                         stroke-linecap="round"
-                         stroke-linejoin="round"
+                         strokeWidth="2"
+                         strokeLinecap="round"
+                         strokeLinejoin="round"
                          className="h-5 w-5">
                       <rect x="3" y="3" width="18" height="18" rx="2"/>
                       <line x1="4" y1="14" x2="20" y2="14"/>
@@ -128,9 +128,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                    viewBox="0 0 24 24"
                    fill="none"
                    stroke="currentColor"
-                   stroke-width="2"
-                   stroke-linecap="round"
-                   stroke-linejoin="round"
+                   strokeWidth="2"
+                   strokeLinecap="round"
+                   strokeLinejoin="round"
                    className="h-5 w-5">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
                 <rect fill="currentColor" x="14" y="4" width="6" height="16"/>
