@@ -10,7 +10,9 @@ import {
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {
   prefGetCopyToClipboardShortcut,
-  prefGetOpenInBrowserShortcut, prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetOpenInBrowserShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
 import {Clip, ClipType} from "@/db";
@@ -62,24 +64,25 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
           <div className="">
             <Button variant="toolbar" size="toolbar" onClick={handlePaste}
                     title={"Paste to " + props.appName + " (" + shortcutToDisplayShortcut(prefGetPasteSelectedItemToActiveAppShortcut()) + ")"}>
-              <ClipboardIcon className="h-5 w-5 text-toolbar-button" strokeWidth={2}/>
+              <ClipboardIcon className="h-5 w-5" strokeWidth={2}/>
             </Button>
             <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}
                     title={"Copy to Clipboard (" + shortcutToDisplayShortcut(prefGetCopyToClipboardShortcut()) + ")"}>
-              <CopyIcon className="h-5 w-5 text-toolbar-button" strokeWidth={2}/>
+              <CopyIcon className="h-5 w-5" strokeWidth={2}/>
             </Button>
             {
                 props.item.type === ClipType.Link &&
                 <Button variant="toolbar" size="toolbar" onClick={handleOpenInBrowser}
                         title={"Open in Browser (" + shortcutToDisplayShortcut(prefGetOpenInBrowserShortcut()) + ")"}>
-                  <GlobeIcon className="h-5 w-5 text-toolbar-button" strokeWidth={2}/>
+                  <GlobeIcon className="h-5 w-5" strokeWidth={2}/>
                 </Button>
             }
           </div>
           <div className="flex-auto draggable"></div>
           <div className="">
             <Button variant="toolbar" size="toolbar" onClick={handleToggleFavorite}
-                    title={props.favorite ? "Remove from favorites" : "Add to favorites"}>
+                    title={props.favorite ? "Remove from favorites (" + shortcutToDisplayShortcut(prefGetToggleFavoriteShortcut()) + ")"
+                        : "Add to favorites (" + shortcutToDisplayShortcut(prefGetToggleFavoriteShortcut()) + ")"}>
               <StarIcon
                   className={props.favorite ? "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5"}
                   strokeWidth={2}/>
