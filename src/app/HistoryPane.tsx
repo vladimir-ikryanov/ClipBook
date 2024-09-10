@@ -12,7 +12,7 @@ import {
   getHistoryItems,
   getPreviewVisibleState,
   getVisibleActiveHistoryItemIndex,
-  getVisibleHistoryItemsLength, setFilterQuery,
+  getVisibleHistoryItemsLength, isHistoryEmpty, setFilterQuery,
   setPreviewVisibleState,
   setVisibleActiveHistoryItemIndex,
   updateHistoryItem
@@ -36,6 +36,7 @@ import {FixedSizeList as List} from "react-window";
 import {Clip} from "@/db";
 import {isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
+import {ClipboardIcon} from "lucide-react";
 
 declare const pasteInFrontApp: (text: string) => void;
 declare const copyToClipboard: (text: string) => void;
@@ -338,6 +339,22 @@ export default function HistoryPane(props: HistoryPaneProps) {
   (window as any).addClipboardData = addClipboardData;
   (window as any).clearHistory = clearHistory;
   (window as any).activateApp = activateApp;
+
+  if (isHistoryEmpty()) {
+    return (
+        <div className="flex h-screen draggable">
+          <div className="flex flex-col text-center m-auto">
+            <ClipboardIcon className="h-24 w-24 m-auto text-secondary-foreground"/>
+            <p className="text-center pt-8 text-2xl font-semibold text-foreground">
+              Your clipboard is empty
+            </p>
+            <p className="text-center pt-2">
+              Start copying text or links to build your history.
+            </p>
+          </div>
+        </div>
+    )
+  }
 
   return (
       <Tabs defaultValue={activeTab}

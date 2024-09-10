@@ -189,11 +189,11 @@ export default function Actions(props: ActionsProps) {
               </CommandItem>
               <CommandItem onSelect={handleToggleFavorite}>
                 {
-                  getActiveHistoryItem().favorite ?
+                  getActiveHistoryItem()?.favorite ?
                       <StarOffIcon className="mr-2 h-4 w-4"/> :
                       <StarIcon className="mr-2 h-4 w-4"/>
                 }
-                <span>{getActiveHistoryItem().favorite ? "Remove from Favorites" : "Add to Favorites"}</span>
+                <span>{getActiveHistoryItem()?.favorite ? "Remove from Favorites" : "Add to Favorites"}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
                 </CommandShortcut>
