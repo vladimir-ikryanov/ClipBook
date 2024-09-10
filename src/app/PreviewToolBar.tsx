@@ -87,7 +87,8 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                   className={props.favorite ? "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5"}
                   strokeWidth={2}/>
             </Button>
-            <Button variant="toolbar" size="toolbar" onClick={handleToggleInfo}>
+            <Button variant="toolbar" size="toolbar" onClick={handleToggleInfo}
+                    title={props.displayInfo ? "Hide details" : "Show details"}>
               {
                 props.displayInfo ?
                     <svg xmlns="http://www.w3.org/2000/svg"
