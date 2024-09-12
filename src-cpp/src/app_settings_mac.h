@@ -12,8 +12,8 @@ class AppSettingsMac : public AppSettings {
   void saveTheme(std::string theme) override;
   std::string getTheme() override;
 
-  void saveWindowBoundsForScreen(int screen_id, molybden::Rect bounds) override;
-  molybden::Rect getWindowBoundsForScreen(int screen_id) override;
+  void saveWindowBoundsForScreen(int screen_id, molybden::Rect screen_bounds, molybden::Rect window_bounds) override;
+  molybden::Rect getWindowBoundsForScreen(int screen_id, molybden::Rect screen_bounds) override;
 
   void saveIgnoreConfidentialContent(bool ignore) override;
   bool shouldIgnoreConfidentialContent() override;
@@ -88,6 +88,9 @@ class AppSettingsMac : public AppSettings {
 
   void saveToggleFavoriteShortcut(std::string shortcut) override;
   std::string getToggleFavoriteShortcut() override;
+
+ private:
+  static molybden::Rect getWindowBoundsForScreen(int screen_id);
 };
 
 

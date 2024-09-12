@@ -16,8 +16,8 @@ class AppSettings {
   virtual void saveTheme(std::string theme) = 0;
   virtual std::string getTheme() = 0;
 
-  virtual void saveWindowBoundsForScreen(int screen_id, molybden::Rect bounds) = 0;
-  virtual molybden::Rect getWindowBoundsForScreen(int screen_id) = 0;
+  virtual void saveWindowBoundsForScreen(int screen_id, molybden::Rect screen_bounds, molybden::Rect window_bounds) = 0;
+  virtual molybden::Rect getWindowBoundsForScreen(int screen_id, molybden::Rect screen_bounds) = 0;
 
   virtual void saveIgnoreConfidentialContent(bool ignore) = 0;
   virtual bool shouldIgnoreConfidentialContent() = 0;

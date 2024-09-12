@@ -11,6 +11,7 @@ NSString *prefWindowBoundsY = @"window.bounds.y";
 NSString *prefWindowBoundsWidth = @"window.bounds.width";
 NSString *prefWindowBoundsHeight = @"window.bounds.height";
 NSString *prefScreenNumber = @"screen_%@";
+NSString *prefScreenInfo = @"screen_%@_%@:%@_%@x%@";
 NSString *prefAppTheme = @"app.theme";
 NSString *prefIgnoreConfidentialContent = @"privacy.ignore_confidential_content";
 NSString *prefIgnoreTransientContent = @"privacy.ignore_transient_content";
@@ -41,27 +42,53 @@ NSString *prefToggleFavoriteShortcut = @"app.toggle_favorite_shortcut";
 
 AppSettingsMac::AppSettingsMac() = default;
 
-void AppSettingsMac::saveWindowBoundsForScreen(int screen_id, molybden::Rect bounds) {
-  if (bounds.size.isEmpty()) {
-    return;
-  }
-  NSMutableDictionary *prefValue = [[NSMutableDictionary alloc] init];
-  prefValue[prefWindowBoundsX] = [NSNumber numberWithInt:bounds.origin.x];
-  prefValue[prefWindowBoundsY] = [NSNumber numberWithInt:bounds.origin.y];
-  prefValue[prefWindowBoundsWidth] = [NSNumber numberWithUnsignedInt:bounds.size.width];
-  prefValue[prefWindowBoundsHeight] = [NSNumber numberWithUnsignedInt:bounds.size.height];
-
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  NSString *key = [NSString stringWithFormat:prefScreenNumber, [NSNumber numberWithInt:screen_id]];
-  [defaults setObject:prefValue forKey:key];
-  [defaults synchronize];
-}
-
 molybden::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id) {
   NSString *key = [NSString stringWithFormat:prefScreenNumber, [NSNumber numberWithInt:screen_id]];
   NSDictionary *value = [[NSUserDefaults standardUserDefaults] objectForKey:key];
   if (value == nil) {
     return {};
+  }
+  auto x = [[value objectForKey:prefWindowBoundsX] intValue];
+  auto y = [[value objectForKey:prefWindowBoundsY] intValue];
+  auto width = [[value objectForKey:prefWindowBoundsWidth] unsignedIntValue];
+  auto height = [[value objectForKey:prefWindowBoundsHeight] unsignedIntValue];
+  return {molybden::Point(x, y), molybden::Size(width, height)};
+}
+
+void AppSettingsMac::saveWindowBoundsForScreen(int screen_id,
+                                               molybden::Rect screen_bounds,
+                                               molybden::Rect window_bounds) {
+  if (window_bounds.size.isEmpty()) {
+    return;
+  }
+  NSMutableDictionary *prefValue = [[NSMutableDictionary alloc] init];
+  prefValue[prefWindowBoundsX] = [NSNumber numberWithInt:window_bounds.origin.x];
+  prefValue[prefWindowBoundsY] = [NSNumber numberWithInt:window_bounds.origin.y];
+  prefValue[prefWindowBoundsWidth] = [NSNumber numberWithUnsignedInt:window_bounds.size.width];
+  prefValue[prefWindowBoundsHeight] = [NSNumber numberWithUnsignedInt:window_bounds.size.height];
+
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *key = [NSString stringWithFormat:prefScreenInfo,
+                                             [NSNumber numberWithInt:screen_id],
+                                             [NSNumber numberWithInt:screen_bounds.origin.x],
+                                             [NSNumber numberWithInt:screen_bounds.origin.y],
+                                             [NSNumber numberWithInt:static_cast<int>(screen_bounds.size.width)],
+                                             [NSNumber numberWithInt:static_cast<int>(screen_bounds.size.height)]];
+  [defaults setObject:prefValue forKey:key];
+  [defaults synchronize];
+}
+
+molybden::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id,
+                                                        molybden::Rect screen_bounds) {
+  NSString *key = [NSString stringWithFormat:prefScreenInfo,
+                                             [NSNumber numberWithInt:screen_id],
+                                             [NSNumber numberWithInt:screen_bounds.origin.x],
+                                             [NSNumber numberWithInt:screen_bounds.origin.y],
+                                             [NSNumber numberWithInt:static_cast<int>(screen_bounds.size.width)],
+                                             [NSNumber numberWithInt:static_cast<int>(screen_bounds.size.height)]];
+  NSDictionary *value = [[NSUserDefaults standardUserDefaults] objectForKey:key];
+  if (value == nil) {
+    return getWindowBoundsForScreen(screen_id);
   }
   auto x = [[value objectForKey:prefWindowBoundsX] intValue];
   auto y = [[value objectForKey:prefWindowBoundsY] intValue];

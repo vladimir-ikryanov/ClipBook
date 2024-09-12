@@ -295,21 +295,36 @@ std::string MainAppMac::getUpdateServerUrl() {
 void MainAppMac::restoreWindowBounds() {
   NSScreen *main_screen = [NSScreen mainScreen];
   NSNumber *screen_number = [[main_screen deviceDescription] objectForKey:@"NSScreenNumber"];
-  auto bounds = settings_->getWindowBoundsForScreen([screen_number intValue]);
-  if (bounds.size.isEmpty()) {
+  int screen_id = [screen_number intValue];
+  auto screen_frame = [main_screen frame];
+  auto screen_origin = molybden::Point(static_cast<int32_t>(screen_frame.origin.x),
+                                       static_cast<int32_t>(screen_frame.origin.y));
+  auto screen_size = molybden::Size(static_cast<int32_t>(screen_frame.size.width),
+                                    static_cast<int32_t>(screen_frame.size.height));
+  auto screen_bounds = molybden::Rect(screen_origin, screen_size);
+  auto window_bounds = settings_->getWindowBoundsForScreen(screen_id, screen_bounds);
+  if (!window_bounds.size.isEmpty()) {
+    app_window_->setBounds(window_bounds);
+  } else {
     auto screen_x = static_cast<int32_t>([main_screen frame].origin.x);
     auto screen_y = static_cast<int32_t>([main_screen frame].origin.y);
     app_window_->setPosition(screen_x, screen_y);
     app_window_->centerWindow();
-  } else {
-    app_window_->setBounds(bounds);
   }
 }
 
 void MainAppMac::saveWindowBounds() {
   NSScreen *main_screen = [NSScreen mainScreen];
   NSNumber *screen_number = [[main_screen deviceDescription] objectForKey:@"NSScreenNumber"];
-  settings_->saveWindowBoundsForScreen([screen_number intValue], app_window_->bounds());
+  int screen_id = [screen_number intValue];
+  auto screen_frame = [main_screen frame];
+  auto screen_origin = molybden::Point(static_cast<int32_t>(screen_frame.origin.x),
+                                       static_cast<int32_t>(screen_frame.origin.y));
+  auto screen_size = molybden::Size(static_cast<int32_t>(screen_frame.size.width),
+                                    static_cast<int32_t>(screen_frame.size.height));
+  auto screen_bounds = molybden::Rect(screen_origin, screen_size);
+  auto window_bounds = app_window_->bounds();
+  settings_->saveWindowBoundsForScreen(screen_id, screen_bounds, window_bounds);
 }
 
 void MainAppMac::setOpenAtLogin(bool open) {
