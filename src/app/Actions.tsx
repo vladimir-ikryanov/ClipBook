@@ -7,7 +7,7 @@ import {
   CopyIcon,
   Edit3Icon,
   GlobeIcon,
-  PanelRightClose,
+  PanelRightClose, SettingsIcon,
   StarIcon,
   StarOffIcon,
   TrashIcon
@@ -215,7 +215,7 @@ export default function Actions(props: ActionsProps) {
               </CommandItem>
               <CommandSeparator/>
               <CommandItem onSelect={handleOpenSettings}>
-                <PanelRightClose className="mr-2 h-4 w-4"/>
+                <SettingsIcon className="mr-2 h-4 w-4"/>
                 <span>{"Settings..."}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetOpenSettingsShortcut()}/>
