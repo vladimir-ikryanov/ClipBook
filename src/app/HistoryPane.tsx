@@ -23,7 +23,7 @@ import {
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
-  prefGetOpenInBrowserShortcut,
+  prefGetOpenInBrowserShortcut, prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
@@ -43,6 +43,7 @@ declare const copyToClipboard: (text: string) => void;
 declare const clearEntireHistory: () => void;
 declare const hideAppWindow: () => void;
 declare const openInBrowser: (url: string) => void;
+declare const openSettingsWindow: () => void;
 
 type HistoryPaneProps = {
   appName: string
@@ -173,6 +174,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
         }
         e.preventDefault()
       }
+      // Open the settings window with the settings shortcut.
+      if (isShortcutMatch(prefGetOpenSettingsShortcut(), e)) {
+        openSettingsWindow()
+        e.preventDefault()
+      }
     }
 
     document.addEventListener("keydown", down)
@@ -268,6 +274,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (isUrl(item.content)) {
       openInBrowser(item.content)
     }
+  }
+
+  function handleOpenSettings() {
+    openSettingsWindow()
   }
 
   function handleSearchHistory() {
@@ -381,6 +391,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onEditContent={handleEditContent}
                               onCopyToClipboard={handleCopyToClipboard}
                               onOpenInBrowser={handleOpenInBrowser}
+                              onOpenSettings={handleOpenSettings}
                               onSearchHistory={handleSearchHistory}
                               onToggleFavorite={handleToggleFavorite}
                               onTogglePreview={handleTogglePreview}

@@ -21,6 +21,7 @@ type ActionsBarProps = {
   onEditContent: () => void
   onCopyToClipboard: () => void
   onOpenInBrowser: () => void
+  onOpenSettings: () => void
   onDeleteItem: () => void
   onDeleteAllItems: () => void
 }
@@ -49,6 +50,7 @@ export default function ActionsBar(props: ActionsBarProps) {
                    onEditContent={props.onEditContent}
                    onCopyToClipboard={props.onCopyToClipboard}
                    onOpenInBrowser={props.onOpenInBrowser}
+                   onOpenSettings={props.onOpenSettings}
                    onPaste={props.onPaste}
                    onToggleFavorite={props.onToggleFavorite}
                    onTogglePreview={props.onTogglePreview}

@@ -27,7 +27,7 @@ import {
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
-  prefGetOpenInBrowserShortcut,
+  prefGetOpenInBrowserShortcut, prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetShowMoreActionsShortcut, prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut
@@ -46,6 +46,7 @@ export type HideActionsReason =
     | "editContent"
     | "copyToClipboard"
     | "openInBrowser"
+    | "openSettings"
     | "deleteItem"
     | "deleteAllItems"
 
@@ -59,6 +60,7 @@ type ActionsProps = {
   onEditContent: () => void
   onCopyToClipboard: () => void
   onOpenInBrowser: () => void
+  onOpenSettings: () => void
   onDeleteItem: () => void
   onDeleteAllItems: () => void
 }
@@ -119,6 +121,12 @@ export default function Actions(props: ActionsProps) {
     closeReason = "togglePreview"
     handleOpenChange(false)
     props.onTogglePreview()
+  }
+
+  function handleOpenSettings() {
+    closeReason = "openSettings"
+    handleOpenChange(false)
+    props.onOpenSettings()
   }
 
   function handleDeleteItem() {
@@ -203,6 +211,14 @@ export default function Actions(props: ActionsProps) {
                 <span>{getPreviewVisibleState() ? "Hide Preview" : "Show Preview"}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
+                </CommandShortcut>
+              </CommandItem>
+              <CommandSeparator/>
+              <CommandItem onSelect={handleOpenSettings}>
+                <PanelRightClose className="mr-2 h-4 w-4"/>
+                <span>{"Settings..."}</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetOpenSettingsShortcut()}/>
                 </CommandShortcut>
               </CommandItem>
               <CommandSeparator/>

@@ -5,14 +5,12 @@ import {useEffect, useState} from "react";
 import * as React from "react";
 import {
   prefGetCloseAppShortcut,
-  prefGetOpenSettingsShortcut,
   prefGetZoomUIInShortcut,
   prefGetZoomUIOutShortcut
 } from "@/pref";
 import {isShortcutMatch} from "@/lib/shortcuts";
 
 declare const hideAppWindow: () => void;
-declare const openSettingsWindow: () => void;
 declare const zoomIn: () => void;
 declare const zoomOut: () => void;
 
@@ -39,11 +37,6 @@ export default function App() {
       // Zoom out the UI with the zoom out shortcut.
       if (isShortcutMatch(prefGetZoomUIOutShortcut(), e)) {
         zoomOut()
-        e.preventDefault()
-      }
-      // Open the settings window with the settings shortcut.
-      if (isShortcutMatch(prefGetOpenSettingsShortcut(), e)) {
-        openSettingsWindow()
         e.preventDefault()
       }
     }
