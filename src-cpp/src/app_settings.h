@@ -37,6 +37,9 @@ class AppSettings {
   virtual void saveShowIconInMenuBar(bool show) = 0;
   virtual bool shouldShowIconInMenuBar() = 0;
 
+  virtual void saveShowIconInDock(bool show) = 0;
+  virtual bool shouldShowIconInDock() = 0;
+
   virtual void saveAppsToIgnore(std::string apps) = 0;
   virtual std::string getAppsToIgnore() = 0;
 

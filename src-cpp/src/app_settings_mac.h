@@ -33,6 +33,9 @@ class AppSettingsMac : public AppSettings {
   void saveShowIconInMenuBar(bool show) override;
   bool shouldShowIconInMenuBar() override;
 
+  void saveShowIconInDock(bool show) override;
+  bool shouldShowIconInDock() override;
+
   void saveAppsToIgnore(std::string apps) override;
   std::string getAppsToIgnore() override;
 

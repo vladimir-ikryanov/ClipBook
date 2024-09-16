@@ -541,6 +541,13 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("shouldShowIconInMenuBar", [this]() -> bool {
     return settings_->shouldShowIconInMenuBar();
   });
+  window->putProperty("saveShowIconInDock", [this](bool show) -> void {
+    setShowIconInDock(show);
+    settings_->saveShowIconInDock(show);
+  });
+  window->putProperty("shouldShowIconInDock", [this]() -> bool {
+    return settings_->shouldShowIconInDock();
+  });
 
   // Application shortcuts.
   window->putProperty("saveOpenAppShortcut", [this](std::string shortcut) -> void {
@@ -686,6 +693,9 @@ void MainApp::setShowIconInMenuBar(bool show) {
   } else {
     destroyTray();
   }
+}
+
+void MainApp::setShowIconInDock(bool show) {
 }
 
 void MainApp::createTray() {

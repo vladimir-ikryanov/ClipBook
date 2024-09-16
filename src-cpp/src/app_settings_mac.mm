@@ -19,6 +19,7 @@ NSString *prefOpenAtLogin = @"app.open_at_login";
 NSString *prefCheckForUpdatesAutomatically = @"app.check_for_updates_automatically";
 NSString *prefWarnOnClearHistory = @"app.warn_on_clear_history";
 NSString *prefShowIconInMenuBar = @"app.show_icon_in_menu_bar";
+NSString *prefShowIconInDock = @"app.show_icon_in_dock";
 NSString *prefIgnoreApps = @"privacy.ignore_apps";
 
 // Shortcuts.
@@ -204,6 +205,20 @@ bool AppSettingsMac::shouldShowIconInMenuBar() {
     return [defaults boolForKey:prefShowIconInMenuBar];
   }
   return true;
+}
+
+void AppSettingsMac::saveShowIconInDock(bool show) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:show forKey:prefShowIconInDock];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldShowIconInDock() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefShowIconInDock] != nil) {
+    return [defaults boolForKey:prefShowIconInDock];
+  }
+  return false;
 }
 
 void AppSettingsMac::saveOpenAppShortcut(std::string shortcut) {

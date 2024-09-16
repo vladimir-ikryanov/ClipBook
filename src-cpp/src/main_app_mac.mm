@@ -415,6 +415,7 @@ bool MainAppMac::init() {
   if (!open_at_login && app_in_login_items) {
     setOpenAtLogin(false);
   }
+  setShowIconInDock(settings_->shouldShowIconInDock());
   return MainApp::init();
 }
 
@@ -514,4 +515,12 @@ std::string MainAppMac::getAppNameFromPath(const std::string &app_path) {
     return [appName UTF8String];
   }
   return {};
+}
+
+void MainAppMac::setShowIconInDock(bool show) {
+  if (show) {
+    app_->dock()->show();
+  } else {
+    app_->dock()->hide();
+  }
 }

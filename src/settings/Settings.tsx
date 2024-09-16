@@ -5,11 +5,11 @@ import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {useEffect, useState} from "react";
 import {
   prefGetCheckForUpdatesAutomatically,
-  prefGetOpenAtLogin, prefGetShowIconInMenuBar,
+  prefGetOpenAtLogin, prefGetShowIconInDock, prefGetShowIconInMenuBar,
   prefGetTheme,
   prefGetWarnOnClearHistory,
   prefSetCheckForUpdatesAutomatically,
-  prefSetOpenAtLogin, prefSetShowIconInMenuBar,
+  prefSetOpenAtLogin, prefSetShowIconInDock, prefSetShowIconInMenuBar,
   prefSetTheme,
   prefSetWarnOnClearHistory,
 } from "@/pref";
@@ -23,6 +23,7 @@ export default function Settings() {
   const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory());
   const [checkForUpdatesAutomatically, setCheckForUpdatesAutomatically] = useState(prefGetCheckForUpdatesAutomatically());
   const [showIconInMenuBar, setShowIconInMenuBar] = useState(prefGetShowIconInMenuBar());
+  const [showIconInDock, setShowIconInDock] = useState(prefGetShowIconInDock());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -56,9 +57,14 @@ export default function Settings() {
     prefSetWarnOnClearHistory(warnOnClearHistory)
   }
 
-  function handleShowIconChange(showIcon: boolean) {
+  function handleShowIconInMenuBarChange(showIcon: boolean) {
     setShowIconInMenuBar(showIcon)
     prefSetShowIconInMenuBar(showIcon)
+  }
+
+  function handleShowIconInDockChange(showIcon: boolean) {
+    setShowIconInDock(showIcon)
+    prefSetShowIconInDock(showIcon)
   }
 
   return (
@@ -170,7 +176,18 @@ ClipBook will check for updates automatically and notify you when a new version 
                 </span>
               </Label>
               <Switch id="showIcon" checked={showIconInMenuBar}
-                      onCheckedChange={handleShowIconChange}/>
+                      onCheckedChange={handleShowIconInMenuBarChange}/>
+            </div>
+
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label htmlFor="showIcon" className="flex flex-col text-base">
+                <span className="">Show icon in Dock</span>
+                <span className="text-neutral-500 font-normal text-sm">
+                  Display the ClipBook app icon in&nbsp;Dock.
+                </span>
+              </Label>
+              <Switch id="showIcon" checked={showIconInDock}
+                      onCheckedChange={handleShowIconInDockChange}/>
             </div>
 
             <hr/>
