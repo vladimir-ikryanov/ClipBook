@@ -15,47 +15,51 @@ using namespace molybden;
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 static std::string kShortcutSeparator = " + ";
-static std::string kMeta = "Meta";
-static std::string kControl = "Control";
-static std::string kAlt = "Alt";
-static std::string kShift = "Shift";
+static std::string kMetaLeft = "MetaLeft";
+static std::string kMetaRight = "MetaRight";
+static std::string kControlLeft = "ControlLeft";
+static std::string kControlRight = "ControlRight";
+static std::string kAltLeft = "AltLeft";
+static std::string kAltRight = "AltRight";
+static std::string kShiftLeft = "ShiftLeft";
+static std::string kShiftRight = "ShiftRight";
 static std::map<std::string, KeyCode> kKeyCodes = {
-    {"a", KeyCode::A},
-    {"b", KeyCode::B},
-    {"c", KeyCode::C},
-    {"d", KeyCode::D},
-    {"e", KeyCode::E},
-    {"f", KeyCode::F},
-    {"g", KeyCode::G},
-    {"h", KeyCode::H},
-    {"i", KeyCode::I},
-    {"j", KeyCode::J},
-    {"k", KeyCode::K},
-    {"l", KeyCode::L},
-    {"m", KeyCode::M},
-    {"n", KeyCode::N},
-    {"o", KeyCode::O},
-    {"p", KeyCode::P},
-    {"q", KeyCode::Q},
-    {"r", KeyCode::R},
-    {"s", KeyCode::S},
-    {"t", KeyCode::T},
-    {"u", KeyCode::U},
-    {"v", KeyCode::V},
-    {"w", KeyCode::W},
-    {"x", KeyCode::X},
-    {"y", KeyCode::Y},
-    {"z", KeyCode::Z},
-    {"0", KeyCode::DIGIT0},
-    {"1", KeyCode::DIGIT1},
-    {"2", KeyCode::DIGIT2},
-    {"3", KeyCode::DIGIT3},
-    {"4", KeyCode::DIGIT4},
-    {"5", KeyCode::DIGIT5},
-    {"6", KeyCode::DIGIT6},
-    {"7", KeyCode::DIGIT7},
-    {"8", KeyCode::DIGIT8},
-    {"9", KeyCode::DIGIT9},
+    {"KeyA", KeyCode::A},
+    {"KeyB", KeyCode::B},
+    {"KeyC", KeyCode::C},
+    {"KeyD", KeyCode::D},
+    {"KeyE", KeyCode::E},
+    {"KeyF", KeyCode::F},
+    {"KeyG", KeyCode::G},
+    {"KeyH", KeyCode::H},
+    {"KeyI", KeyCode::I},
+    {"KeyJ", KeyCode::J},
+    {"KeyK", KeyCode::K},
+    {"KeyL", KeyCode::L},
+    {"KeyM", KeyCode::M},
+    {"KeyN", KeyCode::N},
+    {"KeyO", KeyCode::O},
+    {"KeyP", KeyCode::P},
+    {"KeyQ", KeyCode::Q},
+    {"KeyR", KeyCode::R},
+    {"KeyS", KeyCode::S},
+    {"KeyT", KeyCode::T},
+    {"KeyU", KeyCode::U},
+    {"KeyV", KeyCode::V},
+    {"KeyW", KeyCode::W},
+    {"KeyX", KeyCode::X},
+    {"KeyY", KeyCode::Y},
+    {"KeyZ", KeyCode::Z},
+    {"Digit0", KeyCode::DIGIT0},
+    {"Digit1", KeyCode::DIGIT1},
+    {"Digit2", KeyCode::DIGIT2},
+    {"Digit3", KeyCode::DIGIT3},
+    {"Digit4", KeyCode::DIGIT4},
+    {"Digit5", KeyCode::DIGIT5},
+    {"Digit6", KeyCode::DIGIT6},
+    {"Digit7", KeyCode::DIGIT7},
+    {"Digit8", KeyCode::DIGIT8},
+    {"Digit9", KeyCode::DIGIT9},
     {"F1", KeyCode::F1},
     {"F2", KeyCode::F2},
     {"F3", KeyCode::F3},
@@ -85,7 +89,6 @@ static std::map<std::string, KeyCode> kKeyCodes = {
     {"Tab", KeyCode::TAB},
     {"Space", KeyCode::SPACE},
     {"Enter", KeyCode::ENTER},
-    {"MENU", KeyCode::MENU},
     {"Delete", KeyCode::DEL},
     {"Home", KeyCode::HOME},
     {"End", KeyCode::END},
@@ -99,17 +102,17 @@ static std::map<std::string, KeyCode> kKeyCodes = {
     {"NumLock", KeyCode::NUM_LOCK},
     {"ScrollLock", KeyCode::SCROLL_LOCK},
     {"Insert", KeyCode::INSERT},
-    {";", KeyCode::SEMICOLON},
-    {"=", KeyCode::EQUALS},
-    {",", KeyCode::COMMA},
-    {"-", KeyCode::MINUS},
-    {".", KeyCode::PERIOD},
-    {"/", KeyCode::SLASH},
-    {"\\", KeyCode::BACKSLASH},
-    {"`", KeyCode::BACK_QUOTE},
-    {"'", KeyCode::QUOTE},
-    {"[", KeyCode::OPEN_BRACE},
-    {"]", KeyCode::CLOSE_BRACE},
+    {"Semicolon", KeyCode::SEMICOLON},
+    {"Equal", KeyCode::EQUALS},
+    {"Comma", KeyCode::COMMA},
+    {"Minus", KeyCode::MINUS},
+    {"Period", KeyCode::PERIOD},
+    {"Slash", KeyCode::SLASH},
+    {"Backslash", KeyCode::BACKSLASH},
+    {"Backquote", KeyCode::BACK_QUOTE},
+    {"Quote", KeyCode::QUOTE},
+    {"BracketLeft", KeyCode::OPEN_BRACE},
+    {"BracketRight", KeyCode::CLOSE_BRACE},
 };
 
 std::vector<std::string> split(const std::string &str, const std::string &delimiter) {
@@ -128,13 +131,13 @@ int32_t extractKeyModifiers(const std::string &shortcut) {
   auto parts = split(shortcut, kShortcutSeparator);
   int32_t key_modifiers = 0;
   for (const auto &part : parts) {
-    if (part == kMeta) {
+    if (part == kMetaLeft || part == kMetaRight) {
       key_modifiers |= KeyModifier::COMMAND_OR_CTRL;
-    } else if (part == kControl) {
+    } else if (part == kControlLeft || part == kControlRight) {
       key_modifiers |= KeyModifier::CTRL;
-    } else if (part == kAlt) {
+    } else if (part == kAltLeft || part == kAltRight) {
       key_modifiers |= KeyModifier::ALT;
-    } else if (part == kShift) {
+    } else if (part == kShiftLeft || part == kShiftRight) {
       key_modifiers |= KeyModifier::SHIFT;
     }
   }
@@ -144,7 +147,10 @@ int32_t extractKeyModifiers(const std::string &shortcut) {
 KeyCode extractKeyCode(const std::string &shortcut) {
   auto parts = split(shortcut, kShortcutSeparator);
   for (const auto &part : parts) {
-    if (part == kMeta || part == kControl || part == kAlt || part == kShift) {
+    if (part == kMetaLeft || part == kMetaRight
+        || part == kControlLeft || part == kControlRight
+        || part == kAltLeft || part == kAltRight
+        || part == kShiftLeft || part == kShiftRight) {
       continue;
     }
     auto it = kKeyCodes.find(part);

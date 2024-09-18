@@ -22,23 +22,23 @@ NSString *prefShowIconInMenuBar = @"app.show_icon_in_menu_bar";
 NSString *prefIgnoreApps = @"privacy.ignore_apps";
 
 // Shortcuts.
-NSString *prefOpenAppShortcut = @"app.open_app_shortcut";
-NSString *prefCloseAppShortcut = @"app.close_app_shortcut";
-NSString *prefSelectNextItemShortcut = @"app.select_next_item_shortcut";
-NSString *prefSelectPreviousItemShortcut = @"app.select_previous_item_shortcut";
-NSString *prefPasteSelectedItemToActiveAppShortcut = @"app.paste_selected_item_to_active_app_shortcut";
-NSString *prefEditHistoryItemShortcut = @"app.edit_history_item_shortcut";
-NSString *prefOpenInBrowserShortcut = @"app.open_in_browser_shortcut";
-NSString *prefCopyToClipboardShortcut = @"app.copy_to_clipboard_shortcut";
-NSString *prefDeleteHistoryItemShortcut = @"app.delete_history_item_shortcut";
-NSString *prefClearHistoryShortcut = @"app.clear_history_shortcut";
-NSString *prefSearchHistoryShortcut = @"app.search_history_shortcut";
-NSString *prefTogglePreviewShortcut = @"app.toggle_preview_shortcut";
-NSString *prefShowMoreActionsShortcut = @"app.show_more_actions_shortcut";
-NSString *prefZoomUIInShortcut = @"app.zoom_ui_in_shortcut";
-NSString *prefZoomUIOutShortcut = @"app.zoom_ui_out_shortcut";
-NSString *prefOpenSettingsShortcut = @"app.open_settings_shortcut";
-NSString *prefToggleFavoriteShortcut = @"app.toggle_favorite_shortcut";
+NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
+NSString *prefCloseAppShortcut = @"app.close_app_shortcut2";
+NSString *prefSelectNextItemShortcut = @"app.select_next_item_shortcut2";
+NSString *prefSelectPreviousItemShortcut = @"app.select_previous_item_shortcut2";
+NSString *prefPasteSelectedItemToActiveAppShortcut = @"app.paste_selected_item_to_active_app_shortcut2";
+NSString *prefEditHistoryItemShortcut = @"app.edit_history_item_shortcut2";
+NSString *prefOpenInBrowserShortcut = @"app.open_in_browser_shortcut2";
+NSString *prefCopyToClipboardShortcut = @"app.copy_to_clipboard_shortcut2";
+NSString *prefDeleteHistoryItemShortcut = @"app.delete_history_item_shortcut2";
+NSString *prefClearHistoryShortcut = @"app.clear_history_shortcut2";
+NSString *prefSearchHistoryShortcut = @"app.search_history_shortcut2";
+NSString *prefTogglePreviewShortcut = @"app.toggle_preview_shortcut2";
+NSString *prefShowMoreActionsShortcut = @"app.show_more_actions_shortcut2";
+NSString *prefZoomUIInShortcut = @"app.zoom_ui_in_shortcut2";
+NSString *prefZoomUIOutShortcut = @"app.zoom_ui_out_shortcut2";
+NSString *prefOpenSettingsShortcut = @"app.open_settings_shortcut2";
+NSString *prefToggleFavoriteShortcut = @"app.toggle_favorite_shortcut2";
 
 AppSettingsMac::AppSettingsMac() = default;
 
@@ -218,7 +218,7 @@ std::string AppSettingsMac::getOpenAppShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Shift + Meta + v";
+  return "ShiftLeft + MetaLeft + KeyV";
 }
 
 void AppSettingsMac::saveCloseAppShortcut(std::string shortcut) {
@@ -293,7 +293,7 @@ std::string AppSettingsMac::getEditHistoryItemShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + e";
+  return "MetaLeft + KeyE";
 }
 
 void AppSettingsMac::saveOpenInBrowserShortcut(std::string shortcut) {
@@ -308,7 +308,7 @@ std::string AppSettingsMac::getOpenInBrowserShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Alt + Enter";
+  return "AltLeft + Enter";
 }
 
 void AppSettingsMac::saveCopyToClipboardShortcut(std::string shortcut) {
@@ -323,7 +323,7 @@ std::string AppSettingsMac::getCopyToClipboardShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + c";
+  return "MetaLeft + KeyC";
 }
 
 void AppSettingsMac::saveDeleteHistoryItemShortcut(std::string shortcut) {
@@ -338,7 +338,7 @@ std::string AppSettingsMac::getDeleteHistoryItemShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + Backspace";
+  return "MetaLeft + Backspace";
 }
 
 void AppSettingsMac::saveClearHistoryShortcut(std::string shortcut) {
@@ -353,7 +353,7 @@ std::string AppSettingsMac::getClearHistoryShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Shift + Meta + Backspace";
+  return "ShiftLeft + MetaLeft + Backspace";
 }
 
 void AppSettingsMac::saveSearchHistoryShortcut(std::string shortcut) {
@@ -368,7 +368,7 @@ std::string AppSettingsMac::getSearchHistoryShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + f";
+  return "MetaLeft + KeyF";
 }
 
 void AppSettingsMac::saveTogglePreviewShortcut(std::string shortcut) {
@@ -383,7 +383,7 @@ std::string AppSettingsMac::getTogglePreviewShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + p";
+  return "MetaLeft + KeyP";
 }
 
 void AppSettingsMac::saveShowMoreActionsShortcut(std::string shortcut) {
@@ -398,7 +398,7 @@ std::string AppSettingsMac::getShowMoreActionsShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + a";
+  return "MetaLeft + KeyA";
 }
 
 void AppSettingsMac::saveZoomUIInShortcut(std::string shortcut) {
@@ -413,7 +413,7 @@ std::string AppSettingsMac::getZoomUIInShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + =";
+  return "MetaLeft + Equal";
 }
 
 void AppSettingsMac::saveZoomUIOutShortcut(std::string shortcut) {
@@ -428,7 +428,7 @@ std::string AppSettingsMac::getZoomUIOutShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + -";
+  return "MetaLeft + Minus";
 }
 
 void AppSettingsMac::saveOpenSettingsShortcut(std::string shortcut) {
@@ -443,7 +443,7 @@ std::string AppSettingsMac::getOpenSettingsShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + ,";
+  return "MetaLeft + Comma";
 }
 
 void AppSettingsMac::saveAppsToIgnore(std::string apps) {
@@ -473,5 +473,5 @@ std::string AppSettingsMac::getToggleFavoriteShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Meta + s";
+  return "MetaLeft + KeyS";
 }

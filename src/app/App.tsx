@@ -21,7 +21,7 @@ export default function App() {
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       // Prevent leaving the history items with the tab key.
-      if (e.key === "Tab") {
+      if (e.code === "Tab") {
         e.preventDefault()
       }
       // Close the app window with the close app shortcut.

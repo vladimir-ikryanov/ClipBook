@@ -50,7 +50,7 @@ export default function ShortcutInput(props: ShortcutProps) {
     if (isEditing) {
       e.preventDefault()
       e.stopPropagation()
-      const key = e.key === ' ' ? 'Space' : e.key;
+      const key = e.code
       let keys: string[] = currentKeys;
       // Add the key to the current keys if it's not already there
       if (!currentKeys.includes(key)) {

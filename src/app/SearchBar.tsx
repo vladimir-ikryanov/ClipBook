@@ -20,11 +20,11 @@ export default function SearchBar(props: SearchBarProps) {
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Escape" && props.searchQuery.length > 0) {
+    if (e.code === "Escape" && props.searchQuery.length > 0) {
       handleClearSearch()
       e.stopPropagation()
     }
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+    if (e.code === "ArrowUp" || e.code === "ArrowDown") {
       e.preventDefault()
     }
   }

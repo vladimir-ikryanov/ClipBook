@@ -27,7 +27,7 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
   const [content, setContent] = React.useState(props.item?.content)
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Escape") {
+    if (e.code === "Escape") {
       props.onFinishEditing()
     }
     e.stopPropagation()
