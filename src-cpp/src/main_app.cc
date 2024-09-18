@@ -555,6 +555,18 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getCloseAppShortcut", [this]() -> std::string {
     return settings_->getCloseAppShortcut();
   });
+  window->putProperty("saveCloseAppShortcut2", [this](std::string shortcut) -> void {
+    settings_->saveCloseAppShortcut2(shortcut);
+  });
+  window->putProperty("getCloseAppShortcut2", [this]() -> std::string {
+    return settings_->getCloseAppShortcut2();
+  });
+  window->putProperty("saveCloseAppShortcut3", [this](std::string shortcut) -> void {
+    settings_->saveCloseAppShortcut3(shortcut);
+  });
+  window->putProperty("getCloseAppShortcut3", [this]() -> std::string {
+    return settings_->getCloseAppShortcut3();
+  });
   window->putProperty("saveSelectNextItemShortcut", [this](std::string shortcut) -> void {
     settings_->saveSelectNextItemShortcut(shortcut);
   });

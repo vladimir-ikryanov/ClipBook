@@ -5,6 +5,8 @@ import {useEffect, useState} from "react";
 import * as React from "react";
 import {
   prefGetCloseAppShortcut,
+  prefGetCloseAppShortcut2,
+  prefGetCloseAppShortcut3,
   prefGetZoomUIInShortcut,
   prefGetZoomUIOutShortcut
 } from "@/pref";
@@ -25,7 +27,9 @@ export default function App() {
         e.preventDefault()
       }
       // Close the app window with the close app shortcut.
-      if (isShortcutMatch(prefGetCloseAppShortcut(), e)) {
+      if (isShortcutMatch(prefGetCloseAppShortcut(), e)
+          || isShortcutMatch(prefGetCloseAppShortcut2(), e)
+          || isShortcutMatch(prefGetCloseAppShortcut3(), e)) {
         hideAppWindow()
         e.preventDefault()
       }

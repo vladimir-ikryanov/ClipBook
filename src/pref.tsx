@@ -19,6 +19,10 @@ declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
 declare const saveCloseAppShortcut: (shortcut: string) => void;
 declare const getCloseAppShortcut: () => string;
+declare const saveCloseAppShortcut2: (shortcut: string) => void;
+declare const getCloseAppShortcut2: () => string;
+declare const saveCloseAppShortcut3: (shortcut: string) => void;
+declare const getCloseAppShortcut3: () => string;
 declare const saveSelectNextItemShortcut: (shortcut: string) => void;
 declare const getSelectNextItemShortcut: () => string;
 declare const saveSelectPreviousItemShortcut: (shortcut: string) => void;
@@ -112,6 +116,22 @@ export function prefGetCloseAppShortcut() {
 
 export function prefSetCloseAppShortcut(shortcut: string) {
   saveCloseAppShortcut(shortcut)
+}
+
+export function prefGetCloseAppShortcut2() {
+  return getCloseAppShortcut2()
+}
+
+export function prefSetCloseAppShortcut2(shortcut: string) {
+  saveCloseAppShortcut2(shortcut)
+}
+
+export function prefGetCloseAppShortcut3() {
+  return getCloseAppShortcut3()
+}
+
+export function prefSetCloseAppShortcut3(shortcut: string) {
+  saveCloseAppShortcut3(shortcut)
 }
 
 export function prefGetSelectNextItemShortcut() {

@@ -44,6 +44,12 @@ class AppSettingsMac : public AppSettings {
   void saveCloseAppShortcut(std::string shortcut) override;
   std::string getCloseAppShortcut() override;
 
+  void saveCloseAppShortcut2(std::string shortcut) override;
+  std::string getCloseAppShortcut2() override;
+
+  void saveCloseAppShortcut3(std::string shortcut) override;
+  std::string getCloseAppShortcut3() override;
+
   void saveSelectNextItemShortcut(std::string shortcut) override;
   std::string getSelectNextItemShortcut() override;
 

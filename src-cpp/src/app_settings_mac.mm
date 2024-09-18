@@ -24,6 +24,8 @@ NSString *prefIgnoreApps = @"privacy.ignore_apps";
 // Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
 NSString *prefCloseAppShortcut = @"app.close_app_shortcut2";
+NSString *prefCloseAppShortcut2 = @"app.close_app_shortcut3";
+NSString *prefCloseAppShortcut3 = @"app.close_app_shortcut4";
 NSString *prefSelectNextItemShortcut = @"app.select_next_item_shortcut2";
 NSString *prefSelectPreviousItemShortcut = @"app.select_previous_item_shortcut2";
 NSString *prefPasteSelectedItemToActiveAppShortcut = @"app.paste_selected_item_to_active_app_shortcut2";
@@ -234,6 +236,36 @@ std::string AppSettingsMac::getCloseAppShortcut() {
     return {[shortcut UTF8String]};
   }
   return "Escape";
+}
+
+void AppSettingsMac::saveCloseAppShortcut2(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefCloseAppShortcut2];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getCloseAppShortcut2() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefCloseAppShortcut2];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "MetaLeft + KeyW";
+}
+
+void AppSettingsMac::saveCloseAppShortcut3(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefCloseAppShortcut3];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getCloseAppShortcut3() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefCloseAppShortcut3];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ShiftLeft + MetaLeft + KeyV";
 }
 
 void AppSettingsMac::saveSelectNextItemShortcut(std::string shortcut) {

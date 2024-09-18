@@ -4,6 +4,8 @@ import ShortcutInput from "@/settings/ShortcutInput";
 import {
   prefGetClearHistoryShortcut,
   prefGetCloseAppShortcut,
+  prefGetCloseAppShortcut2,
+  prefGetCloseAppShortcut3,
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
@@ -19,7 +21,7 @@ import {
   prefGetZoomUIInShortcut,
   prefGetZoomUIOutShortcut,
   prefSetClearHistoryShortcut,
-  prefSetCloseAppShortcut,
+  prefSetCloseAppShortcut, prefSetCloseAppShortcut2, prefSetCloseAppShortcut3,
   prefSetCopyToClipboardShortcut,
   prefSetDeleteHistoryItemShortcut,
   prefSetEditHistoryItemShortcut,
@@ -44,6 +46,8 @@ declare const updateOpenSettingsShortcut: () => void;
 export default function Shortcuts() {
   const [openAppShortcut, setOpenAppShortcut] = useState(prefGetOpenAppShortcut());
   const [closeAppShortcut, setCloseAppShortcut] = useState(prefGetCloseAppShortcut());
+  const [closeAppShortcut2, setCloseAppShortcut2] = useState(prefGetCloseAppShortcut2());
+  const [closeAppShortcut3, setCloseAppShortcut3] = useState(prefGetCloseAppShortcut3());
   const [selectNextItemShortcut, setSelectNextItemShortcut] = useState(prefGetSelectNextItemShortcut());
   const [selectPreviousItemShortcut, setSelectPreviousItemShortcut] = useState(prefGetSelectPreviousItemShortcut());
   const [pasteSelectedItemToActiveAppShortcut, setPasteSelectedItemToActiveAppShortcut] = useState(prefGetPasteSelectedItemToActiveAppShortcut());
@@ -81,6 +85,16 @@ export default function Shortcuts() {
   function handleCloseAppShortcutChange(shortcut: string) {
     setCloseAppShortcut(shortcut)
     prefSetCloseAppShortcut(shortcut)
+  }
+
+  function handleCloseAppShortcutChange2(shortcut: string) {
+    setCloseAppShortcut2(shortcut)
+    prefSetCloseAppShortcut2(shortcut)
+  }
+
+  function handleCloseAppShortcutChange3(shortcut: string) {
+    setCloseAppShortcut3(shortcut)
+    prefSetCloseAppShortcut3(shortcut)
   }
 
   function handleSelectNextItemShortcutChange(shortcut: string) {
@@ -193,14 +207,27 @@ export default function Shortcuts() {
             <div className="flex items-center justify-between space-x-20 pt-6">
               <span className="">Open ClipBook</span>
               <ShortcutInput shortcut={openAppShortcut}
-                             defaultShortcut="MetaLeft + ShiftLeft + KeyV"
+                             defaultShortcut="ShiftLeft + MetaLeft + KeyV"
                              onSave={handleOpenAppShortcutChange}/>
             </div>
+            <hr/>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Close ClipBook</span>
+              <span>Close ClipBook</span>
+              <ShortcutInput shortcut={closeAppShortcut3}
+                             defaultShortcut="ShiftLeft + MetaLeft + KeyV"
+                             onSave={handleCloseAppShortcutChange3}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span></span>
+              <ShortcutInput shortcut={closeAppShortcut2} defaultShortcut="MetaLeft + KeyW"
+                             onSave={handleCloseAppShortcutChange2}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span></span>
               <ShortcutInput shortcut={closeAppShortcut} defaultShortcut="Escape"
                              onSave={handleCloseAppShortcutChange}/>
             </div>
+            <hr/>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Select next history item</span>
               <ShortcutInput shortcut={selectNextItemShortcut}
@@ -213,6 +240,7 @@ export default function Shortcuts() {
                              defaultShortcut="ArrowUp"
                              onSave={handleSelectPreviousItemShortcutChange}/>
             </div>
+            <hr/>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Paste selected item to active app</span>
               <ShortcutInput shortcut={pasteSelectedItemToActiveAppShortcut}
@@ -268,6 +296,7 @@ export default function Shortcuts() {
                              defaultShortcut="MetaLeft + KeyA"
                              onSave={handleShowMoreActionsShortcutChange}/>
             </div>
+            <hr/>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Make UI text bigger</span>
               <ShortcutInput shortcut={zoomUIInShortcut} defaultShortcut="MetaLeft + Equal"
@@ -279,6 +308,7 @@ export default function Shortcuts() {
                              defaultShortcut="MetaLeft + Minus"
                              onSave={handleZoomUIOutShortcutChange}/>
             </div>
+            <hr/>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Open Settings</span>
               <ShortcutInput shortcut={openSettingsShortcut}

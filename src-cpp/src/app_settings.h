@@ -48,6 +48,12 @@ class AppSettings {
   virtual void saveCloseAppShortcut(std::string shortcut) = 0;
   virtual std::string getCloseAppShortcut() = 0;
 
+  virtual void saveCloseAppShortcut2(std::string shortcut) = 0;
+  virtual std::string getCloseAppShortcut2() = 0;
+
+  virtual void saveCloseAppShortcut3(std::string shortcut) = 0;
+  virtual std::string getCloseAppShortcut3() = 0;
+
   virtual void saveSelectNextItemShortcut(std::string shortcut) = 0;
   virtual std::string getSelectNextItemShortcut() = 0;
 
