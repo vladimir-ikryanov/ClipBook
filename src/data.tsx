@@ -18,7 +18,7 @@ let filterQuery = "";
 let visibleActiveHistoryItemIndex = 0;
 let visibleHistoryItemsLength = 0;
 let previewVisible = true;
-let infoVisible = false;
+let infoVisible = true;
 let sortType = SortHistoryType.TimeOfLastCopy;
 
 loadSettings()
