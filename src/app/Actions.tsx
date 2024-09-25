@@ -151,6 +151,14 @@ export default function Actions(props: ActionsProps) {
     return getActiveHistoryItem()?.type === ClipType.Link
   }
 
+  function isActiveHistoryItemEditable() {
+    let type = getActiveHistoryItem()?.type;
+    return type === ClipType.Text ||
+        type === ClipType.Link ||
+        type === ClipType.Email ||
+        type === ClipType.Color
+  }
+
   return (
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
@@ -188,13 +196,16 @@ export default function Actions(props: ActionsProps) {
                     </CommandShortcut>
                   </CommandItem>
               }
-              <CommandItem onSelect={handleEditContent}>
-                <Edit3Icon className="mr-2 h-4 w-4"/>
-                <span>Edit Content...</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
-                </CommandShortcut>
-              </CommandItem>
+              {
+                  isActiveHistoryItemEditable() &&
+                  <CommandItem onSelect={handleEditContent}>
+                    <Edit3Icon className="mr-2 h-4 w-4"/>
+                    <span>Edit Content...</span>
+                    <CommandShortcut className="flex flex-row">
+                      <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
+                    </CommandShortcut>
+                  </CommandItem>
+              }
               <CommandItem onSelect={handleToggleFavorite}>
                 {
                   getActiveHistoryItem()?.favorite ?
