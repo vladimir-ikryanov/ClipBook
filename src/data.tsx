@@ -139,10 +139,26 @@ function hasItem(item: Clip): number {
   return -1;
 }
 
+export function isTextItem(item: Clip): boolean {
+  return item.type === ClipType.Text ||
+      item.type === ClipType.Link ||
+      item.type === ClipType.Email ||
+      item.type === ClipType.Color
+}
+
+function findItem(content: string, imageFileName: string): Clip | undefined {
+  if (imageFileName.length > 0) {
+    return findItemByImageFileName(imageFileName)
+  }
+  return findItemByContent(content)
+}
+
 function findItemByContent(content: string): Clip | undefined {
   for (let i = 0; i < history.length; i++) {
-    if (history[i].content === content) {
-      return history[i]
+    if (isTextItem(history[i])) {
+      if (history[i].content === content) {
+        return history[i]
+      }
     }
   }
   return undefined
@@ -150,8 +166,10 @@ function findItemByContent(content: string): Clip | undefined {
 
 export function findItemByImageFileName(imageFileName: string): Clip | undefined {
   for (let i = 0; i < history.length; i++) {
-    if (history[i].imageFileName === imageFileName) {
-      return history[i]
+    if (history[i].type === ClipType.Image) {
+      if (history[i].imageFileName === imageFileName) {
+        return history[i]
+      }
     }
   }
   return undefined
@@ -189,8 +207,7 @@ export async function addHistoryItem(content: string,
                                      imageWidth: number,
                                      imageHeight: number,
                                      imageSizeInBytes: number): Promise<Clip[]> {
-  let item = imageFileName.length > 0 ?
-      findItemByImageFileName(imageFileName) : findItemByContent(content)
+  let item = findItem(content, imageFileName)
   if (item) {
     item.numberOfCopies++
     item.lastTimeCopy = new Date()

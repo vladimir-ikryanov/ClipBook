@@ -607,6 +607,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getCopyToClipboardShortcut", [this]() -> std::string {
     return settings_->getCopyToClipboardShortcut();
   });
+  window->putProperty("saveCopyTextFromImageShortcut", [this](std::string shortcut) -> void {
+    settings_->saveCopyTextFromImageShortcut(shortcut);
+  });
+  window->putProperty("getCopyTextFromImageShortcut", [this]() -> std::string {
+    return settings_->getCopyTextFromImageShortcut();
+  });
   window->putProperty("saveDeleteHistoryItemShortcut", [this](std::string shortcut) -> void {
     settings_->saveDeleteHistoryItemShortcut(shortcut);
   });

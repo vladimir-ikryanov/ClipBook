@@ -72,6 +72,9 @@ class AppSettings {
   virtual void saveCopyToClipboardShortcut(std::string shortcut) = 0;
   virtual std::string getCopyToClipboardShortcut() = 0;
 
+  virtual void saveCopyTextFromImageShortcut(std::string shortcut) = 0;
+  virtual std::string getCopyTextFromImageShortcut() = 0;
+
   virtual void saveDeleteHistoryItemShortcut(std::string shortcut) = 0;
   virtual std::string getDeleteHistoryItemShortcut() = 0;
 

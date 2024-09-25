@@ -29,6 +29,7 @@ type HistoryItemListPaneProps = {
   onSearchHistory: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
+  onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
   onOpenSettings: () => void
   onDeleteItem: () => void
@@ -111,6 +112,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
                   onHideActions={props.onHideActions}
                   onEditContent={props.onEditContent}
                   onCopyToClipboard={props.onCopyToClipboard}
+                  onCopyTextFromImage={props.onCopyTextFromImage}
                   onOpenInBrowser={props.onOpenInBrowser}
                   onOpenSettings={props.onOpenSettings}
                   onSearchHistory={props.onSearchHistory}

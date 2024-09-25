@@ -23,7 +23,7 @@ import {
   CommandShortcut,
 } from "@/components/ui/command"
 import {
-  prefGetClearHistoryShortcut,
+  prefGetClearHistoryShortcut, prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
@@ -45,6 +45,7 @@ export type HideActionsReason =
     | "paste"
     | "editContent"
     | "copyToClipboard"
+    | "copyTextFromImage"
     | "openInBrowser"
     | "openSettings"
     | "deleteItem"
@@ -59,6 +60,7 @@ type ActionsProps = {
   onPaste: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
+  onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
   onOpenSettings: () => void
   onDeleteItem: () => void
@@ -147,8 +149,19 @@ export default function Actions(props: ActionsProps) {
     props.onOpenInBrowser()
   }
 
+  function handleCopyTextFromImage() {
+    closeReason = "copyTextFromImage"
+    handleOpenChange(false)
+    props.onCopyTextFromImage()
+  }
+
   function isActiveHistoryItemIsUrl() {
     return getActiveHistoryItem()?.type === ClipType.Link
+  }
+
+  function canCopyTextFromImage() {
+    let item = getActiveHistoryItem()
+    return item?.type === ClipType.Image && item?.content.length > 0
   }
 
   function isActiveHistoryItemEditable() {
@@ -193,6 +206,16 @@ export default function Actions(props: ActionsProps) {
                     <span>Open in Browser</span>
                     <CommandShortcut className="flex flex-row">
                       <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
+                    </CommandShortcut>
+                  </CommandItem>
+              }
+              {
+                  canCopyTextFromImage() &&
+                  <CommandItem onSelect={handleCopyTextFromImage}>
+                    <CopyIcon className="mr-2 h-4 w-4"/>
+                    <span>Copy Text from Image</span>
+                    <CommandShortcut className="flex flex-row">
+                      <ShortcutLabel shortcut={prefGetCopyTextFromImageShortcut()}/>
                     </CommandShortcut>
                   </CommandItem>
               }

@@ -35,6 +35,8 @@ declare const saveOpenInBrowserShortcut: (shortcut: string) => void;
 declare const getOpenInBrowserShortcut: () => string;
 declare const saveCopyToClipboardShortcut: (shortcut: string) => void;
 declare const getCopyToClipboardShortcut: () => string;
+declare const saveCopyTextFromImageShortcut: (shortcut: string) => void;
+declare const getCopyTextFromImageShortcut: () => string;
 declare const saveDeleteHistoryItemShortcut: (shortcut: string) => void;
 declare const getDeleteHistoryItemShortcut: () => string;
 declare const saveClearHistoryShortcut: (shortcut: string) => void;
@@ -272,4 +274,12 @@ export function prefGetAppsToIgnore(): string[] {
 
 export function prefSetAppsToIgnore(apps: string[]) {
   setAppsToIgnore(apps.join(","))
+}
+
+export function prefGetCopyTextFromImageShortcut() {
+  return getCopyTextFromImageShortcut()
+}
+
+export function prefSetCopyTextFromImageShortcut(shortcut: string) {
+  saveCopyTextFromImageShortcut(shortcut)
 }

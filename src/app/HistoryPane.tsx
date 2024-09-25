@@ -16,7 +16,7 @@ import {
   getPreviewVisibleState,
   getVisibleActiveHistoryItemIndex,
   getVisibleHistoryItemsLength,
-  isHistoryEmpty,
+  isHistoryEmpty, isTextItem,
   setFilterQuery,
   setPreviewVisibleState,
   setVisibleActiveHistoryItemIndex,
@@ -24,7 +24,7 @@ import {
 } from "@/data";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {
-  prefGetClearHistoryShortcut,
+  prefGetClearHistoryShortcut, prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
@@ -185,6 +185,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
         handleCopyToClipboard()
         e.preventDefault()
       }
+      // Copy text from the active item (image) when the copy text from image shortcut is pressed.
+      if (isShortcutMatch(prefGetCopyTextFromImageShortcut(), e)) {
+        handleCopyTextFromImage()
+        e.preventDefault()
+      }
       // Clear the history when the clear history shortcut is pressed.
       if (isShortcutMatch(prefGetClearHistoryShortcut(), e)) {
         handleDeleteAllItems()
@@ -277,6 +282,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleEditContent() {
+    let item = getActiveHistoryItem()
+    if (!isTextItem(item)) {
+      return
+    }
     if (!isPreviewVisible()) {
       handleTogglePreview()
     }
@@ -290,6 +299,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
   function handleCopyToClipboard() {
     copyToClipboard(getActiveHistoryItem().content)
     hideAppWindow()
+  }
+
+  function handleCopyTextFromImage() {
+    let item = getActiveHistoryItem()
+    if (item.type === ClipType.Image) {
+      copyToClipboard(item.content)
+    }
   }
 
   function handleOpenInBrowser() {
@@ -418,6 +434,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onHideClipDropdownMenu={handleHideClipDropdownMenu}
                               onEditContent={handleEditContent}
                               onCopyToClipboard={handleCopyToClipboard}
+                              onCopyTextFromImage={handleCopyTextFromImage}
                               onOpenInBrowser={handleOpenInBrowser}
                               onOpenSettings={handleOpenSettings}
                               onSearchHistory={handleSearchHistory}

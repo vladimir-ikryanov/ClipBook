@@ -20,6 +20,7 @@ type ActionsBarProps = {
   onSearchHistory: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
+  onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
   onOpenSettings: () => void
   onDeleteItem: () => void
@@ -49,6 +50,7 @@ export default function ActionsBar(props: ActionsBarProps) {
                    onHideActions={props.onHideActions}
                    onEditContent={props.onEditContent}
                    onCopyToClipboard={props.onCopyToClipboard}
+                   onCopyTextFromImage={props.onCopyTextFromImage}
                    onOpenInBrowser={props.onOpenInBrowser}
                    onOpenSettings={props.onOpenSettings}
                    onPaste={props.onPaste}
