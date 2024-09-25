@@ -460,6 +460,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("copyToClipboard", [this](std::string text) {
     copyToClipboard(text);
   });
+  window->putProperty("deleteImage", [this](std::string imageFileName) {
+    deleteImage(std::move(imageFileName));
+  });
   window->putProperty("openInBrowser", [this](std::string url) {
     app_->desktop()->openUrl(url);
   });
@@ -770,4 +773,15 @@ void MainApp::selectAppsToIgnore() {
       }
     }
   });
+}
+
+std::string MainApp::getImagesDir() {
+  return app_->profile()->path() + "/images";
+}
+
+void MainApp::deleteImage(const std::string &imageFileName) {
+  std::string filePath = getImagesDir() + "/" + imageFileName;
+  if (fs::exists(filePath)) {
+      fs::remove(filePath);
+  }
 }

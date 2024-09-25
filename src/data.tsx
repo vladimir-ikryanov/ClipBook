@@ -1,4 +1,4 @@
-import {addClip, Clip, deleteAllClips, deleteClip, getAllClips, updateClip} from "@/db";
+import {addClip, Clip, ClipType, deleteAllClips, deleteClip, getAllClips, updateClip} from "@/db";
 
 export type HistoryItem = {
   content: string
@@ -148,6 +148,15 @@ function findItemByContent(content: string): Clip | undefined {
   return undefined
 }
 
+function findItemByImageFileName(imageFileName: string): Clip | undefined {
+  for (let i = 0; i < history.length; i++) {
+    if (history[i].imageFileName === imageFileName) {
+      return history[i]
+    }
+  }
+  return undefined
+}
+
 async function deleteItem(item: Clip) {
   let index = hasItem(item);
   if (index !== -1) {
@@ -173,14 +182,25 @@ export function isHistoryEmpty() {
   return history.length === 0
 }
 
-export async function addHistoryItem(content: string, sourceAppPath: string): Promise<Clip[]> {
-  let item = findItemByContent(content);
+export async function addHistoryItem(content: string,
+                                     sourceAppPath: string,
+                                     imageFileName: string,
+                                     imageThumbFileName: string,
+                                     imageWidth: number,
+                                     imageHeight: number,
+                                     imageSizeInBytes: number): Promise<Clip[]> {
+  let item = imageFileName.length > 0 ?
+      findItemByImageFileName(imageFileName) : findItemByContent(content)
   if (item) {
     item.numberOfCopies++
     item.lastTimeCopy = new Date()
     await updateClip(item.id!, item)
   } else {
-    item = new Clip(content, sourceAppPath)
+    item = new Clip(content, sourceAppPath, imageFileName)
+    item.imageWidth = imageWidth
+    item.imageHeight = imageHeight
+    item.imageSizeInBytes = imageSizeInBytes
+    item.imageThumbFileName = imageThumbFileName
     await addClip(item)
     history.push(item)
   }

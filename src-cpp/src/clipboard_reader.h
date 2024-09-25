@@ -3,24 +3,30 @@
 
 #include "main_app.h"
 
-#include "molybden.hpp"
+struct ImageInfo {
+  int width = 0;
+  int height = 0;
+  unsigned long size_in_bytes = 0;
+  std::string file_name;
+  std::string thumb_file_name;
+};
 
-using namespace molybden;
+struct ClipboardData {
+  AppInfo active_app_info;
+  std::string content;
+  ImageInfo image_info;
+};
 
 class ClipboardReader {
  public:
-  static std::shared_ptr<ClipboardReader> create(const std::shared_ptr<MainApp> &app);
-
   void start();
 
- private:
+ protected:
   explicit ClipboardReader(const std::shared_ptr<MainApp> &app);
 
-  bool readClipboardData(const std::shared_ptr<ClipboardDataType> &type);
+  virtual bool readClipboardData(ClipboardData &data) = 0;
 
   std::shared_ptr<MainApp> app_;
-  std::string data_;
-  AppInfo active_app_info_;
 };
 
 #endif // CLIPBOOK_CLIPBOARD_READER_H_

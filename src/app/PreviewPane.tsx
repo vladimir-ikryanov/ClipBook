@@ -1,7 +1,7 @@
 import '../app.css';
 import React from "react";
 import PreviewToolBar from "@/app/PreviewToolBar";
-import {Clip} from "@/db";
+import {Clip, ClipType} from "@/db";
 import {getClipType} from "@/lib/utils";
 import InfoPane from "@/app/InfoPane";
 import {getInfoVisibleState, setInfoVisibleState} from "@/data";
@@ -47,6 +47,25 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
     setInfoVisibleState(visible)
   }
 
+  function renderTextArea() {
+    return (
+        <textarea id='preview'
+                  ref={props.previewTextareaRef}
+                  className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text-sm"
+                  value={props.item.content}
+                  onChange={handleOnChange}
+                  onKeyDown={handleKeyDown}/>
+    )
+  }
+
+  function renderImage() {
+    return (
+        <div className="flex flex-grow m-0 bg-secondary items-center justify-center outline-none resize-none overflow-hidden">
+          <img src={"clipbook://images/" + props.item.imageFileName} alt={props.item.content} className="max-h-full max-w-full object-contain"/>
+        </div>
+    )
+  }
+
   if (!props.item) {
     return <div
         className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]"></div>
@@ -70,12 +89,7 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
                         onCopyToClipboard={props.onCopyToClipboard}
                         onOpenInBrowser={props.onOpenInBrowser}
                         onDeleteItem={props.onDeleteItem}/>
-        <textarea id='preview'
-                  ref={props.previewTextareaRef}
-                  className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text-sm"
-                  value={props.item.content}
-                  onChange={handleOnChange}
-                  onKeyDown={handleKeyDown}/>
+        {props.item.type === ClipType.Image ? renderImage() : renderTextArea()}
         <InfoPane item={props.item} display={displayInfo}/>
       </div>
   )

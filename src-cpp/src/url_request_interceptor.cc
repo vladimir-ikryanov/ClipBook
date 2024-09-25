@@ -1032,16 +1032,30 @@ void UrlRequestInterceptor::intercept(const molybden::InterceptUrlRequestArgs &a
                                       molybden::InterceptUrlRequestAction action) {
   URL url(args.request.url);
 
-  auto url_path = url.pathItems();
+  auto host = url.host();
+
   fs::path file_path;
-  fs::path resources_dir = args.network->profile()->app()->getPath(molybden::PathKey::kAppResources);
-  if (url_path.empty() || isRoutingPage(url.string())) {
-    file_path = resources_dir.append("index.html");
-  } else {
-    for (const auto& path_item : url_path) {
-      resources_dir.append(path_item);
+  auto url_path = url.pathItems();
+
+  if (host == "app") {
+    fs::path resources_dir = args.network->profile()->app()->getPath(molybden::PathKey::kAppResources);
+    if (url_path.empty() || isRoutingPage(url.string())) {
+      file_path = resources_dir.append("index.html");
+    } else {
+      for (const auto& path_item : url_path) {
+        resources_dir.append(path_item);
+      }
+      file_path = resources_dir;
     }
-    file_path = resources_dir;
+  }
+
+  if (host == "images") {
+    fs::path profile_dir = args.network->profile()->path();
+    fs::path images_dir = profile_dir.append("images");
+    for (const auto& path_item : url_path) {
+      images_dir.append(path_item);
+    }
+    file_path = images_dir;
   }
 
   if (!fs::exists(file_path) || fs::is_directory(file_path)) {

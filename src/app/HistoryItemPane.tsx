@@ -5,7 +5,7 @@ import {getFilterQuery} from "@/data";
 import {Clip, ClipType} from "@/db";
 import {toCSSColor} from "@/lib/utils";
 import {
-  FileIcon,
+  FileIcon, ImageIcon,
   LinkIcon,
   MailIcon,
   StarIcon
@@ -68,6 +68,9 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     if (props.item.type === ClipType.Email) {
       return <MailIcon className="h-5 w-5"/>
     }
+    if (props.item.type === ClipType.Image) {
+      return <img src={"clipbook://images/" + props.item.imageThumbFileName} alt={props.item.imageThumbFileName} className="h-5 w-5"/>
+    }
     return <FileIcon className="h-5 w-5"/>
   }
 
@@ -111,6 +114,13 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     }</span>
   }
 
+  function getItemLabel() {
+    if (props.item.type === ClipType.Image) {
+      return "Image (" + props.item.imageWidth + "x" + props.item.imageHeight + ")";
+    }
+    return props.item.content;
+  }
+
   return (
       <TabsTrigger
           id={`tab-${props.index}`}
@@ -126,7 +136,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
         <div
             className="flex-grow text-base text-justify font-normal whitespace-nowrap overflow-hidden overflow-ellipsis">
           {
-            highlightAllMatches(props.item.content, getFilterQuery())
+            highlightAllMatches(getItemLabel(), getFilterQuery())
           }
         </div>
         {renderActionsButton()}

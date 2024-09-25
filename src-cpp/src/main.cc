@@ -6,7 +6,7 @@
 #include "main_app_win.h"
 #endif
 
-#include "clipboard_reader.h"
+#include "clipboard_reader_mac.h"
 #include "welcome_window.h"
 #include "url_request_interceptor.h"
 
@@ -24,7 +24,7 @@ std::string getHomeDirectory() {
 void launch() {
   AppOptions options;
   // Configure logging.
-  options.logging.enabled = false;
+  options.logging.enabled = true;
   options.logging.log_level = LogLevel::kError;
   options.logging.destination = Destination::kFile;
   options.logging.log_file = getHomeDirectory() + "/Library/Application Support/ClipBook/clipbook.log";
@@ -47,6 +47,6 @@ void launch() {
       welcome_window->show();
     }
     main_app->launch();
-    ClipboardReader::create(main_app)->start();
+    ClipboardReaderMac::create(main_app)->start();
   });
 }

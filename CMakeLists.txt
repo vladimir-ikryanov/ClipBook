@@ -16,6 +16,8 @@ set(APP_SOURCES
         src-cpp/src/clipboard_reader.cc
         src-cpp/src/url.h
         src-cpp/src/url.cc
+        src-cpp/src/utils.h
+        src-cpp/src/utils.cc
         src-cpp/src/url_request_interceptor.h
         src-cpp/src/url_request_interceptor.cc
         src-cpp/src/welcome_window.h
@@ -37,6 +39,8 @@ if (OS_MAC)
             src-cpp/src/main_app_mac.mm
             src-cpp/src/app_settings_mac.h
             src-cpp/src/app_settings_mac.mm
+            src-cpp/src/clipboard_reader_mac.h
+            src-cpp/src/clipboard_reader_mac.mm
     )
 endif ()
 

@@ -6,13 +6,17 @@ import HistoryItemsPane from "@/app/HistoryItemsPane";
 import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
-  addHistoryItem, clear,
+  addHistoryItem,
+  clear,
   deleteHistoryItem,
-  getActiveHistoryItem, getHistoryItemIndex,
+  getActiveHistoryItem,
+  getHistoryItemIndex,
   getHistoryItems,
   getPreviewVisibleState,
   getVisibleActiveHistoryItemIndex,
-  getVisibleHistoryItemsLength, isHistoryEmpty, setFilterQuery,
+  getVisibleHistoryItemsLength,
+  isHistoryEmpty,
+  setFilterQuery,
   setPreviewVisibleState,
   setVisibleActiveHistoryItemIndex,
   updateHistoryItem
@@ -23,23 +27,26 @@ import {
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
-  prefGetOpenInBrowserShortcut, prefGetOpenSettingsShortcut,
+  prefGetOpenInBrowserShortcut,
+  prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
-  prefGetShowMoreActionsShortcut, prefGetToggleFavoriteShortcut,
+  prefGetShowMoreActionsShortcut,
+  prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
 import {HideActionsReason} from "@/app/Actions";
 import {FixedSizeList as List} from "react-window";
-import {Clip} from "@/db";
+import {Clip, ClipType} from "@/db";
 import {isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
 
 declare const pasteInFrontApp: (text: string) => void;
 declare const copyToClipboard: (text: string) => void;
+declare const deleteImage: (imageFileName: string) => void;
 declare const clearEntireHistory: () => void;
 declare const hideAppWindow: () => void;
 declare const openInBrowser: (url: string) => void;
@@ -63,10 +70,17 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
   const [historyItem, setHistoryItem] = useState(history[getVisibleActiveHistoryItemIndex()]);
 
-  async function addClipboardData(content: string, sourceAppPath: string) {
+  async function addClipboardData(content: string,
+                                  sourceAppPath: string,
+                                  imageFileName: string,
+                                  imageThumbFileName: string,
+                                  imageWidth: number,
+                                  imageHeight: number,
+                                  imageSizeInBytes: number) {
     let selectedItem = getActiveHistoryItem();
 
-    let clips = await addHistoryItem(content, sourceAppPath)
+    let clips = await addHistoryItem(
+        content, sourceAppPath, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes)
     setHistory([...clips])
 
     let selectedItemIndex = getHistoryItemIndex(selectedItem);
@@ -294,6 +308,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
       }
     }
     await deleteHistoryItem(itemToDelete)
+    if (itemToDelete.type === ClipType.Image) {
+      deleteImage(itemToDelete.imageFileName!)
+      deleteImage(itemToDelete.imageThumbFileName!)
+    }
     // If the history is not empty, update the preview text to the new active item.
     let items = getHistoryItems();
     if (items.length > 0) {

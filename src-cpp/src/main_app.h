@@ -21,6 +21,8 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void resume();
   bool isPaused() const;
 
+  std::string getImagesDir();
+
   virtual bool init();
   virtual void launch();
 
@@ -58,6 +60,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void createTray();
   void destroyTray();
   void initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &window);
+  void deleteImage(const std::string &imageFileName);
 
   virtual void enableOpenAppShortcut() = 0;
   virtual void disableOpenAppShortcut() = 0;

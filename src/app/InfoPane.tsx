@@ -30,6 +30,9 @@ export default function InfoPane(props: InfoPaneProps) {
     if (props.item.type === ClipType.Email) {
       return "Email"
     }
+    if (props.item.type === ClipType.Image) {
+      return "Image"
+    }
     return "Text"
   }
 

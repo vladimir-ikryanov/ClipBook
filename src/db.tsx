@@ -5,7 +5,8 @@ export enum ClipType {
   Text,
   Link,
   Email,
-  Color
+  Color,
+  Image
 }
 
 export class Clip {
@@ -17,11 +18,17 @@ export class Clip {
   firstTimeCopy: Date = new Date();
   lastTimeCopy: Date = new Date();
   numberOfCopies: number = 1;
+  imageFileName?: string;
+  imageThumbFileName?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  imageSizeInBytes?: number;
 
-  constructor(content: string, sourceApp: string) {
+  constructor(content: string, sourceApp: string, imageFileName?: string) {
     this.content = content;
     this.sourceApp = sourceApp;
-    this.type = getClipType(content);
+    this.imageFileName = imageFileName;
+    this.type = imageFileName ? ClipType.Image : getClipType(content);
   }
 }
 
@@ -31,7 +38,7 @@ class AppDatabase extends Dexie {
   constructor() {
     super('ClipBookDB');
     this.version(1).stores({
-      history: '++id, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies'
+      history: '++id, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes'
     });
   }
 }
