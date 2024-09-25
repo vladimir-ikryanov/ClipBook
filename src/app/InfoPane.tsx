@@ -40,12 +40,35 @@ export default function InfoPane(props: InfoPaneProps) {
     return date.toDateString() + " at " + date.toLocaleTimeString()
   }
 
+  function isImage() {
+    return props.item.type === ClipType.Image
+  }
+
+  function getImageDimensionsLabel() {
+    return props.item.imageWidth + "x" + props.item.imageHeight
+  }
+
+  function getImageSizeLabel() {
+    let imageSizeInBytes = props.item.imageSizeInBytes;
+    if (!imageSizeInBytes) {
+      return "Unknown"
+    }
+    if (imageSizeInBytes < 1024) {
+      return imageSizeInBytes + " bytes"
+    }
+    if (imageSizeInBytes < 1024 * 1024) {
+      return (imageSizeInBytes / 1024).toFixed(2) + " KB"
+    }
+    return (imageSizeInBytes / 1024 / 1024).toFixed(2) + " MB"
+  }
+
   if (!props.display || !props.item) {
     return <div></div>
   }
 
   return (
-      <div className="flex flex-col w-full p-4 border-t-solid border-t-preview-border border-t space-y-2 text-sm">
+      <div
+          className="flex flex-col w-full p-4 border-t-solid border-t-preview-border border-t space-y-2 text-sm">
         <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
           <div className="flex-none text-preview-infoLabel font-semibold">Application</div>
           <div className="flex-grow"></div>
@@ -64,6 +87,22 @@ export default function InfoPane(props: InfoPaneProps) {
           <div className="flex-grow"></div>
           <div className="flex-none text-foreground">{getType()}</div>
         </div>
+        {
+            isImage() &&
+            <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+              <div className="flex-none text-preview-infoLabel font-semibold">Image dimensions</div>
+              <div className="flex-grow"></div>
+              <div className="flex-none text-foreground">{getImageDimensionsLabel()}</div>
+            </div>
+        }
+        {
+            isImage() &&
+            <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+              <div className="flex-none text-preview-infoLabel font-semibold">Image size</div>
+              <div className="flex-grow"></div>
+              <div className="flex-none text-foreground">{getImageSizeLabel()}</div>
+            </div>
+        }
         <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
           <div className="flex-none text-preview-infoLabel font-semibold">Number of copies</div>
           <div className="flex-grow"></div>
