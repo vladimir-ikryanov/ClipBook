@@ -9,6 +9,7 @@ import {
   addHistoryItem,
   clear,
   deleteHistoryItem,
+  findItemByImageFileName,
   getActiveHistoryItem,
   getHistoryItemIndex,
   getHistoryItems,
@@ -69,6 +70,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
   const [historyItem, setHistoryItem] = useState(history[getVisibleActiveHistoryItemIndex()]);
+
+  async function setTextFromImage(imageFileName: string, text: string) {
+    let clip = findItemByImageFileName(imageFileName)
+    if (clip) {
+      clip.content = text
+      await updateHistoryItem(clip.id!, clip)
+    }
+  }
 
   async function addClipboardData(content: string,
                                   sourceAppPath: string,
@@ -365,6 +374,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   (window as any).addClipboardData = addClipboardData;
+  (window as any).setTextFromImage = setTextFromImage;
   (window as any).clearHistory = clearHistory;
   (window as any).activateApp = activateApp;
 

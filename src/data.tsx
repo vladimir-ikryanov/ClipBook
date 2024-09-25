@@ -148,7 +148,7 @@ function findItemByContent(content: string): Clip | undefined {
   return undefined
 }
 
-function findItemByImageFileName(imageFileName: string): Clip | undefined {
+export function findItemByImageFileName(imageFileName: string): Clip | undefined {
   for (let i = 0; i < history.length; i++) {
     if (history[i].imageFileName === imageFileName) {
       return history[i]

@@ -1,12 +1,58 @@
 #include "clipboard_reader_mac.h"
 
 #import <Cocoa/Cocoa.h>
+#import <Vision/Vision.h>
 
 #include <filesystem>
 
 #include "utils.h"
 
 namespace fs = std::filesystem;
+
+void extractTextFromImage(NSImage *image, const std::string& imageFileName, const std::shared_ptr<MainApp>& app, ClipboardData &data) {
+  // Convert NSImage to CGImage
+  CGImageRef cgImage = [image CGImageForProposedRect:nullptr context:nil hints:nil];
+  if (cgImage == nil) {
+    return;
+  }
+
+  // Create a VNImageRequestHandler with the CGImage
+  VNImageRequestHandler *handler = [[VNImageRequestHandler alloc] initWithCGImage:cgImage options:@{}];
+
+  // Create a text recognition request
+  VNRecognizeTextRequest *textRequest = [[VNRecognizeTextRequest alloc] initWithCompletionHandler:^(
+      VNRequest *request,
+      NSError *_Nullable error) {
+    if (error != nil) {
+      return;
+    }
+
+    // Process the text recognition results
+    std::string content;
+    NSArray *observations = request.results;
+    for (VNRecognizedTextObservation *observation in observations) {
+      VNRecognizedText *recognizedText = [[observation topCandidates:1] firstObject];
+      if (recognizedText != nil) {
+        NSString *string = recognizedText.string;
+        content += [string UTF8String];
+        content += "\n";
+      }
+    }
+
+    if (content.empty()) {
+      return;
+    }
+
+    data.content = content;
+
+    auto js_window = app->browser()->mainFrame()->executeJavaScript("window");
+    js_window.asJsObject()->call("setTextFromImage", imageFileName, content);
+  }];
+
+  // Perform the request
+  NSError *error = nil;
+  [handler performRequests:@[textRequest] error:&error];
+}
 
 NSImage *createThumbnail(NSImage *image, int width, int height) {
   // Get the original image dimensions
@@ -164,9 +210,6 @@ bool ClipboardReaderMac::readClipboardData(ClipboardData &data) {
   }
 
   // Read image content.
-  // TODO: Do not save duplicated images.
-  // ✓ TODO: Do not save image when copy file.
-  // ✓ TODO: Don't convert to PNG when copy JPEG?
   if ([types containsObject:NSPasteboardTypePNG]) {
     // Make sure the images directory exists.
     fs::path imagesDir = app_->getImagesDir();
@@ -209,10 +252,13 @@ bool ClipboardReaderMac::readClipboardData(ClipboardData &data) {
     NSString *thumbnail_path = [images_dir stringByAppendingPathComponent:thumbnail_filename];
     [thumbnail_png_data writeToFile:thumbnail_path atomically:YES];
     data.image_info.thumb_file_name = [thumbnail_filename UTF8String];
+    [thumbnail release];
+
+    // Extract text from image.
+    extractTextFromImage(image, [image_filename UTF8String], app_, data);
 
     // Release resources.
     [image release];
-    [thumbnail release];
 
     return true;
   }
