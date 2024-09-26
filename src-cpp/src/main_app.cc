@@ -454,11 +454,11 @@ void MainApp::showSettingsWindow() {
 }
 
 void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &window) {
-  window->putProperty("pasteInFrontApp", [this](std::string text) {
-    paste(text);
+  window->putProperty("pasteInFrontApp", [this](std::string text, std::string imageFileName) {
+    paste(text, imageFileName);
   });
-  window->putProperty("copyToClipboard", [this](std::string text) {
-    copyToClipboard(text);
+  window->putProperty("copyToClipboard", [this](std::string text, std::string imageFileName) {
+    copyToClipboard(text, imageFileName);
   });
   window->putProperty("deleteImage", [this](std::string imageFileName) {
     deleteImage(std::move(imageFileName));

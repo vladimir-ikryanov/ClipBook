@@ -4,9 +4,13 @@
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
 
+#include <filesystem>
+
 #define KEY_CODE_V ((CGKeyCode)9)
 
 using namespace molybden;
+
+namespace fs = std::filesystem;
 
 /*
  * I have to use the deprecated LaunchServices functions for managing login items,
@@ -274,22 +278,34 @@ void MainAppMac::paste() {
   CFRelease(source);
 }
 
-void MainAppMac::paste(const std::string &text) {
+void MainAppMac::paste(const std::string &text, const std::string &imageFileName) {
   if (!isAccessibilityAccessGranted()) {
-    showAccessibilityAccessDialog(text);
+    showAccessibilityAccessDialog(text, imageFileName);
     return;
   }
   // Hide the browser window and activate the previously active app.
   hide();
-  copyToClipboard(text);
+  copyToClipboard(text, imageFileName);
   paste();
 }
 
-void MainAppMac::copyToClipboard(const std::string &text) {
-  // Clear the pasteboard and set the new text.
+void MainAppMac::copyToClipboard(const std::string &text, const std::string &imageFileName) {
   auto pasteboard = [NSPasteboard generalPasteboard];
+  // Clear the pasteboard and set the new text.
   [pasteboard clearContents];
-  [pasteboard setString:[NSString stringWithUTF8String:text.c_str()] forType:NSPasteboardTypeString];
+  // Set the image data if the image file name is not empty.
+  if (!imageFileName.empty()) {
+    fs::path imagesDir = getImagesDir();
+    auto imageFilePath = [NSString stringWithUTF8String:imagesDir.append(imageFileName).c_str()];
+    NSImage *image = [[NSImage alloc] initWithContentsOfFile:imageFilePath];
+    if (image) {
+      NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithData:[image TIFFRepresentation]];
+      NSData *data = [imageRep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+      [pasteboard setData:data forType:NSPasteboardTypePNG];
+    }
+  } else {
+    [pasteboard setString:[NSString stringWithUTF8String:text.c_str()] forType:NSPasteboardTypeString];
+  }
 }
 
 std::string MainAppMac::getUpdateServerUrl() {
@@ -477,7 +493,7 @@ bool MainAppMac::isAccessibilityAccessGranted() {
   return AXIsProcessTrusted();
 }
 
-void MainAppMac::showAccessibilityAccessDialog(const std::string &text) {
+void MainAppMac::showAccessibilityAccessDialog(const std::string &text, const std::string &imageFileName) {
   MessageDialogOptions options;
   options.message = "Accessibility access required";
   options.informative_text = "ClipBook needs accessibility access to paste directly into other apps.";
@@ -487,7 +503,7 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text) {
       MessageDialogButton("Cancel", MessageDialogButtonType::kCancel)
   };
   auto_hide_disabled_ = true;
-  MessageDialog::show(app_window_, options, [this, text](const MessageDialogResult &result) {
+  MessageDialog::show(app_window_, options, [this, text, imageFileName](const MessageDialogResult &result) {
     auto_hide_disabled_ = false;
     if (result.button.type == MessageDialogButtonType::kDefault) {
       hide();
@@ -495,7 +511,7 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text) {
     }
     if (result.button.type == MessageDialogButtonType::kNone) {
       hide();
-      copyToClipboard(text);
+      copyToClipboard(text, imageFileName);
     }
   });
 }

@@ -45,8 +45,8 @@ import {isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
 
-declare const pasteInFrontApp: (text: string) => void;
-declare const copyToClipboard: (text: string) => void;
+declare const pasteInFrontApp: (text: string, imageFileName: string) => void;
+declare const copyToClipboard: (text: string, imageFileName: string) => void;
 declare const deleteImage: (imageFileName: string) => void;
 declare const clearEntireHistory: () => void;
 declare const hideAppWindow: () => void;
@@ -240,7 +240,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handlePaste(): void {
-    pasteInFrontApp(getActiveHistoryItem().content)
+    let item = getActiveHistoryItem();
+    pasteInFrontApp(item.content, item.imageFileName ? item.imageFileName : "")
     // Clear the search query in the search field after paste.
     handleSearchQueryChange("")
   }
@@ -297,14 +298,15 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleCopyToClipboard() {
-    copyToClipboard(getActiveHistoryItem().content)
+    let item = getActiveHistoryItem();
+    copyToClipboard(item.content, item.imageFileName ? item.imageFileName : "")
     hideAppWindow()
   }
 
   function handleCopyTextFromImage() {
     let item = getActiveHistoryItem()
     if (item.type === ClipType.Image) {
-      copyToClipboard(item.content)
+      copyToClipboard(item.content, item.imageFileName!)
     }
   }
 
@@ -365,7 +367,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleMouseDoubleClick(tabIndex: number) {
-    pasteInFrontApp(history[tabIndex].content)
+    let item = history[tabIndex];
+    pasteInFrontApp(item.content, item.imageFileName ? item.imageFileName : "")
   }
 
   function handleFinishEditing() {

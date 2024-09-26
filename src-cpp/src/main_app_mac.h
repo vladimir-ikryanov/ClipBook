@@ -18,8 +18,8 @@ class MainAppMac : public MainApp {
   void hide() override;
   void activate() override;
   void paste() override;
-  void paste(const std::string &text) override;
-  void copyToClipboard(const std::string &text) override;
+  void paste(const std::string &text, const std::string &imageFileName) override;
+  void copyToClipboard(const std::string &text, const std::string &imageFileName) override;
   void setOpenAtLogin(bool open) override;
   AppInfo getActiveAppInfo() override;
   std::string getAppIconAsBase64(const std::string& app_path) override;
@@ -33,7 +33,7 @@ class MainAppMac : public MainApp {
   std::string getUpdateServerUrl() override;
 
   bool isAccessibilityAccessGranted();
-  void showAccessibilityAccessDialog(const std::string &text);
+  void showAccessibilityAccessDialog(const std::string &text, const std::string &imageFileName);
   void showSystemAccessibilityPreferencesDialog();
 
  private:
