@@ -539,7 +539,10 @@ std::string MainAppMac::getAppNameFromPath(const std::string &app_path) {
   NSBundle *appBundle = [NSBundle bundleWithPath:[NSString stringWithUTF8String:app_path.c_str()]];
   if (appBundle) {
     NSString *appName = [[appBundle infoDictionary] objectForKey:@"CFBundleName"];
-    return [appName UTF8String];
+    if (!appName) {
+      appName = [[appBundle infoDictionary] objectForKey:@"CFBundleDisplayName"];
+    }
+    return appName ? [appName UTF8String] : "";
   }
   return {};
 }
