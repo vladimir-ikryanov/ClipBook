@@ -306,7 +306,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   function handleCopyTextFromImage() {
     let item = getActiveHistoryItem()
     if (item.type === ClipType.Image) {
-      copyToClipboard(item.content, item.imageFileName!)
+      copyToClipboard(item.content, "")
     }
   }
 
