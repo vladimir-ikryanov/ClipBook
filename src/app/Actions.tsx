@@ -7,7 +7,7 @@ import {
   CopyIcon,
   Edit3Icon,
   GlobeIcon,
-  PanelRightClose, SettingsIcon,
+  PanelRightClose, ScanTextIcon, SettingsIcon,
   StarIcon,
   StarOffIcon,
   TrashIcon
@@ -37,6 +37,7 @@ import {isShortcutMatch} from "@/lib/shortcuts";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {getActiveHistoryItem, getPreviewVisibleState, toBase64Icon} from "@/data";
 import {ClipType} from "@/db";
+import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
 
 export type HideActionsReason =
     "cancel"
@@ -212,7 +213,7 @@ export default function Actions(props: ActionsProps) {
               {
                   canCopyTextFromImage() &&
                   <CommandItem onSelect={handleCopyTextFromImage}>
-                    <CopyIcon className="mr-2 h-4 w-4"/>
+                    <ScanTextIcon className="mr-2 h-4 w-4"/>
                     <span>Copy Text from Image</span>
                     <CommandShortcut className="flex flex-row">
                       <ShortcutLabel shortcut={prefGetCopyTextFromImageShortcut()}/>
@@ -241,7 +242,11 @@ export default function Actions(props: ActionsProps) {
                 </CommandShortcut>
               </CommandItem>
               <CommandItem onSelect={handleTogglePreview}>
-                <PanelRightClose className="mr-2 h-4 w-4"/>
+                {
+                  getPreviewVisibleState() ?
+                      <HidePreviewPaneIcon className="mr-2 h-4 w-4"/> :
+                      <ShowPreviewPaneIcon className="mr-2 h-4 w-4"/>
+                }
                 <span>{getPreviewVisibleState() ? "Hide Preview" : "Show Preview"}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>

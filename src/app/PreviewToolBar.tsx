@@ -17,6 +17,7 @@ import {
   prefGetTogglePreviewShortcut
 } from "@/pref";
 import {Clip, ClipType} from "@/db";
+import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Icons";
 
 type PreviewToolBarProps = {
   item: Clip
@@ -103,51 +104,12 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
             <Button variant="toolbar" size="toolbar" onClick={handleToggleInfo}
                     title={props.displayInfo ? "Hide details" : "Show details"}>
               {
-                props.displayInfo ?
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         width="20"
-                         height="20"
-                         viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="currentColor"
-                         strokeWidth="2"
-                         strokeLinecap="round"
-                         strokeLinejoin="round"
-                         className="h-5 w-5">
-                      <rect x="3" y="3" width="18" height="18" rx="2"/>
-                      <rect fill="currentColor" x="4" y="14" width="16" height="6"/>
-                    </svg>
-                    :
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         width="20"
-                         height="20"
-                         viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="currentColor"
-                         strokeWidth="2"
-                         strokeLinecap="round"
-                         strokeLinejoin="round"
-                         className="h-5 w-5">
-                      <rect x="3" y="3" width="18" height="18" rx="2"/>
-                      <line x1="4" y1="14" x2="20" y2="14"/>
-                    </svg>
+                props.displayInfo ? <HideInfoPaneIcon className="h-5 w-5"/> : <ShowInfoPaneIcon className="h-5 w-5"/>
               }
             </Button>
             <Button variant="toolbar" size="toolbar" onClick={handleHidePreview}
                     title={"Hide preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
-              <svg xmlns="http://www.w3.org/2000/svg"
-                   width="20"
-                   height="20"
-                   viewBox="0 0 24 24"
-                   fill="none"
-                   stroke="currentColor"
-                   strokeWidth="2"
-                   strokeLinecap="round"
-                   strokeLinejoin="round"
-                   className="h-5 w-5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <rect fill="currentColor" x="14" y="4" width="6" height="16"/>
-              </svg>
+              <HidePreviewPaneIcon className="h-5 w-5"/>
             </Button>
           </div>
         </div>
