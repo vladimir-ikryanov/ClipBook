@@ -186,8 +186,14 @@ async function deleteItem(item: Clip) {
 export function getHistoryItems(): Clip[] {
   visibleHistoryItemsLength = history.length
   if (filterQuery.length > 0) {
-    let filteredHistory = Array.from(history.filter(item =>
-        item.content.toLowerCase().includes(filterQuery.toLowerCase())));
+    let filteredHistory = Array.from(history.filter(item => {
+      let contentHasText = item.content.toLowerCase().includes(filterQuery.toLowerCase());
+      if (!contentHasText && item.type === ClipType.Image) {
+        let imageTitle = "Image (" + item.imageWidth + "x" + item.imageHeight + ")";
+        contentHasText = imageTitle.toLowerCase().includes(filterQuery.toLowerCase());
+      }
+      return contentHasText
+    }));
     visibleHistoryItemsLength = filteredHistory.length
     sortHistory(sortType, filteredHistory)
     return filteredHistory
