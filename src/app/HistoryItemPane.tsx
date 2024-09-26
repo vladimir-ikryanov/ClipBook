@@ -5,7 +5,7 @@ import {getFilterQuery} from "@/data";
 import {Clip, ClipType} from "@/db";
 import {toCSSColor} from "@/lib/utils";
 import {
-  FileIcon, ImageIcon,
+  FileIcon,
   LinkIcon,
   MailIcon,
   StarIcon
@@ -24,6 +24,7 @@ type HistoryItemPaneProps = {
   onEditHistoryItem: (item: Clip) => void
   onEditContent: () => void
   onCopyToClipboard: () => void
+  onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
   onDeleteItem: () => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>
@@ -85,6 +86,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
                               onEditHistoryItem={props.onEditHistoryItem}
                               onEditContent={props.onEditContent}
                               onCopyToClipboard={props.onCopyToClipboard}
+                              onCopyTextFromImage={props.onCopyTextFromImage}
                               onOpenInBrowser={props.onOpenInBrowser}
                               onDeleteItem={props.onDeleteItem}/>
     }

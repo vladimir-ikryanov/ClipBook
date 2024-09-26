@@ -3,18 +3,22 @@ import React, {KeyboardEvent, useState} from 'react';
 import {
   CopyIcon,
   Edit3Icon,
-  EllipsisVerticalIcon, GlobeIcon, StarIcon,
+  EllipsisVerticalIcon,
+  GlobeIcon, ScanTextIcon,
+  StarIcon,
   StarOffIcon,
   TrashIcon
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem, DropdownMenuSeparator,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {
+  prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
@@ -24,7 +28,7 @@ import {
 } from "@/pref";
 import {CommandShortcut} from "@/components/ui/command";
 import {Clip, ClipType} from "@/db";
-import {toBase64Icon} from "@/data";
+import {isTextItem, toBase64Icon} from "@/data";
 
 export type HideClipDropdownMenuReason =
     "cancel"
@@ -32,6 +36,7 @@ export type HideClipDropdownMenuReason =
     | "pin"
     | "editContent"
     | "copyToClipboard"
+    | "copyTextFromImage"
     | "deleteItem"
 
 type HistoryItemMenuProps = {
@@ -44,6 +49,7 @@ type HistoryItemMenuProps = {
   onEditHistoryItem: (item: Clip) => void
   onEditContent: () => void
   onCopyToClipboard: () => void
+  onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
   onDeleteItem: () => void
 }
@@ -79,6 +85,12 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
     props.onCopyToClipboard()
   }
 
+  function handleCopyTextFromImage() {
+    closeReason = "copyTextFromImage"
+    handleOpenChange(false)
+    props.onCopyTextFromImage()
+  }
+
   function handlePin() {
     closeReason = "pin"
     handleOpenChange(false)
@@ -109,7 +121,7 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
             <DropdownMenuItem onClick={handlePaste}>
               <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                    alt="Application icon"/>
-              <span>Paste to {props.appName}</span>
+              <span className="mr-12">Paste to {props.appName}</span>
               <CommandShortcut className="flex flex-row">
                 <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
               </CommandShortcut>
@@ -126,19 +138,32 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
               props.item.type === ClipType.Link &&
               <DropdownMenuItem onClick={props.onOpenInBrowser}>
                 <GlobeIcon className="mr-2 h-4 w-4"/>
-                <span>Open in Browser</span>
+                <span className="mr-12">Open in Browser</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
                 </CommandShortcut>
               </DropdownMenuItem>
             }
-            <DropdownMenuItem onClick={handleEditContent}>
-              <Edit3Icon className="mr-2 h-4 w-4"/>
-              <span>Edit Content...</span>
-              <CommandShortcut className="flex flex-row">
-                <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
-              </CommandShortcut>
-            </DropdownMenuItem>
+            {
+              isTextItem(props.item) &&
+                <DropdownMenuItem onClick={handleEditContent}>
+                  <Edit3Icon className="mr-2 h-4 w-4"/>
+                  <span className="mr-12">Edit Content...</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
+                  </CommandShortcut>
+                </DropdownMenuItem>
+            }
+            {
+                props.item.type === ClipType.Image && props.item.content.length > 0 &&
+                <DropdownMenuItem onClick={handleCopyTextFromImage}>
+                  <ScanTextIcon className="mr-2 h-4 w-4"/>
+                  <span className="mr-12">Copy Text from Image</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetCopyTextFromImageShortcut()}/>
+                  </CommandShortcut>
+                </DropdownMenuItem>
+            }
             <DropdownMenuItem onClick={handlePin}>
               {
                 props.item.favorite ? <StarOffIcon className="mr-2 h-4 w-4"/> : <StarIcon className="mr-2 h-4 w-4"/>

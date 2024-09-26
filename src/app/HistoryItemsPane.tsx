@@ -73,6 +73,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
                                          onMouseDoubleClick={handleMouseDoubleClick}
                                          onEditContent={props.onEditContent}
                                          onCopyToClipboard={props.onCopyToClipboard}
+                                         onCopyTextFromImage={props.onCopyTextFromImage}
                                          onOpenInBrowser={props.onOpenInBrowser}
                                          onDeleteItem={props.onDeleteItem}/>
                     )
