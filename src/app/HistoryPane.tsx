@@ -456,6 +456,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          onHidePreview={handleTogglePreview}
                          onPaste={handlePaste}
                          onCopyToClipboard={handleCopyToClipboard}
+                         onCopyTextFromImage={handleCopyTextFromImage}
                          onOpenInBrowser={handleOpenInBrowser}
                          onDeleteItem={handleDeleteItem}
                          previewTextareaRef={previewTextareaRef}/>

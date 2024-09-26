@@ -4,11 +4,12 @@ import {Button} from "@/components/ui/button";
 import {
   ClipboardIcon,
   CopyIcon,
-  GlobeIcon,
+  GlobeIcon, ScanTextIcon,
   StarIcon,
 } from "lucide-react";
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {
+  prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardShortcut,
   prefGetOpenInBrowserShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
@@ -28,6 +29,7 @@ type PreviewToolBarProps = {
   onHidePreview: () => void
   onEditHistoryItem: (item: Clip) => void
   onCopyToClipboard: () => void
+  onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
   onDeleteItem: () => void
 }
@@ -53,6 +55,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     props.onOpenInBrowser()
   }
 
+  function handleCopyTextFromImage() {
+    props.onCopyTextFromImage()
+  }
+
   function handleToggleFavorite() {
     props.item.favorite = !props.item.favorite
     props.onEditHistoryItem(props.item)
@@ -75,6 +81,13 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 <Button variant="toolbar" size="toolbar" onClick={handleOpenInBrowser}
                         title={"Open in Browser (" + shortcutToDisplayShortcut(prefGetOpenInBrowserShortcut()) + ")"}>
                   <GlobeIcon className="h-5 w-5" strokeWidth={2}/>
+                </Button>
+            }
+            {
+                props.item.type === ClipType.Image && props.item.content.length > 0 &&
+                <Button variant="toolbar" size="toolbar" onClick={handleCopyTextFromImage}
+                        title={"Copy Text from Image (" + shortcutToDisplayShortcut(prefGetCopyTextFromImageShortcut()) + ")"}>
+                  <ScanTextIcon className="h-5 w-5" strokeWidth={2}/>
                 </Button>
             }
           </div>

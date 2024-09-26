@@ -16,6 +16,7 @@ type HistoryItemPreviewPaneProps = {
   onPaste: () => void
   onHidePreview: () => void
   onCopyToClipboard: () => void
+  onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
   onDeleteItem: () => void
   previewTextareaRef?: React.Ref<HTMLTextAreaElement>
@@ -87,6 +88,7 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
                         onHidePreview={props.onHidePreview}
                         onEditHistoryItem={props.onEditHistoryItem}
                         onCopyToClipboard={props.onCopyToClipboard}
+                        onCopyTextFromImage={props.onCopyTextFromImage}
                         onOpenInBrowser={props.onOpenInBrowser}
                         onDeleteItem={props.onDeleteItem}/>
         {props.item.type === ClipType.Image ? renderImage() : renderTextArea()}
