@@ -103,21 +103,41 @@ export default function InfoPane(props: InfoPaneProps) {
               <div className="flex-none text-foreground">{getImageSizeLabel()}</div>
             </div>
         }
-        <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-          <div className="flex-none text-preview-infoLabel font-semibold">Number of copies</div>
-          <div className="flex-grow"></div>
-          <div className="flex-none text-foreground">{props.item.numberOfCopies}</div>
-        </div>
-        <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-          <div className="flex-none text-preview-infoLabel font-semibold">First copy time</div>
-          <div className="flex-grow"></div>
-          <div className="flex-none text-foreground">{getTimeString(props.item.firstTimeCopy)}</div>
-        </div>
-        <div className="flex w-full">
-          <div className="flex-none text-preview-infoLabel font-semibold">Last copy time</div>
-          <div className="flex-grow"></div>
-          <div className="flex-none text-foreground">{getTimeString(props.item.lastTimeCopy)}</div>
-        </div>
+        {
+            props.item.numberOfCopies === 1 &&
+            <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+              <div className="flex-none text-preview-infoLabel font-semibold">Copy time</div>
+              <div className="flex-grow"></div>
+              <div
+                  className="flex-none text-foreground">{getTimeString(props.item.firstTimeCopy)}</div>
+            </div>
+        }
+        {
+            props.item.numberOfCopies > 1 &&
+            <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+              <div className="flex-none text-preview-infoLabel font-semibold">Number of copies</div>
+              <div className="flex-grow"></div>
+              <div className="flex-none text-foreground">{props.item.numberOfCopies}</div>
+            </div>
+        }
+        {
+            props.item.numberOfCopies > 1 &&
+            <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+              <div className="flex-none text-preview-infoLabel font-semibold">First copy time</div>
+              <div className="flex-grow"></div>
+              <div
+                  className="flex-none text-foreground">{getTimeString(props.item.firstTimeCopy)}</div>
+            </div>
+        }
+        {
+            props.item.numberOfCopies > 1 &&
+            <div className="flex w-full">
+              <div className="flex-none text-preview-infoLabel font-semibold">Last copy time</div>
+              <div className="flex-grow"></div>
+              <div
+                  className="flex-none text-foreground">{getTimeString(props.item.lastTimeCopy)}</div>
+            </div>
+        }
       </div>
   )
 }
