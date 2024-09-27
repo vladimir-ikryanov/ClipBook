@@ -11,6 +11,7 @@ import {
   prefGetZoomUIOutShortcut
 } from "@/pref";
 import {isShortcutMatch} from "@/lib/shortcuts";
+import {TooltipProvider} from "@/components/ui/tooltip";
 
 declare const hideAppWindow: () => void;
 declare const zoomIn: () => void;
@@ -59,7 +60,9 @@ export default function App() {
 
   return (
       <ThemeProvider defaultTheme="system">
-        <HistoryPane appName={appName} appIcon={appIcon}/>
+        <TooltipProvider delayDuration={250}>
+          <HistoryPane appName={appName} appIcon={appIcon}/>
+        </TooltipProvider>
       </ThemeProvider>
   )
 }

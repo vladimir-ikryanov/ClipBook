@@ -18,6 +18,8 @@ import {
 } from "@/pref";
 import {Clip, ClipType} from "@/db";
 import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Icons";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import ShortcutLabel from "@/app/ShortcutLabel";
 
 type PreviewToolBarProps = {
   item: Clip
@@ -69,48 +71,106 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
       <div className="flex flex-col">
         <div className="flex m-2 h-10">
           <div className="">
-            <Button variant="toolbar" size="toolbar" onClick={handlePaste}
-                    title={"Paste to " + props.appName + " (" + shortcutToDisplayShortcut(prefGetPasteSelectedItemToActiveAppShortcut()) + ")"}>
-              <ClipboardIcon className="h-5 w-5" strokeWidth={2}/>
-            </Button>
-            <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}
-                    title={"Copy to Clipboard (" + shortcutToDisplayShortcut(prefGetCopyToClipboardShortcut()) + ")"}>
-              <CopyIcon className="h-5 w-5" strokeWidth={2}/>
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="toolbar" size="toolbar" onClick={handlePaste}>
+                  <ClipboardIcon className="h-5 w-5" strokeWidth={2}/>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="flex items-center">
+                <div className="select-none mr-2">Paste to {props.appName}</div>
+                <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}>
+                  <CopyIcon className="h-5 w-5" strokeWidth={2}/>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="flex items-center">
+                <div className="select-none mr-2">Copy to Clipboard</div>
+                <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
+              </TooltipContent>
+            </Tooltip>
             {
                 props.item.type === ClipType.Link &&
-                <Button variant="toolbar" size="toolbar" onClick={handleOpenInBrowser}
-                        title={"Open in Browser (" + shortcutToDisplayShortcut(prefGetOpenInBrowserShortcut()) + ")"}>
-                  <GlobeIcon className="h-5 w-5" strokeWidth={2}/>
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="toolbar" size="toolbar" onClick={handleOpenInBrowser}>
+                      <GlobeIcon className="h-5 w-5" strokeWidth={2}/>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex items-center">
+                    <div className="select-none mr-2">Open in Browser</div>
+                    <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
+                  </TooltipContent>
+                </Tooltip>
             }
             {
                 props.item.type === ClipType.Image && props.item.content.length > 0 &&
-                <Button variant="toolbar" size="toolbar" onClick={handleCopyTextFromImage}
-                        title={"Copy Text from Image (" + shortcutToDisplayShortcut(prefGetCopyTextFromImageShortcut()) + ")"}>
-                  <ScanTextIcon className="h-5 w-5" strokeWidth={2}/>
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="toolbar" size="toolbar" onClick={handleCopyTextFromImage}>
+                      <ScanTextIcon className="h-5 w-5" strokeWidth={2}/>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex items-center">
+                    <div className="select-none mr-2">Copy Text from Image</div>
+                    <ShortcutLabel shortcut={prefGetCopyTextFromImageShortcut()}/>
+                  </TooltipContent>
+                </Tooltip>
             }
           </div>
           <div className="flex-auto draggable"></div>
           <div className="">
-            <Button variant="toolbar" size="toolbar" onClick={handleToggleFavorite}
-                    title={props.favorite ? "Remove from favorites (" + shortcutToDisplayShortcut(prefGetToggleFavoriteShortcut()) + ")"
-                        : "Add to favorites (" + shortcutToDisplayShortcut(prefGetToggleFavoriteShortcut()) + ")"}>
-              <StarIcon
-                  className={props.favorite ? "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5"}
-                  strokeWidth={2}/>
-            </Button>
-            <Button variant="toolbar" size="toolbar" onClick={handleToggleInfo}
-                    title={props.displayInfo ? "Hide details" : "Show details"}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="toolbar" size="toolbar" onClick={handleToggleFavorite}>
+                  <StarIcon
+                      className={props.favorite ? "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5"}
+                      strokeWidth={2}/>
+                </Button>
+              </TooltipTrigger>
               {
-                props.displayInfo ? <HideInfoPaneIcon className="h-5 w-5"/> : <ShowInfoPaneIcon className="h-5 w-5"/>
+                props.favorite ?
+                    <TooltipContent className="flex items-center">
+                      <div className="select-none mr-2">Remove from favorites</div>
+                      <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
+                    </TooltipContent> :
+                    <TooltipContent className="flex items-center">
+                      <div className="select-none mr-2">Add to favorites</div>
+                      <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
+                    </TooltipContent>
               }
-            </Button>
-            <Button variant="toolbar" size="toolbar" onClick={handleHidePreview}
-                    title={"Hide preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
-              <HidePreviewPaneIcon className="h-5 w-5"/>
-            </Button>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="toolbar" size="toolbar" onClick={handleToggleInfo}>
+                  {
+                    props.displayInfo ? <HideInfoPaneIcon className="h-5 w-5"/> :
+                        <ShowInfoPaneIcon className="h-5 w-5"/>
+                  }
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="flex items-center">
+                <div className="select-none mr-1">{props.displayInfo ? "Hide details" : "Show details"}</div>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="toolbar" size="toolbar" onClick={handleHidePreview}>
+                  <HidePreviewPaneIcon className="h-5 w-5"/>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="flex items-center">
+                <div className="select-none mr-2">Hide preview panel</div>
+                <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>

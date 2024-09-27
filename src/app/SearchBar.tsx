@@ -6,6 +6,8 @@ import {Button} from "@/components/ui/button";
 import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {prefGetTogglePreviewShortcut} from "@/pref";
 import {ShowPreviewPaneIcon} from "@/app/Icons";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import ShortcutLabel from "@/app/ShortcutLabel";
 
 type SearchBarProps = {
   searchQuery: string
@@ -55,16 +57,30 @@ export default function SearchBar(props: SearchBarProps) {
           </div>
           <div className={props.searchQuery.length == 0 ? "flex-auto draggable" : "flex-none"}></div>
           <div className={props.searchQuery.length == 0 ? "hidden" : ""}>
-            <Button variant="toolbar" size="toolbar" onClick={handleClearSearch}
-                    title={"Clear search (Esc)"}>
-              <XIcon className="h-5 w-5"/>
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="toolbar" size="toolbar" onClick={handleClearSearch}>
+                  <XIcon className="h-5 w-5"/>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="flex items-center">
+                <div className="select-none mr-2">Clear search</div>
+                <ShortcutLabel shortcut="Escape"/>
+              </TooltipContent>
+            </Tooltip>
           </div>
           <div className={props.isPreviewVisible ? "hidden" : ""}>
-            <Button variant="toolbar" size="toolbar" onClick={handleShowHidePreview}
-                    title={"Show preview panel (" + shortcutToDisplayShortcut(prefGetTogglePreviewShortcut()) + ")"}>
-              <ShowPreviewPaneIcon className="h-5 w-5"/>
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="toolbar" size="toolbar" onClick={handleShowHidePreview}>
+                  <ShowPreviewPaneIcon className="h-5 w-5"/>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="flex items-center">
+                <div className="select-none mr-2">Show preview panel</div>
+                <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>
