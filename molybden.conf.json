@@ -2,8 +2,8 @@
   "app": {
     "name": "ClipBook",
     "version": {
-      "major": "2",
-      "minor": "0",
+      "major": "1",
+      "minor": "10",
       "patch": "0"
     },
     "author": "Vladimir Ikryanov",
