@@ -200,6 +200,20 @@ bool ClipboardReaderMac::readClipboardData(ClipboardData &data) {
     return false;
   }
 
+  // Read file paths.
+  if ([types containsObject:NSFilenamesPboardType]) {
+    NSArray *file_paths = [pasteboard propertyListForType:NSFilenamesPboardType];
+    if (file_paths != nil && [file_paths count] > 0) {
+      std::string content;
+      for (NSString *file_path in file_paths) {
+        content += [file_path UTF8String];
+        content += "\n";
+      }
+      data.content = content;
+      return true;
+    }
+  }
+
   // Read image content in the PNG and TIFF formats.
   if ([types containsObject:NSPasteboardTypePNG] || [types containsObject:NSPasteboardTypeTIFF]) {
     // Make sure the images directory exists.
