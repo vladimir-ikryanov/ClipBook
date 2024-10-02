@@ -200,17 +200,8 @@ bool ClipboardReaderMac::readClipboardData(ClipboardData &data) {
     return false;
   }
 
-  // Read text content.
-  if ([types containsObject:NSPasteboardTypeString]) {
-    std::string content = [[pasteboard stringForType:NSPasteboardTypeString] UTF8String];
-    if (!isEmptyOrSpaces(content)) {
-      data.content = content;
-      return true;
-    }
-  }
-
-  // Read image content.
-  if ([types containsObject:NSPasteboardTypePNG]) {
+  // Read image content in the PNG and TIFF formats.
+  if ([types containsObject:NSPasteboardTypePNG] || [types containsObject:NSPasteboardTypeTIFF]) {
     // Make sure the images directory exists.
     fs::path imagesDir = app_->getImagesDir();
     if (!fs::exists(imagesDir)) {
@@ -218,7 +209,15 @@ bool ClipboardReaderMac::readClipboardData(ClipboardData &data) {
     }
 
     // Get image info.
-    NSData *png_data = [pasteboard dataForType:NSPasteboardTypePNG];
+    NSData *png_data = nil;
+    if ([types containsObject:NSPasteboardTypePNG]) {
+      png_data = [pasteboard dataForType:NSPasteboardTypePNG];
+    } else {
+      NSData *tiff_data = [pasteboard dataForType:NSPasteboardTypeTIFF];
+      NSBitmapImageRep *image_rep = [NSBitmapImageRep imageRepWithData:tiff_data];
+      png_data = [image_rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+    }
+
     NSImage *image = [[NSImage alloc] initWithData:png_data];
     data.image_info.width = static_cast<int>([image size].width);
     data.image_info.height = static_cast<int>([image size].height);
@@ -260,7 +259,23 @@ bool ClipboardReaderMac::readClipboardData(ClipboardData &data) {
     // Release resources.
     [image release];
 
+    if ([types containsObject:NSPasteboardTypeString]) {
+      std::string content = [[pasteboard stringForType:NSPasteboardTypeString] UTF8String];
+      if (!isEmptyOrSpaces(content)) {
+        data.image_info.text = content;
+      }
+    }
+
     return true;
+  }
+
+  // Read text content.
+  if ([types containsObject:NSPasteboardTypeString]) {
+    std::string content = [[pasteboard stringForType:NSPasteboardTypeString] UTF8String];
+    if (!isEmptyOrSpaces(content)) {
+      data.content = content;
+      return true;
+    }
   }
   return false;
 }

@@ -23,6 +23,7 @@ export class Clip {
   imageWidth?: number;
   imageHeight?: number;
   imageSizeInBytes?: number;
+  imageText?: string;
 
   constructor(content: string, sourceApp: string, imageFileName?: string) {
     this.content = content;
@@ -38,7 +39,7 @@ class AppDatabase extends Dexie {
   constructor() {
     super('ClipBookDB');
     this.version(1).stores({
-      history: '++id, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes'
+      history: '++id, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText'
     });
   }
 }

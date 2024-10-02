@@ -278,18 +278,22 @@ void MainAppMac::paste() {
   CFRelease(source);
 }
 
-void MainAppMac::paste(const std::string &text, const std::string &imageFileName) {
+void MainAppMac::paste(const std::string &text,
+                       const std::string &imageFileName,
+                       const std::string &imageText) {
   if (!isAccessibilityAccessGranted()) {
-    showAccessibilityAccessDialog(text, imageFileName);
+    showAccessibilityAccessDialog(text, imageFileName, imageText);
     return;
   }
   // Hide the browser window and activate the previously active app.
   hide();
-  copyToClipboard(text, imageFileName);
+  copyToClipboard(text, imageFileName, imageText);
   paste();
 }
 
-void MainAppMac::copyToClipboard(const std::string &text, const std::string &imageFileName) {
+void MainAppMac::copyToClipboard(const std::string &text,
+                                 const std::string &imageFileName,
+                                 const std::string &imageText) {
   auto pasteboard = [NSPasteboard generalPasteboard];
   // Clear the pasteboard and set the new text.
   [pasteboard clearContents];
@@ -302,6 +306,10 @@ void MainAppMac::copyToClipboard(const std::string &text, const std::string &ima
       NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithData:[image TIFFRepresentation]];
       NSData *data = [imageRep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
       [pasteboard setData:data forType:NSPasteboardTypePNG];
+    }
+    // Paste the image text if it is not empty.
+    if (!imageText.empty()) {
+      [pasteboard setString:[NSString stringWithUTF8String:imageText.c_str()] forType:NSPasteboardTypeString];
     }
   } else {
     [pasteboard setString:[NSString stringWithUTF8String:text.c_str()] forType:NSPasteboardTypeString];
@@ -493,7 +501,7 @@ bool MainAppMac::isAccessibilityAccessGranted() {
   return AXIsProcessTrusted();
 }
 
-void MainAppMac::showAccessibilityAccessDialog(const std::string &text, const std::string &imageFileName) {
+void MainAppMac::showAccessibilityAccessDialog(const std::string &text, const std::string &imageFileName, const std::string &imageText) {
   MessageDialogOptions options;
   options.message = "Accessibility access required";
   options.informative_text = "ClipBook needs accessibility access to paste directly into other apps.";
@@ -503,7 +511,7 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text, const st
       MessageDialogButton("Cancel", MessageDialogButtonType::kCancel)
   };
   auto_hide_disabled_ = true;
-  MessageDialog::show(app_window_, options, [this, text, imageFileName](const MessageDialogResult &result) {
+  MessageDialog::show(app_window_, options, [this, text, imageFileName, imageText](const MessageDialogResult &result) {
     auto_hide_disabled_ = false;
     if (result.button.type == MessageDialogButtonType::kDefault) {
       hide();
@@ -511,7 +519,7 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text, const st
     }
     if (result.button.type == MessageDialogButtonType::kNone) {
       hide();
-      copyToClipboard(text, imageFileName);
+      copyToClipboard(text, imageFileName, imageText);
     }
   });
 }

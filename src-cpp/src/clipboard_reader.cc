@@ -27,7 +27,8 @@ void ClipboardReader::start() {
                                      data.image_info.thumb_file_name,
                                      data.image_info.width,
                                      data.image_info.height,
-                                     data.image_info.size_in_bytes);
+                                     data.image_info.size_in_bytes,
+                                     data.image_info.text);
       }
     }
   });

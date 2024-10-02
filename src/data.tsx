@@ -190,6 +190,9 @@ export function getHistoryItems(): Clip[] {
       let contentHasText = item.content.toLowerCase().includes(filterQuery.toLowerCase());
       if (!contentHasText && item.type === ClipType.Image) {
         let imageTitle = "Image (" + item.imageWidth + "x" + item.imageHeight + ")";
+        if (item.imageText && item.imageText.length > 0) {
+          imageTitle = item.imageText;
+        }
         contentHasText = imageTitle.toLowerCase().includes(filterQuery.toLowerCase());
       }
       return contentHasText
@@ -212,7 +215,8 @@ export async function addHistoryItem(content: string,
                                      imageThumbFileName: string,
                                      imageWidth: number,
                                      imageHeight: number,
-                                     imageSizeInBytes: number): Promise<Clip[]> {
+                                     imageSizeInBytes: number,
+                                     imageText: string): Promise<Clip[]> {
   let item = findItem(content, imageFileName)
   if (item) {
     item.numberOfCopies++
@@ -224,6 +228,7 @@ export async function addHistoryItem(content: string,
     item.imageHeight = imageHeight
     item.imageSizeInBytes = imageSizeInBytes
     item.imageThumbFileName = imageThumbFileName
+    item.imageText = imageText
     await addClip(item)
     history.push(item)
   }

@@ -30,8 +30,12 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   virtual void hide();
   virtual void activate() = 0;
   virtual void paste() = 0;
-  virtual void paste(const std::string &text, const std::string &imageFileName) = 0;
-  virtual void copyToClipboard(const std::string &text, const std::string &imageFileName) = 0;
+  virtual void paste(const std::string &text,
+                     const std::string &imageFileName,
+                     const std::string &imageText) = 0;
+  virtual void copyToClipboard(const std::string &text,
+                               const std::string &imageFileName,
+                               const std::string &imageText) = 0;
   virtual void setOpenAtLogin(bool open) = 0;
   virtual AppInfo getActiveAppInfo() = 0;
   virtual std::string getAppIconAsBase64(const std::string& app_path) = 0;

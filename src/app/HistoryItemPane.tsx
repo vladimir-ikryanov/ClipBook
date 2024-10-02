@@ -118,6 +118,9 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
 
   function getItemLabel() {
     if (props.item.type === ClipType.Image) {
+      if (props.item.imageText && props.item.imageText.length > 0) {
+        return props.item.imageText;
+      }
       return "Image (" + props.item.imageWidth + "x" + props.item.imageHeight + ")";
     }
     return props.item.content;

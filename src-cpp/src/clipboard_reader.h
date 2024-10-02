@@ -9,6 +9,7 @@ struct ImageInfo {
   unsigned long size_in_bytes = 0;
   std::string file_name;
   std::string thumb_file_name;
+  std::string text;
 };
 
 struct ClipboardData {
