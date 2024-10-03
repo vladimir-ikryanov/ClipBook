@@ -4,12 +4,19 @@
 #import <Vision/Vision.h>
 
 #include <filesystem>
+#include <memory>
+#include <thread>
 
 #include "utils.h"
 
 namespace fs = std::filesystem;
 
-void extractTextFromImage(NSImage *image, const std::string& imageFileName, const std::shared_ptr<MainApp>& app, ClipboardData &data) {
+static int kCheckIntervalInSeconds = 1;
+
+void extractTextFromImage(NSImage *image,
+                          const std::string &imageFileName,
+                          const std::shared_ptr<MainApp> &app,
+                          ClipboardData &data) {
   // Convert NSImage to CGImage
   CGImageRef cgImage = [image CGImageForProposedRect:nullptr context:nil hints:nil];
   if (cgImage == nil) {
@@ -100,7 +107,7 @@ std::vector<fs::path> findImages(const fs::path &dir,
   return images;
 }
 
-std::string getThumbImageFileName(const std::string& imageFileName) {
+std::string getThumbImageFileName(const std::string &imageFileName) {
   std::string thumbFileName = imageFileName;
   size_t pos = thumbFileName.find_last_of('_');
   if (pos != std::string::npos) {
@@ -109,7 +116,7 @@ std::string getThumbImageFileName(const std::string& imageFileName) {
   return thumbFileName;
 }
 
-bool findIdenticalImage(NSImage *srcImage, const fs::path &imagesDir, ImageInfo& imageInfo) {
+bool findIdenticalImage(NSImage *srcImage, const fs::path &imagesDir, ImageInfo &imageInfo) {
   auto images = findImages(imagesDir, "image_", ".png");
   for (const auto &image_path : images) {
     NSImage *dstImage = [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String:image_path.c_str()]];
@@ -169,8 +176,37 @@ ClipboardReaderMac::create(const std::shared_ptr<MainApp> &app) {
   return manager;
 }
 
-ClipboardReaderMac::ClipboardReaderMac(const std::shared_ptr<MainApp> &app)
-    : ClipboardReader(app) {}
+ClipboardReaderMac::ClipboardReaderMac(const std::shared_ptr<MainApp> &app) : app_(app) {}
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
+
+void ClipboardReaderMac::start() {
+  std::thread t([this]() {
+    while (true) {
+      std::this_thread::sleep_for(std::chrono::seconds(kCheckIntervalInSeconds));
+      if (app_->isPaused()) {
+        continue;
+      }
+      ClipboardData data;
+      if (readClipboardData(data)) {
+        auto js_window = app_->browser()->mainFrame()->executeJavaScript("window");
+        js_window.asJsObject()->call("addClipboardData",
+                                     data.content,
+                                     data.active_app_info.path,
+                                     data.image_info.file_name,
+                                     data.image_info.thumb_file_name,
+                                     data.image_info.width,
+                                     data.image_info.height,
+                                     data.image_info.size_in_bytes,
+                                     data.image_info.text);
+      }
+    }
+  });
+  t.join();
+}
+
+#pragma clang diagnostic pop
 
 bool ClipboardReaderMac::readClipboardData(ClipboardData &data) {
   // Check if the clipboard has changed.

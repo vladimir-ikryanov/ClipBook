@@ -12,8 +12,6 @@ set(APP_SOURCES
         src-cpp/src/main.cc
         src-cpp/src/main_app.h
         src-cpp/src/main_app.cc
-        src-cpp/src/clipboard_reader.h
-        src-cpp/src/clipboard_reader.cc
         src-cpp/src/url.h
         src-cpp/src/url.cc
         src-cpp/src/utils.h
