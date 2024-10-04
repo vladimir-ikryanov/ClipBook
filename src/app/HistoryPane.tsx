@@ -107,6 +107,52 @@ export default function HistoryPane(props: HistoryPaneProps) {
     scrollToActiveTab()
   }
 
+  async function mergeClipboardData(content: string,
+                                    sourceAppPath: string,
+                                    imageFileName: string,
+                                    imageThumbFileName: string,
+                                    imageWidth: number,
+                                    imageHeight: number,
+                                    imageSizeInBytes: number,
+                                    imageText: string) {
+    if (history.length > 0) {
+      let lastItem = history[0]
+      if (isTextItem(lastItem)) {
+        let item = new Clip(content, sourceAppPath, imageFileName)
+        if (isTextItem(item)) {
+          lastItem.content += "\n" + content
+        } else {
+          await addClipboardData(content,
+              sourceAppPath,
+              imageFileName,
+              imageThumbFileName,
+              imageWidth,
+              imageHeight,
+              imageSizeInBytes,
+              imageText)
+          return
+        }
+        await updateHistoryItem(lastItem.id!, lastItem)
+        setHistoryItem(lastItem)
+        let items = getHistoryItems();
+        setHistory(items)
+        let index = items.findIndex(i => i.id === item.id)
+        setVisibleActiveHistoryItemIndex(index)
+        setActiveTab(index.toString())
+        scrollToActiveTab()
+      } else {
+        await addClipboardData(content,
+            sourceAppPath,
+            imageFileName,
+            imageThumbFileName,
+            imageWidth,
+            imageHeight,
+            imageSizeInBytes,
+            imageText)
+      }
+    }
+  }
+
   async function clearHistory() {
     setHistory(await clear())
   }
@@ -392,8 +438,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
   async function handleEditHistoryItem(item: Clip) {
     await updateHistoryItem(item.id!, item)
     setHistoryItem(item)
-    setHistory(getHistoryItems())
-    let index = getHistoryItems().findIndex(i => i.id === item.id)
+    let items = getHistoryItems();
+    setHistory(items)
+    let index = items.findIndex(i => i.id === item.id)
     setVisibleActiveHistoryItemIndex(index)
     setActiveTab(index.toString())
     scrollToActiveTab()
@@ -407,6 +454,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   (window as any).addClipboardData = addClipboardData;
+  (window as any).mergeClipboardData = mergeClipboardData;
   (window as any).setTextFromImage = setTextFromImage;
   (window as any).clearHistory = clearHistory;
   (window as any).activateApp = activateApp;

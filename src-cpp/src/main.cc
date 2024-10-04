@@ -47,6 +47,6 @@ void launch() {
       welcome_window->show();
     }
     main_app->launch();
-    ClipboardReaderMac::create(main_app)->start();
+    std::make_shared<ClipboardReaderMac>(main_app)->start();
   });
 }

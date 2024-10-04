@@ -3,6 +3,12 @@
 
 #include "main_app.h"
 
+#include <mutex>
+
+#ifdef __OBJC__
+#import <Cocoa/Cocoa.h>
+#endif
+
 struct ImageInfo {
   int width = 0;
   int height = 0;
@@ -20,16 +26,25 @@ struct ClipboardData {
 
 class ClipboardReaderMac {
  public:
-  static std::shared_ptr<ClipboardReaderMac> create(const std::shared_ptr<MainApp> &app);
+  explicit ClipboardReaderMac(const std::shared_ptr<MainApp> &app);
+  ~ClipboardReaderMac();
+
   void start();
 
  private:
-  explicit ClipboardReaderMac(const std::shared_ptr<MainApp> &app);
-
-  bool readClipboardData(ClipboardData &data);
+  void readClipboardData();
+  void readAndMergeClipboardData();
+  bool readClipboardData(const std::shared_ptr<ClipboardData> &data);
+  void sendClipboardData(std::shared_ptr<ClipboardData> data, const std::string &function_name);
 
   std::shared_ptr<MainApp> app_;
+  std::shared_ptr<ClipboardData> data_;
   long last_change_count_ = 0;
+  bool pause_reader_ = false;
+#ifdef __OBJC__
+  id monitor_;
+#endif
+  std::mutex mutex_;
 };
 
 #endif // CLIPBOOK_CLIPBOARD_READER_MAC_H_
