@@ -1,3 +1,5 @@
+import {decl} from "postcss";
+
 declare const saveTheme: (theme: string) => void;
 declare const getTheme: () => string;
 declare const saveOpenAtLogin: (openAtLogin: boolean) => void;
@@ -14,6 +16,12 @@ declare const saveShowIconInMenuBar: (showIcon: boolean) => void;
 declare const shouldShowIconInMenuBar: () => boolean;
 declare const setAppsToIgnore: (apps: string) => void;
 declare const getAppsToIgnore: () => string;
+declare const saveCopyAndMergeEnabled: (enabled: boolean) => void;
+declare const isCopyAndMergeEnabled: () => boolean;
+declare const saveCopyAndMergeSeparator: (separator: string) => void;
+declare const getCopyAndMergeSeparator: () => string;
+declare const saveCopyToClipboardAfterMerge: (copy: boolean) => void;
+declare const shouldCopyToClipboardAfterMerge: () => boolean;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -282,4 +290,37 @@ export function prefGetCopyTextFromImageShortcut() {
 
 export function prefSetCopyTextFromImageShortcut(shortcut: string) {
   saveCopyTextFromImageShortcut(shortcut)
+}
+
+export function prefGetCopyAndMergeEnabled() {
+  return isCopyAndMergeEnabled()
+}
+
+export function prefSetCopyAndMergeEnabled(enabled: boolean) {
+  saveCopyAndMergeEnabled(enabled)
+}
+
+export enum CopyAndMergeSeparator {
+  LINE = "\n",
+  SPACE = " ",
+}
+
+export function prefGetCopyAndMergeSeparator(): CopyAndMergeSeparator {
+  let separator = getCopyAndMergeSeparator();
+  if (separator === " ") {
+    return CopyAndMergeSeparator.SPACE
+  }
+  return CopyAndMergeSeparator.LINE
+}
+
+export function prefSetCopyAndMergeSeparator(separator: CopyAndMergeSeparator) {
+  saveCopyAndMergeSeparator(separator)
+}
+
+export function prefGetCopyToClipboardAfterMerge() {
+  return shouldCopyToClipboardAfterMerge()
+}
+
+export function prefSetCopyToClipboardAfterMerge(copy: boolean) {
+  saveCopyToClipboardAfterMerge(copy)
 }

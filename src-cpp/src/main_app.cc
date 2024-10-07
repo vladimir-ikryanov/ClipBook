@@ -448,7 +448,7 @@ void MainApp::showSettingsWindow() {
   settings_window_->setWindowButtonVisible(WindowButtonType::kMaximize, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kRestore, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kZoom, false);
-  settings_window_->setSize(700, 650);
+  settings_window_->setSize(700, 740);
   settings_window_->centerWindow();
   settings_window_->show();
 }
@@ -545,6 +545,24 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("shouldShowIconInMenuBar", [this]() -> bool {
     return settings_->shouldShowIconInMenuBar();
+  });
+  window->putProperty("saveCopyAndMergeEnabled", [this](bool enabled) -> void {
+    settings_->saveCopyAndMergeEnabled(enabled);
+  });
+  window->putProperty("isCopyAndMergeEnabled", [this]() -> bool {
+    return settings_->isCopyAndMergeEnabled();
+  });
+  window->putProperty("saveCopyAndMergeSeparator", [this](std::string separator) -> void {
+    settings_->saveCopyAndMergeSeparator(separator);
+  });
+  window->putProperty("getCopyAndMergeSeparator", [this]() -> std::string {
+    return settings_->getCopyAndMergeSeparator();
+  });
+  window->putProperty("saveCopyToClipboardAfterMerge", [this](bool copy) -> void {
+    settings_->saveCopyToClipboardAfterMerge(copy);
+  });
+  window->putProperty("shouldCopyToClipboardAfterMerge", [this]() -> bool {
+    return settings_->shouldCopyToClipboardAfterMerge();
   });
 
   // Application shortcuts.

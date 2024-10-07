@@ -36,6 +36,15 @@ class AppSettingsMac : public AppSettings {
   void saveAppsToIgnore(std::string apps) override;
   std::string getAppsToIgnore() override;
 
+  void saveCopyAndMergeEnabled(bool enabled) override;
+  bool isCopyAndMergeEnabled() override;
+
+  void saveCopyAndMergeSeparator(std::string separator) override;
+  std::string getCopyAndMergeSeparator() override;
+
+  void saveCopyToClipboardAfterMerge(bool copy) override;
+  bool shouldCopyToClipboardAfterMerge() override;
+
   // Shortcuts.
 
   void saveOpenAppShortcut(std::string shortcut) override;

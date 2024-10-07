@@ -20,6 +20,9 @@ NSString *prefCheckForUpdatesAutomatically = @"app.check_for_updates_automatical
 NSString *prefWarnOnClearHistory = @"app.warn_on_clear_history";
 NSString *prefShowIconInMenuBar = @"app.show_icon_in_menu_bar";
 NSString *prefIgnoreApps = @"privacy.ignore_apps";
+NSString *prefCopyAndMergeEnabled = @"copy_and_merge.enabled";
+NSString *prefCopyAndMergeSeparator = @"copy_and_merge.separator";
+NSString *prefCopyToClipboardAfterMerge = @"copy_to_clipboard_after_merge";
 
 // Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
@@ -208,6 +211,51 @@ bool AppSettingsMac::shouldShowIconInMenuBar() {
   }
   return true;
 }
+
+void AppSettingsMac::saveCopyAndMergeEnabled(bool enabled) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:enabled forKey:prefCopyAndMergeEnabled];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::isCopyAndMergeEnabled() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefCopyAndMergeEnabled] != nil) {
+    return [defaults boolForKey:prefCopyAndMergeEnabled];
+  }
+  return true;
+}
+
+void AppSettingsMac::saveCopyAndMergeSeparator(std::string separator) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:separator.c_str()] forKey:prefCopyAndMergeSeparator];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getCopyAndMergeSeparator() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *separator = [defaults objectForKey:prefCopyAndMergeSeparator];
+  if (separator != nil) {
+    return {[separator UTF8String]};
+  }
+  return "\n";
+}
+
+void AppSettingsMac::saveCopyToClipboardAfterMerge(bool copy) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:copy forKey:prefCopyToClipboardAfterMerge];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldCopyToClipboardAfterMerge() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefCopyToClipboardAfterMerge] != nil) {
+    return [defaults boolForKey:prefCopyToClipboardAfterMerge];
+  }
+  return true;
+}
+
+// Shortcuts.
 
 void AppSettingsMac::saveOpenAppShortcut(std::string shortcut) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];

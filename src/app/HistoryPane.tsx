@@ -24,7 +24,10 @@ import {
 } from "@/data";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {
-  prefGetClearHistoryShortcut, prefGetCopyTextFromImageShortcut,
+  prefGetClearHistoryShortcut,
+  prefGetCopyAndMergeSeparator,
+  prefGetCopyTextFromImageShortcut,
+  prefGetCopyToClipboardAfterMerge,
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
@@ -120,7 +123,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       if (isTextItem(lastItem)) {
         let item = new Clip(content, sourceAppPath, imageFileName)
         if (isTextItem(item)) {
-          lastItem.content += "\n" + content
+          lastItem.content += prefGetCopyAndMergeSeparator() + content
         } else {
           await addClipboardData(content,
               sourceAppPath,
@@ -140,6 +143,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
         setVisibleActiveHistoryItemIndex(index)
         setActiveTab(index.toString())
         scrollToActiveTab()
+
+        if (prefGetCopyToClipboardAfterMerge()) {
+          console.log("Copying merged content to clipboard")
+        }
+
       } else {
         await addClipboardData(content,
             sourceAppPath,

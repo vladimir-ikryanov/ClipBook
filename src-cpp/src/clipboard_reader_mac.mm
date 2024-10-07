@@ -202,6 +202,9 @@ bool isEquals(const std::shared_ptr<ClipboardData> &newData,
 
 ClipboardReaderMac::ClipboardReaderMac(const std::shared_ptr<MainApp> &app) : app_(app) {
   monitor_ = [NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskKeyDown handler:^(NSEvent *event) {
+    if (!app_->settings()->isCopyAndMergeEnabled()) {
+      return;
+    }
     if (([event modifierFlags] & NSEventModifierFlagCommand) &&
         [[event characters] isEqualToString:@"c"]) {
       static CFAbsoluteTime lastTapTime = 0;
@@ -297,7 +300,6 @@ bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> 
     return false;
   }
   last_change_count_ = changeCount;
-//  NSLog(@"Change count: %ld", last_change_count_);
 
   // Check if the active app should be ignored.
   auto settings = app_->settings();

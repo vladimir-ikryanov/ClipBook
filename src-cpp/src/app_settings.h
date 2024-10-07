@@ -40,6 +40,15 @@ class AppSettings {
   virtual void saveAppsToIgnore(std::string apps) = 0;
   virtual std::string getAppsToIgnore() = 0;
 
+  virtual void saveCopyAndMergeEnabled(bool enabled) = 0;
+  virtual bool isCopyAndMergeEnabled() = 0;
+
+  virtual void saveCopyAndMergeSeparator(std::string separator) = 0;
+  virtual std::string getCopyAndMergeSeparator() = 0;
+
+  virtual void saveCopyToClipboardAfterMerge(bool copy) = 0;
+  virtual bool shouldCopyToClipboardAfterMerge() = 0;
+
   // Shortcuts.
 
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;

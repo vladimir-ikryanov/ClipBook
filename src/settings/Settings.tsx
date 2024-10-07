@@ -4,16 +4,32 @@ import {Switch} from "@/components/ui/switch";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {useEffect, useState} from "react";
 import {
+  CopyAndMergeSeparator,
   prefGetCheckForUpdatesAutomatically,
-  prefGetOpenAtLogin, prefGetShowIconInMenuBar,
+  prefGetCopyAndMergeEnabled,
+  prefGetCopyAndMergeSeparator,
+  prefGetCopyToClipboardAfterMerge,
+  prefGetOpenAtLogin,
+  prefGetShowIconInMenuBar,
   prefGetTheme,
   prefGetWarnOnClearHistory,
   prefSetCheckForUpdatesAutomatically,
-  prefSetOpenAtLogin, prefSetShowIconInMenuBar,
+  prefSetCopyAndMergeEnabled,
+  prefSetCopyAndMergeSeparator,
+  prefSetCopyToClipboardAfterMerge,
+  prefSetOpenAtLogin,
+  prefSetShowIconInMenuBar,
   prefSetTheme,
   prefSetWarnOnClearHistory,
 } from "@/pref";
 import {KeyboardIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 declare const closeSettingsWindow: () => void;
 
@@ -23,6 +39,9 @@ export default function Settings() {
   const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory());
   const [checkForUpdatesAutomatically, setCheckForUpdatesAutomatically] = useState(prefGetCheckForUpdatesAutomatically());
   const [showIconInMenuBar, setShowIconInMenuBar] = useState(prefGetShowIconInMenuBar());
+  const [copyAndMergeEnabled, setCopyAndMergeEnabled] = useState(prefGetCopyAndMergeEnabled());
+  const [copyToClipboardAfterMerge, setCopyToClipboardAfterMerge] = useState(prefGetCopyToClipboardAfterMerge());
+  const [copyAndMergeSeparator, setCopyAndMergeSeparator] = useState(prefGetCopyAndMergeSeparator());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -59,6 +78,21 @@ export default function Settings() {
   function handleShowIconChange(showIcon: boolean) {
     setShowIconInMenuBar(showIcon)
     prefSetShowIconInMenuBar(showIcon)
+  }
+
+  function handleCopyAndMergeChange(copyAndMerge: boolean) {
+    setCopyAndMergeEnabled(copyAndMerge)
+    prefSetCopyAndMergeEnabled(copyAndMerge)
+  }
+
+  function handleCopyToClipboardAfterMergeChange(copyToClipboardAfterMerge: boolean) {
+    setCopyToClipboardAfterMerge(copyToClipboardAfterMerge)
+    prefSetCopyToClipboardAfterMerge(copyToClipboardAfterMerge)
+  }
+
+  function handleCopyAndMergeSeparatorChange(separator: CopyAndMergeSeparator) {
+    setCopyAndMergeSeparator(separator)
+    prefSetCopyAndMergeSeparator(separator)
   }
 
   return (
@@ -171,6 +205,52 @@ ClipBook will check for updates automatically and notify you when a new version 
               </Label>
               <Switch id="showIcon" checked={showIconInMenuBar}
                       onCheckedChange={handleShowIconChange}/>
+            </div>
+
+            <hr/>
+
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label htmlFor="copyAndMerge" className="flex flex-col text-base">
+                <span className="">Copy and merge</span>
+                <span className="text-neutral-500 font-normal text-sm mt-1">
+Press <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd> to append the currently selected text to the previously copied text in the clipboard&nbsp;history.
+            </span>
+              </Label>
+              <Switch id="copyAndMerge" checked={copyAndMergeEnabled}
+                      onCheckedChange={handleCopyAndMergeChange}/>
+            </div>
+
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label className="flex flex-col text-base">
+                <span className="">Copy and merge separator</span>
+                <span className="text-neutral-500 font-normal text-sm">
+                  Select how the appended text should be separated from the previously copied&nbsp;text.
+                </span>
+              </Label>
+              <Select defaultValue={copyAndMergeSeparator}
+                      onValueChange={handleCopyAndMergeSeparatorChange}
+                      disabled={!copyAndMergeEnabled}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue/>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={CopyAndMergeSeparator.LINE}>New line</SelectItem>
+                  <SelectItem value={CopyAndMergeSeparator.SPACE}>Space</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label htmlFor="copyToClipboardAfterMerge" className="flex flex-col text-base">
+                <span className="">Paste back to system clipboard</span>
+                <span className="text-neutral-500 font-normal text-sm">
+Automatically copy the merged text to the system clipboard after&nbsp;merging.
+                </span>
+              </Label>
+              <Switch id="copyToClipboardAfterMerge"
+                      checked={copyToClipboardAfterMerge}
+                      onCheckedChange={handleCopyToClipboardAfterMergeChange}
+                      disabled={!copyAndMergeEnabled}/>
             </div>
 
             <hr/>
