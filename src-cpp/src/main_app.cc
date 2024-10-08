@@ -462,6 +462,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
                       [this](std::string text, std::string imageFileName, std::string imageText) {
                         copyToClipboard(text, imageFileName, imageText);
                       });
+  window->putProperty("copyToClipboardAfterMerge", [this](std::string text) {
+    copyToClipboardAfterMerge(std::move(text));
+  });
   window->putProperty("deleteImage", [this](std::string imageFileName) {
     deleteImage(std::move(imageFileName));
   });

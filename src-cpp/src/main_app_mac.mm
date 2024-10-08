@@ -168,6 +168,7 @@ KeyCode extractKeyCode(const std::string &shortcut) {
 MainAppMac::MainAppMac(const std::shared_ptr<App> &app,
                        const std::shared_ptr<AppSettings> &settings)
     : MainApp(app, settings), active_app_(nullptr) {
+  clipboard_reader_ = std::make_shared<ClipboardReaderMac>();
 }
 
 molybden::Shortcut MainAppMac::createShortcut(const std::string &shortcut) {
@@ -316,6 +317,10 @@ void MainAppMac::copyToClipboard(const std::string &text,
   }
 }
 
+void MainAppMac::copyToClipboardAfterMerge(std::string text) {
+  clipboard_reader_->copyToClipboardAfterMerge(std::move(text));
+}
+
 std::string MainAppMac::getUpdateServerUrl() {
 #ifdef ARCH_MAC_X64
   return "https://clipbook.app/downloads/mac/x64";
@@ -452,6 +457,11 @@ bool MainAppMac::init() {
     setOpenAtLogin(false);
   }
   return MainApp::init();
+}
+
+void MainAppMac::launch() {
+  MainApp::launch();
+  clipboard_reader_->start(shared_from_this());
 }
 
 bool MainAppMac::isAppInLoginItems() {

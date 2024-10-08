@@ -50,6 +50,7 @@ import {ClipboardIcon} from "lucide-react";
 
 declare const pasteInFrontApp: (text: string, imageFileName: string, imageText: string) => void;
 declare const copyToClipboard: (text: string, imageFileName: string, imageText: string) => void;
+declare const copyToClipboardAfterMerge: (text: string) => void;
 declare const deleteImage: (imageFileName: string) => void;
 declare const clearEntireHistory: () => void;
 declare const hideAppWindow: () => void;
@@ -124,41 +125,31 @@ export default function HistoryPane(props: HistoryPaneProps) {
         let item = new Clip(content, sourceAppPath, imageFileName)
         if (isTextItem(item)) {
           lastItem.content += prefGetCopyAndMergeSeparator() + content
-        } else {
-          await addClipboardData(content,
-              sourceAppPath,
-              imageFileName,
-              imageThumbFileName,
-              imageWidth,
-              imageHeight,
-              imageSizeInBytes,
-              imageText)
+
+          if (prefGetCopyToClipboardAfterMerge()) {
+            copyToClipboardAfterMerge(lastItem.content)
+          }
+
+          await updateHistoryItem(lastItem.id!, lastItem)
+          setHistoryItem(lastItem)
+          let items = getHistoryItems();
+          setHistory(items)
+          let index = items.findIndex(i => i.id === item.id)
+          setVisibleActiveHistoryItemIndex(index)
+          setActiveTab(index.toString())
+          scrollToActiveTab()
           return
         }
-        await updateHistoryItem(lastItem.id!, lastItem)
-        setHistoryItem(lastItem)
-        let items = getHistoryItems();
-        setHistory(items)
-        let index = items.findIndex(i => i.id === item.id)
-        setVisibleActiveHistoryItemIndex(index)
-        setActiveTab(index.toString())
-        scrollToActiveTab()
-
-        if (prefGetCopyToClipboardAfterMerge()) {
-          console.log("Copying merged content to clipboard")
-        }
-
-      } else {
-        await addClipboardData(content,
-            sourceAppPath,
-            imageFileName,
-            imageThumbFileName,
-            imageWidth,
-            imageHeight,
-            imageSizeInBytes,
-            imageText)
       }
     }
+    await addClipboardData(content,
+        sourceAppPath,
+        imageFileName,
+        imageThumbFileName,
+        imageWidth,
+        imageHeight,
+        imageSizeInBytes,
+        imageText)
   }
 
   async function clearHistory() {
@@ -463,6 +454,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   (window as any).addClipboardData = addClipboardData;
   (window as any).mergeClipboardData = mergeClipboardData;
+  (window as any).copyToClipboardAfterMerge = copyToClipboardAfterMerge;
   (window as any).setTextFromImage = setTextFromImage;
   (window as any).clearHistory = clearHistory;
   (window as any).activateApp = activateApp;

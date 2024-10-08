@@ -26,23 +26,25 @@ struct ClipboardData {
 
 class ClipboardReaderMac {
  public:
-  explicit ClipboardReaderMac(const std::shared_ptr<MainApp> &app);
+  explicit ClipboardReaderMac();
   ~ClipboardReaderMac();
 
-  void start();
+  void start(const std::shared_ptr<MainApp> &app);
+  void copyToClipboardAfterMerge(std::string text);
 
  private:
   void readClipboardData();
   void readAndMergeClipboardData();
   bool readClipboardData(const std::shared_ptr<ClipboardData> &data);
-  void sendClipboardData(std::shared_ptr<ClipboardData> data, const std::string &function_name);
+  void addClipboardData(const std::shared_ptr<ClipboardData>& data);
+  void mergeClipboardData(const std::shared_ptr<ClipboardData>& data);
 
   std::shared_ptr<MainApp> app_;
   std::shared_ptr<ClipboardData> data_;
   long last_change_count_ = 0;
   bool pause_reader_ = false;
 #ifdef __OBJC__
-  id monitor_;
+  id monitor_ = nil;
 #endif
   std::mutex mutex_;
 };

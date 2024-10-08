@@ -7,12 +7,15 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
+#include "clipboard_reader_mac.h"
+
 class MainAppMac : public MainApp {
  public:
   explicit MainAppMac(const std::shared_ptr<molybden::App> &app,
                       const std::shared_ptr<AppSettings> &settings);
 
   bool init() override;
+  void launch() override;
 
   void show() override;
   void hide() override;
@@ -24,6 +27,7 @@ class MainAppMac : public MainApp {
   void copyToClipboard(const std::string &text,
                        const std::string &imageFileName,
                        const std::string &imageText) override;
+  void copyToClipboardAfterMerge(std::string text) override;
   void setOpenAtLogin(bool open) override;
   AppInfo getActiveAppInfo() override;
   std::string getAppIconAsBase64(const std::string& app_path) override;
@@ -54,6 +58,7 @@ class MainAppMac : public MainApp {
  private:
   molybden::Shortcut open_app_shortcut_;
   molybden::Shortcut open_settings_shortcut_;
+  std::shared_ptr<ClipboardReaderMac> clipboard_reader_;
 #ifdef __OBJC__
   NSRunningApplication *active_app_{};
 #endif

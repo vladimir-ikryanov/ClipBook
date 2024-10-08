@@ -11,8 +11,8 @@
 
 namespace fs = std::filesystem;
 
-static int kCheckIntervalInMilliseconds = 100;
-static int kCheckIntervalAttempts = 5;
+static int kCheckInterval = 500;
+static int kCopyToClipboardAfterMergeDelay = 1000;
 
 void extractTextFromImage(NSImage *image,
                           const std::string &imageFileName,
@@ -200,13 +200,26 @@ bool isEquals(const std::shared_ptr<ClipboardData> &newData,
   return true;
 }
 
-ClipboardReaderMac::ClipboardReaderMac(const std::shared_ptr<MainApp> &app) : app_(app) {
+ClipboardReaderMac::ClipboardReaderMac() = default;
+
+ClipboardReaderMac::~ClipboardReaderMac() {
+  if (monitor_ != nil) {
+    [NSEvent removeMonitor:monitor_];
+  }
+}
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
+
+void ClipboardReaderMac::start(const std::shared_ptr<MainApp> &app) {
+  app_ = app;
   monitor_ = [NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskKeyDown handler:^(NSEvent *event) {
-    if (!app_->settings()->isCopyAndMergeEnabled()) {
+    if (!app_->settings()->isCopyAndMergeEnabled() || app_->isPaused()) {
       return;
     }
     if (([event modifierFlags] & NSEventModifierFlagCommand) &&
         [[event characters] isEqualToString:@"c"]) {
+      std::lock_guard<std::mutex> guard(mutex_);
       static CFAbsoluteTime lastTapTime = 0;
       CFAbsoluteTime currentTime = CFAbsoluteTimeGetCurrent();
       // Detect double-tap within 500ms
@@ -218,27 +231,17 @@ ClipboardReaderMac::ClipboardReaderMac(const std::shared_ptr<MainApp> &app) : ap
       lastTapTime = currentTime;
     }
   }];
-}
 
-ClipboardReaderMac::~ClipboardReaderMac() {
-  [NSEvent removeMonitor:monitor_];
-}
-
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
-
-void ClipboardReaderMac::start() {
   std::thread t([this]() {
     while (true) {
       if (app_->isPaused()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(
-            kCheckIntervalInMilliseconds * kCheckIntervalAttempts));
+        std::this_thread::sleep_for(std::chrono::milliseconds(kCheckInterval));
         continue;
       }
-      int attempts = 0;
-      while (attempts < kCheckIntervalAttempts) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(kCheckIntervalInMilliseconds));
-        attempts++;
+      std::this_thread::sleep_for(std::chrono::milliseconds(kCheckInterval));
+      if (pause_reader_) {
+        pause_reader_ = false;
+        continue;
       }
       readClipboardData();
     }
@@ -248,20 +251,45 @@ void ClipboardReaderMac::start() {
 
 #pragma clang diagnostic pop
 
-void ClipboardReaderMac::sendClipboardData(std::shared_ptr<ClipboardData> data,
-                                           const std::string &function_name) {
-  auto frame = app_->browser()->mainFrame();
-  frame->executeJavaScript("window", [data, function_name](molybden::JsValue window) {
-    window.asJsObject()->call(function_name,
-                              data->content,
-                              data->active_app_info.path,
-                              data->image_info.file_name,
-                              data->image_info.thumb_file_name,
-                              data->image_info.width,
-                              data->image_info.height,
-                              data->image_info.size_in_bytes,
-                              data->image_info.text);
+void ClipboardReaderMac::copyToClipboardAfterMerge(std::string text) {
+  std::thread t([this, text]() {
+    std::this_thread::sleep_for(std::chrono::milliseconds(kCopyToClipboardAfterMergeDelay));
+    std::lock_guard<std::mutex> guard(mutex_);
+    NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+    [pasteboard clearContents];
+    NSString *string = [NSString stringWithUTF8String:text.c_str()];
+    [pasteboard setString:string forType:NSPasteboardTypeString];
+    readClipboardData(data_);
   });
+  t.detach();
+}
+
+void ClipboardReaderMac::addClipboardData(const std::shared_ptr<ClipboardData> &data) {
+  auto frame = app_->browser()->mainFrame();
+  auto window = frame->executeJavaScript("window");
+  window.asJsObject()->call("addClipboardData",
+                            data->content,
+                            data->active_app_info.path,
+                            data->image_info.file_name,
+                            data->image_info.thumb_file_name,
+                            data->image_info.width,
+                            data->image_info.height,
+                            data->image_info.size_in_bytes,
+                            data->image_info.text);
+}
+
+void ClipboardReaderMac::mergeClipboardData(const std::shared_ptr<ClipboardData> &data) {
+  auto frame = app_->browser()->mainFrame();
+  auto window = frame->executeJavaScript("window");
+  window.asJsObject()->call("mergeClipboardData",
+                            data->content,
+                            data->active_app_info.path,
+                            data->image_info.file_name,
+                            data->image_info.thumb_file_name,
+                            data->image_info.width,
+                            data->image_info.height,
+                            data->image_info.size_in_bytes,
+                            data->image_info.text);
 }
 
 void ClipboardReaderMac::readAndMergeClipboardData() {
@@ -269,7 +297,7 @@ void ClipboardReaderMac::readAndMergeClipboardData() {
     std::lock_guard<std::mutex> guard(mutex_);
     std::shared_ptr<ClipboardData> data = std::make_shared<ClipboardData>();
     if (readClipboardData(data)) {
-      sendClipboardData(data, "mergeClipboardData");
+      mergeClipboardData(data);
       data_ = data;
     }
     pause_reader_ = false;
@@ -279,14 +307,10 @@ void ClipboardReaderMac::readAndMergeClipboardData() {
 
 void ClipboardReaderMac::readClipboardData() {
   std::lock_guard<std::mutex> guard(mutex_);
-  if (pause_reader_) {
-    pause_reader_ = false;
-    return;
-  }
   std::shared_ptr<ClipboardData> data = std::make_shared<ClipboardData>();
   if (readClipboardData(data)) {
     if (!isEquals(data, data_)) {
-      sendClipboardData(data, "addClipboardData");
+      addClipboardData(data);
       data_ = data;
     }
   }
@@ -318,20 +342,6 @@ bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> 
   }
   if (ignore_confidential_content && [types containsObject:@"org.nspasteboard.ConcealedType"]) {
     return false;
-  }
-
-  // Read file paths.
-  if ([types containsObject:NSFilenamesPboardType]) {
-    NSArray *file_paths = [pasteboard propertyListForType:NSFilenamesPboardType];
-    if (file_paths != nil && [file_paths count] > 0) {
-      std::string content;
-      for (NSString *file_path in file_paths) {
-        content += [file_path UTF8String];
-        content += "\n";
-      }
-      data->content = content;
-      return true;
-    }
   }
 
   // Read image content in the PNG and TIFF formats.

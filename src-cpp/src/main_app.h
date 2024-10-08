@@ -36,6 +36,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   virtual void copyToClipboard(const std::string &text,
                                const std::string &imageFileName,
                                const std::string &imageText) = 0;
+  virtual void copyToClipboardAfterMerge(std::string text) = 0;
   virtual void setOpenAtLogin(bool open) = 0;
   virtual AppInfo getActiveAppInfo() = 0;
   virtual std::string getAppIconAsBase64(const std::string& app_path) = 0;
