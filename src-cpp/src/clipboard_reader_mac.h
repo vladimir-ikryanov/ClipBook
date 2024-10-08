@@ -42,7 +42,7 @@ class ClipboardReaderMac {
   std::shared_ptr<MainApp> app_;
   std::shared_ptr<ClipboardData> data_;
   long last_change_count_ = 0;
-  bool pause_reader_ = false;
+  bool copy_and_merge_requested_ = false;
 #ifdef __OBJC__
   id monitor_ = nil;
 #endif

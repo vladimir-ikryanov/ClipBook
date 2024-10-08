@@ -12,7 +12,7 @@
 namespace fs = std::filesystem;
 
 static int kCheckInterval = 500;
-static int kCopyToClipboardAfterMergeDelay = 1000;
+static int kCopyToClipboardAfterMergeDelay = 500;
 
 void extractTextFromImage(NSImage *image,
                           const std::string &imageFileName,
@@ -200,6 +200,8 @@ bool isEquals(const std::shared_ptr<ClipboardData> &newData,
   return true;
 }
 
+static CFAbsoluteTime lastTapTime = 0;
+
 ClipboardReaderMac::ClipboardReaderMac() = default;
 
 ClipboardReaderMac::~ClipboardReaderMac() {
@@ -219,14 +221,9 @@ void ClipboardReaderMac::start(const std::shared_ptr<MainApp> &app) {
     }
     if (([event modifierFlags] & NSEventModifierFlagCommand) &&
         [[event characters] isEqualToString:@"c"]) {
-      std::lock_guard<std::mutex> guard(mutex_);
-      static CFAbsoluteTime lastTapTime = 0;
       CFAbsoluteTime currentTime = CFAbsoluteTimeGetCurrent();
-      // Detect double-tap within 500ms
       if (currentTime - lastTapTime < 0.5) {
-        readAndMergeClipboardData();
-      } else {
-        pause_reader_ = true;
+        copy_and_merge_requested_ = true;
       }
       lastTapTime = currentTime;
     }
@@ -239,10 +236,6 @@ void ClipboardReaderMac::start(const std::shared_ptr<MainApp> &app) {
         continue;
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(kCheckInterval));
-      if (pause_reader_) {
-        pause_reader_ = false;
-        continue;
-      }
       readClipboardData();
     }
   });
@@ -253,7 +246,9 @@ void ClipboardReaderMac::start(const std::shared_ptr<MainApp> &app) {
 
 void ClipboardReaderMac::copyToClipboardAfterMerge(std::string text) {
   std::thread t([this, text]() {
-    std::this_thread::sleep_for(std::chrono::milliseconds(kCopyToClipboardAfterMergeDelay));
+    do {
+      std::this_thread::sleep_for(std::chrono::milliseconds(kCopyToClipboardAfterMergeDelay));
+    } while (copy_and_merge_requested_);
     std::lock_guard<std::mutex> guard(mutex_);
     NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
     [pasteboard clearContents];
@@ -300,20 +295,28 @@ void ClipboardReaderMac::readAndMergeClipboardData() {
       mergeClipboardData(data);
       data_ = data;
     }
-    pause_reader_ = false;
   });
   t.detach();
 }
 
 void ClipboardReaderMac::readClipboardData() {
+  // Let the user press Command+C second time and do not read the clipboard
+  // if the time since the last Command+C is less than 0.5 seconds.
+  CFAbsoluteTime currentTime = CFAbsoluteTimeGetCurrent();
+  if (currentTime - lastTapTime < 0.5) {
+    return;
+  }
   std::lock_guard<std::mutex> guard(mutex_);
   std::shared_ptr<ClipboardData> data = std::make_shared<ClipboardData>();
   if (readClipboardData(data)) {
-    if (!isEquals(data, data_)) {
+    data_ = data;
+    if (copy_and_merge_requested_) {
+      mergeClipboardData(data);
+    } else {
       addClipboardData(data);
-      data_ = data;
     }
   }
+  copy_and_merge_requested_ = false;
 }
 
 bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> &data) {
