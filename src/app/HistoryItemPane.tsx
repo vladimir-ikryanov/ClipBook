@@ -137,7 +137,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
           onDoubleClick={handleMouseDoubleClick}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}>
-        <div className="flex mr-3 text-primary-foreground">{renderClipIcon()}</div>
+        <div className="flex flex-none mr-3 text-primary-foreground">{renderClipIcon()}</div>
         <div
             className="flex-grow text-base text-justify font-normal whitespace-nowrap overflow-hidden overflow-ellipsis">
           {
