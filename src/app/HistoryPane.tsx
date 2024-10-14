@@ -120,18 +120,27 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                     imageSizeInBytes: number,
                                     imageText: string) {
     if (history.length > 0) {
-      let lastItem = history[0]
-      if (isTextItem(lastItem)) {
+      // Find the first non-favorite item to merge with.
+      let targetItem = history[0]
+      for (let i = 0; i < history.length; i++) {
+        const item = history[i]
+        if (!item.favorite) {
+          targetItem = item
+          break
+        }
+      }
+
+      if (isTextItem(targetItem)) {
         let item = new Clip(content, sourceAppPath, imageFileName)
         if (isTextItem(item)) {
-          lastItem.content += prefGetCopyAndMergeSeparator() + content
+          targetItem.content += prefGetCopyAndMergeSeparator() + content
 
           if (prefGetCopyToClipboardAfterMerge()) {
-            copyToClipboardAfterMerge(lastItem.content)
+            copyToClipboardAfterMerge(targetItem.content)
           }
 
-          await updateHistoryItem(lastItem.id!, lastItem)
-          setHistoryItem(lastItem)
+          await updateHistoryItem(targetItem.id!, targetItem)
+          setHistoryItem(targetItem)
           let items = getHistoryItems();
           setHistory(items)
           let index = items.findIndex(i => i.id === item.id)
