@@ -448,7 +448,7 @@ void MainApp::showSettingsWindow() {
   settings_window_->setWindowButtonVisible(WindowButtonType::kMaximize, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kRestore, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kZoom, false);
-  settings_window_->setSize(700, 740);
+  settings_window_->setSize(700, 633);
   settings_window_->centerWindow();
   settings_window_->show();
 }

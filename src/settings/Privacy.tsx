@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Switch} from "@/components/ui/switch";
 import {Label} from "@/components/ui/label";
-import {KeyboardIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
+import {KeyboardIcon, ListIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 import {useEffect, useState} from "react";
 import {
   prefGetAppsToIgnore,
@@ -75,12 +75,20 @@ export default function Privacy() {
             </div>
             <div
                 className="flex flex-row p-0 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
+              <a href="/settings/history" className="flex flex-row py-2 px-2 gap-x-2 w-full">
+                <ListIcon className="h-5 w-5 mt-0.5"/>
+                <span className="">History</span>
+              </a>
+            </div>
+            <div
+                className="flex flex-row p-0 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
               <a href="/settings/shortcuts" className="flex flex-row py-2 px-2 gap-x-2 w-full">
                 <KeyboardIcon className="h-5 w-5 mt-0.5"/>
                 <span className="">Shortcuts</span>
               </a>
             </div>
-            <div className="flex flex-row gap-x-2 py-2 px-2 mx-4 bg-settings-sidebarSelection rounded-sm shadow">
+            <div
+                className="flex flex-row gap-x-2 py-2 px-2 mx-4 bg-settings-sidebarSelection rounded-sm shadow">
               <ShieldCheckIcon className="h-5 w-5 mt-0.5"/>
               <span className="">Privacy</span>
             </div>

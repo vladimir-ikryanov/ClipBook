@@ -13,6 +13,7 @@ import './index.css'
 import {ThemeProvider} from "@/app/ThemeProvider";
 import Privacy from "@/settings/Privacy";
 import Shortcuts from "@/settings/Shortcuts";
+import History from "@/settings/History";
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
   {
     path: "/settings",
     element: <Settings/>,
+  },
+  {
+    path: "/settings/history",
+    element: <History/>,
   },
   {
     path: "/settings/privacy",
