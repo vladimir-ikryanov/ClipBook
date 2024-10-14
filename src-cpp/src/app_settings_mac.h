@@ -30,6 +30,9 @@ class AppSettingsMac : public AppSettings {
   void saveWarnOnClearHistory(bool warn) override;
   bool shouldWarnOnClearHistory() override;
 
+  void saveKeepFavoritesOnClearHistory(bool keep) override;
+  bool shouldKeepFavoritesOnClearHistory() override;
+
   void saveShowIconInMenuBar(bool show) override;
   bool shouldShowIconInMenuBar() override;
 

@@ -18,6 +18,7 @@ NSString *prefIgnoreTransientContent = @"privacy.ignore_transient_content";
 NSString *prefOpenAtLogin = @"app.open_at_login";
 NSString *prefCheckForUpdatesAutomatically = @"app.check_for_updates_automatically";
 NSString *prefWarnOnClearHistory = @"app.warn_on_clear_history";
+NSString *prefKeepFavoritesOnClearHistory = @"app.keep_favorites_on_clear_history";
 NSString *prefShowIconInMenuBar = @"app.show_icon_in_menu_bar";
 NSString *prefIgnoreApps = @"privacy.ignore_apps";
 NSString *prefCopyAndMergeEnabled = @"copy_and_merge.enabled";
@@ -194,6 +195,20 @@ bool AppSettingsMac::shouldWarnOnClearHistory() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:prefWarnOnClearHistory] != nil) {
     return [defaults boolForKey:prefWarnOnClearHistory];
+  }
+  return true;
+}
+
+void AppSettingsMac::saveKeepFavoritesOnClearHistory(bool keep) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:keep forKey:prefKeepFavoritesOnClearHistory];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldKeepFavoritesOnClearHistory() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefKeepFavoritesOnClearHistory] != nil) {
+    return [defaults boolForKey:prefKeepFavoritesOnClearHistory];
   }
   return true;
 }

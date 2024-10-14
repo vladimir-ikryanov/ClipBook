@@ -9,6 +9,7 @@ import {
   prefGetCopyAndMergeEnabled,
   prefGetCopyAndMergeSeparator,
   prefGetCopyToClipboardAfterMerge,
+  prefGetKeepFavoritesOnClearHistory,
   prefGetOpenAtLogin,
   prefGetShowIconInMenuBar,
   prefGetTheme,
@@ -16,7 +17,7 @@ import {
   prefSetCheckForUpdatesAutomatically,
   prefSetCopyAndMergeEnabled,
   prefSetCopyAndMergeSeparator,
-  prefSetCopyToClipboardAfterMerge,
+  prefSetCopyToClipboardAfterMerge, prefSetKeepFavoritesOnClearHistory,
   prefSetOpenAtLogin,
   prefSetShowIconInMenuBar,
   prefSetTheme,
@@ -37,6 +38,7 @@ export default function Settings() {
   const [theme, setTheme] = useState(prefGetTheme());
   const [openAtLogin, setOpenAtLogin] = useState(prefGetOpenAtLogin());
   const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory());
+  const [keepFavoritesOnClearHistory, setKeepFavoritesOnClearHistory] = useState(prefGetKeepFavoritesOnClearHistory());
   const [checkForUpdatesAutomatically, setCheckForUpdatesAutomatically] = useState(prefGetCheckForUpdatesAutomatically());
   const [showIconInMenuBar, setShowIconInMenuBar] = useState(prefGetShowIconInMenuBar());
   const [copyAndMergeEnabled, setCopyAndMergeEnabled] = useState(prefGetCopyAndMergeEnabled());
@@ -73,6 +75,11 @@ export default function Settings() {
   function handleWarnOnClearHistoryChange(warnOnClearHistory: boolean) {
     setWarnOnClearHistory(warnOnClearHistory)
     prefSetWarnOnClearHistory(warnOnClearHistory)
+  }
+
+  function handleKeepFavoritesOnClearHistoryChange(keepFavoritesOnClearHistory: boolean) {
+    setKeepFavoritesOnClearHistory(keepFavoritesOnClearHistory)
+    prefSetKeepFavoritesOnClearHistory(keepFavoritesOnClearHistory)
   }
 
   function handleShowIconChange(showIcon: boolean) {
@@ -257,13 +264,24 @@ Automatically copy the merged text to the system clipboard after&nbsp;merging.
 
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="warnOnClearAll" className="flex flex-col text-base">
-                <span className="">Warn when clearing all history</span>
+                <span className="">Warn when clearing entire history</span>
                 <span className="text-neutral-500 font-normal text-sm">
-Display a confirmation dialog when clearing all clipboard&nbsp;history.
+Display a confirmation dialog when clearing entire clipboard&nbsp;history.
             </span>
               </Label>
               <Switch id="warnOnClearAll" checked={warnOnClearHistory}
                       onCheckedChange={handleWarnOnClearHistoryChange}/>
+            </div>
+
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label htmlFor="keepFavoritesOnClearAll" className="flex flex-col text-base">
+                <span className="">Keep favorites when clearing entire history</span>
+                <span className="text-neutral-500 font-normal text-sm">
+Do not remove items market as favorite when clearing entire clipboard&nbsp;history.
+            </span>
+              </Label>
+              <Switch id="keepFavoritesOnClearAll" checked={keepFavoritesOnClearHistory}
+                      onCheckedChange={handleKeepFavoritesOnClearHistoryChange}/>
             </div>
           </div>
         </div>

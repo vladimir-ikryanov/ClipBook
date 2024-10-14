@@ -30,7 +30,7 @@ import {
   prefGetCopyToClipboardAfterMerge,
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
-  prefGetEditHistoryItemShortcut,
+  prefGetEditHistoryItemShortcut, prefGetKeepFavoritesOnClearHistory,
   prefGetOpenInBrowserShortcut,
   prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
@@ -162,7 +162,20 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function clearHistory() {
-    setHistory(await clear())
+    let keepFavorites = prefGetKeepFavoritesOnClearHistory()
+    let items = await clear(keepFavorites)
+    setHistory(items)
+    // If the history is not empty, update the preview text to the new active item.
+    if (items.length > 0) {
+      let activeHistoryItemIndex = getVisibleActiveHistoryItemIndex()
+      if (activeHistoryItemIndex >= items.length) {
+        activeHistoryItemIndex = 0
+        setVisibleActiveHistoryItemIndex(activeHistoryItemIndex)
+        setHistoryItem(items[getVisibleActiveHistoryItemIndex()])
+        setActiveTab(activeHistoryItemIndex.toString())
+        scrollToActiveTab()
+      }
+    }
   }
 
   function focusSearchField() {

@@ -243,7 +243,23 @@ export async function updateHistoryItem(id: number, item: Clip) {
   await updateClip(id, item)
 }
 
-export async function clear(): Promise<Clip[]> {
+function getFavorites(): Clip[] {
+  return history.filter(item => item.favorite)
+}
+
+export async function clear(keepFavorites: boolean): Promise<Clip[]> {
+  if (keepFavorites) {
+    let favorites = getFavorites()
+    if (favorites.length > 0) {
+      for (const clip of history) {
+        if (!clip.favorite) {
+          await deleteClip(clip.id!)
+        }
+      }
+      history = favorites
+      return getHistoryItems()
+    }
+  }
   history = []
   await deleteAllClips()
   return getHistoryItems()

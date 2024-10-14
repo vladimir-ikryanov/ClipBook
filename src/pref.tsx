@@ -8,6 +8,8 @@ declare const saveCheckForUpdatesAutomatically: (value: boolean) => void;
 declare const shouldCheckForUpdatesAutomatically: () => boolean;
 declare const saveWarnOnClearHistory: (warn: boolean) => void;
 declare const shouldWarnOnClearHistory: () => boolean;
+declare const saveKeepFavoritesOnClearHistory: (keep: boolean) => void;
+declare const shouldKeepFavoritesOnClearHistory: () => boolean;
 declare const saveIgnoreTransientContent: (ignore: boolean) => void;
 declare const saveIgnoreConfidentialContent: (ignore: boolean) => void;
 declare const shouldIgnoreTransientContent: () => boolean;
@@ -94,6 +96,14 @@ export function prefGetWarnOnClearHistory() {
 
 export function prefSetWarnOnClearHistory(warn: boolean) {
   saveWarnOnClearHistory(warn)
+}
+
+export function prefGetKeepFavoritesOnClearHistory() {
+  return shouldKeepFavoritesOnClearHistory()
+}
+
+export function prefSetKeepFavoritesOnClearHistory(keep: boolean) {
+  saveKeepFavoritesOnClearHistory(keep)
 }
 
 export function prefGetIgnoreTransientContent() {

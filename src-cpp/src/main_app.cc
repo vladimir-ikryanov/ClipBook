@@ -542,6 +542,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("shouldWarnOnClearHistory", [this]() -> bool {
     return settings_->shouldWarnOnClearHistory();
   });
+  window->putProperty("saveKeepFavoritesOnClearHistory", [this](bool keep) -> void {
+    settings_->saveKeepFavoritesOnClearHistory(keep);
+  });
+  window->putProperty("shouldKeepFavoritesOnClearHistory", [this]() -> bool {
+      return settings_->shouldKeepFavoritesOnClearHistory();
+  });
   window->putProperty("saveShowIconInMenuBar", [this](bool show) -> void {
     setShowIconInMenuBar(show);
     settings_->saveShowIconInMenuBar(show);
