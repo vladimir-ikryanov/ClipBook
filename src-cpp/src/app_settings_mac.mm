@@ -24,6 +24,7 @@ NSString *prefIgnoreApps = @"privacy.ignore_apps";
 NSString *prefCopyAndMergeEnabled = @"copy_and_merge.enabled";
 NSString *prefCopyAndMergeSeparator = @"copy_and_merge.separator";
 NSString *prefCopyToClipboardAfterMerge = @"copy_to_clipboard_after_merge";
+NSString *prefClearHistoryOnQuit = @"clear_history_on_quit";
 
 // Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
@@ -585,4 +586,18 @@ std::string AppSettingsMac::getToggleFavoriteShortcut() {
     return {[shortcut UTF8String]};
   }
   return "MetaLeft + KeyS";
+}
+
+void AppSettingsMac::saveClearHistoryOnQuit(bool clear) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:clear forKey:prefClearHistoryOnQuit];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldClearHistoryOnQuit() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefClearHistoryOnQuit] != nil) {
+    return [defaults boolForKey:prefClearHistoryOnQuit];
+  }
+  return false;
 }

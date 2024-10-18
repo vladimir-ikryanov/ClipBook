@@ -48,6 +48,9 @@ class AppSettingsMac : public AppSettings {
   void saveCopyToClipboardAfterMerge(bool copy) override;
   bool shouldCopyToClipboardAfterMerge() override;
 
+  void saveClearHistoryOnQuit(bool clear) override;
+  bool shouldClearHistoryOnQuit() override;
+
   // Shortcuts.
 
   void saveOpenAppShortcut(std::string shortcut) override;

@@ -24,6 +24,8 @@ declare const saveCopyAndMergeSeparator: (separator: string) => void;
 declare const getCopyAndMergeSeparator: () => string;
 declare const saveCopyToClipboardAfterMerge: (copy: boolean) => void;
 declare const shouldCopyToClipboardAfterMerge: () => boolean;
+declare const saveClearHistoryOnQuit: (clear: boolean) => void;
+declare const shouldClearHistoryOnQuit: () => boolean;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -346,4 +348,12 @@ export function prefGetQuickPasteShortcuts(): string[] {
     shortcuts.push(`${modifier} + Digit${i}`)
   }
   return shortcuts
+}
+
+export function prefGetClearHistoryOnQuit() {
+  return shouldClearHistoryOnQuit()
+}
+
+export function prefSetClearHistoryOnQuit(clear: boolean) {
+  saveClearHistoryOnQuit(clear)
 }

@@ -67,6 +67,8 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &window);
   void deleteImage(const std::string &imageFileName);
 
+  void quit();
+
   virtual void enableOpenAppShortcut() = 0;
   virtual void disableOpenAppShortcut() = 0;
   virtual void updateOpenSettingsShortcut() = 0;

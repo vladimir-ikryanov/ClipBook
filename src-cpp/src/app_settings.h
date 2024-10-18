@@ -52,6 +52,9 @@ class AppSettings {
   virtual void saveCopyToClipboardAfterMerge(bool copy) = 0;
   virtual bool shouldCopyToClipboardAfterMerge() = 0;
 
+  virtual void saveClearHistoryOnQuit(bool clear) = 0;
+  virtual bool shouldClearHistoryOnQuit() = 0;
+
   // Shortcuts.
 
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;

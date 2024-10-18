@@ -573,6 +573,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("shouldCopyToClipboardAfterMerge", [this]() -> bool {
     return settings_->shouldCopyToClipboardAfterMerge();
   });
+  window->putProperty("saveClearHistoryOnQuit", [this](bool clear) -> void {
+    settings_->saveClearHistoryOnQuit(clear);
+  });
+  window->putProperty("shouldClearHistoryOnQuit", [this]() -> bool {
+    return settings_->shouldClearHistoryOnQuit();
+  });
 
   // Application shortcuts.
   window->putProperty("saveOpenAppShortcut", [this](std::string shortcut) -> void {
@@ -779,10 +785,17 @@ void MainApp::createTray() {
           pause_resume_item_,
           menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
             std::thread([this]() {
-              app_->quit();
+              quit();
             }).detach();
           })
       }));
+}
+
+void MainApp::quit() {
+  if (settings_->shouldClearHistoryOnQuit()) {
+    app_window_->mainFrame()->executeJavaScript("clearHistory()");
+  }
+  app_->quit();
 }
 
 void MainApp::destroyTray() {

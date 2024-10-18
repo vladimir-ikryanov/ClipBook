@@ -3,12 +3,12 @@ import {Label} from "@/components/ui/label";
 import {Switch} from "@/components/ui/switch";
 import {useEffect, useState} from "react";
 import {
-  CopyAndMergeSeparator,
+  CopyAndMergeSeparator, prefGetClearHistoryOnQuit,
   prefGetCopyAndMergeEnabled,
   prefGetCopyAndMergeSeparator,
   prefGetCopyToClipboardAfterMerge,
   prefGetKeepFavoritesOnClearHistory,
-  prefGetWarnOnClearHistory,
+  prefGetWarnOnClearHistory, prefSetClearHistoryOnQuit,
   prefSetCopyAndMergeEnabled,
   prefSetCopyAndMergeSeparator,
   prefSetCopyToClipboardAfterMerge, prefSetKeepFavoritesOnClearHistory,
@@ -31,6 +31,7 @@ export default function History() {
   const [copyAndMergeEnabled, setCopyAndMergeEnabled] = useState(prefGetCopyAndMergeEnabled());
   const [copyToClipboardAfterMerge, setCopyToClipboardAfterMerge] = useState(prefGetCopyToClipboardAfterMerge());
   const [copyAndMergeSeparator, setCopyAndMergeSeparator] = useState(prefGetCopyAndMergeSeparator());
+  const [clearHistoryOnQuit, setClearHistoryOnQuit] = useState(prefGetClearHistoryOnQuit());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -67,6 +68,11 @@ export default function History() {
   function handleCopyAndMergeSeparatorChange(separator: CopyAndMergeSeparator) {
     setCopyAndMergeSeparator(separator)
     prefSetCopyAndMergeSeparator(separator)
+  }
+
+  function handleClearHistoryOnQuitChange(clearHistoryOnQuit: boolean) {
+    setClearHistoryOnQuit(clearHistoryOnQuit)
+    prefSetClearHistoryOnQuit(clearHistoryOnQuit)
   }
 
   return (
@@ -175,6 +181,19 @@ Do not remove items market as favorite when clearing entire clipboard&nbsp;histo
               </Label>
               <Switch id="keepFavoritesOnClearAll" checked={keepFavoritesOnClearHistory}
                       onCheckedChange={handleKeepFavoritesOnClearHistoryChange}/>
+            </div>
+
+            <hr/>
+
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label htmlFor="clearHistoryOnQuit" className="flex flex-col text-base">
+                <span className="">Clear entire history on quit</span>
+                <span className="text-neutral-500 font-normal text-sm">
+Clear the entire clipboard history when ClipBook is&nbsp;terminated.
+            </span>
+              </Label>
+              <Switch id="clearHistoryOnQuit" checked={clearHistoryOnQuit}
+                      onCheckedChange={handleClearHistoryOnQuitChange}/>
             </div>
           </div>
         </div>
