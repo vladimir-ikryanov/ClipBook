@@ -334,3 +334,16 @@ export function prefGetCopyToClipboardAfterMerge() {
 export function prefSetCopyToClipboardAfterMerge(copy: boolean) {
   saveCopyToClipboardAfterMerge(copy)
 }
+
+export function prefGetQuickPasteModifier() {
+  return "MetaLeft"
+}
+
+export function prefGetQuickPasteShortcuts(): string[] {
+  const shortcuts = [];
+  let modifier = prefGetQuickPasteModifier();
+  for (let i = 1; i <= 9; i++) {
+    shortcuts.push(`${modifier} + Digit${i}`)
+  }
+  return shortcuts
+}

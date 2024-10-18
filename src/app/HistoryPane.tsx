@@ -22,7 +22,7 @@ import {
   setVisibleActiveHistoryItemIndex,
   updateHistoryItem
 } from "@/data";
-import {isShortcutMatch} from "@/lib/shortcuts";
+import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
   prefGetClearHistoryShortcut,
   prefGetCopyAndMergeSeparator,
@@ -30,10 +30,13 @@ import {
   prefGetCopyToClipboardAfterMerge,
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
-  prefGetEditHistoryItemShortcut, prefGetKeepFavoritesOnClearHistory,
+  prefGetEditHistoryItemShortcut,
+  prefGetKeepFavoritesOnClearHistory,
   prefGetOpenInBrowserShortcut,
   prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetQuickPasteModifier,
+  prefGetQuickPasteShortcuts,
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
@@ -72,6 +75,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const listRef = useRef<List>(null);
   const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
+  const [quickPasteModifierPressed, setQuickPasteModifierPressed] = useState(false);
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
   const [historyItem, setHistoryItem] = useState(history[getVisibleActiveHistoryItemIndex()]);
 
@@ -282,11 +286,57 @@ export default function HistoryPane(props: HistoryPaneProps) {
         openSettingsWindow()
         e.preventDefault()
       }
+
+      // Paste using quick paste shortcuts.
+      let shortcuts = prefGetQuickPasteShortcuts();
+      let quickPasteShortcut = isQuickPasteShortcut(shortcuts, e);
+      if (quickPasteShortcut.match) {
+        handlePasteByIndex(quickPasteShortcut.index)
+        e.preventDefault()
+      }
     }
 
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
   }, [history])
+
+  // Listen to key down and key up events to find out when the Command key is pressed and released.
+  // When the Command key is pressed set the bool property to true, when it is released set it to false.
+  useEffect(() => {
+    let pressTimer: NodeJS.Timeout | null = null; // To track the timer
+
+    const down = (e: KeyboardEvent) => {
+      if (e.code === prefGetQuickPasteModifier()) {
+        // Start the timer when the key is pressed
+        pressTimer = setTimeout(() => {
+          setQuickPasteModifierPressed(true);
+        }, 500); // 500ms delay
+      }
+    };
+
+    const up = (e: KeyboardEvent) => {
+      if (e.code === prefGetQuickPasteModifier()) {
+        // Clear the timer if the key is released before 500ms
+        if (pressTimer) {
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+
+        // If the state was set to true, reset it on key release
+        if (quickPasteModifierPressed) {
+          setQuickPasteModifierPressed(false);
+        }
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    document.addEventListener("keyup", up);
+
+    return () => {
+      document.removeEventListener("keydown", down);
+      document.removeEventListener("keyup", up);
+    };
+  }, [quickPasteModifierPressed]);
 
   function selectNextItem() {
     let activeTabIndex = getVisibleActiveHistoryItemIndex();
@@ -321,6 +371,19 @@ export default function HistoryPane(props: HistoryPaneProps) {
     pasteInFrontApp(item.content, imageFileName, imageText)
     // Clear the search query in the search field after paste.
     handleSearchQueryChange("")
+  }
+
+  function handlePasteByIndex(index: number) {
+    if (index < history.length) {
+      let item = history[index]
+      let imageFileName = item.imageFileName ? item.imageFileName : "";
+      let imageText = item.imageText ? item.imageText : "";
+      pasteInFrontApp(item.content, imageFileName, imageText)
+      // Clear the search query in the search field after paste.
+      handleSearchQueryChange("")
+      // Clear the indicator after paste.
+      setQuickPasteModifierPressed(false)
+    }
   }
 
   function handleClose(): void {
@@ -513,6 +576,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onShowHidePreview={handleTogglePreview}
                               onMouseDoubleClick={handleMouseDoubleClick}
                               isPreviewVisible={previewVisible}
+                              isQuickPasteModifierPressed={quickPasteModifierPressed}
                               searchFieldRef={searchFieldRef}
                               listRef={listRef}
                               onPaste={handlePaste}

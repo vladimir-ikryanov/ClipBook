@@ -18,6 +18,7 @@ type HistoryItemListPaneProps = {
   searchQuery: string
   onSearchQueryChange: (searchQuery: string) => void
   isPreviewVisible: boolean
+  isQuickPasteModifierPressed: boolean
   onShowHidePreview: () => void
   onPaste: () => void
   onClose: () => void
@@ -67,6 +68,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
                                          historySize={props.history.length}
                                          appName={props.appName}
                                          appIcon={props.appIcon}
+                                         isQuickPasteModifierPressed={props.isQuickPasteModifierPressed}
                                          onHideClipDropdownMenu={props.onHideClipDropdownMenu}
                                          onPaste={props.onPaste}
                                          onEditHistoryItem={props.onEditHistoryItem}

@@ -175,3 +175,15 @@ export const isShortcutMatch = (shortcut: string, event: KeyboardEvent): boolean
 export const isModifierKey = (key: string): boolean => {
   return ['MetaLeft', 'MetaRight', 'AltLeft', 'AltRight', 'ControlLeft', 'ControlRight', 'ShiftLeft', 'ShiftRight'].includes(key);
 }
+
+export const isQuickPasteShortcut = (shortcuts: string[], event: KeyboardEvent): {
+  match: boolean,
+  index: number
+} => {
+  for (let i = 0; i < shortcuts.length; i++){
+    if (isShortcutMatch(shortcuts[i], event)) {
+      return {match: true, index: i}
+    }
+  }
+  return {match: false, index: -1}
+}

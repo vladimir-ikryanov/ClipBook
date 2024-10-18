@@ -11,6 +11,7 @@ import {
   StarIcon
 } from "lucide-react";
 import HistoryItemMenu, {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
+import ShortcutLabel from "@/app/ShortcutLabel";
 
 type HistoryItemPaneProps = {
   item: Clip
@@ -18,6 +19,7 @@ type HistoryItemPaneProps = {
   historySize: number
   appName: string
   appIcon: string
+  isQuickPasteModifierPressed: boolean
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onMouseDoubleClick: (tabIndex: number) => void
   onPaste: () => void
@@ -76,6 +78,9 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   }
 
   function renderActionsButton() {
+    if (props.isQuickPasteModifierPressed) {
+      return renderQuickPasteAlias()
+    }
     if (mouseOver || actionsMenuOpen) {
       return <HistoryItemMenu item={props.item}
                               appName={props.appName}
@@ -99,6 +104,18 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     }
     return <div className="ml-4 justify-center items-center text-primary-foreground">
       <StarIcon className="h-4 w-5"/>
+    </div>
+  }
+
+  function renderQuickPasteAlias() {
+    if (!props.isQuickPasteModifierPressed) {
+      return null
+    }
+    if (props.index >= 9) {
+      return null
+    }
+    return <div className="flex flex-none ml-4">
+      <ShortcutLabel shortcut={String(props.index + 1)}/>
     </div>
   }
 
