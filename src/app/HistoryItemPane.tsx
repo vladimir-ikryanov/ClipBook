@@ -119,12 +119,18 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     </div>
   }
 
+  function escapeRegExp(string: string) {
+    // Escapes special characters used in regular expressions
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   function highlightAllMatches(text: string, query: string) {
     if (!query) {
       return text;
     }
 
-    const regex = new RegExp(`(${query})`, 'gi');
+    const escapedQuery = escapeRegExp(query);
+    const regex = new RegExp(`(${escapedQuery})`, 'gi');
     const parts = text.split(regex);
     return <span>{
       parts.map((part, index) =>
