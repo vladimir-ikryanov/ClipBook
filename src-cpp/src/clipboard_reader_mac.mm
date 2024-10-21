@@ -215,6 +215,10 @@ ClipboardReaderMac::~ClipboardReaderMac() {
 
 void ClipboardReaderMac::start(const std::shared_ptr<MainApp> &app) {
   app_ = app;
+
+  // Initialize the last change count on start to ignore the initial clipboard content.
+  last_change_count_ = [[NSPasteboard generalPasteboard] changeCount];
+
   monitor_ = [NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskKeyDown handler:^(NSEvent *event) {
     if (!app_->settings()->isCopyAndMergeEnabled() || app_->isPaused()) {
       return;
