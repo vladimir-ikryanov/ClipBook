@@ -67,6 +67,14 @@ declare const saveOpenSettingsShortcut: (shortcut: string) => void;
 declare const getOpenSettingsShortcut: () => string;
 declare const saveToggleFavoriteShortcut: (shortcut: string) => void;
 declare const getToggleFavoriteShortcut: () => string;
+declare const saveNavigateToFirstItemShortcut: (shortcut: string) => void;
+declare const getNavigateToFirstItemShortcut: () => string;
+declare const saveNavigateToLastItemShortcut: (shortcut: string) => void;
+declare const getNavigateToLastItemShortcut: () => string;
+declare const saveNavigateToNextGroupOfItemsShortcut: (shortcut: string) => void;
+declare const getNavigateToNextGroupOfItemsShortcut: () => string;
+declare const saveNavigateToPrevGroupOfItemsShortcut: (shortcut: string) => void;
+declare const getNavigateToPrevGroupOfItemsShortcut: () => string;
 
 export function prefGetTheme() {
   return getTheme()
@@ -364,4 +372,36 @@ export function prefGetClearHistoryOnMacReboot() {
 
 export function prefSetClearHistoryOnMacReboot(clear: boolean) {
   saveClearHistoryOnMacReboot(clear)
+}
+
+export function prefGetNavigateToFirstItemShortcut() {
+  return getNavigateToFirstItemShortcut()
+}
+
+export function prefSetNavigateToFirstItemShortcut(shortcut: string) {
+  saveNavigateToFirstItemShortcut(shortcut)
+}
+
+export function prefGetNavigateToLastItemShortcut() {
+  return getNavigateToLastItemShortcut()
+}
+
+export function prefSetNavigateToLastItemShortcut(shortcut: string) {
+  saveNavigateToLastItemShortcut(shortcut)
+}
+
+export function prefGetNavigateToNextGroupOfItemsShortcut() {
+  return getNavigateToNextGroupOfItemsShortcut()
+}
+
+export function prefSetNavigateToNextGroupOfItemsShortcut(shortcut: string) {
+  saveNavigateToNextGroupOfItemsShortcut(shortcut)
+}
+
+export function prefGetNavigateToPrevGroupOfItemsShortcut() {
+  return getNavigateToPrevGroupOfItemsShortcut()
+}
+
+export function prefSetNavigateToPrevGroupOfItemsShortcut(shortcut: string) {
+  saveNavigateToPrevGroupOfItemsShortcut(shortcut)
 }

@@ -50,6 +50,10 @@ NSString *prefZoomUIInShortcut = @"app.zoom_ui_in_shortcut2";
 NSString *prefZoomUIOutShortcut = @"app.zoom_ui_out_shortcut2";
 NSString *prefOpenSettingsShortcut = @"app.open_settings_shortcut2";
 NSString *prefToggleFavoriteShortcut = @"app.toggle_favorite_shortcut2";
+NSString *prefNavigateToFirstItemShortcut = @"app.navigate_to_first_item_shortcut";
+NSString *prefNavigateToLastItemShortcut = @"app.navigate_to_last_item_shortcut";
+NSString *prefNavigateToNextGroupOfItemsShortcut = @"app.navigate_to_next_group_of_items_shortcut";
+NSString *prefNavigateToPrevGroupOfItemsShortcut = @"app.navigate_to_prev_group_of_items_shortcut";
 
 AppSettingsMac::AppSettingsMac() = default;
 
@@ -632,4 +636,65 @@ bool AppSettingsMac::shouldClearHistoryOnMacReboot() {
     return [defaults boolForKey:prefClearHistoryOnMacReboot];
   }
   return false;
+}
+
+
+void AppSettingsMac::saveNavigateToFirstItemShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefNavigateToFirstItemShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getNavigateToFirstItemShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefNavigateToFirstItemShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "MetaLeft + ArrowUp";
+}
+
+void AppSettingsMac::saveNavigateToLastItemShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefNavigateToLastItemShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getNavigateToLastItemShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefNavigateToLastItemShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "MetaLeft + ArrowDown";
+}
+
+void AppSettingsMac::saveNavigateToNextGroupOfItemsShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefNavigateToNextGroupOfItemsShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getNavigateToNextGroupOfItemsShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefNavigateToNextGroupOfItemsShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "AltLeft + ArrowDown";
+}
+
+void AppSettingsMac::saveNavigateToPrevGroupOfItemsShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefNavigateToPrevGroupOfItemsShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getNavigateToPrevGroupOfItemsShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefNavigateToPrevGroupOfItemsShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "AltLeft + ArrowUp";
 }

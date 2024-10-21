@@ -720,10 +720,36 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getToggleFavoriteShortcut", [this]() -> std::string {
     return settings_->getToggleFavoriteShortcut();
   });
+  window->putProperty("saveNavigateToFirstItemShortcut", [this](std::string shortcut) -> void {
+    settings_->saveNavigateToFirstItemShortcut(shortcut);
+  });
+  window->putProperty("getNavigateToFirstItemShortcut", [this]() -> std::string {
+    return settings_->getNavigateToFirstItemShortcut();
+  });
+  window->putProperty("saveNavigateToLastItemShortcut", [this](std::string shortcut) -> void {
+    settings_->saveNavigateToLastItemShortcut(shortcut);
+  });
+  window->putProperty("getNavigateToLastItemShortcut", [this]() -> std::string {
+    return settings_->getNavigateToLastItemShortcut();
+  });
+  window->putProperty("saveNavigateToNextGroupOfItemsShortcut",
+                      [this](std::string shortcut) -> void {
+                        settings_->saveNavigateToNextGroupOfItemsShortcut(shortcut);
+                      });
+  window->putProperty("getNavigateToNextGroupOfItemsShortcut", [this]() -> std::string {
+    return settings_->getNavigateToNextGroupOfItemsShortcut();
+  });
+  window->putProperty("saveNavigateToPrevGroupOfItemsShortcut",
+                      [this](std::string shortcut) -> void {
+                        settings_->saveNavigateToPrevGroupOfItemsShortcut(shortcut);
+                      });
+  window->putProperty("getNavigateToPrevGroupOfItemsShortcut", [this]() -> std::string {
+    return settings_->getNavigateToPrevGroupOfItemsShortcut();
+  });
+
   window->putProperty("selectAppsToIgnore", [this]() {
     selectAppsToIgnore();
   });
-
   window->putProperty("getAppsToIgnore", [this]() -> std::string {
     return settings_->getAppsToIgnore();
   });

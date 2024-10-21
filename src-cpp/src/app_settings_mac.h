@@ -119,6 +119,18 @@ class AppSettingsMac : public AppSettings {
   void saveToggleFavoriteShortcut(std::string shortcut) override;
   std::string getToggleFavoriteShortcut() override;
 
+  void saveNavigateToFirstItemShortcut(std::string shortcut) override;
+  std::string getNavigateToFirstItemShortcut() override;
+
+  void saveNavigateToLastItemShortcut(std::string shortcut) override;
+  std::string getNavigateToLastItemShortcut() override;
+
+  void saveNavigateToNextGroupOfItemsShortcut(std::string shortcut) override;
+  std::string getNavigateToNextGroupOfItemsShortcut() override;
+
+  void saveNavigateToPrevGroupOfItemsShortcut(std::string shortcut) override;
+  std::string getNavigateToPrevGroupOfItemsShortcut() override;
+
  private:
   static molybden::Rect getWindowBoundsForScreen(int screen_id);
 };

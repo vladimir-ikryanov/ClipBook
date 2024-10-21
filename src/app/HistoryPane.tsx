@@ -32,6 +32,10 @@ import {
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetKeepFavoritesOnClearHistory,
+  prefGetNavigateToFirstItemShortcut,
+  prefGetNavigateToLastItemShortcut,
+  prefGetNavigateToNextGroupOfItemsShortcut,
+  prefGetNavigateToPrevGroupOfItemsShortcut,
   prefGetOpenInBrowserShortcut,
   prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
@@ -224,6 +228,26 @@ export default function HistoryPane(props: HistoryPaneProps) {
         selectNextItem()
         e.preventDefault()
       }
+      // Select the first item in the list.
+      if (isShortcutMatch(prefGetNavigateToFirstItemShortcut(), e)) {
+        selectFirstItem()
+        e.preventDefault()
+      }
+      // Select the last item in the list.
+      if (isShortcutMatch(prefGetNavigateToLastItemShortcut(), e)) {
+        selectLastItem()
+        e.preventDefault()
+      }
+      // Jump to the next fifth item in the list.
+      if (isShortcutMatch(prefGetNavigateToNextGroupOfItemsShortcut(), e)) {
+        jumpToNextGroupOfItems()
+        e.preventDefault()
+      }
+      // Jump to the previous fifth item in the list.
+      if (isShortcutMatch(prefGetNavigateToPrevGroupOfItemsShortcut(), e)) {
+        jumpToPrevGroupOfItems()
+        e.preventDefault()
+      }
       // Paste the selected item to the active app when the paste shortcut is pressed.
       if (isShortcutMatch(prefGetPasteSelectedItemToActiveAppShortcut(), e)) {
         handlePaste()
@@ -358,6 +382,50 @@ export default function HistoryPane(props: HistoryPaneProps) {
       setHistoryItem(history[activeTabIndex])
       scrollToActiveTab()
     }
+  }
+
+  function selectFirstItem() {
+    let activeTabIndex = 0;
+    setVisibleActiveHistoryItemIndex(activeTabIndex)
+    setActiveTab(activeTabIndex.toString())
+    setHistoryItem(history[activeTabIndex])
+    scrollToActiveTab()
+  }
+
+  function selectLastItem() {
+    let activeTabIndex = getVisibleHistoryItemsLength() - 1;
+    setVisibleActiveHistoryItemIndex(activeTabIndex)
+    setActiveTab(activeTabIndex.toString())
+    setHistoryItem(history[activeTabIndex])
+    scrollToActiveTab()
+  }
+
+  function jumpToNextGroupOfItems() {
+    let activeTabIndex = getVisibleActiveHistoryItemIndex();
+    let nextGroupIndex = activeTabIndex + 5;
+    if (nextGroupIndex < getVisibleHistoryItemsLength()) {
+      activeTabIndex = nextGroupIndex;
+    } else {
+      activeTabIndex = getVisibleHistoryItemsLength() - 1;
+    }
+    setVisibleActiveHistoryItemIndex(activeTabIndex)
+    setActiveTab(activeTabIndex.toString())
+    setHistoryItem(history[activeTabIndex])
+    scrollToActiveTab()
+  }
+
+  function jumpToPrevGroupOfItems() {
+    let activeTabIndex = getVisibleActiveHistoryItemIndex();
+    let previousGroupIndex = activeTabIndex - 5;
+    if (previousGroupIndex >= 0) {
+      activeTabIndex = previousGroupIndex;
+    } else {
+      activeTabIndex = 0;
+    }
+    setVisibleActiveHistoryItemIndex(activeTabIndex)
+    setActiveTab(activeTabIndex.toString())
+    setHistoryItem(history[activeTabIndex])
+    scrollToActiveTab()
   }
 
   function isPreviewVisible(): boolean {

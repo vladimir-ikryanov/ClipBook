@@ -122,6 +122,18 @@ class AppSettings {
 
   virtual void saveToggleFavoriteShortcut(std::string shortcut) = 0;
   virtual std::string getToggleFavoriteShortcut() = 0;
+
+  virtual void saveNavigateToFirstItemShortcut(std::string shortcut) = 0;
+  virtual std::string getNavigateToFirstItemShortcut() = 0;
+
+  virtual void saveNavigateToLastItemShortcut(std::string shortcut) = 0;
+  virtual std::string getNavigateToLastItemShortcut() = 0;
+
+  virtual void saveNavigateToNextGroupOfItemsShortcut(std::string shortcut) = 0;
+  virtual std::string getNavigateToNextGroupOfItemsShortcut() = 0;
+
+  virtual void saveNavigateToPrevGroupOfItemsShortcut(std::string shortcut) = 0;
+  virtual std::string getNavigateToPrevGroupOfItemsShortcut() = 0;
 };
 
 
