@@ -13,6 +13,9 @@ class AppSettings {
  public:
   static std::shared_ptr<AppSettings> create();
 
+  virtual void saveLastSystemBootTime(long time) = 0;
+  virtual long getLastSystemBootTime() = 0;
+
   virtual void saveTheme(std::string theme) = 0;
   virtual std::string getTheme() = 0;
 
@@ -54,6 +57,9 @@ class AppSettings {
 
   virtual void saveClearHistoryOnQuit(bool clear) = 0;
   virtual bool shouldClearHistoryOnQuit() = 0;
+
+  virtual void saveClearHistoryOnMacReboot(bool clear) = 0;
+  virtual bool shouldClearHistoryOnMacReboot() = 0;
 
   // Shortcuts.
 

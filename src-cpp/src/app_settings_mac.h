@@ -9,6 +9,9 @@ class AppSettingsMac : public AppSettings {
  public:
   AppSettingsMac();
 
+  void saveLastSystemBootTime(long time) override;
+  long getLastSystemBootTime() override;
+
   void saveTheme(std::string theme) override;
   std::string getTheme() override;
 
@@ -50,6 +53,9 @@ class AppSettingsMac : public AppSettings {
 
   void saveClearHistoryOnQuit(bool clear) override;
   bool shouldClearHistoryOnQuit() override;
+
+  void saveClearHistoryOnMacReboot(bool clear) override;
+  bool shouldClearHistoryOnMacReboot() override;
 
   // Shortcuts.
 

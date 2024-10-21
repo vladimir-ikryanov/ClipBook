@@ -26,6 +26,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSetti
       app_window_visible_(false),
       checking_for_updates_(false),
       app_paused_(false),
+      after_system_reboot_(false),
       settings_(settings) {
   request_interceptor_ = std::make_shared<UrlRequestInterceptor>();
 }
@@ -70,6 +71,14 @@ bool MainApp::init() {
 
   // Run the update checker.
   runUpdateChecker();
+
+  // Check if the app is running after system reboot.
+  auto system_boot_time = getSystemBootTime();
+  auto last_system_boot_time = settings_->getLastSystemBootTime();
+  if (system_boot_time > last_system_boot_time) {
+    after_system_reboot_ = true;
+    settings_->saveLastSystemBootTime(system_boot_time);
+  }
 
   std::string filePath = getUserDataDir() + "/version.txt";
   if (!fs::exists(filePath)) {
@@ -448,7 +457,7 @@ void MainApp::showSettingsWindow() {
   settings_window_->setWindowButtonVisible(WindowButtonType::kMaximize, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kRestore, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kZoom, false);
-  settings_window_->setSize(700, 633);
+  settings_window_->setSize(700, 655);
   settings_window_->centerWindow();
   settings_window_->show();
 }
@@ -502,6 +511,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("updateOpenSettingsShortcut", [this]() {
     updateOpenSettingsShortcut();
+  });
+  window->putProperty("isAfterSystemReboot", [this]() -> bool {
+    return after_system_reboot_;
   });
 
   window->putProperty("saveTheme", [this](std::string theme) -> void {
@@ -578,6 +590,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("shouldClearHistoryOnQuit", [this]() -> bool {
     return settings_->shouldClearHistoryOnQuit();
+  });
+  window->putProperty("saveClearHistoryOnMacReboot", [this](bool clear) -> void {
+    settings_->saveClearHistoryOnMacReboot(clear);
+  });
+  window->putProperty("shouldClearHistoryOnMacReboot", [this]() -> bool {
+      return settings_->shouldClearHistoryOnMacReboot();
   });
 
   // Application shortcuts.
@@ -832,4 +850,8 @@ void MainApp::deleteImage(const std::string &imageFileName) {
   if (fs::exists(filePath)) {
       fs::remove(filePath);
   }
+}
+
+long MainApp::getSystemBootTime() {
+  return -1;
 }

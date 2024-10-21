@@ -3,15 +3,20 @@ import {Label} from "@/components/ui/label";
 import {Switch} from "@/components/ui/switch";
 import {useEffect, useState} from "react";
 import {
-  CopyAndMergeSeparator, prefGetClearHistoryOnQuit,
+  CopyAndMergeSeparator,
+  prefGetClearHistoryOnMacReboot,
+  prefGetClearHistoryOnQuit,
   prefGetCopyAndMergeEnabled,
   prefGetCopyAndMergeSeparator,
   prefGetCopyToClipboardAfterMerge,
   prefGetKeepFavoritesOnClearHistory,
-  prefGetWarnOnClearHistory, prefSetClearHistoryOnQuit,
+  prefGetWarnOnClearHistory,
+  prefSetClearHistoryOnMacReboot,
+  prefSetClearHistoryOnQuit,
   prefSetCopyAndMergeEnabled,
   prefSetCopyAndMergeSeparator,
-  prefSetCopyToClipboardAfterMerge, prefSetKeepFavoritesOnClearHistory,
+  prefSetCopyToClipboardAfterMerge,
+  prefSetKeepFavoritesOnClearHistory,
   prefSetWarnOnClearHistory,
 } from "@/pref";
 import {KeyboardIcon, ListIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
@@ -32,6 +37,7 @@ export default function History() {
   const [copyToClipboardAfterMerge, setCopyToClipboardAfterMerge] = useState(prefGetCopyToClipboardAfterMerge());
   const [copyAndMergeSeparator, setCopyAndMergeSeparator] = useState(prefGetCopyAndMergeSeparator());
   const [clearHistoryOnQuit, setClearHistoryOnQuit] = useState(prefGetClearHistoryOnQuit());
+  const [clearHistoryOnMacReboot, setClearHistoryOnMacReboot] = useState(prefGetClearHistoryOnMacReboot());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -73,6 +79,11 @@ export default function History() {
   function handleClearHistoryOnQuitChange(clearHistoryOnQuit: boolean) {
     setClearHistoryOnQuit(clearHistoryOnQuit)
     prefSetClearHistoryOnQuit(clearHistoryOnQuit)
+  }
+
+  function handleClearHistoryOnMacRebootChange(clearHistoryOnMacReboot: boolean) {
+    setClearHistoryOnMacReboot(clearHistoryOnMacReboot)
+    prefSetClearHistoryOnMacReboot(clearHistoryOnMacReboot)
   }
 
   return (
@@ -194,6 +205,16 @@ Clear the entire clipboard history when ClipBook is&nbsp;terminated.
               </Label>
               <Switch id="clearHistoryOnQuit" checked={clearHistoryOnQuit}
                       onCheckedChange={handleClearHistoryOnQuitChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label htmlFor="clearHistoryOnMacReboot" className="flex flex-col text-base">
+                <span className="">Clear entire history on Mac restart</span>
+                <span className="text-neutral-500 font-normal text-sm">
+Clear the entire clipboard history on Mac&nbsp;shutdown/restart.
+            </span>
+              </Label>
+              <Switch id="clearHistoryOnMacReboot" checked={clearHistoryOnMacReboot}
+                      onCheckedChange={handleClearHistoryOnMacRebootChange}/>
             </div>
           </div>
         </div>

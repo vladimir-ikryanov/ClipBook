@@ -25,6 +25,9 @@ NSString *prefCopyAndMergeEnabled = @"copy_and_merge.enabled";
 NSString *prefCopyAndMergeSeparator = @"copy_and_merge.separator";
 NSString *prefCopyToClipboardAfterMerge = @"copy_to_clipboard_after_merge";
 NSString *prefClearHistoryOnQuit = @"clear_history_on_quit";
+NSString *prefClearHistoryOnMacReboot = @"clear_history_on_mac_reboot";
+
+NSString *prefLastSystemBootTime = @"last_system_boot_time";
 
 // Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
@@ -49,6 +52,21 @@ NSString *prefOpenSettingsShortcut = @"app.open_settings_shortcut2";
 NSString *prefToggleFavoriteShortcut = @"app.toggle_favorite_shortcut2";
 
 AppSettingsMac::AppSettingsMac() = default;
+
+void AppSettingsMac::saveLastSystemBootTime(long time) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSNumber numberWithLong:time] forKey:prefLastSystemBootTime];
+  [defaults synchronize];
+}
+
+long AppSettingsMac::getLastSystemBootTime() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSNumber *time = [defaults objectForKey:prefLastSystemBootTime];
+  if (time != nil) {
+    return [time longValue];
+  }
+  return -1;
+}
 
 molybden::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id) {
   NSString *key = [NSString stringWithFormat:prefScreenNumber, [NSNumber numberWithInt:screen_id]];
@@ -598,6 +616,20 @@ bool AppSettingsMac::shouldClearHistoryOnQuit() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:prefClearHistoryOnQuit] != nil) {
     return [defaults boolForKey:prefClearHistoryOnQuit];
+  }
+  return false;
+}
+
+void AppSettingsMac::saveClearHistoryOnMacReboot(bool clear) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:clear forKey:prefClearHistoryOnMacReboot];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldClearHistoryOnMacReboot() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefClearHistoryOnMacReboot] != nil) {
+    return [defaults boolForKey:prefClearHistoryOnMacReboot];
   }
   return false;
 }

@@ -69,6 +69,9 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
 
   void quit();
 
+  // Returns the boot time of the system in seconds since Unix epoch or -1 if failed.
+  virtual long getSystemBootTime();
+
   virtual void enableOpenAppShortcut() = 0;
   virtual void disableOpenAppShortcut() = 0;
   virtual void updateOpenSettingsShortcut() = 0;
@@ -81,6 +84,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   bool app_window_visible_;
   bool checking_for_updates_;
   bool app_paused_;
+  bool after_system_reboot_;
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Tray> tray_;
   std::shared_ptr<molybden::Browser> app_window_;

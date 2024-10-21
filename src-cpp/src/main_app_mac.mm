@@ -5,6 +5,8 @@
 #import <ApplicationServices/ApplicationServices.h>
 
 #include <filesystem>
+#include <sys/sysctl.h>
+#include <time.h>
 
 #define KEY_CODE_V ((CGKeyCode)9)
 
@@ -563,4 +565,14 @@ std::string MainAppMac::getAppNameFromPath(const std::string &app_path) {
     return appName ? [appName UTF8String] : "";
   }
   return {};
+}
+
+long MainAppMac::getSystemBootTime() {
+  struct timeval boot_time{};
+  size_t size = sizeof(boot_time);
+  int mib[2] = {CTL_KERN, KERN_BOOTTIME};
+  if (sysctl(mib, 2, &boot_time, &size, nullptr, 0) != -1 && boot_time.tv_sec != 0) {
+    return boot_time.tv_sec;
+  }
+  return -1;
 }

@@ -50,6 +50,7 @@ class MainAppMac : public MainApp {
   void restoreWindowBounds();
   void saveWindowBounds();
   molybden::Shortcut createShortcut(const std::string &shortcut);
+  long getSystemBootTime() override;
 
   static void addAppToLoginItems();
   static void removeAppFromLoginItems();

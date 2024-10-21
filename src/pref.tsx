@@ -1,5 +1,3 @@
-import {decl} from "postcss";
-
 declare const saveTheme: (theme: string) => void;
 declare const getTheme: () => string;
 declare const saveOpenAtLogin: (openAtLogin: boolean) => void;
@@ -26,6 +24,8 @@ declare const saveCopyToClipboardAfterMerge: (copy: boolean) => void;
 declare const shouldCopyToClipboardAfterMerge: () => boolean;
 declare const saveClearHistoryOnQuit: (clear: boolean) => void;
 declare const shouldClearHistoryOnQuit: () => boolean;
+declare const saveClearHistoryOnMacReboot: (clear: boolean) => void;
+declare const shouldClearHistoryOnMacReboot: () => boolean;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -356,4 +356,12 @@ export function prefGetClearHistoryOnQuit() {
 
 export function prefSetClearHistoryOnQuit(clear: boolean) {
   saveClearHistoryOnQuit(clear)
+}
+
+export function prefGetClearHistoryOnMacReboot() {
+  return shouldClearHistoryOnMacReboot()
+}
+
+export function prefSetClearHistoryOnMacReboot(clear: boolean) {
+  saveClearHistoryOnMacReboot(clear)
 }

@@ -1,4 +1,7 @@
 import {addClip, Clip, ClipType, deleteAllClips, deleteClip, getAllClips, updateClip} from "@/db";
+import {prefGetClearHistoryOnMacReboot} from "@/pref";
+
+declare const isAfterSystemReboot: () => boolean;
 
 export type HistoryItem = {
   content: string
@@ -86,6 +89,13 @@ async function loadHistoryForPromo() {
 }
 
 async function loadHistory() {
+  // Clear history on Mac reboot.
+  if (prefGetClearHistoryOnMacReboot() && isAfterSystemReboot()) {
+    await deleteAllClips()
+    history = []
+    return
+  }
+
   history = await getAllClips()
   if (localStorage.getItem("history")) {
     let items: HistoryItem[] = JSON.parse(localStorage.getItem("history")!)
