@@ -60,6 +60,11 @@ void extractTextFromImage(NSImage *image,
   // Perform the request
   NSError *error = nil;
   [handler performRequests:@[textRequest] error:&error];
+
+  // Clean up.
+  [textRequest release];
+  [handler release];
+  CGImageRelease(cgImage);
 }
 
 NSImage *createThumbnail(NSImage *image, int width, int height) {
@@ -117,87 +122,69 @@ std::string getThumbImageFileName(const std::string &imageFileName) {
   return thumbFileName;
 }
 
+NSSize getImageSizeFromFile(NSString *imagePath) {
+  NSURL *imageURL = [NSURL fileURLWithPath:imagePath];
+
+  CGImageSourceRef imageSource = CGImageSourceCreateWithURL((__bridge CFURLRef)imageURL, nullptr);
+  if (!imageSource) {
+    return NSZeroSize;
+  }
+
+  auto imageProperties = (__bridge NSDictionary *)CGImageSourceCopyPropertiesAtIndex(imageSource, 0, nullptr);
+  if (!imageProperties) {
+    CFRelease(imageSource);
+    return NSZeroSize;
+  }
+
+  NSNumber *width = imageProperties[(NSString *)kCGImagePropertyPixelWidth];
+  NSNumber *height = imageProperties[(NSString *)kCGImagePropertyPixelHeight];
+
+  CFRelease(imageSource);
+
+  if (width && height) {
+    return NSMakeSize(width.floatValue, height.floatValue);
+  } else {
+    return NSZeroSize;
+  }
+}
+
 bool findIdenticalImage(NSImage *srcImage, const fs::path &imagesDir, ImageInfo &imageInfo) {
+  CGImageRef srcCGImage = [srcImage CGImageForProposedRect:nullptr context:nil hints:nil];
   auto images = findImages(imagesDir, "image_", ".png");
   for (const auto &image_path : images) {
-    NSImage *dstImage = [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String:image_path.c_str()]];
-    if (dstImage == nil) {
-      continue;
-    }
-    // Compare the images.
-    NSBitmapImageRep *srcImageRep = [NSBitmapImageRep imageRepWithData:[srcImage TIFFRepresentation]];
-    NSBitmapImageRep *dstImageRep = [NSBitmapImageRep imageRepWithData:[dstImage TIFFRepresentation]];
+    auto imagePath = [NSString stringWithUTF8String:image_path.c_str()];
+    // Compare image pixels.
+    NSImage *dstImage = [[NSImage alloc] initWithContentsOfFile:imagePath];
+    CGImageRef dstCGImage = [dstImage CGImageForProposedRect:nullptr context:nil hints:nil];
 
-    // Compare image dimensions.
-    if ([dstImageRep pixelsWide] != [srcImageRep pixelsWide] ||
-        [dstImageRep pixelsHigh] != [srcImageRep pixelsHigh]) {
+    size_t width1 = CGImageGetWidth(srcCGImage);
+    size_t height1 = CGImageGetHeight(srcCGImage);
+    size_t width2 = CGImageGetWidth(dstCGImage);
+    size_t height2 = CGImageGetHeight(dstCGImage);
+
+    if (width1 != width2 || height1 != height2) {
       [dstImage release];
       continue;
     }
 
-    // Compare bytes per row.
-    if ([dstImageRep bytesPerRow] != [srcImageRep bytesPerRow]) {
-      [dstImage release];
-      continue;
-    }
+    CFDataRef data1 = CGDataProviderCopyData(CGImageGetDataProvider(srcCGImage));
+    CFDataRef data2 = CGDataProviderCopyData(CGImageGetDataProvider(dstCGImage));
 
-    // Compare pixels.
-    NSUInteger bytesPerRow = [dstImageRep bytesPerRow];
-    unsigned char *dstData = [dstImageRep bitmapData];
-    unsigned char *srcData = [srcImageRep bitmapData];
+    BOOL identical = CFDataGetLength(data1) == CFDataGetLength(data2) &&
+                     memcmp(CFDataGetBytePtr(data1), CFDataGetBytePtr(data2), CFDataGetLength(data1)) == 0;
 
-    bool identical = true;
-    for (NSUInteger row = 0; row < [dstImageRep pixelsHigh]; row++) {
-      if (memcmp(dstData + row * bytesPerRow, srcData + row * bytesPerRow, bytesPerRow) != 0) {
-        identical = false;
-        break;
-      }
-    }
+    CFRelease(data1);
+    CFRelease(data2);
 
-    if (!identical) {
-      [dstImage release];
-      continue;
-    }
+    [dstImage release];
 
     if (identical) {
       imageInfo.file_name = image_path.filename().string();
       imageInfo.thumb_file_name = getThumbImageFileName(imageInfo.file_name);
-      [dstImage release];
       return true;
     }
-
-    [dstImage release];
   }
   return false;
-}
-
-bool isEquals(const std::shared_ptr<ClipboardData> &newData,
-              const std::shared_ptr<ClipboardData> &oldData) {
-  if (oldData == nullptr) {
-    return false;
-  }
-  if (newData->image_info.width != oldData->image_info.width) {
-    return false;
-  }
-  if (newData->image_info.height != oldData->image_info.height) {
-    return false;
-  }
-  if (newData->image_info.size_in_bytes != oldData->image_info.size_in_bytes) {
-    return false;
-  }
-  if (newData->image_info.text != oldData->image_info.text) {
-    return false;
-  }
-  if (newData->content != oldData->content) {
-    return false;
-  }
-  if (newData->image_info.file_name != oldData->image_info.file_name) {
-    return false;
-  }
-  if (newData->image_info.thumb_file_name != oldData->image_info.thumb_file_name) {
-    return false;
-  }
-  return true;
 }
 
 static CFAbsoluteTime lastTapTime = 0;
@@ -289,18 +276,6 @@ void ClipboardReaderMac::mergeClipboardData(const std::shared_ptr<ClipboardData>
                             data->image_info.height,
                             data->image_info.size_in_bytes,
                             data->image_info.text);
-}
-
-void ClipboardReaderMac::readAndMergeClipboardData() {
-  std::thread t([this]() {
-    std::lock_guard<std::mutex> guard(mutex_);
-    std::shared_ptr<ClipboardData> data = std::make_shared<ClipboardData>();
-    if (readClipboardData(data)) {
-      mergeClipboardData(data);
-      data_ = data;
-    }
-  });
-  t.detach();
 }
 
 void ClipboardReaderMac::readClipboardData() {
@@ -402,6 +377,9 @@ bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> 
     NSString *thumbnail_path = [images_dir stringByAppendingPathComponent:thumbnail_filename];
     [thumbnail_png_data writeToFile:thumbnail_path atomically:YES];
     data->image_info.thumb_file_name = [thumbnail_filename UTF8String];
+    [thumbnail_png_data release];
+    [thumbnail_image_rep release];
+    [thumbnail_data release];
     [thumbnail release];
 
     // Extract text from image.

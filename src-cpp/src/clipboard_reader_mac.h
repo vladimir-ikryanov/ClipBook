@@ -34,7 +34,6 @@ class ClipboardReaderMac {
 
  private:
   void readClipboardData();
-  void readAndMergeClipboardData();
   bool readClipboardData(const std::shared_ptr<ClipboardData> &data);
   void addClipboardData(const std::shared_ptr<ClipboardData>& data);
   void mergeClipboardData(const std::shared_ptr<ClipboardData>& data);

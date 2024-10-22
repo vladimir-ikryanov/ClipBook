@@ -6,7 +6,6 @@
 
 #include <filesystem>
 #include <sys/sysctl.h>
-#include <time.h>
 
 #define KEY_CODE_V ((CGKeyCode)9)
 
