@@ -4,6 +4,7 @@
 #import <Vision/Vision.h>
 
 #include <filesystem>
+#include <fstream>
 #include <memory>
 #include <thread>
 
@@ -99,11 +100,15 @@ NSImage *createThumbnail(NSImage *image, int width, int height) {
 
 std::vector<fs::path> findImages(const fs::path &dir,
                                  const std::string &filePrefix,
+                                 const std::string &excludeFilePrefix,
                                  const std::string &fileExtension) {
   std::vector<fs::path> images;
   for (const auto &entry : fs::directory_iterator(dir)) {
     if (entry.is_regular_file()) {
       std::string filename = entry.path().filename().string();
+      if (filename.find(excludeFilePrefix) == 0) {
+          continue;
+      }
       if (filename.find(filePrefix) == 0 &&
           filename.find(fileExtension) == filename.size() - fileExtension.size()) {
         images.push_back(entry.path());
@@ -122,47 +127,60 @@ std::string getThumbImageFileName(const std::string &imageFileName) {
   return thumbFileName;
 }
 
-NSSize getImageSizeFromFile(NSString *imagePath) {
-  NSURL *imageURL = [NSURL fileURLWithPath:imagePath];
-
-  CGImageSourceRef imageSource = CGImageSourceCreateWithURL((__bridge CFURLRef)imageURL, nullptr);
-  if (!imageSource) {
-    return NSZeroSize;
-  }
-
-  auto imageProperties = (__bridge NSDictionary *)CGImageSourceCopyPropertiesAtIndex(imageSource, 0, nullptr);
-  if (!imageProperties) {
-    CFRelease(imageSource);
-    return NSZeroSize;
-  }
-
-  NSNumber *width = imageProperties[(NSString *)kCGImagePropertyPixelWidth];
-  NSNumber *height = imageProperties[(NSString *)kCGImagePropertyPixelHeight];
-
-  CFRelease(imageSource);
-
-  if (width && height) {
-    return NSMakeSize(width.floatValue, height.floatValue);
-  } else {
-    return NSZeroSize;
-  }
-}
-
-bool findIdenticalImage(NSImage *srcImage, const fs::path &imagesDir, ImageInfo &imageInfo) {
+bool findIdenticalImage(NSImage *srcImage,
+                        const fs::path &imagesDir,
+                        const std::shared_ptr<ClipboardData> &data) {
   CGImageRef srcCGImage = [srcImage CGImageForProposedRect:nullptr context:nil hints:nil];
-  auto images = findImages(imagesDir, "image_", ".png");
+  size_t srcWidth = CGImageGetWidth(srcCGImage);
+  size_t srcHeight = CGImageGetHeight(srcCGImage);
+
+  auto images = findImages(imagesDir, "image_", "image_thumb_", ".png");
   for (const auto &image_path : images) {
-    auto imagePath = [NSString stringWithUTF8String:image_path.c_str()];
+    // Get file name without extension.
+    auto image_info_path = image_path.string().replace(image_path.string().find(".png"), 4, ".info");
+    bool file_exists = fs::exists(image_info_path);
+    if (file_exists) {
+      std::ifstream input_file(image_info_path);
+      if (input_file.is_open()) {
+        std::string line;
+        int width = 0;
+        int height = 0;
+        int size_in_bytes = 0;
+        while (std::getline(input_file, line)) {
+          if (line.find("width: ") == 0) {
+            width = std::stoi(line.substr(7));
+          } else if (line.find("height: ") == 0) {
+            height = std::stoi(line.substr(8));
+          }
+        }
+        input_file.close();
+
+        if (width != srcWidth || height != srcHeight) {
+          continue;
+        }
+      }
+    }
+
     // Compare image pixels.
+    auto imagePath = [NSString stringWithUTF8String:image_path.c_str()];
     NSImage *dstImage = [[NSImage alloc] initWithContentsOfFile:imagePath];
     CGImageRef dstCGImage = [dstImage CGImageForProposedRect:nullptr context:nil hints:nil];
 
-    size_t width1 = CGImageGetWidth(srcCGImage);
-    size_t height1 = CGImageGetHeight(srcCGImage);
-    size_t width2 = CGImageGetWidth(dstCGImage);
-    size_t height2 = CGImageGetHeight(dstCGImage);
+    size_t dstWidth = CGImageGetWidth(dstCGImage);
+    size_t dstHeight = CGImageGetHeight(dstCGImage);
 
-    if (width1 != width2 || height1 != height2) {
+    if (!file_exists) {
+      // Create image info file for old images.
+      std::string text_to_write = "width: " + std::to_string(dstWidth) + "\n" +
+                                  "height: " + std::to_string(dstHeight) + "\n";
+      std::ofstream output_file(image_info_path);
+      if (output_file.is_open()) {
+        output_file << text_to_write;
+        output_file.close();
+      }
+    }
+
+    if (srcWidth != dstWidth || srcHeight != dstHeight) {
       [dstImage release];
       continue;
     }
@@ -179,8 +197,8 @@ bool findIdenticalImage(NSImage *srcImage, const fs::path &imagesDir, ImageInfo 
     [dstImage release];
 
     if (identical) {
-      imageInfo.file_name = image_path.filename().string();
-      imageInfo.thumb_file_name = getThumbImageFileName(imageInfo.file_name);
+      data->image_info.file_name = image_path.filename().string();
+      data->image_info.thumb_file_name = getThumbImageFileName(data->image_info.file_name);
       return true;
     }
   }
@@ -350,10 +368,7 @@ bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> 
     data->image_info.size_in_bytes = [png_data length];
 
     // Check if an identical image is already stored in the directory and use it.
-    ImageInfo image_info;
-    if (findIdenticalImage(image, imagesDir, image_info)) {
-      data->image_info.file_name = image_info.file_name;
-      data->image_info.thumb_file_name = image_info.thumb_file_name;
+    if (findIdenticalImage(image, imagesDir, data)) {
       [image release];
       return true;
     }
@@ -366,6 +381,16 @@ bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> 
     NSString *image_path = [images_dir stringByAppendingPathComponent:image_filename];
     [png_data writeToFile:image_path atomically:YES];
     data->image_info.file_name = [image_filename UTF8String];
+
+    // Save image info to file.
+    std::string image_info_filename = "image_" + std::to_string(creation_time_in_ms) + ".info";
+    std::string text_to_write = "width: " + std::to_string(data->image_info.width) + "\n" +
+                                "height: " + std::to_string(data->image_info.height) + "\n";
+    std::ofstream output_file(imagesDir / image_info_filename);
+    if (output_file.is_open()) {
+      output_file << text_to_write;
+      output_file.close();
+    }
 
     // Save image thumbnail to file.
     NSImage *thumbnail = createThumbnail(image, 48, 48);
