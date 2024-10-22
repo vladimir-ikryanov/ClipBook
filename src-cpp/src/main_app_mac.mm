@@ -308,6 +308,8 @@ void MainAppMac::copyToClipboard(const std::string &text,
       NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithData:[image TIFFRepresentation]];
       NSData *data = [imageRep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
       [pasteboard setData:data forType:NSPasteboardTypePNG];
+      [imageRep release];
+      [image release];
     }
     // Paste the image text if it is not empty.
     if (!imageText.empty()) {
@@ -551,6 +553,11 @@ std::string MainAppMac::getAppIconAsBase64(const std::string &app_path) {
 
   // Base64 encode the data
   NSString *base64String = [imageData base64EncodedStringWithOptions:0];
+
+  [imageData release];
+  [newRep release];
+  [image release];
+
   return [base64String UTF8String];
 }
 
