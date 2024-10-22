@@ -155,7 +155,7 @@ bool findIdenticalImage(NSImage *srcImage,
         }
         input_file.close();
 
-        if (width != srcWidth || height != srcHeight) {
+        if (width != data->image_info.width || height != data->image_info.height) {
           continue;
         }
       }
@@ -170,9 +170,11 @@ bool findIdenticalImage(NSImage *srcImage,
     size_t dstHeight = CGImageGetHeight(dstCGImage);
 
     if (!file_exists) {
+      const NSSize &dstImageSize = [dstImage size];
       // Create image info file for old images.
-      std::string text_to_write = "width: " + std::to_string(dstWidth) + "\n" +
-                                  "height: " + std::to_string(dstHeight) + "\n";
+      std::string text_to_write =
+          "width: " + std::to_string(static_cast<int>(dstImageSize.width)) + "\n" +
+          "height: " + std::to_string(static_cast<int>(dstImageSize.height)) + "\n";
       std::ofstream output_file(image_info_path);
       if (output_file.is_open()) {
         output_file << text_to_write;
