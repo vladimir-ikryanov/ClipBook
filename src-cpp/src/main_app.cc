@@ -875,6 +875,10 @@ void MainApp::deleteImage(const std::string &imageFileName) {
   std::string filePath = getImagesDir() + "/" + imageFileName;
   if (fs::exists(filePath)) {
       fs::remove(filePath);
+      auto infoFilePath = fs::path(filePath).replace_extension(".info");
+      if (fs::exists(infoFilePath)) {
+          fs::remove(infoFilePath);
+      }
   }
 }
 
