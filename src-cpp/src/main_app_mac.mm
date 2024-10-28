@@ -554,10 +554,6 @@ std::string MainAppMac::getAppIconAsBase64(const std::string &app_path) {
   // Base64 encode the data
   NSString *base64String = [imageData base64EncodedStringWithOptions:0];
 
-  [imageData release];
-  [newRep release];
-  [image release];
-
   return [base64String UTF8String];
 }
 
