@@ -45,6 +45,13 @@
     --settings-sidebar-selection: #fafafa;
     --settings-table-row: #eeeeee;
     --settings-table-row2: #f5f5f5;
+    --settings-input-placeholder: #8a8a8a;
+    --buy-button-background: #006fff;
+    --buy-button-background-hover: #0064e1;
+    --buy-button-text: white;
+    --activate-button-background: #616161;
+    --activate-button-background-hover: #4a4a4a;
+    --activate-button-text: white;
 
     font-size: 14px;
   }
@@ -99,6 +106,13 @@
     --settings-sidebar-selection: #3e4144;
     --settings-table-row: #212121;
     --settings-table-row2: #272727;
+    --settings-input-placeholder: #555555;
+    --buy-button-background: #006fff;
+    --buy-button-background-hover: #0064e1;
+    --buy-button-text: white;
+    --activate-button-background: #3e4144;
+    --activate-button-background-hover: #3a3c40;
+    --activate-button-text: white;
   }
 }
 

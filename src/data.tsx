@@ -64,13 +64,14 @@ async function loadHistoryForPromo() {
   await sleep(500)
   await addClip(new Clip("john.doe@mail.com", "/System/Applications/Mail.app"))
   await sleep(500)
-  await addClip(new Clip("rgb(255 100 3 / 80%)", "/Applications/Arc.app"))
+  await addClip(new Clip("rgb(255 100 3 / 80%)", "/Applications/Safari.app"))
   await sleep(500)
-  await addClip(new Clip("hsl(330 100% 50%)", "/Applications/Arc.app"))
+  await addClip(new Clip("hsl(330 100% 50%)", "/Applications/Safari.app"))
   await sleep(500)
-  await addClip(new Clip("#65a30d", "/Applications/Arc.app"))
+  await addClip(new Clip("#65a30d", "/Applications/Safari.app"))
   await sleep(500)
-  await addClip(new Clip("https://clipbook.app", "/Applications/Arc.app"))
+  await addClip(new Clip("https://clipbook.app", "/Applications/Safari.app"))
+  await addClip(new Clip("https://github.com/vladimir-ikryanov/ClipBook", "/Applications/Safari.app"))
   await sleep(500)
   await addClip(new Clip("🔒 All data is securely stored on your Mac and never leave it", "/System/Applications/Notes.app"))
   await sleep(500)
@@ -82,8 +83,13 @@ async function loadHistoryForPromo() {
   await sleep(500)
   await addClip(new Clip("⌛️ Unlimited clipboard history", "/System/Applications/Notes.app"))
   await sleep(500)
-  await addClip(new Clip("Keep everything you copy and quickly access it whenever you need it", "/System/Applications/Notes.app"))
+  await addClip(new Clip("Keep everything you copy and quickly access your macOS clipboard history whenever you need it.\n" +
+      "\n" +
+      "ClipBook runs in background and remembers everything you copy. You will never loose what you have already copied.\n" +
+      "\n" +
+      "Your clipboard history is always at your hands. To open your macOS clipboard history just press the following global keyboard shortcut.", "/System/Applications/Notes.app"))
   await sleep(500)
+  await addClip(new Clip("Standard clipboard stores only one entry and overwrites the previous one. It is easy to accidentally overwrite. It is inconvenient and wastes a lot of time because of such a limitation. If you copy a lot, if you are annoyed by wasting time searching for information that was copied just a couple of minutes or hours ago, if you are tired of constantly switching applications for copying and pasting, then the clipboard history app is for you. Once you try it, you will no longer be able to imagine working on a Mac without this application.", "/System/Applications/Notes.app"))
   await addClip(new Clip("Clipboard history app for your Mac", "/System/Applications/Notes.app"))
   history = await getAllClips()
 }

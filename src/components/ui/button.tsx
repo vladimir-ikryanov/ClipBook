@@ -21,7 +21,9 @@ const buttonVariants = cva(
           tool: "focus:outline-none",
           link: "text-primary underline-offset-4 hover:underline",
           toolbar: "rounded-sm text-toolbar-button hover:bg-accent hover:text-accent-foreground",
-          menu: "rounded-sm hover:text-accent-foreground"
+          menu: "rounded-sm hover:text-accent-foreground",
+          buy: "bg-settings-buyButton text-settings-buyButtonText hover:bg-settings-buyButtonHover",
+          activate: "bg-settings-activateButton text-settings-activateButtonText hover:bg-settings-activateButtonHover",
         },
         size: {
           default: "h-10 px-4 py-2",

@@ -14,6 +14,7 @@ import {ThemeProvider} from "@/app/ThemeProvider";
 import Privacy from "@/settings/Privacy";
 import Shortcuts from "@/settings/Shortcuts";
 import History from "@/settings/History";
+import License from "@/settings/License";
 
 const router = createBrowserRouter([
   {
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
   {
     path: "/settings/shortcuts",
     element: <Shortcuts/>,
+  },
+  {
+    path: "/settings/license",
+    element: <License/>,
   },
 ]);
 

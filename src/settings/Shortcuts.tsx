@@ -37,7 +37,7 @@ import {
   prefSetZoomUIInShortcut,
   prefSetZoomUIOutShortcut
 } from "@/pref";
-import {KeyboardIcon, ListIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
+import {KeyboardIcon, KeyRoundIcon, ListIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 
 declare const enableOpenAppShortcut: () => void;
 declare const closeSettingsWindow: () => void;
@@ -202,6 +202,14 @@ export default function Shortcuts() {
               <a href="/settings/privacy" className="flex flex-row py-2 px-2 gap-x-2 w-full">
                 <ShieldCheckIcon className="h-5 w-5 mt-0.5"/>
                 <span className="">Privacy</span>
+              </a>
+            </div>
+            <div className="flex flex-grow"></div>
+            <div
+                className="flex flex-row p-0 m-4 hover:bg-background hover:rounded-sm hover:shadow">
+              <a href="/settings/license" className="flex flex-row py-2 px-2 gap-x-2 w-full">
+                <KeyRoundIcon className="h-5 w-5 mt-0.5"/>
+                <span className="">License</span>
               </a>
             </div>
           </div>

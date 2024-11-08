@@ -65,6 +65,13 @@ module.exports = {
           sidebarSelection: "var(--settings-sidebar-selection)",
           tableRow: "var(--settings-table-row)",
           tableRow2: "var(--settings-table-row2)",
+          inputPlaceholder: "var(--settings-input-placeholder)",
+          buyButton: "var(--buy-button-background)",
+          buyButtonHover: "var(--buy-button-background-hover)",
+          buyButtonText: "var(--buy-button-text)",
+          activateButton: "var(--activate-button-background)",
+          activateButtonHover: "var(--activate-button-background-hover)",
+          activateButtonText: "var(--activate-button-text)",
         },
         toolbar: {
           DEFAULT: "var(--toolbar-background)",
