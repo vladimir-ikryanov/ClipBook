@@ -523,15 +523,21 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("buyLicense", [this]() {
     app_->desktop()->openUrl("https://clipbook.app/checkout/");
   });
-  window->putProperty("isActivated", []() -> bool {
+  window->putProperty("isActivated", [this]() -> bool {
 #ifdef OFFICIAL_BUILD
-    return isActivated();
+    return isLicenseActivated(settings_->getLicenseKey(), settings_->getRuntimeKey());
 #endif
     return true;
   });
-  window->putProperty("activateLicense", [](std::string licenseKey) {
+  window->putProperty("activateLicense", [this](std::string licenseKey) {
 #ifdef OFFICIAL_BUILD
-    activateLicense(licenseKey);
+    activateLicense(licenseKey, [this](const std::string &runtimeKey) {
+      settings_->saveRuntimeKey(runtimeKey);
+      settings_window_->mainFrame()->executeJavaScript("licenseActivationCompleted('')");
+    }, [this](const std::string &error) {
+      settings_window_->mainFrame()->executeJavaScript(
+          "licenseActivationCompleted('" + error + "')");
+    });
 #endif
   });
 

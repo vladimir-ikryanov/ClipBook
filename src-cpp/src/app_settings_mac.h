@@ -15,6 +15,9 @@ class AppSettingsMac : public AppSettings {
   void saveLicenseKey(std::string key) override;
   std::string getLicenseKey() override;
 
+  void saveRuntimeKey(std::string key) override;
+  std::string getRuntimeKey() override;
+
   void saveTheme(std::string theme) override;
   std::string getTheme() override;
 

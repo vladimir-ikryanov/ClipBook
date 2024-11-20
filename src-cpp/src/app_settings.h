@@ -19,6 +19,9 @@ class AppSettings {
   virtual void saveLicenseKey(std::string key) = 0;
   virtual std::string getLicenseKey() = 0;
 
+  virtual void saveRuntimeKey(std::string key) = 0;
+  virtual std::string getRuntimeKey() = 0;
+
   virtual void saveTheme(std::string theme) = 0;
   virtual std::string getTheme() = 0;
 

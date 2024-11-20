@@ -44,6 +44,16 @@ export default function License() {
     prefSetLicenseKey(key)
   }
 
+  function licenseActivationCompleted(error: string) {
+    if (error) {
+      alert("Failed to activate license: " + error)
+    } else {
+      alert("License activated successfully")
+    }
+  }
+
+  (window as any).licenseActivationCompleted = licenseActivationCompleted
+
   function renderLicenseItem() {
     return (
         <div className="flex flex-row gap-x-2 py-2 px-2 m-4 bg-settings-sidebarSelection rounded-sm shadow">

@@ -67,5 +67,5 @@ set_property(TARGET molybden_lib PROPERTY CXX_STANDARD 20)
 target_include_directories(molybden_lib PRIVATE ${MOLYBDEN_SDK_DIR}/include)
 
 if (OS_MAC)
-    target_link_libraries(molybden_lib PRIVATE "-framework Cocoa -framework Vision")
+    target_link_libraries(molybden_lib PRIVATE "-framework Cocoa -framework Vision -framework IOKit")
 endif ()
