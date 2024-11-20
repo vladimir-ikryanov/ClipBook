@@ -63,6 +63,7 @@ module.exports = {
           border: "var(--settings-border)",
           selection: "var(--settings-selection)",
           sidebarSelection: "var(--settings-sidebar-selection)",
+          sidebarLabel: "var(--settings-sidebar-label)",
           tableRow: "var(--settings-table-row)",
           tableRow2: "var(--settings-table-row2)",
           inputPlaceholder: "var(--settings-input-placeholder)",

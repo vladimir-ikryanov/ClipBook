@@ -7,6 +7,9 @@ project(ClipBook LANGUAGES CXX)
 # Important: Do not move this include above the project declaration.
 include(node_modules/@molybden-apps/molybden/Molybden.cmake)
 
+# The official build flag is used to enable/disable certain features.
+set(OFFICIAL_BUILD TRUE)
+
 # The source files of your app.
 set(APP_SOURCES
         src-cpp/src/main.cc
@@ -40,10 +43,21 @@ if (OS_MAC)
             src-cpp/src/clipboard_reader_mac.h
             src-cpp/src/clipboard_reader_mac.mm
     )
+    if (OFFICIAL_BUILD)
+        set(LICENSING_SOURCES_MAC
+                src-cpp/src/licensing/licensing.h
+                src-cpp/src/licensing/licensing.mm
+        )
+    endif ()
+endif ()
+
+# Add additional compile definitions.
+if (OFFICIAL_BUILD)
+    add_compile_definitions(OFFICIAL_BUILD)
 endif ()
 
 # Defines the main target of the application.
-add_library(molybden_lib STATIC ${APP_SOURCES} ${APP_SOURCES_WIN} ${APP_SOURCES_MAC})
+add_library(molybden_lib STATIC ${APP_SOURCES} ${APP_SOURCES_WIN} ${APP_SOURCES_MAC} ${LICENSING_SOURCES_MAC})
 
 # The Molybden API requires C++20.
 set_property(TARGET molybden_lib PROPERTY CXX_STANDARD 20)

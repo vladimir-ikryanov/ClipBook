@@ -5,6 +5,10 @@
 
 #include "main_app.h"
 
+#ifdef OFFICIAL_BUILD
+#include "licensing/licensing.h"
+#endif
+
 using namespace molybden;
 
 namespace fs = std::filesystem;
@@ -514,6 +518,20 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("isAfterSystemReboot", [this]() -> bool {
     return after_system_reboot_;
+  });
+  window->putProperty("buyLicense", [this]() {
+    app_->desktop()->openUrl("https://clipbook.app/checkout/");
+  });
+  window->putProperty("isActivated", []() -> bool {
+#ifdef OFFICIAL_BUILD
+    return isActivated();
+#endif
+    return true;
+  });
+  window->putProperty("activateLicense", [](std::string licenseKey) {
+#ifdef OFFICIAL_BUILD
+    activateLicense(licenseKey);
+#endif
   });
 
   window->putProperty("saveTheme", [this](std::string theme) -> void {

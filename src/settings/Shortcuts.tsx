@@ -209,7 +209,9 @@ export default function Shortcuts() {
                 className="flex flex-row p-0 m-4 hover:bg-background hover:rounded-sm hover:shadow">
               <a href="/settings/license" className="flex flex-row py-2 px-2 gap-x-2 w-full">
                 <KeyRoundIcon className="h-5 w-5 mt-0.5"/>
-                <span className="">License</span>
+                <div className="">License</div>
+                <div className="grow"></div>
+                <div className="rounded bg-settings-sidebarLabel text-xs px-1.5 py-1">Trial</div>
               </a>
             </div>
           </div>

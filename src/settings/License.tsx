@@ -5,6 +5,8 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 
 declare const closeSettingsWindow: () => void;
+declare const buyLicense: () => void;
+declare const activateLicense: (licenseKey: string) => void;
 
 export default function License() {
   const [licenseKey, setLicenseKey] = React.useState("")
@@ -22,11 +24,11 @@ export default function License() {
   }, [])
 
   function handleBuyLicense() {
-    console.log("Buy License")
+    buyLicense()
   }
 
   function handleActivateLicense() {
-    console.log("Activate License")
+    activateLicense(licenseKey)
   }
 
   function handleLicenseKeyChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -71,7 +73,9 @@ export default function License() {
             <div
                 className="flex flex-row gap-x-2 py-2 px-2 m-4 bg-settings-sidebarSelection rounded-sm shadow">
               <KeyRoundIcon className="h-5 w-5 mt-0.5"/>
-              <span className="">License</span>
+              <div className="">License</div>
+              <div className="grow"></div>
+              <div className="rounded bg-settings-sidebarLabel text-xs px-1.5 py-1">Trial</div>
             </div>
           </div>
         </div>
@@ -91,6 +95,9 @@ export default function License() {
               <Input placeholder="XXXX-0000-0000-0000-0000000000000000"
                      onChange={handleLicenseKeyChange}
                      className="mb-4 text-lg placeholder:text-settings-inputPlaceholder"/>
+              <p className="text-secondary-foreground text-sm text-pretty mb-4">
+                You can find your license key in the email you received after purchasing ClipBook.
+              </p>
               <div className="grid grid-cols-2 space-x-2">
                 <Button onClick={handleActivateLicense} disabled={licenseKeyInvalid}
                         variant="activate">Activate</Button>

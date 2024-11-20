@@ -15,6 +15,9 @@ dist
 dist-ssr
 *.local
 
+# Licensing
+src-cpp/src/licensing
+
 # Molybde build directories
 build-dev
 build-dist
