@@ -1,5 +1,7 @@
 declare const saveTheme: (theme: string) => void;
 declare const getTheme: () => string;
+declare const saveLicenseKey: (licenseKey: string) => void;
+declare const getLicenseKey: () => string;
 declare const saveOpenAtLogin: (openAtLogin: boolean) => void;
 declare const shouldOpenAtLogin: () => boolean;
 declare const saveCheckForUpdatesAutomatically: (value: boolean) => void;
@@ -82,6 +84,14 @@ export function prefGetTheme() {
 
 export function prefSetTheme(theme: string) {
   saveTheme(theme)
+}
+
+export function prefSetLicenseKey(licenseKey: string) {
+  saveLicenseKey(licenseKey)
+}
+
+export function prefGetLicenseKey() {
+  return getLicenseKey()
 }
 
 export function prefGetOpenAtLogin() {

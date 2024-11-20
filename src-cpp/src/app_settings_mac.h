@@ -12,6 +12,9 @@ class AppSettingsMac : public AppSettings {
   void saveLastSystemBootTime(long time) override;
   long getLastSystemBootTime() override;
 
+  void saveLicenseKey(std::string key) override;
+  std::string getLicenseKey() override;
+
   void saveTheme(std::string theme) override;
   std::string getTheme() override;
 

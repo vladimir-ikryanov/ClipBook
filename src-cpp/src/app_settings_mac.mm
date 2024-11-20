@@ -28,6 +28,7 @@ NSString *prefClearHistoryOnQuit = @"clear_history_on_quit";
 NSString *prefClearHistoryOnMacReboot = @"clear_history_on_mac_reboot";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
+NSString *prefLicenseKey = @"license_key";
 
 // Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
@@ -70,6 +71,21 @@ long AppSettingsMac::getLastSystemBootTime() {
     return [time longValue];
   }
   return -1;
+}
+
+void AppSettingsMac::saveLicenseKey(std::string key) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:key.c_str()] forKey:prefLicenseKey];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getLicenseKey() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *key = [defaults objectForKey:prefLicenseKey];
+  if (key != nil) {
+    return [key UTF8String];
+  }
+  return "";
 }
 
 molybden::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id) {

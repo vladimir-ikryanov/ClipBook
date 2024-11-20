@@ -1,16 +1,17 @@
 import * as React from "react";
 import {KeyboardIcon, KeyRoundIcon, ListIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
+import {prefGetLicenseKey, prefSetLicenseKey} from "@/pref";
 
 declare const closeSettingsWindow: () => void;
 declare const buyLicense: () => void;
 declare const activateLicense: (licenseKey: string) => void;
 
 export default function License() {
-  const [licenseKey, setLicenseKey] = React.useState("")
-  const [licenseKeyInvalid, setLicenseKeyInvalid] = React.useState(true)
+  const [licenseKey, setLicenseKey] = useState(prefGetLicenseKey())
+  const [licenseKeyInvalid, setLicenseKeyInvalid] = useState(isLicenseKeyFormatInvalid(licenseKey))
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -31,9 +32,15 @@ export default function License() {
     activateLicense(licenseKey)
   }
 
+  function isLicenseKeyFormatInvalid(licenseKey: string) {
+    return licenseKey.length !== 36
+  }
+
   function handleLicenseKeyChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setLicenseKey(e.target.value)
-    setLicenseKeyInvalid(e.target.value.length !== 36)
+    let key = e.target.value;
+    setLicenseKey(key)
+    setLicenseKeyInvalid(isLicenseKeyFormatInvalid(key))
+    prefSetLicenseKey(key)
   }
 
   return (
@@ -94,6 +101,7 @@ export default function License() {
               <p className="mb-2">License key:</p>
               <Input placeholder="XXXX-0000-0000-0000-0000000000000000"
                      onChange={handleLicenseKeyChange}
+                     value={licenseKey}
                      className="mb-4 text-lg placeholder:text-settings-inputPlaceholder"/>
               <p className="text-secondary-foreground text-sm text-pretty mb-4">
                 You can find your license key in the email you received after purchasing ClipBook.

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <utility>
 
 #include "main_app.h"
 
@@ -540,6 +541,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("getTheme", [this]() -> std::string {
     return settings_->getTheme();
+  });
+  window->putProperty("saveLicenseKey", [this](std::string key) -> void {
+    settings_->saveLicenseKey(std::move(key));
+  });
+  window->putProperty("getLicenseKey", [this]() -> std::string {
+    return settings_->getLicenseKey();
   });
   window->putProperty("saveIgnoreConfidentialContent", [this](bool ignore) -> void {
     settings_->saveIgnoreConfidentialContent(ignore);

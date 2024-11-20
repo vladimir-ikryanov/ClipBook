@@ -16,6 +16,9 @@ class AppSettings {
   virtual void saveLastSystemBootTime(long time) = 0;
   virtual long getLastSystemBootTime() = 0;
 
+  virtual void saveLicenseKey(std::string key) = 0;
+  virtual std::string getLicenseKey() = 0;
+
   virtual void saveTheme(std::string theme) = 0;
   virtual std::string getTheme() = 0;
 
