@@ -11,6 +11,7 @@ import {
   prefSetIgnoreTransientContent,
 } from "@/pref";
 import IgnoreAppsPane from "@/settings/IgnoreAppsPane";
+import {isLicenseActivated} from "@/licensing";
 
 declare const closeSettingsWindow: () => void;
 declare const selectAppsToIgnore: () => string[];
@@ -61,6 +62,27 @@ export default function Privacy() {
   // Attach the function to the window object
   (window as any).addAppToIgnore = addAppToIgnore;
 
+  function renderLicenseItem() {
+    return (
+        <div
+            className="flex flex-row p-0 m-4 hover:bg-background hover:rounded-sm hover:shadow">
+          <a href="/settings/license" className="flex flex-row py-2 px-2 gap-x-2 w-full">
+            {
+              isLicenseActivated() ? <KeyRoundIcon
+                      className="h-5 w-5 mt-0.5 text-settings-titleLicenseActivatedLabel"/> :
+                  <KeyRoundIcon className="h-5 w-5 mt-0.5"/>
+            }
+            <div className="">License</div>
+            <div className="grow"></div>
+            {
+                !isLicenseActivated() &&
+                <div className="rounded bg-settings-sidebarLabel text-xs px-1.5 py-1">Trial</div>
+            }
+          </a>
+        </div>
+    )
+  }
+
   return (
       <div className="flex h-screen select-none">
         <div className="flex bg-secondary">
@@ -93,15 +115,7 @@ export default function Privacy() {
               <span className="">Privacy</span>
             </div>
             <div className="flex flex-grow"></div>
-            <div
-                className="flex flex-row p-0 m-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings/license" className="flex flex-row py-2 px-2 gap-x-2 w-full">
-                <KeyRoundIcon className="h-5 w-5 mt-0.5"/>
-                <div className="">License</div>
-                <div className="grow"></div>
-                <div className="rounded bg-settings-sidebarLabel text-xs px-1.5 py-1">Trial</div>
-              </a>
-            </div>
+            {renderLicenseItem()}
           </div>
         </div>
 

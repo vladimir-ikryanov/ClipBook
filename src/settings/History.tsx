@@ -27,6 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {isLicenseActivated} from "@/licensing";
+import {render} from "react-dom";
 
 declare const closeSettingsWindow: () => void;
 
@@ -86,11 +88,32 @@ export default function History() {
     prefSetClearHistoryOnMacReboot(clearHistoryOnMacReboot)
   }
 
+  function renderLicenseItem() {
+    return (
+        <div
+            className="flex flex-row p-0 m-4 hover:bg-background hover:rounded-sm hover:shadow">
+          <a href="/settings/license" className="flex flex-row py-2 px-2 gap-x-2 w-full">
+            {
+              isLicenseActivated() ? <KeyRoundIcon
+                      className="h-5 w-5 mt-0.5 text-settings-titleLicenseActivatedLabel"/> :
+                  <KeyRoundIcon className="h-5 w-5 mt-0.5"/>
+            }
+            <div className="">License</div>
+            <div className="grow"></div>
+            {
+                !isLicenseActivated() &&
+                <div className="rounded bg-settings-sidebarLabel text-xs px-1.5 py-1">Trial</div>
+            }
+          </a>
+        </div>
+  )
+  }
+
   return (
-      <div className="flex h-screen select-none">
-        <div className="flex bg-secondary">
-          <div className="flex flex-col w-52 gap-y-1">
-            <div className="flex draggable p-6"></div>
+    <div className="flex h-screen select-none">
+      <div className="flex bg-secondary">
+        <div className="flex flex-col w-52 gap-y-1">
+          <div className="flex draggable p-6"></div>
             <div
                 className="flex flex-row gap-x-2 p-0 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
               <a href="/settings" className="flex flex-row py-2 px-2 gap-x-2 w-full cursor-default">
@@ -118,15 +141,7 @@ export default function History() {
               </a>
             </div>
             <div className="flex flex-grow"></div>
-            <div
-                className="flex flex-row p-0 m-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings/license" className="flex flex-row py-2 px-2 gap-x-2 w-full">
-                <KeyRoundIcon className="h-5 w-5 mt-0.5"/>
-                <div className="">License</div>
-                <div className="grow"></div>
-                <div className="rounded bg-settings-sidebarLabel text-xs px-1.5 py-1">Trial</div>
-              </a>
-            </div>
+          {renderLicenseItem()}
           </div>
         </div>
 

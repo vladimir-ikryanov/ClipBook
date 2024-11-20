@@ -64,6 +64,8 @@ module.exports = {
           selection: "var(--settings-selection)",
           sidebarSelection: "var(--settings-sidebar-selection)",
           sidebarLabel: "var(--settings-sidebar-label)",
+          titleLicenseTrialLabel: "var(--settings-title-license-trial-label)",
+          titleLicenseActivatedLabel: "var(--settings-title-license-activated-label)",
           tableRow: "var(--settings-table-row)",
           tableRow2: "var(--settings-table-row2)",
           inputPlaceholder: "var(--settings-input-placeholder)",
