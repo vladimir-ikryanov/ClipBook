@@ -13,6 +13,7 @@ declare const activateLicense: (licenseKey: string) => void;
 export default function License() {
   const [licenseKey, setLicenseKey] = useState(prefGetLicenseKey())
   const [licenseKeyInvalid, setLicenseKeyInvalid] = useState(isLicenseKeyFormatInvalid(licenseKey))
+  const [isActivated, setIsActivated] = useState(isLicenseActivated())
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -47,36 +48,41 @@ export default function License() {
   function licenseActivationCompleted(error: string) {
     if (error) {
       alert("Failed to activate license: " + error)
+      setIsActivated(false)
     } else {
       alert("License activated successfully")
+      setIsActivated(true)
     }
   }
 
   (window as any).licenseActivationCompleted = licenseActivationCompleted
 
-  function renderLicenseItem() {
+  function renderSidebarLicenseItem() {
     return (
-        <div className="flex flex-row gap-x-2 py-2 px-2 m-4 bg-settings-sidebarSelection rounded-sm shadow">
+        <div
+            className="flex flex-row gap-x-2 py-2 px-2 m-4 bg-settings-sidebarSelection rounded-sm shadow">
           {
-            isLicenseActivated() ? <KeyRoundIcon className="h-5 w-5 mt-0.5 text-settings-titleLicenseActivatedLabel"/> : <KeyRoundIcon className="h-5 w-5 mt-0.5"/>
+            isActivated ? <KeyRoundIcon
+                    className="h-5 w-5 mt-0.5 text-settings-titleLicenseActivatedLabel"/> :
+                <KeyRoundIcon className="h-5 w-5 mt-0.5"/>
           }
           <div className="">License</div>
           <div className="grow"></div>
           {
-              !isLicenseActivated() &&
+              !isActivated &&
               <div className="rounded bg-settings-sidebarLabel text-xs px-1.5 py-1">Trial</div>
           }
         </div>
     )
   }
 
-  function renderTitleLabel() {
-    if (isLicenseActivated()) {
+  function renderTitle() {
+    if (isActivated) {
       return <span
-          className="rounded-sm border border-settings-titleLicenseActivatedLabel text-settings-titleLicenseActivatedLabel px-2 py-1 ml-4">Activated</span>
+          className="text-sm rounded-sm border border-settings-titleLicenseActivatedLabel text-settings-titleLicenseActivatedLabel px-2 py-1 ml-4">Activated</span>
     }
     return <span
-        className="rounded-sm border border-settings-titleLicenseTrialLabel text-settings-titleLicenseTrialLabel px-2 py-1 ml-4">Trial</span>
+        className="text-sm rounded-sm border border-settings-titleLicenseTrialLabel text-settings-titleLicenseTrialLabel px-2 py-1 ml-4">Trial</span>
   }
 
   return (
@@ -113,7 +119,7 @@ export default function License() {
               </a>
             </div>
             <div className="flex flex-grow"></div>
-            {renderLicenseItem()}
+            {renderSidebarLicenseItem()}
           </div>
         </div>
 
@@ -121,31 +127,33 @@ export default function License() {
           <div className="flex pt-8 px-8 border-b border-b-border draggable sticky items-center">
             <span className="text-2xl pb-3 font-semibold">ClipBook License</span>
             <div className="pb-2">
-              {renderTitleLabel()}
+              {renderTitle()}
             </div>
           </div>
 
           <div className="flex flex-col px-8 pb-8 gap-4 flex-grow overflow-y-auto">
             <div className="flex flex-col pt-6 pb-1">
               {
-                !isLicenseActivated() &&
-                    <p className="mb-6 text-pretty">
-                      You are currently using a <span className="text-searchHighlight">trial version</span> of ClipBook. To continue using
-                      ClipBook,
-                      please purchase a license key from online store and activate it.
-                    </p>
+                  !isActivated &&
+                  <p className="mb-6 text-pretty">
+                    You are currently using a <span
+                      className="text-searchHighlight">trial version</span> of ClipBook. To continue
+                    using
+                    ClipBook,
+                    please purchase a license key from online store and activate it.
+                  </p>
               }
               <p className="mb-2">License key:</p>
               <Input placeholder="XXXX-0000-0000-0000-0000000000000000"
                      onChange={handleLicenseKeyChange}
                      value={licenseKey}
-                     disabled={isLicenseActivated()}
+                     disabled={isActivated}
                      className="mb-4 text-lg placeholder:text-settings-inputPlaceholder"/>
               <p className="text-secondary-foreground text-sm text-pretty mb-4">
                 You can find your license key in the email you received after purchasing ClipBook.
               </p>
               {
-                  !isLicenseActivated() &&
+                  !isActivated &&
                   <div className="grid grid-cols-2 space-x-2">
                     <Button onClick={handleActivateLicense} disabled={licenseKeyInvalid}
                             variant="activate">Activate</Button>
