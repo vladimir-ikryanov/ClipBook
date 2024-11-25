@@ -438,7 +438,12 @@ void MainApp::setTheme(const std::string &theme) {
 }
 
 void MainApp::showSettingsWindow() {
+  showSettingsWindow("/settings");
+}
+
+void MainApp::showSettingsWindow(const std::string &section) {
   if (settings_window_ && !settings_window_->isClosed()) {
+    settings_window_->navigation()->loadUrl(app_->baseUrl() + section);
     settings_window_->show();
     return;
   }
@@ -456,7 +461,7 @@ void MainApp::showSettingsWindow() {
           action.can();
         }
       };
-  settings_window_->navigation()->loadUrlAndWait(app_->baseUrl() + "/settings");
+  settings_window_->navigation()->loadUrlAndWait(app_->baseUrl() + section);
   settings_window_->setWindowTitleVisible(false);
   settings_window_->setWindowTitlebarVisible(false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kMaximize, false);
@@ -523,22 +528,43 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("buyLicense", [this]() {
     app_->desktop()->openUrl("https://clipbook.app/checkout/");
   });
+  window->putProperty("isTrial", [this]() -> bool {
+#ifdef OFFICIAL_BUILD
+    return isTrial(app_->version());
+#endif
+    return false;
+  });
+  window->putProperty("isTrialExpired", [this]() -> bool {
+#ifdef OFFICIAL_BUILD
+    return isTrialExpired(app_->version());
+#endif
+    return false;
+  });
+  window->putProperty("getTrialDaysLeft", [this]() -> int {
+#ifdef OFFICIAL_BUILD
+    return getTrialDaysLeft(app_->version());
+#endif
+    return 0;
+  });
   window->putProperty("isActivated", [this]() -> bool {
 #ifdef OFFICIAL_BUILD
-    return isLicenseActivated(settings_->getLicenseKey(), settings_->getRuntimeKey());
+    return isLicenseActivated(settings_->getLicenseKey());
 #endif
     return true;
   });
   window->putProperty("activateLicense", [this](std::string licenseKey) {
 #ifdef OFFICIAL_BUILD
     activateLicense(licenseKey, [this](const std::string &runtimeKey) {
-      settings_->saveRuntimeKey(runtimeKey);
       settings_window_->mainFrame()->executeJavaScript("licenseActivationCompleted('')");
     }, [this](const std::string &error) {
       settings_window_->mainFrame()->executeJavaScript(
           "licenseActivationCompleted('" + error + "')");
     });
 #endif
+  });
+  window->putProperty("openSettingsLicense", [this]() {
+    hide();
+    showSettingsWindow("/settings/license");
   });
 
   window->putProperty("saveTheme", [this](std::string theme) -> void {

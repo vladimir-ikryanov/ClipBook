@@ -58,6 +58,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void showUpdateAvailableDialog(const std::shared_ptr<molybden::AppUpdate> &app_update,
                                  const std::function<void()> &complete);
   void showSettingsWindow();
+  void showSettingsWindow(const std::string &section);
   void selectAppsToIgnore();
 
   void setTheme(const std::string &theme);

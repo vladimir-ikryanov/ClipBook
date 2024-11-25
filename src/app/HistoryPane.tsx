@@ -54,6 +54,7 @@ import {Clip, ClipType} from "@/db";
 import {isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
+import {getTrialLicenseDaysLeft, isTrialLicense} from "@/licensing";
 
 declare const pasteInFrontApp: (text: string, imageFileName: string, imageText: string) => void;
 declare const copyToClipboard: (text: string, imageFileName: string, imageText: string) => void;
@@ -82,6 +83,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [quickPasteModifierPressed, setQuickPasteModifierPressed] = useState(false);
   const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
   const [historyItem, setHistoryItem] = useState(history[getVisibleActiveHistoryItemIndex()]);
+  const [isTrial, setIsTrial] = useState(isTrialLicense());
+  const [trialDaysLeft, setTrialDaysLeft] = useState(getTrialLicenseDaysLeft());
 
   async function setTextFromImage(imageFileName: string, text: string) {
     let clip = findItemByImageFileName(imageFileName)
@@ -203,6 +206,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
       setHistoryItem(history[activeTabIndex])
       scrollToActiveTab()
     }
+    // Check the trial status and show the trial dialog if necessary.
+    setIsTrial(isTrialLicense())
+    setTrialDaysLeft(getTrialLicenseDaysLeft())
   }
 
   function scrollToActiveTab() {
@@ -645,6 +651,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onMouseDoubleClick={handleMouseDoubleClick}
                               isPreviewVisible={previewVisible}
                               isQuickPasteModifierPressed={quickPasteModifierPressed}
+                              isTrial={isTrial}
+                              trialDaysLeft={trialDaysLeft}
                               searchFieldRef={searchFieldRef}
                               listRef={listRef}
                               onPaste={handlePaste}

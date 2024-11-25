@@ -29,7 +29,6 @@ NSString *prefClearHistoryOnMacReboot = @"clear_history_on_mac_reboot";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
-NSString *prefRuntimeKey = @"runtime_key";
 
 // Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
@@ -83,21 +82,6 @@ void AppSettingsMac::saveLicenseKey(std::string key) {
 std::string AppSettingsMac::getLicenseKey() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   NSString *key = [defaults objectForKey:prefLicenseKey];
-  if (key != nil) {
-    return [key UTF8String];
-  }
-  return "";
-}
-
-void AppSettingsMac::saveRuntimeKey(std::string key) {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setObject:[NSString stringWithUTF8String:key.c_str()] forKey:prefRuntimeKey];
-  [defaults synchronize];
-}
-
-std::string AppSettingsMac::getRuntimeKey() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  NSString *key = [defaults objectForKey:prefRuntimeKey];
   if (key != nil) {
     return [key UTF8String];
   }

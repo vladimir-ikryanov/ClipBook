@@ -1,18 +1,21 @@
 import '../app.css';
 import {Input} from "@/components/ui/input"
 import React from "react";
-import {PanelRightOpen, SearchIcon, XIcon} from "lucide-react";
+import {SearchIcon, XIcon} from "lucide-react";
 import {Button} from "@/components/ui/button";
-import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {prefGetTogglePreviewShortcut} from "@/pref";
 import {ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
 
+declare const openSettingsLicense: () => void;
+
 type SearchBarProps = {
   searchQuery: string
   onSearchQueryChange: (searchQuery: string) => void
   isPreviewVisible: boolean
+  isTrial: boolean
+  trialDaysLeft: number
   onShowHidePreview: () => void
   searchFieldRef?: React.Ref<HTMLInputElement>
 }
@@ -40,6 +43,10 @@ export default function SearchBar(props: SearchBarProps) {
     props.onSearchQueryChange("")
   }
 
+  function handleClickTrial() {
+    openSettingsLicense()
+  }
+
   return (
       <div className="flex flex-col border-b-solid border-b-border border-b">
         <div className="flex m-2">
@@ -55,7 +62,25 @@ export default function SearchBar(props: SearchBarProps) {
                    onKeyDown={handleKeyDown}
                    ref={props.searchFieldRef}/>
           </div>
-          <div className={props.searchQuery.length == 0 ? "flex-auto draggable" : "flex-none"}></div>
+          <div
+              className={props.searchQuery.length == 0 ? "flex-auto draggable" : "flex-none"}></div>
+          <div className={props.isTrial ? "" : "hidden"}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="toolbar" size="toolbar" onClick={handleClickTrial}>
+                  <span className="rounded-sm bg-accent py-1 px-2.5">
+                    Trial {props.trialDaysLeft > 0 ? `(${props.trialDaysLeft} days left)` : "(expired)"}
+                  </span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="flex items-center">
+                <div className="select-none mr-2">
+                  Trial license
+                  {props.trialDaysLeft > 0 ? ` (${props.trialDaysLeft} days left)` : " (expired)"}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </div>
           <div className={props.searchQuery.length == 0 ? "hidden" : ""}>
             <Tooltip>
               <TooltipTrigger asChild>
