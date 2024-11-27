@@ -54,7 +54,8 @@ import {Clip, ClipType} from "@/db";
 import {isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
-import {getTrialLicenseDaysLeft, isTrialLicense} from "@/licensing";
+import {getTrialLicenseDaysLeft, isTrialLicense, isTrialLicenseExpired} from "@/licensing";
+import TrialExpiredMessage from "@/app/TrialExpiredMessage";
 
 declare const pasteInFrontApp: (text: string, imageFileName: string, imageText: string) => void;
 declare const copyToClipboard: (text: string, imageFileName: string, imageText: string) => void;
@@ -85,6 +86,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [historyItem, setHistoryItem] = useState(history[getVisibleActiveHistoryItemIndex()]);
   const [isTrial, setIsTrial] = useState(isTrialLicense());
   const [trialDaysLeft, setTrialDaysLeft] = useState(getTrialLicenseDaysLeft());
+  const [isTrialExpired, setIsTrialExpired] = useState(isTrialLicenseExpired());
 
   async function setTextFromImage(imageFileName: string, text: string) {
     let clip = findItemByImageFileName(imageFileName)
@@ -206,9 +208,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
       setHistoryItem(history[activeTabIndex])
       scrollToActiveTab()
     }
-    // Check the trial status and show the trial dialog if necessary.
+    // Update the trial state and days left when the app is activated.
     setIsTrial(isTrialLicense())
     setTrialDaysLeft(getTrialLicenseDaysLeft())
+    setIsTrialExpired(isTrialLicenseExpired())
   }
 
   function scrollToActiveTab() {
@@ -640,6 +643,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
             onValueChange={onTabChange}
             orientation="vertical"
             className="w-full p-0 m-0">
+        <TrialExpiredMessage visible={isTrialExpired}/>
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel className="flex flex-col">
             <HistoryItemsPane history={history}

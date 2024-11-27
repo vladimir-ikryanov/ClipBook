@@ -1,6 +1,5 @@
 declare const isActivated: () => boolean;
 declare const isTrial: () => boolean;
-declare const isTrialExpired: () => boolean;
 declare const getTrialDaysLeft: () => number;
 
 export function isLicenseActivated(): boolean {
@@ -12,7 +11,7 @@ export function isTrialLicense(): boolean {
 }
 
 export function isTrialLicenseExpired(): boolean {
-  return isTrialExpired()
+  return isTrial() && getTrialLicenseDaysLeft() <= 0
 }
 
 export function getTrialLicenseDaysLeft(): number {

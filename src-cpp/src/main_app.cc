@@ -528,15 +528,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("buyLicense", [this]() {
     app_->desktop()->openUrl("https://clipbook.app/checkout/");
   });
+  window->putProperty("helpWithActivation", [this]() {
+    app_->desktop()->openUrl("mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Activation%20Error&body=License%20Key:%20" + settings_->getLicenseKey());
+  });
   window->putProperty("isTrial", [this]() -> bool {
 #ifdef OFFICIAL_BUILD
     return isTrial(app_->version());
-#endif
-    return false;
-  });
-  window->putProperty("isTrialExpired", [this]() -> bool {
-#ifdef OFFICIAL_BUILD
-    return isTrialExpired(app_->version());
 #endif
     return false;
   });

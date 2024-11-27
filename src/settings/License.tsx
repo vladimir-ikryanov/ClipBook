@@ -5,15 +5,19 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {prefGetLicenseKey, prefSetLicenseKey} from "@/pref";
 import {isLicenseActivated} from "@/licensing";
+import ActivationErrorMessage from "@/settings/ActivationErrorMessage";
 
 declare const closeSettingsWindow: () => void;
 declare const buyLicense: () => void;
+declare const helpWithActivation: () => void;
 declare const activateLicense: (licenseKey: string) => void;
 
 export default function License() {
   const [licenseKey, setLicenseKey] = useState(prefGetLicenseKey())
   const [licenseKeyInvalid, setLicenseKeyInvalid] = useState(isLicenseKeyFormatInvalid(licenseKey))
   const [isActivated, setIsActivated] = useState(isLicenseActivated())
+  const [showErrorMessage, setShowErrorMessage] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -34,6 +38,15 @@ export default function License() {
     activateLicense(licenseKey)
   }
 
+  function handleClose() {
+    setShowErrorMessage(false)
+  }
+
+  function handleHelp() {
+    setShowErrorMessage(false)
+    helpWithActivation()
+  }
+
   function isLicenseKeyFormatInvalid(licenseKey: string) {
     return licenseKey.length !== 36
   }
@@ -46,11 +59,12 @@ export default function License() {
   }
 
   function licenseActivationCompleted(error: string) {
+    setErrorMessage(error)
     if (error) {
-      alert("Failed to activate license: " + error)
+      setShowErrorMessage(true)
       setIsActivated(false)
     } else {
-      alert("License activated successfully")
+      setShowErrorMessage(false)
       setIsActivated(true)
     }
   }
@@ -149,6 +163,7 @@ export default function License() {
                      value={licenseKey}
                      disabled={isActivated}
                      className="mb-4 text-lg placeholder:text-settings-inputPlaceholder"/>
+              <ActivationErrorMessage visible={showErrorMessage} message={errorMessage} onClose={handleClose} onHelp={handleHelp}/>
               <p className="text-secondary-foreground text-sm text-pretty mb-4">
                 You can find your license key in the email you received after purchasing ClipBook.
               </p>
