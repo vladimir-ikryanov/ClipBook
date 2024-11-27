@@ -69,14 +69,15 @@ export default function SearchBar(props: SearchBarProps) {
               <TooltipTrigger asChild>
                 <Button variant="toolbar" size="toolbar" onClick={handleClickTrial}>
                   <span className="rounded-sm bg-accent py-1 px-2.5">
-                    Trial {props.trialDaysLeft > 0 ? `(${props.trialDaysLeft} days left)` : "(expired)"}
+                    Trial {props.trialDaysLeft > 0 ? `(${props.trialDaysLeft} ${props.trialDaysLeft > 1 ? "days" : "day"} left)` : " expired"}
                   </span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
                 <div className="select-none mr-2">
-                  Trial license
-                  {props.trialDaysLeft > 0 ? ` (${props.trialDaysLeft} days left)` : " (expired)"}
+                  {
+                    props.trialDaysLeft > 0 ? `Trial will expire in ${props.trialDaysLeft} ${props.trialDaysLeft > 1 ? "days" : "day"}` : "Trial expired"
+                  }
                 </div>
               </TooltipContent>
             </Tooltip>
