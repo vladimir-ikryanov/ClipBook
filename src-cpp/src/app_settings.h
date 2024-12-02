@@ -19,6 +19,9 @@ class AppSettings {
   virtual void saveLicenseKey(std::string key) = 0;
   virtual std::string getLicenseKey() = 0;
 
+  virtual void setShouldDisplayThankYouDialog(bool display) = 0;
+  virtual bool shouldDisplayThankYouDialog() = 0;
+
   virtual void saveTheme(std::string theme) = 0;
   virtual std::string getTheme() = 0;
 

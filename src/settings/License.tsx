@@ -140,7 +140,7 @@ export default function License() {
         <div className="flex flex-col flex-grow">
           <div className="flex pt-8 px-8 border-b border-b-border draggable sticky items-center">
             <span className="text-2xl pb-3 font-semibold">ClipBook License</span>
-            <div className="pb-2">
+            <div className="pb-2.5">
               {renderTitle()}
             </div>
           </div>

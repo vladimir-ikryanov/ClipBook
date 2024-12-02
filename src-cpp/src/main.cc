@@ -8,17 +8,9 @@
 
 #include "welcome_window.h"
 #include "url_request_interceptor.h"
+#include "utils.h"
 
 using namespace molybden;
-
-std::string getHomeDirectory() {
-  const char* homeDir = getenv("HOME");
-  if (homeDir != nullptr) {
-    return {homeDir};
-  } else {
-    return ""; // Home directory not found
-  }
-}
 
 void launch() {
   AppOptions options;
@@ -26,7 +18,7 @@ void launch() {
   options.logging.enabled = false;
   options.logging.log_level = LogLevel::kError;
   options.logging.destination = Destination::kFile;
-  options.logging.log_file = getHomeDirectory() + "/Library/Application Support/ClipBook/clipbook.log";
+  options.logging.log_file = getAppDataDir() + "/clipbook.log";
   // Register the custom URL scheme.
   options.schemes.emplace_back(kClipBookScheme);
 

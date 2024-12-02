@@ -6,3 +6,19 @@ bool isEmptyOrSpaces(const std::string &str) {
     return std::isspace(static_cast<unsigned char>(c));
   });
 }
+
+std::string getUserHomeDir() {
+  const char *homeDir = getenv("HOME");
+  if (homeDir != nullptr) {
+    return {homeDir};
+  }
+  return "";
+}
+
+std::string getAppDataDir() {
+  std::string homeDir = getUserHomeDir();
+  if (homeDir.empty()) {
+    return "";
+  }
+  return homeDir + "/Library/Application Support/ClipBook";
+}

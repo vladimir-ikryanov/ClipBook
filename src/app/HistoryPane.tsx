@@ -32,6 +32,7 @@ import {
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetKeepFavoritesOnClearHistory,
+  prefGetLicenseKey,
   prefGetNavigateToFirstItemShortcut,
   prefGetNavigateToLastItemShortcut,
   prefGetNavigateToNextGroupOfItemsShortcut,
@@ -46,7 +47,9 @@ import {
   prefGetSelectPreviousItemShortcut,
   prefGetShowMoreActionsShortcut,
   prefGetToggleFavoriteShortcut,
-  prefGetTogglePreviewShortcut
+  prefGetTogglePreviewShortcut,
+  prefSetDisplayThankYouDialog,
+  prefShouldDisplayThankYouMessage
 } from "@/pref";
 import {HideActionsReason} from "@/app/Actions";
 import {FixedSizeList as List} from "react-window";
@@ -56,6 +59,7 @@ import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
 import {getTrialLicenseDaysLeft, isTrialLicense, isTrialLicenseExpired} from "@/licensing";
 import TrialExpiredMessage from "@/app/TrialExpiredMessage";
+import FreeLicenseMessage from "@/app/FreeLicenseMessage";
 
 declare const pasteInFrontApp: (text: string, imageFileName: string, imageText: string) => void;
 declare const copyToClipboard: (text: string, imageFileName: string, imageText: string) => void;
@@ -87,6 +91,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [isTrial, setIsTrial] = useState(isTrialLicense());
   const [trialDaysLeft, setTrialDaysLeft] = useState(getTrialLicenseDaysLeft());
   const [isTrialExpired, setIsTrialExpired] = useState(isTrialLicenseExpired());
+  const [displayThankYouMessage, setDisplayThankYouMessage] = useState(prefShouldDisplayThankYouMessage());
 
   async function setTextFromImage(imageFileName: string, text: string) {
     let clip = findItemByImageFileName(imageFileName)
@@ -614,6 +619,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setHistoryItem(history[index])
   }
 
+  function handleCloseThankYouMessage() {
+    setDisplayThankYouMessage(false)
+    prefSetDisplayThankYouDialog(false)
+  }
+
   (window as any).addClipboardData = addClipboardData;
   (window as any).mergeClipboardData = mergeClipboardData;
   (window as any).copyToClipboardAfterMerge = copyToClipboardAfterMerge;
@@ -644,6 +654,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
             orientation="vertical"
             className="w-full p-0 m-0">
         <TrialExpiredMessage visible={isTrialExpired}/>
+        <FreeLicenseMessage visible={displayThankYouMessage} licenseKey={prefGetLicenseKey()}
+                            onClose={handleCloseThankYouMessage}/>
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel className="flex flex-col">
             <HistoryItemsPane history={history}

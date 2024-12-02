@@ -156,6 +156,15 @@ void MainApp::launch() {
   }
 
   app_window_->navigation()->loadUrlAndWait(app_->baseUrl());
+
+#ifdef OFFICIAL_BUILD
+  activateLicense([this](const std::string &licenseKey) {
+    settings_->saveLicenseKey(licenseKey);
+    settings_->setShouldDisplayThankYouDialog(true);
+  }, [](const std::string &error) {
+    LOG(ERROR) << "Failed to activate a license key: " << error;
+  });
+#endif
 }
 
 void MainApp::show() {
@@ -533,7 +542,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("isTrial", [this]() -> bool {
 #ifdef OFFICIAL_BUILD
-    return isTrial(app_->version());
+    return isTrial();
 #endif
     return false;
   });
@@ -551,7 +560,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("activateLicense", [this](std::string licenseKey) {
 #ifdef OFFICIAL_BUILD
-    activateLicense(licenseKey, [this](const std::string &runtimeKey) {
+    activateLicense(licenseKey, [this]() {
       settings_window_->mainFrame()->executeJavaScript("licenseActivationCompleted('')");
     }, [this](const std::string &error) {
       settings_window_->mainFrame()->executeJavaScript(
@@ -562,6 +571,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("openSettingsLicense", [this]() {
     hide();
     showSettingsWindow("/settings/license");
+  });
+  window->putProperty("shouldDisplayThankYouDialog", [this]() -> bool {
+    return settings_->shouldDisplayThankYouDialog();
+  });
+  window->putProperty("saveDisplayThankYouDialog", [this](bool display) {
+    settings_->setShouldDisplayThankYouDialog(display);
   });
 
   window->putProperty("saveTheme", [this](std::string theme) -> void {

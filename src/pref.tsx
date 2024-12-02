@@ -2,6 +2,8 @@ declare const saveTheme: (theme: string) => void;
 declare const getTheme: () => string;
 declare const saveLicenseKey: (licenseKey: string) => void;
 declare const getLicenseKey: () => string;
+declare const saveDisplayThankYouDialog: (display: boolean) => void;
+declare const shouldDisplayThankYouDialog: () => boolean;
 declare const saveOpenAtLogin: (openAtLogin: boolean) => void;
 declare const shouldOpenAtLogin: () => boolean;
 declare const saveCheckForUpdatesAutomatically: (value: boolean) => void;
@@ -414,4 +416,12 @@ export function prefGetNavigateToPrevGroupOfItemsShortcut() {
 
 export function prefSetNavigateToPrevGroupOfItemsShortcut(shortcut: string) {
   saveNavigateToPrevGroupOfItemsShortcut(shortcut)
+}
+
+export function prefSetDisplayThankYouDialog(display: boolean) {
+  saveDisplayThankYouDialog(display)
+}
+
+export function prefShouldDisplayThankYouMessage() {
+  return shouldDisplayThankYouDialog()
 }

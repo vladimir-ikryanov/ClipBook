@@ -29,6 +29,7 @@ NSString *prefClearHistoryOnMacReboot = @"clear_history_on_mac_reboot";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
+NSString *prefDisplayThankYouDialog = @"display_thank_you_dialog";
 
 // Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
@@ -713,4 +714,15 @@ std::string AppSettingsMac::getNavigateToPrevGroupOfItemsShortcut() {
     return {[shortcut UTF8String]};
   }
   return "AltLeft + ArrowUp";
+}
+
+void AppSettingsMac::setShouldDisplayThankYouDialog(bool display) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:display forKey:prefDisplayThankYouDialog];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldDisplayThankYouDialog() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  return [defaults boolForKey:prefDisplayThankYouDialog];
 }
