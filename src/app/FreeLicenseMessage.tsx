@@ -29,20 +29,20 @@ export default function FreeLicenseMessage(props: FreeLicenseMessageProps) {
         <AlertDialogTrigger asChild>
           <Button className="hidden">Show Dialog</Button>
         </AlertDialogTrigger>
-        <AlertDialogContent className="flex flex-col items-center pt-10 pb-8">
+        <AlertDialogContent className="flex flex-col p-8">
           <h2 className="font-semibold text-2xl text-accent-foreground">Thank you for using ClipBook!</h2>
-          <p className="text-center">
+          <p className="">
             ClipBook was free for a long time, but I had to make it a paid app to keep it alive. The monthly expenses are getting higher and higher, and I need to cover them.
           </p>
-          <p className="text-center">
+          <p className="">
             Since you used ClipBook before it became a paid app, I'm giving you a free lifetime license key as my thank you.
           </p>
           <div
               className="text-lg font-mono bg-secondary py-3 px-4 rounded-md">{props.licenseKey}</div>
-          <p className="text-center">
-            You will receive all future updates for free. Enjoy!
+          <p className="">
+            This license grants you free lifetime updates. Enjoy!
           </p>
-          <p className="text-center text-primary-foreground">Vladimir Ikryanov<br/>Founder of ClipBook</p>
+          <p className="text-primary-foreground">Vladimir Ikryanov<br/>Founder of ClipBook</p>
           <Button className="mt-4" onClick={handleClose} variant="buy">Close</Button>
         </AlertDialogContent>
       </AlertDialog>

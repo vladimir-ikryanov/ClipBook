@@ -6,7 +6,6 @@
 #include "main_app_win.h"
 #endif
 
-#include "welcome_window.h"
 #include "url_request_interceptor.h"
 #include "utils.h"
 
@@ -33,9 +32,7 @@ void launch() {
 #endif
     bool first_run = main_app->init();
     if (first_run) {
-      // Show the welcome window if the app is running for the first time.
-      auto* welcome_window = new WelcomeWindow(main_app);
-      welcome_window->show();
+      main_app->showWelcomeWindow();
     }
     main_app->launch();
   });

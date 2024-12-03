@@ -21,8 +21,6 @@ set(APP_SOURCES
         src-cpp/src/utils.cc
         src-cpp/src/url_request_interceptor.h
         src-cpp/src/url_request_interceptor.cc
-        src-cpp/src/welcome_window.h
-        src-cpp/src/welcome_window.cc
         src-cpp/src/app_settings.h
         src-cpp/src/app_settings.cc
 )

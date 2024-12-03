@@ -21,6 +21,8 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void resume();
   bool isPaused() const;
 
+  void showWelcomeWindow();
+
   std::string getImagesDir();
 
   virtual bool init();
@@ -89,6 +91,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Tray> tray_;
   std::shared_ptr<molybden::Browser> app_window_;
+  std::shared_ptr<molybden::Browser> welcome_window_;
   std::shared_ptr<molybden::Browser> settings_window_;
   std::shared_ptr<molybden::CustomMenuItem> open_app_item_;
   std::shared_ptr<molybden::CustomMenuItem> open_settings_item_;

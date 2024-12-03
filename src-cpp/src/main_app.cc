@@ -161,6 +161,7 @@ void MainApp::launch() {
   activateLicense([this](const std::string &licenseKey) {
     settings_->saveLicenseKey(licenseKey);
     settings_->setShouldDisplayThankYouDialog(true);
+    app_window_->navigation()->reloadIgnoringCache();
   }, [](const std::string &error) {
     LOG(ERROR) << "Failed to activate a license key: " << error;
   });
@@ -481,7 +482,38 @@ void MainApp::showSettingsWindow(const std::string &section) {
   settings_window_->show();
 }
 
+void MainApp::showWelcomeWindow() {
+  welcome_window_ = Browser::create(app_);
+  welcome_window_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
+    initJavaScriptApi(args.window);
+    action.proceed();
+  };
+  welcome_window_->navigation()->loadUrlAndWait(app_->baseUrl() + "/welcome");
+  welcome_window_->setWindowTitleVisible(false);
+  welcome_window_->setWindowTitlebarVisible(false);
+  welcome_window_->setWindowButtonVisible(WindowButtonType::kMaximize, false);
+  welcome_window_->setWindowButtonVisible(WindowButtonType::kMinimize, false);
+  welcome_window_->setWindowButtonVisible(WindowButtonType::kRestore, false);
+  welcome_window_->setWindowButtonVisible(WindowButtonType::kZoom, false);
+  welcome_window_->setSize(500, 700);
+  welcome_window_->centerWindow();
+  welcome_window_->show();
+}
+
 void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &window) {
+  // Welcome window.
+  window->putProperty("enableAccessibilityAccess", [this]() {
+    paste();
+    welcome_window_->loadUrl(app_->baseUrl() + "/enjoy");
+  });
+  window->putProperty("openHistory", [this]() {
+    welcome_window_->hide();
+    show();
+  });
+  window->putProperty("openUrl", [this](std::string url) {
+    app_->desktop()->openUrl(url);
+  });
+  // App window.
   window->putProperty("pasteInFrontApp",
                       [this](std::string text, std::string imageFileName, std::string imageText) {
                         paste(text, imageFileName, imageText);
