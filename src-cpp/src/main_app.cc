@@ -19,7 +19,7 @@ std::string kKeyboardShortcutsUrl =
 std::string kProductUpdatesUrl =
     "https://clipbook.app/tags/updates/?utm_source=app&utm_medium=help";
 std::string kContactSupportUrl =
-    "mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
+    "mailto:vladimir.ikryanov@clipbook.app?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
 std::string kFeatureRequestUrl =
     "https://clipbook.app/roadmap/?utm_source=app&utm_medium=help";
 int32_t kUpdateCheckIntervalInHours = 2;
@@ -570,7 +570,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
     app_->desktop()->openUrl("https://clipbook.app/checkout/");
   });
   window->putProperty("helpWithActivation", [this]() {
-    app_->desktop()->openUrl("mailto:vladimir.ikryanov@gmail.com?subject=ClipBook%20Activation%20Error&body=License%20Key:%20" + settings_->getLicenseKey());
+    app_->desktop()->openUrl("mailto:vladimir.ikryanov@clipbook.app?subject=ClipBook%20Activation%20Error&body=License%20Key:%20" + settings_->getLicenseKey());
   });
   window->putProperty("isTrial", [this]() -> bool {
 #ifdef OFFICIAL_BUILD
