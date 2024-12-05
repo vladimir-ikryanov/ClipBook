@@ -24,12 +24,16 @@ export default function FreeLicenseMessage(props: FreeLicenseMessageProps) {
     props.onClose()
   }
 
+  function handleKeyDown(e: React.KeyboardEvent) {
+    e.stopPropagation()
+  }
+
   return (
       <AlertDialog open={props.visible}>
         <AlertDialogTrigger asChild>
           <Button className="hidden">Show Dialog</Button>
         </AlertDialogTrigger>
-        <AlertDialogContent className="flex flex-col p-8">
+        <AlertDialogContent className="flex flex-col p-8" onKeyDown={handleKeyDown}>
           <h2 className="font-semibold text-2xl text-accent-foreground">Thank you for using ClipBook!</h2>
           <p className="">
             ClipBook was free for a long time, but I had to make it a paid app to keep it alive. The monthly expenses are getting higher and higher, and I need to cover them.
