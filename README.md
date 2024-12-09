@@ -55,4 +55,4 @@ By using ClipBook, you agree to the [Terms of Use](https://clipbook.app/terms/) 
 
 ## Support
 
-For questions or support, please contact me via [email/contact page].
+For questions or support, please [contact me](mailto:vladimir.ikryanov@clipbook.app).
