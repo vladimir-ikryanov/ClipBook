@@ -41,6 +41,10 @@ npm install
 npm run molybden build
 ```
 
+This command will build and pack ClipBook into a native executable and place it in the project's `build-dist/bin` directory. It will also create a DMG installer in `build-dist/pack`.
+
+**Note**: The application will not be signed and notarized. You can sign and notarize it using your own Apple developer certificate by following the instructions in the [Molybden documentation](https://teamdev.com/molybden/docs/distribution/signing.html#macos). 
+
 ## License
 
 ClipBook’s source code is provided for transparency and personal use. However, its use in commercial or redistributed products is restricted without a license. Please refer to the LICENSE file for details.
