@@ -47,7 +47,7 @@ This command will build and pack ClipBook into a native executable and place it 
 
 ## License
 
-ClipBook’s source code is provided for transparency and personal use. However, its use in commercial or redistributed products is restricted without a license. Please refer to the LICENSE file for details.
+ClipBook’s source code is provided for transparency and personal use. However, its use in commercial or redistributed products is restricted without a license. Please refer to the [LICENSE](LICENSE.md) file for details.
 
 ## Terms of Use
 
