@@ -1,5 +1,4 @@
 import '../app.css';
-import {TabsTrigger} from "@/components/ui/tabs";
 import React, {CSSProperties, KeyboardEvent, MouseEvent, useState} from 'react';
 import {getFilterQuery} from "@/data";
 import {Clip, ClipType} from "@/db";
@@ -16,12 +15,14 @@ import ShortcutLabel from "@/app/ShortcutLabel";
 type HistoryItemPaneProps = {
   item: Clip
   index: number
+  selected: boolean
   historySize: number
   appName: string
   appIcon: string
   isQuickPasteModifierPressed: boolean
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
-  onMouseDoubleClick: (tabIndex: number) => void
+  onMouseDown(index: number): void
+  onMouseDoubleClick: (index: number) => void
   onPaste: () => void
   onEditHistoryItem: (item: Clip) => void
   onEditContent: () => void
@@ -45,6 +46,11 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
       e.stopPropagation()
     }
+  }
+
+  const handleMouseDown = (e: MouseEvent) => {
+    props.onMouseDown(props.index)
+    e.preventDefault()
   }
 
   const handleMouseDoubleClick = (e: MouseEvent) => {
@@ -150,13 +156,12 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   }
 
   return (
-      <TabsTrigger
+      <div
           id={`tab-${props.index}`}
           style={props.style}
-          ref={props.tabsTriggerRef}
-          value={props.index.toString()}
-          className="flex flex-row cursor-default data-[state=active]:bg-accent py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis hover:bg-popover"
+          className={`flex flex-row cursor-default items-center ${props.selected ? 'bg-accent' : 'hover:bg-popover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis rounded-md`}
           onKeyDown={handleKeyDown}
+          onMouseDown={handleMouseDown}
           onDoubleClick={handleMouseDoubleClick}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}>
@@ -168,7 +173,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
           }
         </div>
         {renderActionsButton()}
-      </TabsTrigger>
+      </div>
   )
 }
 

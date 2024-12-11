@@ -1,5 +1,4 @@
 import '../app.css';
-import {TabsList} from "@/components/ui/tabs";
 import React from "react";
 import SearchBar from "@/app/SearchBar";
 import ActionsBar from "@/app/ActionsBar";
@@ -21,6 +20,8 @@ type HistoryItemListPaneProps = {
   isQuickPasteModifierPressed: boolean
   isTrial: boolean
   trialDaysLeft: number
+  selectedItemIndex: number
+  onSelectedItemIndexChange: (index: number) => void
   onShowHidePreview: () => void
   onPaste: () => void
   onClose: () => void
@@ -37,18 +38,22 @@ type HistoryItemListPaneProps = {
   onOpenSettings: () => void
   onDeleteItem: () => void
   onDeleteAllItems: () => void
-  onMouseDoubleClick: (tabIndex: number) => void
+  onMouseDoubleClick: (index: number) => void
   searchFieldRef?: React.Ref<HTMLInputElement>
   listRef?: React.Ref<List>
 }
 
 const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
-  function handleMouseDoubleClick(tabIndex: number) {
-    props.onMouseDoubleClick(tabIndex)
+  function handleMouseDown(index: number) {
+    props.onSelectedItemIndexChange(index)
+  }
+
+  function handleMouseDoubleClick(index: number) {
+    props.onMouseDoubleClick(index)
   }
 
   function renderTabsList() {
-    return <TabsList loop={false} className="flex h-full p-2">
+    return <div className="flex h-full p-2">
       <div className="grid h-full w-full">
         <AutoSizer style={{}}>
           {(sizeProps: Size) => {
@@ -66,6 +71,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
                     return (
                         <HistoryItemPane style={style}
                                          index={index}
+                                         selected={index === props.selectedItemIndex}
                                          item={props.history[index]}
                                          historySize={props.history.length}
                                          appName={props.appName}
@@ -74,6 +80,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
                                          onHideClipDropdownMenu={props.onHideClipDropdownMenu}
                                          onPaste={props.onPaste}
                                          onEditHistoryItem={props.onEditHistoryItem}
+                                         onMouseDown={handleMouseDown}
                                          onMouseDoubleClick={handleMouseDoubleClick}
                                          onEditContent={props.onEditContent}
                                          onCopyToClipboard={props.onCopyToClipboard}
@@ -88,7 +95,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
           }}
         </AutoSizer>
       </div>
-    </TabsList>
+    </div>
   }
 
   function renderNoSearchResults() {

@@ -1,5 +1,4 @@
 import '../app.css';
-import {Tabs} from "@/components/ui/tabs";
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/components/ui/resizable";
 import PreviewPane from "@/app/PreviewPane"
 import HistoryItemsPane from "@/app/HistoryItemsPane";
@@ -86,7 +85,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [quickPasteModifierPressed, setQuickPasteModifierPressed] = useState(false);
-  const [activeTab, setActiveTab] = useState(getVisibleActiveHistoryItemIndex().toString());
+  const [selectedItemIndex, setSelectedItemIndex] = useState(getVisibleActiveHistoryItemIndex());
   const [historyItem, setHistoryItem] = useState(history[getVisibleActiveHistoryItemIndex()]);
   const [isTrial, setIsTrial] = useState(isTrialLicense());
   const [trialDaysLeft, setTrialDaysLeft] = useState(getTrialLicenseDaysLeft());
@@ -124,9 +123,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
     let selectedItemIndex = getHistoryItemIndex(selectedItem);
     setVisibleActiveHistoryItemIndex(selectedItemIndex)
-    setActiveTab(selectedItemIndex.toString())
+    setSelectedItemIndex(selectedItemIndex)
     setHistoryItem(selectedItem)
-    scrollToActiveTab()
+    scrollToSelectedItem()
   }
 
   async function mergeClipboardData(content: string,
@@ -163,8 +162,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
           setHistory(items)
           let index = items.findIndex(i => i.id === item.id)
           setVisibleActiveHistoryItemIndex(index)
-          setActiveTab(index.toString())
-          scrollToActiveTab()
+          setSelectedItemIndex(index)
+          scrollToSelectedItem()
           return
         }
       }
@@ -190,8 +189,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
         activeHistoryItemIndex = 0
         setVisibleActiveHistoryItemIndex(activeHistoryItemIndex)
         setHistoryItem(items[getVisibleActiveHistoryItemIndex()])
-        setActiveTab(activeHistoryItemIndex.toString())
-        scrollToActiveTab()
+        setSelectedItemIndex(activeHistoryItemIndex)
+        scrollToSelectedItem()
       }
     }
   }
@@ -209,9 +208,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (getVisibleHistoryItemsLength() > 0) {
       let activeTabIndex = 0;
       setVisibleActiveHistoryItemIndex(activeTabIndex)
-      setActiveTab(activeTabIndex.toString())
+      setSelectedItemIndex(activeTabIndex)
       setHistoryItem(history[activeTabIndex])
-      scrollToActiveTab()
+      scrollToSelectedItem()
     }
     // Update the trial state and days left when the app is activated.
     setIsTrial(isTrialLicense())
@@ -219,7 +218,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setIsTrialExpired(isTrialLicenseExpired())
   }
 
-  function scrollToActiveTab() {
+  function scrollToSelectedItem() {
     let activeTabIndex = getVisibleActiveHistoryItemIndex();
     if (listRef.current) {
       listRef.current.scrollToItem(activeTabIndex, "auto")
@@ -228,7 +227,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   useEffect(() => {
     focusSearchField()
-  }, [activeTab])
+  }, [selectedItemIndex])
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -381,9 +380,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (activeTabIndex < getVisibleHistoryItemsLength() - 1) {
       activeTabIndex = activeTabIndex + 1
       setVisibleActiveHistoryItemIndex(activeTabIndex)
-      setActiveTab(activeTabIndex.toString())
+      setSelectedItemIndex(activeTabIndex)
       setHistoryItem(history[activeTabIndex])
-      scrollToActiveTab()
+      scrollToSelectedItem()
     }
   }
 
@@ -392,26 +391,26 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (activeTabIndex > 0) {
       activeTabIndex = activeTabIndex - 1
       setVisibleActiveHistoryItemIndex(activeTabIndex)
-      setActiveTab(activeTabIndex.toString())
+      setSelectedItemIndex(activeTabIndex)
       setHistoryItem(history[activeTabIndex])
-      scrollToActiveTab()
+      scrollToSelectedItem()
     }
   }
 
   function selectFirstItem() {
     let activeTabIndex = 0;
     setVisibleActiveHistoryItemIndex(activeTabIndex)
-    setActiveTab(activeTabIndex.toString())
+    setSelectedItemIndex(activeTabIndex)
     setHistoryItem(history[activeTabIndex])
-    scrollToActiveTab()
+    scrollToSelectedItem()
   }
 
   function selectLastItem() {
     let activeTabIndex = getVisibleHistoryItemsLength() - 1;
     setVisibleActiveHistoryItemIndex(activeTabIndex)
-    setActiveTab(activeTabIndex.toString())
+    setSelectedItemIndex(activeTabIndex)
     setHistoryItem(history[activeTabIndex])
-    scrollToActiveTab()
+    scrollToSelectedItem()
   }
 
   function jumpToNextGroupOfItems() {
@@ -423,9 +422,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
       activeTabIndex = getVisibleHistoryItemsLength() - 1;
     }
     setVisibleActiveHistoryItemIndex(activeTabIndex)
-    setActiveTab(activeTabIndex.toString())
+    setSelectedItemIndex(activeTabIndex)
     setHistoryItem(history[activeTabIndex])
-    scrollToActiveTab()
+    scrollToSelectedItem()
   }
 
   function jumpToPrevGroupOfItems() {
@@ -437,9 +436,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
       activeTabIndex = 0;
     }
     setVisibleActiveHistoryItemIndex(activeTabIndex)
-    setActiveTab(activeTabIndex.toString())
+    setSelectedItemIndex(activeTabIndex)
     setHistoryItem(history[activeTabIndex])
-    scrollToActiveTab()
+    scrollToSelectedItem()
   }
 
   function isPreviewVisible(): boolean {
@@ -555,7 +554,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       let activeTabIndex = 0;
       if (activeTabIndex < getVisibleHistoryItemsLength() - 1) {
         setVisibleActiveHistoryItemIndex(activeTabIndex)
-        setActiveTab(activeTabIndex.toString())
+        setSelectedItemIndex(activeTabIndex)
       }
     }
     await deleteHistoryItem(itemToDelete)
@@ -581,7 +580,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setHistory(getHistoryItems())
 
     setVisibleActiveHistoryItemIndex(0)
-    setActiveTab("0")
+    setSelectedItemIndex(0)
     // The props.items array won't be updated until the next render, so we need to get the updated
     // items right now to update the preview text.
     setHistoryItem(getHistoryItems()[0])
@@ -590,8 +589,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
-  function handleMouseDoubleClick(tabIndex: number) {
-    let item = history[tabIndex];
+  function handleMouseDoubleClick(index: number) {
+    let item = history[index];
     let imageFileName = item.imageFileName ? item.imageFileName : "";
     let imageText = item.imageText ? item.imageText : "";
     pasteInFrontApp(item.content, imageFileName, imageText)
@@ -608,14 +607,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setHistory(items)
     let index = items.findIndex(i => i.id === item.id)
     setVisibleActiveHistoryItemIndex(index)
-    setActiveTab(index.toString())
-    scrollToActiveTab()
+    setSelectedItemIndex(index)
+    scrollToSelectedItem()
   }
 
-  function onTabChange(tabIndex: string): void {
-    let index = parseInt(tabIndex);
+  function onSelectedItemIndexChange(index: number): void {
     setVisibleActiveHistoryItemIndex(index)
-    setActiveTab(tabIndex)
+    setSelectedItemIndex(index)
     setHistoryItem(history[index])
   }
 
@@ -648,11 +646,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   return (
-      <Tabs defaultValue={activeTab}
-            value={activeTab}
-            onValueChange={onTabChange}
-            orientation="vertical"
-            className="w-full p-0 m-0">
+      <div className="w-full p-0 m-0">
         <TrialExpiredMessage visible={isTrialExpired}/>
         <FreeLicenseMessage visible={displayThankYouMessage} licenseKey={prefGetLicenseKey()}
                             onClose={handleCloseThankYouMessage}/>
@@ -662,6 +656,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               appName={props.appName}
                               appIcon={props.appIcon}
                               searchQuery={searchQuery}
+                              selectedItemIndex={selectedItemIndex}
+                              onSelectedItemIndexChange={onSelectedItemIndexChange}
                               onSearchQueryChange={handleSearchQueryChange}
                               onShowHidePreview={handleTogglePreview}
                               onMouseDoubleClick={handleMouseDoubleClick}
@@ -705,6 +701,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          previewTextareaRef={previewTextareaRef}/>
           </ResizablePanel>
         </ResizablePanelGroup>
-      </Tabs>
+      </div>
   )
 }
