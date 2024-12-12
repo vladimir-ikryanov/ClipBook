@@ -207,7 +207,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     focusSearchField()
     if (getVisibleHistoryLength() > 0) {
       let activeTabIndex = 0;
-      setSelectedItemIndex(activeTabIndex)
+      setSelectedHistoryItemIndex(activeTabIndex)
       setSelectedItemIndex(activeTabIndex)
       setHistoryItem(history[activeTabIndex])
       scrollToSelectedItem()
