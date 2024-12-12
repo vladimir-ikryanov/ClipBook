@@ -7,7 +7,8 @@ import {
   CopyIcon,
   Edit3Icon,
   GlobeIcon,
-  PanelRightClose, ScanTextIcon, SettingsIcon,
+  ScanTextIcon,
+  SettingsIcon,
   StarIcon,
   StarOffIcon,
   TrashIcon
@@ -23,13 +24,16 @@ import {
   CommandShortcut,
 } from "@/components/ui/command"
 import {
-  prefGetClearHistoryShortcut, prefGetCopyTextFromImageShortcut,
+  prefGetClearHistoryShortcut,
+  prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
-  prefGetOpenInBrowserShortcut, prefGetOpenSettingsShortcut,
+  prefGetOpenInBrowserShortcut,
+  prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
-  prefGetShowMoreActionsShortcut, prefGetToggleFavoriteShortcut,
+  prefGetShowMoreActionsShortcut,
+  prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
 import ShortcutLabel from "@/app/ShortcutLabel";
