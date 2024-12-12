@@ -18,7 +18,7 @@ export enum SortHistoryType {
 
 let history: Clip[];
 let filterQuery = "";
-let selectedItemIndex = 0;
+let selectedItemIndices: number[] = [];
 let visibleHistoryLength = 0;
 let previewVisible = true;
 let infoVisible = true;
@@ -306,11 +306,16 @@ export function sortHistory(type: SortHistoryType, history: Clip[]) {
 }
 
 export function setSelectedHistoryItemIndex(index: number) {
-  selectedItemIndex = index
+  selectedItemIndices = []
+  selectedItemIndices.push(index)
 }
 
-export function getSelectedHistoryItemIndex() {
-  return selectedItemIndex
+export function getSelectedHistoryItemIndex(): number {
+  return selectedItemIndices.length > 0 ? selectedItemIndices[0] : 0
+}
+
+export function getSelectedHistoryItem(): Clip {
+  return getHistoryItems()[getSelectedHistoryItemIndex()]
 }
 
 export function getVisibleHistoryLength() {
@@ -323,10 +328,6 @@ export function setFilterQuery(query: string) {
 
 export function getFilterQuery(): string {
   return filterQuery
-}
-
-export function getSelectedHistoryItem(): Clip {
-  return getHistoryItems()[selectedItemIndex]
 }
 
 export function getHistoryItemIndex(item: Clip): number {
