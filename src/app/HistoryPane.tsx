@@ -9,7 +9,7 @@ import {
   clear,
   deleteHistoryItem,
   findItemByImageFileName,
-  getActiveHistoryItem,
+  getSelectedHistoryItem,
   getHistoryItemIndex,
   getHistoryItems,
   getPreviewVisibleState,
@@ -108,7 +108,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   imageHeight: number,
                                   imageSizeInBytes: number,
                                   imageText: string) {
-    let selectedItem = getActiveHistoryItem();
+    let selectedItem = getSelectedHistoryItem();
 
     let clips = await addHistoryItem(
         content,
@@ -446,7 +446,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handlePaste(): void {
-    let item = getActiveHistoryItem();
+    let item = getSelectedHistoryItem();
     let imageFileName = item.imageFileName ? item.imageFileName : "";
     let imageText = item.imageText ? item.imageText : "";
     pasteInFrontApp(item.content, imageFileName, imageText)
@@ -472,7 +472,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function handleToggleFavorite() {
-    let item = getActiveHistoryItem()
+    let item = getSelectedHistoryItem()
     item.favorite = !item.favorite
     await handleEditHistoryItem(item)
   }
@@ -504,7 +504,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleEditContent() {
-    let item = getActiveHistoryItem()
+    let item = getSelectedHistoryItem()
     if (!isTextItem(item)) {
       return
     }
@@ -519,7 +519,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleCopyToClipboard() {
-    let item = getActiveHistoryItem();
+    let item = getSelectedHistoryItem();
     let imageFileName = item.imageFileName ? item.imageFileName : "";
     let imageText = item.imageText ? item.imageText : "";
     copyToClipboard(item.content, imageFileName, imageText)
@@ -527,14 +527,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleCopyTextFromImage() {
-    let item = getActiveHistoryItem()
+    let item = getSelectedHistoryItem()
     if (item.type === ClipType.Image) {
       copyToClipboard(item.content, "", "")
     }
   }
 
   function handleOpenInBrowser() {
-    let item = getActiveHistoryItem()
+    let item = getSelectedHistoryItem()
     if (isUrl(item.content)) {
       openInBrowser(item.content)
     }
@@ -549,7 +549,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function handleDeleteItem() {
-    let itemToDelete = getActiveHistoryItem();
+    let itemToDelete = getSelectedHistoryItem();
     if (getSelectedHistoryItemIndex() === getVisibleHistoryLength() - 1) {
       let activeTabIndex = 0;
       if (activeTabIndex < getVisibleHistoryLength() - 1) {

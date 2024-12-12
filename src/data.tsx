@@ -325,7 +325,7 @@ export function getFilterQuery(): string {
   return filterQuery
 }
 
-export function getActiveHistoryItem(): Clip {
+export function getSelectedHistoryItem(): Clip {
   return getHistoryItems()[selectedItemIndex]
 }
 

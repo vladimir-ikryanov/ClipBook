@@ -35,7 +35,7 @@ import {
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {getActiveHistoryItem, getPreviewVisibleState, toBase64Icon} from "@/data";
+import {getSelectedHistoryItem, getPreviewVisibleState, toBase64Icon} from "@/data";
 import {ClipType} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
 
@@ -157,16 +157,16 @@ export default function Actions(props: ActionsProps) {
   }
 
   function isActiveHistoryItemIsUrl() {
-    return getActiveHistoryItem()?.type === ClipType.Link
+    return getSelectedHistoryItem()?.type === ClipType.Link
   }
 
   function canCopyTextFromImage() {
-    let item = getActiveHistoryItem()
+    let item = getSelectedHistoryItem()
     return item?.type === ClipType.Image && item?.content.length > 0
   }
 
   function isActiveHistoryItemEditable() {
-    let type = getActiveHistoryItem()?.type;
+    let type = getSelectedHistoryItem()?.type;
     return type === ClipType.Text ||
         type === ClipType.Link ||
         type === ClipType.Email ||
@@ -232,11 +232,11 @@ export default function Actions(props: ActionsProps) {
               }
               <CommandItem onSelect={handleToggleFavorite}>
                 {
-                  getActiveHistoryItem()?.favorite ?
+                  getSelectedHistoryItem()?.favorite ?
                       <StarOffIcon className="mr-2 h-4 w-4"/> :
                       <StarIcon className="mr-2 h-4 w-4"/>
                 }
-                <span>{getActiveHistoryItem()?.favorite ? "Remove from Favorites" : "Add to Favorites"}</span>
+                <span>{getSelectedHistoryItem()?.favorite ? "Remove from Favorites" : "Add to Favorites"}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
                 </CommandShortcut>
