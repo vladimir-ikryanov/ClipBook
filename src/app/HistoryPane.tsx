@@ -13,12 +13,12 @@ import {
   getHistoryItemIndex,
   getHistoryItems,
   getPreviewVisibleState,
-  getVisibleActiveHistoryItemIndex,
-  getVisibleHistoryItemsLength,
+  getSelectedHistoryItemIndex,
+  getVisibleHistoryLength,
   isHistoryEmpty, isTextItem,
   setFilterQuery,
   setPreviewVisibleState,
-  setVisibleActiveHistoryItemIndex,
+  setSelectedHistoryItemIndex,
   updateHistoryItem
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
@@ -85,8 +85,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [quickPasteModifierPressed, setQuickPasteModifierPressed] = useState(false);
-  const [selectedItemIndex, setSelectedItemIndex] = useState(getVisibleActiveHistoryItemIndex());
-  const [historyItem, setHistoryItem] = useState(history[getVisibleActiveHistoryItemIndex()]);
+  const [selectedItemIndex, setSelectedItemIndex] = useState(getSelectedHistoryItemIndex());
+  const [historyItem, setHistoryItem] = useState(history[getSelectedHistoryItemIndex()]);
   const [isTrial, setIsTrial] = useState(isTrialLicense());
   const [trialDaysLeft, setTrialDaysLeft] = useState(getTrialLicenseDaysLeft());
   const [isTrialExpired, setIsTrialExpired] = useState(isTrialLicenseExpired());
@@ -122,7 +122,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setHistory([...clips])
 
     let selectedItemIndex = getHistoryItemIndex(selectedItem);
-    setVisibleActiveHistoryItemIndex(selectedItemIndex)
+    setSelectedHistoryItemIndex(selectedItemIndex)
     setSelectedItemIndex(selectedItemIndex)
     setHistoryItem(selectedItem)
     scrollToSelectedItem()
@@ -161,7 +161,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
           let items = getHistoryItems();
           setHistory(items)
           let index = items.findIndex(i => i.id === item.id)
-          setVisibleActiveHistoryItemIndex(index)
+          setSelectedHistoryItemIndex(index)
           setSelectedItemIndex(index)
           scrollToSelectedItem()
           return
@@ -184,11 +184,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setHistory(items)
     // If the history is not empty, update the preview text to the new active item.
     if (items.length > 0) {
-      let activeHistoryItemIndex = getVisibleActiveHistoryItemIndex()
+      let activeHistoryItemIndex = getSelectedHistoryItemIndex()
       if (activeHistoryItemIndex >= items.length) {
         activeHistoryItemIndex = 0
-        setVisibleActiveHistoryItemIndex(activeHistoryItemIndex)
-        setHistoryItem(items[getVisibleActiveHistoryItemIndex()])
+        setSelectedHistoryItemIndex(activeHistoryItemIndex)
+        setHistoryItem(items[getSelectedHistoryItemIndex()])
         setSelectedItemIndex(activeHistoryItemIndex)
         scrollToSelectedItem()
       }
@@ -205,9 +205,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function activateApp() {
     focusSearchField()
-    if (getVisibleHistoryItemsLength() > 0) {
+    if (getVisibleHistoryLength() > 0) {
       let activeTabIndex = 0;
-      setVisibleActiveHistoryItemIndex(activeTabIndex)
+      setSelectedItemIndex(activeTabIndex)
       setSelectedItemIndex(activeTabIndex)
       setHistoryItem(history[activeTabIndex])
       scrollToSelectedItem()
@@ -219,7 +219,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function scrollToSelectedItem() {
-    let activeTabIndex = getVisibleActiveHistoryItemIndex();
+    let activeTabIndex = getSelectedHistoryItemIndex();
     if (listRef.current) {
       listRef.current.scrollToItem(activeTabIndex, "auto")
     }
@@ -376,10 +376,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }, [quickPasteModifierPressed]);
 
   function selectNextItem() {
-    let activeTabIndex = getVisibleActiveHistoryItemIndex();
-    if (activeTabIndex < getVisibleHistoryItemsLength() - 1) {
+    let activeTabIndex = getSelectedHistoryItemIndex();
+    if (activeTabIndex < getVisibleHistoryLength() - 1) {
       activeTabIndex = activeTabIndex + 1
-      setVisibleActiveHistoryItemIndex(activeTabIndex)
+      setSelectedHistoryItemIndex(activeTabIndex)
       setSelectedItemIndex(activeTabIndex)
       setHistoryItem(history[activeTabIndex])
       scrollToSelectedItem()
@@ -387,10 +387,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function selectPreviousItem() {
-    let activeTabIndex = getVisibleActiveHistoryItemIndex();
+    let activeTabIndex = getSelectedHistoryItemIndex();
     if (activeTabIndex > 0) {
       activeTabIndex = activeTabIndex - 1
-      setVisibleActiveHistoryItemIndex(activeTabIndex)
+      setSelectedHistoryItemIndex(activeTabIndex)
       setSelectedItemIndex(activeTabIndex)
       setHistoryItem(history[activeTabIndex])
       scrollToSelectedItem()
@@ -399,43 +399,43 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function selectFirstItem() {
     let activeTabIndex = 0;
-    setVisibleActiveHistoryItemIndex(activeTabIndex)
+    setSelectedHistoryItemIndex(activeTabIndex)
     setSelectedItemIndex(activeTabIndex)
     setHistoryItem(history[activeTabIndex])
     scrollToSelectedItem()
   }
 
   function selectLastItem() {
-    let activeTabIndex = getVisibleHistoryItemsLength() - 1;
-    setVisibleActiveHistoryItemIndex(activeTabIndex)
+    let activeTabIndex = getVisibleHistoryLength() - 1;
+    setSelectedHistoryItemIndex(activeTabIndex)
     setSelectedItemIndex(activeTabIndex)
     setHistoryItem(history[activeTabIndex])
     scrollToSelectedItem()
   }
 
   function jumpToNextGroupOfItems() {
-    let activeTabIndex = getVisibleActiveHistoryItemIndex();
+    let activeTabIndex = getSelectedHistoryItemIndex();
     let nextGroupIndex = activeTabIndex + 5;
-    if (nextGroupIndex < getVisibleHistoryItemsLength()) {
+    if (nextGroupIndex < getVisibleHistoryLength()) {
       activeTabIndex = nextGroupIndex;
     } else {
-      activeTabIndex = getVisibleHistoryItemsLength() - 1;
+      activeTabIndex = getVisibleHistoryLength() - 1;
     }
-    setVisibleActiveHistoryItemIndex(activeTabIndex)
+    setSelectedHistoryItemIndex(activeTabIndex)
     setSelectedItemIndex(activeTabIndex)
     setHistoryItem(history[activeTabIndex])
     scrollToSelectedItem()
   }
 
   function jumpToPrevGroupOfItems() {
-    let activeTabIndex = getVisibleActiveHistoryItemIndex();
+    let activeTabIndex = getSelectedHistoryItemIndex();
     let previousGroupIndex = activeTabIndex - 5;
     if (previousGroupIndex >= 0) {
       activeTabIndex = previousGroupIndex;
     } else {
       activeTabIndex = 0;
     }
-    setVisibleActiveHistoryItemIndex(activeTabIndex)
+    setSelectedHistoryItemIndex(activeTabIndex)
     setSelectedItemIndex(activeTabIndex)
     setHistoryItem(history[activeTabIndex])
     scrollToSelectedItem()
@@ -550,10 +550,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   async function handleDeleteItem() {
     let itemToDelete = getActiveHistoryItem();
-    if (getVisibleActiveHistoryItemIndex() === getVisibleHistoryItemsLength() - 1) {
+    if (getSelectedHistoryItemIndex() === getVisibleHistoryLength() - 1) {
       let activeTabIndex = 0;
-      if (activeTabIndex < getVisibleHistoryItemsLength() - 1) {
-        setVisibleActiveHistoryItemIndex(activeTabIndex)
+      if (activeTabIndex < getVisibleHistoryLength() - 1) {
+        setSelectedHistoryItemIndex(activeTabIndex)
         setSelectedItemIndex(activeTabIndex)
       }
     }
@@ -565,7 +565,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     // If the history is not empty, update the preview text to the new active item.
     let items = getHistoryItems();
     if (items.length > 0) {
-      setHistoryItem(items[getVisibleActiveHistoryItemIndex()])
+      setHistoryItem(items[getSelectedHistoryItemIndex()])
     }
     setHistory(getHistoryItems())
   }
@@ -579,7 +579,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setFilterQuery(searchQuery)
     setHistory(getHistoryItems())
 
-    setVisibleActiveHistoryItemIndex(0)
+    setSelectedHistoryItemIndex(0)
     setSelectedItemIndex(0)
     // The props.items array won't be updated until the next render, so we need to get the updated
     // items right now to update the preview text.
@@ -606,13 +606,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
     let items = getHistoryItems();
     setHistory(items)
     let index = items.findIndex(i => i.id === item.id)
-    setVisibleActiveHistoryItemIndex(index)
+    setSelectedHistoryItemIndex(index)
     setSelectedItemIndex(index)
     scrollToSelectedItem()
   }
 
   function onSelectedItemIndexChange(index: number): void {
-    setVisibleActiveHistoryItemIndex(index)
+    setSelectedHistoryItemIndex(index)
     setSelectedItemIndex(index)
     setHistoryItem(history[index])
   }

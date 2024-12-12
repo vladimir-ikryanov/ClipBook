@@ -18,8 +18,8 @@ export enum SortHistoryType {
 
 let history: Clip[];
 let filterQuery = "";
-let visibleActiveHistoryItemIndex = 0;
-let visibleHistoryItemsLength = 0;
+let selectedItemIndex = 0;
+let visibleHistoryLength = 0;
 let previewVisible = true;
 let infoVisible = true;
 let sortType = SortHistoryType.TimeOfLastCopy;
@@ -200,7 +200,7 @@ async function deleteItem(item: Clip) {
 }
 
 export function getHistoryItems(): Clip[] {
-  visibleHistoryItemsLength = history.length
+  visibleHistoryLength = history.length
   if (filterQuery.length > 0) {
     let filteredHistory = Array.from(history.filter(item => {
       let contentHasText = item.content.toLowerCase().includes(filterQuery.toLowerCase());
@@ -213,7 +213,7 @@ export function getHistoryItems(): Clip[] {
       }
       return contentHasText
     }));
-    visibleHistoryItemsLength = filteredHistory.length
+    visibleHistoryLength = filteredHistory.length
     sortHistory(sortType, filteredHistory)
     return filteredHistory
   }
@@ -305,16 +305,16 @@ export function sortHistory(type: SortHistoryType, history: Clip[]) {
   })
 }
 
-export function setVisibleActiveHistoryItemIndex(index: number) {
-  visibleActiveHistoryItemIndex = index
+export function setSelectedHistoryItemIndex(index: number) {
+  selectedItemIndex = index
 }
 
-export function getVisibleActiveHistoryItemIndex() {
-  return visibleActiveHistoryItemIndex
+export function getSelectedHistoryItemIndex() {
+  return selectedItemIndex
 }
 
-export function getVisibleHistoryItemsLength() {
-  return visibleHistoryItemsLength
+export function getVisibleHistoryLength() {
+  return visibleHistoryLength
 }
 
 export function setFilterQuery(query: string) {
@@ -326,7 +326,7 @@ export function getFilterQuery(): string {
 }
 
 export function getActiveHistoryItem(): Clip {
-  return getHistoryItems()[visibleActiveHistoryItemIndex]
+  return getHistoryItems()[selectedItemIndex]
 }
 
 export function getHistoryItemIndex(item: Clip): number {
