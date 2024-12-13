@@ -39,7 +39,12 @@ import {
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {getSelectedHistoryItem, getPreviewVisibleState, toBase64Icon} from "@/data";
+import {
+  getFirstSelectedHistoryItem,
+  getPreviewVisibleState,
+  toBase64Icon,
+  getSelectedHistoryItemIndices, getSelectedHistoryItems
+} from "@/data";
 import {ClipType} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
 
@@ -54,6 +59,7 @@ export type HideActionsReason =
     | "openInBrowser"
     | "openSettings"
     | "deleteItem"
+    | "deleteItems"
     | "deleteAllItems"
 
 type ActionsProps = {
@@ -69,6 +75,7 @@ type ActionsProps = {
   onOpenInBrowser: () => void
   onOpenSettings: () => void
   onDeleteItem: () => void
+  onDeleteItems: () => void
   onDeleteAllItems: () => void
 }
 
@@ -142,6 +149,12 @@ export default function Actions(props: ActionsProps) {
     props.onDeleteItem()
   }
 
+  function handleDeleteItems() {
+    closeReason = "deleteItems"
+    handleOpenChange(false)
+    props.onDeleteItems()
+  }
+
   function handleDeleteAllItems() {
     closeReason = "deleteAllItems"
     handleOpenChange(false)
@@ -160,21 +173,43 @@ export default function Actions(props: ActionsProps) {
     props.onCopyTextFromImage()
   }
 
-  function isActiveHistoryItemIsUrl() {
-    return getSelectedHistoryItem()?.type === ClipType.Link
+  function canShowOpenInBrowser() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      return getFirstSelectedHistoryItem()?.type === ClipType.Link
+    }
+    return false
   }
 
-  function canCopyTextFromImage() {
-    let item = getSelectedHistoryItem()
-    return item?.type === ClipType.Image && item?.content.length > 0
+  function canShowCopyTextFromImage() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem();
+      return item?.type === ClipType.Image && item?.content.length > 0
+    }
+    return false
   }
 
-  function isActiveHistoryItemEditable() {
-    let type = getSelectedHistoryItem()?.type;
-    return type === ClipType.Text ||
-        type === ClipType.Link ||
-        type === ClipType.Email ||
-        type === ClipType.Color
+  function canShowEditContent() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem();
+      let type = item?.type;
+      return type === ClipType.Text ||
+          type === ClipType.Link ||
+          type === ClipType.Email ||
+          type === ClipType.Color
+    }
+    return false
+  }
+
+  function canShowToggleFavorite() {
+    return getSelectedHistoryItemIndices().length === 1
+  }
+
+  function canShowDeleteItem() {
+    return getSelectedHistoryItemIndices().length === 1
+  }
+
+  function canShowDeleteItems() {
+    return getSelectedHistoryItemIndices().length > 1
   }
 
   return (
@@ -205,7 +240,7 @@ export default function Actions(props: ActionsProps) {
               </CommandItem>
               <CommandSeparator/>
               {
-                  isActiveHistoryItemIsUrl() &&
+                  canShowOpenInBrowser() &&
                   <CommandItem onSelect={handleOpenInBrowser}>
                     <GlobeIcon className="mr-2 h-4 w-4"/>
                     <span>Open in Browser</span>
@@ -215,7 +250,7 @@ export default function Actions(props: ActionsProps) {
                   </CommandItem>
               }
               {
-                  canCopyTextFromImage() &&
+                  canShowCopyTextFromImage() &&
                   <CommandItem onSelect={handleCopyTextFromImage}>
                     <ScanTextIcon className="mr-2 h-4 w-4"/>
                     <span>Copy Text from Image</span>
@@ -225,7 +260,7 @@ export default function Actions(props: ActionsProps) {
                   </CommandItem>
               }
               {
-                  isActiveHistoryItemEditable() &&
+                  canShowEditContent() &&
                   <CommandItem onSelect={handleEditContent}>
                     <Edit3Icon className="mr-2 h-4 w-4"/>
                     <span>Edit Content...</span>
@@ -234,17 +269,20 @@ export default function Actions(props: ActionsProps) {
                     </CommandShortcut>
                   </CommandItem>
               }
-              <CommandItem onSelect={handleToggleFavorite}>
-                {
-                  getSelectedHistoryItem()?.favorite ?
-                      <StarOffIcon className="mr-2 h-4 w-4"/> :
-                      <StarIcon className="mr-2 h-4 w-4"/>
-                }
-                <span>{getSelectedHistoryItem()?.favorite ? "Remove from Favorites" : "Add to Favorites"}</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
-                </CommandShortcut>
-              </CommandItem>
+              {
+                  canShowToggleFavorite() &&
+                  <CommandItem onSelect={handleToggleFavorite}>
+                    {
+                      getFirstSelectedHistoryItem()?.favorite ?
+                          <StarOffIcon className="mr-2 h-4 w-4"/> :
+                          <StarIcon className="mr-2 h-4 w-4"/>
+                    }
+                    <span>{getFirstSelectedHistoryItem()?.favorite ? "Remove from Favorites" : "Add to Favorites"}</span>
+                    <CommandShortcut className="flex flex-row">
+                      <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
+                    </CommandShortcut>
+                  </CommandItem>
+              }
               <CommandItem onSelect={handleTogglePreview}>
                 {
                   getPreviewVisibleState() ?
@@ -265,13 +303,28 @@ export default function Actions(props: ActionsProps) {
                 </CommandShortcut>
               </CommandItem>
               <CommandSeparator/>
-              <CommandItem onSelect={handleDeleteItem}>
-                <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
-                <span className="text-actions-danger">Delete</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
-                </CommandShortcut>
-              </CommandItem>
+              {
+                  canShowDeleteItem() &&
+                  <CommandItem onSelect={handleDeleteItem}>
+                    <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
+                    <span className="text-actions-danger">Delete</span>
+                    <CommandShortcut className="flex flex-row">
+                      <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
+                    </CommandShortcut>
+                  </CommandItem>
+              }
+              {
+                  canShowDeleteItems() &&
+                  <CommandItem onSelect={handleDeleteItems}>
+                    <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
+                    <span className="text-actions-danger">
+                      Delete {getSelectedHistoryItemIndices().length} Items
+                    </span>
+                    <CommandShortcut className="flex flex-row">
+                      <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
+                    </CommandShortcut>
+                  </CommandItem>
+              }
               <CommandItem onSelect={handleDeleteAllItems}>
                 <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
                 <span className="text-actions-danger">Delete All...</span>

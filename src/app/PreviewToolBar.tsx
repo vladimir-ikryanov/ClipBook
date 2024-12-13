@@ -7,7 +7,6 @@ import {
   GlobeIcon, ScanTextIcon,
   StarIcon,
 } from "lucide-react";
-import {shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {
   prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardShortcut,
@@ -20,10 +19,10 @@ import {Clip, ClipType} from "@/db";
 import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
+import {getFirstSelectedHistoryItem, getHistoryItem} from "@/data";
 
 type PreviewToolBarProps = {
-  item: Clip
-  favorite: boolean
+  selectedItemIndices: number[]
   appName: string
   appIcon: string
   displayInfo: boolean
@@ -33,6 +32,7 @@ type PreviewToolBarProps = {
   onEditHistoryItem: (item: Clip) => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
+  onToggleFavorite: () => void
   onOpenInBrowser: () => void
   onDeleteItem: () => void
 }
@@ -63,8 +63,32 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   }
 
   function handleToggleFavorite() {
-    props.item.favorite = !props.item.favorite
-    props.onEditHistoryItem(props.item)
+    props.onToggleFavorite()
+  }
+
+  function selectedItemsAreMarkedAsFavorite() {
+    return props.selectedItemIndices.every(index => getHistoryItem(index).favorite)
+  }
+
+  function canShowCopyToClipboard() {
+    return props.selectedItemIndices.length === 1
+  }
+
+  function canShowOpenInBrowser() {
+    return props.selectedItemIndices.length === 1 &&
+        getFirstSelectedHistoryItem().type === ClipType.Link
+  }
+
+  function canShowCopyTextFromImage() {
+    if (props.selectedItemIndices.length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      return item.type === ClipType.Image && item.content.length > 0
+    }
+    return false
+  }
+
+  function canShowNumberOfSelectedItems() {
+    return props.selectedItemIndices.length > 1
   }
 
   return (
@@ -83,19 +107,22 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
               </TooltipContent>
             </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}>
-                  <CopyIcon className="h-5 w-5" strokeWidth={2}/>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="flex items-center">
-                <div className="select-none mr-2">Copy to Clipboard</div>
-                <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
-              </TooltipContent>
-            </Tooltip>
             {
-                props.item.type === ClipType.Link &&
+                canShowCopyToClipboard() &&
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}>
+                      <CopyIcon className="h-5 w-5" strokeWidth={2}/>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex items-center">
+                    <div className="select-none mr-2">Copy to Clipboard</div>
+                    <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
+                  </TooltipContent>
+                </Tooltip>
+            }
+            {
+                canShowOpenInBrowser() &&
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="toolbar" size="toolbar" onClick={handleOpenInBrowser}>
@@ -109,7 +136,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 </Tooltip>
             }
             {
-                props.item.type === ClipType.Image && props.item.content.length > 0 &&
+                canShowCopyTextFromImage() &&
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="toolbar" size="toolbar" onClick={handleCopyTextFromImage}>
@@ -123,18 +150,23 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 </Tooltip>
             }
           </div>
-          <div className="flex-auto draggable"></div>
+          <div className="flex-auto text-sm pt-2.5 items-center justify-center text-center text-toolbar-button draggable">
+            {
+                canShowNumberOfSelectedItems() &&
+                props.selectedItemIndices.length + " items"
+            }
+          </div>
           <div className="">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="toolbar" size="toolbar" onClick={handleToggleFavorite}>
                   <StarIcon
-                      className={props.favorite ? "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5"}
+                      className={selectedItemsAreMarkedAsFavorite() ? "h-5 w-5 text-toolbar-buttonSelected" : "h-5 w-5"}
                       strokeWidth={2}/>
                 </Button>
               </TooltipTrigger>
               {
-                props.favorite ?
+                selectedItemsAreMarkedAsFavorite() ?
                     <TooltipContent className="flex items-center">
                       <div className="select-none mr-2">Remove from favorites</div>
                       <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
@@ -156,7 +188,8 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
-                <div className="select-none mr-1">{props.displayInfo ? "Hide details" : "Show details"}</div>
+                <div
+                    className="select-none mr-1">{props.displayInfo ? "Hide details" : "Show details"}</div>
               </TooltipContent>
             </Tooltip>
 

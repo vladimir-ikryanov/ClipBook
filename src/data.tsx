@@ -18,6 +18,7 @@ export enum SortHistoryType {
 
 let history: Clip[];
 let filterQuery = "";
+let lastSelectedItemIndex = -1;
 let selectedItemIndices: number[] = [];
 let visibleHistoryLength = 0;
 let previewVisible = true;
@@ -305,17 +306,55 @@ export function sortHistory(type: SortHistoryType, history: Clip[]) {
   })
 }
 
-export function setSelectedHistoryItemIndex(index: number) {
-  selectedItemIndices = []
-  selectedItemIndices.push(index)
+export function getLastSelectedItemIndex(): number {
+  return lastSelectedItemIndex
 }
 
-export function getSelectedHistoryItemIndex(): number {
+export function setSelectedHistoryItemIndex(index: number) {
+  clearSelection()
+  addSelectedHistoryItemIndex(index)
+}
+
+export function getFirstSelectedHistoryItemIndex(): number {
   return selectedItemIndices.length > 0 ? selectedItemIndices[0] : 0
 }
 
-export function getSelectedHistoryItem(): Clip {
-  return getHistoryItems()[getSelectedHistoryItemIndex()]
+export function clearSelection() {
+  selectedItemIndices = []
+  lastSelectedItemIndex = -1
+}
+
+export function addSelectedHistoryItemIndex(index: number) {
+  if (!selectedItemIndices.includes(index)) {
+    selectedItemIndices.push(index)
+  }
+  lastSelectedItemIndex = index
+}
+
+export function removeSelectedHistoryItemIndex(index: number) {
+  let i = selectedItemIndices.indexOf(index)
+  if (i !== -1) {
+    selectedItemIndices.splice(i, 1)
+    // Make the last selected item from the list the last selected item.
+    lastSelectedItemIndex = selectedItemIndices.length > 0 ? selectedItemIndices[selectedItemIndices.length - 1] : -1
+  }
+}
+
+export function getSelectedHistoryItemIndices(): number[] {
+  return Array.from(selectedItemIndices)
+}
+
+export function getFirstSelectedHistoryItem(): Clip {
+  return getHistoryItems()[getFirstSelectedHistoryItemIndex()]
+}
+
+export function isHistoryItemSelected(index: number): boolean {
+  return selectedItemIndices.includes(index)
+}
+
+export function getSelectedHistoryItems(): Clip[] {
+  let items = getHistoryItems()
+  return selectedItemIndices.map(index => items[index])
 }
 
 export function getVisibleHistoryLength() {
@@ -330,8 +369,12 @@ export function getFilterQuery(): string {
   return filterQuery
 }
 
+export function getHistoryItem(index: number): Clip {
+  return getHistoryItems()[index]
+}
+
 export function getHistoryItemIndex(item: Clip): number {
-  return getHistoryItems().indexOf(item)
+  return getHistoryItems().findIndex(i => i.id === item.id)
 }
 
 export function setPreviewVisibleState(visible: boolean) {

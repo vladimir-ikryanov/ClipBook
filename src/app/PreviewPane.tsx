@@ -2,12 +2,20 @@ import '../app.css';
 import React from "react";
 import PreviewToolBar from "@/app/PreviewToolBar";
 import {Clip, ClipType} from "@/db";
-import {getClipType} from "@/lib/utils";
-import InfoPane from "@/app/InfoPane";
-import {getInfoVisibleState, setInfoVisibleState} from "@/data";
+import ItemInfoPane from "@/app/ItemInfoPane";
+import {
+  getFirstSelectedHistoryItem,
+  getInfoVisibleState,
+  getSelectedHistoryItems,
+  setInfoVisibleState
+} from "@/data";
+import PreviewTextPane from "@/app/PreviewTextPane";
+import PreviewImagePane from "@/app/PreviewImagePane";
+import ItemsInfoPane from "@/app/ItemsInfoPane";
+import PreviewItemsPane from "@/app/PreviewItemsPane";
 
-type HistoryItemPreviewPaneProps = {
-  item: Clip
+type PreviewPaneProps = {
+  selectedItemIndices: number[]
   appName: string
   appIcon: string
   visible: boolean
@@ -18,29 +26,13 @@ type HistoryItemPreviewPaneProps = {
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
+  onToggleFavorite: () => void
   onDeleteItem: () => void
   previewTextareaRef?: React.Ref<HTMLTextAreaElement>
 }
 
-export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
+export default function PreviewPane(props: PreviewPaneProps) {
   const [displayInfo, setDisplayInfo] = React.useState(getInfoVisibleState())
-  // I need this state to keep caret position when editing the content.
-  const [content, setContent] = React.useState(props.item?.content)
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.code === "Escape") {
-      props.onFinishEditing()
-    }
-    e.stopPropagation()
-  }
-
-  function handleOnChange() {
-    let content = (document.getElementById('preview') as HTMLTextAreaElement).value;
-    setContent(content)
-    props.item.content = content
-    props.item.type = getClipType(content)
-    props.onEditHistoryItem(props.item)
-  }
 
   function handleToggleInfo() {
     let visible = !displayInfo;
@@ -48,26 +40,33 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
     setInfoVisibleState(visible)
   }
 
-  function renderTextArea() {
-    return (
-        <textarea id='preview'
-                  ref={props.previewTextareaRef}
-                  className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text-sm"
-                  value={props.item.content}
-                  onChange={handleOnChange}
-                  onKeyDown={handleKeyDown}/>
-    )
+  function renderContent() {
+    if (props.selectedItemIndices.length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      return item.type === ClipType.Image ? renderImage(item) : renderText(item)
+    }
+    return <PreviewItemsPane items={getSelectedHistoryItems()}/>
   }
 
-  function renderImage() {
-    return (
-        <div className="flex flex-grow m-0 bg-secondary items-center justify-center outline-none resize-none overflow-hidden">
-          <img src={"clipbook://images/" + props.item.imageFileName} alt={props.item.content} className="max-h-full max-w-full object-contain"/>
-        </div>
-    )
+  function renderText(item: Clip) {
+    return <PreviewTextPane item={item}
+                            onEditHistoryItem={props.onEditHistoryItem}
+                            onFinishEditing={props.onFinishEditing}
+                            previewTextareaRef={props.previewTextareaRef}/>
   }
 
-  if (!props.item) {
+  function renderImage(item: Clip) {
+    return <PreviewImagePane item={item}/>
+  }
+
+  function renderInfo() {
+    if (props.selectedItemIndices.length === 1) {
+      return <ItemInfoPane item={getFirstSelectedHistoryItem()} display={displayInfo}/>
+    }
+    return <ItemsInfoPane items={getSelectedHistoryItems()} display={displayInfo}/>
+  }
+
+  if (props.selectedItemIndices.length === 0) {
     return <div
         className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]"></div>
   }
@@ -78,8 +77,7 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
 
   return (
       <div className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]">
-        <PreviewToolBar item={props.item}
-                        favorite={props.item.favorite}
+        <PreviewToolBar selectedItemIndices={props.selectedItemIndices}
                         appName={props.appName}
                         appIcon={props.appIcon}
                         displayInfo={displayInfo}
@@ -90,9 +88,10 @@ export default function PreviewPane(props: HistoryItemPreviewPaneProps) {
                         onCopyToClipboard={props.onCopyToClipboard}
                         onCopyTextFromImage={props.onCopyTextFromImage}
                         onOpenInBrowser={props.onOpenInBrowser}
+                        onToggleFavorite={props.onToggleFavorite}
                         onDeleteItem={props.onDeleteItem}/>
-        {props.item.type === ClipType.Image ? renderImage() : renderTextArea()}
-        <InfoPane item={props.item} display={displayInfo}/>
+        {renderContent()}
+        {renderInfo()}
       </div>
   )
 }

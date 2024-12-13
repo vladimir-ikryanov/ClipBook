@@ -6,12 +6,12 @@ import {toBase64Icon} from "@/data";
 declare const getAppNameFromPath: (appPath: string) => string;
 declare const getAppIconAsBase64: (appPath: string) => string;
 
-type InfoPaneProps = {
+type ItemInfoPaneProps = {
   item: Clip
   display: boolean
 }
 
-export default function InfoPane(props: InfoPaneProps) {
+export default function ItemInfoPane(props: ItemInfoPaneProps) {
   function getSourceAppIcon(): string {
     return toBase64Icon(getAppIconAsBase64(props.item.sourceApp))
   }

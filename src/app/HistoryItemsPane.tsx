@@ -9,8 +9,14 @@ import HistoryItemPane from "@/app/HistoryItemPane";
 import {Clip} from "@/db";
 import {SearchIcon} from "lucide-react";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
+import {
+  addSelectedHistoryItemIndex,
+  getSelectedHistoryItemIndices,
+  removeSelectedHistoryItemIndex,
+  setSelectedHistoryItemIndex
+} from "@/data";
 
-type HistoryItemListPaneProps = {
+type HistoryItemsPaneProps = {
   history: Clip[]
   appName: string
   appIcon: string
@@ -20,8 +26,8 @@ type HistoryItemListPaneProps = {
   isQuickPasteModifierPressed: boolean
   isTrial: boolean
   trialDaysLeft: number
-  selectedItemIndex: number
-  onSelectedItemIndexChange: (index: number) => void
+  selectedItemIndices: number[]
+  onSelectedItemsChange: () => void
   onShowHidePreview: () => void
   onPaste: () => void
   onClose: () => void
@@ -37,22 +43,57 @@ type HistoryItemListPaneProps = {
   onOpenInBrowser: () => void
   onOpenSettings: () => void
   onDeleteItem: () => void
+  onDeleteItems: () => void
   onDeleteAllItems: () => void
   onMouseDoubleClick: (index: number) => void
   searchFieldRef?: React.Ref<HTMLInputElement>
   listRef?: React.Ref<List>
 }
 
-const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
-  function handleMouseDown(index: number) {
-    props.onSelectedItemIndexChange(index)
+const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
+  function handleMouseDown(index: number, metaKeyDown: boolean, shiftKeyDown: boolean) {
+    // Handle click without modifier keys: select a single item.
+    if (!metaKeyDown && !shiftKeyDown) {
+      setSelectedHistoryItemIndex(index)
+    }
+    // Handle click with meta key: toggle selection of an item.
+    if (metaKeyDown) {
+      let selectedIndices = getSelectedHistoryItemIndices()
+      if (selectedIndices.includes(index)) {
+        removeSelectedHistoryItemIndex(index)
+      } else {
+        addSelectedHistoryItemIndex(index)
+      }
+    }
+    // Handle click with shift key: select a range of items.
+    if (shiftKeyDown) {
+      let selectedIndices = getSelectedHistoryItemIndices()
+      if (selectedIndices.length === 0) {
+        setSelectedHistoryItemIndex(index)
+      } else {
+        // Sort selected indices.
+        selectedIndices.sort((a, b) => a - b)
+        let firstIndex = selectedIndices[0]
+        let lastIndex = selectedIndices[selectedIndices.length - 1]
+        if (index < firstIndex) {
+          for (let i = index; i <= firstIndex; i++) {
+            addSelectedHistoryItemIndex(i)
+          }
+        } else if (index > lastIndex) {
+          for (let i = lastIndex; i <= index; i++) {
+            addSelectedHistoryItemIndex(i)
+          }
+        }
+      }
+    }
+    props.onSelectedItemsChange()
   }
 
   function handleMouseDoubleClick(index: number) {
     props.onMouseDoubleClick(index)
   }
 
-  function renderTabsList() {
+  function renderItems() {
     return <div className="flex h-full p-2">
       <div className="grid h-full w-full">
         <AutoSizer style={{}}>
@@ -71,7 +112,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
                     return (
                         <HistoryItemPane style={style}
                                          index={index}
-                                         selected={index === props.selectedItemIndex}
+                                         selectedItemIndices={props.selectedItemIndices}
                                          item={props.history[index]}
                                          historySize={props.history.length}
                                          appName={props.appName}
@@ -115,7 +156,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
     }
 
     return <div className="flex flex-col h-screen">
-      {renderTabsList()}
+      {renderItems()}
       <div className="grow"></div>
       <ActionsBar appName={props.appName}
                   appIcon={props.appIcon}
@@ -131,6 +172,7 @@ const HistoryItemsPane = (props: HistoryItemListPaneProps) => {
                   onToggleFavorite={props.onToggleFavorite}
                   onTogglePreview={props.onTogglePreview}
                   onDeleteItem={props.onDeleteItem}
+                  onDeleteItems={props.onDeleteItems}
                   onDeleteAllItems={props.onDeleteAllItems}/>
     </div>
   }

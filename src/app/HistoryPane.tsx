@@ -5,21 +5,21 @@ import HistoryItemsPane from "@/app/HistoryItemsPane";
 import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
-  addHistoryItem,
-  clear,
+  addHistoryItem, addSelectedHistoryItemIndex,
+  clear, clearSelection,
   deleteHistoryItem,
   findItemByImageFileName,
-  getSelectedHistoryItem,
+  getFirstSelectedHistoryItem,
   getHistoryItemIndex,
-  getHistoryItems,
+  getHistoryItems, getLastSelectedItemIndex,
   getPreviewVisibleState,
-  getSelectedHistoryItemIndex,
+  getFirstSelectedHistoryItemIndex, getSelectedHistoryItemIndices,
   getVisibleHistoryLength,
-  isHistoryEmpty, isTextItem,
+  isHistoryEmpty, isHistoryItemSelected, isTextItem, removeSelectedHistoryItemIndex,
   setFilterQuery,
   setPreviewVisibleState,
   setSelectedHistoryItemIndex,
-  updateHistoryItem
+  updateHistoryItem, getHistoryItem, getSelectedHistoryItems
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
@@ -85,8 +85,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [quickPasteModifierPressed, setQuickPasteModifierPressed] = useState(false);
-  const [selectedItemIndex, setSelectedItemIndex] = useState(getSelectedHistoryItemIndex());
-  const [historyItem, setHistoryItem] = useState(history[getSelectedHistoryItemIndex()]);
+  const [selectedItemIndices, setSelectedItemIndices] = useState(getSelectedHistoryItemIndices());
   const [isTrial, setIsTrial] = useState(isTrialLicense());
   const [trialDaysLeft, setTrialDaysLeft] = useState(getTrialLicenseDaysLeft());
   const [isTrialExpired, setIsTrialExpired] = useState(isTrialLicenseExpired());
@@ -108,7 +107,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   imageHeight: number,
                                   imageSizeInBytes: number,
                                   imageText: string) {
-    let selectedItem = getSelectedHistoryItem();
+    let selectedItem = getFirstSelectedHistoryItem();
 
     let clips = await addHistoryItem(
         content,
@@ -122,10 +121,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setHistory([...clips])
 
     let selectedItemIndex = getHistoryItemIndex(selectedItem);
-    setSelectedHistoryItemIndex(selectedItemIndex)
-    setSelectedItemIndex(selectedItemIndex)
-    setHistoryItem(selectedItem)
-    scrollToSelectedItem()
+    clearSelection()
+    addSelectedHistoryItemIndex(selectedItemIndex)
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
+    scrollToLastSelectedItem()
   }
 
   async function mergeClipboardData(content: string,
@@ -157,13 +156,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
           }
 
           await updateHistoryItem(targetItem.id!, targetItem)
-          setHistoryItem(targetItem)
-          let items = getHistoryItems();
+          let items = getHistoryItems()
           setHistory(items)
           let index = items.findIndex(i => i.id === item.id)
           setSelectedHistoryItemIndex(index)
-          setSelectedItemIndex(index)
-          scrollToSelectedItem()
+          setSelectedItemIndices(getSelectedHistoryItemIndices())
+          scrollToLastSelectedItem()
           return
         }
       }
@@ -184,13 +182,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setHistory(items)
     // If the history is not empty, update the preview text to the new active item.
     if (items.length > 0) {
-      let activeHistoryItemIndex = getSelectedHistoryItemIndex()
+      let activeHistoryItemIndex = getFirstSelectedHistoryItemIndex()
       if (activeHistoryItemIndex >= items.length) {
         activeHistoryItemIndex = 0
         setSelectedHistoryItemIndex(activeHistoryItemIndex)
-        setHistoryItem(items[getSelectedHistoryItemIndex()])
-        setSelectedItemIndex(activeHistoryItemIndex)
-        scrollToSelectedItem()
+        setSelectedItemIndices(getSelectedHistoryItemIndices())
+        scrollToLastSelectedItem()
       }
     }
   }
@@ -206,11 +203,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
   function activateApp() {
     focusSearchField()
     if (getVisibleHistoryLength() > 0) {
-      let activeTabIndex = 0;
-      setSelectedHistoryItemIndex(activeTabIndex)
-      setSelectedItemIndex(activeTabIndex)
-      setHistoryItem(history[activeTabIndex])
-      scrollToSelectedItem()
+      setSelectedHistoryItemIndex(0)
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
+      scrollToLastSelectedItem()
     }
     // Update the trial state and days left when the app is activated.
     setIsTrial(isTrialLicense())
@@ -218,19 +213,23 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setIsTrialExpired(isTrialLicenseExpired())
   }
 
-  function scrollToSelectedItem() {
-    let activeTabIndex = getSelectedHistoryItemIndex();
-    if (listRef.current) {
-      listRef.current.scrollToItem(activeTabIndex, "auto")
+  function scrollToLastSelectedItem() {
+    let selectedItemIndices = getSelectedHistoryItemIndices()
+    if (selectedItemIndices.length === 0) {
+      return
+    }
+    let index = getLastSelectedItemIndex()
+    if (listRef.current && index >= 0) {
+      listRef.current.scrollToItem(index, "auto")
     }
   }
 
   useEffect(() => {
     focusSearchField()
-  }, [selectedItemIndex])
+  }, [selectedItemIndices])
 
   useEffect(() => {
-    const down = (e: KeyboardEvent) => {
+    const down = async (e: KeyboardEvent) => {
       // Select the previous item when the select previous item shortcut is pressed.
       if (isShortcutMatch(prefGetSelectPreviousItemShortcut(), e)) {
         selectPreviousItem()
@@ -239,6 +238,16 @@ export default function HistoryPane(props: HistoryPaneProps) {
       // Select the next item when the select next item shortcut is pressed.
       if (isShortcutMatch(prefGetSelectNextItemShortcut(), e)) {
         selectNextItem()
+        e.preventDefault()
+      }
+      // Add the previous item to the selected items.
+      if (isShortcutMatch(prefGetSelectPreviousItemShortcut() + " + ShiftLeft", e)) {
+        selectPreviousItem(e.shiftKey)
+        e.preventDefault()
+      }
+      // Add the next item to the selected items.
+      if (isShortcutMatch(prefGetSelectNextItemShortcut() + " + ShiftLeft", e)) {
+        selectNextItem(e.shiftKey)
         e.preventDefault()
       }
       // Select the first item in the list.
@@ -268,7 +277,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       }
       // Delete the active item when the delete shortcut is pressed.
       if (isShortcutMatch(prefGetDeleteHistoryItemShortcut(), e)) {
-        handleDeleteItem()
+        await handleDeleteItem()
         e.preventDefault()
       }
       // Focus the search field when the search history shortcut is pressed.
@@ -278,7 +287,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       }
       // Toggle the favorite status of the active item when the toggle favorite shortcut is pressed.
       if (isShortcutMatch(prefGetToggleFavoriteShortcut(), e)) {
-        handleToggleFavorite()
+        await handleToggleFavorite()
         e.preventDefault()
       }
       // Show or hide the preview panel when the preview shortcut is pressed.
@@ -375,70 +384,78 @@ export default function HistoryPane(props: HistoryPaneProps) {
     };
   }, [quickPasteModifierPressed]);
 
-  function selectNextItem() {
-    let activeTabIndex = getSelectedHistoryItemIndex();
-    if (activeTabIndex < getVisibleHistoryLength() - 1) {
-      activeTabIndex = activeTabIndex + 1
-      setSelectedHistoryItemIndex(activeTabIndex)
-      setSelectedItemIndex(activeTabIndex)
-      setHistoryItem(history[activeTabIndex])
-      scrollToSelectedItem()
+  function selectNextItem(shiftKeyDown: boolean = false) {
+    let index = getLastSelectedItemIndex()
+    if (index < getVisibleHistoryLength() - 1) {
+      let nextItemIndex = index + 1;
+      if (shiftKeyDown) {
+        if (isHistoryItemSelected(nextItemIndex)) {
+          removeSelectedHistoryItemIndex(index)
+        } else {
+          addSelectedHistoryItemIndex(nextItemIndex)
+        }
+      } else {
+        setSelectedHistoryItemIndex(nextItemIndex)
+      }
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
+      scrollToLastSelectedItem()
     }
   }
 
-  function selectPreviousItem() {
-    let activeTabIndex = getSelectedHistoryItemIndex();
-    if (activeTabIndex > 0) {
-      activeTabIndex = activeTabIndex - 1
-      setSelectedHistoryItemIndex(activeTabIndex)
-      setSelectedItemIndex(activeTabIndex)
-      setHistoryItem(history[activeTabIndex])
-      scrollToSelectedItem()
+  function selectPreviousItem(shiftKeyDown: boolean = false) {
+    let index = getLastSelectedItemIndex()
+    if (index > 0) {
+      let prevItemIndex = index - 1;
+      if (shiftKeyDown) {
+        if (isHistoryItemSelected(prevItemIndex)) {
+          removeSelectedHistoryItemIndex(index)
+        } else {
+          addSelectedHistoryItemIndex(prevItemIndex)
+        }
+      } else {
+        setSelectedHistoryItemIndex(prevItemIndex)
+      }
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
+      scrollToLastSelectedItem()
     }
   }
 
   function selectFirstItem() {
-    let activeTabIndex = 0;
-    setSelectedHistoryItemIndex(activeTabIndex)
-    setSelectedItemIndex(activeTabIndex)
-    setHistoryItem(history[activeTabIndex])
-    scrollToSelectedItem()
+    setSelectedHistoryItemIndex(0)
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
+    scrollToLastSelectedItem()
   }
 
   function selectLastItem() {
-    let activeTabIndex = getVisibleHistoryLength() - 1;
-    setSelectedHistoryItemIndex(activeTabIndex)
-    setSelectedItemIndex(activeTabIndex)
-    setHistoryItem(history[activeTabIndex])
-    scrollToSelectedItem()
+    setSelectedHistoryItemIndex(getVisibleHistoryLength() - 1)
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
+    scrollToLastSelectedItem()
   }
 
   function jumpToNextGroupOfItems() {
-    let activeTabIndex = getSelectedHistoryItemIndex();
-    let nextGroupIndex = activeTabIndex + 5;
+    let index = getFirstSelectedHistoryItemIndex();
+    let nextGroupIndex = index + 5;
     if (nextGroupIndex < getVisibleHistoryLength()) {
-      activeTabIndex = nextGroupIndex;
+      index = nextGroupIndex;
     } else {
-      activeTabIndex = getVisibleHistoryLength() - 1;
+      index = getVisibleHistoryLength() - 1;
     }
-    setSelectedHistoryItemIndex(activeTabIndex)
-    setSelectedItemIndex(activeTabIndex)
-    setHistoryItem(history[activeTabIndex])
-    scrollToSelectedItem()
+    setSelectedHistoryItemIndex(index)
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
+    scrollToLastSelectedItem()
   }
 
   function jumpToPrevGroupOfItems() {
-    let activeTabIndex = getSelectedHistoryItemIndex();
-    let previousGroupIndex = activeTabIndex - 5;
+    let index = getFirstSelectedHistoryItemIndex();
+    let previousGroupIndex = index - 5;
     if (previousGroupIndex >= 0) {
-      activeTabIndex = previousGroupIndex;
+      index = previousGroupIndex;
     } else {
-      activeTabIndex = 0;
+      index = 0;
     }
-    setSelectedHistoryItemIndex(activeTabIndex)
-    setSelectedItemIndex(activeTabIndex)
-    setHistoryItem(history[activeTabIndex])
-    scrollToSelectedItem()
+    setSelectedHistoryItemIndex(index)
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
+    scrollToLastSelectedItem()
   }
 
   function isPreviewVisible(): boolean {
@@ -446,7 +463,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handlePaste(): void {
-    let item = getSelectedHistoryItem();
+    let item = getFirstSelectedHistoryItem();
     let imageFileName = item.imageFileName ? item.imageFileName : "";
     let imageText = item.imageText ? item.imageText : "";
     pasteInFrontApp(item.content, imageFileName, imageText)
@@ -472,9 +489,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function handleToggleFavorite() {
-    let item = getSelectedHistoryItem()
-    item.favorite = !item.favorite
-    await handleEditHistoryItem(item)
+    let items = getSelectedHistoryItems()
+    items.forEach(item => {
+      item.favorite = !item.favorite
+    })
+    await handleEditHistoryItems(items)
   }
 
   function handleTogglePreview(): void {
@@ -504,7 +523,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleEditContent() {
-    let item = getSelectedHistoryItem()
+    let item = getFirstSelectedHistoryItem()
     if (!isTextItem(item)) {
       return
     }
@@ -519,7 +538,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleCopyToClipboard() {
-    let item = getSelectedHistoryItem();
+    let item = getFirstSelectedHistoryItem();
     let imageFileName = item.imageFileName ? item.imageFileName : "";
     let imageText = item.imageText ? item.imageText : "";
     copyToClipboard(item.content, imageFileName, imageText)
@@ -527,14 +546,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleCopyTextFromImage() {
-    let item = getSelectedHistoryItem()
+    let item = getFirstSelectedHistoryItem()
     if (item.type === ClipType.Image) {
       copyToClipboard(item.content, "", "")
     }
   }
 
   function handleOpenInBrowser() {
-    let item = getSelectedHistoryItem()
+    let item = getFirstSelectedHistoryItem()
     if (isUrl(item.content)) {
       openInBrowser(item.content)
     }
@@ -548,26 +567,41 @@ export default function HistoryPane(props: HistoryPaneProps) {
     focusSearchField()
   }
 
-  async function handleDeleteItem() {
-    let itemToDelete = getSelectedHistoryItem();
-    if (getSelectedHistoryItemIndex() === getVisibleHistoryLength() - 1) {
-      let activeTabIndex = 0;
-      if (activeTabIndex < getVisibleHistoryLength() - 1) {
-        setSelectedHistoryItemIndex(activeTabIndex)
-        setSelectedItemIndex(activeTabIndex)
-      }
+  async function deleteItem(item: Clip) {
+    await deleteHistoryItem(item)
+    if (item.type === ClipType.Image) {
+      deleteImage(item.imageFileName!)
+      deleteImage(item.imageThumbFileName!)
     }
-    await deleteHistoryItem(itemToDelete)
-    if (itemToDelete.type === ClipType.Image) {
-      deleteImage(itemToDelete.imageFileName!)
-      deleteImage(itemToDelete.imageThumbFileName!)
-    }
+
     // If the history is not empty, update the preview text to the new active item.
-    let items = getHistoryItems();
+    let items = getHistoryItems()
     if (items.length > 0) {
-      setHistoryItem(items[getSelectedHistoryItemIndex()])
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
     }
-    setHistory(getHistoryItems())
+    setHistory(items)
+  }
+
+  async function handleDeleteItem() {
+    await handleDeleteItems()
+  }
+
+  async function handleDeleteItems() {
+    let nextSelectedItemIndex = getVisibleHistoryLength() - 1
+    let items = getSelectedHistoryItems()
+    clearSelection()
+    for (let item of items) {
+      let index = getHistoryItemIndex(item)
+      nextSelectedItemIndex = Math.min(index, nextSelectedItemIndex)
+      await deleteItem(item)
+    }
+
+    let lastIndex = getVisibleHistoryLength() - 1
+    if (nextSelectedItemIndex >= lastIndex) {
+      nextSelectedItemIndex = lastIndex
+    }
+    setSelectedHistoryItemIndex(nextSelectedItemIndex)
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
   }
 
   function handleDeleteAllItems() {
@@ -580,10 +614,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setHistory(getHistoryItems())
 
     setSelectedHistoryItemIndex(0)
-    setSelectedItemIndex(0)
+    clearSelection()
     // The props.items array won't be updated until the next render, so we need to get the updated
     // items right now to update the preview text.
-    setHistoryItem(getHistoryItems()[0])
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
     if (searchQuery == "") {
       focusSearchField()
     }
@@ -600,21 +634,40 @@ export default function HistoryPane(props: HistoryPaneProps) {
     focusSearchField()
   }
 
-  async function handleEditHistoryItem(item: Clip) {
-    await updateHistoryItem(item.id!, item)
-    setHistoryItem(item)
-    let items = getHistoryItems();
-    setHistory(items)
-    let index = items.findIndex(i => i.id === item.id)
+  async function selectItem(item: Clip) {
+    let index = getHistoryItemIndex(item)
+    console.log("Selected item", index)
     setSelectedHistoryItemIndex(index)
-    setSelectedItemIndex(index)
-    scrollToSelectedItem()
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
+    scrollToLastSelectedItem()
   }
 
-  function onSelectedItemIndexChange(index: number): void {
-    setSelectedHistoryItemIndex(index)
-    setSelectedItemIndex(index)
-    setHistoryItem(history[index])
+  async function selectItems(items: Clip[]) {
+    clearSelection()
+    for (let item of items) {
+      let index = getHistoryItemIndex(item)
+      addSelectedHistoryItemIndex(index)
+    }
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
+    scrollToLastSelectedItem()
+  }
+
+  async function handleEditHistoryItem(item: Clip) {
+    await updateHistoryItem(item.id!, item)
+    setHistory(getHistoryItems())
+    await selectItem(item)
+  }
+
+  async function handleEditHistoryItems(items: Clip[]) {
+    for (let item of items) {
+      await updateHistoryItem(item.id!, item)
+    }
+    setHistory(getHistoryItems())
+    await selectItems(items)
+  }
+
+  function handleSelectedItemsChange() {
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
   }
 
   function handleCloseThankYouMessage() {
@@ -656,8 +709,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               appName={props.appName}
                               appIcon={props.appIcon}
                               searchQuery={searchQuery}
-                              selectedItemIndex={selectedItemIndex}
-                              onSelectedItemIndexChange={onSelectedItemIndexChange}
+                              selectedItemIndices={selectedItemIndices}
+                              onSelectedItemsChange={handleSelectedItemsChange}
                               onSearchQueryChange={handleSearchQueryChange}
                               onShowHidePreview={handleTogglePreview}
                               onMouseDoubleClick={handleMouseDoubleClick}
@@ -681,12 +734,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onTogglePreview={handleTogglePreview}
                               onEditHistoryItem={handleEditHistoryItem}
                               onDeleteItem={handleDeleteItem}
+                              onDeleteItems={handleDeleteItems}
                               onDeleteAllItems={handleDeleteAllItems}/>
           </ResizablePanel>
           <ResizableHandle/>
           <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}
                           className="transition-all duration-200 ease-out bg-secondary">
-            <PreviewPane item={historyItem}
+            <PreviewPane selectedItemIndices={selectedItemIndices}
                          appName={props.appName}
                          appIcon={props.appIcon}
                          visible={previewVisible}
@@ -698,6 +752,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          onCopyTextFromImage={handleCopyTextFromImage}
                          onOpenInBrowser={handleOpenInBrowser}
                          onDeleteItem={handleDeleteItem}
+                         onToggleFavorite={handleToggleFavorite}
                          previewTextareaRef={previewTextareaRef}/>
           </ResizablePanel>
         </ResizablePanelGroup>

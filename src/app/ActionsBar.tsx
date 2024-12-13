@@ -24,6 +24,7 @@ type ActionsBarProps = {
   onOpenInBrowser: () => void
   onOpenSettings: () => void
   onDeleteItem: () => void
+  onDeleteItems: () => void
   onDeleteAllItems: () => void
 }
 
@@ -57,6 +58,7 @@ export default function ActionsBar(props: ActionsBarProps) {
                    onToggleFavorite={props.onToggleFavorite}
                    onTogglePreview={props.onTogglePreview}
                    onDeleteItem={props.onDeleteItem}
+                   onDeleteItems={props.onDeleteItems}
                    onDeleteAllItems={props.onDeleteAllItems}/>
         </div>
       </div>

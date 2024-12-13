@@ -1,6 +1,6 @@
 import '../app.css';
 import React, {CSSProperties, KeyboardEvent, MouseEvent, useState} from 'react';
-import {getFilterQuery} from "@/data";
+import {getFilterQuery, getSelectedHistoryItemIndices} from "@/data";
 import {Clip, ClipType} from "@/db";
 import {toCSSColor} from "@/lib/utils";
 import {
@@ -15,13 +15,13 @@ import ShortcutLabel from "@/app/ShortcutLabel";
 type HistoryItemPaneProps = {
   item: Clip
   index: number
-  selected: boolean
+  selectedItemIndices: number[]
   historySize: number
   appName: string
   appIcon: string
   isQuickPasteModifierPressed: boolean
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
-  onMouseDown(index: number): void
+  onMouseDown(index: number, metaKeyDown: boolean, shiftKeyDown: boolean): void
   onMouseDoubleClick: (index: number) => void
   onPaste: () => void
   onEditHistoryItem: (item: Clip) => void
@@ -49,7 +49,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   }
 
   const handleMouseDown = (e: MouseEvent) => {
-    props.onMouseDown(props.index)
+    props.onMouseDown(props.index, e.metaKey, e.shiftKey)
     e.preventDefault()
   }
 
@@ -78,7 +78,8 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
       return <MailIcon className="h-5 w-5"/>
     }
     if (props.item.type === ClipType.Image) {
-      return <img src={"clipbook://images/" + props.item.imageThumbFileName} alt={props.item.imageThumbFileName} className="h-5 w-5"/>
+      return <img src={"clipbook://images/" + props.item.imageThumbFileName}
+                  alt={props.item.imageThumbFileName} className="h-5 w-5"/>
     }
     return <FileIcon className="h-5 w-5"/>
   }
@@ -101,16 +102,17 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
                               onOpenInBrowser={props.onOpenInBrowser}
                               onDeleteItem={props.onDeleteItem}/>
     }
-    return renderStarIcon()
+    return renderFavoriteIcon()
   }
 
-  function renderStarIcon() {
-    if (!props.item.favorite) {
-      return null
+  function renderFavoriteIcon() {
+    if (props.item.favorite) {
+      return (
+          <div className="ml-4 justify-center items-center text-primary-foreground">
+            <StarIcon className="h-4 w-5"/>
+          </div>
+      )
     }
-    return <div className="ml-4 justify-center items-center text-primary-foreground">
-      <StarIcon className="h-4 w-5"/>
-    </div>
   }
 
   function renderQuickPasteAlias() {
@@ -155,11 +157,32 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     return props.item.content;
   }
 
+  function getRoundedStyle() {
+    let result = ""
+    if (props.selectedItemIndices.length > 1) {
+      // Check if there's selected item before the current item.
+      if (!props.selectedItemIndices.includes(props.index - 1)) {
+        result += " rounded-t-md"
+      }
+      // Check if there's selected item after the current item.
+      if (!props.selectedItemIndices.includes(props.index + 1)) {
+        result += " rounded-b-md"
+      }
+    } else {
+      result = "rounded-md"
+    }
+    return result
+  }
+
+  function isItemSelected() {
+    return props.selectedItemIndices.includes(props.index)
+  }
+
   return (
       <div
           id={`tab-${props.index}`}
           style={props.style}
-          className={`flex flex-row cursor-default items-center ${props.selected ? 'bg-accent' : 'hover:bg-popover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis rounded-md`}
+          className={`flex flex-row cursor-default items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-popover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
           onKeyDown={handleKeyDown}
           onMouseDown={handleMouseDown}
           onDoubleClick={handleMouseDoubleClick}
