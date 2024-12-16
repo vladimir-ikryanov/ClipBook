@@ -138,7 +138,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                       <ChevronDown className="h-4 w-4" strokeWidth={2.5}/>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="p-1 bg-actions-background" align="start" onKeyDown={handleKeyDown}>
+                  <DropdownMenuContent className="p-1.5 bg-actions-background" align="start" onKeyDown={handleKeyDown}>
                     <DropdownMenuLabel className="font-normal text-secondary-foreground">
                       When pasting multiple items,<br/>separate them with:
                     </DropdownMenuLabel>

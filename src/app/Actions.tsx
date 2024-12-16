@@ -224,7 +224,7 @@ export default function Actions(props: ActionsProps) {
             <ShortcutLabel shortcut={prefGetShowMoreActionsShortcut()}/>
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="end" className="w-[300px] pt-2 pb-0 px-0 bg-actions-background" onKeyDown={handleKeyDown}>
+        <PopoverContent align="end" className="w-[300px] pt-1.5 pb-0 px-0 bg-actions-background" onKeyDown={handleKeyDown}>
           <Command>
             <CommandList>
               <CommandItem onSelect={handlePaste}>

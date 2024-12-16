@@ -116,7 +116,7 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
           <DropdownMenuTrigger className="ml-4 text-primary-foreground hover:text-accent-foreground" asChild>
             <EllipsisVerticalIcon className="h-5 w-5"/>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="p-1 bg-actions-background" align="start"
+          <DropdownMenuContent className="p-1.5 bg-actions-background" align="start"
                                onKeyDown={handleKeyDown}>
             <DropdownMenuItem onClick={handlePaste}>
               <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
