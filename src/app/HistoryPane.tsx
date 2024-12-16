@@ -490,8 +490,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   async function handleToggleFavorite() {
     let items = getSelectedHistoryItems()
+    let favorite = items.some(item => !item.favorite)
     items.forEach(item => {
-      item.favorite = !item.favorite
+      item.favorite = favorite
     })
     await handleEditHistoryItems(items)
   }
@@ -523,6 +524,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleEditContent() {
+    // Edit content is not available when multiple items are selected.
+    if (getSelectedHistoryItemIndices().length > 1) {
+      return
+    }
     let item = getFirstSelectedHistoryItem()
     if (!isTextItem(item)) {
       return
@@ -538,14 +543,22 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleCopyToClipboard() {
-    let item = getFirstSelectedHistoryItem();
-    let imageFileName = item.imageFileName ? item.imageFileName : "";
-    let imageText = item.imageText ? item.imageText : "";
+    // Copy to clipboard is not available when multiple items are selected.
+    if (getSelectedHistoryItemIndices().length > 1) {
+      return
+    }
+    let item = getFirstSelectedHistoryItem()
+    let imageFileName = item.imageFileName ? item.imageFileName : ""
+    let imageText = item.imageText ? item.imageText : ""
     copyToClipboard(item.content, imageFileName, imageText)
     hideAppWindow()
   }
 
   function handleCopyTextFromImage() {
+    // Copy text from image is not available when multiple items are selected.
+    if (getSelectedHistoryItemIndices().length > 1) {
+      return
+    }
     let item = getFirstSelectedHistoryItem()
     if (item.type === ClipType.Image) {
       copyToClipboard(item.content, "", "")
@@ -553,6 +566,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleOpenInBrowser() {
+    // Open in browser is not available when multiple items are selected.
+    if (getSelectedHistoryItemIndices().length > 1) {
+      return
+    }
     let item = getFirstSelectedHistoryItem()
     if (isUrl(item.content)) {
       openInBrowser(item.content)
@@ -655,7 +672,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
   async function handleEditHistoryItem(item: Clip) {
     await updateHistoryItem(item.id!, item)
     setHistory(getHistoryItems())
-    await selectItem(item)
   }
 
   async function handleEditHistoryItems(items: Clip[]) {

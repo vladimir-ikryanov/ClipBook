@@ -173,6 +173,10 @@ export default function Actions(props: ActionsProps) {
     props.onCopyTextFromImage()
   }
 
+  function canShowCopyToClipboard() {
+    return getSelectedHistoryItemIndices().length === 1
+  }
+
   function canShowOpenInBrowser() {
     if (getSelectedHistoryItemIndices().length === 1) {
       return getFirstSelectedHistoryItem()?.type === ClipType.Link
@@ -200,8 +204,8 @@ export default function Actions(props: ActionsProps) {
     return false
   }
 
-  function canShowToggleFavorite() {
-    return getSelectedHistoryItemIndices().length === 1
+  function canAddToFavorites() {
+    return getSelectedHistoryItems().some(item => !item.favorite)
   }
 
   function canShowDeleteItem() {
@@ -231,13 +235,16 @@ export default function Actions(props: ActionsProps) {
                   <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
                 </CommandShortcut>
               </CommandItem>
-              <CommandItem onSelect={handleCopyToClipboard}>
-                <CopyIcon className="mr-2 h-4 w-4"/>
-                <span>Copy to Clipboard</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
-                </CommandShortcut>
-              </CommandItem>
+              {
+                  canShowCopyToClipboard() &&
+                  <CommandItem onSelect={handleCopyToClipboard}>
+                    <CopyIcon className="mr-2 h-4 w-4"/>
+                    <span>Copy to Clipboard</span>
+                    <CommandShortcut className="flex flex-row">
+                      <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
+                    </CommandShortcut>
+                  </CommandItem>
+              }
               <CommandSeparator/>
               {
                   canShowOpenInBrowser() &&
@@ -269,20 +276,17 @@ export default function Actions(props: ActionsProps) {
                     </CommandShortcut>
                   </CommandItem>
               }
-              {
-                  canShowToggleFavorite() &&
-                  <CommandItem onSelect={handleToggleFavorite}>
-                    {
-                      getFirstSelectedHistoryItem()?.favorite ?
-                          <StarOffIcon className="mr-2 h-4 w-4"/> :
-                          <StarIcon className="mr-2 h-4 w-4"/>
-                    }
-                    <span>{getFirstSelectedHistoryItem()?.favorite ? "Remove from Favorites" : "Add to Favorites"}</span>
-                    <CommandShortcut className="flex flex-row">
-                      <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
-                    </CommandShortcut>
-                  </CommandItem>
-              }
+              <CommandItem onSelect={handleToggleFavorite}>
+                {
+                  canAddToFavorites() ?
+                      <StarIcon className="mr-2 h-4 w-4"/> :
+                      <StarOffIcon className="mr-2 h-4 w-4"/>
+                }
+                <span>{canAddToFavorites() ? "Add to Favorites" : "Remove from Favorites"}</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
+                </CommandShortcut>
+              </CommandItem>
               <CommandItem onSelect={handleTogglePreview}>
                 {
                   getPreviewVisibleState() ?
