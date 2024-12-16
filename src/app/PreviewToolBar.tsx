@@ -1,12 +1,22 @@
 import '../app.css';
-import React from "react";
+import React, {KeyboardEvent} from "react";
 import {Button} from "@/components/ui/button";
 import {
+  ChevronDown,
   ClipboardIcon,
   CopyIcon,
   GlobeIcon, ScanTextIcon,
   StarIcon,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardShortcut,
@@ -19,7 +29,7 @@ import {Clip, ClipType} from "@/db";
 import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
-import {getFirstSelectedHistoryItem, getHistoryItem} from "@/data";
+import {getFirstSelectedHistoryItem, getHistoryItem, getSelectedHistoryItemIndices} from "@/data";
 
 type PreviewToolBarProps = {
   selectedItemIndices: number[]
@@ -38,6 +48,14 @@ type PreviewToolBarProps = {
 }
 
 export default function PreviewToolBar(props: PreviewToolBarProps) {
+  const [position, setPosition] = React.useState("return")
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
+      e.stopPropagation()
+    }
+  }
+
   function handleHidePreview() {
     props.onHidePreview()
   }
@@ -91,6 +109,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     return props.selectedItemIndices.length > 1
   }
 
+  function canShowPasteOptions() {
+    return props.selectedItemIndices.length > 1
+  }
+
   return (
       <div className="flex flex-col">
         <div className="flex m-2 h-10">
@@ -102,10 +124,34 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
-                <div className="select-none mr-2">Paste to {props.appName}</div>
+                <div className="select-none mr-2">
+                  Paste {getSelectedHistoryItemIndices().length > 1 ? getSelectedHistoryItemIndices().length + " Items" : ""} to {props.appName}
+                </div>
                 <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
               </TooltipContent>
             </Tooltip>
+            {
+                canShowPasteOptions() &&
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="dropdown" size="dropdown">
+                      <ChevronDown className="h-4 w-4" strokeWidth={2.5}/>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="p-1 bg-actions-background" align="start" onKeyDown={handleKeyDown}>
+                    <DropdownMenuLabel className="font-normal text-secondary-foreground">
+                      When pasting multiple items,<br/>separate them with:
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator/>
+                    <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                      <DropdownMenuRadioItem value="return"><span className="pr-1">Return</span><ShortcutLabel shortcut="Enter"/></DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="tab"><span className="pr-1">Tab</span><ShortcutLabel
+                          shortcut="Tab"/></DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+            }
 
             {
                 canShowCopyToClipboard() &&

@@ -10,6 +10,11 @@
 
 class MainApp : public std::enable_shared_from_this<MainApp> {
  public:
+  enum Key {
+    kCmdV = 0,
+    kReturn,
+    kTab
+  };
   explicit MainApp(const std::shared_ptr<molybden::App> &app,
                    const std::shared_ptr<AppSettings> &settings);
 
@@ -35,6 +40,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   virtual void paste(const std::string &text,
                      const std::string &imageFileName,
                      const std::string &imageText) = 0;
+  virtual void sendKey(Key key) = 0;
   virtual void copyToClipboard(const std::string &text,
                                const std::string &imageFileName,
                                const std::string &imageText) = 0;

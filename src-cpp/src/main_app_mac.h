@@ -24,6 +24,7 @@ class MainAppMac : public MainApp {
   void paste(const std::string &text,
              const std::string &imageFileName,
              const std::string &imageText) override;
+  void sendKey(Key key) override;
   void copyToClipboard(const std::string &text,
                        const std::string &imageFileName,
                        const std::string &imageText) override;

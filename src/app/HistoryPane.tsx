@@ -19,7 +19,7 @@ import {
   setFilterQuery,
   setPreviewVisibleState,
   setSelectedHistoryItemIndex,
-  updateHistoryItem, getHistoryItem, getSelectedHistoryItems
+  updateHistoryItem, getSelectedHistoryItems
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
@@ -60,7 +60,8 @@ import {getTrialLicenseDaysLeft, isTrialLicense, isTrialLicenseExpired} from "@/
 import TrialExpiredMessage from "@/app/TrialExpiredMessage";
 import FreeLicenseMessage from "@/app/FreeLicenseMessage";
 
-declare const pasteInFrontApp: (text: string, imageFileName: string, imageText: string) => void;
+declare const pasteItemInFrontApp: (text: string, imageFileName: string, imageText: string) => void;
+declare const pressReturn: () => void;
 declare const copyToClipboard: (text: string, imageFileName: string, imageText: string) => void;
 declare const copyToClipboardAfterMerge: (text: string) => void;
 declare const deleteImage: (imageFileName: string) => void;
@@ -462,21 +463,24 @@ export default function HistoryPane(props: HistoryPaneProps) {
     return previewPanelRef.current ? previewPanelRef.current.getSize() > 0 : false
   }
 
-  function handlePaste(): void {
-    let item = getFirstSelectedHistoryItem();
+  function pasteItem(item: Clip) {
     let imageFileName = item.imageFileName ? item.imageFileName : "";
     let imageText = item.imageText ? item.imageText : "";
-    pasteInFrontApp(item.content, imageFileName, imageText)
+    pasteItemInFrontApp(item.content, imageFileName, imageText)
+  }
+
+  function handlePaste(): void {
+    getSelectedHistoryItems().forEach(item => {
+      pasteItem(item)
+      pressReturn()
+    })
     // Clear the search query in the search field after paste.
     handleSearchQueryChange("")
   }
 
   function handlePasteByIndex(index: number) {
     if (index < history.length) {
-      let item = history[index]
-      let imageFileName = item.imageFileName ? item.imageFileName : "";
-      let imageText = item.imageText ? item.imageText : "";
-      pasteInFrontApp(item.content, imageFileName, imageText)
+      pasteItem(history[index])
       // Clear the search query in the search field after paste.
       handleSearchQueryChange("")
       // Clear the indicator after paste.
@@ -644,19 +648,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
     let item = history[index];
     let imageFileName = item.imageFileName ? item.imageFileName : "";
     let imageText = item.imageText ? item.imageText : "";
-    pasteInFrontApp(item.content, imageFileName, imageText)
+    pasteItemInFrontApp(item.content, imageFileName, imageText)
   }
 
   function handleFinishEditing() {
     focusSearchField()
-  }
-
-  async function selectItem(item: Clip) {
-    let index = getHistoryItemIndex(item)
-    console.log("Selected item", index)
-    setSelectedHistoryItemIndex(index)
-    setSelectedItemIndices(getSelectedHistoryItemIndices())
-    scrollToLastSelectedItem()
   }
 
   async function selectItems(items: Clip[]) {

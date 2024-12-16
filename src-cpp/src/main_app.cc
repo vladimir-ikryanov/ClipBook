@@ -514,10 +514,16 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
     app_->desktop()->openUrl(url);
   });
   // App window.
-  window->putProperty("pasteInFrontApp",
+  window->putProperty("pasteItemInFrontApp",
                       [this](std::string text, std::string imageFileName, std::string imageText) {
                         paste(text, imageFileName, imageText);
                       });
+  window->putProperty("pressReturn", [this]() {
+    sendKey(Key::kReturn);
+  });
+  window->putProperty("pressTab", [this]() {
+    sendKey(Key::kTab);
+  });
   window->putProperty("copyToClipboard",
                       [this](std::string text, std::string imageFileName, std::string imageText) {
                         copyToClipboard(text, imageFileName, imageText);

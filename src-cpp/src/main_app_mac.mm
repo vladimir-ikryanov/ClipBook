@@ -8,6 +8,8 @@
 #include <sys/sysctl.h>
 
 #define KEY_CODE_V ((CGKeyCode)9)
+#define KEY_CODE_RETURN ((CGKeyCode)36)
+#define KEY_CODE_TAB ((CGKeyCode)48)
 
 using namespace molybden;
 
@@ -264,13 +266,26 @@ void MainAppMac::hide() {
   }
 }
 
-void MainAppMac::paste() {
-  // Simulate the key press of Command + V to paste the text into the active app.
+void MainAppMac::sendKey(MainApp::Key key) {
   CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
 
-  CGEventRef key_down = CGEventCreateKeyboardEvent(source, KEY_CODE_V, TRUE);
-  CGEventSetFlags(key_down, kCGEventFlagMaskCommand);
-  CGEventRef key_up = CGEventCreateKeyboardEvent(source, KEY_CODE_V, FALSE);
+  CGEventRef key_down = nullptr;
+  CGEventRef key_up = nullptr;
+
+  if (key == Key::kCmdV) {
+    key_down = CGEventCreateKeyboardEvent(source, KEY_CODE_V, TRUE);
+    CGEventSetFlags(key_down, kCGEventFlagMaskCommand);
+    key_up = CGEventCreateKeyboardEvent(source, KEY_CODE_V, FALSE);
+  } else if (key == Key::kReturn) {
+    key_down = CGEventCreateKeyboardEvent(source, KEY_CODE_RETURN, TRUE);
+    key_up = CGEventCreateKeyboardEvent(source, KEY_CODE_RETURN, FALSE);
+  } else if (key == Key::kTab) {
+    key_down = CGEventCreateKeyboardEvent(source, KEY_CODE_TAB, TRUE);
+    key_up = CGEventCreateKeyboardEvent(source, KEY_CODE_TAB, FALSE);
+  } else {
+    CFRelease(source);
+    return;
+  }
 
   CGEventPost(kCGAnnotatedSessionEventTap, key_down);
   CGEventPost(kCGAnnotatedSessionEventTap, key_up);
@@ -278,6 +293,13 @@ void MainAppMac::paste() {
   CFRelease(key_up);
   CFRelease(key_down);
   CFRelease(source);
+
+  // 50 milliseconds delay to let the target app process the key combination.
+  usleep(50000);
+}
+
+void MainAppMac::paste() {
+  sendKey(Key::kCmdV);
 }
 
 void MainAppMac::paste(const std::string &text,
