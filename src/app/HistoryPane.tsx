@@ -659,9 +659,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
   function handleSearchQueryChange(searchQuery: string): void {
     setSearchQuery(searchQuery)
     setFilterQuery(searchQuery)
-    setHistory(getHistoryItems())
+    let items = getHistoryItems();
+    setHistory(items)
 
-    setSelectedHistoryItemIndex(0)
+    if (items.length === 0) {
+      clearSelection()
+    } else {
+      setSelectedHistoryItemIndex(0)
+    }
     // The props.items array won't be updated until the next render, so we need to get the updated
     // items right now to update the preview text.
     setSelectedItemIndices(getSelectedHistoryItemIndices())
