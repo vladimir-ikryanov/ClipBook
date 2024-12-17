@@ -216,6 +216,14 @@ export default function Actions(props: ActionsProps) {
     return getSelectedHistoryItemIndices().length > 1
   }
 
+  function getMultipleItemsIndicator(): string {
+    let indices = getSelectedHistoryItemIndices().length
+    if (indices > 1) {
+      return indices + " Items"
+    }
+    return ""
+  }
+
   return (
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
@@ -224,13 +232,13 @@ export default function Actions(props: ActionsProps) {
             <ShortcutLabel shortcut={prefGetShowMoreActionsShortcut()}/>
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="end" className="w-[300px] pt-1.5 pb-0 px-0 bg-actions-background" onKeyDown={handleKeyDown}>
+        <PopoverContent align="end" className="w-[320px] pt-1.5 pb-0 px-0 bg-actions-background" onKeyDown={handleKeyDown}>
           <Command>
             <CommandList>
               <CommandItem onSelect={handlePaste}>
                 <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                      alt="Application icon"/>
-                <span>Paste to {props.appName}</span>
+                <span>Paste {getMultipleItemsIndicator()} to {props.appName}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
                 </CommandShortcut>
@@ -282,7 +290,9 @@ export default function Actions(props: ActionsProps) {
                       <StarIcon className="mr-2 h-4 w-4"/> :
                       <StarOffIcon className="mr-2 h-4 w-4"/>
                 }
-                <span>{canAddToFavorites() ? "Add to Favorites" : "Remove from Favorites"}</span>
+                <span>{canAddToFavorites() ?
+                    `Add ${getMultipleItemsIndicator()} to Favorites` :
+                    `Remove ${getMultipleItemsIndicator()} from Favorites`}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
                 </CommandShortcut>
@@ -322,7 +332,7 @@ export default function Actions(props: ActionsProps) {
                   <CommandItem onSelect={handleDeleteItems}>
                     <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
                     <span className="text-actions-danger">
-                      Delete {getSelectedHistoryItemIndices().length} Items
+                      Delete {getMultipleItemsIndicator()}
                     </span>
                     <CommandShortcut className="flex flex-row">
                       <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
