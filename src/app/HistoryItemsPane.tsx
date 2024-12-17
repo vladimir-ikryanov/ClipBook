@@ -60,7 +60,9 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
     if (metaKeyDown) {
       let selectedIndices = getSelectedHistoryItemIndices()
       if (selectedIndices.includes(index)) {
-        removeSelectedHistoryItemIndex(index)
+        if (selectedIndices.length > 1) {
+          removeSelectedHistoryItemIndex(index)
+        }
       } else {
         addSelectedHistoryItemIndex(index)
       }
