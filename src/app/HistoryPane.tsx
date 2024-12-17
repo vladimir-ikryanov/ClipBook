@@ -12,7 +12,7 @@ import {
   deleteHistoryItem,
   findItemByImageFileName,
   getFirstSelectedHistoryItem,
-  getFirstSelectedHistoryItemIndex,
+  getFirstSelectedHistoryItemIndex, getHistoryItem,
   getHistoryItemIndex,
   getHistoryItems,
   getLastSelectedItemIndex,
@@ -119,9 +119,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   imageHeight: number,
                                   imageSizeInBytes: number,
                                   imageText: string) {
-    let selectedItem = getFirstSelectedHistoryItem();
-
-    let clips = await addHistoryItem(
+    let item = await addHistoryItem(
         content,
         sourceAppPath,
         imageFileName,
@@ -130,11 +128,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
         imageHeight,
         imageSizeInBytes,
         imageText)
-    setHistory([...clips])
+    setHistory([...getHistoryItems()])
 
-    let selectedItemIndex = getHistoryItemIndex(selectedItem);
+    let index = getHistoryItemIndex(item)
     clearSelection()
-    addSelectedHistoryItemIndex(selectedItemIndex)
+    addSelectedHistoryItemIndex(index)
     setSelectedItemIndices(getSelectedHistoryItemIndices())
     scrollToLastSelectedItem()
   }
@@ -169,8 +167,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
           await updateHistoryItem(targetItem.id!, targetItem)
           let items = getHistoryItems()
-          setHistory(items)
-          let index = items.findIndex(i => i.id === item.id)
+          setHistory([...items])
+          let index = items.findIndex(i => i.id === targetItem.id)
           setSelectedHistoryItemIndex(index)
           setSelectedItemIndices(getSelectedHistoryItemIndices())
           scrollToLastSelectedItem()
@@ -495,6 +493,18 @@ export default function HistoryPane(props: HistoryPaneProps) {
     handleSearchQueryChange("")
   }
 
+  async function handleMerge() {
+    let content = ""
+    let indices = getSelectedHistoryItemIndices()
+    for (let index of indices) {
+      let item = getHistoryItem(index)
+      content += item.content + "\n"
+    }
+    await handleDeleteItems()
+    await addClipboardData(content, "ClipBook.app", "", "", 0, 0, 0, "")
+
+  }
+
   function handlePasteByIndex(index: number) {
     if (index < history.length) {
       pasteItem(history[index])
@@ -777,6 +787,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          onFinishEditing={handleFinishEditing}
                          onHidePreview={handleTogglePreview}
                          onPaste={handlePaste}
+                         onMerge={handleMerge}
                          onCopyToClipboard={handleCopyToClipboard}
                          onCopyTextFromImage={handleCopyTextFromImage}
                          onOpenInBrowser={handleOpenInBrowser}

@@ -401,6 +401,13 @@ void MainAppMac::setOpenAtLogin(bool open) {
   }
 }
 
+AppInfo MainAppMac::getAppInfo() {
+  AppInfo app_info;
+  NSString *app_path = [[NSBundle mainBundle] bundlePath];
+  app_info.path = [app_path fileSystemRepresentation];
+  return app_info;
+}
+
 AppInfo MainAppMac::getActiveAppInfo() {
   NSRunningApplication *app = [[NSWorkspace sharedWorkspace] frontmostApplication];
   if (app) {
@@ -564,8 +571,14 @@ void MainAppMac::showSystemAccessibilityPreferencesDialog() {
 }
 
 std::string MainAppMac::getAppIconAsBase64(const std::string &app_path) {
+  std::string path = app_path;
+  // Check if the given app_path is "ClipBook.app".
+  if (app_path.find("ClipBook.app") != std::string::npos) {
+    path = getAppInfo().path;
+  }
+
   NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-  NSImage *image = [workspace iconForFile:[NSString stringWithUTF8String:app_path.c_str()]];
+  NSImage *image = [workspace iconForFile:[NSString stringWithUTF8String:path.c_str()]];
   // Convert NSImage to NSData (using PNG format in this example).
   CGImageRef cgRef = [image CGImageForProposedRect:NULL context:nil hints:nil];
   NSBitmapImageRep *newRep = [[NSBitmapImageRep alloc] initWithCGImage:cgRef];
@@ -580,7 +593,13 @@ std::string MainAppMac::getAppIconAsBase64(const std::string &app_path) {
 }
 
 std::string MainAppMac::getAppNameFromPath(const std::string &app_path) {
-  NSBundle *appBundle = [NSBundle bundleWithPath:[NSString stringWithUTF8String:app_path.c_str()]];
+  std::string path = app_path;
+  // Check if the given app_path is "ClipBook.app".
+  if (app_path.find("ClipBook.app") != std::string::npos) {
+    path = getAppInfo().path;
+  }
+
+  NSBundle *appBundle = [NSBundle bundleWithPath:[NSString stringWithUTF8String:path.c_str()]];
   if (appBundle) {
     NSString *appName = [[appBundle infoDictionary] objectForKey:@"CFBundleName"];
     if (!appName) {

@@ -30,7 +30,12 @@ import {Clip, ClipType} from "@/db";
 import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
-import {getFirstSelectedHistoryItem, getHistoryItem, getSelectedHistoryItemIndices} from "@/data";
+import {
+  getFirstSelectedHistoryItem,
+  getHistoryItem,
+  getSelectedHistoryItemIndices,
+  getSelectedHistoryItems, isTextItem
+} from "@/data";
 
 type PreviewToolBarProps = {
   selectedItemIndices: number[]
@@ -38,6 +43,7 @@ type PreviewToolBarProps = {
   appIcon: string
   displayInfo: boolean
   onPaste: () => void
+  onMerge: () => void
   onToggleInfo: () => void
   onHidePreview: () => void
   onEditHistoryItem: (item: Clip) => void
@@ -64,6 +70,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
   function handlePaste() {
     props.onPaste()
+  }
+
+  function handleMerge() {
+    props.onMerge()
   }
 
   function handleCopyToClipboard() {
@@ -113,6 +123,13 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
   function canShowPasteOptions() {
     return props.selectedItemIndices.length > 1
+  }
+
+  function canShowMergeItems() {
+    if (props.selectedItemIndices.length > 1) {
+      return getSelectedHistoryItems().every(item => isTextItem(item))
+    }
+    return false
   }
 
   function handlePasteItemsSeparatorChange(value: string) {
@@ -165,6 +182,32 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     </DropdownMenuRadioGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
+            }
+
+            {
+                canShowMergeItems() &&
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="toolbar" size="toolbar" onClick={handleMerge}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                           strokeLinecap="round" strokeLinejoin="round"
+                           className="lucide lucide-unfold-vertical h-5 w-5">
+                        <path d="M12 22v-6"/>
+                        <path d="M12 8V2"/>
+                        <path d="M4 12H2"/>
+                        <path d="M10 12H8"/>
+                        <path d="M16 12h-2"/>
+                        <path d="M22 12h-2"/>
+                        <path d="m15 5-3 3-3-3"/>
+                        <path d="m15 19-3-3-3 3"/>
+                      </svg>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex items-center">
+                    <div className="select-none mr-2">Merge {props.selectedItemIndices.length} items</div>
+                  </TooltipContent>
+                </Tooltip>
             }
 
             {

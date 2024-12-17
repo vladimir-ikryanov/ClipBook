@@ -233,7 +233,7 @@ export async function addHistoryItem(content: string,
                                      imageWidth: number,
                                      imageHeight: number,
                                      imageSizeInBytes: number,
-                                     imageText: string): Promise<Clip[]> {
+                                     imageText: string): Promise<Clip> {
   let item = findItem(content, imageFileName)
   if (item) {
     item.numberOfCopies++
@@ -247,9 +247,10 @@ export async function addHistoryItem(content: string,
     item.imageThumbFileName = imageThumbFileName
     item.imageText = imageText
     await addClip(item)
+    console.log("Added item to history: " + item.id)
     history.push(item)
   }
-  return getHistoryItems()
+  return item
 }
 
 export async function deleteHistoryItem(item: Clip) {

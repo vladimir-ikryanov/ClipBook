@@ -30,6 +30,7 @@ class MainAppMac : public MainApp {
                        const std::string &imageText) override;
   void copyToClipboardAfterMerge(std::string text) override;
   void setOpenAtLogin(bool open) override;
+  AppInfo getAppInfo() override;
   AppInfo getActiveAppInfo() override;
   std::string getAppIconAsBase64(const std::string& app_path) override;
   std::string getAppNameFromPath(const std::string &app_path) override;

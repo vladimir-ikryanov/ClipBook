@@ -22,6 +22,7 @@ type PreviewPaneProps = {
   onEditHistoryItem: (item: Clip) => void
   onFinishEditing: () => void
   onPaste: () => void
+  onMerge: () => void
   onHidePreview: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
@@ -82,6 +83,7 @@ export default function PreviewPane(props: PreviewPaneProps) {
                         appIcon={props.appIcon}
                         displayInfo={displayInfo}
                         onPaste={props.onPaste}
+                        onMerge={props.onMerge}
                         onToggleInfo={handleToggleInfo}
                         onHidePreview={props.onHidePreview}
                         onEditHistoryItem={props.onEditHistoryItem}
