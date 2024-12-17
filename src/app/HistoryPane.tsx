@@ -662,7 +662,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setHistory(getHistoryItems())
 
     setSelectedHistoryItemIndex(0)
-    clearSelection()
     // The props.items array won't be updated until the next render, so we need to get the updated
     // items right now to update the preview text.
     setSelectedItemIndices(getSelectedHistoryItemIndices())
@@ -760,6 +759,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               searchFieldRef={searchFieldRef}
                               listRef={listRef}
                               onPaste={handlePaste}
+                              onMerge={handleMerge}
                               onClose={handleClose}
                               onHideActions={handleHideActions}
                               onHideClipDropdownMenu={handleHideClipDropdownMenu}

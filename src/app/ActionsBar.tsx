@@ -13,6 +13,7 @@ type ActionsBarProps = {
   appName: string
   appIcon: string
   onPaste: () => void
+  onMerge: () => void
   onClose: () => void
   onHideActions: (reason: HideActionsReason) => void
   onToggleFavorite: () => void
@@ -55,6 +56,7 @@ export default function ActionsBar(props: ActionsBarProps) {
                    onOpenInBrowser={props.onOpenInBrowser}
                    onOpenSettings={props.onOpenSettings}
                    onPaste={props.onPaste}
+                   onMerge={props.onMerge}
                    onToggleFavorite={props.onToggleFavorite}
                    onTogglePreview={props.onTogglePreview}
                    onDeleteItem={props.onDeleteItem}

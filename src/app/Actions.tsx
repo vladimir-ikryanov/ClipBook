@@ -43,7 +43,7 @@ import {
   getFirstSelectedHistoryItem,
   getPreviewVisibleState,
   toBase64Icon,
-  getSelectedHistoryItemIndices, getSelectedHistoryItems
+  getSelectedHistoryItemIndices, getSelectedHistoryItems, isTextItem
 } from "@/data";
 import {ClipType} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
@@ -53,6 +53,7 @@ export type HideActionsReason =
     | "togglePreview"
     | "toggleFavorite"
     | "paste"
+    | "merge"
     | "editContent"
     | "copyToClipboard"
     | "copyTextFromImage"
@@ -69,6 +70,7 @@ type ActionsProps = {
   onTogglePreview: () => void
   onToggleFavorite: () => void
   onPaste: () => void
+  onMerge: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
@@ -125,6 +127,12 @@ export default function Actions(props: ActionsProps) {
     props.onPaste()
   }
 
+  function handleMerge() {
+    closeReason = "merge"
+    handleOpenChange(false)
+    props.onMerge()
+  }
+
   function handleToggleFavorite() {
     closeReason = "toggleFavorite"
     handleOpenChange(false)
@@ -175,6 +183,13 @@ export default function Actions(props: ActionsProps) {
 
   function canShowCopyToClipboard() {
     return getSelectedHistoryItemIndices().length === 1
+  }
+
+  function canShowMergeItems() {
+    if (getSelectedHistoryItemIndices().length > 1) {
+      return getSelectedHistoryItems().every(item => isTextItem(item))
+    }
+    return false
   }
 
   function canShowOpenInBrowser() {
@@ -243,6 +258,13 @@ export default function Actions(props: ActionsProps) {
                   <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
                 </CommandShortcut>
               </CommandItem>
+              {
+                  canShowMergeItems() &&
+                  <CommandItem onSelect={handleMerge}>
+                    <CopyIcon className="mr-2 h-4 w-4"/>
+                    <span>Merge {getMultipleItemsIndicator()}</span>
+                  </CommandItem>
+              }
               {
                   canShowCopyToClipboard() &&
                   <CommandItem onSelect={handleCopyToClipboard}>

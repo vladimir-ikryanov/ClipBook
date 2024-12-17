@@ -30,6 +30,7 @@ type HistoryItemsPaneProps = {
   onSelectedItemsChange: () => void
   onShowHidePreview: () => void
   onPaste: () => void
+  onMerge: () => void
   onClose: () => void
   onEditHistoryItem: (item: Clip) => void
   onHideActions: (reason: HideActionsReason) => void
@@ -163,6 +164,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
       <ActionsBar appName={props.appName}
                   appIcon={props.appIcon}
                   onPaste={props.onPaste}
+                  onMerge={props.onMerge}
                   onClose={props.onClose}
                   onHideActions={props.onHideActions}
                   onEditContent={props.onEditContent}
