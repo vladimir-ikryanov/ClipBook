@@ -5,24 +5,33 @@ import HistoryItemsPane from "@/app/HistoryItemsPane";
 import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
-  addHistoryItem, addSelectedHistoryItemIndex,
-  clear, clearSelection,
+  addHistoryItem,
+  addSelectedHistoryItemIndex,
+  clear,
+  clearSelection,
   deleteHistoryItem,
   findItemByImageFileName,
   getFirstSelectedHistoryItem,
+  getFirstSelectedHistoryItemIndex,
   getHistoryItemIndex,
-  getHistoryItems, getLastSelectedItemIndex,
+  getHistoryItems,
+  getLastSelectedItemIndex,
   getPreviewVisibleState,
-  getFirstSelectedHistoryItemIndex, getSelectedHistoryItemIndices,
+  getSelectedHistoryItemIndices,
+  getSelectedHistoryItems,
   getVisibleHistoryLength,
-  isHistoryEmpty, isHistoryItemSelected, isTextItem, removeSelectedHistoryItemIndex,
+  isHistoryEmpty,
+  isHistoryItemSelected,
+  isTextItem,
+  removeSelectedHistoryItemIndex,
   setFilterQuery,
   setPreviewVisibleState,
   setSelectedHistoryItemIndex,
-  updateHistoryItem, getSelectedHistoryItems
+  updateHistoryItem
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
+  PasteItemsSeparator,
   prefGetClearHistoryShortcut,
   prefGetCopyAndMergeSeparator,
   prefGetCopyTextFromImageShortcut,
@@ -38,6 +47,7 @@ import {
   prefGetNavigateToPrevGroupOfItemsShortcut,
   prefGetOpenInBrowserShortcut,
   prefGetOpenSettingsShortcut,
+  prefGetPasteItemsSeparator,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetQuickPasteModifier,
   prefGetQuickPasteShortcuts,
@@ -62,6 +72,7 @@ import FreeLicenseMessage from "@/app/FreeLicenseMessage";
 
 declare const pasteItemInFrontApp: (text: string, imageFileName: string, imageText: string) => void;
 declare const pressReturn: () => void;
+declare const pressTab: () => void;
 declare const copyToClipboard: (text: string, imageFileName: string, imageText: string) => void;
 declare const copyToClipboardAfterMerge: (text: string) => void;
 declare const deleteImage: (imageFileName: string) => void;
@@ -472,7 +483,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
   function handlePaste(): void {
     getSelectedHistoryItems().forEach(item => {
       pasteItem(item)
-      pressReturn()
+      let separator = prefGetPasteItemsSeparator()
+      if (separator === PasteItemsSeparator.RETURN) {
+        pressReturn()
+      }
+      if (separator === PasteItemsSeparator.TAB) {
+        pressTab()
+      }
     })
     // Clear the search query in the search field after paste.
     handleSearchQueryChange("")

@@ -18,12 +18,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  PasteItemsSeparator,
   prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardShortcut,
-  prefGetOpenInBrowserShortcut,
+  prefGetOpenInBrowserShortcut, prefGetPasteItemsSeparator,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetToggleFavoriteShortcut,
-  prefGetTogglePreviewShortcut
+  prefGetTogglePreviewShortcut, prefSetPasteItemsSeparator
 } from "@/pref";
 import {Clip, ClipType} from "@/db";
 import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Icons";
@@ -48,7 +49,8 @@ type PreviewToolBarProps = {
 }
 
 export default function PreviewToolBar(props: PreviewToolBarProps) {
-  const [position, setPosition] = React.useState("return")
+  const [pasteOptionsMenuOpen, setPasteOptionsMenuOpen] = React.useState(false)
+  const [pasteItemsSeparator, setPasteItemsSeparator] = React.useState(prefGetPasteItemsSeparator())
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
@@ -113,6 +115,15 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     return props.selectedItemIndices.length > 1
   }
 
+  function handlePasteItemsSeparatorChange(value: string) {
+    setPasteItemsSeparator(value as PasteItemsSeparator)
+    prefSetPasteItemsSeparator(value as PasteItemsSeparator)
+  }
+
+  function handlePasteOptionsMenuOpenChange(open: boolean) {
+    setPasteOptionsMenuOpen(open)
+  }
+
   return (
       <div className="flex flex-col">
         <div className="flex m-2 h-10">
@@ -132,9 +143,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
             </Tooltip>
             {
                 canShowPasteOptions() &&
-                <DropdownMenu>
+                <DropdownMenu open={pasteOptionsMenuOpen} onOpenChange={handlePasteOptionsMenuOpenChange}>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="dropdown" size="dropdown">
+                    <Button variant="dropdown" size="dropdown" className={pasteOptionsMenuOpen ? "bg-accent" : ""}>
                       <ChevronDown className="h-4 w-4" strokeWidth={2.5}/>
                     </Button>
                   </DropdownMenuTrigger>
@@ -143,11 +154,14 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                       When pasting multiple items,<br/>separate them with:
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator/>
-                    <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-                      <DropdownMenuRadioItem value="return"><span className="pr-1">Return</span><ShortcutLabel shortcut="Enter"/></DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="tab"><span className="pr-1">Tab</span><ShortcutLabel
-                          shortcut="Tab"/></DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
+                    <DropdownMenuRadioGroup value={pasteItemsSeparator} onValueChange={handlePasteItemsSeparatorChange}>
+                      <DropdownMenuRadioItem value={PasteItemsSeparator.RETURN}>
+                        <span className="pr-1">Return</span><ShortcutLabel shortcut="Enter"/>
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value={PasteItemsSeparator.TAB}>
+                        <span className="pr-1">Tab</span><ShortcutLabel shortcut="Tab"/>
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value={PasteItemsSeparator.NONE}>None</DropdownMenuRadioItem>
                     </DropdownMenuRadioGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>

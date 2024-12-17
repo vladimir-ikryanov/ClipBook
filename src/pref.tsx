@@ -80,6 +80,12 @@ declare const getNavigateToNextGroupOfItemsShortcut: () => string;
 declare const saveNavigateToPrevGroupOfItemsShortcut: (shortcut: string) => void;
 declare const getNavigateToPrevGroupOfItemsShortcut: () => string;
 
+export enum PasteItemsSeparator {
+  NONE = "none",
+  RETURN = "return",
+  TAB = "tab",
+}
+
 export function prefGetTheme() {
   return getTheme()
 }
@@ -424,4 +430,21 @@ export function prefSetDisplayThankYouDialog(display: boolean) {
 
 export function prefShouldDisplayThankYouMessage() {
   return shouldDisplayThankYouDialog()
+}
+
+export function prefGetPasteItemsSeparator() {
+  let separator = localStorage.getItem("app.paste.items.separator")
+  if (separator === null) {
+    return PasteItemsSeparator.RETURN
+  }
+  if (separator === PasteItemsSeparator.RETURN) {
+    return PasteItemsSeparator.RETURN
+  } else if (separator === PasteItemsSeparator.TAB) {
+    return PasteItemsSeparator.TAB
+  }
+  return PasteItemsSeparator.NONE
+}
+
+export function prefSetPasteItemsSeparator(separator: PasteItemsSeparator) {
+  localStorage.setItem("app.paste.items.separator", separator)
 }
