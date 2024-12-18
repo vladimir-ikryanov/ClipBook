@@ -360,6 +360,19 @@ export default function HistoryPane(props: HistoryPaneProps) {
     return () => document.removeEventListener("keydown", down)
   }, [history])
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        setQuickPasteModifierPressed(false)
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   // Listen to key down and key up events to find out when the Command key is pressed and released.
   // When the Command key is pressed set the bool property to true, when it is released set it to false.
   useEffect(() => {
