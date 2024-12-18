@@ -608,15 +608,20 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
-  function handleOpenInBrowser() {
-    // Open in browser is not available when multiple items are selected.
-    if (getSelectedHistoryItemIndices().length > 1) {
-      return
-    }
-    let item = getFirstSelectedHistoryItem()
+  function openItemInBrowser(item: Clip) {
     if (isUrl(item.content)) {
       openInBrowser(item.content)
     }
+  }
+
+  function handleOpenInBrowser() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      openItemInBrowser(getFirstSelectedHistoryItem())
+    }
+  }
+
+  function handleOpenInBrowserByIndex(index: number) {
+    openItemInBrowser(getHistoryItem(index))
   }
 
   function handleOpenSettings() {
@@ -812,6 +817,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onCopyToClipboardByIndex={handleCopyToClipboardByIndex}
                               onCopyTextFromImage={handleCopyTextFromImage}
                               onOpenInBrowser={handleOpenInBrowser}
+                              onOpenInBrowserByIndex={handleOpenInBrowserByIndex}
                               onOpenSettings={handleOpenSettings}
                               onSearchHistory={handleSearchHistory}
                               onToggleFavorite={handleToggleFavorite}

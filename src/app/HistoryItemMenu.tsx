@@ -37,6 +37,7 @@ export type HideClipDropdownMenuReason =
     | "editContent"
     | "copyToClipboard"
     | "copyTextFromImage"
+    | "openInBrowser"
     | "deleteItem"
 
 type HistoryItemMenuProps = {
@@ -52,7 +53,7 @@ type HistoryItemMenuProps = {
   onEditContent: (index: number) => void
   onCopyToClipboard: (index: number) => void
   onCopyTextFromImage: () => void
-  onOpenInBrowser: () => void
+  onOpenInBrowser: (index: number) => void
   onDeleteItem: (index: number) => void
 }
 
@@ -116,6 +117,12 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
     props.onDeleteItem(props.index)
   }
 
+  function handleOpenInBrowser() {
+    closeReason = "openInBrowser"
+    handleOpenChange(false)
+    props.onOpenInBrowser(props.index)
+  }
+
   return (
       <div>
         <DropdownMenu open={open} onOpenChange={handleOpenChange}>
@@ -142,7 +149,7 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
             <DropdownMenuSeparator/>
             {
               props.item.type === ClipType.Link &&
-              <DropdownMenuItem onClick={props.onOpenInBrowser}>
+              <DropdownMenuItem onClick={handleOpenInBrowser}>
                 <GlobeIcon className="mr-2 h-4 w-4"/>
                 <span className="mr-12">Open in Browser</span>
                 <CommandShortcut className="flex flex-row">

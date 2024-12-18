@@ -45,6 +45,7 @@ type HistoryItemsPaneProps = {
   onCopyToClipboardByIndex: (index: number) => void
   onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
+  onOpenInBrowserByIndex: (index: number) => void
   onOpenSettings: () => void
   onDeleteItem: () => void
   onDeleteItemByIndex: (index: number) => void
@@ -133,7 +134,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                                          onEditContent={props.onEditContentByIndex}
                                          onCopyToClipboard={props.onCopyToClipboardByIndex}
                                          onCopyTextFromImage={props.onCopyTextFromImage}
-                                         onOpenInBrowser={props.onOpenInBrowser}
+                                         onOpenInBrowser={props.onOpenInBrowserByIndex}
                                          onDeleteItem={props.onDeleteItemByIndex}/>
                     )
                   }
