@@ -215,6 +215,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function activateApp() {
     focusSearchField()
+    setQuickPasteModifierPressed(false)
     if (getVisibleHistoryLength() > 0) {
       setSelectedHistoryItemIndex(0)
       setSelectedItemIndices(getSelectedHistoryItemIndices())
@@ -368,7 +369,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       if (e.code === prefGetQuickPasteModifier()) {
         // Start the timer when the key is pressed
         pressTimer = setTimeout(() => {
-          setQuickPasteModifierPressed(true);
+          setQuickPasteModifierPressed(true)
         }, 500); // 500ms delay
       }
     };
@@ -383,7 +384,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
         // If the state was set to true, reset it on key release
         if (quickPasteModifierPressed) {
-          setQuickPasteModifierPressed(false);
+          setQuickPasteModifierPressed(false)
         }
       }
     };
@@ -515,7 +516,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
-  function handleClose(): void {
+  function handleClose() {
     hideAppWindow()
   }
 
