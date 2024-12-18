@@ -30,6 +30,7 @@ type HistoryItemsPaneProps = {
   onSelectedItemsChange: () => void
   onShowHidePreview: () => void
   onPaste: () => void
+  onPasteByIndex: (index: number) => void
   onMerge: () => void
   onClose: () => void
   onEditHistoryItem: (item: Clip) => void
@@ -125,7 +126,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                                          appIcon={props.appIcon}
                                          isQuickPasteModifierPressed={props.isQuickPasteModifierPressed}
                                          onHideClipDropdownMenu={props.onHideClipDropdownMenu}
-                                         onPaste={props.onPaste}
+                                         onPaste={props.onPasteByIndex}
                                          onEditHistoryItem={props.onEditHistoryItem}
                                          onMouseDown={handleMouseDown}
                                          onMouseDoubleClick={handleMouseDoubleClick}

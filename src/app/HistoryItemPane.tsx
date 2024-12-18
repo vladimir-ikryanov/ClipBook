@@ -23,7 +23,7 @@ type HistoryItemPaneProps = {
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onMouseDown(index: number, metaKeyDown: boolean, shiftKeyDown: boolean): void
   onMouseDoubleClick: (index: number) => void
-  onPaste: () => void
+  onPaste: (index: number) => void
   onEditHistoryItem: (item: Clip) => void
   onEditContent: (index: number) => void
   onCopyToClipboard: (index: number) => void

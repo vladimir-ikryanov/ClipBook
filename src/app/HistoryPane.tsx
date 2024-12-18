@@ -478,7 +478,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     pasteItemInFrontApp(item.content, imageFileName, imageText)
   }
 
-  function handlePaste(): void {
+  function handlePaste() {
     getSelectedHistoryItems().forEach(item => {
       pasteItem(item)
       let separator = prefGetPasteItemsSeparator()
@@ -502,15 +502,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
     await handleDeleteItems()
     await addClipboardData(content, "ClipBook.app", "", "", 0, 0, 0, "")
-
   }
 
   function handlePasteByIndex(index: number) {
     if (index < history.length) {
       pasteItem(history[index])
-      // Clear the search query in the search field after paste.
       handleSearchQueryChange("")
-      // Clear the indicator after paste.
       setQuickPasteModifierPressed(false)
     }
   }
@@ -804,6 +801,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               searchFieldRef={searchFieldRef}
                               listRef={listRef}
                               onPaste={handlePaste}
+                              onPasteByIndex={handlePasteByIndex}
                               onMerge={handleMerge}
                               onClose={handleClose}
                               onHideActions={handleHideActions}

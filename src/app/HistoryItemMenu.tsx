@@ -47,7 +47,7 @@ type HistoryItemMenuProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
-  onPaste: () => void
+  onPaste: (index: number) => void
   onEditHistoryItem: (item: Clip) => void
   onEditContent: (index: number) => void
   onCopyToClipboard: (index: number) => void
@@ -82,7 +82,7 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
   function handlePaste() {
     closeReason = "paste"
     handleOpenChange(false)
-    props.onPaste()
+    props.onPaste(props.index)
   }
 
   function handleCopyToClipboard() {
