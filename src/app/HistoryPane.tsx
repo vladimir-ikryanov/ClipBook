@@ -287,7 +287,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       }
       // Delete the active item when the delete shortcut is pressed.
       if (isShortcutMatch(prefGetDeleteHistoryItemShortcut(), e)) {
-        await handleDeleteItem()
+        await handleDeleteItems()
         e.preventDefault()
       }
       // Focus the search field when the search history shortcut is pressed.

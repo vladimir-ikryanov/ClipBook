@@ -90,8 +90,7 @@ export default function PreviewPane(props: PreviewPaneProps) {
                         onCopyToClipboard={props.onCopyToClipboard}
                         onCopyTextFromImage={props.onCopyTextFromImage}
                         onOpenInBrowser={props.onOpenInBrowser}
-                        onToggleFavorite={props.onToggleFavorite}
-                        onDeleteItem={props.onDeleteItem}/>
+                        onToggleFavorite={props.onToggleFavorite}/>
         {renderContent()}
         {renderInfo()}
       </div>

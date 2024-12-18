@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import {
   DropdownMenu,
-  DropdownMenuContent,
+  DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -51,7 +51,6 @@ type PreviewToolBarProps = {
   onCopyTextFromImage: () => void
   onToggleFavorite: () => void
   onOpenInBrowser: () => void
-  onDeleteItem: () => void
 }
 
 export default function PreviewToolBar(props: PreviewToolBarProps) {

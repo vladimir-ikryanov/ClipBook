@@ -1,5 +1,5 @@
 import '../app.css';
-import React, {KeyboardEvent, useState} from 'react';
+import React, {KeyboardEvent, MouseEvent, useState} from 'react';
 import {
   CopyIcon,
   Edit3Icon,
@@ -41,8 +41,10 @@ export type HideClipDropdownMenuReason =
 
 type HistoryItemMenuProps = {
   item: Clip
+  index: number
   appName: string
   appIcon: string
+  open: boolean
   onOpenChange: (open: boolean) => void
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onPaste: () => void
@@ -55,7 +57,7 @@ type HistoryItemMenuProps = {
 }
 
 const HistoryItemMenu = (props: HistoryItemMenuProps) => {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(props.open)
 
   let closeReason: HideClipDropdownMenuReason = "cancel"
 
@@ -63,6 +65,10 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
       e.stopPropagation()
     }
+  }
+
+  const handleMouseDown = (e: MouseEvent) => {
+    e.stopPropagation()
   }
 
   function handleOpenChange(open: boolean) {
@@ -117,7 +123,7 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
             <EllipsisVerticalIcon className="h-5 w-5"/>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="p-1.5 bg-actions-background" align="start"
-                               onKeyDown={handleKeyDown}>
+                               onKeyDown={handleKeyDown} onMouseDown={handleMouseDown}>
             <DropdownMenuItem onClick={handlePaste}>
               <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                    alt="Application icon"/>

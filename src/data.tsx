@@ -247,7 +247,6 @@ export async function addHistoryItem(content: string,
     item.imageThumbFileName = imageThumbFileName
     item.imageText = imageText
     await addClip(item)
-    console.log("Added item to history: " + item.id)
     history.push(item)
   }
   return item

@@ -1,6 +1,6 @@
 import '../app.css';
 import React, {CSSProperties, KeyboardEvent, MouseEvent, useState} from 'react';
-import {getFilterQuery, getSelectedHistoryItemIndices} from "@/data";
+import {getFilterQuery} from "@/data";
 import {Clip, ClipType} from "@/db";
 import {toCSSColor} from "@/lib/utils";
 import {
@@ -58,12 +58,14 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     e.preventDefault()
   }
 
-  function handleMouseEnter() {
+  const handleMouseEnter = (e: MouseEvent) => {
     setMouseOver(true)
+    e.preventDefault()
   }
 
-  function handleMouseLeave() {
+  const handleMouseLeave = (e: MouseEvent) => {
     setMouseOver(false)
+    e.preventDefault()
   }
 
   function renderClipIcon() {
@@ -89,18 +91,23 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
       return renderQuickPasteAlias()
     }
     if (mouseOver || actionsMenuOpen) {
-      return <HistoryItemMenu item={props.item}
-                              appName={props.appName}
-                              appIcon={props.appIcon}
-                              onOpenChange={handleDropdownMenuOpenChange}
-                              onHideClipDropdownMenu={props.onHideClipDropdownMenu}
-                              onPaste={props.onPaste}
-                              onEditHistoryItem={props.onEditHistoryItem}
-                              onEditContent={props.onEditContent}
-                              onCopyToClipboard={props.onCopyToClipboard}
-                              onCopyTextFromImage={props.onCopyTextFromImage}
-                              onOpenInBrowser={props.onOpenInBrowser}
-                              onDeleteItem={props.onDeleteItem}/>
+      if (props.selectedItemIndices.length === 1 ||
+          (props.selectedItemIndices.length > 1 && !props.selectedItemIndices.includes(props.index))) {
+        return <HistoryItemMenu item={props.item}
+                                index={props.index}
+                                appName={props.appName}
+                                appIcon={props.appIcon}
+                                open={actionsMenuOpen}
+                                onOpenChange={handleDropdownMenuOpenChange}
+                                onHideClipDropdownMenu={props.onHideClipDropdownMenu}
+                                onPaste={props.onPaste}
+                                onEditHistoryItem={props.onEditHistoryItem}
+                                onEditContent={props.onEditContent}
+                                onCopyToClipboard={props.onCopyToClipboard}
+                                onCopyTextFromImage={props.onCopyTextFromImage}
+                                onOpenInBrowser={props.onOpenInBrowser}
+                                onDeleteItem={props.onDeleteItem}/>
+      }
     }
     return renderFavoriteIcon()
   }
