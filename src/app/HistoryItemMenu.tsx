@@ -52,7 +52,7 @@ type HistoryItemMenuProps = {
   onEditHistoryItem: (item: Clip) => void
   onEditContent: (index: number) => void
   onCopyToClipboard: (index: number) => void
-  onCopyTextFromImage: () => void
+  onCopyTextFromImage: (index: number) => void
   onOpenInBrowser: (index: number) => void
   onDeleteItem: (index: number) => void
 }
@@ -95,7 +95,7 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
   function handleCopyTextFromImage() {
     closeReason = "copyTextFromImage"
     handleOpenChange(false)
-    props.onCopyTextFromImage()
+    props.onCopyTextFromImage(props.index)
   }
 
   function handleToggleFavorite() {

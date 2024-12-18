@@ -4,7 +4,7 @@ import PreviewToolBar from "@/app/PreviewToolBar";
 import {Clip, ClipType} from "@/db";
 import ItemInfoPane from "@/app/ItemInfoPane";
 import {
-  getFirstSelectedHistoryItem,
+  getFirstSelectedHistoryItem, getHistoryItem,
   getInfoVisibleState,
   getSelectedHistoryItems,
   setInfoVisibleState
@@ -43,7 +43,9 @@ export default function PreviewPane(props: PreviewPaneProps) {
 
   function renderContent() {
     if (props.selectedItemIndices.length === 1) {
-      let item = getFirstSelectedHistoryItem()
+      console.log("Selected item indices: ", props.selectedItemIndices)
+      let item = getHistoryItem(props.selectedItemIndices[0])
+      console.log("First selected history item: ", item)
       return item.type === ClipType.Image ? renderImage(item) : renderText(item)
     }
     return <PreviewItemsPane items={getSelectedHistoryItems()}/>

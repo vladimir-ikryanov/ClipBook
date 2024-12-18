@@ -27,7 +27,7 @@ type HistoryItemPaneProps = {
   onEditHistoryItem: (item: Clip) => void
   onEditContent: (index: number) => void
   onCopyToClipboard: (index: number) => void
-  onCopyTextFromImage: () => void
+  onCopyTextFromImage: (index: number) => void
   onOpenInBrowser: (index: number) => void
   onDeleteItem: (index: number) => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>

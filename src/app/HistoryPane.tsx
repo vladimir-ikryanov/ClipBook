@@ -130,11 +130,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
         imageText)
     setHistory([...getHistoryItems()])
 
+    // The added item might not be in the visible history list if it doesn't match the search query.
     let index = getHistoryItemIndex(item)
-    clearSelection()
-    addSelectedHistoryItemIndex(index)
-    setSelectedItemIndices(getSelectedHistoryItemIndices())
-    scrollToLastSelectedItem()
+    if (index >= 0) {
+      clearSelection()
+      addSelectedHistoryItemIndex(index)
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
+      scrollToLastSelectedItem()
+    }
   }
 
   async function mergeClipboardData(content: string,
@@ -586,26 +589,29 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleCopyToClipboard() {
-    // Copy to clipboard is not available when multiple items are selected.
-    if (getSelectedHistoryItemIndices().length > 1) {
-      return
+    if (getSelectedHistoryItemIndices().length === 1) {
+      copyItemToClipboard(getFirstSelectedHistoryItem())
     }
-    copyItemToClipboard(getFirstSelectedHistoryItem())
   }
 
   function handleCopyToClipboardByIndex(index: number) {
     copyItemToClipboard(getHistoryItem(index))
   }
 
-  function handleCopyTextFromImage() {
-    // Copy text from image is not available when multiple items are selected.
-    if (getSelectedHistoryItemIndices().length > 1) {
-      return
-    }
-    let item = getFirstSelectedHistoryItem()
+  function copyTextFromImage(item: Clip) {
     if (item.type === ClipType.Image) {
       copyToClipboard(item.content, "", "")
     }
+  }
+
+  function handleCopyTextFromImage() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      copyTextFromImage(getFirstSelectedHistoryItem())
+    }
+  }
+
+  function handleCopyTextFromImageByIndex(index: number) {
+    copyTextFromImage(getHistoryItem(index))
   }
 
   function openItemInBrowser(item: Clip) {
@@ -816,6 +822,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onCopyToClipboard={handleCopyToClipboard}
                               onCopyToClipboardByIndex={handleCopyToClipboardByIndex}
                               onCopyTextFromImage={handleCopyTextFromImage}
+                              onCopyTextFromImageByIndex={handleCopyTextFromImageByIndex}
                               onOpenInBrowser={handleOpenInBrowser}
                               onOpenInBrowserByIndex={handleOpenInBrowserByIndex}
                               onOpenSettings={handleOpenSettings}
