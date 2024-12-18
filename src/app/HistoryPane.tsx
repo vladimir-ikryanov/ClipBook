@@ -581,16 +581,23 @@ export default function HistoryPane(props: HistoryPaneProps) {
     handleEditContent()
   }
 
+  function copyItemToClipboard(item: Clip) {
+    let imageFileName = item.imageFileName ? item.imageFileName : ""
+    let imageText = item.imageText ? item.imageText : ""
+    copyToClipboard(item.content, imageFileName, imageText)
+    hideAppWindow()
+  }
+
   function handleCopyToClipboard() {
     // Copy to clipboard is not available when multiple items are selected.
     if (getSelectedHistoryItemIndices().length > 1) {
       return
     }
-    let item = getFirstSelectedHistoryItem()
-    let imageFileName = item.imageFileName ? item.imageFileName : ""
-    let imageText = item.imageText ? item.imageText : ""
-    copyToClipboard(item.content, imageFileName, imageText)
-    hideAppWindow()
+    copyItemToClipboard(getFirstSelectedHistoryItem())
+  }
+
+  function handleCopyToClipboardByIndex(index: number) {
+    copyItemToClipboard(getHistoryItem(index))
   }
 
   function handleCopyTextFromImage() {
@@ -804,6 +811,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onEditContent={handleEditContent}
                               onEditContentByIndex={handleEditContentByIndex}
                               onCopyToClipboard={handleCopyToClipboard}
+                              onCopyToClipboardByIndex={handleCopyToClipboardByIndex}
                               onCopyTextFromImage={handleCopyTextFromImage}
                               onOpenInBrowser={handleOpenInBrowser}
                               onOpenSettings={handleOpenSettings}
