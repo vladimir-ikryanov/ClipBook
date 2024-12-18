@@ -570,7 +570,15 @@ export default function HistoryPane(props: HistoryPaneProps) {
       if (previewTextareaRef.current) {
         previewTextareaRef.current.focus()
       }
-    }, 0);
+    }, 50);
+  }
+
+  function handleEditContentByIndex(index: number) {
+    if (getLastSelectedItemIndex() !== index) {
+      setSelectedHistoryItemIndex(index)
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
+    }
+    handleEditContent()
   }
 
   function handleCopyToClipboard() {
@@ -794,6 +802,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onHideActions={handleHideActions}
                               onHideClipDropdownMenu={handleHideClipDropdownMenu}
                               onEditContent={handleEditContent}
+                              onEditContentByIndex={handleEditContentByIndex}
                               onCopyToClipboard={handleCopyToClipboard}
                               onCopyTextFromImage={handleCopyTextFromImage}
                               onOpenInBrowser={handleOpenInBrowser}

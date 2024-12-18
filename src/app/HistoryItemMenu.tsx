@@ -33,7 +33,7 @@ import {isTextItem, toBase64Icon} from "@/data";
 export type HideClipDropdownMenuReason =
     "cancel"
     | "paste"
-    | "pin"
+    | "toggleFavorite"
     | "editContent"
     | "copyToClipboard"
     | "copyTextFromImage"
@@ -49,7 +49,7 @@ type HistoryItemMenuProps = {
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onPaste: () => void
   onEditHistoryItem: (item: Clip) => void
-  onEditContent: () => void
+  onEditContent: (index: number) => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
@@ -97,8 +97,8 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
     props.onCopyTextFromImage()
   }
 
-  function handlePin() {
-    closeReason = "pin"
+  function handleToggleFavorite() {
+    closeReason = "toggleFavorite"
     handleOpenChange(false)
     props.item.favorite = !props.item.favorite
     props.onEditHistoryItem(props.item)
@@ -107,7 +107,7 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
   function handleEditContent() {
     closeReason = "editContent"
     handleOpenChange(false)
-    props.onEditContent()
+    props.onEditContent(props.index)
   }
 
   function handleDeleteItem() {
@@ -170,7 +170,7 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
                   </CommandShortcut>
                 </DropdownMenuItem>
             }
-            <DropdownMenuItem onClick={handlePin}>
+            <DropdownMenuItem onClick={handleToggleFavorite}>
               {
                 props.item.favorite ? <StarOffIcon className="mr-2 h-4 w-4"/> : <StarIcon className="mr-2 h-4 w-4"/>
               }
