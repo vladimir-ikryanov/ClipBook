@@ -53,7 +53,7 @@ type HistoryItemMenuProps = {
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
-  onDeleteItem: () => void
+  onDeleteItem: (index: number) => void
 }
 
 const HistoryItemMenu = (props: HistoryItemMenuProps) => {
@@ -113,7 +113,7 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
   function handleDeleteItem() {
     closeReason = "deleteItem"
     handleOpenChange(false)
-    props.onDeleteItem()
+    props.onDeleteItem(props.index)
   }
 
   return (

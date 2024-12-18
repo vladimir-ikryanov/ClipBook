@@ -634,6 +634,31 @@ export default function HistoryPane(props: HistoryPaneProps) {
     await handleDeleteItems()
   }
 
+  async function handleDeleteItemByIndex(index: number) {
+    let item = getHistoryItem(index)
+    let indices = getSelectedHistoryItemIndices()
+    // If the item is selected, and it's the only selected item,
+    // then delete it and select the first item.
+    if (getLastSelectedItemIndex() === index) {
+      await deleteItem(item)
+      if (getVisibleHistoryLength() > 0) {
+        setSelectedHistoryItemIndex(0)
+        setSelectedItemIndices(getSelectedHistoryItemIndices())
+        scrollToLastSelectedItem()
+      }
+    } else {
+      await deleteItem(item)
+      // Get all the selected indices that are more than the current index.
+      let indicesToShift = indices.filter(i => i > index)
+      // Decrement the indices that are more than the current index.
+      for (let i of indicesToShift) {
+        removeSelectedHistoryItemIndex(i)
+        addSelectedHistoryItemIndex(i - 1)
+      }
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
+    }
+  }
+
   async function handleDeleteItems() {
     let nextSelectedItemIndex = getVisibleHistoryLength() - 1
     let items = getSelectedHistoryItems()
@@ -778,6 +803,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onTogglePreview={handleTogglePreview}
                               onEditHistoryItem={handleEditHistoryItem}
                               onDeleteItem={handleDeleteItem}
+                              onDeleteItemByIndex={handleDeleteItemByIndex}
                               onDeleteItems={handleDeleteItems}
                               onDeleteAllItems={handleDeleteAllItems}/>
           </ResizablePanel>
