@@ -194,6 +194,9 @@ ClipBook will check for updates automatically and notify you when a new version 
                 <span className="text-neutral-500 font-normal text-sm">
                   Display the ClipBook app icon in the menu&nbsp;bar.
                 </span>
+                <span className={`${showIconInMenuBar ? "text-neutral-500" : ""} font-normal text-sm`}>
+                  You can always open <strong>Settings</strong> by pressing <kbd>⌘</kbd><kbd>,</kbd> inside the ClipBook window.
+                </span>
               </Label>
               <Switch id="showIcon" checked={showIconInMenuBar}
                       onCheckedChange={handleShowIconChange}/>
