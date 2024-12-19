@@ -682,6 +682,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
         setSelectedHistoryItemIndex(0)
         setSelectedItemIndices(getSelectedHistoryItemIndices())
         scrollToLastSelectedItem()
+      } else {
+        clearSelection()
+        setSelectedItemIndices(getSelectedHistoryItemIndices())
       }
     } else {
       await deleteItem(item)
@@ -697,8 +700,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function handleDeleteItems() {
-    let nextSelectedItemIndex = getVisibleHistoryLength() - 1
     let items = getSelectedHistoryItems()
+    if (items.length === 0) {
+      return
+    }
+    let nextSelectedItemIndex = getVisibleHistoryLength() - 1
     clearSelection()
     for (let item of items) {
       let index = getHistoryItemIndex(item)
@@ -710,7 +716,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (nextSelectedItemIndex >= lastIndex) {
       nextSelectedItemIndex = lastIndex
     }
-    setSelectedHistoryItemIndex(nextSelectedItemIndex)
+    if (nextSelectedItemIndex >= 0) {
+      setSelectedHistoryItemIndex(nextSelectedItemIndex)
+    }
     setSelectedItemIndices(getSelectedHistoryItemIndices())
   }
 

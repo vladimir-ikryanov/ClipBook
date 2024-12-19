@@ -33,6 +33,10 @@ export default function SearchBar(props: SearchBarProps) {
     if (e.code === "ArrowUp" || e.code === "ArrowDown") {
       e.preventDefault()
     }
+    // Prevent clearing search query with cmd + backspace (default macOS hotkey).
+    if (e.code === "Backspace" && e.metaKey) {
+      e.preventDefault()
+    }
   }
 
   const handleShowHidePreview = () => {
