@@ -383,7 +383,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
 
     const down = (e: KeyboardEvent) => {
-      if (e.code === prefGetQuickPasteModifier()) {
+      if (e.code === prefGetQuickPasteModifier() && !e.shiftKey && !e.altKey && !e.ctrlKey) {
         startShowQuickPasteModifiersRequest()
       } else {
         cancelShowQuickPasteModifiersRequest()
