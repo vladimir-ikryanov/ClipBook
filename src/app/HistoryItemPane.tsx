@@ -49,15 +49,12 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   }
 
   const handleMouseDown = (e: MouseEvent) => {
-    if (!props.selectedItemIndices.includes(props.index)) {
+    // Check if this is ae.metaKey double click event.
+    if (e.detail === 2) {
+      props.onMouseDoubleClick(props.index)
+    } else {
       props.onMouseDown(props.index, e.metaKey, e.shiftKey)
-      e.preventDefault()
     }
-  }
-
-  const handleMouseDoubleClick = (e: MouseEvent) => {
-    console.log("handleMouseDoubleClick")
-    props.onMouseDoubleClick(props.index)
     e.preventDefault()
   }
 
@@ -195,7 +192,6 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
           className={`flex flex-row cursor-default select-none items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-popover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
           onKeyDown={handleKeyDown}
           onMouseDown={handleMouseDown}
-          onDoubleClick={handleMouseDoubleClick}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}>
         <div className="flex flex-none mr-3 text-primary-foreground">{renderClipIcon()}</div>
