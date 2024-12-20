@@ -215,7 +215,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function activateApp() {
     focusSearchField()
-    setQuickPasteModifierPressed(false)
     if (getVisibleHistoryLength() > 0) {
       setSelectedHistoryItemIndex(0)
       setSelectedItemIndices(getSelectedHistoryItemIndices())
@@ -360,45 +359,40 @@ export default function HistoryPane(props: HistoryPaneProps) {
     return () => document.removeEventListener("keydown", down)
   }, [history])
 
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        setQuickPasteModifierPressed(false)
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
-
   // Listen to key down and key up events to find out when the Command key is pressed and released.
   // When the Command key is pressed set the bool property to true, when it is released set it to false.
   useEffect(() => {
     let pressTimer: NodeJS.Timeout | null = null; // To track the timer
 
+    function startShowQuickPasteModifiersRequest() {
+      pressTimer = setTimeout(() => {
+        setQuickPasteModifierPressed(true)
+      }, 500); // 500ms delay
+    }
+
+    function cancelShowQuickPasteModifiersRequest() {
+      // Clear the timer if the key is released before 500ms
+      if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+      // If the state was set to true, reset it on key release
+      if (quickPasteModifierPressed) {
+        setQuickPasteModifierPressed(false)
+      }
+    }
+
     const down = (e: KeyboardEvent) => {
       if (e.code === prefGetQuickPasteModifier()) {
-        // Start the timer when the key is pressed
-        pressTimer = setTimeout(() => {
-          setQuickPasteModifierPressed(true)
-        }, 500); // 500ms delay
+        startShowQuickPasteModifiersRequest()
+      } else {
+        cancelShowQuickPasteModifiersRequest()
       }
     };
 
     const up = (e: KeyboardEvent) => {
       if (e.code === prefGetQuickPasteModifier()) {
-        // Clear the timer if the key is released before 500ms
-        if (pressTimer) {
-          clearTimeout(pressTimer);
-          pressTimer = null;
-        }
-
-        // If the state was set to true, reset it on key release
-        if (quickPasteModifierPressed) {
-          setQuickPasteModifierPressed(false)
-        }
+        cancelShowQuickPasteModifiersRequest()
       }
     };
 
