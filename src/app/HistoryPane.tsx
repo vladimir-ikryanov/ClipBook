@@ -490,14 +490,17 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handlePaste() {
-    getSelectedHistoryItems().forEach(item => {
+    let items = getSelectedHistoryItems()
+    items.forEach(item => {
       pasteItem(item)
-      let separator = prefGetPasteItemsSeparator()
-      if (separator === PasteItemsSeparator.RETURN) {
-        pressReturn()
-      }
-      if (separator === PasteItemsSeparator.TAB) {
-        pressTab()
+      if (items.length > 1) {
+        let separator = prefGetPasteItemsSeparator()
+        if (separator === PasteItemsSeparator.RETURN) {
+          pressReturn()
+        }
+        if (separator === PasteItemsSeparator.TAB) {
+          pressTab()
+        }
       }
     })
     // Clear the search query in the search field after paste.
