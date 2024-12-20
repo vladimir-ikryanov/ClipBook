@@ -746,9 +746,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleMouseDoubleClick(index: number) {
-    let item = history[index];
-    let imageFileName = item.imageFileName ? item.imageFileName : "";
-    let imageText = item.imageText ? item.imageText : "";
+    let item = getHistoryItem(index)
+    let imageFileName = item.imageFileName ? item.imageFileName : ""
+    let imageText = item.imageText ? item.imageText : ""
     pasteItemInFrontApp(item.content, imageFileName, imageText)
   }
 

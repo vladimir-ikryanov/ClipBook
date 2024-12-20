@@ -49,11 +49,14 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   }
 
   const handleMouseDown = (e: MouseEvent) => {
-    props.onMouseDown(props.index, e.metaKey, e.shiftKey)
-    e.preventDefault()
+    if (!props.selectedItemIndices.includes(props.index)) {
+      props.onMouseDown(props.index, e.metaKey, e.shiftKey)
+      e.preventDefault()
+    }
   }
 
   const handleMouseDoubleClick = (e: MouseEvent) => {
+    console.log("handleMouseDoubleClick")
     props.onMouseDoubleClick(props.index)
     e.preventDefault()
   }
@@ -189,7 +192,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
       <div
           id={`tab-${props.index}`}
           style={props.style}
-          className={`flex flex-row cursor-default items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-popover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
+          className={`flex flex-row cursor-default select-none items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-popover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
           onKeyDown={handleKeyDown}
           onMouseDown={handleMouseDown}
           onDoubleClick={handleMouseDoubleClick}
