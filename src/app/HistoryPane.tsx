@@ -97,6 +97,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [quickPasteModifierPressed, setQuickPasteModifierPressed] = useState(false);
+  const [hidePreviewOnEditFinish, setHidePreviewOnEditFinish] = useState(false);
   const [selectedItemIndices, setSelectedItemIndices] = useState(getSelectedHistoryItemIndices());
   const [isTrial, setIsTrial] = useState(isTrialLicense());
   const [trialDaysLeft, setTrialDaysLeft] = useState(getTrialLicenseDaysLeft());
@@ -575,6 +576,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       return
     }
     if (!isPreviewVisible()) {
+      setHidePreviewOnEditFinish(true)
       handleTogglePreview()
     }
     setTimeout(() => {
@@ -750,6 +752,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleFinishEditing() {
+    if (hidePreviewOnEditFinish) {
+      handleTogglePreview()
+      setHidePreviewOnEditFinish(false)
+    }
     focusSearchField()
   }
 

@@ -2,6 +2,8 @@ import '../app.css';
 import React from "react";
 import {Clip} from "@/db";
 import {getClipType} from "@/lib/utils";
+import {isShortcutMatch} from "@/lib/shortcuts";
+import {prefGetEditHistoryItemShortcut} from "@/pref";
 
 type PreviewTextPaneProps = {
   item: Clip
@@ -15,7 +17,7 @@ export default function PreviewTextPane(props: PreviewTextPaneProps) {
   const [content, setContent] = React.useState(props.item.content)
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.code === "Escape") {
+    if (e.code === "Escape" || isShortcutMatch(prefGetEditHistoryItemShortcut(), e.nativeEvent)) {
       props.onFinishEditing()
     }
     e.stopPropagation()
