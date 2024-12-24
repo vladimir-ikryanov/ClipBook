@@ -468,6 +468,7 @@ NSRect MainAppMac::getActiveWindowBounds(NSRunningApplication *app) {
   if (!windowListInfo) {
     return {};
   }
+  NSRect windowBounds = {};
   auto windowInfoList = (__bridge NSArray *)windowListInfo;
   for (NSDictionary *info in windowInfoList) {
     NSNumber *windowPID = info[(__bridge NSString *)kCGWindowOwnerPID];
@@ -479,14 +480,14 @@ NSRect MainAppMac::getActiveWindowBounds(NSRunningApplication *app) {
         NSNumber *width = boundsDict[@"Width"];
         NSNumber *height = boundsDict[@"Height"];
         if (x && y && width && height) {
-          CFRelease(windowListInfo);
-          return NSMakeRect(x.doubleValue, y.doubleValue, width.doubleValue, height.doubleValue);
+          // The last window in the list is the active window.
+          windowBounds = NSMakeRect(x.doubleValue, y.doubleValue, width.doubleValue, height.doubleValue);
         }
       }
     }
   }
   CFRelease(windowListInfo);
-  return {};
+  return windowBounds;
 }
 
 bool MainAppMac::moveToActiveWindowCenter() {
