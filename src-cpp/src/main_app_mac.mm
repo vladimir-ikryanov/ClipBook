@@ -21,6 +21,14 @@ namespace fs = std::filesystem;
  */
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
+// Open window strategy pref values.
+static std::string kActiveScreenLastPosition = "activeScreenLastPosition";
+static std::string kActiveScreenCenter = "activeScreenCenter";
+static std::string kActiveWindowCenter = "activeWindowCenter";
+static std::string kScreenWithCursor = "screenWithCursor";
+static std::string kMouseCursor = "mouseCursor";
+static std::string kInputCursor = "inputCursor";
+
 static std::string kShortcutSeparator = " + ";
 static std::string kMetaLeft = "MetaLeft";
 static std::string kMetaRight = "MetaRight";
@@ -359,6 +367,148 @@ std::string MainAppMac::getUpdateServerUrl() {
 }
 
 void MainAppMac::restoreWindowBounds() {
+  auto strategy = settings_->getOpenWindowStrategy();
+  if (strategy == kActiveScreenLastPosition) {
+    moveToLastPositionOnActiveScreen();
+  }
+  if (strategy == kActiveScreenCenter) {
+    moveToActiveScreenCenter();
+  }
+  if (strategy == kActiveWindowCenter) {
+    if (!moveToActiveWindowCenter()) {
+      moveToActiveScreenCenter();
+    }
+  }
+  if (strategy == kScreenWithCursor) {
+    if (!moveToScreenWithMousePointer()) {
+      moveToActiveScreenCenter();
+    }
+  }
+  if (strategy == kMouseCursor) {
+    moveToMousePointerLocation();
+  }
+  if (strategy == kInputCursor) {
+    if (!moveToInputCursorLocation()) {
+      moveToActiveScreenCenter();
+    }
+  }
+}
+
+NSScreen *screenContainingMousePointer() {
+  // Get the current mouse location in global screen coordinates
+  NSPoint mouseLocation = [NSEvent mouseLocation];
+  for (NSScreen *screen in [NSScreen screens]) {
+    if (NSPointInRect(mouseLocation, screen.frame)) {
+      return screen;
+    }
+  }
+  return nil;
+}
+
+void MainAppMac::moveToScreen(NSScreen *screen) {
+  auto window_size = restoreWindowSize();
+  auto primary_screen = [[NSScreen screens] firstObject];
+  auto primary_screen_bounds = [primary_screen frame];
+  auto screen_bounds = [screen frame];
+  auto x = static_cast<int32_t>((screen_bounds.size.width - window_size.width) / 2);
+  auto y = static_cast<int32_t>((screen_bounds.size.height - window_size.height) / 2);
+  x += static_cast<int32_t>(screen_bounds.origin.x);
+  y += static_cast<int32_t>(primary_screen_bounds.size.height - (screen_bounds.origin.y + screen_bounds.size.height));
+  app_window_->setPosition(x, y);
+}
+
+bool MainAppMac::moveToScreenWithMousePointer() {
+  auto screen = screenContainingMousePointer();
+  if (screen) {
+    moveToScreen(screen);
+    return true;
+  }
+  return false;
+}
+
+void MainAppMac::moveToMousePointerLocation() {
+  auto window_size = restoreWindowSize();
+  NSPoint mouse_location = [NSEvent mouseLocation];
+  auto x = static_cast<int32_t>(mouse_location.x);
+  auto primary_screen = [[NSScreen screens] firstObject];
+  auto primary_screen_bounds = [primary_screen frame];
+  auto y = static_cast<int32_t>(primary_screen_bounds.size.height - mouse_location.y);
+  app_window_->setPosition(x + 5, y + 5);
+}
+
+bool MainAppMac::moveToInputCursorLocation() {
+  auto caret_position = getInputCursorLocationOnScreen();
+  if (caret_position.x == 0 && caret_position.y == 0) {
+    return false;
+  }
+  restoreWindowSize();
+  auto x = static_cast<int32_t>(caret_position.x);
+  auto y = static_cast<int32_t>(caret_position.y);
+  app_window_->setPosition(x, y);
+  return true;
+}
+
+molybden::Size MainAppMac::restoreWindowSize() {
+  auto window_bounds = settings_->getWindowBounds();
+  if (!window_bounds.size.isEmpty()) {
+    app_window_->setSize(window_bounds.size);
+    return window_bounds.size;
+  }
+  return app_window_->bounds().size;
+}
+
+void MainAppMac::moveToActiveScreenCenter() {
+  moveToScreen([NSScreen mainScreen]);
+}
+
+NSRect MainAppMac::getActiveWindowBounds(NSRunningApplication *app) {
+  // Exclude desktop elements and include only on-screen windows.
+  CFArrayRef windowListInfo = CGWindowListCopyWindowInfo(
+      kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+  if (!windowListInfo) {
+    return {};
+  }
+  auto windowInfoList = (__bridge NSArray *)windowListInfo;
+  for (NSDictionary *info in windowInfoList) {
+    NSNumber *windowPID = info[(__bridge NSString *)kCGWindowOwnerPID];
+    if (windowPID && windowPID.unsignedIntValue == [app processIdentifier]) {
+      NSDictionary *boundsDict = info[(__bridge NSString *)kCGWindowBounds];
+      if (boundsDict) {
+        NSNumber *x = boundsDict[@"X"];
+        NSNumber *y = boundsDict[@"Y"];
+        NSNumber *width = boundsDict[@"Width"];
+        NSNumber *height = boundsDict[@"Height"];
+        if (x && y && width && height) {
+          CFRelease(windowListInfo);
+          return NSMakeRect(x.doubleValue, y.doubleValue, width.doubleValue, height.doubleValue);
+        }
+      }
+    }
+  }
+  CFRelease(windowListInfo);
+  return {};
+}
+
+bool MainAppMac::moveToActiveWindowCenter() {
+  auto window_size = restoreWindowSize();
+  // Get the active window bounds on screen.
+  auto active_app = [[NSWorkspace sharedWorkspace] frontmostApplication];
+  if (active_app) {
+    auto active_window_bounds = getActiveWindowBounds(active_app);
+    if (!NSIsEmptyRect(active_window_bounds)) {
+      // Move the window to the center of the active window.
+      auto x = static_cast<int32_t>(active_window_bounds.origin.x +
+                                    (active_window_bounds.size.width - window_size.width) / 2);
+      auto y = static_cast<int32_t>(active_window_bounds.origin.y +
+                                    (active_window_bounds.size.height - window_size.height) / 2);
+      app_window_->setPosition(x, y);
+      return true;
+    }
+  }
+  return false;
+}
+
+void MainAppMac::moveToLastPositionOnActiveScreen() {
   NSScreen *main_screen = [NSScreen mainScreen];
   NSNumber *screen_number = [[main_screen deviceDescription] objectForKey:@"NSScreenNumber"];
   int screen_id = [screen_number intValue];
@@ -372,10 +522,7 @@ void MainAppMac::restoreWindowBounds() {
   if (!window_bounds.size.isEmpty()) {
     app_window_->setBounds(window_bounds);
   } else {
-    auto screen_x = static_cast<int32_t>([main_screen frame].origin.x);
-    auto screen_y = static_cast<int32_t>([main_screen frame].origin.y);
-    app_window_->setPosition(screen_x, screen_y);
-    app_window_->centerWindow();
+    moveToScreen(main_screen);
   }
 }
 
@@ -391,6 +538,7 @@ void MainAppMac::saveWindowBounds() {
   auto screen_bounds = molybden::Rect(screen_origin, screen_size);
   auto window_bounds = app_window_->bounds();
   settings_->saveWindowBoundsForScreen(screen_id, screen_bounds, window_bounds);
+  settings_->saveWindowBounds(window_bounds);
 }
 
 void MainAppMac::setOpenAtLogin(bool open) {
@@ -618,4 +766,60 @@ long MainAppMac::getSystemBootTime() {
     return boot_time.tv_sec;
   }
   return -1;
+}
+
+NSPoint MainAppMac::getInputCursorLocationOnScreen() {
+  // Get the system-wide accessibility object
+  AXUIElementRef systemWideElement = AXUIElementCreateSystemWide();
+
+  // Get the focused element
+  AXUIElementRef focusedElement = nullptr;
+  AXError error = AXUIElementCopyAttributeValue(systemWideElement, kAXFocusedUIElementAttribute, (CFTypeRef *)&focusedElement);
+  CFRelease(systemWideElement);
+
+  if (error != kAXErrorSuccess || focusedElement == nullptr) {
+    NSLog(@"Failed to get the focused element");
+    return NSZeroPoint;
+  }
+
+  // Check if the focused element supports the AXSelectedTextRange attribute
+  Boolean hasTextRange = false;
+  error = AXUIElementIsAttributeSettable(focusedElement, kAXSelectedTextRangeAttribute, &hasTextRange);
+  if (error != kAXErrorSuccess || !hasTextRange) {
+    NSLog(@"Focused element does not support text ranges");
+    CFRelease(focusedElement);
+    return NSZeroPoint;
+  }
+
+  // Get the selected text range (text caret location)
+  CFTypeRef textRangeValue = nullptr;
+  error = AXUIElementCopyAttributeValue(focusedElement, kAXSelectedTextRangeAttribute, &textRangeValue);
+  if (error != kAXErrorSuccess || textRangeValue == nullptr) {
+    NSLog(@"Failed to get the selected text range");
+    CFRelease(focusedElement);
+    return NSZeroPoint;
+  }
+
+  // Request the bounds for the selected text range
+  CFTypeRef boundsValue = nullptr;
+  error = AXUIElementCopyParameterizedAttributeValue(focusedElement, kAXBoundsForRangeParameterizedAttribute, textRangeValue, &boundsValue);
+  CFRelease(textRangeValue);
+
+  if (error != kAXErrorSuccess || boundsValue == nullptr) {
+    NSLog(@"Failed to get the bounds for the text range");
+    CFRelease(focusedElement);
+    return NSZeroPoint;
+  }
+
+  CGRect caretBounds = CGRectZero;
+  if (AXValueGetValue((AXValueRef)boundsValue, kAXValueTypeCGRect, &caretBounds)) {
+    NSLog(@"Caret bounds: (%f, %f), size: (%f, %f)", caretBounds.origin.x, caretBounds.origin.y, caretBounds.size.width, caretBounds.size.height);
+  }
+  CFRelease(boundsValue);
+  CFRelease(focusedElement);
+  caretBounds.origin.x += 4;
+  caretBounds.origin.y += caretBounds.size.height + 6;
+
+  // Return the caret's position as an NSPoint
+  return NSPointFromCGPoint(caretBounds.origin);
 }

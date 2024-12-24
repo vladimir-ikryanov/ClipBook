@@ -50,7 +50,14 @@ class MainAppMac : public MainApp {
 
  private:
   void restoreWindowBounds();
+  molybden::Size restoreWindowSize();
   void saveWindowBounds();
+  void moveToLastPositionOnActiveScreen();
+  void moveToActiveScreenCenter();
+  bool moveToInputCursorLocation();
+  bool moveToActiveWindowCenter();
+  bool moveToScreenWithMousePointer();
+  void moveToMousePointerLocation();
   molybden::Shortcut createShortcut(const std::string &shortcut);
   long getSystemBootTime() override;
 
@@ -64,6 +71,9 @@ class MainAppMac : public MainApp {
   std::shared_ptr<ClipboardReaderMac> clipboard_reader_;
 #ifdef __OBJC__
   NSRunningApplication *active_app_{};
+  NSPoint getInputCursorLocationOnScreen();
+  void moveToScreen(NSScreen *screen);
+  static NSRect getActiveWindowBounds(NSRunningApplication *app);
 #endif
 };
 

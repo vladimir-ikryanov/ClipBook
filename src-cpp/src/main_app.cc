@@ -704,6 +704,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("shouldClearHistoryOnMacReboot", [this]() -> bool {
       return settings_->shouldClearHistoryOnMacReboot();
   });
+  window->putProperty("saveOpenWindowStrategy", [this](std::string strategy) -> void {
+    settings_->saveOpenWindowStrategy(std::move(strategy));
+  });
+  window->putProperty("getOpenWindowStrategy", [this]() -> std::string {
+    return settings_->getOpenWindowStrategy();
+  });
 
   // Application shortcuts.
   window->putProperty("saveOpenAppShortcut", [this](std::string shortcut) -> void {

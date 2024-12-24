@@ -4,25 +4,52 @@ import {Switch} from "@/components/ui/switch";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {useEffect, useState} from "react";
 import {
+  OpenWindowStrategy,
   prefGetCheckForUpdatesAutomatically,
-  prefGetOpenAtLogin,
+  prefGetOpenAtLogin, prefGetOpenWindowStrategy,
   prefGetShowIconInMenuBar,
   prefGetTheme,
   prefSetCheckForUpdatesAutomatically,
-  prefSetOpenAtLogin,
+  prefSetOpenAtLogin, prefSetOpenWindowStrategy,
   prefSetShowIconInMenuBar,
   prefSetTheme,
 } from "@/pref";
-import {KeyboardIcon, KeyRoundIcon, ListIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
+import {
+  ChevronsUpDown,
+  KeyboardIcon,
+  KeyRoundIcon,
+  ListIcon,
+  SettingsIcon,
+  ShieldCheckIcon,
+} from "lucide-react";
 import {isLicenseActivated} from "@/licensing";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import {Button} from "@/components/ui/button";
 
 declare const closeSettingsWindow: () => void;
 
+// The map of open strategy enum values to labels.
+const openWindowStrategyLabels = {
+  [OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION]: "Last location on active screen",
+  [OpenWindowStrategy.ACTIVE_SCREEN_CENTER]: "Center of the active screen",
+  [OpenWindowStrategy.ACTIVE_WINDOW_CENTER]: "Center of the active window",
+  [OpenWindowStrategy.SCREEN_WITH_CURSOR]: "Screen with mouse pointer",
+  [OpenWindowStrategy.MOUSE_CURSOR]: "Mouse pointer location",
+  [OpenWindowStrategy.INPUT_CURSOR]: "Text caret location",
+}
+
 export default function Settings() {
-  const [theme, setTheme] = useState(prefGetTheme());
-  const [openAtLogin, setOpenAtLogin] = useState(prefGetOpenAtLogin());
-  const [checkForUpdatesAutomatically, setCheckForUpdatesAutomatically] = useState(prefGetCheckForUpdatesAutomatically());
-  const [showIconInMenuBar, setShowIconInMenuBar] = useState(prefGetShowIconInMenuBar());
+  const [theme, setTheme] = useState(prefGetTheme())
+  const [openAtLogin, setOpenAtLogin] = useState(prefGetOpenAtLogin())
+  const [checkForUpdatesAutomatically, setCheckForUpdatesAutomatically] = useState(prefGetCheckForUpdatesAutomatically())
+  const [showIconInMenuBar, setShowIconInMenuBar] = useState(prefGetShowIconInMenuBar())
+  const [openWindowStrategy, setOpenWindowStrategy] = React.useState(prefGetOpenWindowStrategy())
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -54,6 +81,11 @@ export default function Settings() {
   function handleShowIconChange(showIcon: boolean) {
     setShowIconInMenuBar(showIcon)
     prefSetShowIconInMenuBar(showIcon)
+  }
+
+  function handleOpenWindowStrategyChange(value: string) {
+    setOpenWindowStrategy(value as OpenWindowStrategy)
+    prefSetOpenWindowStrategy(value as OpenWindowStrategy)
   }
 
   function renderLicenseItem() {
@@ -194,12 +226,82 @@ ClipBook will check for updates automatically and notify you when a new version 
                 <span className="text-neutral-500 font-normal text-sm">
                   Display the ClipBook app icon in the menu&nbsp;bar.
                 </span>
-                <span className={`${showIconInMenuBar ? "text-neutral-500" : ""} font-normal text-sm`}>
+                <span
+                    className={`${showIconInMenuBar ? "text-neutral-500" : ""} font-normal text-sm`}>
                   You can always open <strong>Settings</strong> by pressing <kbd>⌘</kbd><kbd>,</kbd> inside the ClipBook window.
                 </span>
               </Label>
               <Switch id="showIcon" checked={showIconInMenuBar}
                       onCheckedChange={handleShowIconChange}/>
+            </div>
+
+            <div className="flex items-center justify-between space-x-10 py-1">
+              <Label htmlFor="showIcon" className="flex flex-col text-base">
+                <span className="">Open window at</span>
+                <span className="text-neutral-500 font-normal text-sm">
+                  Select where the ClipBook window should be opened if it's possible.
+                </span>
+              </Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="dropdown" className="px-4 outline-none">
+                    {openWindowStrategyLabels[openWindowStrategy]}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="p-1.5 bg-actions-background" align="end">
+                  <DropdownMenuRadioGroup value={openWindowStrategy} onValueChange={handleOpenWindowStrategyChange}>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION}>
+                      <div className="flex flex-col">
+                        <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION]}</span>
+                        <span className="text-secondary-foreground">
+                          ClipBook window remembers its position on each screen and opens at<br/>the last position on the active screen.
+                        </span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_SCREEN_CENTER}>
+                      <div className="flex flex-col">
+                        <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_SCREEN_CENTER]}</span>
+                        <span className="text-secondary-foreground">
+                          Open at the center of the active screen.
+                        </span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_WINDOW_CENTER}>
+                      <div className="flex flex-col">
+                        <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_WINDOW_CENTER]}</span>
+                        <span className="text-secondary-foreground">
+                          Open at the center of the active window. If there is no active window,<br/>then open at the center of the active screen.
+                        </span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.SCREEN_WITH_CURSOR}>
+                      <div className="flex flex-col">
+                        <span>{openWindowStrategyLabels[OpenWindowStrategy.SCREEN_WITH_CURSOR]}</span>
+                        <span className="text-secondary-foreground">
+                          Open at the center of the screen where the mouse pointer is located.
+                        </span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.MOUSE_CURSOR}>
+                      <div className="flex flex-col">
+                        <span>{openWindowStrategyLabels[OpenWindowStrategy.MOUSE_CURSOR]}</span>
+                        <span className="text-secondary-foreground">
+                          Open near the mouse pointer location.
+                        </span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.INPUT_CURSOR}>
+                      <div className="flex flex-col">
+                        <span>{openWindowStrategyLabels[OpenWindowStrategy.INPUT_CURSOR]}</span>
+                        <span className="text-secondary-foreground">
+                          Open near the current text caret location. If the caret location cannot<br/>be determined, then open at the center of the active screen.
+                        </span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>

@@ -25,6 +25,9 @@ class AppSettings {
   virtual void saveTheme(std::string theme) = 0;
   virtual std::string getTheme() = 0;
 
+  virtual void saveWindowBounds(molybden::Rect window_bounds) = 0;
+  virtual molybden::Rect getWindowBounds() = 0;
+
   virtual void saveWindowBoundsForScreen(int screen_id, molybden::Rect screen_bounds, molybden::Rect window_bounds) = 0;
   virtual molybden::Rect getWindowBoundsForScreen(int screen_id, molybden::Rect screen_bounds) = 0;
 
@@ -140,6 +143,9 @@ class AppSettings {
 
   virtual void saveNavigateToPrevGroupOfItemsShortcut(std::string shortcut) = 0;
   virtual std::string getNavigateToPrevGroupOfItemsShortcut() = 0;
+
+  virtual void saveOpenWindowStrategy(std::string strategy) = 0;
+  virtual std::string getOpenWindowStrategy() = 0;
 };
 
 

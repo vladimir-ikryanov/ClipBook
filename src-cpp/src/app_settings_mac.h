@@ -21,6 +21,9 @@ class AppSettingsMac : public AppSettings {
   void saveTheme(std::string theme) override;
   std::string getTheme() override;
 
+  void saveWindowBounds(molybden::Rect window_bounds) override;
+  molybden::Rect getWindowBounds() override;
+
   void saveWindowBoundsForScreen(int screen_id, molybden::Rect screen_bounds, molybden::Rect window_bounds) override;
   molybden::Rect getWindowBoundsForScreen(int screen_id, molybden::Rect screen_bounds) override;
 
@@ -136,6 +139,9 @@ class AppSettingsMac : public AppSettings {
 
   void saveNavigateToPrevGroupOfItemsShortcut(std::string shortcut) override;
   std::string getNavigateToPrevGroupOfItemsShortcut() override;
+
+  void saveOpenWindowStrategy(std::string strategy) override;
+  std::string getOpenWindowStrategy() override;
 
  private:
   static molybden::Rect getWindowBoundsForScreen(int screen_id);

@@ -30,6 +30,8 @@ declare const saveClearHistoryOnQuit: (clear: boolean) => void;
 declare const shouldClearHistoryOnQuit: () => boolean;
 declare const saveClearHistoryOnMacReboot: (clear: boolean) => void;
 declare const shouldClearHistoryOnMacReboot: () => boolean;
+declare const saveOpenWindowStrategy: (strategy: string) => void;
+declare const getOpenWindowStrategy: () => string;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -84,6 +86,15 @@ export enum PasteItemsSeparator {
   NONE = "none",
   RETURN = "return",
   TAB = "tab",
+}
+
+export enum OpenWindowStrategy {
+  ACTIVE_SCREEN_LAST_POSITION = "activeScreenLastPosition",
+  ACTIVE_SCREEN_CENTER = "activeScreenCenter",
+  ACTIVE_WINDOW_CENTER = "activeWindowCenter",
+  SCREEN_WITH_CURSOR = "screenWithCursor",
+  MOUSE_CURSOR = "mouseCursor",
+  INPUT_CURSOR = "inputCursor",
 }
 
 export function prefGetTheme() {
@@ -447,4 +458,29 @@ export function prefGetPasteItemsSeparator() {
 
 export function prefSetPasteItemsSeparator(separator: PasteItemsSeparator) {
   localStorage.setItem("app.paste.items.separator", separator)
+}
+
+export function prefGetOpenWindowStrategy(): OpenWindowStrategy {
+  let strategy = getOpenWindowStrategy()
+  if (strategy === null) {
+    return OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION
+  }
+  if (strategy === OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION) {
+    return OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION
+  } else if (strategy === OpenWindowStrategy.ACTIVE_SCREEN_CENTER) {
+    return OpenWindowStrategy.ACTIVE_SCREEN_CENTER
+  } else if (strategy === OpenWindowStrategy.ACTIVE_WINDOW_CENTER) {
+    return OpenWindowStrategy.ACTIVE_WINDOW_CENTER
+  } else if (strategy === OpenWindowStrategy.SCREEN_WITH_CURSOR) {
+    return OpenWindowStrategy.SCREEN_WITH_CURSOR
+  } else if (strategy === OpenWindowStrategy.MOUSE_CURSOR) {
+    return OpenWindowStrategy.MOUSE_CURSOR
+  } else if (strategy === OpenWindowStrategy.INPUT_CURSOR) {
+    return OpenWindowStrategy.INPUT_CURSOR
+  }
+  return OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION
+}
+
+export function prefSetOpenWindowStrategy(strategy: OpenWindowStrategy) {
+  saveOpenWindowStrategy(strategy)
 }

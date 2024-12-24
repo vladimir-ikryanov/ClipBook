@@ -6,6 +6,7 @@ NSString *appThemeLight = @"light";
 NSString *appThemeDark = @"dark";
 NSString *appThemeSystem = @"system";
 
+NSString *prefWindowBounds = @"window_bounds";
 NSString *prefWindowBoundsX = @"window.bounds.x";
 NSString *prefWindowBoundsY = @"window.bounds.y";
 NSString *prefWindowBoundsWidth = @"window.bounds.width";
@@ -30,6 +31,8 @@ NSString *prefClearHistoryOnMacReboot = @"clear_history_on_mac_reboot";
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
 NSString *prefDisplayThankYouDialog = @"display_thank_you_dialog";
+
+NSString *prefOpenWindowStrategy = @"open_window_strategy";
 
 // Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
@@ -87,6 +90,31 @@ std::string AppSettingsMac::getLicenseKey() {
     return [key UTF8String];
   }
   return "";
+}
+
+void AppSettingsMac::saveWindowBounds(molybden::Rect window_bounds) {
+  NSMutableDictionary *prefValue = [[NSMutableDictionary alloc] init];
+  prefValue[prefWindowBoundsX] = [NSNumber numberWithInt:window_bounds.origin.x];
+  prefValue[prefWindowBoundsY] = [NSNumber numberWithInt:window_bounds.origin.y];
+  prefValue[prefWindowBoundsWidth] = [NSNumber numberWithUnsignedInt:window_bounds.size.width];
+  prefValue[prefWindowBoundsHeight] = [NSNumber numberWithUnsignedInt:window_bounds.size.height];
+
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:prefValue forKey:prefWindowBounds];
+  [defaults synchronize];
+}
+
+molybden::Rect AppSettingsMac::getWindowBounds() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSDictionary *value = [defaults objectForKey:prefWindowBounds];
+  if (value == nil) {
+    return {};
+  }
+  auto x = [[value objectForKey:prefWindowBoundsX] intValue];
+  auto y = [[value objectForKey:prefWindowBoundsY] intValue];
+  auto width = [[value objectForKey:prefWindowBoundsWidth] unsignedIntValue];
+  auto height = [[value objectForKey:prefWindowBoundsHeight] unsignedIntValue];
+  return {molybden::Point(x, y), molybden::Size(width, height)};
 }
 
 molybden::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id) {
@@ -725,4 +753,19 @@ void AppSettingsMac::setShouldDisplayThankYouDialog(bool display) {
 bool AppSettingsMac::shouldDisplayThankYouDialog() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   return [defaults boolForKey:prefDisplayThankYouDialog];
+}
+
+void AppSettingsMac::saveOpenWindowStrategy(std::string strategy) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:strategy.c_str()] forKey:prefOpenWindowStrategy];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getOpenWindowStrategy() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *strategy = [defaults objectForKey:prefOpenWindowStrategy];
+  if (strategy != nil) {
+    return {[strategy UTF8String]};
+  }
+  return "activeScreenLastPosition";
 }
