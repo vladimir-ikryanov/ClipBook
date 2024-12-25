@@ -251,7 +251,7 @@ ClipBook will check for updates automatically and notify you when a new version 
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="p-1.5 bg-actions-background" align="end">
                   <DropdownMenuRadioGroup value={openWindowStrategy} onValueChange={handleOpenWindowStrategyChange}>
-                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION}>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION} className="py-2 pr-4 pl-10">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION]}</span>
                         <span className="text-secondary-foreground">
@@ -259,7 +259,7 @@ ClipBook will check for updates automatically and notify you when a new version 
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_SCREEN_CENTER}>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_SCREEN_CENTER} className="py-2 pr-4 pl-10">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_SCREEN_CENTER]}</span>
                         <span className="text-secondary-foreground">
@@ -267,7 +267,7 @@ ClipBook will check for updates automatically and notify you when a new version 
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_WINDOW_CENTER}>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_WINDOW_CENTER} className="py-2 pr-4 pl-10">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_WINDOW_CENTER]}</span>
                         <span className="text-secondary-foreground">
@@ -275,7 +275,7 @@ ClipBook will check for updates automatically and notify you when a new version 
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={OpenWindowStrategy.SCREEN_WITH_CURSOR}>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.SCREEN_WITH_CURSOR} className="py-2 pr-4 pl-10">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.SCREEN_WITH_CURSOR]}</span>
                         <span className="text-secondary-foreground">
@@ -283,7 +283,7 @@ ClipBook will check for updates automatically and notify you when a new version 
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={OpenWindowStrategy.MOUSE_CURSOR}>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.MOUSE_CURSOR} className="py-2 pr-4 pl-10">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.MOUSE_CURSOR]}</span>
                         <span className="text-secondary-foreground">
@@ -291,11 +291,11 @@ ClipBook will check for updates automatically and notify you when a new version 
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={OpenWindowStrategy.INPUT_CURSOR}>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.INPUT_CURSOR} className="py-2 pr-4 pl-10">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.INPUT_CURSOR]}</span>
                         <span className="text-secondary-foreground">
-                          Open near the current text caret location. If the caret location cannot<br/>be determined, then open at the center of the active screen.
+                          Open near the current text caret location. If the caret location cannot<br/>be determined, then open at the center of the active window.
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
