@@ -389,7 +389,9 @@ void MainAppMac::restoreWindowBounds() {
   }
   if (strategy == kInputCursor) {
     if (!moveToInputCursorLocation()) {
-      moveToActiveScreenCenter();
+      if (!moveToActiveWindowCenter()) {
+        moveToActiveScreenCenter();
+      }
     }
   }
 }
