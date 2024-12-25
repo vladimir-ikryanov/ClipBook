@@ -151,7 +151,7 @@ void MainApp::launch() {
 
   // Set the initial window size and position if it's the first run.
   if (first_run_ || !app_->isProduction()) {
-    app_window_->setSize(1080, 640);
+    app_window_->setSize(835, 535);
     app_window_->centerWindow();
   }
 
