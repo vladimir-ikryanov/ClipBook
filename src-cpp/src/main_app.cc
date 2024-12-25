@@ -404,7 +404,7 @@ void MainApp::showAboutDialog() {
   options.title = "About " + app_->name();
   options.message = app_->name();
 
-  std::string arch = "";
+  std::string arch;
 #ifdef ARCH_MAC_X64
   arch = "(Intel)";
 #endif
@@ -578,7 +578,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("helpWithActivation", [this]() {
     app_->desktop()->openUrl("mailto:vladimir.ikryanov@clipbook.app?subject=ClipBook%20Activation%20Error&body=License%20Key:%20" + settings_->getLicenseKey());
   });
-  window->putProperty("isTrial", [this]() -> bool {
+  window->putProperty("isTrial", []() -> bool {
 #ifdef OFFICIAL_BUILD
     return isTrial();
 #endif

@@ -176,6 +176,23 @@ KeyCode extractKeyCode(const std::string &shortcut) {
   return KeyCode::UNKNOWN;
 }
 
+/**
+ * Returns true if the current machine is an Apple Silicon Mac.
+ */
+bool isAppleSilicon() {
+  size_t size;
+  sysctlbyname("hw.processor64", nullptr, &size, nullptr, 0);
+
+  char processor[256];
+  sysctlbyname("hw.machine", processor, &size, nullptr, 0);
+
+  NSString *processorString = [NSString stringWithUTF8String:processor];
+  if ([processorString containsString:@"arm64"]) {
+    return true;
+  }
+  return false;
+}
+
 MainAppMac::MainAppMac(const std::shared_ptr<App> &app,
                        const std::shared_ptr<AppSettings> &settings)
     : MainApp(app, settings), active_app_(nullptr) {
@@ -355,15 +372,10 @@ void MainAppMac::copyToClipboardAfterMerge(std::string text) {
 }
 
 std::string MainAppMac::getUpdateServerUrl() {
-#ifdef ARCH_MAC_X64
+  if (isAppleSilicon()) {
+    return "https://clipbook.app/downloads/mac/arm64";
+  }
   return "https://clipbook.app/downloads/mac/x64";
-#endif
-#ifdef ARCH_MAC_ARM64
-  return "https://clipbook.app/downloads/mac/arm64";
-#endif
-#ifdef ARCH_MAC_UNIVERSAL
-  return "https://clipbook.app/downloads/mac/universal";
-#endif
 }
 
 void MainAppMac::restoreWindowBounds() {
