@@ -146,6 +146,9 @@ class AppSettings {
 
   virtual void saveOpenWindowStrategy(std::string strategy) = 0;
   virtual std::string getOpenWindowStrategy() = 0;
+
+  virtual void saveTreatDigitNumbersAsColor(bool treat) = 0;
+  virtual bool shouldTreatDigitNumbersAsColor() = 0;
 };
 
 

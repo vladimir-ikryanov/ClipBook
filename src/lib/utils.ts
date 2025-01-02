@@ -1,6 +1,7 @@
 import {type ClassValue, clsx} from "clsx"
 import {twMerge} from "tailwind-merge"
 import {ClipType} from "@/db";
+import {prefShouldTreatDigitNumbersAsColor} from "@/pref";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -17,7 +18,16 @@ export function isUrl(str: string) {
   return urlRegex.test(str)
 }
 
+export function isDigit(str: string) {
+  return /^\d+$/.test(str)
+}
+
 export function isColor(str: string): boolean {
+  if (str.length === 3 || str.length === 4 || str.length === 6 || str.length === 8) {
+    if (isDigit(str) && !prefShouldTreatDigitNumbersAsColor()) {
+      return false;
+    }
+  }
   return toCSSColor(str) !== ""
 }
 

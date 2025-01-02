@@ -27,7 +27,7 @@ import {
   setFilterQuery,
   setPreviewVisibleState,
   setSelectedHistoryItemIndex,
-  updateHistoryItem
+  updateHistoryItem, updateHistoryItemTypes
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
@@ -58,7 +58,7 @@ import {
   prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut,
   prefSetDisplayThankYouDialog,
-  prefShouldDisplayThankYouMessage
+  prefShouldDisplayThankYouMessage, prefShouldTreatDigitNumbersAsColor
 } from "@/pref";
 import {HideActionsReason} from "@/app/Actions";
 import {FixedSizeList as List} from "react-window";
@@ -85,6 +85,8 @@ type HistoryPaneProps = {
   appName: string
   appIcon: string
 }
+
+let treatDigitNumbersAsColor = prefShouldTreatDigitNumbersAsColor()
 
 export default function HistoryPane(props: HistoryPaneProps) {
   const [history, setHistory] = useState(getHistoryItems())
@@ -214,7 +216,18 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }, 0);
   }
 
+  function updateHistoryItemsIfNecessary() {
+    let newValue = prefShouldTreatDigitNumbersAsColor()
+    if (treatDigitNumbersAsColor !== newValue) {
+      if (updateHistoryItemTypes()) {
+        setHistory([...getHistoryItems()])
+      }
+      treatDigitNumbersAsColor = newValue
+    }
+  }
+
   function activateApp() {
+    updateHistoryItemsIfNecessary()
     focusSearchField()
     if (getVisibleHistoryLength() > 0) {
       setSelectedHistoryItemIndex(0)

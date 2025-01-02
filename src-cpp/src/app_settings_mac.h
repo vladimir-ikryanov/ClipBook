@@ -143,6 +143,9 @@ class AppSettingsMac : public AppSettings {
   void saveOpenWindowStrategy(std::string strategy) override;
   std::string getOpenWindowStrategy() override;
 
+  void saveTreatDigitNumbersAsColor(bool treat) override;
+  bool shouldTreatDigitNumbersAsColor() override;
+
  private:
   static molybden::Rect getWindowBoundsForScreen(int screen_id);
 };

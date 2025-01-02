@@ -33,6 +33,7 @@ NSString *prefLicenseKey = @"license_key";
 NSString *prefDisplayThankYouDialog = @"display_thank_you_dialog";
 
 NSString *prefOpenWindowStrategy = @"open_window_strategy";
+NSString *prefTreatDigitNumbersAsColor = @"treat_digit_numbers_as_color";
 
 // Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
@@ -768,4 +769,15 @@ std::string AppSettingsMac::getOpenWindowStrategy() {
     return {[strategy UTF8String]};
   }
   return "activeScreenLastPosition";
+}
+
+void AppSettingsMac::saveTreatDigitNumbersAsColor(bool treat) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:treat forKey:prefTreatDigitNumbersAsColor];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldTreatDigitNumbersAsColor() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  return [defaults boolForKey:prefTreatDigitNumbersAsColor];
 }

@@ -16,8 +16,8 @@ import {
   prefSetCopyAndMergeEnabled,
   prefSetCopyAndMergeSeparator,
   prefSetCopyToClipboardAfterMerge,
-  prefSetKeepFavoritesOnClearHistory,
-  prefSetWarnOnClearHistory,
+  prefSetKeepFavoritesOnClearHistory, prefSetTreatDigitNumbersAsColor,
+  prefSetWarnOnClearHistory, prefShouldTreatDigitNumbersAsColor,
 } from "@/pref";
 import {KeyboardIcon, KeyRoundIcon, ListIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 import {
@@ -28,18 +28,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {isLicenseActivated} from "@/licensing";
-import {render} from "react-dom";
+import {updateHistoryItemTypes} from "@/data";
 
 declare const closeSettingsWindow: () => void;
 
 export default function History() {
-  const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory());
-  const [keepFavoritesOnClearHistory, setKeepFavoritesOnClearHistory] = useState(prefGetKeepFavoritesOnClearHistory());
-  const [copyAndMergeEnabled, setCopyAndMergeEnabled] = useState(prefGetCopyAndMergeEnabled());
-  const [copyToClipboardAfterMerge, setCopyToClipboardAfterMerge] = useState(prefGetCopyToClipboardAfterMerge());
-  const [copyAndMergeSeparator, setCopyAndMergeSeparator] = useState(prefGetCopyAndMergeSeparator());
-  const [clearHistoryOnQuit, setClearHistoryOnQuit] = useState(prefGetClearHistoryOnQuit());
-  const [clearHistoryOnMacReboot, setClearHistoryOnMacReboot] = useState(prefGetClearHistoryOnMacReboot());
+  const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory())
+  const [keepFavoritesOnClearHistory, setKeepFavoritesOnClearHistory] = useState(prefGetKeepFavoritesOnClearHistory())
+  const [copyAndMergeEnabled, setCopyAndMergeEnabled] = useState(prefGetCopyAndMergeEnabled())
+  const [copyToClipboardAfterMerge, setCopyToClipboardAfterMerge] = useState(prefGetCopyToClipboardAfterMerge())
+  const [copyAndMergeSeparator, setCopyAndMergeSeparator] = useState(prefGetCopyAndMergeSeparator())
+  const [clearHistoryOnQuit, setClearHistoryOnQuit] = useState(prefGetClearHistoryOnQuit())
+  const [clearHistoryOnMacReboot, setClearHistoryOnMacReboot] = useState(prefGetClearHistoryOnMacReboot())
+  const [treatDigitNumbersAsColor, setTreatDigitNumbersAsColor] = useState(prefShouldTreatDigitNumbersAsColor())
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -86,6 +87,11 @@ export default function History() {
   function handleClearHistoryOnMacRebootChange(clearHistoryOnMacReboot: boolean) {
     setClearHistoryOnMacReboot(clearHistoryOnMacReboot)
     prefSetClearHistoryOnMacReboot(clearHistoryOnMacReboot)
+  }
+
+  function handleTreatDigitNumbersAsColorChange(treatDigitNumbersAsColor: boolean) {
+    setTreatDigitNumbersAsColor(treatDigitNumbersAsColor)
+    prefSetTreatDigitNumbersAsColor(treatDigitNumbersAsColor)
   }
 
   function renderLicenseItem() {
@@ -162,7 +168,7 @@ Press <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd> to append the currently selected te
                       onCheckedChange={handleCopyAndMergeChange}/>
             </div>
 
-            <div className="flex items-center justify-between space-x-20 py-1">
+            <div className="flex items-center justify-between space-x-10 py-1">
               <Label className="flex flex-col text-base">
                 <span className="">Copy and merge separator</span>
                 <span className="text-neutral-500 font-normal text-sm">
@@ -172,7 +178,7 @@ Press <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd> to append the currently selected te
               <Select defaultValue={copyAndMergeSeparator}
                       onValueChange={handleCopyAndMergeSeparatorChange}
                       disabled={!copyAndMergeEnabled}>
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-[150px]">
                   <SelectValue/>
                 </SelectTrigger>
                 <SelectContent>
@@ -193,6 +199,21 @@ Automatically copy the merged text to the system clipboard after&nbsp;merging.
                       checked={copyToClipboardAfterMerge}
                       onCheckedChange={handleCopyToClipboardAfterMergeChange}
                       disabled={!copyAndMergeEnabled}/>
+            </div>
+
+            <hr/>
+
+            <div className="flex items-center justify-between space-x-12 pb-1">
+              <Label htmlFor="digitToColor" className="flex flex-col text-base">
+                <span className="">
+                  Recognize 8-digit number as a color
+                </span>
+                <span className="text-neutral-500 font-normal text-sm mt-1">
+                  Treat 8-digit, 6-digit, 4-digit, and 3-digit numbers as a hex color&nbsp;code.
+                </span>
+              </Label>
+              <Switch id="digitToColor" checked={treatDigitNumbersAsColor}
+                      onCheckedChange={handleTreatDigitNumbersAsColorChange}/>
             </div>
 
             <hr/>
@@ -243,6 +264,6 @@ Clear the entire clipboard history on Mac&nbsp;shutdown/restart.
             </div>
           </div>
         </div>
-      </div>
+    </div>
   )
 }

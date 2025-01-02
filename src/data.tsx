@@ -1,5 +1,6 @@
 import {addClip, Clip, ClipType, deleteAllClips, deleteClip, getAllClips, updateClip} from "@/db";
 import {prefGetClearHistoryOnMacReboot} from "@/pref";
+import {getClipType} from "@/lib/utils";
 
 declare const isAfterSystemReboot: () => boolean;
 
@@ -398,4 +399,17 @@ export function toBase64Icon(base64IconData: string): string {
     return '';
   }
   return "data:image/png;base64," + base64IconData;
+}
+
+export function updateHistoryItemTypes(): boolean {
+  let historyUpdated = false
+  for (let i = 0; i < history.length; i++) {
+    let clip = history[i];
+    let oldType = clip.type;
+    clip.type = clip.imageFileName ? ClipType.Image : getClipType(clip.content);
+    if (oldType !== clip.type) {
+      historyUpdated = true
+    }
+  }
+  return historyUpdated
 }

@@ -32,6 +32,8 @@ declare const saveClearHistoryOnMacReboot: (clear: boolean) => void;
 declare const shouldClearHistoryOnMacReboot: () => boolean;
 declare const saveOpenWindowStrategy: (strategy: string) => void;
 declare const getOpenWindowStrategy: () => string;
+declare const setTreatDigitNumbersAsColor: (treat: boolean) => void;
+declare const shouldTreatDigitNumbersAsColor: () => boolean;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -483,4 +485,12 @@ export function prefGetOpenWindowStrategy(): OpenWindowStrategy {
 
 export function prefSetOpenWindowStrategy(strategy: OpenWindowStrategy) {
   saveOpenWindowStrategy(strategy)
+}
+
+export function prefSetTreatDigitNumbersAsColor(treat: boolean) {
+  setTreatDigitNumbersAsColor(treat)
+}
+
+export function prefShouldTreatDigitNumbersAsColor() {
+  return shouldTreatDigitNumbersAsColor()
 }

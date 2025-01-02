@@ -477,7 +477,7 @@ void MainApp::showSettingsWindow(const std::string &section) {
   settings_window_->setWindowButtonVisible(WindowButtonType::kMaximize, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kRestore, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kZoom, false);
-  settings_window_->setSize(700, 670);
+  settings_window_->setSize(700, 724);
   settings_window_->centerWindow();
   settings_window_->show();
 }
@@ -874,6 +874,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("getAppNameFromPath", [this](std::string app_path) -> std::string {
     return getAppNameFromPath(app_path);
+  });
+  window->putProperty("setTreatDigitNumbersAsColor", [this](bool treat) -> void {
+    settings_->saveTreatDigitNumbersAsColor(treat);
+  });
+  window->putProperty("shouldTreatDigitNumbersAsColor", [this]() -> bool {
+    return settings_->shouldTreatDigitNumbersAsColor();
   });
 }
 
