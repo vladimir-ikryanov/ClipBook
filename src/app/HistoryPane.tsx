@@ -93,12 +93,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [searchQuery, setSearchQuery] = useState("")
 
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
-  const previewTextareaRef = useRef<HTMLTextAreaElement>(null);
   const searchFieldRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<List>(null);
   const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
   const [quickPasteModifierPressed, setQuickPasteModifierPressed] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const [hidePreviewOnEditFinish, setHidePreviewOnEditFinish] = useState(false);
   const [selectedItemIndices, setSelectedItemIndices] = useState(getSelectedHistoryItemIndices());
   const [isTrial, setIsTrial] = useState(isTrialLicense());
@@ -216,18 +216,18 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }, 0);
   }
 
-  function updateHistoryItemsIfNecessary() {
+  async function updateHistoryItemsIfNecessary() {
     let newValue = prefShouldTreatDigitNumbersAsColor()
     if (treatDigitNumbersAsColor !== newValue) {
-      if (updateHistoryItemTypes()) {
+      if (await updateHistoryItemTypes()) {
         setHistory([...getHistoryItems()])
       }
       treatDigitNumbersAsColor = newValue
     }
   }
 
-  function activateApp() {
-    updateHistoryItemsIfNecessary()
+  async function activateApp() {
+    await updateHistoryItemsIfNecessary()
     focusSearchField()
     if (getVisibleHistoryLength() > 0) {
       setSelectedHistoryItemIndex(0)
@@ -593,9 +593,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       handleTogglePreview()
     }
     setTimeout(() => {
-      if (previewTextareaRef.current) {
-        previewTextareaRef.current.focus()
-      }
+      setEditMode(true)
     }, 50);
   }
 
@@ -769,6 +767,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       handleTogglePreview()
       setHidePreviewOnEditFinish(false)
     }
+    setEditMode(false)
     focusSearchField()
   }
 
@@ -880,6 +879,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          appName={props.appName}
                          appIcon={props.appIcon}
                          visible={previewVisible}
+                         editMode={editMode}
                          onEditHistoryItem={handleEditHistoryItem}
                          onFinishEditing={handleFinishEditing}
                          onHidePreview={handleTogglePreview}
@@ -889,8 +889,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          onCopyTextFromImage={handleCopyTextFromImage}
                          onOpenInBrowser={handleOpenInBrowser}
                          onDeleteItem={handleDeleteItem}
-                         onToggleFavorite={handleToggleFavorite}
-                         previewTextareaRef={previewTextareaRef}/>
+                         onToggleFavorite={handleToggleFavorite}/>
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

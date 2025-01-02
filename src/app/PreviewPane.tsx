@@ -13,12 +13,14 @@ import PreviewTextPane from "@/app/PreviewTextPane";
 import PreviewImagePane from "@/app/PreviewImagePane";
 import ItemsInfoPane from "@/app/ItemsInfoPane";
 import PreviewItemsPane from "@/app/PreviewItemsPane";
+import PreviewColorPane from "@/app/PreviewColorPane";
 
 type PreviewPaneProps = {
   selectedItemIndices: number[]
   appName: string
   appIcon: string
   visible: boolean
+  editMode: boolean
   onEditHistoryItem: (item: Clip) => void
   onFinishEditing: () => void
   onPaste: () => void
@@ -29,7 +31,6 @@ type PreviewPaneProps = {
   onOpenInBrowser: () => void
   onToggleFavorite: () => void
   onDeleteItem: () => void
-  previewTextareaRef?: React.Ref<HTMLTextAreaElement>
 }
 
 export default function PreviewPane(props: PreviewPaneProps) {
@@ -44,16 +45,30 @@ export default function PreviewPane(props: PreviewPaneProps) {
   function renderContent() {
     if (props.selectedItemIndices.length === 1) {
       let item = getHistoryItem(props.selectedItemIndices[0])
-      return item.type === ClipType.Image ? renderImage(item) : renderText(item)
+      if (item.type === ClipType.Color) {
+        return renderColor(item)
+      }
+      if (item.type === ClipType.Image) {
+        return renderImage(item)
+      }
+      return renderText(item)
     }
     return <PreviewItemsPane items={getSelectedHistoryItems()}/>
   }
 
   function renderText(item: Clip) {
     return <PreviewTextPane item={item}
+                            editMode={props.editMode}
                             onEditHistoryItem={props.onEditHistoryItem}
-                            onFinishEditing={props.onFinishEditing}
-                            previewTextareaRef={props.previewTextareaRef}/>
+                            onFinishEditing={props.onFinishEditing}/>
+  }
+
+  function renderColor(item: Clip) {
+    return <PreviewColorPane item={item}
+                             colorText={item.content}
+                             editMode={props.editMode}
+                             onEditHistoryItem={props.onEditHistoryItem}
+                             onFinishEditing={props.onFinishEditing}/>
   }
 
   function renderImage(item: Clip) {
