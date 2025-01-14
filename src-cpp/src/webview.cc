@@ -19,10 +19,10 @@ bool HeadlessWebView::fetchLinkPreviewDetails(const std::string &url, LinkPrevie
     return false;
   }
   auto frame = browser_->mainFrame();
-  auto title = frame->executeJavaScript(
-      "document.querySelector('meta[property=\"og:title\"]')?.getAttribute('content')").asString();
+  auto title = frame->executeJavaScript("document.title").asString();
   if (title.empty()) {
-    title = frame->executeJavaScript("document.title").asString();
+    title = frame->executeJavaScript(
+        "document.querySelector('meta[property=\"og:title\"]')?.getAttribute('content')").asString();
   }
   details.title = title;
 

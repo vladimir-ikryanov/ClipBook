@@ -87,6 +87,12 @@ module.exports = {
           infoBorder: "var(--preview-info-border)",
           infoLabel: "var(--preview-info-label)",
         },
+        skeleton: {
+          DEFAULT: "var(--skeleton-background)",
+          background: "var(--skeleton-background)",
+          foreground: "var(--skeleton-foreground)",
+          text: "var(--skeleton-text)",
+        }
       },
       borderRadius: {
         lg: "var(--radius)",

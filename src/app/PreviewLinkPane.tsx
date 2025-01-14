@@ -2,7 +2,6 @@ import '../app.css';
 import React, {useEffect, useState} from "react";
 import {Clip, getLinkPreviewDetails, LinkPreviewDetails, saveLinkPreviewDetails} from "@/db";
 import PreviewLinkCard from "@/app/PreviewLinkCard";
-import PreviewLinkProgressBar from "@/app/PreviewLinkProgressBar";
 import {getClipType} from "@/lib/utils";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {prefGetEditHistoryItemShortcut} from "@/pref";
@@ -23,15 +22,12 @@ type PreviewLinkPaneProps = {
 
 export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
   const [loading, setLoading] = useState(false)
-  const [authorizationRequired, setAuthorizationRequired] = useState(false)
-
   const [content, setContent] = useState(props.linkText)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [imageFileName, setImageFileName] = useState("")
-  const [faviconFileName, setFaviconFileName] = useState("")
 
-  function handleFinishEditing() {
+  function finishEditing() {
     props.item.content = content
     props.item.type = getClipType(content)
     props.onEditHistoryItem(props.item)
@@ -40,7 +36,7 @@ export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.code === "Escape" || isShortcutMatch(prefGetEditHistoryItemShortcut(), e.nativeEvent)) {
-      handleFinishEditing()
+      finishEditing()
     }
     e.stopPropagation()
   }
@@ -56,9 +52,7 @@ export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
     setTitle(details.title)
     setDescription(details.description)
     setImageFileName(details.imageFileName)
-    setFaviconFileName(details.faviconFileName)
     setLoading(false)
-    setAuthorizationRequired(false)
   }
 
   useEffect(() => {
@@ -71,10 +65,10 @@ export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
 
   useEffect(() => {
     let url = props.item.content
-    // getLinkPreviewDetails(url).then(details => {
-    //   if (details) {
-    //     updateLinkPreviewDetails(details)
-    //   } else {
+    getLinkPreviewDetails(url).then(details => {
+      if (details) {
+        updateLinkPreviewDetails(details)
+      } else {
         setLoading(true)
         const callbackInstance: FetchRequestCallback = {
           run: function(success: boolean, title: string, description: string, imageFileName: string, faviconFileName: string) {
@@ -94,15 +88,12 @@ export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
                   faviconFileName: faviconFileName
                 })
               });
-            } else {
-              setAuthorizationRequired(true)
             }
           }
         }
-        console.log('Fetching link preview details for', url)
         fetchLinkPreviewDetails(url, callbackInstance)
-    //   }
-    // })
+      }
+    })
   }, [props.linkText])
 
   if (props.editMode) {
@@ -111,7 +102,7 @@ export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
                   className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text-sm"
                   autoFocus={true}
                   value={content}
-                  onBlur={handleFinishEditing}
+                  onBlur={finishEditing}
                   onChange={handleOnChange}
                   onKeyDown={handleKeyDown}/>
     )
@@ -119,9 +110,7 @@ export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
 
   return (
       <div className="h-full overflow-auto">
-        <PreviewLinkProgressBar visible={loading}/>
         <PreviewLinkCard loading={loading}
-                         authorizationRequired={authorizationRequired}
                          url={props.linkText}
                          title={title}
                          description={description}

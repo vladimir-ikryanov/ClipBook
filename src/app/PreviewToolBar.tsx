@@ -4,13 +4,13 @@ import {Button} from "@/components/ui/button";
 import {
   ChevronDown,
   ClipboardIcon,
-  CopyIcon,
+  CopyIcon, EyeIcon,
   GlobeIcon, ScanTextIcon,
   StarIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
-  DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -51,6 +51,7 @@ type PreviewToolBarProps = {
   onCopyTextFromImage: () => void
   onToggleFavorite: () => void
   onOpenInBrowser: () => void
+  onPreviewLink: () => void
 }
 
 export default function PreviewToolBar(props: PreviewToolBarProps) {
@@ -87,6 +88,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     props.onOpenInBrowser()
   }
 
+  function handlePreviewLink() {
+    props.onPreviewLink()
+  }
+
   function handleCopyTextFromImage() {
     props.onCopyTextFromImage()
   }
@@ -106,6 +111,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   function canShowOpenInBrowser() {
     return props.selectedItemIndices.length === 1 &&
         getFirstSelectedHistoryItem().type === ClipType.Link
+  }
+
+  function canShowPreviewLink() {
+    return canShowOpenInBrowser()
   }
 
   function canShowCopyTextFromImage() {
@@ -234,6 +243,19 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                   <TooltipContent className="flex items-center">
                     <div className="select-none mr-2">Open in Browser</div>
                     <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
+                  </TooltipContent>
+                </Tooltip>
+            }
+            {
+                canShowPreviewLink() &&
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="toolbar" size="toolbar" onClick={handlePreviewLink}>
+                      <EyeIcon className="h-5 w-5" strokeWidth={2}/>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex items-center">
+                    <div className="select-none mr-2">Preview link</div>
                   </TooltipContent>
                 </Tooltip>
             }

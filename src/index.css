@@ -55,6 +55,10 @@
     --activate-button-background: #616161;
     --activate-button-background-hover: #4a4a4a;
     --activate-button-text: white;
+    /* Skeleton */
+    --skeleton-background: #3a3a3a;
+    --skeleton-foreground: #2e2e2e;
+    --skeleton-text: #3c3c3c;
 
     font-size: 14px;
   }
@@ -119,6 +123,10 @@
     --activate-button-background: #3e4144;
     --activate-button-background-hover: #3a3c40;
     --activate-button-text: white;
+    /* Skeleton */
+    --skeleton-background: #282828;
+    --skeleton-foreground: #3c3c3c;
+    --skeleton-text: #939393;
   }
 }
 

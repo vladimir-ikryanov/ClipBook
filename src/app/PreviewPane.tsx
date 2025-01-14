@@ -31,6 +31,7 @@ type PreviewPaneProps = {
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
+  onPreviewLink: () => void
   onToggleFavorite: () => void
   onDeleteItem: () => void
 }
@@ -102,7 +103,8 @@ export default function PreviewPane(props: PreviewPaneProps) {
                         onCopyToClipboard={props.onCopyToClipboard}
                         onCopyTextFromImage={props.onCopyTextFromImage}
                         onOpenInBrowser={props.onOpenInBrowser}
-                        onToggleFavorite={props.onToggleFavorite}/>
+                        onToggleFavorite={props.onToggleFavorite}
+                        onPreviewLink={props.onPreviewLink}/>
         {renderContent()}
         {renderInfo()}
       </div>

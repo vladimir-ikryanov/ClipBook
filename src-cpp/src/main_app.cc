@@ -539,6 +539,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("openInBrowser", [this](std::string url) {
     app_->desktop()->openUrl(url);
   });
+  window->putProperty("previewLink", [this](std::string url) {
+    previewLink(url);
+  });
   window->putProperty("hideAppWindow", [this]() {
     hide();
   });
@@ -1040,4 +1043,15 @@ void MainApp::deleteImage(const std::string &imageFileName) {
 
 long MainApp::getSystemBootTime() {
   return -1;
+}
+
+void MainApp::previewLink(const std::string &url) {
+  if (!preview_window_ || preview_window_->isClosed()) {
+    preview_window_ = Browser::create(app_);
+    preview_window_->setSize(1280, 800);
+    preview_window_->setAlwaysOnTop(true);
+    preview_window_->centerWindow();
+  }
+  preview_window_->navigation()->loadUrl(url);
+  preview_window_->show();
 }

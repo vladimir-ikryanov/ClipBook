@@ -79,6 +79,7 @@ declare const deleteImage: (imageFileName: string) => void;
 declare const clearEntireHistory: () => void;
 declare const hideAppWindow: () => void;
 declare const openInBrowser: (url: string) => void;
+declare const previewLink: (url: string) => void;
 declare const openSettingsWindow: () => void;
 
 type HistoryPaneProps = {
@@ -650,6 +651,18 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
+  function previewLinkInApp(item: Clip) {
+    if (isUrl(item.content)) {
+      previewLink(item.content)
+    }
+  }
+
+  function handlePreviewLink() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      previewLinkInApp(getFirstSelectedHistoryItem())
+    }
+  }
+
   function handleOpenInBrowserByIndex(index: number) {
     openItemInBrowser(getHistoryItem(index))
   }
@@ -888,6 +901,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          onCopyToClipboard={handleCopyToClipboard}
                          onCopyTextFromImage={handleCopyTextFromImage}
                          onOpenInBrowser={handleOpenInBrowser}
+                         onPreviewLink={handlePreviewLink}
                          onDeleteItem={handleDeleteItem}
                          onToggleFavorite={handleToggleFavorite}/>
           </ResizablePanel>

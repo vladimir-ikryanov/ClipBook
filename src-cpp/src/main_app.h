@@ -79,8 +79,8 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void destroyTray();
   void initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &window);
   void deleteImage(const std::string &imageFileName);
-
   void fetchLinkPreviewDetails(const std::string &url, const std::shared_ptr<molybden::JsObject> &callback);
+  void previewLink(const std::string &url);
 
   void quit();
 
@@ -103,6 +103,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Tray> tray_;
   std::shared_ptr<molybden::Browser> app_window_;
+  std::shared_ptr<molybden::Browser> preview_window_;
   std::shared_ptr<molybden::Browser> welcome_window_;
   std::shared_ptr<molybden::Browser> settings_window_;
   std::shared_ptr<molybden::CustomMenuItem> open_app_item_;
