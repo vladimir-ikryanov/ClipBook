@@ -34,3 +34,37 @@ kbd {
   margin: 0 2px;
   font-family: inherit !important;
 }
+
+.loader {
+  flex: none;
+  width: auto;
+  height: 1px;
+  margin-left: 2px;
+  margin-right: 2px;
+  background: linear-gradient(90deg,
+  #fb0094,
+  #0066ff,
+  #00c300,
+  #c6c600,
+  #fb0094
+  );
+  animation: animate 1s linear infinite;
+  background-size: 200%;
+}
+
+.no-loader {
+  flex: none;
+  width: auto;
+  height: 1px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+@keyframes animate {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

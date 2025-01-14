@@ -16,8 +16,8 @@ import {
   prefSetCopyAndMergeEnabled,
   prefSetCopyAndMergeSeparator,
   prefSetCopyToClipboardAfterMerge,
-  prefSetKeepFavoritesOnClearHistory, prefSetTreatDigitNumbersAsColor,
-  prefSetWarnOnClearHistory, prefShouldTreatDigitNumbersAsColor,
+  prefSetKeepFavoritesOnClearHistory, prefSetShowPreviewForLinks, prefSetTreatDigitNumbersAsColor,
+  prefSetWarnOnClearHistory, prefShouldShowPreviewForLinks, prefShouldTreatDigitNumbersAsColor,
 } from "@/pref";
 import {KeyboardIcon, KeyRoundIcon, ListIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 import {
@@ -41,6 +41,7 @@ export default function History() {
   const [clearHistoryOnQuit, setClearHistoryOnQuit] = useState(prefGetClearHistoryOnQuit())
   const [clearHistoryOnMacReboot, setClearHistoryOnMacReboot] = useState(prefGetClearHistoryOnMacReboot())
   const [treatDigitNumbersAsColor, setTreatDigitNumbersAsColor] = useState(prefShouldTreatDigitNumbersAsColor())
+  const [showPreviewForLinks, setShowPreviewForLinks] = useState(prefShouldShowPreviewForLinks())
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -92,6 +93,11 @@ export default function History() {
   function handleTreatDigitNumbersAsColorChange(treatDigitNumbersAsColor: boolean) {
     setTreatDigitNumbersAsColor(treatDigitNumbersAsColor)
     prefSetTreatDigitNumbersAsColor(treatDigitNumbersAsColor)
+  }
+
+  function handleShowPreviewForLinksChange(showPreviewForLinks: boolean) {
+    setShowPreviewForLinks(showPreviewForLinks)
+    prefSetShowPreviewForLinks(showPreviewForLinks)
   }
 
   function renderLicenseItem() {
@@ -214,6 +220,21 @@ Automatically copy the merged text to the system clipboard after&nbsp;merging.
               </Label>
               <Switch id="digitToColor" checked={treatDigitNumbersAsColor}
                       onCheckedChange={handleTreatDigitNumbersAsColorChange}/>
+            </div>
+
+            <hr/>
+
+            <div className="flex items-center justify-between space-x-12 pb-1">
+              <Label htmlFor="showPreviewForLinks" className="flex flex-col text-base">
+                <span className="">
+                  Show preview for links
+                </span>
+                <span className="text-neutral-500 font-normal text-sm mt-1">
+                  Fetch and display a favicon, title, description, and social card image for&nbsp;links.
+                </span>
+              </Label>
+              <Switch id="showPreviewForLinks" checked={showPreviewForLinks}
+                      onCheckedChange={handleShowPreviewForLinksChange}/>
             </div>
 
             <hr/>

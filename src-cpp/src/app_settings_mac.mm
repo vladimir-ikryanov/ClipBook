@@ -34,6 +34,7 @@ NSString *prefDisplayThankYouDialog = @"display_thank_you_dialog";
 
 NSString *prefOpenWindowStrategy = @"open_window_strategy";
 NSString *prefTreatDigitNumbersAsColor = @"treat_digit_numbers_as_color";
+NSString *prefShowPreviewForLinks = @"show_preview_for_links";
 
 // Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
@@ -779,5 +780,22 @@ void AppSettingsMac::saveTreatDigitNumbersAsColor(bool treat) {
 
 bool AppSettingsMac::shouldTreatDigitNumbersAsColor() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefTreatDigitNumbersAsColor] == nil) {
+    return true;
+  }
   return [defaults boolForKey:prefTreatDigitNumbersAsColor];
+}
+
+void AppSettingsMac::saveShowPreviewForLinks(bool show) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:show forKey:prefShowPreviewForLinks];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldShowPreviewForLinks() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefShowPreviewForLinks] == nil) {
+    return true;
+  }
+  return [defaults boolForKey:prefShowPreviewForLinks];
 }

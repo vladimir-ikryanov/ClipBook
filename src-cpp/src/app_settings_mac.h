@@ -146,6 +146,9 @@ class AppSettingsMac : public AppSettings {
   void saveTreatDigitNumbersAsColor(bool treat) override;
   bool shouldTreatDigitNumbersAsColor() override;
 
+  void saveShowPreviewForLinks(bool show) override;
+  bool shouldShowPreviewForLinks() override;
+
  private:
   static molybden::Rect getWindowBoundsForScreen(int screen_id);
 };

@@ -44,6 +44,10 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
     return props.item.type === ClipType.Image
   }
 
+  function isLink() {
+    return props.item.type === ClipType.Link
+  }
+
   function getImageDimensionsLabel() {
     return props.item.imageWidth + "x" + props.item.imageHeight
   }
@@ -87,6 +91,14 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
           <div className="flex-grow"></div>
           <div className="flex-none text-foreground">{getType()}</div>
         </div>
+        {
+            isLink() &&
+            <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+              <div className="flex-none text-preview-infoLabel font-semibold">URL</div>
+              <div className="flex-grow"></div>
+              <div className="flex-auto text-foreground text-end">{props.item.content}</div>
+            </div>
+        }
         {
             isImage() &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">

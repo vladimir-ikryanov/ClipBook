@@ -149,6 +149,9 @@ class AppSettings {
 
   virtual void saveTreatDigitNumbersAsColor(bool treat) = 0;
   virtual bool shouldTreatDigitNumbersAsColor() = 0;
+
+  virtual void saveShowPreviewForLinks(bool show) = 0;
+  virtual bool shouldShowPreviewForLinks() = 0;
 };
 
 

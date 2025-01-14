@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <utility>
 
 #include "url.h"
 
@@ -1028,17 +1029,19 @@ bool isRoutingPage(const std::string& url) {
   });
 }
 
+UrlRequestInterceptor::UrlRequestInterceptor(std::string profile_path, std::string resources_dir) :
+    profile_path_(std::move(profile_path)), resources_dir_(std::move(resources_dir)) {}
+
 void UrlRequestInterceptor::intercept(const molybden::InterceptUrlRequestArgs &args,
                                       molybden::InterceptUrlRequestAction action) {
   URL url(args.request.url);
 
-  auto host = url.host();
-
   fs::path file_path;
   auto url_path = url.pathItems();
 
+  auto host = url.host();
   if (host == "app") {
-    fs::path resources_dir = args.network->profile()->app()->getPath(molybden::PathKey::kAppResources);
+    fs::path resources_dir = resources_dir_;
     if (url_path.empty() || isRoutingPage(url.string())) {
       file_path = resources_dir.append("index.html");
     } else {
@@ -1050,7 +1053,7 @@ void UrlRequestInterceptor::intercept(const molybden::InterceptUrlRequestArgs &a
   }
 
   if (host == "images") {
-    fs::path profile_dir = args.network->profile()->path();
+    fs::path profile_dir = profile_path_;
     fs::path images_dir = profile_dir.append("images");
     for (const auto& path_item : url_path) {
       images_dir.append(path_item);
@@ -1083,7 +1086,7 @@ void UrlRequestInterceptor::intercept(const molybden::InterceptUrlRequestArgs &a
     delete[] buffer;
     file.close();
   } else {
-    LOG(ERROR) << "Fail to read file " << file_path;
+    LOG(ERROR) << "Failed to read file " << file_path;
     job->fail();
   }
   job->complete();

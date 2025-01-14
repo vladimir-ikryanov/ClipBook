@@ -14,6 +14,8 @@ import PreviewImagePane from "@/app/PreviewImagePane";
 import ItemsInfoPane from "@/app/ItemsInfoPane";
 import PreviewItemsPane from "@/app/PreviewItemsPane";
 import PreviewColorPane from "@/app/PreviewColorPane";
+import PreviewLinkPane from "@/app/PreviewLinkPane";
+import {prefShouldShowPreviewForLinks} from "@/pref";
 
 type PreviewPaneProps = {
   selectedItemIndices: number[]
@@ -46,33 +48,28 @@ export default function PreviewPane(props: PreviewPaneProps) {
     if (props.selectedItemIndices.length === 1) {
       let item = getHistoryItem(props.selectedItemIndices[0])
       if (item.type === ClipType.Color) {
-        return renderColor(item)
+        return <PreviewColorPane item={item}
+                                 colorText={item.content}
+                                 editMode={props.editMode}
+                                 onEditHistoryItem={props.onEditHistoryItem}
+                                 onFinishEditing={props.onFinishEditing}/>
       }
       if (item.type === ClipType.Image) {
-        return renderImage(item)
+        return <PreviewImagePane item={item}/>
       }
-      return renderText(item)
+      if (item.type === ClipType.Link && prefShouldShowPreviewForLinks()) {
+        return <PreviewLinkPane item={item}
+                                linkText={item.content}
+                                editMode={props.editMode}
+                                onEditHistoryItem={props.onEditHistoryItem}
+                                onFinishEditing={props.onFinishEditing}/>
+      }
+      return <PreviewTextPane item={item}
+                              editMode={props.editMode}
+                              onEditHistoryItem={props.onEditHistoryItem}
+                              onFinishEditing={props.onFinishEditing}/>
     }
     return <PreviewItemsPane items={getSelectedHistoryItems()}/>
-  }
-
-  function renderText(item: Clip) {
-    return <PreviewTextPane item={item}
-                            editMode={props.editMode}
-                            onEditHistoryItem={props.onEditHistoryItem}
-                            onFinishEditing={props.onFinishEditing}/>
-  }
-
-  function renderColor(item: Clip) {
-    return <PreviewColorPane item={item}
-                             colorText={item.content}
-                             editMode={props.editMode}
-                             onEditHistoryItem={props.onEditHistoryItem}
-                             onFinishEditing={props.onFinishEditing}/>
-  }
-
-  function renderImage(item: Clip) {
-    return <PreviewImagePane item={item}/>
   }
 
   function renderInfo() {

@@ -18,6 +18,12 @@ export function isUrl(str: string) {
   return urlRegex.test(str)
 }
 
+export function getDomainFromURL(url: string): string {
+  const domainRegex = /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/
+  const match = url.match(domainRegex)
+  return match ? match[1] : ""
+}
+
 export function isDigit(str: string) {
   return /^\d+$/.test(str)
 }

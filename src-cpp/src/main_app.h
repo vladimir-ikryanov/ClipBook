@@ -3,10 +3,12 @@
 
 #include <memory>
 #include <string>
+#include <list>
 
 #include "molybden.hpp"
 #include "app_settings.h"
 #include "url_request_interceptor.h"
+#include "webview.h"
 
 class MainApp : public std::enable_shared_from_this<MainApp> {
  public:
@@ -29,6 +31,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void showWelcomeWindow();
 
   std::string getImagesDir();
+  std::string getLinkImagesDir();
 
   virtual bool init();
   virtual void launch();
@@ -77,6 +80,8 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &window);
   void deleteImage(const std::string &imageFileName);
 
+  void fetchLinkPreviewDetails(const std::string &url, const std::shared_ptr<molybden::JsObject> &callback);
+
   void quit();
 
   // Returns the boot time of the system in seconds since Unix epoch or -1 if failed.
@@ -105,6 +110,8 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   std::shared_ptr<molybden::CustomMenuItem> pause_resume_item_;
   std::shared_ptr<molybden::CustomMenuItem> check_for_updates_item_;
   std::shared_ptr<AppSettings> settings_;
+
+  std::list<std::string> fetch_url_requests_;
 
  private:
   std::shared_ptr<UrlRequestInterceptor> request_interceptor_;

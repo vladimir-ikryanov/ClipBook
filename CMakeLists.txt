@@ -23,6 +23,8 @@ set(APP_SOURCES
         src-cpp/src/url_request_interceptor.cc
         src-cpp/src/app_settings.h
         src-cpp/src/app_settings.cc
+        src-cpp/src/webview.h
+        src-cpp/src/webview.cc
 )
 
 if (OS_WIN)

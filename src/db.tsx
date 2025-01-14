@@ -9,6 +9,23 @@ export enum ClipType {
   Image
 }
 
+export class LinkPreviewDetails {
+  id?: number;
+  url: string;
+  title: string;
+  description: string;
+  imageFileName: string;
+  faviconFileName: string;
+
+  constructor(url: string, title: string, description: string, imageFileName: string, faviconFileName: string) {
+    this.url = url
+    this.title = title
+    this.description = description
+    this.imageFileName = imageFileName
+    this.faviconFileName = faviconFileName
+  }
+}
+
 export class Clip {
   id?: number;
   content: string;
@@ -35,11 +52,13 @@ export class Clip {
 
 class AppDatabase extends Dexie {
   public history!: Table<Clip, number>;
+  public linkPreviews!: Table<LinkPreviewDetails, number>;
 
   constructor() {
     super('ClipBookDB');
     this.version(1).stores({
-      history: '++id, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText'
+      history: '++id, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText',
+      linkPreviews: '++id, url, title, description, imageFileName, faviconFileName'
     });
   }
 }
@@ -64,4 +83,13 @@ export async function deleteClip(id: number) {
 
 export async function deleteAllClips() {
   await db.history.clear()
+}
+
+export async function saveLinkPreviewDetails(details: LinkPreviewDetails) {
+  await db.linkPreviews.where('url').equals(details.url).delete()
+  await db.linkPreviews.add(details)
+}
+
+export async function getLinkPreviewDetails(url: string): Promise<LinkPreviewDetails | undefined> {
+  return db.linkPreviews.where('url').equals(url).first()
 }

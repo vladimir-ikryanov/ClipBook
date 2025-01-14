@@ -13,11 +13,11 @@
       "macOS": {
         "icon": "src-cpp/assets/app.icns",
         "bundleID": "com.ikryanov.clipbook",
-        "codesignIdentity": "",
+        "codesignIdentity": "Developer ID Application: Vladimir Ikryanov (96B3X7S47C)",
         "codesignEntitlements": "src-cpp/assets/entitlements.plist",
-        "teamID": "",
-        "appleID": "",
-        "password": "",
+        "teamID": "96B3X7S47C",
+        "appleID": "vladimir.ikryanov@gmail.com",
+        "password": "uxpj-xjvd-wybo-remi",
         "installer": {
           "dmg": {
             "name": "",

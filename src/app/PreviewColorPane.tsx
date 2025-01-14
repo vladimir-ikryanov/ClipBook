@@ -7,8 +7,8 @@ import {isShortcutMatch} from "@/lib/shortcuts";
 import {prefGetEditHistoryItemShortcut} from "@/pref";
 
 type PreviewColorPaneProps = {
-  item: Clip,
-  colorText: string,
+  item: Clip
+  colorText: string
   editMode: boolean
   onEditHistoryItem: (item: Clip) => void
   onFinishEditing: () => void

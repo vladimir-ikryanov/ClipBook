@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "main_app.h"
+#include "webview.h"
 
 #ifdef OFFICIAL_BUILD
 #include "licensing/licensing.h"
@@ -33,7 +34,8 @@ MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSetti
       app_paused_(false),
       after_system_reboot_(false),
       settings_(settings) {
-  request_interceptor_ = std::make_shared<UrlRequestInterceptor>();
+  request_interceptor_ = std::make_shared<UrlRequestInterceptor>(
+      app_->profile()->path(), app_->getPath(molybden::PathKey::kAppResources));
 }
 
 bool MainApp::init() {
@@ -477,7 +479,7 @@ void MainApp::showSettingsWindow(const std::string &section) {
   settings_window_->setWindowButtonVisible(WindowButtonType::kMaximize, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kRestore, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kZoom, false);
-  settings_window_->setSize(700, 724);
+  settings_window_->setSize(700, 760);
   settings_window_->centerWindow();
   settings_window_->show();
 }
@@ -881,6 +883,37 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("shouldTreatDigitNumbersAsColor", [this]() -> bool {
     return settings_->shouldTreatDigitNumbersAsColor();
   });
+  window->putProperty("setShowPreviewForLinks", [this](bool show) -> void {
+    settings_->saveShowPreviewForLinks(show);
+  });
+  window->putProperty("shouldShowPreviewForLinks", [this]() -> bool {
+    return settings_->shouldShowPreviewForLinks();
+  });
+  window->putProperty("fetchLinkPreviewDetails", [this](std::string url, std::shared_ptr<JsObject> callback) {
+    std::thread([this, url, callback]() {
+      fetchLinkPreviewDetails(url, callback);
+    }).detach();
+  });
+}
+
+void MainApp::fetchLinkPreviewDetails(const std::string &url, const std::shared_ptr<molybden::JsObject> &callback) {
+  // If the given URL is already being fetched, ignore the request.
+  if (std::find(fetch_url_requests_.begin(), fetch_url_requests_.end(), url) != fetch_url_requests_.end()) {
+    LOG(ERROR) << "Skip fetching link preview: " << url;
+    return;
+  }
+  LOG(ERROR) << "Fetching link preview: " << url;
+  fetch_url_requests_.push_back(url);
+  HeadlessWebView headless(app_, getLinkImagesDir());
+  LinkPreviewDetails details;
+  auto success = headless.fetchLinkPreviewDetails(url, details);
+  fetch_url_requests_.remove(url);
+  callback->call("run",
+                 success,
+                 details.title,
+                 details.description,
+                 details.imageFileName,
+                 details.faviconFileName);
 }
 
 bool MainApp::isPaused() const {
@@ -988,6 +1021,10 @@ void MainApp::selectAppsToIgnore() {
 
 std::string MainApp::getImagesDir() {
   return app_->profile()->path() + "/images";
+}
+
+std::string MainApp::getLinkImagesDir() {
+  return app_->profile()->path() + "/images/links";
 }
 
 void MainApp::deleteImage(const std::string &imageFileName) {

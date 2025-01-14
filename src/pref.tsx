@@ -34,6 +34,8 @@ declare const saveOpenWindowStrategy: (strategy: string) => void;
 declare const getOpenWindowStrategy: () => string;
 declare const setTreatDigitNumbersAsColor: (treat: boolean) => void;
 declare const shouldTreatDigitNumbersAsColor: () => boolean;
+declare const setShowPreviewForLinks: (show: boolean) => void;
+declare const shouldShowPreviewForLinks: () => boolean;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -493,4 +495,12 @@ export function prefSetTreatDigitNumbersAsColor(treat: boolean) {
 
 export function prefShouldTreatDigitNumbersAsColor() {
   return shouldTreatDigitNumbersAsColor()
+}
+
+export function prefSetShowPreviewForLinks(show: boolean) {
+  setShowPreviewForLinks(show)
+}
+
+export function prefShouldShowPreviewForLinks() {
+  return shouldShowPreviewForLinks()
 }
