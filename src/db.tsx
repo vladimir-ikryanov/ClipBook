@@ -90,6 +90,10 @@ export async function saveLinkPreviewDetails(details: LinkPreviewDetails) {
   await db.linkPreviews.add(details)
 }
 
+export async function deleteLinkPreviewDetails(url: string) {
+  await db.linkPreviews.where('url').equals(url).delete()
+}
+
 export async function getLinkPreviewDetails(url: string): Promise<LinkPreviewDetails | undefined> {
   return db.linkPreviews.where('url').equals(url).first()
 }

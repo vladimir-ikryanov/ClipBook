@@ -31,8 +31,8 @@ export default function PreviewLinkCard(props: PreviewLinkCardProps) {
           props.imageFileName === "" ?
               <div className="flex h-52 w-full bg-skeleton-foreground items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                     stroke-linejoin="round" className="lucide lucide-image-off text-skeleton-text">
+                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                     strokeLinejoin="round" className="lucide lucide-image-off text-skeleton-text">
                   <line x1="2" x2="22" y1="2" y2="22"/>
                   <path d="M10.41 10.41a2 2 0 1 1-2.83-2.83"/>
                   <line x1="13.5" x2="6" y1="13.5" y2="21"/>

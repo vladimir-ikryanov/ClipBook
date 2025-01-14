@@ -1,6 +1,12 @@
 import '../app.css';
 import React, {useEffect, useState} from "react";
-import {Clip, getLinkPreviewDetails, LinkPreviewDetails, saveLinkPreviewDetails} from "@/db";
+import {
+  Clip,
+  deleteLinkPreviewDetails,
+  getLinkPreviewDetails,
+  LinkPreviewDetails,
+  saveLinkPreviewDetails
+} from "@/db";
 import PreviewLinkCard from "@/app/PreviewLinkCard";
 import {getClipType} from "@/lib/utils";
 import {isShortcutMatch} from "@/lib/shortcuts";
@@ -16,6 +22,8 @@ type PreviewLinkPaneProps = {
   item: Clip
   linkText: string
   editMode: boolean
+  updateLinkPreview: boolean
+  onLinkPreviewUpdated: () => void
   onEditHistoryItem: (item: Clip) => void
   onFinishEditing: () => void
 }
@@ -53,6 +61,7 @@ export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
     setDescription(details.description)
     setImageFileName(details.imageFileName)
     setLoading(false)
+    props.onLinkPreviewUpdated()
   }
 
   useEffect(() => {
@@ -60,10 +69,24 @@ export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
       let textarea = document.getElementById('preview') as HTMLTextAreaElement;
       setContent(props.linkText)
       textarea.focus()
+      textarea.selectionStart = textarea.selectionEnd = textarea.value.length
     }
   }, [props.editMode]);
 
   useEffect(() => {
+    if (props.updateLinkPreview) {
+      let url = props.item.content
+      deleteLinkPreviewDetails(url).then(() => {
+        loadLinkPreview()
+      })
+    }
+  }, [props.updateLinkPreview]);
+
+  useEffect(() => {
+    loadLinkPreview();
+  }, [props.linkText])
+
+  function loadLinkPreview() {
     let url = props.item.content
     getLinkPreviewDetails(url).then(details => {
       if (details) {
@@ -71,7 +94,7 @@ export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
       } else {
         setLoading(true)
         const callbackInstance: FetchRequestCallback = {
-          run: function(success: boolean, title: string, description: string, imageFileName: string, faviconFileName: string) {
+          run: function (success: boolean, title: string, description: string, imageFileName: string, faviconFileName: string) {
             if (success) {
               saveLinkPreviewDetails({
                 url: url,
@@ -94,7 +117,7 @@ export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
         fetchLinkPreviewDetails(url, callbackInstance)
       }
     })
-  }, [props.linkText])
+  }
 
   if (props.editMode) {
     return (

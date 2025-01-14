@@ -1,16 +1,16 @@
 import '../app.css';
-import React, {KeyboardEvent} from "react";
+import React, {KeyboardEvent, MouseEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {
   ChevronDown,
   ClipboardIcon,
-  CopyIcon, EyeIcon,
-  GlobeIcon, ScanTextIcon,
-  StarIcon,
+  CopyIcon, Edit3Icon, EllipsisVerticalIcon, EyeIcon,
+  GlobeIcon, RefreshCcwIcon, RefreshCwIcon, ScanTextIcon,
+  StarIcon, TrashIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
-  DropdownMenuContent,
+  DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -20,11 +20,11 @@ import {
 import {
   PasteItemsSeparator,
   prefGetCopyTextFromImageShortcut,
-  prefGetCopyToClipboardShortcut,
+  prefGetCopyToClipboardShortcut, prefGetDeleteHistoryItemShortcut, prefGetEditHistoryItemShortcut,
   prefGetOpenInBrowserShortcut, prefGetPasteItemsSeparator,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetToggleFavoriteShortcut,
-  prefGetTogglePreviewShortcut, prefSetPasteItemsSeparator
+  prefGetTogglePreviewShortcut, prefSetPasteItemsSeparator, prefShouldShowPreviewForLinks
 } from "@/pref";
 import {Clip, ClipType} from "@/db";
 import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Icons";
@@ -36,6 +36,7 @@ import {
   getSelectedHistoryItemIndices,
   getSelectedHistoryItems, isTextItem
 } from "@/data";
+import {CommandShortcut} from "@/components/ui/command";
 
 type PreviewToolBarProps = {
   selectedItemIndices: number[]
@@ -46,22 +47,29 @@ type PreviewToolBarProps = {
   onMerge: () => void
   onToggleInfo: () => void
   onHidePreview: () => void
-  onEditHistoryItem: (item: Clip) => void
+  onDeleteItem: () => void
+  onRequestEditItem: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
   onToggleFavorite: () => void
   onOpenInBrowser: () => void
   onPreviewLink: () => void
+  onUpdateLinkPreview: () => void
 }
 
 export default function PreviewToolBar(props: PreviewToolBarProps) {
-  const [pasteOptionsMenuOpen, setPasteOptionsMenuOpen] = React.useState(false)
-  const [pasteItemsSeparator, setPasteItemsSeparator] = React.useState(prefGetPasteItemsSeparator())
+  const [openMenu, setOpenMenu] = useState(false)
+  const [pasteOptionsMenuOpen, setPasteOptionsMenuOpen] = useState(false)
+  const [pasteItemsSeparator, setPasteItemsSeparator] = useState(prefGetPasteItemsSeparator())
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
       e.stopPropagation()
     }
+  }
+
+  const handleMouseDown = (e: MouseEvent) => {
+    e.stopPropagation()
   }
 
   function handleHidePreview() {
@@ -80,6 +88,17 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     props.onCopyToClipboard()
   }
 
+  function handleRequestEditItem() {
+    setOpenMenu(false)
+    setTimeout(() => {
+      props.onRequestEditItem()
+    }, 250)
+  }
+
+  function handleDeleteItem() {
+    props.onDeleteItem()
+  }
+
   function handleToggleInfo() {
     props.onToggleInfo()
   }
@@ -90,6 +109,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
   function handlePreviewLink() {
     props.onPreviewLink()
+  }
+
+  function handleUpdateLinkPreview() {
+    props.onUpdateLinkPreview()
   }
 
   function handleCopyTextFromImage() {
@@ -111,6 +134,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   function canShowOpenInBrowser() {
     return props.selectedItemIndices.length === 1 &&
         getFirstSelectedHistoryItem().type === ClipType.Link
+  }
+
+  function canShowEditContent() {
+    return props.selectedItemIndices.length === 1 && isTextItem(getFirstSelectedHistoryItem())
   }
 
   function canShowPreviewLink() {
@@ -147,6 +174,18 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
   function handlePasteOptionsMenuOpenChange(open: boolean) {
     setPasteOptionsMenuOpen(open)
+  }
+
+  function handleOpenMenuChange(open: boolean) {
+    setOpenMenu(open)
+  }
+
+  function getMultipleItemsIndicator(): string {
+    let indices = getSelectedHistoryItemIndices().length
+    if (indices > 1) {
+      return "Delete " + indices + " Items"
+    }
+    return "Delete"
   }
 
   return (
@@ -247,19 +286,6 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 </Tooltip>
             }
             {
-                canShowPreviewLink() &&
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="toolbar" size="toolbar" onClick={handlePreviewLink}>
-                      <EyeIcon className="h-5 w-5" strokeWidth={2}/>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="flex items-center">
-                    <div className="select-none mr-2">Preview link</div>
-                  </TooltipContent>
-                </Tooltip>
-            }
-            {
                 canShowCopyTextFromImage() &&
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -300,6 +326,65 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                       <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
                     </TooltipContent>
               }
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenu open={openMenu} onOpenChange={handleOpenMenuChange}>
+                  <DropdownMenuTrigger className="text-primary-foreground hover:text-accent-foreground" asChild>
+                    <Button variant="dropdown" size="toolbar" className={openMenu ? "bg-accent text-accent-foreground" : ""}>
+                      <EllipsisVerticalIcon className="h-5 w-5" strokeWidth={2}/>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="p-1.5 bg-actions-background" align="center"
+                                       onKeyDown={handleKeyDown} onMouseDown={handleMouseDown}>
+                    {
+                        canShowEditContent() &&
+                        <DropdownMenuItem onClick={handleRequestEditItem}>
+                          <Edit3Icon className="mr-2 h-4 w-4"/>
+                          <span className="mr-12">Edit Content...</span>
+                          <CommandShortcut className="flex flex-row">
+                            <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
+                          </CommandShortcut>
+                        </DropdownMenuItem>
+                    }
+                    {
+                        canShowEditContent() && <DropdownMenuSeparator/>
+                    }
+                    {
+                        canShowPreviewLink() &&
+                        <DropdownMenuItem onClick={handlePreviewLink}>
+                          <EyeIcon className="mr-2 h-4 w-4"/>
+                          <span className="mr-12">Preview Link...</span>
+                        </DropdownMenuItem>
+                    }
+                    {
+                        canShowPreviewLink() && prefShouldShowPreviewForLinks() &&
+                        <DropdownMenuItem onClick={handleUpdateLinkPreview}>
+                          <RefreshCwIcon className="mr-2 h-4 w-4"/>
+                          <span className="mr-12">Update Link Preview</span>
+                        </DropdownMenuItem>
+                    }
+                    {
+                        canShowPreviewLink() && <DropdownMenuSeparator/>
+                    }
+                    <DropdownMenuItem onClick={handleDeleteItem}>
+                      <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
+                      <span className="mr-12 text-actions-danger">
+                        {
+                          getMultipleItemsIndicator()
+                        }
+                      </span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
+                      </CommandShortcut>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TooltipTrigger>
+              <TooltipContent className="flex items-center">
+                <div className="select-none mr-1">"More actions"</div>
+              </TooltipContent>
             </Tooltip>
 
             <Tooltip>

@@ -794,6 +794,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
     scrollToLastSelectedItem()
   }
 
+  async function handleRequestEditItem() {
+    handleEditContent()
+  }
+
   async function handleEditHistoryItem(item: Clip) {
     await updateHistoryItem(item.id!, item)
     setHistory(getHistoryItems())
@@ -893,6 +897,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          appIcon={props.appIcon}
                          visible={previewVisible}
                          editMode={editMode}
+                         onRequestEditItem={handleRequestEditItem}
                          onEditHistoryItem={handleEditHistoryItem}
                          onFinishEditing={handleFinishEditing}
                          onHidePreview={handleTogglePreview}

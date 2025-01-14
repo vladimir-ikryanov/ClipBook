@@ -1,5 +1,5 @@
 import '../app.css';
-import React from "react";
+import React, {useState} from "react";
 import PreviewToolBar from "@/app/PreviewToolBar";
 import {Clip, ClipType} from "@/db";
 import ItemInfoPane from "@/app/ItemInfoPane";
@@ -23,6 +23,7 @@ type PreviewPaneProps = {
   appIcon: string
   visible: boolean
   editMode: boolean
+  onRequestEditItem: () => void
   onEditHistoryItem: (item: Clip) => void
   onFinishEditing: () => void
   onPaste: () => void
@@ -37,12 +38,21 @@ type PreviewPaneProps = {
 }
 
 export default function PreviewPane(props: PreviewPaneProps) {
-  const [displayInfo, setDisplayInfo] = React.useState(getInfoVisibleState())
+  const [displayInfo, setDisplayInfo] = useState(getInfoVisibleState())
+  const [updateLinkPreview, setUpdateLinkPreview] = useState(false)
 
   function handleToggleInfo() {
     let visible = !displayInfo;
     setDisplayInfo(visible)
     setInfoVisibleState(visible)
+  }
+
+  function handleUpdateLinkPreview() {
+    setUpdateLinkPreview(true)
+  }
+
+  function handleLinkPreviewUpdated() {
+    setUpdateLinkPreview(false)
   }
 
   function renderContent() {
@@ -62,6 +72,8 @@ export default function PreviewPane(props: PreviewPaneProps) {
         return <PreviewLinkPane item={item}
                                 linkText={item.content}
                                 editMode={props.editMode}
+                                updateLinkPreview={updateLinkPreview}
+                                onLinkPreviewUpdated={handleLinkPreviewUpdated}
                                 onEditHistoryItem={props.onEditHistoryItem}
                                 onFinishEditing={props.onFinishEditing}/>
       }
@@ -99,12 +111,14 @@ export default function PreviewPane(props: PreviewPaneProps) {
                         onMerge={props.onMerge}
                         onToggleInfo={handleToggleInfo}
                         onHidePreview={props.onHidePreview}
-                        onEditHistoryItem={props.onEditHistoryItem}
+                        onRequestEditItem={props.onRequestEditItem}
+                        onDeleteItem={props.onDeleteItem}
                         onCopyToClipboard={props.onCopyToClipboard}
                         onCopyTextFromImage={props.onCopyTextFromImage}
                         onOpenInBrowser={props.onOpenInBrowser}
                         onToggleFavorite={props.onToggleFavorite}
-                        onPreviewLink={props.onPreviewLink}/>
+                        onPreviewLink={props.onPreviewLink}
+                        onUpdateLinkPreview={handleUpdateLinkPreview}/>
         {renderContent()}
         {renderInfo()}
       </div>

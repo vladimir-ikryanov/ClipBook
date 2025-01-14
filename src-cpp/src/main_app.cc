@@ -902,10 +902,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
 void MainApp::fetchLinkPreviewDetails(const std::string &url, const std::shared_ptr<molybden::JsObject> &callback) {
   // If the given URL is already being fetched, ignore the request.
   if (std::find(fetch_url_requests_.begin(), fetch_url_requests_.end(), url) != fetch_url_requests_.end()) {
-    LOG(ERROR) << "Skip fetching link preview: " << url;
+    LOG(INFO) << "Skip fetching link preview: " << url;
     return;
   }
-  LOG(ERROR) << "Fetching link preview: " << url;
   fetch_url_requests_.push_back(url);
   HeadlessWebView headless(app_, getLinkImagesDir());
   LinkPreviewDetails details;
