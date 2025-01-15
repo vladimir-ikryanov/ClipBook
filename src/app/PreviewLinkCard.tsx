@@ -13,7 +13,7 @@ type PreviewLinkCardProps = {
 export default function PreviewLinkCard(props: PreviewLinkCardProps) {
   if (props.loading) {
     return (
-        <div className="flex flex-col m-3 mt-0.5 rounded-md bg-skeleton-background overflow-clip">
+        <div className="flex flex-col mx-4 mt-0.5 mb-4 rounded-md bg-skeleton-background overflow-clip">
           <Skeleton className="flex h-52 w-full items-center justify-center rounded-none bg-skeleton-foreground">
             <span className="text-skeleton-text">Loading preview...</span>
           </Skeleton>
@@ -26,7 +26,7 @@ export default function PreviewLinkCard(props: PreviewLinkCardProps) {
     )
   }
   return (
-      <div className="m-3 mt-0.5 rounded-md bg-muted overflow-clip">
+      <div className="mx-4 mt-0.5 mb-4 rounded-md bg-muted overflow-clip">
         {
           props.imageFileName === "" ?
               <div className="flex h-52 w-full bg-skeleton-foreground items-center justify-center">
@@ -47,8 +47,8 @@ export default function PreviewLinkCard(props: PreviewLinkCardProps) {
               </div>
         }
         <div className="p-4 space-y-1">
-          <div className="font-semibold text-sm">{props.title}</div>
-          <div className="text-secondary-foreground text-sm">{props.description}</div>
+          <div className="font-semibold text-sm">{props.title.length === 0 ? "No title" : props.title}</div>
+          <div className="text-secondary-foreground text-sm">{props.description.length === 0 ? "No description" : props.description}</div>
         </div>
       </div>
   )

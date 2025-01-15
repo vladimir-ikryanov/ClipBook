@@ -18,7 +18,9 @@ export default function PreviewTextPane(props: PreviewTextPaneProps) {
 
   useEffect(() => {
     if (props.editMode) {
-      (document.getElementById('preview') as HTMLTextAreaElement).focus()
+      let textarea = document.getElementById('preview') as HTMLTextAreaElement;
+      textarea.focus()
+      textarea.selectionStart = textarea.selectionEnd = textarea.value.length
     }
   }, [props.editMode]);
 

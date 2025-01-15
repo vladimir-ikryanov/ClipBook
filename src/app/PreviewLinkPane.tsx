@@ -36,8 +36,6 @@ export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
   const [imageFileName, setImageFileName] = useState("")
 
   function finishEditing() {
-    props.item.content = content
-    props.item.type = getClipType(content)
     props.onEditHistoryItem(props.item)
     props.onFinishEditing()
   }

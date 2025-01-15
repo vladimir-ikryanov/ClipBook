@@ -328,64 +328,57 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
               }
             </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenu open={openMenu} onOpenChange={handleOpenMenuChange}>
-                  <DropdownMenuTrigger className="text-primary-foreground hover:text-accent-foreground" asChild>
-                    <Button variant="dropdown" size="toolbar" className={openMenu ? "bg-accent text-accent-foreground" : ""}>
-                      <EllipsisVerticalIcon className="h-5 w-5" strokeWidth={2}/>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="p-1.5 bg-actions-background" align="center"
-                                       onKeyDown={handleKeyDown} onMouseDown={handleMouseDown}>
-                    {
-                        canShowEditContent() &&
-                        <DropdownMenuItem onClick={handleRequestEditItem}>
-                          <Edit3Icon className="mr-2 h-4 w-4"/>
-                          <span className="mr-12">Edit Content...</span>
-                          <CommandShortcut className="flex flex-row">
-                            <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
-                          </CommandShortcut>
-                        </DropdownMenuItem>
-                    }
-                    {
-                        canShowEditContent() && <DropdownMenuSeparator/>
-                    }
-                    {
-                        canShowPreviewLink() &&
-                        <DropdownMenuItem onClick={handlePreviewLink}>
-                          <EyeIcon className="mr-2 h-4 w-4"/>
-                          <span className="mr-12">Preview Link...</span>
-                        </DropdownMenuItem>
-                    }
-                    {
-                        canShowPreviewLink() && prefShouldShowPreviewForLinks() &&
-                        <DropdownMenuItem onClick={handleUpdateLinkPreview}>
-                          <RefreshCwIcon className="mr-2 h-4 w-4"/>
-                          <span className="mr-12">Update Link Preview</span>
-                        </DropdownMenuItem>
-                    }
-                    {
-                        canShowPreviewLink() && <DropdownMenuSeparator/>
-                    }
-                    <DropdownMenuItem onClick={handleDeleteItem}>
-                      <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
-                      <span className="mr-12 text-actions-danger">
-                        {
-                          getMultipleItemsIndicator()
-                        }
-                      </span>
+            <DropdownMenu open={openMenu} onOpenChange={handleOpenMenuChange}>
+              <DropdownMenuTrigger className="text-primary-foreground hover:text-accent-foreground" asChild>
+                <Button variant="dropdown" size="toolbar" className={openMenu ? "bg-accent text-accent-foreground" : ""}>
+                  <EllipsisVerticalIcon className="h-5 w-5" strokeWidth={2}/>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="p-1.5 bg-actions-background" align="center"
+                                   onKeyDown={handleKeyDown} onMouseDown={handleMouseDown}>
+                {
+                    canShowEditContent() &&
+                    <DropdownMenuItem onClick={handleRequestEditItem}>
+                      <Edit3Icon className="mr-2 h-4 w-4"/>
+                      <span className="mr-12">Edit Content...</span>
                       <CommandShortcut className="flex flex-row">
-                        <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
+                        <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
                       </CommandShortcut>
                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TooltipTrigger>
-              <TooltipContent className="flex items-center">
-                <div className="select-none mr-1">"More actions"</div>
-              </TooltipContent>
-            </Tooltip>
+                }
+                {
+                    canShowEditContent() && <DropdownMenuSeparator/>
+                }
+                {
+                    canShowPreviewLink() &&
+                    <DropdownMenuItem onClick={handlePreviewLink}>
+                      <EyeIcon className="mr-2 h-4 w-4"/>
+                      <span className="mr-12">Preview</span>
+                    </DropdownMenuItem>
+                }
+                {
+                    canShowPreviewLink() && prefShouldShowPreviewForLinks() &&
+                    <DropdownMenuItem onClick={handleUpdateLinkPreview}>
+                      <RefreshCwIcon className="mr-2 h-4 w-4"/>
+                      <span className="mr-12">Update</span>
+                    </DropdownMenuItem>
+                }
+                {
+                    canShowPreviewLink() && <DropdownMenuSeparator/>
+                }
+                <DropdownMenuItem onClick={handleDeleteItem}>
+                  <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
+                  <span className="mr-12 text-actions-danger">
+                    {
+                      getMultipleItemsIndicator()
+                    }
+                  </span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
+                  </CommandShortcut>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Tooltip>
               <TooltipTrigger asChild>
