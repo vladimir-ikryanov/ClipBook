@@ -14,12 +14,16 @@ using namespace molybden;
 void launch() {
   AppOptions options;
   // Configure logging.
-  options.logging.enabled = true;
+  options.logging.enabled = false;
   options.logging.log_level = LogLevel::kError;
   options.logging.destination = Destination::kStandardOutput;
   options.logging.log_file = getAppDataDir() + "/clipbook.log";
   // Register the custom URL scheme.
   options.schemes.emplace_back(kClipBookScheme);
+  // Allow displaying proprietary content when preview links.
+  options.enable_aac = true;
+  options.enable_h264 = true;
+  options.enable_widevine = true;
 
   App::init(options, [](std::shared_ptr<App> app) {
     std::shared_ptr<MainApp> main_app;

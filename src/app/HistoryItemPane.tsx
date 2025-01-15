@@ -29,6 +29,7 @@ type HistoryItemPaneProps = {
   onCopyToClipboard: (index: number) => void
   onCopyTextFromImage: (index: number) => void
   onOpenInBrowser: (index: number) => void
+  onPreviewLink: (index: number) => void
   onDeleteItem: (index: number) => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>
   style: CSSProperties
@@ -106,6 +107,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
                                 onCopyToClipboard={props.onCopyToClipboard}
                                 onCopyTextFromImage={props.onCopyTextFromImage}
                                 onOpenInBrowser={props.onOpenInBrowser}
+                                onPreviewLink={props.onPreviewLink}
                                 onDeleteItem={props.onDeleteItem}/>
       }
     }

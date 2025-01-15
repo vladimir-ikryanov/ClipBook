@@ -667,6 +667,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
     openItemInBrowser(getHistoryItem(index))
   }
 
+  function handlePreviewLinkByIndex(index: number) {
+    previewLinkInApp(getHistoryItem(index))
+  }
+
   function handleOpenSettings() {
     openSettingsWindow()
   }
@@ -878,7 +882,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onCopyTextFromImage={handleCopyTextFromImage}
                               onCopyTextFromImageByIndex={handleCopyTextFromImageByIndex}
                               onOpenInBrowser={handleOpenInBrowser}
+                              onPreviewLink={handlePreviewLink}
                               onOpenInBrowserByIndex={handleOpenInBrowserByIndex}
+                              onPreviewLinkByIndex={handlePreviewLinkByIndex}
                               onOpenSettings={handleOpenSettings}
                               onSearchHistory={handleSearchHistory}
                               onToggleFavorite={handleToggleFavorite}

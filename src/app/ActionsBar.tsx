@@ -23,6 +23,7 @@ type ActionsBarProps = {
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
+  onPreviewLink: () => void
   onOpenSettings: () => void
   onDeleteItem: () => void
   onDeleteItems: () => void
@@ -34,13 +35,13 @@ export default function ActionsBar(props: ActionsBarProps) {
       <div
           className="flex items-center justify-between p-2 border-t-solid border-t-border border-t">
         <div className="flex space-x-1 text-sm text-primary-foreground">
-          <Button variant="info" className="p-1 h-8 rounded-sm">
+          <Button variant="info" className="p-1 h-8 rounded-sm outline-none">
             <ShortcutLabel
                 shortcut={prefGetSelectNextItemShortcut() + " + " + prefGetSelectPreviousItemShortcut()}/>
             <p className="px-2">Navigate</p>
           </Button>
 
-          <Button variant="ghost" className="p-1 h-8 rounded-sm" onClick={props.onPaste}>
+          <Button variant="ghost" className="p-1 h-8 rounded-sm outline-none" onClick={props.onPaste}>
             <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
             <p className="px-2 text-">Paste to {props.appName}</p>
           </Button>
@@ -54,6 +55,7 @@ export default function ActionsBar(props: ActionsBarProps) {
                    onCopyToClipboard={props.onCopyToClipboard}
                    onCopyTextFromImage={props.onCopyTextFromImage}
                    onOpenInBrowser={props.onOpenInBrowser}
+                   onPreviewLink={props.onPreviewLink}
                    onOpenSettings={props.onOpenSettings}
                    onPaste={props.onPaste}
                    onMerge={props.onMerge}

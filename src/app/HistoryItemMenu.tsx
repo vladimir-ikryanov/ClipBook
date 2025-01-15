@@ -3,7 +3,7 @@ import React, {KeyboardEvent, MouseEvent, useState} from 'react';
 import {
   CopyIcon,
   Edit3Icon,
-  EllipsisVerticalIcon,
+  EllipsisVerticalIcon, EyeIcon,
   GlobeIcon, ScanTextIcon,
   StarIcon,
   StarOffIcon,
@@ -38,6 +38,7 @@ export type HideClipDropdownMenuReason =
     | "copyToClipboard"
     | "copyTextFromImage"
     | "openInBrowser"
+    | "previewLink"
     | "deleteItem"
 
 type HistoryItemMenuProps = {
@@ -54,6 +55,7 @@ type HistoryItemMenuProps = {
   onCopyToClipboard: (index: number) => void
   onCopyTextFromImage: (index: number) => void
   onOpenInBrowser: (index: number) => void
+  onPreviewLink: (index: number) => void
   onDeleteItem: (index: number) => void
 }
 
@@ -123,6 +125,12 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
     props.onOpenInBrowser(props.index)
   }
 
+  function handlePreviewLink() {
+    closeReason = "previewLink"
+    handleOpenChange(false)
+    props.onPreviewLink(props.index)
+  }
+
   return (
       <div>
         <DropdownMenu open={open} onOpenChange={handleOpenChange}>
@@ -186,6 +194,16 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
                 <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
               </CommandShortcut>
             </DropdownMenuItem>
+            {
+                props.item.type === ClipType.Link && <DropdownMenuSeparator/>
+            }
+            {
+                props.item.type === ClipType.Link &&
+                <DropdownMenuItem onClick={handlePreviewLink}>
+                  <EyeIcon className="mr-2 h-4 w-4"/>
+                  <span className="mr-12">Preview</span>
+                </DropdownMenuItem>
+            }
             <DropdownMenuSeparator/>
             <DropdownMenuItem onClick={handleDeleteItem}>
               <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>

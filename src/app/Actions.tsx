@@ -5,7 +5,7 @@ import * as React from "react"
 import {useEffect} from "react"
 import {
   CopyIcon,
-  Edit3Icon,
+  Edit3Icon, EyeIcon,
   GlobeIcon,
   ScanTextIcon,
   SettingsIcon,
@@ -34,7 +34,7 @@ import {
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetShowMoreActionsShortcut,
   prefGetToggleFavoriteShortcut,
-  prefGetTogglePreviewShortcut
+  prefGetTogglePreviewShortcut, prefShouldShowPreviewForLinks
 } from "@/pref";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
@@ -58,6 +58,7 @@ export type HideActionsReason =
     | "copyToClipboard"
     | "copyTextFromImage"
     | "openInBrowser"
+    | "preview"
     | "openSettings"
     | "deleteItem"
     | "deleteItems"
@@ -75,6 +76,7 @@ type ActionsProps = {
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
   onOpenInBrowser: () => void
+  onPreviewLink: () => void
   onOpenSettings: () => void
   onDeleteItem: () => void
   onDeleteItems: () => void
@@ -175,6 +177,12 @@ export default function Actions(props: ActionsProps) {
     props.onOpenInBrowser()
   }
 
+  function handlePreviewLink() {
+    closeReason = "preview"
+    handleOpenChange(false)
+    props.onPreviewLink()
+  }
+
   function handleCopyTextFromImage() {
     closeReason = "copyTextFromImage"
     handleOpenChange(false)
@@ -197,6 +205,10 @@ export default function Actions(props: ActionsProps) {
       return getFirstSelectedHistoryItem()?.type === ClipType.Link
     }
     return false
+  }
+
+  function canShowPreview() {
+    return canShowOpenInBrowser()
   }
 
   function canShowCopyTextFromImage() {
@@ -242,7 +254,7 @@ export default function Actions(props: ActionsProps) {
   return (
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" className="p-1 h-8 rounded-sm">
+          <Button variant="ghost" className="p-1 h-8 rounded-sm outline-none">
             <p className="px-2">Actions</p>
             <ShortcutLabel shortcut={prefGetShowMoreActionsShortcut()}/>
           </Button>
@@ -342,6 +354,16 @@ export default function Actions(props: ActionsProps) {
                   <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
                 </CommandShortcut>
               </CommandItem>
+              {
+                canShowPreview() && <CommandSeparator/>
+              }
+              {
+                  canShowPreview() &&
+                  <CommandItem onSelect={handlePreviewLink}>
+                    <EyeIcon className="mr-2 h-4 w-4"/>
+                    <span>Preview Link</span>
+                  </CommandItem>
+              }
               <CommandSeparator/>
               <CommandItem onSelect={handleOpenSettings}>
                 <SettingsIcon className="mr-2 h-4 w-4"/>
