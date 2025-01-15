@@ -5,7 +5,7 @@ import {
   ChevronDown,
   ClipboardIcon,
   CopyIcon, Edit3Icon, EllipsisVerticalIcon, EyeIcon,
-  GlobeIcon, RefreshCcwIcon, RefreshCwIcon, ScanTextIcon,
+  GlobeIcon, RefreshCwIcon, ScanTextIcon,
   StarIcon, TrashIcon,
 } from "lucide-react";
 import {
@@ -26,7 +26,7 @@ import {
   prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut, prefSetPasteItemsSeparator, prefShouldShowPreviewForLinks
 } from "@/pref";
-import {Clip, ClipType} from "@/db";
+import {ClipType} from "@/db";
 import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
