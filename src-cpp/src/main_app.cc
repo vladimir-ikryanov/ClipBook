@@ -611,6 +611,16 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
     });
 #endif
   });
+  window->putProperty("deactivateLicense", [this](std::string licenseKey) {
+#ifdef OFFICIAL_BUILD
+    deactivateLicense(licenseKey, [this]() {
+      settings_window_->mainFrame()->executeJavaScript("licenseDeactivationCompleted('')");
+    }, [this](const std::string &error) {
+      settings_window_->mainFrame()->executeJavaScript(
+          "licenseDeactivationCompleted('" + error + "')");
+    });
+#endif
+  });
   window->putProperty("openSettingsLicense", [this]() {
     hide();
     showSettingsWindow("/settings/license");

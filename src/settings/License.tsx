@@ -11,6 +11,7 @@ declare const closeSettingsWindow: () => void;
 declare const buyLicense: () => void;
 declare const helpWithActivation: () => void;
 declare const activateLicense: (licenseKey: string) => void;
+declare const deactivateLicense: (licenseKey: string) => void;
 
 export default function License() {
   const [licenseKey, setLicenseKey] = useState(prefGetLicenseKey())
@@ -36,6 +37,10 @@ export default function License() {
 
   function handleActivateLicense() {
     activateLicense(licenseKey)
+  }
+
+  function handleDeactivateLicense() {
+    deactivateLicense(licenseKey)
   }
 
   function handleClose() {
@@ -76,7 +81,19 @@ export default function License() {
     }
   }
 
-  (window as any).licenseActivationCompleted = licenseActivationCompleted
+  function licenseDeactivationCompleted(error: string) {
+    setErrorMessage(error)
+    if (error) {
+      setShowErrorMessage(true)
+      setIsActivated(true)
+    } else {
+      setShowErrorMessage(false)
+      setIsActivated(false)
+    }
+  }
+
+  (window as any).licenseActivationCompleted = licenseActivationCompleted;
+  (window as any).licenseDeactivationCompleted = licenseDeactivationCompleted;
 
   function renderSidebarLicenseItem() {
     return (
@@ -172,9 +189,12 @@ export default function License() {
                      disabled={isActivated}
                      className="mb-4 text-lg placeholder:text-settings-inputPlaceholder"/>
               <ActivationErrorMessage visible={showErrorMessage} message={errorMessage} onClose={handleClose} onHelp={handleHelp}/>
-              <p className="text-secondary-foreground text-sm text-pretty mb-4">
-                You can find your license key in the email you received after purchasing ClipBook.
-              </p>
+              {
+                  !isActivated &&
+                  <p className="text-secondary-foreground text-sm text-pretty mb-4">
+                    You can find your license key in the email you received after purchasing ClipBook.
+                  </p>
+              }
               {
                   !isActivated &&
                   <div className="grid grid-cols-2 space-x-2">
@@ -182,6 +202,10 @@ export default function License() {
                             variant="activate">Activate</Button>
                     <Button onClick={handleBuyLicense} variant="buy">Buy License</Button>
                   </div>
+              }
+              {
+                  isActivated &&
+                  <Button onClick={handleDeactivateLicense} variant="activate">Deactivate</Button>
               }
             </div>
           </div>
