@@ -51,8 +51,15 @@ export default function License() {
     return licenseKey.length !== 36
   }
 
+  function removeSpaces(licenseKey: string): string {
+    let input = document.getElementById("licenseKey") as HTMLInputElement
+    licenseKey = licenseKey.replaceAll(' ', '')
+    input.value = licenseKey
+    return licenseKey
+  }
+
   function handleLicenseKeyChange(e: React.ChangeEvent<HTMLInputElement>) {
-    let key = e.target.value;
+    let key = removeSpaces(e.target.value)
     setLicenseKey(key)
     setLicenseKeyInvalid(isLicenseKeyFormatInvalid(key))
     prefSetLicenseKey(key)
@@ -158,7 +165,8 @@ export default function License() {
                   </p>
               }
               <p className="mb-2">License key:</p>
-              <Input placeholder="XXXX-0000-0000-0000-0000000000000000"
+              <Input id="licenseKey"
+                     placeholder="XXXX-0000-0000-0000-0000000000000000"
                      onChange={handleLicenseKeyChange}
                      value={licenseKey}
                      disabled={isActivated}
