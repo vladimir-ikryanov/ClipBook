@@ -29,6 +29,9 @@ static std::string kScreenWithCursor = "screenWithCursor";
 static std::string kMouseCursor = "mouseCursor";
 static std::string kInputCursor = "inputCursor";
 
+// The minimum width and height of an active app window we can use to center the ClipBook window.
+static int kMinAppWindowSize = 200;
+
 static std::string kShortcutSeparator = " + ";
 static std::string kMetaLeft = "MetaLeft";
 static std::string kMetaRight = "MetaRight";
@@ -512,7 +515,9 @@ bool MainAppMac::moveToActiveWindowCenter() {
   auto active_app = [[NSWorkspace sharedWorkspace] frontmostApplication];
   if (active_app) {
     auto active_window_bounds = getActiveWindowBounds(active_app);
-    if (!NSIsEmptyRect(active_window_bounds)) {
+    if (!NSIsEmptyRect(active_window_bounds) &&
+        (active_window_bounds.size.width > kMinAppWindowSize &&
+         active_window_bounds.size.height > kMinAppWindowSize)) {
       // Move the window to the center of the active window.
       auto x = static_cast<int32_t>(active_window_bounds.origin.x +
                                     (active_window_bounds.size.width - window_size.width) / 2);
