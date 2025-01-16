@@ -288,6 +288,8 @@ void MainAppMac::hide() {
   // Activate the previously active app.
   if (active_app_) {
     [active_app_ activateWithOptions:NSApplicationActivateIgnoringOtherApps];
+    // 150 milliseconds delay to let the target app process the activation.
+    usleep(150000);
   }
 }
 
