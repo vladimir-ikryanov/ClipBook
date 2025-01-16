@@ -1,6 +1,6 @@
 import '../app.css';
 import React, {useState} from "react";
-import PreviewToolBar from "@/app/PreviewToolBar";
+import PreviewToolBar, {HideDropdownReason} from "@/app/PreviewToolBar";
 import {Clip, ClipType} from "@/db";
 import ItemInfoPane from "@/app/ItemInfoPane";
 import {
@@ -23,6 +23,7 @@ type PreviewPaneProps = {
   appIcon: string
   visible: boolean
   editMode: boolean
+  onHideDropdown: (reason: HideDropdownReason) => void
   onRequestEditItem: () => void
   onEditHistoryItem: (item: Clip) => void
   onFinishEditing: () => void
@@ -118,7 +119,8 @@ export default function PreviewPane(props: PreviewPaneProps) {
                         onOpenInBrowser={props.onOpenInBrowser}
                         onToggleFavorite={props.onToggleFavorite}
                         onPreviewLink={props.onPreviewLink}
-                        onUpdateLinkPreview={handleUpdateLinkPreview}/>
+                        onUpdateLinkPreview={handleUpdateLinkPreview}
+                        onHideDropdown={props.onHideDropdown}/>
         {renderContent()}
         {renderInfo()}
       </div>

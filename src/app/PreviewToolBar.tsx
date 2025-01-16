@@ -37,6 +37,15 @@ import {
   getSelectedHistoryItems, isTextItem
 } from "@/data";
 import {CommandShortcut} from "@/components/ui/command";
+import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
+
+export type HideDropdownReason =
+    "cancel"
+    | "togglePreview"
+    | "editContent"
+    | "previewLink"
+    | "updatePreview"
+    | "deleteItem"
 
 type PreviewToolBarProps = {
   selectedItemIndices: number[]
@@ -55,12 +64,15 @@ type PreviewToolBarProps = {
   onOpenInBrowser: () => void
   onPreviewLink: () => void
   onUpdateLinkPreview: () => void
+  onHideDropdown: (reason: HideDropdownReason) => void
 }
 
 export default function PreviewToolBar(props: PreviewToolBarProps) {
-  const [openMenu, setOpenMenu] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState(false)
   const [pasteOptionsMenuOpen, setPasteOptionsMenuOpen] = useState(false)
   const [pasteItemsSeparator, setPasteItemsSeparator] = useState(prefGetPasteItemsSeparator())
+
+  let closeReason: HideDropdownReason = "cancel"
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
@@ -89,13 +101,16 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   }
 
   function handleRequestEditItem() {
-    setOpenMenu(false)
+    closeReason = "editContent"
+    handleOpenDropdownChange(false)
     setTimeout(() => {
       props.onRequestEditItem()
     }, 250)
   }
 
   function handleDeleteItem() {
+    closeReason = "deleteItem"
+    handleOpenDropdownChange(false)
     props.onDeleteItem()
   }
 
@@ -108,10 +123,14 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   }
 
   function handlePreviewLink() {
+    closeReason = "previewLink"
+    handleOpenDropdownChange(false)
     props.onPreviewLink()
   }
 
   function handleUpdateLinkPreview() {
+    closeReason = "updatePreview"
+    handleOpenDropdownChange(false)
     props.onUpdateLinkPreview()
   }
 
@@ -176,8 +195,11 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     setPasteOptionsMenuOpen(open)
   }
 
-  function handleOpenMenuChange(open: boolean) {
-    setOpenMenu(open)
+  function handleOpenDropdownChange(open: boolean) {
+    setOpenDropdown(open)
+    if (!open) {
+      props.onHideDropdown(closeReason)
+    }
   }
 
   function getMultipleItemsIndicator(): string {
@@ -328,9 +350,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
               }
             </Tooltip>
 
-            <DropdownMenu open={openMenu} onOpenChange={handleOpenMenuChange}>
+            <DropdownMenu open={openDropdown} onOpenChange={handleOpenDropdownChange}>
               <DropdownMenuTrigger className="text-primary-foreground hover:text-accent-foreground" asChild>
-                <Button variant="dropdown" size="toolbar" className={openMenu ? "bg-accent text-accent-foreground" : ""}>
+                <Button variant="dropdown" size="toolbar" className={openDropdown ? "bg-accent text-accent-foreground" : ""}>
                   <EllipsisVerticalIcon className="h-5 w-5" strokeWidth={2}/>
                 </Button>
               </DropdownMenuTrigger>

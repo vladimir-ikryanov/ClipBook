@@ -69,6 +69,7 @@ import {ClipboardIcon} from "lucide-react";
 import {getTrialLicenseDaysLeft, isTrialLicense, isTrialLicenseExpired} from "@/licensing";
 import TrialExpiredMessage from "@/app/TrialExpiredMessage";
 import FreeLicenseMessage from "@/app/FreeLicenseMessage";
+import {HideDropdownReason} from "@/app/PreviewToolBar";
 
 declare const pasteItemInFrontApp: (text: string, imageFileName: string, imageText: string) => void;
 declare const pressReturn: () => void;
@@ -214,7 +215,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       if (searchFieldRef.current) {
         searchFieldRef.current.focus()
       }
-    }, 0);
+    }, 250);
   }
 
   async function updateHistoryItemsIfNecessary() {
@@ -580,6 +581,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
+  function handleHideDropdown(reason: HideDropdownReason) {
+    if (reason !== "editContent") {
+      focusSearchField()
+    }
+  }
+
   function handleEditContent() {
     // Edit content is not available when multiple items are selected.
     if (getSelectedHistoryItemIndices().length > 1) {
@@ -903,6 +910,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          appIcon={props.appIcon}
                          visible={previewVisible}
                          editMode={editMode}
+                         onHideDropdown={handleHideDropdown}
                          onRequestEditItem={handleRequestEditItem}
                          onEditHistoryItem={handleEditHistoryItem}
                          onFinishEditing={handleFinishEditing}
