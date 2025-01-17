@@ -56,9 +56,9 @@
     --activate-button-background-hover: #4a4a4a;
     --activate-button-text: white;
     /* Skeleton */
-    --skeleton-background: #3a3a3a;
-    --skeleton-foreground: #2e2e2e;
-    --skeleton-text: #3c3c3c;
+    --skeleton-background: #ffffff;
+    --skeleton-foreground: #dadada;
+    --skeleton-text: #5a5a5a;
 
     font-size: 14px;
   }
