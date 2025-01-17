@@ -12,7 +12,7 @@ import {
   prefGetOpenAppShortcut,
   prefGetOpenInBrowserShortcut,
   prefGetOpenSettingsShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut, prefGetSaveImageAsFileShortcut,
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
@@ -28,7 +28,7 @@ import {
   prefSetOpenAppShortcut,
   prefSetOpenInBrowserShortcut,
   prefSetOpenSettingsShortcut,
-  prefSetPasteSelectedItemToActiveAppShortcut,
+  prefSetPasteSelectedItemToActiveAppShortcut, prefSetSaveImageAsFileShortcut,
   prefSetSearchHistoryShortcut,
   prefSetSelectNextItemShortcut,
   prefSetSelectPreviousItemShortcut,
@@ -64,6 +64,7 @@ export default function Shortcuts() {
   const [zoomUIOutShortcut, setZoomUIOutShortcut] = useState(prefGetZoomUIOutShortcut());
   const [openSettingsShortcut, setOpenSettingsShortcut] = useState(prefGetOpenSettingsShortcut());
   const [toggleFavoriteShortcut, setToggleFavoriteShortcut] = useState(prefGetToggleFavoriteShortcut());
+  const [saveImageAsFileShortcut, setSaveImageAsFileShortcut] = useState(prefGetSaveImageAsFileShortcut());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -172,6 +173,11 @@ export default function Shortcuts() {
   function handleToggleFavoriteShortcutChange(shortcut: string) {
     setToggleFavoriteShortcut(shortcut)
     prefSetToggleFavoriteShortcut(shortcut)
+  }
+
+  function handleSaveImageAsFileShortcutChange(shortcut: string) {
+    setSaveImageAsFileShortcut(shortcut)
+    prefSetSaveImageAsFileShortcut(shortcut)
   }
 
   function renderLicenseItem() {
@@ -296,6 +302,12 @@ export default function Shortcuts() {
               <ShortcutInput shortcut={toggleFavoriteShortcut}
                              defaultShortcut="MetaLeft + KeyS"
                              onSave={handleToggleFavoriteShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Save image as file</span>
+              <ShortcutInput shortcut={saveImageAsFileShortcut}
+                             defaultShortcut="ShiftLeft + MetaLeft + KeyS"
+                             onSave={handleSaveImageAsFileShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Edit history item</span>

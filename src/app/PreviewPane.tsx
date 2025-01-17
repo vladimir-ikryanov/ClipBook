@@ -25,6 +25,7 @@ type PreviewPaneProps = {
   editMode: boolean
   onHideDropdown: (reason: HideDropdownReason) => void
   onRequestEditItem: () => void
+  onSaveImageAsFile: () => void
   onEditHistoryItem: (item: Clip) => void
   onFinishEditing: () => void
   onPaste: () => void
@@ -112,6 +113,7 @@ export default function PreviewPane(props: PreviewPaneProps) {
                         onMerge={props.onMerge}
                         onToggleInfo={handleToggleInfo}
                         onHidePreview={props.onHidePreview}
+                        onSaveImageAsFile={props.onSaveImageAsFile}
                         onRequestEditItem={props.onRequestEditItem}
                         onDeleteItem={props.onDeleteItem}
                         onCopyToClipboard={props.onCopyToClipboard}

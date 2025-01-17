@@ -140,6 +140,9 @@ class AppSettingsMac : public AppSettings {
   void saveNavigateToPrevGroupOfItemsShortcut(std::string shortcut) override;
   std::string getNavigateToPrevGroupOfItemsShortcut() override;
 
+  void saveSaveImageAsFileShortcut(std::string shortcut) override;
+  std::string getSaveImageAsFileShortcut() override;
+
   void saveOpenWindowStrategy(std::string strategy) override;
   std::string getOpenWindowStrategy() override;
 

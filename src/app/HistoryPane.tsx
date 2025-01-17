@@ -50,7 +50,7 @@ import {
   prefGetPasteItemsSeparator,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetQuickPasteModifier,
-  prefGetQuickPasteShortcuts,
+  prefGetQuickPasteShortcuts, prefGetSaveImageAsFileShortcut,
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
@@ -82,6 +82,7 @@ declare const hideAppWindow: () => void;
 declare const openInBrowser: (url: string) => void;
 declare const previewLink: (url: string) => void;
 declare const openSettingsWindow: () => void;
+declare const saveImageAsFile: (imageFilePath: string, imageWidth: number, imageHeight: number) => void;
 
 type HistoryPaneProps = {
   appName: string
@@ -359,6 +360,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
       // Open the settings window with the settings shortcut.
       if (isShortcutMatch(prefGetOpenSettingsShortcut(), e)) {
         openSettingsWindow()
+        e.preventDefault()
+      }
+      // Save image as file when the corresponding shortcut is pressed.
+      if (isShortcutMatch(prefGetSaveImageAsFileShortcut(), e)) {
+        handleSaveImageAsFile()
         e.preventDefault()
       }
 
@@ -809,6 +815,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
     handleEditContent()
   }
 
+  function handleSaveImageAsFile() {
+    let item = getFirstSelectedHistoryItem()
+    if (item.type === ClipType.Image) {
+      saveImageAsFile(item.imageFileName!, item.imageWidth!, item.imageHeight!)
+    }
+  }
+
   async function handleEditHistoryItem(item: Clip) {
     await updateHistoryItem(item.id!, item)
     setHistory(getHistoryItems())
@@ -912,6 +925,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          editMode={editMode}
                          onHideDropdown={handleHideDropdown}
                          onRequestEditItem={handleRequestEditItem}
+                         onSaveImageAsFile={handleSaveImageAsFile}
                          onEditHistoryItem={handleEditHistoryItem}
                          onFinishEditing={handleFinishEditing}
                          onHidePreview={handleTogglePreview}

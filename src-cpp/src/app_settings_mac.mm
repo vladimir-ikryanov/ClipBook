@@ -61,6 +61,7 @@ NSString *prefNavigateToFirstItemShortcut = @"app.navigate_to_first_item_shortcu
 NSString *prefNavigateToLastItemShortcut = @"app.navigate_to_last_item_shortcut";
 NSString *prefNavigateToNextGroupOfItemsShortcut = @"app.navigate_to_next_group_of_items_shortcut";
 NSString *prefNavigateToPrevGroupOfItemsShortcut = @"app.navigate_to_prev_group_of_items_shortcut";
+NSString *prefSaveImageAsFileShortcut = @"app.save_image_as_file_shortcut";
 
 AppSettingsMac::AppSettingsMac() = default;
 
@@ -504,7 +505,7 @@ std::string AppSettingsMac::getCopyTextFromImageShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "MetaLeft + ShiftLeft + KeyC";
+  return "ShiftLeft + MetaLeft + KeyC";
 }
 
 void AppSettingsMac::saveDeleteHistoryItemShortcut(std::string shortcut) {
@@ -744,6 +745,21 @@ std::string AppSettingsMac::getNavigateToPrevGroupOfItemsShortcut() {
     return {[shortcut UTF8String]};
   }
   return "AltLeft + ArrowUp";
+}
+
+void AppSettingsMac::saveSaveImageAsFileShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefSaveImageAsFileShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getSaveImageAsFileShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefSaveImageAsFileShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ShiftLeft + MetaLeft + KeyS";
 }
 
 void AppSettingsMac::setShouldDisplayThankYouDialog(bool display) {

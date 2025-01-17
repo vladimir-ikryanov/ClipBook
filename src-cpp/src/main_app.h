@@ -81,6 +81,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void deleteImage(const std::string &imageFileName);
   void fetchLinkPreviewDetails(const std::string &url, const std::shared_ptr<molybden::JsObject> &callback);
   void previewLink(const std::string &url);
+  void saveImageAsFile(const std::string &imageFileName, int imageWidth, int imageHeight);
 
   void quit();
 
@@ -100,6 +101,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   bool checking_for_updates_;
   bool app_paused_;
   bool after_system_reboot_;
+  std::string save_images_dir_;
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Tray> tray_;
   std::shared_ptr<molybden::Browser> app_window_;

@@ -85,6 +85,8 @@ declare const saveNavigateToNextGroupOfItemsShortcut: (shortcut: string) => void
 declare const getNavigateToNextGroupOfItemsShortcut: () => string;
 declare const saveNavigateToPrevGroupOfItemsShortcut: (shortcut: string) => void;
 declare const getNavigateToPrevGroupOfItemsShortcut: () => string;
+declare const getSaveImageAsFileShortcut: () => string;
+declare const saveSaveImageAsFileShortcut: (shortcut: string) => void;
 
 export enum PasteItemsSeparator {
   NONE = "none",
@@ -503,4 +505,12 @@ export function prefSetShowPreviewForLinks(show: boolean) {
 
 export function prefShouldShowPreviewForLinks() {
   return shouldShowPreviewForLinks()
+}
+
+export function prefGetSaveImageAsFileShortcut() {
+  return getSaveImageAsFileShortcut()
+}
+
+export function prefSetSaveImageAsFileShortcut(shortcut: string) {
+  saveSaveImageAsFileShortcut(shortcut)
 }

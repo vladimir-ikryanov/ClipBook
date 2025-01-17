@@ -144,6 +144,9 @@ class AppSettings {
   virtual void saveNavigateToPrevGroupOfItemsShortcut(std::string shortcut) = 0;
   virtual std::string getNavigateToPrevGroupOfItemsShortcut() = 0;
 
+  virtual void saveSaveImageAsFileShortcut(std::string shortcut) = 0;
+  virtual std::string getSaveImageAsFileShortcut() = 0;
+
   virtual void saveOpenWindowStrategy(std::string strategy) = 0;
   virtual std::string getOpenWindowStrategy() = 0;
 

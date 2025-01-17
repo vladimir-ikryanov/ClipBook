@@ -22,7 +22,7 @@ import {
   prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardShortcut, prefGetDeleteHistoryItemShortcut, prefGetEditHistoryItemShortcut,
   prefGetOpenInBrowserShortcut, prefGetPasteItemsSeparator,
-  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut, prefGetSaveImageAsFileShortcut,
   prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut, prefSetPasteItemsSeparator, prefShouldShowPreviewForLinks
 } from "@/pref";
@@ -45,6 +45,7 @@ export type HideDropdownReason =
     | "editContent"
     | "previewLink"
     | "updatePreview"
+    | "saveImageAsFile"
     | "deleteItem"
 
 type PreviewToolBarProps = {
@@ -56,6 +57,7 @@ type PreviewToolBarProps = {
   onMerge: () => void
   onToggleInfo: () => void
   onHidePreview: () => void
+  onSaveImageAsFile: () => void
   onDeleteItem: () => void
   onRequestEditItem: () => void
   onCopyToClipboard: () => void
@@ -106,6 +108,12 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     setTimeout(() => {
       props.onRequestEditItem()
     }, 250)
+  }
+
+  function handleSaveImageAsFile() {
+    closeReason = "saveImageAsFile"
+    handleOpenDropdownChange(false)
+    props.onSaveImageAsFile()
   }
 
   function handleDeleteItem() {
@@ -184,6 +192,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
       return getSelectedHistoryItems().every(item => isTextItem(item))
     }
     return false
+  }
+
+  function canSaveImageAsFile() {
+    return props.selectedItemIndices.length === 1 && getFirstSelectedHistoryItem().type === ClipType.Image
   }
 
   function handlePasteItemsSeparatorChange(value: string) {
@@ -387,6 +399,19 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 }
                 {
                     canShowPreviewLink() && <DropdownMenuSeparator/>
+                }
+                {
+                    canSaveImageAsFile() &&
+                    <DropdownMenuItem onClick={handleSaveImageAsFile}>
+                      <RefreshCwIcon className="mr-2 h-4 w-4"/>
+                      <span className="mr-12">Save As File...</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetSaveImageAsFileShortcut()}/>
+                      </CommandShortcut>
+                    </DropdownMenuItem>
+                }
+                {
+                    canSaveImageAsFile() && <DropdownMenuSeparator/>
                 }
                 <DropdownMenuItem onClick={handleDeleteItem}>
                   <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>

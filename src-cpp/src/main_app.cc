@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "main_app.h"
+#include "utils.h"
 #include "webview.h"
 
 #ifdef OFFICIAL_BUILD
@@ -533,6 +534,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("copyToClipboardAfterMerge", [this](std::string text) {
     copyToClipboardAfterMerge(std::move(text));
   });
+  window->putProperty("saveImageAsFile", [this](std::string imageFileName, int imageWidth, int imageHeight) {
+    saveImageAsFile(imageFileName, imageWidth, imageHeight);
+  });
   window->putProperty("deleteImage", [this](std::string imageFileName) {
     deleteImage(std::move(imageFileName));
   });
@@ -874,6 +878,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getNavigateToPrevGroupOfItemsShortcut", [this]() -> std::string {
     return settings_->getNavigateToPrevGroupOfItemsShortcut();
   });
+  window->putProperty("saveSaveImageAsFileShortcut", [this](std::string shortcut) -> void {
+    settings_->saveSaveImageAsFileShortcut(shortcut);
+  });
+  window->putProperty("getSaveImageAsFileShortcut", [this]() -> std::string {
+    return settings_->getSaveImageAsFileShortcut();
+  });
 
   window->putProperty("selectAppsToIgnore", [this]() {
     selectAppsToIgnore();
@@ -1063,4 +1073,29 @@ void MainApp::previewLink(const std::string &url) {
   }
   preview_window_->navigation()->loadUrl(url);
   preview_window_->show();
+}
+
+void MainApp::saveImageAsFile(const std::string &imageFileName, int imageWidth, int imageHeight) {
+  auto_hide_disabled_ = true;
+  if (save_images_dir_.empty()) {
+    save_images_dir_ = getUserHomeDir();
+  }
+  std::string destImageFileName = "image_" + std::to_string(imageWidth) + "x" + std::to_string(imageHeight) + ".png";
+  auto destImageFilePath = save_images_dir_ + "/" + destImageFileName;
+
+  SaveDialogOptions options;
+  options.title = "Save Image As";
+  options.default_path = destImageFilePath;
+  options.filters = {{"Images", {"PNG"}}};
+  options.button_label = "Save";
+  SaveDialog::show(browser(), options, [this, imageFileName](SaveDialogResult result) {
+    auto_hide_disabled_ = false;
+    if (!result.canceled) {
+      save_images_dir_ = fs::path(result.path).parent_path().string();
+      std::string srcImageFilePath = getImagesDir() + "/" + imageFileName;
+      fs::copy_file(srcImageFilePath, result.path, fs::copy_options::overwrite_existing);
+      // Show the saved file in Finder.
+      app_->desktop()->showPath(result.path);
+    }
+  });
 }
