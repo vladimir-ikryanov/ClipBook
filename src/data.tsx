@@ -1,6 +1,6 @@
 import {addClip, Clip, ClipType, deleteAllClips, deleteClip, getAllClips, updateClip} from "@/db";
 import {prefGetClearHistoryOnMacReboot} from "@/pref";
-import {getClipType} from "@/lib/utils";
+import {getClipType, isColor} from "@/lib/utils";
 
 declare const isAfterSystemReboot: () => boolean;
 
@@ -121,6 +121,14 @@ async function loadHistory() {
     }
     history = await getAllClips()
     localStorage.removeItem("historyItems")
+  }
+  // Update clip type of the wrong color items.
+  for (let i = 0; i < history.length; i++) {
+    let clip = history[i];
+    if (clip.type == ClipType.Color) {
+      clip.type = isColor(clip.content) ? ClipType.Color : ClipType.Text
+      await updateClip(clip.id!, clip)
+    }
   }
 
   sortHistory(sortType, history)

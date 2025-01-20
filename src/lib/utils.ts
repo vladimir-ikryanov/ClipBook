@@ -74,6 +74,12 @@ export function getClipType(str: string): ClipType {
   return ClipType.Text
 }
 
+function getCSSColor(str: string): string {
+  const s = new Option().style
+  s.color = str
+  return s.color
+}
+
 export function toCSSColor(str: string): string {
   // If the given string is longer than 20 characters, it's not a color.
   if (str.length > 20) {
@@ -85,7 +91,27 @@ export function toCSSColor(str: string): string {
     str = `#${str}`
   }
 
-  const s = new Option().style
-  s.color = str
-  return s.color
+  const hexRegex = /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/
+  if (hexRegex.test(str)) {
+    return getCSSColor(str)
+  }
+
+  const rgbRegex = /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/
+  if (rgbRegex.test(str)) {
+    return getCSSColor(str)
+  }
+
+  const hslRegex = /^hsl\(\s*(\d{1,3})\s*,\s*(\d{1,3})%\s*,\s*(\d{1,3})%\s*\)$/
+  if (hslRegex.test(str)) {
+    return getCSSColor(str)
+  }
+
+  // Check if the string represents a single word with only letters.
+  // If it does, try to get the standard color by name from the string.
+  const wordRegex = /^[a-zA-Z]+$/
+  if (wordRegex.test(str)) {
+    return getCSSColor(str)
+  }
+
+  return ""
 }
