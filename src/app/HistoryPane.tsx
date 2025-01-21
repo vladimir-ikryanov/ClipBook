@@ -638,6 +638,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function copyItemToClipboard(item: Clip) {
+    if (!prefShouldUpdateHistoryAfterAction()) {
+      lastPastedItemIDs.add(item.id!)
+    }
     let imageFileName = item.imageFileName ? item.imageFileName : ""
     let imageText = item.imageText ? item.imageText : ""
     copyToClipboard(item.content, imageFileName, imageText)
