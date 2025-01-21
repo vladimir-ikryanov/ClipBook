@@ -16,8 +16,13 @@ import {
   prefSetCopyAndMergeEnabled,
   prefSetCopyAndMergeSeparator,
   prefSetCopyToClipboardAfterMerge,
-  prefSetKeepFavoritesOnClearHistory, prefSetShowPreviewForLinks, prefSetTreatDigitNumbersAsColor,
-  prefSetWarnOnClearHistory, prefShouldShowPreviewForLinks, prefShouldTreatDigitNumbersAsColor,
+  prefSetKeepFavoritesOnClearHistory,
+  prefSetShowPreviewForLinks,
+  prefSetTreatDigitNumbersAsColor, prefSetUpdateHistoryAfterAction,
+  prefSetWarnOnClearHistory,
+  prefShouldShowPreviewForLinks,
+  prefShouldTreatDigitNumbersAsColor,
+  prefShouldUpdateHistoryAfterAction,
 } from "@/pref";
 import {KeyboardIcon, KeyRoundIcon, ListIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 import {
@@ -28,7 +33,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {isLicenseActivated} from "@/licensing";
-import {updateHistoryItemTypes} from "@/data";
 
 declare const closeSettingsWindow: () => void;
 
@@ -42,6 +46,7 @@ export default function History() {
   const [clearHistoryOnMacReboot, setClearHistoryOnMacReboot] = useState(prefGetClearHistoryOnMacReboot())
   const [treatDigitNumbersAsColor, setTreatDigitNumbersAsColor] = useState(prefShouldTreatDigitNumbersAsColor())
   const [showPreviewForLinks, setShowPreviewForLinks] = useState(prefShouldShowPreviewForLinks())
+  const [updateHistoryAfterAction, setUpdateHistoryAfterAction] = useState(prefShouldUpdateHistoryAfterAction())
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -98,6 +103,11 @@ export default function History() {
   function handleShowPreviewForLinksChange(showPreviewForLinks: boolean) {
     setShowPreviewForLinks(showPreviewForLinks)
     prefSetShowPreviewForLinks(showPreviewForLinks)
+  }
+
+  function handleUpdateHistoryAfterActionChange(updateHistoryAfterAction: boolean) {
+    setUpdateHistoryAfterAction(updateHistoryAfterAction)
+    prefSetUpdateHistoryAfterAction(updateHistoryAfterAction)
   }
 
   function renderLicenseItem() {
@@ -164,6 +174,19 @@ export default function History() {
 
           <div className="flex flex-col px-8 pb-6 gap-4 flex-grow overflow-y-auto">
             <div className="flex items-center justify-between space-x-20 pt-6 pb-1">
+              <Label htmlFor="updateHistoryAfterAction" className="flex flex-col text-base">
+                <span className="">Update history after paste</span>
+                <span className="text-neutral-500 font-normal text-sm mt-1">
+                  Move the item to the top of the history list after paste or copy&nbsp;action.
+                </span>
+              </Label>
+              <Switch id="updateHistoryAfterAction" checked={updateHistoryAfterAction}
+                      onCheckedChange={handleUpdateHistoryAfterActionChange}/>
+            </div>
+
+            <hr/>
+
+            <div className="flex items-center justify-between space-x-20 pb-1">
               <Label htmlFor="copyAndMerge" className="flex flex-col text-base">
                 <span className="">Copy and merge</span>
                 <span className="text-neutral-500 font-normal text-sm mt-1">

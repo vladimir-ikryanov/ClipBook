@@ -172,7 +172,7 @@ export function isTextItem(item: Clip): boolean {
       item.type === ClipType.Color
 }
 
-function findItem(content: string, imageFileName: string): Clip | undefined {
+export function findItem(content: string, imageFileName: string): Clip | undefined {
   if (imageFileName.length > 0) {
     return findItemByImageFileName(imageFileName)
   }
@@ -243,21 +243,14 @@ export async function addHistoryItem(content: string,
                                      imageHeight: number,
                                      imageSizeInBytes: number,
                                      imageText: string): Promise<Clip> {
-  let item = findItem(content, imageFileName)
-  if (item) {
-    item.numberOfCopies++
-    item.lastTimeCopy = new Date()
-    await updateClip(item.id!, item)
-  } else {
-    item = new Clip(content, sourceAppPath, imageFileName)
-    item.imageWidth = imageWidth
-    item.imageHeight = imageHeight
-    item.imageSizeInBytes = imageSizeInBytes
-    item.imageThumbFileName = imageThumbFileName
-    item.imageText = imageText
-    await addClip(item)
-    history.push(item)
-  }
+  let item = new Clip(content, sourceAppPath, imageFileName)
+  item.imageWidth = imageWidth
+  item.imageHeight = imageHeight
+  item.imageSizeInBytes = imageSizeInBytes
+  item.imageThumbFileName = imageThumbFileName
+  item.imageText = imageText
+  await addClip(item)
+  history.push(item)
   return item
 }
 

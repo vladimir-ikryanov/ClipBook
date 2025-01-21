@@ -27,14 +27,14 @@ NSString *prefCopyAndMergeSeparator = @"copy_and_merge.separator";
 NSString *prefCopyToClipboardAfterMerge = @"copy_to_clipboard_after_merge";
 NSString *prefClearHistoryOnQuit = @"clear_history_on_quit";
 NSString *prefClearHistoryOnMacReboot = @"clear_history_on_mac_reboot";
+NSString *prefOpenWindowStrategy = @"open_window_strategy";
+NSString *prefTreatDigitNumbersAsColor = @"treat_digit_numbers_as_color";
+NSString *prefShowPreviewForLinks = @"show_preview_for_links";
+NSString *prefUpdateHistoryAfterAction = @"update_history_after_action";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
 NSString *prefDisplayThankYouDialog = @"display_thank_you_dialog";
-
-NSString *prefOpenWindowStrategy = @"open_window_strategy";
-NSString *prefTreatDigitNumbersAsColor = @"treat_digit_numbers_as_color";
-NSString *prefShowPreviewForLinks = @"show_preview_for_links";
 
 // Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
@@ -814,4 +814,18 @@ bool AppSettingsMac::shouldShowPreviewForLinks() {
     return true;
   }
   return [defaults boolForKey:prefShowPreviewForLinks];
+}
+
+void AppSettingsMac::saveUpdateHistoryAfterAction(bool update) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:update forKey:prefUpdateHistoryAfterAction];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldUpdateHistoryAfterAction() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefUpdateHistoryAfterAction] == nil) {
+    return true;
+  }
+  return [defaults boolForKey:prefUpdateHistoryAfterAction];
 }

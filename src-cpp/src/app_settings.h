@@ -155,6 +155,9 @@ class AppSettings {
 
   virtual void saveShowPreviewForLinks(bool show) = 0;
   virtual bool shouldShowPreviewForLinks() = 0;
+
+  virtual void saveUpdateHistoryAfterAction(bool update) = 0;
+  virtual bool shouldUpdateHistoryAfterAction() = 0;
 };
 
 

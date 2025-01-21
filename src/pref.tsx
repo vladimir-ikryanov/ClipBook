@@ -36,6 +36,8 @@ declare const setTreatDigitNumbersAsColor: (treat: boolean) => void;
 declare const shouldTreatDigitNumbersAsColor: () => boolean;
 declare const setShowPreviewForLinks: (show: boolean) => void;
 declare const shouldShowPreviewForLinks: () => boolean;
+declare const setUpdateHistoryAfterAction: (update: boolean) => void;
+declare const shouldUpdateHistoryAfterAction: () => boolean;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -513,4 +515,12 @@ export function prefGetSaveImageAsFileShortcut() {
 
 export function prefSetSaveImageAsFileShortcut(shortcut: string) {
   saveSaveImageAsFileShortcut(shortcut)
+}
+
+export function prefSetUpdateHistoryAfterAction(update: boolean) {
+  setUpdateHistoryAfterAction(update)
+}
+
+export function prefShouldUpdateHistoryAfterAction() {
+  return shouldUpdateHistoryAfterAction()
 }

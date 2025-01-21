@@ -152,6 +152,9 @@ class AppSettingsMac : public AppSettings {
   void saveShowPreviewForLinks(bool show) override;
   bool shouldShowPreviewForLinks() override;
 
+ void saveUpdateHistoryAfterAction(bool update) override;
+ bool shouldUpdateHistoryAfterAction() override;
+
  private:
   static molybden::Rect getWindowBoundsForScreen(int screen_id);
 };

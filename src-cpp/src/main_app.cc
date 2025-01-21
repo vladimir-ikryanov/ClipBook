@@ -917,6 +917,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
       fetchLinkPreviewDetails(url, callback);
     }).detach();
   });
+  window->putProperty("setUpdateHistoryAfterAction", [this](bool update) -> void {
+    settings_->saveUpdateHistoryAfterAction(update);
+  });
+  window->putProperty("shouldUpdateHistoryAfterAction", [this]() -> bool {
+    return settings_->shouldUpdateHistoryAfterAction();
+  });
 }
 
 void MainApp::fetchLinkPreviewDetails(const std::string &url, const std::shared_ptr<molybden::JsObject> &callback) {

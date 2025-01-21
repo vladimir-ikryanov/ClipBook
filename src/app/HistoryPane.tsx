@@ -9,7 +9,7 @@ import {
   addSelectedHistoryItemIndex,
   clear,
   clearSelection,
-  deleteHistoryItem,
+  deleteHistoryItem, findItem,
   findItemByImageFileName,
   getFirstSelectedHistoryItem,
   getFirstSelectedHistoryItemIndex, getHistoryItem,
@@ -50,7 +50,8 @@ import {
   prefGetPasteItemsSeparator,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetQuickPasteModifier,
-  prefGetQuickPasteShortcuts, prefGetSaveImageAsFileShortcut,
+  prefGetQuickPasteShortcuts,
+  prefGetSaveImageAsFileShortcut,
   prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
@@ -58,11 +59,13 @@ import {
   prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut,
   prefSetDisplayThankYouDialog,
-  prefShouldDisplayThankYouMessage, prefShouldTreatDigitNumbersAsColor
+  prefShouldDisplayThankYouMessage,
+  prefShouldTreatDigitNumbersAsColor,
+  prefShouldUpdateHistoryAfterAction
 } from "@/pref";
 import {HideActionsReason} from "@/app/Actions";
 import {FixedSizeList as List} from "react-window";
-import {Clip, ClipType} from "@/db";
+import {Clip, ClipType, updateClip} from "@/db";
 import {isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
@@ -89,6 +92,7 @@ type HistoryPaneProps = {
   appIcon: string
 }
 
+let lastPastedItemIDs: Set<number> = new Set()
 let treatDigitNumbersAsColor = prefShouldTreatDigitNumbersAsColor()
 
 export default function HistoryPane(props: HistoryPaneProps) {
@@ -125,15 +129,24 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   imageHeight: number,
                                   imageSizeInBytes: number,
                                   imageText: string) {
-    let item = await addHistoryItem(
-        content,
-        sourceAppPath,
-        imageFileName,
-        imageThumbFileName,
-        imageWidth,
-        imageHeight,
-        imageSizeInBytes,
-        imageText)
+    let item = findItem(content, imageFileName)
+    if (item) {
+      item.numberOfCopies++
+      if (!lastPastedItemIDs.delete(item.id!)) {
+        item.lastTimeCopy = new Date()
+      }
+      await updateClip(item.id!, item)
+    } else {
+      item = await addHistoryItem(
+          content,
+          sourceAppPath,
+          imageFileName,
+          imageThumbFileName,
+          imageWidth,
+          imageHeight,
+          imageSizeInBytes,
+          imageText)
+    }
     setHistory([...getHistoryItems()])
 
     // The added item might not be in the visible history list if it doesn't match the search query.
@@ -506,8 +519,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function pasteItem(item: Clip) {
-    let imageFileName = item.imageFileName ? item.imageFileName : "";
-    let imageText = item.imageText ? item.imageText : "";
+    // Remember the last pasted item to be able to skip it when it's added to
+    // the system clipboard during paste.
+    if (!prefShouldUpdateHistoryAfterAction()) {
+      lastPastedItemIDs.add(item.id!)
+    }
+    let imageFileName = item.imageFileName ? item.imageFileName : ""
+    let imageText = item.imageText ? item.imageText : ""
     pasteItemInFrontApp(item.content, imageFileName, imageText)
   }
 
