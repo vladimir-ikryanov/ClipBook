@@ -15,8 +15,13 @@ type PreviewColorPaneProps = {
 }
 
 export default function PreviewColorPane(props: PreviewColorPaneProps) {
+  let cssColorName = ""
   let cssColorValue = toCSSColor(props.colorText)
-  let cssColorName = namer(cssColorValue, { pick: ['ntc'] }).ntc[0].name;
+  if (cssColorValue.length > 0) {
+    if (cssColorValue.startsWith("#") || cssColorValue.startsWith("rgb") || cssColorValue.startsWith("hsl")) {
+      cssColorName = namer(cssColorValue, { pick: ['ntc'] }).ntc[0].name
+    }
+  }
 
   const [content, setContent] = useState(props.item.content)
   const [cssColor, setCssColor] = useState(cssColorValue)
