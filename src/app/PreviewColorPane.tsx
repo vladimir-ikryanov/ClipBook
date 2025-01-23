@@ -15,17 +15,9 @@ type PreviewColorPaneProps = {
 }
 
 export default function PreviewColorPane(props: PreviewColorPaneProps) {
-  let cssColorName = ""
-  let cssColorValue = toCSSColor(props.colorText)
-  if (cssColorValue.length > 0) {
-    if (cssColorValue.startsWith("#") || cssColorValue.startsWith("rgb") || cssColorValue.startsWith("hsl")) {
-      cssColorName = namer(cssColorValue, { pick: ['ntc'] }).ntc[0].name
-    }
-  }
-
   const [content, setContent] = useState(props.item.content)
-  const [cssColor, setCssColor] = useState(cssColorValue)
-  const [colorName, setColorName] = useState(cssColorName)
+  const [cssColor, setCssColor] = useState("")
+  const [colorName, setColorName] = useState("")
 
   useEffect(() => {
     if (props.editMode) {
@@ -36,7 +28,14 @@ export default function PreviewColorPane(props: PreviewColorPaneProps) {
   }, [props.editMode]);
 
   useEffect(() => {
-    setCssColor(toCSSColor(props.colorText))
+    let cssColorName = ""
+    let cssColorValue = toCSSColor(props.colorText)
+    if (cssColorValue.length > 0) {
+      if (cssColorValue.startsWith("#") || cssColorValue.startsWith("rgb") || cssColorValue.startsWith("hsl")) {
+        cssColorName = namer(cssColorValue, { pick: ['ntc'] }).ntc[0].name
+      }
+    }
+    setCssColor(cssColorValue)
     setColorName(cssColorName)
     setContent(props.item.content)
   }, [props.colorText])
