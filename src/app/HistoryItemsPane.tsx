@@ -171,23 +171,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
       {renderItems()}
       <div className="grow"></div>
       <ActionsBar appName={props.appName}
-                  appIcon={props.appIcon}
-                  onPaste={props.onPaste}
-                  onMerge={props.onMerge}
-                  onClose={props.onClose}
-                  onHideActions={props.onHideActions}
-                  onEditContent={props.onEditContent}
-                  onCopyToClipboard={props.onCopyToClipboard}
-                  onCopyTextFromImage={props.onCopyTextFromImage}
-                  onOpenInBrowser={props.onOpenInBrowser}
-                  onPreviewLink={props.onPreviewLink}
-                  onOpenSettings={props.onOpenSettings}
-                  onSearchHistory={props.onSearchHistory}
-                  onToggleFavorite={props.onToggleFavorite}
-                  onTogglePreview={props.onTogglePreview}
-                  onDeleteItem={props.onDeleteItem}
-                  onDeleteItems={props.onDeleteItems}
-                  onDeleteAllItems={props.onDeleteAllItems}/>
+                  onPaste={props.onPaste}/>
     </div>
   }
 
@@ -199,7 +183,25 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    isPreviewVisible={props.isPreviewVisible}
                    isTrial={props.isTrial}
                    trialDaysLeft={props.trialDaysLeft}
-                   searchFieldRef={props.searchFieldRef}/>
+                   searchFieldRef={props.searchFieldRef}
+                   appName={props.appName}
+                   appIcon={props.appIcon}
+                   onPaste={props.onPaste}
+                   onMerge={props.onMerge}
+                   onClose={props.onClose}
+                   onHideActions={props.onHideActions}
+                   onEditContent={props.onEditContent}
+                   onCopyToClipboard={props.onCopyToClipboard}
+                   onCopyTextFromImage={props.onCopyTextFromImage}
+                   onOpenInBrowser={props.onOpenInBrowser}
+                   onPreviewLink={props.onPreviewLink}
+                   onOpenSettings={props.onOpenSettings}
+                   onSearchHistory={props.onSearchHistory}
+                   onToggleFavorite={props.onToggleFavorite}
+                   onTogglePreview={props.onTogglePreview}
+                   onDeleteItem={props.onDeleteItem}
+                   onDeleteItems={props.onDeleteItems}
+                   onDeleteAllItems={props.onDeleteAllItems}/>
         {renderHistoryItems()}
       </div>
   )

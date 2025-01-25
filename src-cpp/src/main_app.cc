@@ -154,7 +154,7 @@ void MainApp::launch() {
 
   // Set the initial window size and position if it's the first run.
   if (first_run_ || !app_->isProduction()) {
-    app_window_->setSize(835, 535);
+    app_window_->setSize(820, 540);
     app_window_->centerWindow();
   }
 
@@ -173,7 +173,10 @@ void MainApp::launch() {
 
 void MainApp::show() {
   app_window_->show();
-  app_window_->mainFrame()->executeJavaScript("activateApp()");
+  auto frame = app_window_->mainFrame();
+  if (frame) {
+    frame->executeJavaScript("activateApp()");
+  }
   app_window_visible_ = true;
 }
 
@@ -197,8 +200,10 @@ std::shared_ptr<AppSettings> MainApp::settings() const {
 }
 
 void MainApp::setActiveAppInfo(const std::string &app_name, const std::string& app_icon) {
-  app_window_->mainFrame()->executeJavaScript(
-      "setActiveAppInfo(\"" + app_name + "\", \"" + app_icon + "\")");
+  auto frame = app_window_->mainFrame();
+  if (frame) {
+    frame->executeJavaScript("setActiveAppInfo(\"" + app_name + "\", \"" + app_icon + "\")");
+  }
 }
 
 void MainApp::clearHistory() {

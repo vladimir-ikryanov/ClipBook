@@ -11,59 +11,26 @@ import ShortcutLabel from "@/app/ShortcutLabel";
 
 type ActionsBarProps = {
   appName: string
-  appIcon: string
   onPaste: () => void
-  onMerge: () => void
-  onClose: () => void
-  onHideActions: (reason: HideActionsReason) => void
-  onToggleFavorite: () => void
-  onTogglePreview: () => void
-  onSearchHistory: () => void
-  onEditContent: () => void
-  onCopyToClipboard: () => void
-  onCopyTextFromImage: () => void
-  onOpenInBrowser: () => void
-  onPreviewLink: () => void
-  onOpenSettings: () => void
-  onDeleteItem: () => void
-  onDeleteItems: () => void
-  onDeleteAllItems: () => void
 }
 
 export default function ActionsBar(props: ActionsBarProps) {
   return (
       <div
           className="flex items-center justify-between p-2 border-t-solid border-t-border border-t">
-        <div className="flex space-x-1 text-sm text-primary-foreground">
+        <div className="flex text-sm text-primary-foreground">
           <Button variant="info" className="p-1 h-8 rounded-sm outline-none">
             <ShortcutLabel
                 shortcut={prefGetSelectNextItemShortcut() + " + " + prefGetSelectPreviousItemShortcut()}/>
-            <p className="px-2">Navigate</p>
-          </Button>
-
-          <Button variant="ghost" className="p-1 h-8 rounded-sm outline-none" onClick={props.onPaste}>
-            <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
-            <p className="px-2 text-">Paste to {props.appName}</p>
+            <p className="pl-2">Navigate</p>
           </Button>
         </div>
 
-        <div className="flex space-x-2">
-          <Actions appName={props.appName}
-                   appIcon={props.appIcon}
-                   onHideActions={props.onHideActions}
-                   onEditContent={props.onEditContent}
-                   onCopyToClipboard={props.onCopyToClipboard}
-                   onCopyTextFromImage={props.onCopyTextFromImage}
-                   onOpenInBrowser={props.onOpenInBrowser}
-                   onPreviewLink={props.onPreviewLink}
-                   onOpenSettings={props.onOpenSettings}
-                   onPaste={props.onPaste}
-                   onMerge={props.onMerge}
-                   onToggleFavorite={props.onToggleFavorite}
-                   onTogglePreview={props.onTogglePreview}
-                   onDeleteItem={props.onDeleteItem}
-                   onDeleteItems={props.onDeleteItems}
-                   onDeleteAllItems={props.onDeleteAllItems}/>
+        <div className="flex">
+          <Button variant="ghost" className="p-1 h-8 rounded-sm outline-none" onClick={props.onPaste}>
+            <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
+            <p className="pl-2 pr-1 text-">Paste to {props.appName}</p>
+          </Button>
         </div>
       </div>
   )

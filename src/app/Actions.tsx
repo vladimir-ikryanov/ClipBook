@@ -2,8 +2,9 @@ import '../app.css';
 import {Button} from "@/components/ui/button";
 
 import * as React from "react"
-import {useEffect} from "react"
+import {useEffect, useState} from "react"
 import {
+  CommandIcon,
   CopyIcon,
   Edit3Icon, EyeIcon,
   GlobeIcon,
@@ -16,6 +17,7 @@ import {
 
 import {
   Command,
+  CommandDialog,
   CommandEmpty,
   CommandInput,
   CommandItem,
@@ -34,7 +36,7 @@ import {
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetShowMoreActionsShortcut,
   prefGetToggleFavoriteShortcut,
-  prefGetTogglePreviewShortcut, prefShouldShowPreviewForLinks
+  prefGetTogglePreviewShortcut
 } from "@/pref";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
@@ -47,6 +49,8 @@ import {
 } from "@/data";
 import {ClipType} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {DialogClose, DialogTitle} from "@/components/ui/dialog";
 
 export type HideActionsReason =
     "cancel"
@@ -84,7 +88,7 @@ type ActionsProps = {
 }
 
 export default function Actions(props: ActionsProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -100,6 +104,10 @@ export default function Actions(props: ActionsProps) {
 
   function handleKeyDown(e: React.KeyboardEvent) {
     e.stopPropagation()
+  }
+
+  function handleClick() {
+    handleOpenChange(!open)
   }
 
   let closeReason: HideActionsReason = "cancel"
@@ -252,15 +260,21 @@ export default function Actions(props: ActionsProps) {
   }
 
   return (
-      <Popover open={open} onOpenChange={handleOpenChange}>
-        <PopoverTrigger asChild>
-          <Button variant="ghost" className="p-1 h-8 rounded-sm outline-none">
-            <p className="px-2">Actions</p>
+      <>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="toolbar" size="toolbar" onClick={handleClick}>
+              <CommandIcon className="h-5 w-5"/>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="flex items-center">
+            <div className="select-none mr-2">Show more actions</div>
             <ShortcutLabel shortcut={prefGetShowMoreActionsShortcut()}/>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent align="end" className="w-[320px] pt-1.5 pb-0 px-0 bg-actions-background" onKeyDown={handleKeyDown}>
-          <Command>
+          </TooltipContent>
+        </Tooltip>
+        <CommandDialog open={open} onOpenChange={handleOpenChange}>
+          <Command onKeyDown={handleKeyDown}>
+            <CommandInput placeholder="Type a command or search..." autoFocus={true}/>
             <CommandList>
               <CommandItem onSelect={handlePaste}>
                 <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
@@ -355,7 +369,7 @@ export default function Actions(props: ActionsProps) {
                 </CommandShortcut>
               </CommandItem>
               {
-                canShowPreview() && <CommandSeparator/>
+                  canShowPreview() && <CommandSeparator/>
               }
               {
                   canShowPreview() &&
@@ -404,9 +418,8 @@ export default function Actions(props: ActionsProps) {
               </CommandItem>
               <CommandEmpty>No results found.</CommandEmpty>
             </CommandList>
-            <CommandInput placeholder="Type a command or search..." autoFocus={true}/>
           </Command>
-        </PopoverContent>
-      </Popover>
+        </CommandDialog>
+      </>
   )
 }

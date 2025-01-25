@@ -7,6 +7,7 @@ import {prefGetTogglePreviewShortcut} from "@/pref";
 import {ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
+import Actions, {HideActionsReason} from "@/app/Actions";
 
 declare const openSettingsLicense: () => void;
 
@@ -18,6 +19,24 @@ type SearchBarProps = {
   trialDaysLeft: number
   onShowHidePreview: () => void
   searchFieldRef?: React.Ref<HTMLInputElement>
+  appName: string
+  appIcon: string
+  onPaste: () => void
+  onMerge: () => void
+  onClose: () => void
+  onHideActions: (reason: HideActionsReason) => void
+  onToggleFavorite: () => void
+  onTogglePreview: () => void
+  onSearchHistory: () => void
+  onEditContent: () => void
+  onCopyToClipboard: () => void
+  onCopyTextFromImage: () => void
+  onOpenInBrowser: () => void
+  onPreviewLink: () => void
+  onOpenSettings: () => void
+  onDeleteItem: () => void
+  onDeleteItems: () => void
+  onDeleteAllItems: () => void
 }
 
 export default function SearchBar(props: SearchBarProps) {
@@ -98,6 +117,24 @@ export default function SearchBar(props: SearchBarProps) {
                 <ShortcutLabel shortcut="Escape"/>
               </TooltipContent>
             </Tooltip>
+          </div>
+          <div>
+            <Actions appName={props.appName}
+                     appIcon={props.appIcon}
+                     onHideActions={props.onHideActions}
+                     onEditContent={props.onEditContent}
+                     onCopyToClipboard={props.onCopyToClipboard}
+                     onCopyTextFromImage={props.onCopyTextFromImage}
+                     onOpenInBrowser={props.onOpenInBrowser}
+                     onPreviewLink={props.onPreviewLink}
+                     onOpenSettings={props.onOpenSettings}
+                     onPaste={props.onPaste}
+                     onMerge={props.onMerge}
+                     onToggleFavorite={props.onToggleFavorite}
+                     onTogglePreview={props.onTogglePreview}
+                     onDeleteItem={props.onDeleteItem}
+                     onDeleteItems={props.onDeleteItems}
+                     onDeleteAllItems={props.onDeleteAllItems}/>
           </div>
           <div className={props.isPreviewVisible ? "hidden" : ""}>
             <Tooltip>

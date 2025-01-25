@@ -52,7 +52,7 @@ NSString *prefDeleteHistoryItemShortcut = @"app.delete_history_item_shortcut2";
 NSString *prefClearHistoryShortcut = @"app.clear_history_shortcut2";
 NSString *prefSearchHistoryShortcut = @"app.search_history_shortcut2";
 NSString *prefTogglePreviewShortcut = @"app.toggle_preview_shortcut2";
-NSString *prefShowMoreActionsShortcut = @"app.show_more_actions_shortcut2";
+NSString *prefShowMoreActionsShortcut = @"app.show_more_actions_shortcut3";
 NSString *prefZoomUIInShortcut = @"app.zoom_ui_in_shortcut2";
 NSString *prefZoomUIOutShortcut = @"app.zoom_ui_out_shortcut2";
 NSString *prefOpenSettingsShortcut = @"app.open_settings_shortcut2";
@@ -580,7 +580,7 @@ std::string AppSettingsMac::getShowMoreActionsShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "MetaLeft + KeyA";
+  return "MetaLeft + KeyK";
 }
 
 void AppSettingsMac::saveZoomUIInShortcut(std::string shortcut) {
