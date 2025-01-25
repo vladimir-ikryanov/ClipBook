@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import {
   ChevronDown,
   ClipboardIcon,
-  CopyIcon, Edit3Icon, EllipsisVerticalIcon, EyeIcon,
+  CopyIcon, DownloadIcon, Edit3Icon, EllipsisVerticalIcon, EyeIcon, FileIcon,
   GlobeIcon, RefreshCwIcon, ScanTextIcon,
   StarIcon, TrashIcon,
 } from "lucide-react";
@@ -403,8 +403,8 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 {
                     canSaveImageAsFile() &&
                     <DropdownMenuItem onClick={handleSaveImageAsFile}>
-                      <RefreshCwIcon className="mr-2 h-4 w-4"/>
-                      <span className="mr-12">Save As File...</span>
+                      <DownloadIcon className="mr-2 h-4 w-4"/>
+                      <span className="mr-12">Save as File...</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetSaveImageAsFileShortcut()}/>
                       </CommandShortcut>

@@ -922,6 +922,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onCopyToClipboardByIndex={handleCopyToClipboardByIndex}
                               onCopyTextFromImage={handleCopyTextFromImage}
                               onCopyTextFromImageByIndex={handleCopyTextFromImageByIndex}
+                              onSaveImageAsFile={handleSaveImageAsFile}
                               onOpenInBrowser={handleOpenInBrowser}
                               onPreviewLink={handlePreviewLink}
                               onOpenInBrowserByIndex={handleOpenInBrowserByIndex}

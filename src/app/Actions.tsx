@@ -5,7 +5,7 @@ import * as React from "react"
 import {useEffect, useState} from "react"
 import {
   CommandIcon,
-  CopyIcon,
+  CopyIcon, DownloadIcon,
   Edit3Icon, EyeIcon,
   GlobeIcon,
   ScanTextIcon,
@@ -33,14 +33,13 @@ import {
   prefGetEditHistoryItemShortcut,
   prefGetOpenInBrowserShortcut,
   prefGetOpenSettingsShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut, prefGetSaveImageAsFileShortcut,
   prefGetShowMoreActionsShortcut,
   prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut
 } from "@/pref";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {
   getFirstSelectedHistoryItem,
   getPreviewVisibleState,
@@ -50,7 +49,6 @@ import {
 import {ClipType} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
-import {DialogClose, DialogTitle} from "@/components/ui/dialog";
 
 export type HideActionsReason =
     "cancel"
@@ -61,6 +59,7 @@ export type HideActionsReason =
     | "editContent"
     | "copyToClipboard"
     | "copyTextFromImage"
+    | "saveImageAsFile"
     | "openInBrowser"
     | "preview"
     | "openSettings"
@@ -79,6 +78,7 @@ type ActionsProps = {
   onEditContent: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
+  onSaveImageAsFile: () => void
   onOpenInBrowser: () => void
   onPreviewLink: () => void
   onOpenSettings: () => void
@@ -197,6 +197,12 @@ export default function Actions(props: ActionsProps) {
     props.onCopyTextFromImage()
   }
 
+  function handleSaveImageAsFile() {
+    closeReason = "saveImageAsFile"
+    handleOpenChange(false)
+    props.onSaveImageAsFile()
+  }
+
   function canShowCopyToClipboard() {
     return getSelectedHistoryItemIndices().length === 1
   }
@@ -223,6 +229,14 @@ export default function Actions(props: ActionsProps) {
     if (getSelectedHistoryItemIndices().length === 1) {
       let item = getFirstSelectedHistoryItem();
       return item?.type === ClipType.Image && item?.content.length > 0
+    }
+    return false
+  }
+
+  function canShowSaveImageAsFile() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem();
+      return item?.type === ClipType.Image
     }
     return false
   }
@@ -331,6 +345,16 @@ export default function Actions(props: ActionsProps) {
                     <span>Copy Text from Image</span>
                     <CommandShortcut className="flex flex-row">
                       <ShortcutLabel shortcut={prefGetCopyTextFromImageShortcut()}/>
+                    </CommandShortcut>
+                  </CommandItem>
+              }
+              {
+                  canShowSaveImageAsFile() &&
+                  <CommandItem onSelect={handleSaveImageAsFile}>
+                    <DownloadIcon className="mr-2 h-4 w-4"/>
+                    <span>Save Image as File...</span>
+                    <CommandShortcut className="flex flex-row">
+                      <ShortcutLabel shortcut={prefGetSaveImageAsFileShortcut()}/>
                     </CommandShortcut>
                   </CommandItem>
               }

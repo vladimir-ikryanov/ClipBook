@@ -31,6 +31,7 @@ type SearchBarProps = {
   onEditContent: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
+  onSaveImageAsFile: () => void
   onOpenInBrowser: () => void
   onPreviewLink: () => void
   onOpenSettings: () => void
@@ -125,6 +126,7 @@ export default function SearchBar(props: SearchBarProps) {
                      onEditContent={props.onEditContent}
                      onCopyToClipboard={props.onCopyToClipboard}
                      onCopyTextFromImage={props.onCopyTextFromImage}
+                     onSaveImageAsFile={props.onSaveImageAsFile}
                      onOpenInBrowser={props.onOpenInBrowser}
                      onPreviewLink={props.onPreviewLink}
                      onOpenSettings={props.onOpenSettings}
