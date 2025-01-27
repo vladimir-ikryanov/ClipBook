@@ -94,9 +94,9 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
         {
             isLink() &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-              <div className="flex-none text-preview-infoLabel font-semibold">URL</div>
+              <div className="flex-none text-preview-infoLabel font-semibold mr-4">URL</div>
               <div className="flex-grow"></div>
-              <div className="flex-auto text-foreground text-end">{props.item.content}</div>
+              <div className="flex-auto text-foreground text-end break-all">{props.item.content}</div>
             </div>
         }
         {
