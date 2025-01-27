@@ -141,14 +141,10 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  function highlightAllMatches(text: string, query: string) {
-    if (!query) {
-      return text;
-    }
-
-    const escapedQuery = escapeRegExp(query);
-    const regex = new RegExp(`(${escapedQuery})`, 'gi');
-    const parts = text.split(regex);
+  function highlightSearchMatches(text: string, query: string) {
+    const escapedQuery = escapeRegExp(query)
+    const regex = new RegExp(`(${escapedQuery})`, 'gi')
+    const parts = text.split(regex)
     return <span>{
       parts.map((part, index) =>
           part.toLowerCase() === query.toLowerCase() ?
@@ -156,14 +152,39 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     }</span>
   }
 
+  function renderItemLabel(text: string, query: string) {
+    // Replace new lines with the Return character.
+    let parts = text.split("\n")
+    return <div className="space-x-1 whitespace-nowrap overflow-hidden overflow-ellipsis">{
+      parts.map((line, index) => {
+        return <>
+          <span className="inline" key={index}>{highlightSearchMatches(line, query)}</span>
+          {
+              index < parts.length - 1 &&
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                   strokeLinejoin="round" className="inline lucide lucide-corner-down-left text-secondary-foreground w-4 h-4">
+                <polyline points="9 10 4 15 9 20"/>
+                <path d="M20 4v7a4 4 0 0 1-4 4H4"/>
+              </svg>
+          }
+        </>
+      })
+    }</div>
+  }
+
   function getItemLabel() {
     if (props.item.type === ClipType.Image) {
       if (props.item.imageText && props.item.imageText.length > 0) {
-        return props.item.imageText;
+        return props.item.imageText
       }
-      return "Image (" + props.item.imageWidth + "x" + props.item.imageHeight + ")";
+      return "Image (" + props.item.imageWidth + "x" + props.item.imageHeight + ")"
     }
-    return props.item.content;
+    let content = props.item.content
+    if (content.length > 256) {
+      content = content.substring(0, 256)
+    }
+    return content
   }
 
   function getRoundedStyle() {
@@ -198,9 +219,9 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
           onMouseLeave={handleMouseLeave}>
         <div className="flex flex-none mr-3 text-primary-foreground">{renderClipIcon()}</div>
         <div
-            className="flex-grow text-base text-justify font-normal whitespace-nowrap overflow-hidden overflow-ellipsis">
+            className="flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis">
           {
-            highlightAllMatches(getItemLabel(), getFilterQuery())
+            renderItemLabel(getItemLabel(), getFilterQuery())
           }
         </div>
         {renderActionsButton()}
