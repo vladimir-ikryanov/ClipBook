@@ -1,6 +1,6 @@
 # ClipBook Source Code License
 
-Copyright (c) 2024 ClipBook
+Copyright (c) 2025 ClipBook
 
 ## 1. Definitions
 
