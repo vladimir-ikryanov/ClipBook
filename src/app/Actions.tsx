@@ -90,6 +90,12 @@ type ActionsProps = {
 export default function Actions(props: ActionsProps) {
   const [open, setOpen] = useState(false)
 
+  function closeCommandsPopup() {
+    setOpen(false)
+  }
+
+  (window as any).closeCommandsPopup = closeCommandsPopup
+
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       // Close the app window with the close app shortcut.

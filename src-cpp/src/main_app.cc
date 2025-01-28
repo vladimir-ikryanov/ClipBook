@@ -182,6 +182,10 @@ void MainApp::show() {
 
 void MainApp::hide() {
   if (!auto_hide_disabled_) {
+    auto frame = app_window_->mainFrame();
+    if (frame) {
+      frame->executeJavaScript("closeCommandsPopup()");
+    }
     app_window_->hide();
     app_window_visible_ = false;
   }

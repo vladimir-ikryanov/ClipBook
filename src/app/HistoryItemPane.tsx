@@ -142,6 +142,9 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   }
 
   function highlightSearchMatches(text: string, query: string) {
+    if (query.length === 0) {
+      return text
+    }
     const escapedQuery = escapeRegExp(query)
     const regex = new RegExp(`(${escapedQuery})`, 'gi')
     const parts = text.split(regex)
@@ -157,8 +160,8 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     let parts = text.split("\n")
     return <div className="space-x-1 whitespace-nowrap overflow-hidden overflow-ellipsis">{
       parts.map((line, index) => {
-        return <>
-          <span className="inline" key={index}>{highlightSearchMatches(line, query)}</span>
+        return <div className="inline" key={index}>
+          <span className="inline">{highlightSearchMatches(line, query)}</span>
           {
               index < parts.length - 1 &&
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -168,7 +171,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
                 <path d="M20 4v7a4 4 0 0 1-4 4H4"/>
               </svg>
           }
-        </>
+        </div>
       })
     }</div>
   }

@@ -274,7 +274,7 @@ void MainAppMac::show() {
   MainApp::setActiveAppInfo(app_name, app_icon);
 
   // Restore the window bounds before showing the window.
-//  restoreWindowBounds();
+  restoreWindowBounds();
   // Show the browser window.
   MainApp::show();
 }
