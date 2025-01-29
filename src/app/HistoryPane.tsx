@@ -52,7 +52,6 @@ import {
   prefGetQuickPasteModifier,
   prefGetQuickPasteShortcuts,
   prefGetSaveImageAsFileShortcut,
-  prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
   prefGetShowMoreActionsShortcut,
@@ -321,11 +320,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
       // Delete the active item when the delete shortcut is pressed.
       if (isShortcutMatch(prefGetDeleteHistoryItemShortcut(), e)) {
         await handleDeleteItems()
-        e.preventDefault()
-      }
-      // Focus the search field when the search history shortcut is pressed.
-      if (isShortcutMatch(prefGetSearchHistoryShortcut(), e)) {
-        handleSearchHistory()
         e.preventDefault()
       }
       // Toggle the favorite status of the active item when the toggle favorite shortcut is pressed.
@@ -709,10 +703,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
     openSettingsWindow()
   }
 
-  function handleSearchHistory() {
-    focusSearchField()
-  }
-
   async function deleteItem(item: Clip) {
     await deleteHistoryItem(item)
     if (item.type === ClipType.Image) {
@@ -928,7 +918,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onOpenInBrowserByIndex={handleOpenInBrowserByIndex}
                               onPreviewLinkByIndex={handlePreviewLinkByIndex}
                               onOpenSettings={handleOpenSettings}
-                              onSearchHistory={handleSearchHistory}
                               onToggleFavorite={handleToggleFavorite}
                               onTogglePreview={handleTogglePreview}
                               onEditHistoryItem={handleEditHistoryItem}

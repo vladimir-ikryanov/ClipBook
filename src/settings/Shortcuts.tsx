@@ -13,7 +13,6 @@ import {
   prefGetOpenInBrowserShortcut,
   prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut, prefGetSaveImageAsFileShortcut,
-  prefGetSearchHistoryShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
   prefGetShowMoreActionsShortcut, prefGetToggleFavoriteShortcut,
@@ -29,7 +28,6 @@ import {
   prefSetOpenInBrowserShortcut,
   prefSetOpenSettingsShortcut,
   prefSetPasteSelectedItemToActiveAppShortcut, prefSetSaveImageAsFileShortcut,
-  prefSetSearchHistoryShortcut,
   prefSetSelectNextItemShortcut,
   prefSetSelectPreviousItemShortcut,
   prefSetShowMoreActionsShortcut, prefSetToggleFavoriteShortcut,
@@ -57,7 +55,6 @@ export default function Shortcuts() {
   const [copyToClipboardShortcut, setCopyToClipboardShortcut] = useState(prefGetCopyToClipboardShortcut());
   const [deleteHistoryItemShortcut, setDeleteHistoryItemShortcut] = useState(prefGetDeleteHistoryItemShortcut());
   const [clearHistoryShortcut, setClearHistoryShortcut] = useState(prefGetClearHistoryShortcut());
-  const [searchHistoryShortcut, setSearchHistoryShortcut] = useState(prefGetSearchHistoryShortcut());
   const [togglePreviewShortcut, setTogglePreviewShortcut] = useState(prefGetTogglePreviewShortcut());
   const [showMoreActionsShortcut, setShowMoreActionsShortcut] = useState(prefGetShowMoreActionsShortcut());
   const [zoomUIInShortcut, setZoomUIInShortcut] = useState(prefGetZoomUIInShortcut());
@@ -137,11 +134,6 @@ export default function Shortcuts() {
   function handleClearHistoryShortcutChange(shortcut: string) {
     setClearHistoryShortcut(shortcut)
     prefSetClearHistoryShortcut(shortcut)
-  }
-
-  function handleSearchHistoryShortcutChange(shortcut: string) {
-    setSearchHistoryShortcut(shortcut)
-    prefSetSearchHistoryShortcut(shortcut)
   }
 
   function handleTogglePreviewShortcutChange(shortcut: string) {
@@ -337,7 +329,7 @@ export default function Shortcuts() {
             <div className="flex items-center justify-between space-x-20">
               <span className="">Show more actions</span>
               <ShortcutInput shortcut={showMoreActionsShortcut}
-                             defaultShortcut="MetaLeft + KeyA"
+                             defaultShortcut="MetaLeft + KeyK"
                              onSave={handleShowMoreActionsShortcutChange}/>
             </div>
             <hr/>

@@ -15,8 +15,9 @@ import {
   TrashIcon
 } from "lucide-react"
 
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandInput,
@@ -49,6 +50,7 @@ import {
 import {ClipType} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {DialogTitle} from "@/components/ui/dialog";
 
 export type HideActionsReason =
     "cancel"
@@ -109,11 +111,16 @@ export default function Actions(props: ActionsProps) {
   }, [])
 
   function handleKeyDown(e: React.KeyboardEvent) {
+    // Close the app window with the close app shortcut.
+    if (isShortcutMatch(prefGetShowMoreActionsShortcut(), e.nativeEvent)) {
+      e.preventDefault()
+      handleOpenChange(false)
+    }
     e.stopPropagation()
   }
 
   function handleClick() {
-    handleOpenChange(!open)
+    handleOpenChange(true)
   }
 
   let closeReason: HideActionsReason = "cancel"
@@ -292,164 +299,169 @@ export default function Actions(props: ActionsProps) {
             <ShortcutLabel shortcut={prefGetShowMoreActionsShortcut()}/>
           </TooltipContent>
         </Tooltip>
-        <CommandDialog open={open} onOpenChange={handleOpenChange}>
-          <Command onKeyDown={handleKeyDown}>
+        <div className="" onKeyDown={handleKeyDown}>
+          <CommandDialog open={open} onOpenChange={handleOpenChange}>
+            <VisuallyHidden>
+              <DialogTitle></DialogTitle>
+            </VisuallyHidden>
             <CommandInput placeholder="Type a command or search..." autoFocus={true}/>
-            <CommandList>
-              <CommandItem onSelect={handlePaste}>
-                <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
-                     alt="Application icon"/>
-                <span>Paste {getMultipleItemsIndicator()} to {props.appName}</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
-                </CommandShortcut>
-              </CommandItem>
-              {
-                  canShowMergeItems() &&
-                  <CommandItem onSelect={handleMerge}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                         viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                         strokeLinecap="round" strokeLinejoin="round"
-                         className="lucide lucide-unfold-vertical mr-2 h-4 w-4">
-                      <path d="M12 22v-6"/>
-                      <path d="M12 8V2"/>
-                      <path d="M4 12H2"/>
-                      <path d="M10 12H8"/>
-                      <path d="M16 12h-2"/>
-                      <path d="M22 12h-2"/>
-                      <path d="m15 5-3 3-3-3"/>
-                      <path d="m15 19-3-3-3 3"/>
-                    </svg>
-                    <span>Merge {getMultipleItemsIndicator()}</span>
-                  </CommandItem>
-              }
-              {
-                  canShowCopyToClipboard() &&
-                  <CommandItem onSelect={handleCopyToClipboard}>
-                    <CopyIcon className="mr-2 h-4 w-4"/>
-                    <span>Copy to Clipboard</span>
-                    <CommandShortcut className="flex flex-row">
-                      <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
-                    </CommandShortcut>
-                  </CommandItem>
-              }
-              <CommandSeparator/>
-              {
-                  canShowOpenInBrowser() &&
-                  <CommandItem onSelect={handleOpenInBrowser}>
-                    <GlobeIcon className="mr-2 h-4 w-4"/>
-                    <span>Open in Browser</span>
-                    <CommandShortcut className="flex flex-row">
-                      <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
-                    </CommandShortcut>
-                  </CommandItem>
-              }
-              {
-                  canShowCopyTextFromImage() &&
-                  <CommandItem onSelect={handleCopyTextFromImage}>
-                    <ScanTextIcon className="mr-2 h-4 w-4"/>
-                    <span>Copy Text from Image</span>
-                    <CommandShortcut className="flex flex-row">
-                      <ShortcutLabel shortcut={prefGetCopyTextFromImageShortcut()}/>
-                    </CommandShortcut>
-                  </CommandItem>
-              }
-              {
-                  canShowSaveImageAsFile() &&
-                  <CommandItem onSelect={handleSaveImageAsFile}>
-                    <DownloadIcon className="mr-2 h-4 w-4"/>
-                    <span>Save Image as File...</span>
-                    <CommandShortcut className="flex flex-row">
-                      <ShortcutLabel shortcut={prefGetSaveImageAsFileShortcut()}/>
-                    </CommandShortcut>
-                  </CommandItem>
-              }
-              {
-                  canShowEditContent() &&
-                  <CommandItem onSelect={handleEditContent}>
-                    <Edit3Icon className="mr-2 h-4 w-4"/>
-                    <span>Edit Content...</span>
-                    <CommandShortcut className="flex flex-row">
-                      <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
-                    </CommandShortcut>
-                  </CommandItem>
-              }
-              <CommandItem onSelect={handleToggleFavorite}>
+            <div className="max-h-[70vh] overflow-y-auto mb-1.5">
+              <CommandList>
+                <CommandItem onSelect={handlePaste}>
+                  <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
+                       alt="Application icon"/>
+                  <span>Paste {getMultipleItemsIndicator()} to {props.appName}</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
+                  </CommandShortcut>
+                </CommandItem>
                 {
-                  canAddToFavorites() ?
-                      <StarIcon className="mr-2 h-4 w-4"/> :
-                      <StarOffIcon className="mr-2 h-4 w-4"/>
+                    canShowMergeItems() &&
+                    <CommandItem onSelect={handleMerge}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                           strokeLinecap="round" strokeLinejoin="round"
+                           className="lucide lucide-unfold-vertical mr-2 h-4 w-4">
+                        <path d="M12 22v-6"/>
+                        <path d="M12 8V2"/>
+                        <path d="M4 12H2"/>
+                        <path d="M10 12H8"/>
+                        <path d="M16 12h-2"/>
+                        <path d="M22 12h-2"/>
+                        <path d="m15 5-3 3-3-3"/>
+                        <path d="m15 19-3-3-3 3"/>
+                      </svg>
+                      <span>Merge {getMultipleItemsIndicator()}</span>
+                    </CommandItem>
                 }
-                <span>{canAddToFavorites() ?
-                    `Add ${getMultipleItemsIndicator()} to Favorites` :
-                    `Remove ${getMultipleItemsIndicator()} from Favorites`}</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
-                </CommandShortcut>
-              </CommandItem>
-              <CommandItem onSelect={handleTogglePreview}>
                 {
-                  getPreviewVisibleState() ?
-                      <HidePreviewPaneIcon className="mr-2 h-4 w-4"/> :
-                      <ShowPreviewPaneIcon className="mr-2 h-4 w-4"/>
+                    canShowCopyToClipboard() &&
+                    <CommandItem onSelect={handleCopyToClipboard}>
+                      <CopyIcon className="mr-2 h-4 w-4"/>
+                      <span>Copy to Clipboard</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
+                      </CommandShortcut>
+                    </CommandItem>
                 }
-                <span>{getPreviewVisibleState() ? "Hide Preview" : "Show Preview"}</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
-                </CommandShortcut>
-              </CommandItem>
-              {
-                  canShowPreview() && <CommandSeparator/>
-              }
-              {
-                  canShowPreview() &&
-                  <CommandItem onSelect={handlePreviewLink}>
-                    <EyeIcon className="mr-2 h-4 w-4"/>
-                    <span>Preview Link</span>
-                  </CommandItem>
-              }
-              <CommandSeparator/>
-              <CommandItem onSelect={handleOpenSettings}>
-                <SettingsIcon className="mr-2 h-4 w-4"/>
-                <span>{"Settings..."}</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetOpenSettingsShortcut()}/>
-                </CommandShortcut>
-              </CommandItem>
-              <CommandSeparator/>
-              {
-                  canShowDeleteItem() &&
-                  <CommandItem onSelect={handleDeleteItem}>
-                    <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
-                    <span className="text-actions-danger">Delete</span>
-                    <CommandShortcut className="flex flex-row">
-                      <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
-                    </CommandShortcut>
-                  </CommandItem>
-              }
-              {
-                  canShowDeleteItems() &&
-                  <CommandItem onSelect={handleDeleteItems}>
-                    <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
-                    <span className="text-actions-danger">
+                <CommandSeparator/>
+                {
+                    canShowOpenInBrowser() &&
+                    <CommandItem onSelect={handleOpenInBrowser}>
+                      <GlobeIcon className="mr-2 h-4 w-4"/>
+                      <span>Open in Browser</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
+                      </CommandShortcut>
+                    </CommandItem>
+                }
+                {
+                    canShowCopyTextFromImage() &&
+                    <CommandItem onSelect={handleCopyTextFromImage}>
+                      <ScanTextIcon className="mr-2 h-4 w-4"/>
+                      <span>Copy Text from Image</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetCopyTextFromImageShortcut()}/>
+                      </CommandShortcut>
+                    </CommandItem>
+                }
+                {
+                    canShowSaveImageAsFile() &&
+                    <CommandItem onSelect={handleSaveImageAsFile}>
+                      <DownloadIcon className="mr-2 h-4 w-4"/>
+                      <span>Save Image as File...</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetSaveImageAsFileShortcut()}/>
+                      </CommandShortcut>
+                    </CommandItem>
+                }
+                {
+                    canShowEditContent() &&
+                    <CommandItem onSelect={handleEditContent}>
+                      <Edit3Icon className="mr-2 h-4 w-4"/>
+                      <span>Edit Content...</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
+                      </CommandShortcut>
+                    </CommandItem>
+                }
+                <CommandItem onSelect={handleToggleFavorite}>
+                  {
+                    canAddToFavorites() ?
+                        <StarIcon className="mr-2 h-4 w-4"/> :
+                        <StarOffIcon className="mr-2 h-4 w-4"/>
+                  }
+                  <span>{canAddToFavorites() ?
+                      `Add ${getMultipleItemsIndicator()} to Favorites` :
+                      `Remove ${getMultipleItemsIndicator()} from Favorites`}</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
+                  </CommandShortcut>
+                </CommandItem>
+                <CommandItem onSelect={handleTogglePreview}>
+                  {
+                    getPreviewVisibleState() ?
+                        <HidePreviewPaneIcon className="mr-2 h-4 w-4"/> :
+                        <ShowPreviewPaneIcon className="mr-2 h-4 w-4"/>
+                  }
+                  <span>{getPreviewVisibleState() ? "Hide Preview" : "Show Preview"}</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
+                  </CommandShortcut>
+                </CommandItem>
+                {
+                    canShowPreview() && <CommandSeparator/>
+                }
+                {
+                    canShowPreview() &&
+                    <CommandItem onSelect={handlePreviewLink}>
+                      <EyeIcon className="mr-2 h-4 w-4"/>
+                      <span>Preview Link</span>
+                    </CommandItem>
+                }
+                <CommandSeparator/>
+                <CommandItem onSelect={handleOpenSettings}>
+                  <SettingsIcon className="mr-2 h-4 w-4"/>
+                  <span>{"Settings..."}</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetOpenSettingsShortcut()}/>
+                  </CommandShortcut>
+                </CommandItem>
+                <CommandSeparator/>
+                {
+                    canShowDeleteItem() &&
+                    <CommandItem onSelect={handleDeleteItem}>
+                      <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
+                      <span className="text-actions-danger">Delete</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
+                      </CommandShortcut>
+                    </CommandItem>
+                }
+                {
+                    canShowDeleteItems() &&
+                    <CommandItem onSelect={handleDeleteItems}>
+                      <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
+                      <span className="text-actions-danger">
                       Delete {getMultipleItemsIndicator()}
                     </span>
-                    <CommandShortcut className="flex flex-row">
-                      <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
-                    </CommandShortcut>
-                  </CommandItem>
-              }
-              <CommandItem onSelect={handleDeleteAllItems}>
-                <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
-                <span className="text-actions-danger">Delete All...</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetClearHistoryShortcut()}/>
-                </CommandShortcut>
-              </CommandItem>
-              <CommandEmpty>No results found.</CommandEmpty>
-            </CommandList>
-          </Command>
-        </CommandDialog>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
+                      </CommandShortcut>
+                    </CommandItem>
+                }
+                <CommandItem onSelect={handleDeleteAllItems}>
+                  <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
+                  <span className="text-actions-danger">Delete All...</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetClearHistoryShortcut()}/>
+                  </CommandShortcut>
+                </CommandItem>
+                <CommandEmpty>No results found.</CommandEmpty>
+              </CommandList>
+            </div>
+          </CommandDialog>
+        </div>
       </>
   )
 }

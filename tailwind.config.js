@@ -92,6 +92,10 @@ module.exports = {
           background: "var(--skeleton-background)",
           foreground: "var(--skeleton-foreground)",
           text: "var(--skeleton-text)",
+        },
+        dialog: {
+          shadow: "var(--dialog-shadow)",
+          overlay: "var(--dialog-overlay)",
         }
       },
       borderRadius: {

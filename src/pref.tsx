@@ -65,8 +65,6 @@ declare const saveDeleteHistoryItemShortcut: (shortcut: string) => void;
 declare const getDeleteHistoryItemShortcut: () => string;
 declare const saveClearHistoryShortcut: (shortcut: string) => void;
 declare const getClearHistoryShortcut: () => string;
-declare const saveSearchHistoryShortcut: (shortcut: string) => void;
-declare const getSearchHistoryShortcut: () => string;
 declare const saveTogglePreviewShortcut: (shortcut: string) => void;
 declare const getTogglePreviewShortcut: () => string;
 declare const saveShowMoreActionsShortcut: (shortcut: string) => void;
@@ -263,14 +261,6 @@ export function prefGetClearHistoryShortcut() {
 
 export function prefSetClearHistoryShortcut(shortcut: string) {
   saveClearHistoryShortcut(shortcut)
-}
-
-export function prefGetSearchHistoryShortcut() {
-  return getSearchHistoryShortcut()
-}
-
-export function prefSetSearchHistoryShortcut(shortcut: string) {
-  saveSearchHistoryShortcut(shortcut)
 }
 
 export function prefGetTogglePreviewShortcut() {

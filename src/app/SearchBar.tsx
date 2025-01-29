@@ -27,7 +27,6 @@ type SearchBarProps = {
   onHideActions: (reason: HideActionsReason) => void
   onToggleFavorite: () => void
   onTogglePreview: () => void
-  onSearchHistory: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void

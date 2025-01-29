@@ -38,7 +38,6 @@ type HistoryItemsPaneProps = {
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onTogglePreview: () => void
   onToggleFavorite: () => void
-  onSearchHistory: () => void
   onEditContent: () => void
   onEditContentByIndex: (index: number) => void
   onCopyToClipboard: () => void
@@ -198,7 +197,6 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    onOpenInBrowser={props.onOpenInBrowser}
                    onPreviewLink={props.onPreviewLink}
                    onOpenSettings={props.onOpenSettings}
-                   onSearchHistory={props.onSearchHistory}
                    onToggleFavorite={props.onToggleFavorite}
                    onTogglePreview={props.onTogglePreview}
                    onDeleteItem={props.onDeleteItem}

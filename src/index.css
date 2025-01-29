@@ -59,6 +59,9 @@
     --skeleton-background: #ffffff;
     --skeleton-foreground: #dadada;
     --skeleton-text: #5a5a5a;
+    /* Dialog */
+    --dialog-shadow: #414141;
+    --dialog-overlay: rgba(0, 0, 0, 0.3);
 
     font-size: 14px;
   }
@@ -127,6 +130,9 @@
     --skeleton-background: #282828;
     --skeleton-foreground: #3c3c3c;
     --skeleton-text: #939393;
+    /* Dialog */
+    --dialog-shadow: black;
+    --dialog-overlay: rgba(0, 0, 0, 0.3);
   }
 }
 
