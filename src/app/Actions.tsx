@@ -93,7 +93,7 @@ export default function Actions(props: ActionsProps) {
   const [open, setOpen] = useState(false)
 
   function closeCommandsPopup() {
-    setOpen(false)
+    handleOpenChange(false)
   }
 
   (window as any).closeCommandsPopup = closeCommandsPopup
