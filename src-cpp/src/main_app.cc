@@ -24,7 +24,7 @@ std::string kContactSupportUrl =
     "mailto:vladimir.ikryanov@clipbook.app?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
 std::string kFeatureRequestUrl =
     "https://clipbook.app/roadmap/?utm_source=app&utm_medium=help";
-int32_t kUpdateCheckIntervalInHours = 2;
+int32_t kUpdateCheckIntervalInHours = 48;
 
 MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSettings> &settings)
     : app_(app),
@@ -76,9 +76,6 @@ bool MainApp::init() {
 
   // Update the open settings shortcut.
   updateOpenSettingsShortcut();
-
-  // Run the update checker.
-  runUpdateChecker();
 
   // Check if the app is running after system reboot.
   auto system_boot_time = getSystemBootTime();
@@ -178,6 +175,11 @@ void MainApp::show() {
     frame->executeJavaScript("activateApp()");
   }
   app_window_visible_ = true;
+
+  // Request the app to check for updates when it's shown/active.
+  if (settings_->shouldCheckForUpdatesAutomatically()) {
+    checkForUpdates();
+  }
 }
 
 void MainApp::hide() {
@@ -234,31 +236,30 @@ void MainApp::clearHistory() {
   }
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
-void MainApp::runUpdateChecker() {
-  std::thread t([this]() {
-    while (true) {
-      std::this_thread::sleep_for(std::chrono::hours(kUpdateCheckIntervalInHours));
-      if (settings_->shouldCheckForUpdatesAutomatically() && !checking_for_updates_) {
-        checkForUpdates();
-      }
-    }
-  });
-  t.detach();
-}
-#pragma clang diagnostic pop
-
 void MainApp::checkForUpdates(bool user_initiated) {
-  checking_for_updates_ = true;
-  if (user_initiated) {
-    check_for_updates_item_->setEnabled(false);
+  // Skip the update check if it's already in progress.
+  if (checking_for_updates_) {
+    return;
   }
-  checkForUpdates([this, user_initiated]() {
-    checking_for_updates_ = false;
-    if (user_initiated) {
-      check_for_updates_item_->setEnabled(true);
+
+  // Skip the update check when the last check was less than 48 hours ago.
+  if (!user_initiated) {
+    auto last_update_check_time = settings_->getLastUpdateCheckTime();
+    auto current_time = getCurrentTimeMillis();
+    auto elapsed_time = current_time - last_update_check_time;
+    if (elapsed_time < (kUpdateCheckIntervalInHours * 60 * 60 * 1000)) {
+      return;
     }
+  }
+
+  // Save the last update check time.
+  settings_->saveLastUpdateCheckTime(getCurrentTimeMillis());
+
+  checking_for_updates_ = true;
+  check_for_updates_item_->setEnabled(false);
+  checkForUpdates([this]() {
+    checking_for_updates_ = false;
+    check_for_updates_item_->setEnabled(true);
   }, user_initiated);
 }
 

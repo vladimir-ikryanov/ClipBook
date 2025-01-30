@@ -4,19 +4,16 @@
 #include <string>
 #include <vector>
 
-/**
- * Returns true if the string is empty or contains only spaces.
- */
+// Returns true if the string is empty or contains only spaces.
 bool isEmptyOrSpaces(const std::string &str);
 
-/**
- * Returns the path to the user's home directory.
- */
+// Returns the path to the user's home directory.
 std::string getUserHomeDir();
 
-/**
- * Returns the path to the application data directory.
- */
+// Returns the path to the application data directory.
 std::string getAppDataDir();
+
+// Returns the current time in milliseconds since the UNIX epoch.
+long long getCurrentTimeMillis();
 
 #endif  // CLIPBOOK_UTILS_H_

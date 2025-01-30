@@ -158,6 +158,9 @@ class AppSettings {
 
   virtual void saveUpdateHistoryAfterAction(bool update) = 0;
   virtual bool shouldUpdateHistoryAfterAction() = 0;
+
+  virtual void saveLastUpdateCheckTime(long time) = 0;
+  virtual long getLastUpdateCheckTime() = 0;
 };
 
 

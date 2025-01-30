@@ -22,3 +22,8 @@ std::string getAppDataDir() {
   }
   return homeDir + "/Library/Application Support/ClipBook";
 }
+
+long long getCurrentTimeMillis() {
+  return duration_cast<std::chrono::milliseconds>(
+      std::chrono::system_clock::now().time_since_epoch()).count();
+}

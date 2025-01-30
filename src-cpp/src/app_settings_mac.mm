@@ -18,6 +18,7 @@ NSString *prefIgnoreConfidentialContent = @"privacy.ignore_confidential_content"
 NSString *prefIgnoreTransientContent = @"privacy.ignore_transient_content";
 NSString *prefOpenAtLogin = @"app.open_at_login";
 NSString *prefCheckForUpdatesAutomatically = @"app.check_for_updates_automatically";
+NSString *prefLastUpdateCheckTime = @"app.last_update_check_time";
 NSString *prefWarnOnClearHistory = @"app.warn_on_clear_history";
 NSString *prefKeepFavoritesOnClearHistory = @"app.keep_favorites_on_clear_history";
 NSString *prefShowIconInMenuBar = @"app.show_icon_in_menu_bar";
@@ -828,4 +829,19 @@ bool AppSettingsMac::shouldUpdateHistoryAfterAction() {
     return true;
   }
   return [defaults boolForKey:prefUpdateHistoryAfterAction];
+}
+
+void AppSettingsMac::saveLastUpdateCheckTime(long time) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSNumber numberWithLong:time] forKey:prefLastUpdateCheckTime];
+  [defaults synchronize];
+}
+
+long AppSettingsMac::getLastUpdateCheckTime() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSNumber *time = [defaults objectForKey:prefLastUpdateCheckTime];
+  if (time != nil) {
+    return [time longValue];
+  }
+  return -1;
 }

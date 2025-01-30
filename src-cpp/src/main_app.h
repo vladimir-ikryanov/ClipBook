@@ -59,7 +59,6 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void clearHistory();
   void checkForUpdates(bool user_initiated = false);
   void checkForUpdates(const std::function<void()> &complete, bool user_initiated);
-  void runUpdateChecker();
   void showAboutDialog();
   void showUpToDateDialog(const std::function<void()> &complete);
   void showRestartRequiredDialog(const std::string &app_version,
