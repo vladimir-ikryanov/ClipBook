@@ -945,7 +945,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
 
   // Settings window.
   window->putProperty("checkForUpdates", [this]() -> void {
-    checkForUpdates(true);
+    std::thread([this]() {
+      checkForUpdates(true);
+    }).detach();
   });
 }
 
