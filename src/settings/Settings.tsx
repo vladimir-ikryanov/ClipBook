@@ -163,13 +163,13 @@ Launch ClipBook automatically at&nbsp;login.
             </div>
 
             <div className="flex items-center justify-between space-x-20 py-1">
-              <Label htmlFor="openAtLogin" className="flex flex-col text-base">
+              <Label htmlFor="checkForUpdates" className="flex flex-col text-base">
                 <span className="">Check for updates automatically</span>
                 <span className="text-neutral-500 font-normal text-sm">
 ClipBook will check for updates automatically and notify you when a new version is&nbsp;available.
             </span>
               </Label>
-              <Switch id="openAtLogin" checked={checkForUpdatesAutomatically}
+              <Switch id="checkForUpdates" checked={checkForUpdatesAutomatically}
                       onCheckedChange={handleCheckForUpdatesAutomaticallyChange}/>
             </div>
 
@@ -236,7 +236,7 @@ ClipBook will check for updates automatically and notify you when a new version 
             </div>
 
             <div className="flex items-center justify-between space-x-10 py-1">
-              <Label htmlFor="showIcon" className="flex flex-col text-base">
+              <Label htmlFor="openWindowStrategy" className="flex flex-col text-base">
                 <span className="">Open window at</span>
                 <span className="text-neutral-500 font-normal text-sm">
                   Select where the ClipBook window should be opened if it's possible.
