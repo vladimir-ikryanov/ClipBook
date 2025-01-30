@@ -257,9 +257,17 @@ void MainApp::checkForUpdates(bool user_initiated) {
 
   checking_for_updates_ = true;
   check_for_updates_item_->setEnabled(false);
+  auto settings_frame = settings_window_->mainFrame();
+  if (settings_frame) {
+    settings_frame->executeJavaScript("setUpdateCheckInProgress(true)");
+  }
   checkForUpdates([this]() {
     checking_for_updates_ = false;
     check_for_updates_item_->setEnabled(true);
+    auto settings_frame = settings_window_->mainFrame();
+    if (settings_frame) {
+      settings_frame->executeJavaScript("setUpdateCheckInProgress(false)");
+    }
   }, user_initiated);
 }
 
@@ -526,6 +534,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("openUrl", [this](std::string url) {
     app_->desktop()->openUrl(url);
   });
+
   // App window.
   window->putProperty("pasteItemInFrontApp",
                       [this](std::string text, std::string imageFileName, std::string imageText) {
@@ -932,6 +941,11 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("shouldUpdateHistoryAfterAction", [this]() -> bool {
     return settings_->shouldUpdateHistoryAfterAction();
+  });
+
+  // Settings window.
+  window->putProperty("checkForUpdates", [this]() -> void {
+    checkForUpdates(true);
   });
 }
 

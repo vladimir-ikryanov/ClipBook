@@ -18,7 +18,7 @@ import {
   ChevronsUpDown,
   KeyboardIcon,
   KeyRoundIcon,
-  ListIcon,
+  ListIcon, RefreshCcwIcon,
   SettingsIcon,
   ShieldCheckIcon,
 } from "lucide-react";
@@ -33,6 +33,7 @@ import {
 import {Button} from "@/components/ui/button";
 
 declare const closeSettingsWindow: () => void;
+declare const checkForUpdates: () => void;
 
 // The map of open strategy enum values to labels.
 const openWindowStrategyLabels = {
@@ -49,7 +50,8 @@ export default function Settings() {
   const [openAtLogin, setOpenAtLogin] = useState(prefGetOpenAtLogin())
   const [checkForUpdatesAutomatically, setCheckForUpdatesAutomatically] = useState(prefGetCheckForUpdatesAutomatically())
   const [showIconInMenuBar, setShowIconInMenuBar] = useState(prefGetShowIconInMenuBar())
-  const [openWindowStrategy, setOpenWindowStrategy] = React.useState(prefGetOpenWindowStrategy())
+  const [openWindowStrategy, setOpenWindowStrategy] = useState(prefGetOpenWindowStrategy())
+  const [checkingForUpdates, setCheckingForUpdates] = useState(false)
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -87,6 +89,16 @@ export default function Settings() {
     setOpenWindowStrategy(value as OpenWindowStrategy)
     prefSetOpenWindowStrategy(value as OpenWindowStrategy)
   }
+
+  function handleCheckForUpdates() {
+    checkForUpdates()
+  }
+
+  function setUpdateCheckInProgress(inProgress: boolean) {
+    setCheckingForUpdates(inProgress)
+  }
+
+  (window as any).setUpdateCheckInProgress = setUpdateCheckInProgress
 
   function renderLicenseItem() {
     return (
@@ -173,6 +185,18 @@ ClipBook will check for updates automatically and notify you when a new version 
                       onCheckedChange={handleCheckForUpdatesAutomaticallyChange}/>
             </div>
 
+            <div className="flex items-center justify-between py-1 space-x-20">
+              <Button variant="activate" size="sm" className="px-4"
+                      onClick={handleCheckForUpdates} disabled={checkingForUpdates}>
+                {
+                  checkingForUpdates ? <RefreshCcwIcon className="animate-spin h-4 w-4 mr-2"/> : null
+                }
+                {
+                  checkingForUpdates ? "Checking for updates..." : "Check for Updates..."
+                }
+              </Button>
+            </div>
+
             <hr/>
 
             <div className="flex justify-between space-x-10 py-1">
@@ -246,12 +270,14 @@ ClipBook will check for updates automatically and notify you when a new version 
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="dropdown" className="px-4 outline-none">
                     {openWindowStrategyLabels[openWindowStrategy]}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="p-1.5 bg-actions-background" align="end">
-                  <DropdownMenuRadioGroup value={openWindowStrategy} onValueChange={handleOpenWindowStrategyChange}>
-                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION} className="py-2 pr-4 pl-10">
+                  <DropdownMenuRadioGroup value={openWindowStrategy}
+                                          onValueChange={handleOpenWindowStrategyChange}>
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION}
+                                           className="py-2 pr-4 pl-10">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION]}</span>
                         <span className="text-secondary-foreground">
@@ -259,7 +285,8 @@ ClipBook will check for updates automatically and notify you when a new version 
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_SCREEN_CENTER} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_SCREEN_CENTER}
+                                           className="py-2 pr-4 pl-10">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_SCREEN_CENTER]}</span>
                         <span className="text-secondary-foreground">
@@ -267,7 +294,8 @@ ClipBook will check for updates automatically and notify you when a new version 
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_WINDOW_CENTER} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_WINDOW_CENTER}
+                                           className="py-2 pr-4 pl-10">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_WINDOW_CENTER]}</span>
                         <span className="text-secondary-foreground">
@@ -275,7 +303,8 @@ ClipBook will check for updates automatically and notify you when a new version 
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={OpenWindowStrategy.SCREEN_WITH_CURSOR} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.SCREEN_WITH_CURSOR}
+                                           className="py-2 pr-4 pl-10">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.SCREEN_WITH_CURSOR]}</span>
                         <span className="text-secondary-foreground">
@@ -283,7 +312,8 @@ ClipBook will check for updates automatically and notify you when a new version 
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={OpenWindowStrategy.MOUSE_CURSOR} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.MOUSE_CURSOR}
+                                           className="py-2 pr-4 pl-10">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.MOUSE_CURSOR]}</span>
                         <span className="text-secondary-foreground">
@@ -291,7 +321,8 @@ ClipBook will check for updates automatically and notify you when a new version 
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={OpenWindowStrategy.INPUT_CURSOR} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={OpenWindowStrategy.INPUT_CURSOR}
+                                           className="py-2 pr-4 pl-10">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.INPUT_CURSOR]}</span>
                         <span className="text-secondary-foreground">
