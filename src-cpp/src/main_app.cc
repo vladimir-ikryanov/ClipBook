@@ -257,17 +257,23 @@ void MainApp::checkForUpdates(bool user_initiated) {
 
   checking_for_updates_ = true;
   check_for_updates_item_->setEnabled(false);
-  auto settings_frame = settings_window_->mainFrame();
-  if (settings_frame) {
-    settings_frame->executeJavaScript("setUpdateCheckInProgress(true)");
+  if (settings_window_) {
+    auto settings_frame = settings_window_->mainFrame();
+    if (settings_frame) {
+      settings_frame->executeJavaScript("setUpdateCheckInProgress(true)");
+    }
   }
   checkForUpdates([this]() {
     checking_for_updates_ = false;
     check_for_updates_item_->setEnabled(true);
-    auto settings_frame = settings_window_->mainFrame();
-    if (settings_frame) {
-      settings_frame->executeJavaScript("setUpdateCheckInProgress(false)");
-    }
+    std::thread([this]() {
+      if (settings_window_) {
+        auto settings_frame = settings_window_->mainFrame();
+        if (settings_frame) {
+          settings_frame->executeJavaScript("setUpdateCheckInProgress(false)");
+        }
+      }
+    }).detach();
   }, user_initiated);
 }
 
