@@ -1,7 +1,7 @@
 import '../app.css';
-import React, {CSSProperties, KeyboardEvent, MouseEvent, useState} from 'react';
+import React, {CSSProperties, KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
 import {getFilterQuery} from "@/data";
-import {Clip, ClipType} from "@/db";
+import {Clip, ClipType, updateClip} from "@/db";
 import {toCSSColor} from "@/lib/utils";
 import {
   FileIcon,
@@ -37,20 +37,76 @@ type HistoryItemPaneProps = {
 
 const HistoryItemPane = (props: HistoryItemPaneProps) => {
   const [mouseOver, setMouseOver] = useState(false)
+  const [renameItemMode, setRenameItemMode] = useState(false)
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false)
+  const [itemName, setItemName] = useState(props.item.name ? props.item.name : "")
+  const [originalItemName, setOriginalItemName] = useState(props.item.name ? props.item.name : "")
+
+  useEffect(() => {
+    function handleAction(event: Event) {
+      const customEvent = event as CustomEvent<{ action: string }>;
+      if (customEvent.detail.action === "renameItem" && !isMultipleItemsSelected() && isItemSelected()) {
+        setRenameItemMode(true)
+      }
+    }
+
+    window.addEventListener("onAction", handleAction);
+    return () => window.removeEventListener("onAction", handleAction);
+  }, [])
+
+  function isItemSelected() {
+    return props.selectedItemIndices.includes(props.index)
+  }
+
+  function isMultipleItemsSelected() {
+    return props.selectedItemIndices.length > 1
+  }
+
+  async function saveItemName(name: string) {
+    setItemName(name)
+    props.item.name = name
+    await updateClip(props.item.id!, props.item)
+  }
+
+  async function handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+    await saveItemName(event.target.value)
+  }
+
+  async function handleFinishRename() {
+    setRenameItemMode(false)
+    setOriginalItemName(itemName)
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "focusSearchInput"}}));
+  }
+
+  async function handleCancelRename() {
+    setRenameItemMode(false)
+    await saveItemName(originalItemName)
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "focusSearchInput"}}));
+  }
 
   function handleDropdownMenuOpenChange(open: boolean) {
     setActionsMenuOpen(open)
   }
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = async (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
       e.stopPropagation()
+    }
+    if (renameItemMode) {
+      if (e.key === "Enter") {
+        await handleFinishRename()
+      }
+      if (e.key === "Escape") {
+        handleCancelRename()
+      }
     }
   }
 
   const handleMouseDown = (e: MouseEvent) => {
-    // Check if this is ae.metaKey double click event.
+    if (renameItemMode) {
+      return
+    }
+    // Check if this is e.metaKey double click event.
     if (e.detail === 2) {
       props.onMouseDoubleClick(props.index)
     } else {
@@ -93,7 +149,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     }
     if (mouseOver || actionsMenuOpen) {
       if (props.selectedItemIndices.length === 1 ||
-          (props.selectedItemIndices.length > 1 && !props.selectedItemIndices.includes(props.index))) {
+          (isMultipleItemsSelected() && !props.selectedItemIndices.includes(props.index))) {
         return <HistoryItemMenu item={props.item}
                                 index={props.index}
                                 appName={props.appName}
@@ -158,7 +214,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   function renderItemLabel(text: string, query: string) {
     // Replace new lines with the Return character.
     let parts = text.split("\n")
-    return <div className="space-x-1 whitespace-nowrap overflow-hidden overflow-ellipsis">{
+    return <div className="ml-2 space-x-1 whitespace-nowrap overflow-hidden overflow-ellipsis">{
       parts.map((line, index) => {
         return <div className="inline" key={index}>
           <span className="inline">{highlightSearchMatches(line, query)}</span>
@@ -176,7 +232,23 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     }</div>
   }
 
+  function renderInputField() {
+    return <div className="flex flex-grow">
+      <input type="text"
+             className="py-0.5 px-1.5 ml-0.5 mr-0 rounded-sm border-none outline-none text-justify font-normal w-full"
+             value={itemName}
+             autoFocus={true}
+             placeholder="Enter a name for this item"
+             onChange={handleNameChange}
+             onBlur={handleFinishRename}
+             onKeyDown={handleKeyDown}/>
+    </div>
+  }
+
   function getItemLabel() {
+    if (props.item.name && props.item.name.length > 0) {
+      return props.item.name
+    }
     if (props.item.type === ClipType.Image) {
       if (props.item.imageText && props.item.imageText.length > 0) {
         return props.item.imageText
@@ -192,7 +264,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
 
   function getRoundedStyle() {
     let result = ""
-    if (props.selectedItemIndices.length > 1) {
+    if (isMultipleItemsSelected()) {
       // Check if there's selected item before the current item.
       if (!props.selectedItemIndices.includes(props.index - 1)) {
         result += " rounded-t-md"
@@ -207,10 +279,6 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     return result
   }
 
-  function isItemSelected() {
-    return props.selectedItemIndices.includes(props.index)
-  }
-
   return (
       <div
           id={`tab-${props.index}`}
@@ -220,11 +288,11 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
           onMouseDown={handleMouseDown}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}>
-        <div className="flex flex-none mr-3 text-primary-foreground">{renderClipIcon()}</div>
+        <div className="flex flex-none mr-1 text-primary-foreground">{renderClipIcon()}</div>
         <div
             className="flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis">
           {
-            renderItemLabel(getItemLabel(), getFilterQuery())
+            renameItemMode ? renderInputField() : renderItemLabel(getItemLabel(), getFilterQuery())
           }
         </div>
         {renderActionsButton()}

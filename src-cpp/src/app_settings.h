@@ -70,6 +70,21 @@ class AppSettings {
   virtual void saveClearHistoryOnMacReboot(bool clear) = 0;
   virtual bool shouldClearHistoryOnMacReboot() = 0;
 
+  virtual void saveOpenWindowStrategy(std::string strategy) = 0;
+  virtual std::string getOpenWindowStrategy() = 0;
+
+  virtual void saveTreatDigitNumbersAsColor(bool treat) = 0;
+  virtual bool shouldTreatDigitNumbersAsColor() = 0;
+
+  virtual void saveShowPreviewForLinks(bool show) = 0;
+  virtual bool shouldShowPreviewForLinks() = 0;
+
+  virtual void saveUpdateHistoryAfterAction(bool update) = 0;
+  virtual bool shouldUpdateHistoryAfterAction() = 0;
+
+  virtual void saveLastUpdateCheckTime(long time) = 0;
+  virtual long getLastUpdateCheckTime() = 0;
+
   // Shortcuts.
 
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;
@@ -150,20 +165,8 @@ class AppSettings {
   virtual void savePauseResumeShortcut(std::string shortcut) = 0;
   virtual std::string getPauseResumeShortcut() = 0;
 
-  virtual void saveOpenWindowStrategy(std::string strategy) = 0;
-  virtual std::string getOpenWindowStrategy() = 0;
-
-  virtual void saveTreatDigitNumbersAsColor(bool treat) = 0;
-  virtual bool shouldTreatDigitNumbersAsColor() = 0;
-
-  virtual void saveShowPreviewForLinks(bool show) = 0;
-  virtual bool shouldShowPreviewForLinks() = 0;
-
-  virtual void saveUpdateHistoryAfterAction(bool update) = 0;
-  virtual bool shouldUpdateHistoryAfterAction() = 0;
-
-  virtual void saveLastUpdateCheckTime(long time) = 0;
-  virtual long getLastUpdateCheckTime() = 0;
+  virtual void saveRenameItemShortcut(std::string shortcut) = 0;
+  virtual std::string getRenameItemShortcut() = 0;
 };
 
 

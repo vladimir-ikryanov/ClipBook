@@ -28,6 +28,7 @@ export class LinkPreviewDetails {
 
 export class Clip {
   id?: number;
+  name?: string;
   content: string;
   type: ClipType = ClipType.Text;
   sourceApp: string;
@@ -57,7 +58,7 @@ class AppDatabase extends Dexie {
   constructor() {
     super('ClipBookDB');
     this.version(1).stores({
-      history: '++id, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText',
+      history: '++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText',
       linkPreviews: '++id, url, title, description, imageFileName, faviconFileName'
     });
   }

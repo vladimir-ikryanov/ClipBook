@@ -213,15 +213,25 @@ export function getHistoryItems(): Clip[] {
   visibleHistoryLength = history.length
   if (filterQuery.length > 0) {
     let filteredHistory = Array.from(history.filter(item => {
-      let contentHasText = item.content.toLowerCase().includes(filterQuery.toLowerCase());
-      if (!contentHasText && item.type === ClipType.Image) {
+      let searchString = filterQuery.toLowerCase();
+      // Search in content.
+      let contentHasText = item.content.toLowerCase().includes(searchString);
+      if (contentHasText) {
+        return true
+      }
+      // Search in name.
+      if (item.name && item.name.toLowerCase().includes(searchString)) {
+        return true
+      }
+      // Search in image title.
+      if (item.type === ClipType.Image) {
         let imageTitle = "Image (" + item.imageWidth + "x" + item.imageHeight + ")";
         if (item.imageText && item.imageText.length > 0) {
           imageTitle = item.imageText;
         }
-        contentHasText = imageTitle.toLowerCase().includes(filterQuery.toLowerCase());
+        return imageTitle.toLowerCase().includes(searchString);
       }
-      return contentHasText
+      return false
     }));
     visibleHistoryLength = filteredHistory.length
     sortHistory(sortType, filteredHistory)

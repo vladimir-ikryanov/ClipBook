@@ -66,6 +66,21 @@ class AppSettingsMac : public AppSettings {
   void saveClearHistoryOnMacReboot(bool clear) override;
   bool shouldClearHistoryOnMacReboot() override;
 
+  void saveOpenWindowStrategy(std::string strategy) override;
+  std::string getOpenWindowStrategy() override;
+
+  void saveTreatDigitNumbersAsColor(bool treat) override;
+  bool shouldTreatDigitNumbersAsColor() override;
+
+  void saveShowPreviewForLinks(bool show) override;
+  bool shouldShowPreviewForLinks() override;
+
+  void saveUpdateHistoryAfterAction(bool update) override;
+  bool shouldUpdateHistoryAfterAction() override;
+
+  void saveLastUpdateCheckTime(long time) override;
+  long getLastUpdateCheckTime() override;
+
   // Shortcuts.
 
   void saveOpenAppShortcut(std::string shortcut) override;
@@ -146,20 +161,8 @@ class AppSettingsMac : public AppSettings {
   void savePauseResumeShortcut(std::string shortcut) override;
   std::string getPauseResumeShortcut() override;
 
-  void saveOpenWindowStrategy(std::string strategy) override;
-  std::string getOpenWindowStrategy() override;
-
-  void saveTreatDigitNumbersAsColor(bool treat) override;
-  bool shouldTreatDigitNumbersAsColor() override;
-
-  void saveShowPreviewForLinks(bool show) override;
-  bool shouldShowPreviewForLinks() override;
-
-  void saveUpdateHistoryAfterAction(bool update) override;
-  bool shouldUpdateHistoryAfterAction() override;
-
-  void saveLastUpdateCheckTime(long time) override;
-  long getLastUpdateCheckTime() override;
+  void saveRenameItemShortcut(std::string shortcut) override;
+  std::string getRenameItemShortcut() override;
 
  private:
   static molybden::Rect getWindowBoundsForScreen(int screen_id);

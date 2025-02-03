@@ -64,6 +64,7 @@ NSString *prefNavigateToNextGroupOfItemsShortcut = @"app.navigate_to_next_group_
 NSString *prefNavigateToPrevGroupOfItemsShortcut = @"app.navigate_to_prev_group_of_items_shortcut";
 NSString *prefSaveImageAsFileShortcut = @"app.save_image_as_file_shortcut";
 NSString *prefPauseResumeShortcut = @"app.pause_resume_shortcut";
+NSString *prefRenameItemShortcut = @"app.rename_item_shortcut";
 
 AppSettingsMac::AppSettingsMac() = default;
 
@@ -341,6 +342,63 @@ bool AppSettingsMac::shouldCopyToClipboardAfterMerge() {
     return [defaults boolForKey:prefCopyToClipboardAfterMerge];
   }
   return true;
+}
+
+void AppSettingsMac::saveTreatDigitNumbersAsColor(bool treat) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:treat forKey:prefTreatDigitNumbersAsColor];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldTreatDigitNumbersAsColor() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefTreatDigitNumbersAsColor] == nil) {
+    return true;
+  }
+  return [defaults boolForKey:prefTreatDigitNumbersAsColor];
+}
+
+void AppSettingsMac::saveShowPreviewForLinks(bool show) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:show forKey:prefShowPreviewForLinks];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldShowPreviewForLinks() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefShowPreviewForLinks] == nil) {
+    return true;
+  }
+  return [defaults boolForKey:prefShowPreviewForLinks];
+}
+
+void AppSettingsMac::saveUpdateHistoryAfterAction(bool update) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:update forKey:prefUpdateHistoryAfterAction];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldUpdateHistoryAfterAction() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefUpdateHistoryAfterAction] == nil) {
+    return true;
+  }
+  return [defaults boolForKey:prefUpdateHistoryAfterAction];
+}
+
+void AppSettingsMac::saveLastUpdateCheckTime(long time) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSNumber numberWithLong:time] forKey:prefLastUpdateCheckTime];
+  [defaults synchronize];
+}
+
+long AppSettingsMac::getLastUpdateCheckTime() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSNumber *time = [defaults objectForKey:prefLastUpdateCheckTime];
+  if (time != nil) {
+    return [time longValue];
+  }
+  return -1;
 }
 
 // Shortcuts.
@@ -805,59 +863,17 @@ std::string AppSettingsMac::getOpenWindowStrategy() {
   return "activeScreenLastPosition";
 }
 
-void AppSettingsMac::saveTreatDigitNumbersAsColor(bool treat) {
+void AppSettingsMac::saveRenameItemShortcut(std::string shortcut) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setBool:treat forKey:prefTreatDigitNumbersAsColor];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefRenameItemShortcut];
   [defaults synchronize];
 }
 
-bool AppSettingsMac::shouldTreatDigitNumbersAsColor() {
+std::string AppSettingsMac::getRenameItemShortcut() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefTreatDigitNumbersAsColor] == nil) {
-    return true;
+  NSString *shortcut = [defaults objectForKey:prefRenameItemShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
   }
-  return [defaults boolForKey:prefTreatDigitNumbersAsColor];
-}
-
-void AppSettingsMac::saveShowPreviewForLinks(bool show) {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setBool:show forKey:prefShowPreviewForLinks];
-  [defaults synchronize];
-}
-
-bool AppSettingsMac::shouldShowPreviewForLinks() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefShowPreviewForLinks] == nil) {
-    return true;
-  }
-  return [defaults boolForKey:prefShowPreviewForLinks];
-}
-
-void AppSettingsMac::saveUpdateHistoryAfterAction(bool update) {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setBool:update forKey:prefUpdateHistoryAfterAction];
-  [defaults synchronize];
-}
-
-bool AppSettingsMac::shouldUpdateHistoryAfterAction() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefUpdateHistoryAfterAction] == nil) {
-    return true;
-  }
-  return [defaults boolForKey:prefUpdateHistoryAfterAction];
-}
-
-void AppSettingsMac::saveLastUpdateCheckTime(long time) {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setObject:[NSNumber numberWithLong:time] forKey:prefLastUpdateCheckTime];
-  [defaults synchronize];
-}
-
-long AppSettingsMac::getLastUpdateCheckTime() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  NSNumber *time = [defaults objectForKey:prefLastUpdateCheckTime];
-  if (time != nil) {
-    return [time longValue];
-  }
-  return -1;
+  return "MetaLeft + KeyR";
 }

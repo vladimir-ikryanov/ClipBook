@@ -917,6 +917,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getPauseResumeShortcut", [this]() -> std::string {
     return settings_->getPauseResumeShortcut();
   });
+  window->putProperty("saveRenameItemShortcut", [this](std::string shortcut) -> void {
+    settings_->saveRenameItemShortcut(shortcut);
+  });
+  window->putProperty("getRenameItemShortcut", [this]() -> std::string {
+    return settings_->getRenameItemShortcut();
+  });
 
   window->putProperty("selectAppsToIgnore", [this]() {
     selectAppsToIgnore();

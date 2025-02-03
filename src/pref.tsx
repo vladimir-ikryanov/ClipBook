@@ -89,6 +89,8 @@ declare const getSaveImageAsFileShortcut: () => string;
 declare const saveSaveImageAsFileShortcut: (shortcut: string) => void;
 declare const savePauseResumeShortcut: (shortcut: string) => void;
 declare const getPauseResumeShortcut: () => string;
+declare const saveRenameItemShortcut: (shortcut: string) => void;
+declare const getRenameItemShortcut: () => string;
 
 export enum OpenWindowStrategy {
   ACTIVE_SCREEN_LAST_POSITION = "activeScreenLastPosition",
@@ -500,4 +502,12 @@ export function prefSetUpdateHistoryAfterAction(update: boolean) {
 
 export function prefShouldUpdateHistoryAfterAction() {
   return shouldUpdateHistoryAfterAction()
+}
+
+export function prefSetRenameItemShortcut(shortcut: string) {
+  saveRenameItemShortcut(shortcut)
+}
+
+export function prefGetRenameItemShortcut() {
+  return getRenameItemShortcut()
 }

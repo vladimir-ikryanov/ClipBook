@@ -48,7 +48,7 @@ import {
   prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetQuickPasteModifier,
-  prefGetQuickPasteShortcuts,
+  prefGetQuickPasteShortcuts, prefGetRenameItemShortcut,
   prefGetSaveImageAsFileShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
@@ -380,6 +380,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
         handlePasteByIndex(quickPasteShortcut.index)
         e.preventDefault()
       }
+
+      // Dispatch the rename item request.
+      if (isShortcutMatch(prefGetRenameItemShortcut(), e)) {
+        window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "renameItem"}}));
+      }
     }
 
     document.addEventListener("keydown", down)
@@ -431,6 +436,18 @@ export default function HistoryPane(props: HistoryPaneProps) {
       document.removeEventListener("keyup", up);
     };
   }, [quickPasteModifierPressed]);
+
+  useEffect(() => {
+    function handleAction(event: Event) {
+      const customEvent = event as CustomEvent<{ action: string }>;
+      if (customEvent.detail.action === "focusSearchInput") {
+        focusSearchField()
+      }
+    }
+
+    window.addEventListener("onAction", handleAction);
+    return () => window.removeEventListener("onAction", handleAction);
+  }, []);
 
   function selectNextItem(shiftKeyDown: boolean = false) {
     let index = getLastSelectedItemIndex()

@@ -14,6 +14,7 @@ import {
   prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetPauseResumeShortcut,
+  prefGetRenameItemShortcut,
   prefGetSaveImageAsFileShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
@@ -32,7 +33,9 @@ import {
   prefSetOpenAppShortcut,
   prefSetOpenInBrowserShortcut,
   prefSetOpenSettingsShortcut,
-  prefSetPasteSelectedItemToActiveAppShortcut, prefSetPauseResumeShortcut,
+  prefSetPasteSelectedItemToActiveAppShortcut,
+  prefSetPauseResumeShortcut,
+  prefSetRenameItemShortcut,
   prefSetSaveImageAsFileShortcut,
   prefSetSelectNextItemShortcut,
   prefSetSelectPreviousItemShortcut,
@@ -70,6 +73,7 @@ export default function Shortcuts() {
   const [toggleFavoriteShortcut, setToggleFavoriteShortcut] = useState(prefGetToggleFavoriteShortcut());
   const [saveImageAsFileShortcut, setSaveImageAsFileShortcut] = useState(prefGetSaveImageAsFileShortcut());
   const [pauseResumeShortcut, setPauseResumeShortcut] = useState(prefGetPauseResumeShortcut());
+  const [renameItemShortcut, setRenameItemShortcut] = useState(prefGetRenameItemShortcut());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -122,6 +126,11 @@ export default function Shortcuts() {
   function handleEditHistoryItemShortcutChange(shortcut: string) {
     setEditHistoryItemShortcut(shortcut)
     prefSetEditHistoryItemShortcut(shortcut)
+  }
+
+  function handleRenameHistoryItemShortcutChange(shortcut: string) {
+    setRenameItemShortcut(shortcut)
+    prefSetRenameItemShortcut(shortcut)
   }
 
   function handleOpenInBrowserShortcutChange(shortcut: string) {
@@ -319,6 +328,12 @@ export default function Shortcuts() {
               <ShortcutInput shortcut={editHistoryItemShortcut}
                              defaultShortcut="MetaLeft + KeyE"
                              onSave={handleEditHistoryItemShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Rename history item</span>
+              <ShortcutInput shortcut={renameItemShortcut}
+                             defaultShortcut="MetaLeft + KeyR"
+                             onSave={handleRenameHistoryItemShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Delete history item</span>
