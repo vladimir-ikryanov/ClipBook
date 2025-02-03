@@ -4,27 +4,24 @@ import {Button} from "@/components/ui/button";
 import {
   ChevronDown,
   ClipboardIcon,
-  CopyIcon, DownloadIcon, Edit3Icon, EllipsisVerticalIcon, EyeIcon, FileIcon,
+  CopyIcon, DownloadIcon, Edit3Icon, EllipsisVerticalIcon, EyeIcon,
   GlobeIcon, RefreshCwIcon, ScanTextIcon,
   StarIcon, TrashIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
-  DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  PasteItemsSeparator,
   prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardShortcut, prefGetDeleteHistoryItemShortcut, prefGetEditHistoryItemShortcut,
-  prefGetOpenInBrowserShortcut, prefGetPasteItemsSeparator,
+  prefGetOpenInBrowserShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut, prefGetSaveImageAsFileShortcut,
   prefGetToggleFavoriteShortcut,
-  prefGetTogglePreviewShortcut, prefSetPasteItemsSeparator, prefShouldShowPreviewForLinks
+  prefGetTogglePreviewShortcut, prefShouldShowPreviewForLinks
 } from "@/pref";
 import {ClipType} from "@/db";
 import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Icons";
@@ -34,10 +31,9 @@ import {
   getFirstSelectedHistoryItem,
   getHistoryItem,
   getSelectedHistoryItemIndices,
-  getSelectedHistoryItems, isTextItem
+  getSelectedHistoryItems, isTextItem, toBase64Icon
 } from "@/data";
 import {CommandShortcut} from "@/components/ui/command";
-import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 
 export type HideDropdownReason =
     "cancel"
@@ -54,6 +50,8 @@ type PreviewToolBarProps = {
   appIcon: string
   displayInfo: boolean
   onPaste: () => void
+  onPasteWithReturn: () => void
+  onPasteWithTab: () => void
   onMerge: () => void
   onToggleInfo: () => void
   onHidePreview: () => void
@@ -72,7 +70,6 @@ type PreviewToolBarProps = {
 export default function PreviewToolBar(props: PreviewToolBarProps) {
   const [openDropdown, setOpenDropdown] = useState(false)
   const [pasteOptionsMenuOpen, setPasteOptionsMenuOpen] = useState(false)
-  const [pasteItemsSeparator, setPasteItemsSeparator] = useState(prefGetPasteItemsSeparator())
 
   let closeReason: HideDropdownReason = "cancel"
 
@@ -92,6 +89,14 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
   function handlePaste() {
     props.onPaste()
+  }
+
+  function handlePasteWithReturn() {
+    props.onPasteWithReturn()
+  }
+
+  function handlePasteWithTab() {
+    props.onPasteWithTab()
   }
 
   function handleMerge() {
@@ -198,11 +203,6 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     return props.selectedItemIndices.length === 1 && getFirstSelectedHistoryItem().type === ClipType.Image
   }
 
-  function handlePasteItemsSeparatorChange(value: string) {
-    setPasteItemsSeparator(value as PasteItemsSeparator)
-    prefSetPasteItemsSeparator(value as PasteItemsSeparator)
-  }
-
   function handlePasteOptionsMenuOpenChange(open: boolean) {
     setPasteOptionsMenuOpen(open)
   }
@@ -217,9 +217,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   function getMultipleItemsIndicator(): string {
     let indices = getSelectedHistoryItemIndices().length
     if (indices > 1) {
-      return "Delete " + indices + " Items"
+      return indices + " Items"
     }
-    return "Delete"
+    return ""
   }
 
   return (
@@ -248,19 +248,25 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="p-1.5 bg-actions-background" align="start" onKeyDown={handleKeyDown}>
-                    <DropdownMenuLabel className="font-normal text-secondary-foreground">
-                      When pasting multiple items,<br/>separate them with:
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator/>
-                    <DropdownMenuRadioGroup value={pasteItemsSeparator} onValueChange={handlePasteItemsSeparatorChange}>
-                      <DropdownMenuRadioItem value={PasteItemsSeparator.RETURN}>
-                        <span className="pr-1">Return</span><ShortcutLabel shortcut="Enter"/>
-                      </DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value={PasteItemsSeparator.TAB}>
-                        <span className="pr-1">Tab</span><ShortcutLabel shortcut="Tab"/>
-                      </DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value={PasteItemsSeparator.NONE}>None</DropdownMenuRadioItem>
-                    </DropdownMenuRadioGroup>
+                    <DropdownMenuItem onClick={handlePaste}>
+                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
+                           alt="Application icon"/>
+                      <span>Paste {getMultipleItemsIndicator()} to {props.appName}</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
+                      </CommandShortcut>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handlePasteWithReturn}>
+                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
+                           alt="Application icon"/>
+                      <span className="mr-2">Paste {getMultipleItemsIndicator()} to {props.appName} with Return</span>
+                      <span className="w-16"></span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handlePasteWithTab}>
+                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
+                           alt="Application icon"/>
+                      <span className="mr-2">Paste {getMultipleItemsIndicator()} to {props.appName} with Tab</span>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
             }
@@ -416,9 +422,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 <DropdownMenuItem onClick={handleDeleteItem}>
                   <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
                   <span className="mr-12 text-actions-danger">
-                    {
-                      getMultipleItemsIndicator()
-                    }
+                    {"Delete " + getMultipleItemsIndicator()}
                   </span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>

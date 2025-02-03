@@ -57,6 +57,8 @@ export type HideActionsReason =
     | "togglePreview"
     | "toggleFavorite"
     | "paste"
+    | "pasteWithTab"
+    | "pasteWithReturn"
     | "merge"
     | "editContent"
     | "copyToClipboard"
@@ -76,6 +78,8 @@ type ActionsProps = {
   onTogglePreview: () => void
   onToggleFavorite: () => void
   onPaste: () => void
+  onPasteWithTab: () => void
+  onPasteWithReturn: () => void
   onMerge: () => void
   onEditContent: () => void
   onCopyToClipboard: () => void
@@ -150,6 +154,18 @@ export default function Actions(props: ActionsProps) {
     props.onPaste()
   }
 
+  function handlePasteWithTab() {
+    closeReason = "pasteWithTab"
+    handleOpenChange(false)
+    props.onPasteWithTab()
+  }
+
+  function handlePasteWithReturn() {
+    closeReason = "pasteWithReturn"
+    handleOpenChange(false)
+    props.onPasteWithReturn()
+  }
+
   function handleMerge() {
     closeReason = "merge"
     handleOpenChange(false)
@@ -218,6 +234,10 @@ export default function Actions(props: ActionsProps) {
 
   function canShowCopyToClipboard() {
     return getSelectedHistoryItemIndices().length === 1
+  }
+
+  function canShowMultiplePaste() {
+    return getSelectedHistoryItemIndices().length > 1
   }
 
   function canShowMergeItems() {
@@ -315,6 +335,22 @@ export default function Actions(props: ActionsProps) {
                     <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
+                {
+                    canShowMultiplePaste() &&
+                    <CommandItem onSelect={handlePasteWithReturn}>
+                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
+                           alt="Application icon"/>
+                      <span>Paste {getMultipleItemsIndicator()} to {props.appName} with Return</span>
+                    </CommandItem>
+                }
+                {
+                    canShowMultiplePaste() &&
+                    <CommandItem onSelect={handlePasteWithTab}>
+                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
+                           alt="Application icon"/>
+                      <span>Paste {getMultipleItemsIndicator()} to {props.appName} with Tab</span>
+                    </CommandItem>
+                }
                 {
                     canShowMergeItems() &&
                     <CommandItem onSelect={handleMerge}>

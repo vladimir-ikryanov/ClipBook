@@ -30,6 +30,8 @@ type HistoryItemsPaneProps = {
   onSelectedItemsChange: () => void
   onShowHidePreview: () => void
   onPaste: () => void
+  onPasteWithTab: () => void
+  onPasteWithReturn: () => void
   onPasteByIndex: (index: number) => void
   onMerge: () => void
   onClose: () => void
@@ -187,6 +189,8 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    appName={props.appName}
                    appIcon={props.appIcon}
                    onPaste={props.onPaste}
+                   onPasteWithTab={props.onPasteWithTab}
+                   onPasteWithReturn={props.onPasteWithReturn}
                    onMerge={props.onMerge}
                    onClose={props.onClose}
                    onHideActions={props.onHideActions}

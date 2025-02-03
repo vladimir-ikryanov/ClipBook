@@ -31,7 +31,6 @@ import {
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
-  PasteItemsSeparator,
   prefGetClearHistoryShortcut,
   prefGetCopyAndMergeSeparator,
   prefGetCopyTextFromImageShortcut,
@@ -47,7 +46,6 @@ import {
   prefGetNavigateToPrevGroupOfItemsShortcut,
   prefGetOpenInBrowserShortcut,
   prefGetOpenSettingsShortcut,
-  prefGetPasteItemsSeparator,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetQuickPasteModifier,
   prefGetQuickPasteShortcuts,
@@ -527,14 +525,29 @@ export default function HistoryPane(props: HistoryPaneProps) {
     let items = getSelectedHistoryItems()
     items.forEach(item => {
       pasteItem(item)
+    })
+    // Clear the search query in the search field after paste.
+    handleSearchQueryChange("")
+  }
+
+  function handlePasteWithTab() {
+    let items = getSelectedHistoryItems()
+    items.forEach(item => {
+      pasteItem(item)
       if (items.length > 1) {
-        let separator = prefGetPasteItemsSeparator()
-        if (separator === PasteItemsSeparator.RETURN) {
-          pressReturn()
-        }
-        if (separator === PasteItemsSeparator.TAB) {
-          pressTab()
-        }
+        pressTab()
+      }
+    })
+    // Clear the search query in the search field after paste.
+    handleSearchQueryChange("")
+  }
+
+  function handlePasteWithReturn() {
+    let items = getSelectedHistoryItems()
+    items.forEach(item => {
+      pasteItem(item)
+      if (items.length > 1) {
+        pressReturn()
       }
     })
     // Clear the search query in the search field after paste.
@@ -901,6 +914,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               searchFieldRef={searchFieldRef}
                               listRef={listRef}
                               onPaste={handlePaste}
+                              onPasteWithTab={handlePasteWithTab}
+                              onPasteWithReturn={handlePasteWithReturn}
                               onPasteByIndex={handlePasteByIndex}
                               onMerge={handleMerge}
                               onClose={handleClose}
@@ -941,6 +956,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          onFinishEditing={handleFinishEditing}
                          onHidePreview={handleTogglePreview}
                          onPaste={handlePaste}
+                         onPasteWithTab={handlePasteWithTab}
+                         onPasteWithReturn={handlePasteWithReturn}
                          onMerge={handleMerge}
                          onCopyToClipboard={handleCopyToClipboard}
                          onCopyTextFromImage={handleCopyTextFromImage}

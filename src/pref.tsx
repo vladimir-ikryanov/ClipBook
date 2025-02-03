@@ -90,12 +90,6 @@ declare const saveSaveImageAsFileShortcut: (shortcut: string) => void;
 declare const savePauseResumeShortcut: (shortcut: string) => void;
 declare const getPauseResumeShortcut: () => string;
 
-export enum PasteItemsSeparator {
-  NONE = "none",
-  RETURN = "return",
-  TAB = "tab",
-}
-
 export enum OpenWindowStrategy {
   ACTIVE_SCREEN_LAST_POSITION = "activeScreenLastPosition",
   ACTIVE_SCREEN_CENTER = "activeScreenCenter",
@@ -441,23 +435,6 @@ export function prefSetDisplayThankYouDialog(display: boolean) {
 
 export function prefShouldDisplayThankYouMessage() {
   return shouldDisplayThankYouDialog()
-}
-
-export function prefGetPasteItemsSeparator() {
-  let separator = localStorage.getItem("app.paste.items.separator")
-  if (separator === null) {
-    return PasteItemsSeparator.RETURN
-  }
-  if (separator === PasteItemsSeparator.RETURN) {
-    return PasteItemsSeparator.RETURN
-  } else if (separator === PasteItemsSeparator.TAB) {
-    return PasteItemsSeparator.TAB
-  }
-  return PasteItemsSeparator.NONE
-}
-
-export function prefSetPasteItemsSeparator(separator: PasteItemsSeparator) {
-  localStorage.setItem("app.paste.items.separator", separator)
 }
 
 export function prefGetOpenWindowStrategy(): OpenWindowStrategy {

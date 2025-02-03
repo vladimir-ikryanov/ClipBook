@@ -22,6 +22,8 @@ type SearchBarProps = {
   appName: string
   appIcon: string
   onPaste: () => void
+  onPasteWithTab: () => void
+  onPasteWithReturn: () => void
   onMerge: () => void
   onClose: () => void
   onHideActions: (reason: HideActionsReason) => void
@@ -130,6 +132,8 @@ export default function SearchBar(props: SearchBarProps) {
                      onPreviewLink={props.onPreviewLink}
                      onOpenSettings={props.onOpenSettings}
                      onPaste={props.onPaste}
+                     onPasteWithTab={props.onPasteWithTab}
+                     onPasteWithReturn={props.onPasteWithReturn}
                      onMerge={props.onMerge}
                      onToggleFavorite={props.onToggleFavorite}
                      onTogglePreview={props.onTogglePreview}
