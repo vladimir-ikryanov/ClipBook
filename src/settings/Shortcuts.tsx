@@ -12,25 +12,32 @@ import {
   prefGetOpenAppShortcut,
   prefGetOpenInBrowserShortcut,
   prefGetOpenSettingsShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut, prefGetSaveImageAsFileShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetPauseResumeShortcut,
+  prefGetSaveImageAsFileShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
-  prefGetShowMoreActionsShortcut, prefGetToggleFavoriteShortcut,
+  prefGetShowMoreActionsShortcut,
+  prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut,
   prefGetZoomUIInShortcut,
   prefGetZoomUIOutShortcut,
   prefSetClearHistoryShortcut,
-  prefSetCloseAppShortcut, prefSetCloseAppShortcut2, prefSetCloseAppShortcut3,
+  prefSetCloseAppShortcut,
+  prefSetCloseAppShortcut2,
+  prefSetCloseAppShortcut3,
   prefSetCopyToClipboardShortcut,
   prefSetDeleteHistoryItemShortcut,
   prefSetEditHistoryItemShortcut,
   prefSetOpenAppShortcut,
   prefSetOpenInBrowserShortcut,
   prefSetOpenSettingsShortcut,
-  prefSetPasteSelectedItemToActiveAppShortcut, prefSetSaveImageAsFileShortcut,
+  prefSetPasteSelectedItemToActiveAppShortcut, prefSetPauseResumeShortcut,
+  prefSetSaveImageAsFileShortcut,
   prefSetSelectNextItemShortcut,
   prefSetSelectPreviousItemShortcut,
-  prefSetShowMoreActionsShortcut, prefSetToggleFavoriteShortcut,
+  prefSetShowMoreActionsShortcut,
+  prefSetToggleFavoriteShortcut,
   prefSetTogglePreviewShortcut,
   prefSetZoomUIInShortcut,
   prefSetZoomUIOutShortcut
@@ -62,6 +69,7 @@ export default function Shortcuts() {
   const [openSettingsShortcut, setOpenSettingsShortcut] = useState(prefGetOpenSettingsShortcut());
   const [toggleFavoriteShortcut, setToggleFavoriteShortcut] = useState(prefGetToggleFavoriteShortcut());
   const [saveImageAsFileShortcut, setSaveImageAsFileShortcut] = useState(prefGetSaveImageAsFileShortcut());
+  const [pauseResumeShortcut, setPauseResumeShortcut] = useState(prefGetPauseResumeShortcut());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -170,6 +178,11 @@ export default function Shortcuts() {
   function handleSaveImageAsFileShortcutChange(shortcut: string) {
     setSaveImageAsFileShortcut(shortcut)
     prefSetSaveImageAsFileShortcut(shortcut)
+  }
+
+  function handlePauseResumeShortcutChange(shortcut: string) {
+    setPauseResumeShortcut(shortcut)
+    prefSetPauseResumeShortcut(shortcut)
   }
 
   function renderLicenseItem() {
@@ -345,6 +358,12 @@ export default function Shortcuts() {
                              onSave={handleZoomUIOutShortcutChange}/>
             </div>
             <hr/>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Pause/resume ClipBook</span>
+              <ShortcutInput shortcut={pauseResumeShortcut}
+                             defaultShortcut=""
+                             onSave={handlePauseResumeShortcutChange}/>
+            </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">Open Settings</span>
               <ShortcutInput shortcut={openSettingsShortcut}

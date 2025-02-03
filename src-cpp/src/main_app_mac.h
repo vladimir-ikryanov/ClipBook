@@ -38,6 +38,7 @@ class MainAppMac : public MainApp {
  protected:
   void enableOpenAppShortcut() override;
   void disableOpenAppShortcut() override;
+  void updatePauseResumeShortcut() override;
   void updateOpenSettingsShortcut() override;
   std::string getUserDataDir() override;
   std::string getUpdateServerUrl() override;
@@ -67,6 +68,7 @@ class MainAppMac : public MainApp {
 
  private:
   molybden::Shortcut open_app_shortcut_;
+  molybden::Shortcut pause_resume_shortcut_;
   molybden::Shortcut open_settings_shortcut_;
   std::shared_ptr<ClipboardReaderMac> clipboard_reader_;
 #ifdef __OBJC__

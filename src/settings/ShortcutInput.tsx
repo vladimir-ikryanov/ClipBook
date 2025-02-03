@@ -78,7 +78,7 @@ export default function ShortcutInput(props: ShortcutProps) {
   }
 
   function handleReset() {
-    if (props.defaultShortcut) {
+    if (props.defaultShortcut !== undefined) {
       setShortcut(props.defaultShortcut)
       props.onSave(props.defaultShortcut)
     }

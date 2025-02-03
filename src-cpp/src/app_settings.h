@@ -147,6 +147,9 @@ class AppSettings {
   virtual void saveSaveImageAsFileShortcut(std::string shortcut) = 0;
   virtual std::string getSaveImageAsFileShortcut() = 0;
 
+  virtual void savePauseResumeShortcut(std::string shortcut) = 0;
+  virtual std::string getPauseResumeShortcut() = 0;
+
   virtual void saveOpenWindowStrategy(std::string strategy) = 0;
   virtual std::string getOpenWindowStrategy() = 0;
 

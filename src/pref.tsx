@@ -87,6 +87,8 @@ declare const saveNavigateToPrevGroupOfItemsShortcut: (shortcut: string) => void
 declare const getNavigateToPrevGroupOfItemsShortcut: () => string;
 declare const getSaveImageAsFileShortcut: () => string;
 declare const saveSaveImageAsFileShortcut: (shortcut: string) => void;
+declare const savePauseResumeShortcut: (shortcut: string) => void;
+declare const getPauseResumeShortcut: () => string;
 
 export enum PasteItemsSeparator {
   NONE = "none",
@@ -505,6 +507,14 @@ export function prefGetSaveImageAsFileShortcut() {
 
 export function prefSetSaveImageAsFileShortcut(shortcut: string) {
   saveSaveImageAsFileShortcut(shortcut)
+}
+
+export function prefGetPauseResumeShortcut() {
+  return getPauseResumeShortcut()
+}
+
+export function prefSetPauseResumeShortcut(shortcut: string) {
+  savePauseResumeShortcut(shortcut)
 }
 
 export function prefSetUpdateHistoryAfterAction(update: boolean) {

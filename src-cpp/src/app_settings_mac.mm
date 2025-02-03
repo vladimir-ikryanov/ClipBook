@@ -63,6 +63,7 @@ NSString *prefNavigateToLastItemShortcut = @"app.navigate_to_last_item_shortcut"
 NSString *prefNavigateToNextGroupOfItemsShortcut = @"app.navigate_to_next_group_of_items_shortcut";
 NSString *prefNavigateToPrevGroupOfItemsShortcut = @"app.navigate_to_prev_group_of_items_shortcut";
 NSString *prefSaveImageAsFileShortcut = @"app.save_image_as_file_shortcut";
+NSString *prefPauseResumeShortcut = @"app.pause_resume_shortcut";
 
 AppSettingsMac::AppSettingsMac() = default;
 
@@ -761,6 +762,21 @@ std::string AppSettingsMac::getSaveImageAsFileShortcut() {
     return {[shortcut UTF8String]};
   }
   return "ShiftLeft + MetaLeft + KeyS";
+}
+
+void AppSettingsMac::savePauseResumeShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefPauseResumeShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getPauseResumeShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefPauseResumeShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "";
 }
 
 void AppSettingsMac::setShouldDisplayThankYouDialog(bool display) {

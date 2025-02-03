@@ -242,15 +242,11 @@ void ClipboardReaderMac::start(const std::shared_ptr<MainApp> &app) {
 
   std::thread t([this]() {
     while (true) {
-      if (app_->isPaused()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(kCheckInterval));
-        continue;
-      }
       std::this_thread::sleep_for(std::chrono::milliseconds(kCheckInterval));
       readClipboardData();
     }
   });
-  t.join();
+  t.detach();
 }
 
 #pragma clang diagnostic pop
@@ -326,6 +322,10 @@ bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> 
     return false;
   }
   last_change_count_ = changeCount;
+
+  if (app_->isPaused()) {
+    return false;
+  }
 
   // Check if the active app should be ignored.
   auto settings = app_->settings();

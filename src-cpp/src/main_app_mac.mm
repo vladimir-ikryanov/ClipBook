@@ -244,6 +244,27 @@ void MainAppMac::disableOpenAppShortcut() {
   }
 }
 
+void MainAppMac::updatePauseResumeShortcut() {
+  if (pause_resume_shortcut_.key != KeyCode::UNKNOWN) {
+    app()->globalShortcuts()->unregisterShortcut(pause_resume_shortcut_);
+    pause_resume_shortcut_.key = KeyCode::UNKNOWN;
+    pause_resume_item_->setShortcut(pause_resume_shortcut_);
+  }
+  auto shortcut_str = settings_->getPauseResumeShortcut();
+  pause_resume_shortcut_ = createShortcut(shortcut_str);
+  pause_resume_item_->setShortcut(pause_resume_shortcut_);
+  if (pause_resume_shortcut_.key == KeyCode::UNKNOWN) {
+    return;
+  }
+  app()->globalShortcuts()->registerShortcut(pause_resume_shortcut_, [this](const Shortcut &) {
+    if (isPaused()) {
+      resume();
+    } else {
+      pause();
+    }
+  });
+}
+
 void MainAppMac::updateOpenSettingsShortcut() {
   auto shortcut_str = settings_->getOpenSettingsShortcut();
   open_settings_shortcut_ = createShortcut(shortcut_str);

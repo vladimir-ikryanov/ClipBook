@@ -143,6 +143,9 @@ class AppSettingsMac : public AppSettings {
   void saveSaveImageAsFileShortcut(std::string shortcut) override;
   std::string getSaveImageAsFileShortcut() override;
 
+  void savePauseResumeShortcut(std::string shortcut) override;
+  std::string getPauseResumeShortcut() override;
+
   void saveOpenWindowStrategy(std::string strategy) override;
   std::string getOpenWindowStrategy() override;
 

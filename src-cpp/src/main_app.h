@@ -89,6 +89,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
 
   virtual void enableOpenAppShortcut() = 0;
   virtual void disableOpenAppShortcut() = 0;
+  virtual void updatePauseResumeShortcut() = 0;
   virtual void updateOpenSettingsShortcut() = 0;
   virtual std::string getUserDataDir() = 0;
   virtual std::string getUpdateServerUrl() = 0;

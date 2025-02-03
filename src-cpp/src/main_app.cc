@@ -73,7 +73,8 @@ bool MainApp::init() {
 
   // Register a global shortcut to show the app.
   enableOpenAppShortcut();
-
+  // Update the pause/resume shortcut.
+  updatePauseResumeShortcut();
   // Update the open settings shortcut.
   updateOpenSettingsShortcut();
 
@@ -908,6 +909,13 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("getSaveImageAsFileShortcut", [this]() -> std::string {
     return settings_->getSaveImageAsFileShortcut();
+  });
+  window->putProperty("savePauseResumeShortcut", [this](std::string shortcut) -> void {
+    settings_->savePauseResumeShortcut(shortcut);
+    updatePauseResumeShortcut();
+  });
+  window->putProperty("getPauseResumeShortcut", [this]() -> std::string {
+    return settings_->getPauseResumeShortcut();
   });
 
   window->putProperty("selectAppsToIgnore", [this]() {
