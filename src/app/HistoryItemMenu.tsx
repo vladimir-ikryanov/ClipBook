@@ -4,7 +4,7 @@ import {
   CopyIcon,
   Edit3Icon,
   EllipsisVerticalIcon, EyeIcon,
-  GlobeIcon, ScanTextIcon,
+  GlobeIcon, PenIcon, ScanTextIcon,
   StarIcon,
   StarOffIcon,
   TrashIcon
@@ -23,7 +23,7 @@ import {
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetOpenInBrowserShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut, prefGetRenameItemShortcut,
   prefGetToggleFavoriteShortcut,
 } from "@/pref";
 import {CommandShortcut} from "@/components/ui/command";
@@ -35,6 +35,7 @@ export type HideClipDropdownMenuReason =
     | "paste"
     | "toggleFavorite"
     | "editContent"
+    | "renameItem"
     | "copyToClipboard"
     | "copyTextFromImage"
     | "openInBrowser"
@@ -52,6 +53,7 @@ type HistoryItemMenuProps = {
   onPaste: (index: number) => void
   onEditHistoryItem: (item: Clip) => void
   onEditContent: (index: number) => void
+  onRenameItem: (index: number) => void
   onCopyToClipboard: (index: number) => void
   onCopyTextFromImage: (index: number) => void
   onOpenInBrowser: (index: number) => void
@@ -111,6 +113,12 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
     closeReason = "editContent"
     handleOpenChange(false)
     props.onEditContent(props.index)
+  }
+
+  function handleRename() {
+    closeReason = "renameItem"
+    handleOpenChange(false)
+    props.onRenameItem(props.index)
   }
 
   function handleDeleteItem() {
@@ -194,6 +202,16 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
                 <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
               </CommandShortcut>
             </DropdownMenuItem>
+            <DropdownMenuSeparator/>
+            {
+              <DropdownMenuItem onClick={handleRename}>
+                <PenIcon className="mr-2 h-4 w-4"/>
+                <span className="mr-12">Rename...</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
+                </CommandShortcut>
+              </DropdownMenuItem>
+            }
             {
                 props.item.type === ClipType.Link && <DropdownMenuSeparator/>
             }

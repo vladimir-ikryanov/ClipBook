@@ -265,10 +265,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   useEffect(() => {
-    focusSearchField()
-  }, [selectedItemIndices])
-
-  useEffect(() => {
     const down = async (e: KeyboardEvent) => {
       // Select the previous item when the select previous item shortcut is pressed.
       if (isShortcutMatch(prefGetSelectPreviousItemShortcut(), e)) {
@@ -383,7 +379,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
       // Dispatch the rename item request.
       if (isShortcutMatch(prefGetRenameItemShortcut(), e)) {
-        window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "renameItem"}}));
+        handleRenameItem()
+        e.preventDefault()
       }
     }
 
@@ -618,13 +615,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleHideActions(reason: HideActionsReason) {
-    if (reason !== "editContent") {
+    if (reason !== "editContent" && reason !== "renameItem") {
       focusSearchField()
     }
   }
 
   function handleHideClipDropdownMenu(reason: HideClipDropdownMenuReason) {
-    if (reason !== "editContent") {
+    if (reason !== "editContent" && reason !== "renameItem") {
       focusSearchField()
     }
   }
@@ -633,6 +630,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (reason !== "editContent") {
       focusSearchField()
     }
+  }
+
+  function handleRenameItem() {
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "renameItem"}}));
+    }, 100);
   }
 
   function handleEditContent() {
@@ -659,6 +662,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
       setSelectedItemIndices(getSelectedHistoryItemIndices())
     }
     handleEditContent()
+  }
+
+  function handleRenameItemByIndex(index: number) {
+    if (getLastSelectedItemIndex() !== index) {
+      setSelectedHistoryItemIndex(index)
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
+    }
+    handleRenameItem()
   }
 
   function copyItemToClipboard(item: Clip) {
@@ -940,6 +951,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onHideClipDropdownMenu={handleHideClipDropdownMenu}
                               onEditContent={handleEditContent}
                               onEditContentByIndex={handleEditContentByIndex}
+                              onRenameItem={handleRenameItem}
+                              onRenameItemByIndex={handleRenameItemByIndex}
                               onCopyToClipboard={handleCopyToClipboard}
                               onCopyToClipboardByIndex={handleCopyToClipboardByIndex}
                               onCopyTextFromImage={handleCopyTextFromImage}

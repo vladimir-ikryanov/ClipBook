@@ -68,3 +68,16 @@ kbd {
     background-position: 200% 0;
   }
 }
+
+/**
+  * Input field focus animation (growing text).
+ */
+@keyframes textGrow {
+  0% { font-size: 1rem; }
+  50% { font-size: 1.2rem; }
+  100% { font-size: 1rem; }
+}
+
+.animate-text {
+  animation: textGrow 0.25s ease-in-out;
+}

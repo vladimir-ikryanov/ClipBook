@@ -7,7 +7,7 @@ import {
   CommandIcon,
   CopyIcon, DownloadIcon,
   Edit3Icon, EyeIcon,
-  GlobeIcon,
+  GlobeIcon, PenIcon,
   ScanTextIcon,
   SettingsIcon,
   StarIcon,
@@ -34,7 +34,9 @@ import {
   prefGetEditHistoryItemShortcut,
   prefGetOpenInBrowserShortcut,
   prefGetOpenSettingsShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut, prefGetSaveImageAsFileShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetRenameItemShortcut,
+  prefGetSaveImageAsFileShortcut,
   prefGetShowMoreActionsShortcut,
   prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut
@@ -61,6 +63,7 @@ export type HideActionsReason =
     | "pasteWithReturn"
     | "merge"
     | "editContent"
+    | "renameItem"
     | "copyToClipboard"
     | "copyTextFromImage"
     | "saveImageAsFile"
@@ -82,6 +85,7 @@ type ActionsProps = {
   onPasteWithReturn: () => void
   onMerge: () => void
   onEditContent: () => void
+  onRenameItem: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
   onSaveImageAsFile: () => void
@@ -140,6 +144,12 @@ export default function Actions(props: ActionsProps) {
     closeReason = "editContent"
     handleOpenChange(false)
     props.onEditContent()
+  }
+
+  function handleRenameItem() {
+    closeReason = "renameItem"
+    handleOpenChange(false)
+    props.onRenameItem()
   }
 
   function handleCopyToClipboard() {
@@ -256,6 +266,10 @@ export default function Actions(props: ActionsProps) {
 
   function canShowPreview() {
     return canShowOpenInBrowser()
+  }
+
+  function canShowRenameItem() {
+    return getSelectedHistoryItemIndices().length === 1
   }
 
   function canShowCopyTextFromImage() {
@@ -453,6 +467,16 @@ export default function Actions(props: ActionsProps) {
                     <CommandItem onSelect={handlePreviewLink}>
                       <EyeIcon className="mr-2 h-4 w-4"/>
                       <span>Preview Link</span>
+                    </CommandItem>
+                }
+                {
+                    canShowRenameItem() &&
+                    <CommandItem onSelect={handleRenameItem}>
+                      <PenIcon className="mr-2 h-4 w-4"/>
+                      <span>Rename...</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
+                      </CommandShortcut>
                     </CommandItem>
                 }
                 <CommandSeparator/>

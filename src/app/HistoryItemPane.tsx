@@ -26,6 +26,7 @@ type HistoryItemPaneProps = {
   onPaste: (index: number) => void
   onEditHistoryItem: (item: Clip) => void
   onEditContent: (index: number) => void
+  onRenameItem: (index: number) => void
   onCopyToClipboard: (index: number) => void
   onCopyTextFromImage: (index: number) => void
   onOpenInBrowser: (index: number) => void
@@ -88,6 +89,15 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     setActionsMenuOpen(open)
   }
 
+  function handleFocus(event: React.FocusEvent<HTMLInputElement>) {
+    if (props.item.name && props.item.name.length > 0) {
+      document.getElementById("animated-input")?.classList.add("animate-text");
+      setTimeout(() => {
+        document.getElementById("animated-input")?.classList.remove("animate-text");
+      }, 300);
+    }
+  }
+
   const handleKeyDown = async (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
       e.stopPropagation()
@@ -97,7 +107,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
         await handleFinishRename()
       }
       if (e.key === "Escape") {
-        handleCancelRename()
+        await handleCancelRename()
       }
     }
   }
@@ -160,6 +170,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
                                 onPaste={props.onPaste}
                                 onEditHistoryItem={props.onEditHistoryItem}
                                 onEditContent={props.onEditContent}
+                                onRenameItem={props.onRenameItem}
                                 onCopyToClipboard={props.onCopyToClipboard}
                                 onCopyTextFromImage={props.onCopyTextFromImage}
                                 onOpenInBrowser={props.onOpenInBrowser}
@@ -235,11 +246,13 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   function renderInputField() {
     return <div className="flex flex-grow">
       <input type="text"
-             className="py-0.5 px-1.5 ml-0.5 mr-0 rounded-sm border-none outline-none text-justify font-normal w-full"
+             id="animated-input"
+             className="py-0.5 px-1.5 ml-0.5 mr-0 rounded-sm bg-transparent border-none outline-none text-justify font-normal w-full"
              value={itemName}
              autoFocus={true}
              placeholder="Enter a name for this item"
              onChange={handleNameChange}
+             onFocus={handleFocus}
              onBlur={handleFinishRename}
              onKeyDown={handleKeyDown}/>
     </div>

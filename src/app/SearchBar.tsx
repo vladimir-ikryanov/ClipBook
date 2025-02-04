@@ -30,6 +30,7 @@ type SearchBarProps = {
   onToggleFavorite: () => void
   onTogglePreview: () => void
   onEditContent: () => void
+  onRenameItem: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
   onSaveImageAsFile: () => void
@@ -125,6 +126,7 @@ export default function SearchBar(props: SearchBarProps) {
                      appIcon={props.appIcon}
                      onHideActions={props.onHideActions}
                      onEditContent={props.onEditContent}
+                     onRenameItem={props.onRenameItem}
                      onCopyToClipboard={props.onCopyToClipboard}
                      onCopyTextFromImage={props.onCopyTextFromImage}
                      onSaveImageAsFile={props.onSaveImageAsFile}
