@@ -6,7 +6,7 @@ import {toCSSColor} from "@/lib/utils";
 import {
   FileIcon,
   LinkIcon,
-  MailIcon,
+  MailIcon, PenIcon, PenLineIcon,
   StarIcon
 } from "lucide-react";
 import HistoryItemMenu, {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
@@ -136,21 +136,24 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   }
 
   function renderClipIcon() {
+    if (renameItemMode) {
+      return <PenLineIcon className="h-5 w-5 animate-pulse"/>
+    }
     if (props.item.type === ClipType.Color) {
       return <div className="h-5 w-5 rounded-full"
                   style={{backgroundColor: toCSSColor(props.item.content)}}/>
     }
     if (props.item.type === ClipType.Link) {
-      return <LinkIcon className="h-5 w-5"/>
+      return <LinkIcon className="h-5 w-5 text-primary-foreground"/>
     }
     if (props.item.type === ClipType.Email) {
-      return <MailIcon className="h-5 w-5"/>
+      return <MailIcon className="h-5 w-5 text-primary-foreground"/>
     }
     if (props.item.type === ClipType.Image) {
       return <img src={"clipbook://images/" + props.item.imageThumbFileName}
                   alt={props.item.imageThumbFileName} className="h-5 w-5"/>
     }
-    return <FileIcon className="h-5 w-5"/>
+    return <FileIcon className="h-5 w-5 text-primary-foreground"/>
   }
 
   function renderActionsButton() {
@@ -247,7 +250,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     return <div className="flex flex-grow">
       <input type="text"
              id="animated-input"
-             className="py-0.5 px-1.5 ml-0.5 mr-0 rounded-sm bg-transparent border-none outline-none text-justify font-normal w-full"
+             className="py-0.5 px-1.5 ml-0.5 mr-0 bg-transparent outline-none text-justify font-normal w-full"
              value={itemName}
              autoFocus={true}
              placeholder="Enter a name for this item"
@@ -301,7 +304,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
           onMouseDown={handleMouseDown}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}>
-        <div className="flex flex-none mr-1 text-primary-foreground">{renderClipIcon()}</div>
+        <div className="flex flex-none mr-1">{renderClipIcon()}</div>
         <div
             className="flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis">
           {

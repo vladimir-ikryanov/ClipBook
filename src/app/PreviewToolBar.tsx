@@ -5,7 +5,7 @@ import {
   ChevronDown,
   ClipboardIcon,
   CopyIcon, DownloadIcon, Edit3Icon, EllipsisVerticalIcon, EyeIcon,
-  GlobeIcon, RefreshCwIcon, ScanTextIcon,
+  GlobeIcon, PenIcon, RefreshCwIcon, ScanTextIcon,
   StarIcon, TrashIcon,
 } from "lucide-react";
 import {
@@ -17,11 +17,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   prefGetCopyTextFromImageShortcut,
-  prefGetCopyToClipboardShortcut, prefGetDeleteHistoryItemShortcut, prefGetEditHistoryItemShortcut,
+  prefGetCopyToClipboardShortcut,
+  prefGetDeleteHistoryItemShortcut,
+  prefGetEditHistoryItemShortcut,
   prefGetOpenInBrowserShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut, prefGetSaveImageAsFileShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetRenameItemShortcut,
+  prefGetSaveImageAsFileShortcut,
   prefGetToggleFavoriteShortcut,
-  prefGetTogglePreviewShortcut, prefShouldShowPreviewForLinks
+  prefGetTogglePreviewShortcut,
+  prefShouldShowPreviewForLinks
 } from "@/pref";
 import {ClipType} from "@/db";
 import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Icons";
@@ -39,6 +44,7 @@ export type HideDropdownReason =
     "cancel"
     | "togglePreview"
     | "editContent"
+    | "renameItem"
     | "previewLink"
     | "updatePreview"
     | "saveImageAsFile"
@@ -57,6 +63,7 @@ type PreviewToolBarProps = {
   onHidePreview: () => void
   onSaveImageAsFile: () => void
   onDeleteItem: () => void
+  onRenameItem: () => void
   onRequestEditItem: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
@@ -115,6 +122,14 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     }, 250)
   }
 
+  function handleRenameItem() {
+    closeReason = "renameItem"
+    handleOpenDropdownChange(false)
+    setTimeout(() => {
+      props.onRenameItem()
+    }, 250)
+  }
+
   function handleSaveImageAsFile() {
     closeReason = "saveImageAsFile"
     handleOpenDropdownChange(false)
@@ -170,6 +185,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
   function canShowEditContent() {
     return props.selectedItemIndices.length === 1 && isTextItem(getFirstSelectedHistoryItem())
+  }
+
+  function canShowRenameItem() {
+    return props.selectedItemIndices.length === 1
   }
 
   function canShowPreviewLink() {
@@ -383,6 +402,16 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                       <span className="mr-12">Edit Content...</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
+                      </CommandShortcut>
+                    </DropdownMenuItem>
+                }
+                {
+                    canShowRenameItem() &&
+                    <DropdownMenuItem onClick={handleRenameItem}>
+                      <PenIcon className="mr-2 h-4 w-4"/>
+                      <span className="mr-12">Rename...</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
                       </CommandShortcut>
                     </DropdownMenuItem>
                 }

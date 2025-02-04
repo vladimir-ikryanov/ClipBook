@@ -994,6 +994,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          onOpenInBrowser={handleOpenInBrowser}
                          onPreviewLink={handlePreviewLink}
                          onDeleteItem={handleDeleteItem}
+                         onRenameItem={handleRenameItem}
                          onToggleFavorite={handleToggleFavorite}/>
           </ResizablePanel>
         </ResizablePanelGroup>

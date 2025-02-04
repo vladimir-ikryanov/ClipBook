@@ -39,6 +39,7 @@ type PreviewPaneProps = {
   onPreviewLink: () => void
   onToggleFavorite: () => void
   onDeleteItem: () => void
+  onRenameItem: () => void
 }
 
 export default function PreviewPane(props: PreviewPaneProps) {
@@ -119,6 +120,7 @@ export default function PreviewPane(props: PreviewPaneProps) {
                         onHidePreview={props.onHidePreview}
                         onSaveImageAsFile={props.onSaveImageAsFile}
                         onRequestEditItem={props.onRequestEditItem}
+                        onRenameItem={props.onRenameItem}
                         onDeleteItem={props.onDeleteItem}
                         onCopyToClipboard={props.onCopyToClipboard}
                         onCopyTextFromImage={props.onCopyTextFromImage}
