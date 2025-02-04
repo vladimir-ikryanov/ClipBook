@@ -634,7 +634,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function handleRenameItem() {
     setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "renameItem"}}));
+      scrollToLastSelectedItem()
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "renameItem"}}));
+      }, 100);
     }, 100);
   }
 
