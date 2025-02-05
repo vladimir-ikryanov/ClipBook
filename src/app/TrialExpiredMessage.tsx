@@ -1,32 +1,73 @@
 import '../app.css';
-import React from "react";
+import React, {useState} from "react";
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {Button} from "@/components/ui/button";
+import {Checkbox} from "@/components/ui/checkbox";
+import {prefIsFeedbackProvided, prefSetFeedbackProvided} from "@/pref";
 
 declare const buyLicense: () => void;
-declare const openSettingsLicense: () => void;
+declare const sendFeedback: (text: string) => void;
+declare const hideAppWindow: () => void;
 
 type TrialExpiredMessageProps = {
   visible: boolean
 }
 
 export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
-  function handleActivate() {
-    openSettingsLicense()
+  const [feedbackProvided, setFeedbackProvided] = useState(prefIsFeedbackProvided())
+  const [feedback, setFeedback] = useState("")
+  const [features, setFeatures] = useState(false)
+  const [need, setNeed] = useState(false)
+  const [value, setValue] = useState(false)
+  const [other, setOther] = useState(true)
+
+  function handleFeedback() {
+    let reason = ""
+    if (features) {
+      reason += "- Missing features\n"
+    }
+    if (need) {
+      reason += "- Don't need it right now\n"
+    }
+    if (value) {
+      reason += "- Wasn't useful for me\n"
+    }
+    if (other) {
+      reason += "- Other\n"
+    }
+    let text = ""
+    if (reason.length > 0) {
+      text += "Reason:\n\n" + reason + "\n"
+    }
+    text += "Feedback:\n\n" + feedback
+    sendFeedback(text)
+    setFeedbackProvided(true)
+    prefSetFeedbackProvided(true)
+  }
+
+  function canSendFeedback() {
+    return features || need || value || other || feedback.length > 0
+  }
+
+  function handleClose() {
+    hideAppWindow()
   }
 
   function handleBuyLicense() {
     buyLicense()
+  }
+
+  function handleFeedbackChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    setFeedback(event.target.value)
   }
 
   return (
@@ -37,16 +78,75 @@ export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Thank you for trying ClipBook
+              <h1 className="text-xl mb-2">Your trial has ended</h1>
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              Your trial has expired.<br/>
-              To continue using ClipBook, please buy a license and activate it.
-            </AlertDialogDescription>
+            <div className="text-[14px] text-dialog-text">
+              <p>I hope you enjoyed using ClipBook. If you like it, please consider supporting the
+                development by purchasing a license.</p>
+              {
+                !feedbackProvided && <p className="mt-4">If you don't like it, please let me know why.</p>
+              }
+              {
+                  !feedbackProvided &&
+                  <div className="flex space-x-4 mt-6 mb-2">
+                    <div className="flex flex-col space-y-2.5 mt-2.5 mr-10">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="features" checked={features}
+                                  onCheckedChange={(checked) => setFeatures(!!checked)}/>
+                        <label htmlFor="features"
+                               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          Missing features
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="need" checked={need}
+                                  onCheckedChange={(checked) => setNeed(!!checked)}/>
+                        <label htmlFor="need"
+                               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          Don't need it right now
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="value" checked={value}
+                                  onCheckedChange={(checked) => setValue(!!checked)}/>
+                        <label htmlFor="value"
+                               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          Wasn't useful for me
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="other" checked={other}
+                                  onCheckedChange={(checked) => setOther(!!checked)}/>
+                        <label htmlFor="other"
+                               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          Other (please specify)
+                        </label>
+                      </div>
+                    </div>
+                    <textarea id="msg" value={feedback} onChange={handleFeedbackChange}
+                              className="flex flex-grow h-32 p-2 bg-background border border-border rounded-md text-dialog-text text-sm outline-none"
+                              placeholder="Your feedback (optional)"></textarea>
+                  </div>
+              }
+            </div>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleActivate}>Activate</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBuyLicense}>Buy license</AlertDialogAction>
+            <div className="flex flex-grow items-center space-x-2 px-2">
+              <img src="assets/photo.png" className="w-10 h-10 rounded-full" alt="Photo"/>
+              <div className="flex flex-col">
+                <p className="text-sm text-secondary-foreground">Vladimir Ikryanov</p>
+                <p className="text-xs text-secondary-foreground mb-1">Founder of ClipBook</p>
+              </div>
+            </div>
+            <div className="flex space-x-3 items-center">
+              {
+                !feedbackProvided && <AlertDialogCancel onClick={handleFeedback} disabled={!canSendFeedback()}>Send Feedback</AlertDialogCancel>
+              }
+              {
+                feedbackProvided && <AlertDialogCancel onClick={handleClose}>Close</AlertDialogCancel>
+              }
+              <AlertDialogAction onClick={handleBuyLicense}>Buy License</AlertDialogAction>
+            </div>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -69,12 +69,14 @@ module.exports = {
           tableRow: "var(--settings-table-row)",
           tableRow2: "var(--settings-table-row2)",
           inputPlaceholder: "var(--settings-input-placeholder)",
-          buyButton: "var(--buy-button-background)",
-          buyButtonHover: "var(--buy-button-background-hover)",
-          buyButtonText: "var(--buy-button-text)",
-          activateButton: "var(--activate-button-background)",
-          activateButtonHover: "var(--activate-button-background-hover)",
-          activateButtonText: "var(--activate-button-text)",
+          primaryButton: "var(--primary-button-background)",
+          primaryButtonHover: "var(--primary-button-background-hover)",
+          primaryButtonText: "var(--primary-button-text)",
+          secondaryButton: "var(--secondary-button-background)",
+          secondaryButtonHover: "var(--secondary-button-background-hover)",
+          secondaryButtonText: "var(--secondary-button-text)",
+          secondaryButtonBorder: "var(--secondary-button-border)",
+          secondaryButtonBorderHover: "var(--secondary-button-border-hover)",
         },
         toolbar: {
           DEFAULT: "var(--toolbar-background)",
@@ -95,7 +97,9 @@ module.exports = {
         },
         dialog: {
           shadow: "var(--dialog-shadow)",
+          border: "var(--dialog-border)",
           overlay: "var(--dialog-overlay)",
+          text: "var(--dialog-text)",
         }
       },
       borderRadius: {

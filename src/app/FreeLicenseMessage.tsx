@@ -47,7 +47,7 @@ export default function FreeLicenseMessage(props: FreeLicenseMessageProps) {
             This license grants you free lifetime updates. Enjoy!
           </p>
           <p className="text-primary-foreground">Vladimir Ikryanov<br/>Founder of ClipBook</p>
-          <Button className="mt-4" onClick={handleClose} variant="buy">Close</Button>
+          <Button className="mt-4" onClick={handleClose} variant="primary">Close</Button>
         </AlertDialogContent>
       </AlertDialog>
   )

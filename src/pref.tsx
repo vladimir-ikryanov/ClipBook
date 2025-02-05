@@ -91,6 +91,8 @@ declare const savePauseResumeShortcut: (shortcut: string) => void;
 declare const getPauseResumeShortcut: () => string;
 declare const saveRenameItemShortcut: (shortcut: string) => void;
 declare const getRenameItemShortcut: () => string;
+declare const setFeedbackProvided: (provided: boolean) => void;
+declare const isFeedbackProvided: () => boolean;
 
 export enum OpenWindowStrategy {
   ACTIVE_SCREEN_LAST_POSITION = "activeScreenLastPosition",
@@ -510,4 +512,12 @@ export function prefSetRenameItemShortcut(shortcut: string) {
 
 export function prefGetRenameItemShortcut() {
   return getRenameItemShortcut()
+}
+
+export function prefIsFeedbackProvided() {
+  return isFeedbackProvided()
+}
+
+export function prefSetFeedbackProvided(provided: boolean) {
+  setFeedbackProvided(provided)
 }

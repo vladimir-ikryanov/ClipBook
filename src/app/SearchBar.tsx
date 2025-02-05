@@ -73,6 +73,49 @@ export default function SearchBar(props: SearchBarProps) {
     openSettingsLicense()
   }
 
+  function getTrialBadgeText() {
+    if (props.trialDaysLeft <= 0) {
+      return "Trial ended"
+    }
+    if (props.trialDaysLeft == 1) {
+      return "Trial ends tomorrow"
+    }
+    return "Trial " + (props.trialDaysLeft > 0 ? `(${props.trialDaysLeft} ${props.trialDaysLeft > 1 ? "days" : "day"} left)` : " expired")
+  }
+
+  function getTrialBadgeBgColor() {
+    if (props.trialDaysLeft <= 0) {
+      return "bg-red-700 text-neutral-300"
+    }
+    if (props.trialDaysLeft == 1) {
+      return "bg-orange-700 text-neutral-300"
+    }
+    if (props.trialDaysLeft == 2) {
+      return "bg-green-700 text-neutral-300"
+    }
+    return "bg-accent"
+  }
+
+  function getTrialBadgeAnimation() {
+    if (props.trialDaysLeft >= 1 && props.trialDaysLeft <= 2) {
+      return "animate-pulse"
+    }
+    return ""
+  }
+
+  function renderTrialBadge() {
+    return (
+        <Button variant="toolbar"
+                size="toolbar"
+                onClick={handleClickTrial}
+                className={getTrialBadgeAnimation()}>
+          <span className={`rounded-sm ${getTrialBadgeBgColor()} py-1 px-2.5`}>
+            {getTrialBadgeText()}
+          </span>
+        </Button>
+    )
+  }
+
   return (
       <div className="flex flex-col border-b-solid border-b-border border-b">
         <div className="flex m-2">
@@ -92,12 +135,7 @@ export default function SearchBar(props: SearchBarProps) {
               className={props.searchQuery.length == 0 ? "flex-auto draggable" : "flex-none"}></div>
           <div className={props.isTrial ? "" : "hidden"}>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="toolbar" size="toolbar" onClick={handleClickTrial}>
-                  <span className="rounded-sm bg-accent py-1 px-2.5">
-                    Trial {props.trialDaysLeft > 0 ? `(${props.trialDaysLeft} ${props.trialDaysLeft > 1 ? "days" : "day"} left)` : " expired"}
-                  </span>
-                </Button>
+              <TooltipTrigger asChild>{renderTrialBadge()}
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
                 <div className="select-none mr-2">

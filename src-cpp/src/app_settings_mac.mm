@@ -32,6 +32,7 @@ NSString *prefOpenWindowStrategy = @"open_window_strategy";
 NSString *prefTreatDigitNumbersAsColor = @"treat_digit_numbers_as_color";
 NSString *prefShowPreviewForLinks = @"show_preview_for_links";
 NSString *prefUpdateHistoryAfterAction = @"update_history_after_action";
+NSString *prefIsFeedbackProvided = @"is_feedback_provided";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
@@ -876,4 +877,15 @@ std::string AppSettingsMac::getRenameItemShortcut() {
     return {[shortcut UTF8String]};
   }
   return "MetaLeft + KeyR";
+}
+
+void AppSettingsMac::saveFeedbackProvided(bool provided) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:provided forKey:prefIsFeedbackProvided];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::isFeedbackProvided() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  return [defaults boolForKey:prefIsFeedbackProvided];
 }

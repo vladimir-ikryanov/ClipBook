@@ -607,6 +607,17 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("isAfterSystemReboot", [this]() -> bool {
     return after_system_reboot_;
   });
+  window->putProperty("isFeedbackProvided", [this]() -> bool {
+#ifdef OFFICIAL_BUILD
+    return settings_->isFeedbackProvided();
+#endif
+    return true;
+  });
+  window->putProperty("setFeedbackProvided", [this](bool provided) {
+#ifdef OFFICIAL_BUILD
+    settings_->saveFeedbackProvided(provided);
+#endif
+  });
   window->putProperty("buyLicense", [this]() {
     app_->desktop()->openUrl("https://clipbook.app/checkout/");
   });
@@ -654,6 +665,11 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("openSettingsLicense", [this]() {
     hide();
     showSettingsWindow("/settings/license");
+  });
+  window->putProperty("sendFeedback", [this](std::string text) {
+#ifdef OFFICIAL_BUILD
+    sendFeedback(text);
+#endif
   });
   window->putProperty("shouldDisplayThankYouDialog", [this]() -> bool {
     return settings_->shouldDisplayThankYouDialog();

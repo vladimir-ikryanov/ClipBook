@@ -81,6 +81,9 @@ class AppSettingsMac : public AppSettings {
   void saveLastUpdateCheckTime(long time) override;
   long getLastUpdateCheckTime() override;
 
+  void saveFeedbackProvided(bool provided) override;
+  bool isFeedbackProvided() override;
+
   // Shortcuts.
 
   void saveOpenAppShortcut(std::string shortcut) override;

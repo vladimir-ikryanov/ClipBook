@@ -186,7 +186,7 @@ ClipBook will check for updates automatically and notify you when a new version 
             </div>
 
             <div className="flex items-center justify-between py-1 space-x-20">
-              <Button variant="activate" size="sm" className="px-4"
+              <Button variant="secondary" size="sm" className="px-4"
                       onClick={handleCheckForUpdates} disabled={checkingForUpdates}>
                 {
                   checkingForUpdates ? <RefreshCcwIcon className="animate-spin h-4 w-4 mr-2"/> : null

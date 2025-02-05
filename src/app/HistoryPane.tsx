@@ -266,6 +266,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   useEffect(() => {
     const down = async (e: KeyboardEvent) => {
+      if (isTrialExpired) {
+        return
+      }
       // Select the previous item when the select previous item shortcut is pressed.
       if (isShortcutMatch(prefGetSelectPreviousItemShortcut(), e)) {
         selectPreviousItem()

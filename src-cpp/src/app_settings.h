@@ -85,6 +85,9 @@ class AppSettings {
   virtual void saveLastUpdateCheckTime(long time) = 0;
   virtual long getLastUpdateCheckTime() = 0;
 
+  virtual void saveFeedbackProvided(bool provided) = 0;
+  virtual bool isFeedbackProvided() = 0;
+
   // Shortcuts.
 
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;
