@@ -6,7 +6,7 @@
 #include "molybden.hpp"
 
 struct AppInfo {
-  std::string path;
+  std::string path = "";
 };
 
 class AppSettings {

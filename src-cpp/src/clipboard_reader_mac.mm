@@ -43,8 +43,13 @@ void extractTextFromImage(NSImage *image,
       VNRecognizedText *recognizedText = [[observation topCandidates:1] firstObject];
       if (recognizedText != nil) {
         NSString *string = recognizedText.string;
-        content += [string UTF8String];
-        content += "\n";
+        if (string != nil) {
+          const char *text = [string UTF8String];
+          if (text != nullptr) {
+            content += text;
+            content += "\n";
+          }
+        }
       }
     }
 
@@ -54,8 +59,11 @@ void extractTextFromImage(NSImage *image,
 
     data->content = content;
 
-    auto js_window = app->browser()->mainFrame()->executeJavaScript("window");
-    js_window.asJsObject()->call("setTextFromImage", imageFileName, content);
+    auto frame = app->browser()->mainFrame();
+    if (frame) {
+      auto js_window = frame->executeJavaScript("window");
+      js_window.asJsObject()->call("setTextFromImage", imageFileName, content);
+    }
   }];
 
   // Perform the request
@@ -107,7 +115,7 @@ std::vector<fs::path> findImages(const fs::path &dir,
     if (entry.is_regular_file()) {
       std::string filename = entry.path().filename().string();
       if (filename.find(excludeFilePrefix) == 0) {
-          continue;
+        continue;
       }
       if (filename.find(filePrefix) == 0 &&
           filename.find(fileExtension) == filename.size() - fileExtension.size()) {
@@ -137,7 +145,9 @@ bool findIdenticalImage(NSImage *srcImage,
   auto images = findImages(imagesDir, "image_", "image_thumb_", ".png");
   for (const auto &image_path : images) {
     // Get file name without extension.
-    auto image_info_path = image_path.string().replace(image_path.string().find(".png"), 4, ".info");
+    auto image_info_path = image_path.string().replace(image_path.string().find(".png"),
+                                                       4,
+                                                       ".info");
     bool file_exists = fs::exists(image_info_path);
     if (file_exists) {
       std::ifstream input_file(image_info_path);
@@ -191,7 +201,9 @@ bool findIdenticalImage(NSImage *srcImage,
     CFDataRef data2 = CGDataProviderCopyData(CGImageGetDataProvider(dstCGImage));
 
     BOOL identical = CFDataGetLength(data1) == CFDataGetLength(data2) &&
-                     memcmp(CFDataGetBytePtr(data1), CFDataGetBytePtr(data2), CFDataGetLength(data1)) == 0;
+                     memcmp(CFDataGetBytePtr(data1),
+                            CFDataGetBytePtr(data2),
+                            CFDataGetLength(data1)) == 0;
 
     CFRelease(data1);
     CFRelease(data2);
@@ -330,9 +342,12 @@ bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> 
   // Check if the active app should be ignored.
   auto settings = app_->settings();
   data->active_app_info = app_->getActiveAppInfo();
-  auto apps_to_ignore = settings->getAppsToIgnore();
-  if (apps_to_ignore.find(data->active_app_info.path) != std::string::npos) {
-    return false;
+  auto active_app_path = data->active_app_info.path;
+  if (!active_app_path.empty()) {
+    auto apps_to_ignore = settings->getAppsToIgnore();
+    if (apps_to_ignore.find(active_app_path) != std::string::npos) {
+      return false;
+    }
   }
 
   // Check if the clipboard has transient or confidential content.
@@ -361,7 +376,13 @@ bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> 
     } else {
       NSData *tiff_data = [pasteboard dataForType:NSPasteboardTypeTIFF];
       NSBitmapImageRep *image_rep = [NSBitmapImageRep imageRepWithData:tiff_data];
-      png_data = [image_rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+      if (image_rep) {
+        png_data = [image_rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+      }
+    }
+
+    if (!png_data) {
+      return false;
     }
 
     NSImage *image = [[NSImage alloc] initWithData:png_data];
@@ -416,21 +437,26 @@ bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> 
     [image release];
 
     if ([types containsObject:NSPasteboardTypeString]) {
-      std::string content = [[pasteboard stringForType:NSPasteboardTypeString] UTF8String];
-      if (!isEmptyOrSpaces(content)) {
-        data->image_info.text = content;
+      auto pasteboard_string = [pasteboard stringForType:NSPasteboardTypeString];
+      if (pasteboard_string) {
+        const char *content = [pasteboard_string UTF8String];
+        if (content != nullptr && !isEmptyOrSpaces(content)) {
+          data->image_info.text = content;
+        }
       }
     }
-
     return true;
   }
 
   // Read text content.
   if ([types containsObject:NSPasteboardTypeString]) {
-    std::string content = [[pasteboard stringForType:NSPasteboardTypeString] UTF8String];
-    if (!isEmptyOrSpaces(content)) {
-      data->content = content;
-      return true;
+    auto pasteboard_string = [pasteboard stringForType:NSPasteboardTypeString];
+    if (pasteboard_string) {
+      const char *content = [pasteboard_string UTF8String];
+      if (content != nullptr && !isEmptyOrSpaces(content)) {
+        data->content = content;
+        return true;
+      }
     }
   }
   return false;

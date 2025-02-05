@@ -600,13 +600,13 @@ AppInfo MainAppMac::getAppInfo() {
 }
 
 AppInfo MainAppMac::getActiveAppInfo() {
+  AppInfo app_info;
   NSRunningApplication *app = [[NSWorkspace sharedWorkspace] frontmostApplication];
   if (app) {
-    AppInfo app_info;
     app_info.path = [[app bundleURL] fileSystemRepresentation];
     return app_info;
   }
-  return {};
+  return app_info;
 }
 
 void MainAppMac::addAppToLoginItems() {
