@@ -105,7 +105,9 @@ void MainApp::launch() {
     createTray();
   }
 
-  app_window_ = Browser::create(app_);
+  BrowserOptions options;
+  options.window_type = WindowType::kFloating;
+  app_window_ = Browser::create(app_, options);
   app_window_->settings()->disableOverscrollHistoryNavigation();
   app_window_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
     initJavaScriptApi(args.window);
@@ -140,9 +142,6 @@ void MainApp::launch() {
   // Hide window title and title bar.
   app_window_->setWindowTitleVisible(false);
   app_window_->setWindowTitlebarVisible(false);
-
-  // Move the window to the active desktop when the app is activated.
-  app_window_->setWindowDisplayPolicy(WindowDisplayPolicy::kMoveToActiveDesktop);
 
   // Display the window always on top of other windows.
   app_window_->setAlwaysOnTop(true);
@@ -1041,40 +1040,47 @@ void MainApp::createTray() {
   } else {
     tray_->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
   }
-  tray_->setMenu(CustomMenu::create(
-      {
-          open_app_item_,
-          menu::Separator(),
-          menu::Menu("Help", {
-              menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
-                app_->desktop()->openUrl(kKeyboardShortcutsUrl);
+  tray_->onClicked += [this](const TrayClicked& event) {
+    if (event.mouse_button == MouseButton::kPrimary) {
+      show();
+    }
+    if (event.mouse_button == MouseButton::kSecondary) {
+      tray_->openMenu(CustomMenu::create(
+          {
+              open_app_item_,
+              menu::Separator(),
+              menu::Menu("Help", {
+                  menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
+                    app_->desktop()->openUrl(kKeyboardShortcutsUrl);
+                  }),
+                  menu::Separator(),
+                  menu::Item("Product Updates", [this](const CustomMenuItemActionArgs &args) {
+                    app_->desktop()->openUrl(kProductUpdatesUrl);
+                  }),
+                  menu::Item("Feature Request", [this](const CustomMenuItemActionArgs &args) {
+                    app_->desktop()->openUrl(kFeatureRequestUrl);
+                  }),
+                  menu::Separator(),
+                  menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
+                    app_->desktop()->openUrl(kContactSupportUrl);
+                  }),
               }),
               menu::Separator(),
-              menu::Item("Product Updates", [this](const CustomMenuItemActionArgs &args) {
-                app_->desktop()->openUrl(kProductUpdatesUrl);
+              menu::Item("About " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
+                showAboutDialog();
               }),
-              menu::Item("Feature Request", [this](const CustomMenuItemActionArgs &args) {
-                app_->desktop()->openUrl(kFeatureRequestUrl);
-              }),
+              check_for_updates_item_,
+              open_settings_item_,
               menu::Separator(),
-              menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
-                app_->desktop()->openUrl(kContactSupportUrl);
-              }),
-          }),
-          menu::Separator(),
-          menu::Item("About " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
-            showAboutDialog();
-          }),
-          check_for_updates_item_,
-          open_settings_item_,
-          menu::Separator(),
-          pause_resume_item_,
-          menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
-            std::thread([this]() {
-              quit();
-            }).detach();
-          })
-      }));
+              pause_resume_item_,
+              menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
+                std::thread([this]() {
+                  quit();
+                }).detach();
+              })
+          }));
+    }
+  };
 }
 
 void MainApp::quit() {
