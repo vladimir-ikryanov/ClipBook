@@ -84,6 +84,9 @@ class AppSettingsMac : public AppSettings {
   void saveFeedbackProvided(bool provided) override;
   bool isFeedbackProvided() override;
 
+  void savePasteOnClick(bool paste) override;
+  bool shouldPasteOnClick() override;
+
   // Shortcuts.
 
   void saveOpenAppShortcut(std::string shortcut) override;

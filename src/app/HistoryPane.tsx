@@ -894,6 +894,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleSelectedItemsChange() {
+    focusSearchField()
     setSelectedItemIndices(getSelectedHistoryItemIndices())
   }
 

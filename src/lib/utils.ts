@@ -2,6 +2,7 @@ import {type ClassValue, clsx} from "clsx"
 import {twMerge} from "tailwind-merge"
 import {ClipType} from "@/db";
 import {prefShouldTreatDigitNumbersAsColor} from "@/pref";
+import {MouseEvent} from "react";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -114,4 +115,8 @@ export function toCSSColor(str: string): string {
   }
 
   return ""
+}
+
+export function hasModifiers(e: MouseEvent) :boolean {
+  return e.metaKey || e.ctrlKey || e.shiftKey || e.altKey
 }

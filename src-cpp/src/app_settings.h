@@ -88,6 +88,9 @@ class AppSettings {
   virtual void saveFeedbackProvided(bool provided) = 0;
   virtual bool isFeedbackProvided() = 0;
 
+  virtual void savePasteOnClick(bool paste) = 0;
+  virtual bool shouldPasteOnClick() = 0;
+
   // Shortcuts.
 
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;

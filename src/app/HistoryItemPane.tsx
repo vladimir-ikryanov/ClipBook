@@ -2,7 +2,7 @@ import '../app.css';
 import React, {CSSProperties, KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
 import {getFilterQuery} from "@/data";
 import {Clip, ClipType, updateClip} from "@/db";
-import {toCSSColor} from "@/lib/utils";
+import {hasModifiers, toCSSColor} from "@/lib/utils";
 import {
   FileIcon,
   LinkIcon,
@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import HistoryItemMenu, {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import ShortcutLabel from "@/app/ShortcutLabel";
+import {prefShouldPasteOnClick} from "@/pref";
 
 type HistoryItemPaneProps = {
   item: Clip
@@ -21,9 +22,10 @@ type HistoryItemPaneProps = {
   appIcon: string
   isQuickPasteModifierPressed: boolean
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
-  onMouseDown(index: number, metaKeyDown: boolean, shiftKeyDown: boolean): void
+  onItemSelected(index: number, metaKeyDown: boolean, shiftKeyDown: boolean): void
   onMouseDoubleClick: (index: number) => void
-  onPaste: (index: number) => void
+  onPaste: () => void
+  onPasteByIndex: (index: number) => void
   onEditHistoryItem: (item: Clip) => void
   onEditContent: (index: number) => void
   onRenameItem: (index: number) => void
@@ -42,6 +44,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false)
   const [itemName, setItemName] = useState(props.item.name ? props.item.name : "")
   const [originalItemName, setOriginalItemName] = useState(props.item.name ? props.item.name : "")
+  const [pasteOnClick, setPasteOnClick] = useState(prefShouldPasteOnClick())
 
   useEffect(() => {
     function handleAction(event: Event) {
@@ -112,21 +115,47 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     }
   }
 
-  const handleMouseDown = (e: MouseEvent) => {
+  const handleMouseUp = (e: MouseEvent) => {
     if (renameItemMode) {
+      return
+    }
+    if (pasteOnClick) {
+      if (e.metaKey || e.shiftKey) {
+        props.onItemSelected(props.index, e.metaKey, e.shiftKey)
+      } else {
+        if (props.selectedItemIndices.length >= 1) {
+          props.onPaste()
+        } else {
+          props.onPasteByIndex(props.index)
+        }
+      }
+    }
+    e.preventDefault()
+  }
+
+  const handleMouseDown = (e: MouseEvent) => {
+    if (renameItemMode || pasteOnClick) {
       return
     }
     // Check if this is e.metaKey double click event.
     if (e.detail === 2) {
       props.onMouseDoubleClick(props.index)
     } else {
-      props.onMouseDown(props.index, e.metaKey, e.shiftKey)
+      props.onItemSelected(props.index, e.metaKey, e.shiftKey)
     }
     e.preventDefault()
   }
 
   const handleMouseEnter = (e: MouseEvent) => {
-    setMouseOver(true)
+    if (pasteOnClick) {
+      if (!hasModifiers(e) && !props.selectedItemIndices.includes(props.index)) {
+        if (e.relatedTarget !== window) {
+          props.onItemSelected(props.index, e.metaKey, e.shiftKey)
+        }
+      }
+    } else {
+      setMouseOver(true)
+    }
     e.preventDefault()
   }
 
@@ -170,7 +199,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
                                 open={actionsMenuOpen}
                                 onOpenChange={handleDropdownMenuOpenChange}
                                 onHideClipDropdownMenu={props.onHideClipDropdownMenu}
-                                onPaste={props.onPaste}
+                                onPaste={props.onPasteByIndex}
                                 onEditHistoryItem={props.onEditHistoryItem}
                                 onEditContent={props.onEditContent}
                                 onRenameItem={props.onRenameItem}
@@ -301,6 +330,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
           style={props.style}
           className={`flex flex-row cursor-default select-none items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-popover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
           onKeyDown={handleKeyDown}
+          onMouseUp={handleMouseUp}
           onMouseDown={handleMouseDown}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}>

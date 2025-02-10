@@ -33,6 +33,7 @@ NSString *prefTreatDigitNumbersAsColor = @"treat_digit_numbers_as_color";
 NSString *prefShowPreviewForLinks = @"show_preview_for_links";
 NSString *prefUpdateHistoryAfterAction = @"update_history_after_action";
 NSString *prefIsFeedbackProvided = @"is_feedback_provided";
+NSString *prefPasteOnClick = @"paste_on_click";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
@@ -888,4 +889,18 @@ void AppSettingsMac::saveFeedbackProvided(bool provided) {
 bool AppSettingsMac::isFeedbackProvided() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   return [defaults boolForKey:prefIsFeedbackProvided];
+}
+
+void AppSettingsMac::savePasteOnClick(bool paste) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:paste forKey:prefPasteOnClick];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldPasteOnClick() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefPasteOnClick] != nil) {
+    return [defaults boolForKey:prefPasteOnClick];
+  }
+  return true;
 }

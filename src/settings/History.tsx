@@ -16,10 +16,10 @@ import {
   prefSetCopyAndMergeEnabled,
   prefSetCopyAndMergeSeparator,
   prefSetCopyToClipboardAfterMerge,
-  prefSetKeepFavoritesOnClearHistory,
+  prefSetKeepFavoritesOnClearHistory, prefSetPasteOnClick,
   prefSetShowPreviewForLinks,
   prefSetTreatDigitNumbersAsColor, prefSetUpdateHistoryAfterAction,
-  prefSetWarnOnClearHistory,
+  prefSetWarnOnClearHistory, prefShouldPasteOnClick,
   prefShouldShowPreviewForLinks,
   prefShouldTreatDigitNumbersAsColor,
   prefShouldUpdateHistoryAfterAction,
@@ -47,6 +47,7 @@ export default function History() {
   const [treatDigitNumbersAsColor, setTreatDigitNumbersAsColor] = useState(prefShouldTreatDigitNumbersAsColor())
   const [showPreviewForLinks, setShowPreviewForLinks] = useState(prefShouldShowPreviewForLinks())
   const [updateHistoryAfterAction, setUpdateHistoryAfterAction] = useState(prefShouldUpdateHistoryAfterAction())
+  const [pasteOnClick, setPasteOnClick] = useState(prefShouldPasteOnClick())
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -108,6 +109,11 @@ export default function History() {
   function handleUpdateHistoryAfterActionChange(updateHistoryAfterAction: boolean) {
     setUpdateHistoryAfterAction(updateHistoryAfterAction)
     prefSetUpdateHistoryAfterAction(updateHistoryAfterAction)
+  }
+
+  function handlePasteOnClickChange(pasteOnClick: boolean) {
+    setPasteOnClick(pasteOnClick)
+    prefSetPasteOnClick(pasteOnClick)
   }
 
   function renderLicenseItem() {
@@ -182,6 +188,19 @@ export default function History() {
               </Label>
               <Switch id="updateHistoryAfterAction" checked={updateHistoryAfterAction}
                       onCheckedChange={handleUpdateHistoryAfterActionChange}/>
+            </div>
+
+            <hr/>
+
+            <div className="flex items-center justify-between space-x-20 pb-1">
+              <Label htmlFor="pasteOnClick" className="flex flex-col text-base">
+                <span className="">Paste on click</span>
+                <span className="text-neutral-500 font-normal text-sm mt-1">
+                  Select history item on mouse over and paste on&nbsp;click.
+                </span>
+              </Label>
+              <Switch id="pasteOnClick" checked={pasteOnClick}
+                      onCheckedChange={handlePasteOnClickChange}/>
             </div>
 
             <hr/>

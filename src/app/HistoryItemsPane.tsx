@@ -64,7 +64,7 @@ type HistoryItemsPaneProps = {
 }
 
 const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
-  function handleMouseDown(index: number, metaKeyDown: boolean, shiftKeyDown: boolean) {
+  function handleItemSelected(index: number, metaKeyDown: boolean, shiftKeyDown: boolean) {
     // Handle click without modifier keys: select a single item.
     if (!metaKeyDown && !shiftKeyDown) {
       setSelectedHistoryItemIndex(index)
@@ -134,9 +134,10 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                                          appIcon={props.appIcon}
                                          isQuickPasteModifierPressed={props.isQuickPasteModifierPressed}
                                          onHideClipDropdownMenu={props.onHideClipDropdownMenu}
-                                         onPaste={props.onPasteByIndex}
+                                         onPaste={props.onPaste}
+                                         onPasteByIndex={props.onPasteByIndex}
                                          onEditHistoryItem={props.onEditHistoryItem}
-                                         onMouseDown={handleMouseDown}
+                                         onItemSelected={handleItemSelected}
                                          onMouseDoubleClick={handleMouseDoubleClick}
                                          onEditContent={props.onEditContentByIndex}
                                          onRenameItem={props.onRenameItemByIndex}

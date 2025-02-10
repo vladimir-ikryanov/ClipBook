@@ -38,6 +38,8 @@ declare const setShowPreviewForLinks: (show: boolean) => void;
 declare const shouldShowPreviewForLinks: () => boolean;
 declare const setUpdateHistoryAfterAction: (update: boolean) => void;
 declare const shouldUpdateHistoryAfterAction: () => boolean;
+declare const shouldPasteOnClick: () => boolean;
+declare const setPasteOnClick: (paste: boolean) => void;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -520,4 +522,12 @@ export function prefIsFeedbackProvided() {
 
 export function prefSetFeedbackProvided(provided: boolean) {
   setFeedbackProvided(provided)
+}
+
+export function prefShouldPasteOnClick() {
+  return shouldPasteOnClick()
+}
+
+export function prefSetPasteOnClick(paste: boolean) {
+  setPasteOnClick(paste)
 }

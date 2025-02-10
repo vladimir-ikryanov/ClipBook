@@ -977,6 +977,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("shouldUpdateHistoryAfterAction", [this]() -> bool {
     return settings_->shouldUpdateHistoryAfterAction();
   });
+  window->putProperty("setPasteOnClick", [this](bool paste) -> void {
+    settings_->savePasteOnClick(paste);
+  });
+  window->putProperty("shouldPasteOnClick", [this]() -> bool {
+    return settings_->shouldPasteOnClick();
+  });
 
   // Settings window.
   window->putProperty("checkForUpdates", [this]() -> void {
