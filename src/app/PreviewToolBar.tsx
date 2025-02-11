@@ -33,17 +33,7 @@ import {
   getSelectedHistoryItems, isTextItem, toBase64Icon
 } from "@/data";
 import {CommandShortcut} from "@/components/ui/command";
-import PreviewToolBarMenu from "@/app/PreviewToolBarMenu";
-
-export type HideDropdownReason =
-    "cancel"
-    | "togglePreview"
-    | "editContent"
-    | "renameItem"
-    | "previewLink"
-    | "updatePreview"
-    | "saveImageAsFile"
-    | "deleteItem"
+import PreviewToolBarMenu, {HideDropdownReason} from "@/app/PreviewToolBarMenu";
 
 type PreviewToolBarProps = {
   selectedItemIndices: number[]
@@ -59,6 +49,7 @@ type PreviewToolBarProps = {
   onSaveImageAsFile: () => void
   onDeleteItem: () => void
   onRenameItem: () => void
+  onFormatText: () => void
   onRequestEditItem: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
@@ -329,6 +320,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                                 onSaveImageAsFile={props.onSaveImageAsFile}
                                 onRequestEditItem={props.onRequestEditItem}
                                 onRenameItem={props.onRenameItem}
+                                onFormatText={props.onFormatText}
                                 onDeleteItem={props.onDeleteItem}
                                 onCopyToClipboard={props.onCopyToClipboard}
                                 onCopyTextFromImage={props.onCopyTextFromImage}

@@ -1,6 +1,6 @@
 import '../app.css';
 import React, {useState} from "react";
-import PreviewToolBar, {HideDropdownReason} from "@/app/PreviewToolBar";
+import PreviewToolBar from "@/app/PreviewToolBar";
 import {Clip, ClipType} from "@/db";
 import ItemInfoPane from "@/app/ItemInfoPane";
 import {
@@ -16,6 +16,7 @@ import PreviewItemsPane from "@/app/PreviewItemsPane";
 import PreviewColorPane from "@/app/PreviewColorPane";
 import PreviewLinkPane from "@/app/PreviewLinkPane";
 import {prefShouldShowPreviewForLinks} from "@/pref";
+import {HideDropdownReason} from "@/app/PreviewToolBarMenu";
 
 type PreviewPaneProps = {
   selectedItemIndices: number[]
@@ -40,6 +41,7 @@ type PreviewPaneProps = {
   onToggleFavorite: () => void
   onDeleteItem: () => void
   onRenameItem: () => void
+  onFormatText: () => void
 }
 
 export default function PreviewPane(props: PreviewPaneProps) {
@@ -121,6 +123,7 @@ export default function PreviewPane(props: PreviewPaneProps) {
                         onSaveImageAsFile={props.onSaveImageAsFile}
                         onRequestEditItem={props.onRequestEditItem}
                         onRenameItem={props.onRenameItem}
+                        onFormatText={props.onFormatText}
                         onDeleteItem={props.onDeleteItem}
                         onCopyToClipboard={props.onCopyToClipboard}
                         onCopyTextFromImage={props.onCopyTextFromImage}

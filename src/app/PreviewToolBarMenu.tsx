@@ -4,13 +4,13 @@ import {Button} from "@/components/ui/button";
 import {
   DownloadIcon, Edit3Icon, EllipsisVerticalIcon, EyeIcon,
   PenIcon, RefreshCwIcon,
-  TrashIcon,
+  TrashIcon, TypeIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
+  DropdownMenuItem, DropdownMenuPortal,
+  DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -34,6 +34,7 @@ export type HideDropdownReason =
     | "togglePreview"
     | "editContent"
     | "renameItem"
+    | "formatText"
     | "previewLink"
     | "updatePreview"
     | "saveImageAsFile"
@@ -53,6 +54,7 @@ type PreviewToolBarMenuProps = {
   onSaveImageAsFile: () => void
   onDeleteItem: () => void
   onRenameItem: () => void
+  onFormatText: () => void
   onRequestEditItem: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
@@ -118,6 +120,12 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
     props.onUpdateLinkPreview()
   }
 
+  function handleFormatText() {
+    closeReason = "formatText"
+    handleOpenDropdownChange(false)
+    props.onFormatText()
+  }
+
   function canShowEditContent() {
     return props.selectedItemIndices.length === 1 && isTextItem(getFirstSelectedHistoryItem())
   }
@@ -135,6 +143,10 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
     return props.selectedItemIndices.length === 1 && getFirstSelectedHistoryItem().type === ClipType.Image
   }
 
+  function canFormatText() {
+    return props.selectedItemIndices.length === 1 && isTextItem(getFirstSelectedHistoryItem())
+  }
+
   function handleOpenDropdownChange(open: boolean) {
     setOpenDropdown(open)
     if (!open) {
@@ -148,6 +160,51 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
       return indices + " Items"
     }
     return ""
+  }
+
+  function renderFormatOptions() {
+    return (
+        <>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <TypeIcon className="mr-2 h-4 w-4"/>
+              <span className="mr-12">Format Text</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem onClick={handleFormatText}>
+                  make lower case
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleFormatText}>
+                  MAKE UPPER CASE
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleFormatText}>
+                  Capitalize Words
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleFormatText}>
+                  Title Case
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleFormatText}>
+                  Sentence case
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleFormatText}>
+                  StripAllWhitespaces
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleFormatText}>
+                  Strip Extra Whitespaces
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleFormatText}>
+                  Remove empty lines
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleFormatText}>
+                  Strip Surrounding Whitespaces
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+          <DropdownMenuSeparator/>
+        </>
+    )
   }
 
   return (
@@ -214,6 +271,11 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
           {
               canSaveImageAsFile() && <DropdownMenuSeparator/>
           }
+
+          {
+              canFormatText() && renderFormatOptions()
+          }
+
           <DropdownMenuItem onClick={handleDeleteItem}>
             <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
             <span className="mr-12 text-actions-danger">

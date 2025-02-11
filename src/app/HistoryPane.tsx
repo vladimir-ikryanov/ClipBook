@@ -69,7 +69,7 @@ import {ClipboardIcon} from "lucide-react";
 import {getTrialLicenseDaysLeft, isTrialLicense, isTrialLicenseExpired} from "@/licensing";
 import TrialExpiredMessage from "@/app/TrialExpiredMessage";
 import FreeLicenseMessage from "@/app/FreeLicenseMessage";
-import {HideDropdownReason} from "@/app/PreviewToolBar";
+import {HideDropdownReason} from "@/app/PreviewToolBarMenu";
 
 declare const pasteItemInFrontApp: (text: string, imageFileName: string, imageText: string) => void;
 declare const pressReturn: () => void;
@@ -647,6 +647,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }, 100);
   }
 
+  function handleFormatText() {
+
+  }
+
   function handleEditContent() {
     // Edit content is not available when multiple items are selected.
     if (getSelectedHistoryItemIndices().length > 1) {
@@ -1008,6 +1012,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          onPreviewLink={handlePreviewLink}
                          onDeleteItem={handleDeleteItem}
                          onRenameItem={handleRenameItem}
+                         onFormatText={handleFormatText}
                          onToggleFavorite={handleToggleFavorite}/>
           </ResizablePanel>
         </ResizablePanelGroup>
