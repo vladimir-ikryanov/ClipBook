@@ -13,11 +13,11 @@
       "macOS": {
         "icon": "src-cpp/assets/app.icns",
         "bundleID": "com.ikryanov.clipbook",
-        "codesignIdentity": "",
+        "codesignIdentity": "${CLIPBOOK_CODESIGN_IDENTITY}",
         "codesignEntitlements": "src-cpp/assets/entitlements.plist",
-        "teamID": "",
-        "appleID": "",
-        "password": "",
+        "teamID": "${CLIPBOOK_TEAM_ID}",
+        "appleID": "${CLIPBOOK_APPLE_ID}",
+        "password": "${CLIPBOOK_PASSWORD}",
         "installer": {
           "dmg": {
             "name": "",
