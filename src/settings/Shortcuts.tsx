@@ -23,6 +23,7 @@ import {
   prefGetTogglePreviewShortcut,
   prefGetZoomUIInShortcut,
   prefGetZoomUIOutShortcut,
+  prefGetZoomUIResetShortcut,
   prefSetClearHistoryShortcut,
   prefSetCloseAppShortcut,
   prefSetCloseAppShortcut2,
@@ -43,7 +44,8 @@ import {
   prefSetToggleFavoriteShortcut,
   prefSetTogglePreviewShortcut,
   prefSetZoomUIInShortcut,
-  prefSetZoomUIOutShortcut
+  prefSetZoomUIOutShortcut,
+  prefSetZoomUIResetShortcut
 } from "@/pref";
 import {KeyboardIcon, KeyRoundIcon, ListIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 import {isLicenseActivated} from "@/licensing";
@@ -69,6 +71,7 @@ export default function Shortcuts() {
   const [showMoreActionsShortcut, setShowMoreActionsShortcut] = useState(prefGetShowMoreActionsShortcut());
   const [zoomUIInShortcut, setZoomUIInShortcut] = useState(prefGetZoomUIInShortcut());
   const [zoomUIOutShortcut, setZoomUIOutShortcut] = useState(prefGetZoomUIOutShortcut());
+  const [zoomUIResetShortcut, setZoomUIResetShortcut] = useState(prefGetZoomUIResetShortcut());
   const [openSettingsShortcut, setOpenSettingsShortcut] = useState(prefGetOpenSettingsShortcut());
   const [toggleFavoriteShortcut, setToggleFavoriteShortcut] = useState(prefGetToggleFavoriteShortcut());
   const [saveImageAsFileShortcut, setSaveImageAsFileShortcut] = useState(prefGetSaveImageAsFileShortcut());
@@ -171,6 +174,11 @@ export default function Shortcuts() {
   function handleZoomUIOutShortcutChange(shortcut: string) {
     setZoomUIOutShortcut(shortcut)
     prefSetZoomUIOutShortcut(shortcut)
+  }
+
+  function handleZoomUIResetShortcutChange(shortcut: string) {
+    setZoomUIResetShortcut(shortcut)
+    prefSetZoomUIResetShortcut(shortcut)
   }
 
   function handleOpenSettingsShortcutChange(shortcut: string) {
@@ -362,15 +370,21 @@ export default function Shortcuts() {
             </div>
             <hr/>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Make UI text bigger</span>
+              <span className="">Zoom In</span>
               <ShortcutInput shortcut={zoomUIInShortcut} defaultShortcut="MetaLeft + Equal"
                              onSave={handleZoomUIInShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Make UI text smaller</span>
+              <span className="">Zoom Out</span>
               <ShortcutInput shortcut={zoomUIOutShortcut}
                              defaultShortcut="MetaLeft + Minus"
                              onSave={handleZoomUIOutShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Reset Zoom</span>
+              <ShortcutInput shortcut={zoomUIResetShortcut}
+                             defaultShortcut="MetaLeft + KeyO"
+                             onSave={handleZoomUIResetShortcutChange}/>
             </div>
             <hr/>
             <div className="flex items-center justify-between space-x-20">

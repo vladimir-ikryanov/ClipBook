@@ -147,6 +147,9 @@ class AppSettings {
   virtual void saveZoomUIOutShortcut(std::string shortcut) = 0;
   virtual std::string getZoomUIOutShortcut() = 0;
 
+  virtual void saveZoomUIResetShortcut(std::string shortcut) = 0;
+  virtual std::string getZoomUIResetShortcut() = 0;
+
   virtual void saveOpenSettingsShortcut(std::string shortcut) = 0;
   virtual std::string getOpenSettingsShortcut() = 0;
 

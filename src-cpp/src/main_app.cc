@@ -589,10 +589,31 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
     clearHistory();
   });
   window->putProperty("zoomIn", [window]() {
-    window->frame()->browser()->zoom()->in();
+    auto zoom = window->frame()->browser()->zoom();
+    if (zoom->level() < molybden::k200) {
+      zoom->in();
+    }
   });
   window->putProperty("zoomOut", [window]() {
-    window->frame()->browser()->zoom()->out();
+    auto zoom = window->frame()->browser()->zoom();
+    if (zoom->level() > molybden::k50) {
+      zoom->out();
+    }
+  });
+  window->putProperty("canZoomIn", [window]() -> bool {
+    auto zoom = window->frame()->browser()->zoom();
+    return zoom->level() < molybden::k200;
+  });
+  window->putProperty("canZoomOut", [window]() -> bool {
+    auto zoom = window->frame()->browser()->zoom();
+    return zoom->level() > molybden::k50;
+  });
+  window->putProperty("resetZoom", [window]() {
+    window->frame()->browser()->zoom()->reset();
+  });
+  window->putProperty("canResetZoom", [window]() -> bool {
+    auto zoom = window->frame()->browser()->zoom();
+    return zoom->level() != molybden::k100;
   });
   window->putProperty("enableOpenAppShortcut", [this]() {
     enableOpenAppShortcut();
@@ -880,6 +901,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("getZoomUIOutShortcut", [this]() -> std::string {
     return settings_->getZoomUIOutShortcut();
+  });
+  window->putProperty("saveZoomUIResetShortcut", [this](std::string shortcut) -> void {
+    settings_->saveZoomUIResetShortcut(shortcut);
+  });
+  window->putProperty("getZoomUIResetShortcut", [this]() -> std::string {
+    return settings_->getZoomUIResetShortcut();
   });
   window->putProperty("saveOpenSettingsShortcut", [this](std::string shortcut) -> void {
     settings_->saveOpenSettingsShortcut(shortcut);

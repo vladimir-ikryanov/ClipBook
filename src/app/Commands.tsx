@@ -12,7 +12,7 @@ import {
   SettingsIcon,
   StarIcon,
   StarOffIcon,
-  TrashIcon
+  TrashIcon, Undo2Icon, ZoomIn, ZoomOut
 } from "lucide-react"
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -39,7 +39,10 @@ import {
   prefGetSaveImageAsFileShortcut,
   prefGetShowMoreActionsShortcut,
   prefGetToggleFavoriteShortcut,
-  prefGetTogglePreviewShortcut
+  prefGetTogglePreviewShortcut,
+  prefGetZoomUIInShortcut,
+  prefGetZoomUIOutShortcut,
+  prefGetZoomUIResetShortcut
 } from "@/pref";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
@@ -53,6 +56,10 @@ import {ClipType} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {DialogTitle} from "@/components/ui/dialog";
+
+declare const canZoomIn: () => boolean;
+declare const canZoomOut: () => boolean;
+declare const canResetZoom: () => boolean;
 
 export type HideActionsReason =
     "cancel"
@@ -69,12 +76,15 @@ export type HideActionsReason =
     | "saveImageAsFile"
     | "openInBrowser"
     | "preview"
+    | "zoomIn"
+    | "zoomOut"
+    | "resetZoom"
     | "openSettings"
     | "deleteItem"
     | "deleteItems"
     | "deleteAllItems"
 
-type ActionsProps = {
+type CommandsProps = {
   appName: string
   appIcon: string
   onHideActions: (reason: HideActionsReason) => void
@@ -91,13 +101,16 @@ type ActionsProps = {
   onSaveImageAsFile: () => void
   onOpenInBrowser: () => void
   onPreviewLink: () => void
+  onZoomIn: () => void
+  onZoomOut: () => void
+  onResetZoom: () => void
   onOpenSettings: () => void
   onDeleteItem: () => void
   onDeleteItems: () => void
   onDeleteAllItems: () => void
 }
 
-export default function Actions(props: ActionsProps) {
+export default function Commands(props: CommandsProps) {
   const [open, setOpen] = useState(false)
 
   function closeCommandsPopup() {
@@ -198,6 +211,24 @@ export default function Actions(props: ActionsProps) {
     closeReason = "openSettings"
     handleOpenChange(false)
     props.onOpenSettings()
+  }
+
+  function handleZoomIn() {
+    closeReason = "zoomIn"
+    handleOpenChange(false)
+    props.onZoomIn()
+  }
+
+  function handleZoomOut() {
+    closeReason = "zoomOut"
+    handleOpenChange(false)
+    props.onZoomOut()
+  }
+
+  function handleResetZoom() {
+    closeReason = "resetZoom"
+    handleOpenChange(false)
+    props.onResetZoom()
   }
 
   function handleDeleteItem() {
@@ -448,17 +479,6 @@ export default function Actions(props: ActionsProps) {
                     <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
-                <CommandItem onSelect={handleTogglePreview}>
-                  {
-                    getPreviewVisibleState() ?
-                        <HidePreviewPaneIcon className="mr-2 h-4 w-4"/> :
-                        <ShowPreviewPaneIcon className="mr-2 h-4 w-4"/>
-                  }
-                  <span>{getPreviewVisibleState() ? "Hide Preview" : "Show Preview"}</span>
-                  <CommandShortcut className="flex flex-row">
-                    <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
-                  </CommandShortcut>
-                </CommandItem>
                 {
                     canShowPreview() && <CommandSeparator/>
                 }
@@ -479,6 +499,39 @@ export default function Actions(props: ActionsProps) {
                       </CommandShortcut>
                     </CommandItem>
                 }
+                <CommandSeparator/>
+                <CommandItem onSelect={handleTogglePreview}>
+                  {
+                    getPreviewVisibleState() ?
+                        <HidePreviewPaneIcon className="mr-2 h-4 w-4"/> :
+                        <ShowPreviewPaneIcon className="mr-2 h-4 w-4"/>
+                  }
+                  <span>{getPreviewVisibleState() ? "Hide Preview" : "Show Preview"}</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
+                  </CommandShortcut>
+                </CommandItem>
+                <CommandItem onSelect={handleZoomIn} disabled={!canZoomIn()}>
+                  <ZoomIn className="mr-2 h-4 w-4"/>
+                  <span>Zoom In</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetZoomUIInShortcut()}/>
+                  </CommandShortcut>
+                </CommandItem>
+                <CommandItem onSelect={handleZoomOut} disabled={!canZoomOut()}>
+                  <ZoomOut className="mr-2 h-4 w-4"/>
+                  <span>Zoom Out</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetZoomUIOutShortcut()}/>
+                  </CommandShortcut>
+                </CommandItem>
+                <CommandItem onSelect={handleResetZoom} disabled={!canResetZoom()}>
+                  <Undo2Icon className="mr-2 h-4 w-4"/>
+                  <span>Reset Zoom</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetZoomUIResetShortcut()}/>
+                  </CommandShortcut>
+                </CommandItem>
                 <CommandSeparator/>
                 <CommandItem onSelect={handleOpenSettings}>
                   <SettingsIcon className="mr-2 h-4 w-4"/>

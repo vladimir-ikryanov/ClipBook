@@ -58,6 +58,7 @@ NSString *prefTogglePreviewShortcut = @"app.toggle_preview_shortcut2";
 NSString *prefShowMoreActionsShortcut = @"app.show_more_actions_shortcut3";
 NSString *prefZoomUIInShortcut = @"app.zoom_ui_in_shortcut2";
 NSString *prefZoomUIOutShortcut = @"app.zoom_ui_out_shortcut2";
+NSString *prefZoomUIResetShortcut = @"app.zoom_ui_reset_shortcut";
 NSString *prefOpenSettingsShortcut = @"app.open_settings_shortcut2";
 NSString *prefToggleFavoriteShortcut = @"app.toggle_favorite_shortcut2";
 NSString *prefNavigateToFirstItemShortcut = @"app.navigate_to_first_item_shortcut";
@@ -673,6 +674,21 @@ std::string AppSettingsMac::getZoomUIOutShortcut() {
     return {[shortcut UTF8String]};
   }
   return "MetaLeft + Minus";
+}
+
+void AppSettingsMac::saveZoomUIResetShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefZoomUIResetShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getZoomUIResetShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefZoomUIResetShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "MetaLeft + KeyO";
 }
 
 void AppSettingsMac::saveOpenSettingsShortcut(std::string shortcut) {

@@ -143,6 +143,9 @@ class AppSettingsMac : public AppSettings {
   void saveZoomUIOutShortcut(std::string shortcut) override;
   std::string getZoomUIOutShortcut() override;
 
+  void saveZoomUIResetShortcut(std::string shortcut) override;
+  std::string getZoomUIResetShortcut() override;
+
   void saveOpenSettingsShortcut(std::string shortcut) override;
   std::string getOpenSettingsShortcut() override;
 

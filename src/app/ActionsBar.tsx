@@ -1,7 +1,6 @@
 import '../app.css';
 import {Button} from "@/components/ui/button";
 import React from "react";
-import Actions, {HideActionsReason} from "@/app/Actions";
 import {
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSelectNextItemShortcut,

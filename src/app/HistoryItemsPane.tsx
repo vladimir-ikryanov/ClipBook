@@ -4,7 +4,7 @@ import SearchBar from "@/app/SearchBar";
 import ActionsBar from "@/app/ActionsBar";
 import {FixedSizeList as List} from "react-window";
 import AutoSizer, {Size} from "react-virtualized-auto-sizer";
-import {HideActionsReason} from "@/app/Actions";
+import {HideActionsReason} from "@/app/Commands";
 import HistoryItemPane from "@/app/HistoryItemPane";
 import {Clip} from "@/db";
 import {SearchIcon} from "lucide-react";
@@ -51,6 +51,9 @@ type HistoryItemsPaneProps = {
   onSaveImageAsFile: () => void
   onOpenInBrowser: () => void
   onPreviewLink: () => void
+  onZoomIn: () => void
+  onZoomOut: () => void
+  onResetZoom: () => void
   onPreviewLinkByIndex: (index: number) => void
   onOpenInBrowserByIndex: (index: number) => void
   onOpenSettings: () => void
@@ -205,6 +208,9 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    onSaveImageAsFile={props.onSaveImageAsFile}
                    onOpenInBrowser={props.onOpenInBrowser}
                    onPreviewLink={props.onPreviewLink}
+                   onZoomIn={props.onZoomIn}
+                   onZoomOut={props.onZoomOut}
+                   onResetZoom={props.onResetZoom}
                    onOpenSettings={props.onOpenSettings}
                    onToggleFavorite={props.onToggleFavorite}
                    onTogglePreview={props.onTogglePreview}

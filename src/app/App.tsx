@@ -8,7 +8,7 @@ import {
   prefGetCloseAppShortcut2,
   prefGetCloseAppShortcut3,
   prefGetZoomUIInShortcut,
-  prefGetZoomUIOutShortcut
+  prefGetZoomUIOutShortcut, prefGetZoomUIResetShortcut
 } from "@/pref";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {TooltipProvider} from "@/components/ui/tooltip";
@@ -16,6 +16,7 @@ import {TooltipProvider} from "@/components/ui/tooltip";
 declare const hideAppWindow: () => void;
 declare const zoomIn: () => void;
 declare const zoomOut: () => void;
+declare const resetZoom: () => void;
 
 export default function App() {
   const [appName, setAppName] = useState("")
@@ -36,12 +37,17 @@ export default function App() {
       }
       // Zoom in the UI with the zoom in shortcut.
       if (isShortcutMatch(prefGetZoomUIInShortcut(), e)) {
-        zoomIn()
+        handleZoomIn()
         e.preventDefault()
       }
       // Zoom out the UI with the zoom out shortcut.
       if (isShortcutMatch(prefGetZoomUIOutShortcut(), e)) {
-        zoomOut()
+        handleZoomOut()
+        e.preventDefault()
+      }
+      // Reset zoom.
+      if (isShortcutMatch(prefGetZoomUIResetShortcut(), e)) {
+        handleResetZoom()
         e.preventDefault()
       }
     }
@@ -55,13 +61,29 @@ export default function App() {
     setAppIcon(appIcon)
   }
 
+  function handleZoomIn() {
+    zoomIn()
+  }
+
+  function handleZoomOut() {
+    zoomOut()
+  }
+
+  function handleResetZoom() {
+    resetZoom()
+  }
+
   // Attach the function to the window object
   (window as any).setActiveAppInfo = setActiveAppInfo;
 
   return (
       <ThemeProvider defaultTheme="system">
         <TooltipProvider delayDuration={250}>
-          <HistoryPane appName={appName} appIcon={appIcon}/>
+          <HistoryPane appName={appName}
+                       appIcon={appIcon}
+                       onZoomIn={handleZoomIn}
+                       onZoomOut={handleZoomOut}
+                       onResetZoom={handleResetZoom}/>
         </TooltipProvider>
       </ThemeProvider>
   )

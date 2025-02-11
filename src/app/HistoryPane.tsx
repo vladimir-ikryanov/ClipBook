@@ -60,7 +60,7 @@ import {
   prefShouldTreatDigitNumbersAsColor,
   prefShouldUpdateHistoryAfterAction
 } from "@/pref";
-import {HideActionsReason} from "@/app/Actions";
+import {HideActionsReason} from "@/app/Commands";
 import {FixedSizeList as List} from "react-window";
 import {Clip, ClipType, updateClip} from "@/db";
 import {isUrl} from "@/lib/utils";
@@ -87,6 +87,9 @@ declare const saveImageAsFile: (imageFilePath: string, imageWidth: number, image
 type HistoryPaneProps = {
   appName: string
   appIcon: string
+  onZoomIn: () => void
+  onZoomOut: () => void
+  onResetZoom: () => void
 }
 
 let lastPastedItemIDs: Set<number> = new Set()
@@ -967,6 +970,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onSaveImageAsFile={handleSaveImageAsFile}
                               onOpenInBrowser={handleOpenInBrowser}
                               onPreviewLink={handlePreviewLink}
+                              onZoomIn={props.onZoomIn}
+                              onZoomOut={props.onZoomOut}
+                              onResetZoom={props.onResetZoom}
                               onOpenInBrowserByIndex={handleOpenInBrowserByIndex}
                               onPreviewLinkByIndex={handlePreviewLinkByIndex}
                               onOpenSettings={handleOpenSettings}

@@ -7,7 +7,7 @@ import {prefGetTogglePreviewShortcut} from "@/pref";
 import {ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
-import Actions, {HideActionsReason} from "@/app/Actions";
+import Commands, {HideActionsReason} from "@/app/Commands";
 
 declare const openSettingsLicense: () => void;
 
@@ -36,6 +36,9 @@ type SearchBarProps = {
   onSaveImageAsFile: () => void
   onOpenInBrowser: () => void
   onPreviewLink: () => void
+  onZoomIn: () => void
+  onZoomOut: () => void
+  onResetZoom: () => void
   onOpenSettings: () => void
   onDeleteItem: () => void
   onDeleteItems: () => void
@@ -160,26 +163,29 @@ export default function SearchBar(props: SearchBarProps) {
             </Tooltip>
           </div>
           <div>
-            <Actions appName={props.appName}
-                     appIcon={props.appIcon}
-                     onHideActions={props.onHideActions}
-                     onEditContent={props.onEditContent}
-                     onRenameItem={props.onRenameItem}
-                     onCopyToClipboard={props.onCopyToClipboard}
-                     onCopyTextFromImage={props.onCopyTextFromImage}
-                     onSaveImageAsFile={props.onSaveImageAsFile}
-                     onOpenInBrowser={props.onOpenInBrowser}
-                     onPreviewLink={props.onPreviewLink}
-                     onOpenSettings={props.onOpenSettings}
-                     onPaste={props.onPaste}
-                     onPasteWithTab={props.onPasteWithTab}
-                     onPasteWithReturn={props.onPasteWithReturn}
-                     onMerge={props.onMerge}
-                     onToggleFavorite={props.onToggleFavorite}
-                     onTogglePreview={props.onTogglePreview}
-                     onDeleteItem={props.onDeleteItem}
-                     onDeleteItems={props.onDeleteItems}
-                     onDeleteAllItems={props.onDeleteAllItems}/>
+            <Commands appName={props.appName}
+                      appIcon={props.appIcon}
+                      onHideActions={props.onHideActions}
+                      onEditContent={props.onEditContent}
+                      onRenameItem={props.onRenameItem}
+                      onCopyToClipboard={props.onCopyToClipboard}
+                      onCopyTextFromImage={props.onCopyTextFromImage}
+                      onSaveImageAsFile={props.onSaveImageAsFile}
+                      onOpenInBrowser={props.onOpenInBrowser}
+                      onPreviewLink={props.onPreviewLink}
+                      onZoomIn={props.onZoomIn}
+                      onZoomOut={props.onZoomOut}
+                      onResetZoom={props.onResetZoom}
+                      onOpenSettings={props.onOpenSettings}
+                      onPaste={props.onPaste}
+                      onPasteWithTab={props.onPasteWithTab}
+                      onPasteWithReturn={props.onPasteWithReturn}
+                      onMerge={props.onMerge}
+                      onToggleFavorite={props.onToggleFavorite}
+                      onTogglePreview={props.onTogglePreview}
+                      onDeleteItem={props.onDeleteItem}
+                      onDeleteItems={props.onDeleteItems}
+                      onDeleteAllItems={props.onDeleteAllItems}/>
           </div>
           <div className={props.isPreviewVisible ? "hidden" : ""}>
             <Tooltip>

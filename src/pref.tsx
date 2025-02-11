@@ -75,6 +75,8 @@ declare const saveZoomUIInShortcut: (shortcut: string) => void;
 declare const getZoomUIInShortcut: () => string;
 declare const saveZoomUIOutShortcut: (shortcut: string) => void;
 declare const getZoomUIOutShortcut: () => string;
+declare const saveZoomUIResetShortcut: (shortcut: string) => void;
+declare const getZoomUIResetShortcut: () => string;
 declare const saveOpenSettingsShortcut: (shortcut: string) => void;
 declare const getOpenSettingsShortcut: () => string;
 declare const saveToggleFavoriteShortcut: (shortcut: string) => void;
@@ -295,6 +297,14 @@ export function prefGetZoomUIOutShortcut() {
 
 export function prefSetZoomUIOutShortcut(shortcut: string) {
   saveZoomUIOutShortcut(shortcut)
+}
+
+export function prefGetZoomUIResetShortcut() {
+  return getZoomUIResetShortcut()
+}
+
+export function prefSetZoomUIResetShortcut(shortcut: string) {
+  saveZoomUIResetShortcut(shortcut)
 }
 
 export function prefGetOpenSettingsShortcut() {
