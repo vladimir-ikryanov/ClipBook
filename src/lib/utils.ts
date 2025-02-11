@@ -3,6 +3,7 @@ import {twMerge} from "tailwind-merge"
 import {ClipType} from "@/db";
 import {prefShouldTreatDigitNumbersAsColor} from "@/pref";
 import {MouseEvent} from "react";
+import {TextFormatOperation} from "@/data";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -119,4 +120,27 @@ export function toCSSColor(str: string): string {
 
 export function hasModifiers(e: MouseEvent) :boolean {
   return e.metaKey || e.ctrlKey || e.shiftKey || e.altKey
+}
+
+export function formatText(text: string, operation: TextFormatOperation) {
+  switch (operation) {
+    case TextFormatOperation.ToUpperCase:
+      return text.toUpperCase()
+    case TextFormatOperation.ToLowerCase:
+      return text.toLowerCase()
+    case TextFormatOperation.CapitalizeWords:
+      return text.replace(/\b\w/g, l => l.toUpperCase())
+    case TextFormatOperation.ToSentenceCase:
+      return text.replace(/(^\w{1}|\.\s+\w{1})/gi, l => l.toUpperCase())
+    case TextFormatOperation.RemoveEmptyLines:
+      return text.replace(/^\s*\n/gm, "")
+    case TextFormatOperation.StripAllWhitespaces:
+      return text.replace(/\s/g, "")
+    case TextFormatOperation.StripExtraWhitespaces:
+      return text.replace(/\s+/g, " ")
+    case TextFormatOperation.TrimSurroundingWhitespaces:
+      return text.trim()
+    default:
+      return text
+  }
 }

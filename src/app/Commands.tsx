@@ -68,6 +68,7 @@ export type HideActionsReason =
     | "paste"
     | "pasteWithTab"
     | "pasteWithReturn"
+    | "pasteWithTransformation"
     | "merge"
     | "editContent"
     | "renameItem"
@@ -93,6 +94,7 @@ type CommandsProps = {
   onPaste: () => void
   onPasteWithTab: () => void
   onPasteWithReturn: () => void
+  onPasteWithTransformation: () => void
   onMerge: () => void
   onEditContent: () => void
   onRenameItem: () => void
@@ -273,6 +275,12 @@ export default function Commands(props: CommandsProps) {
     props.onSaveImageAsFile()
   }
 
+  function handlePasteWithTransformation() {
+    closeReason = "pasteWithTransformation"
+    handleOpenChange(false)
+    props.onPasteWithTransformation()
+  }
+
   function canShowCopyToClipboard() {
     return getSelectedHistoryItemIndices().length === 1
   }
@@ -379,6 +387,13 @@ export default function Commands(props: CommandsProps) {
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
                   </CommandShortcut>
+                </CommandItem>
+                <CommandItem onSelect={handlePasteWithTransformation}>
+                  <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
+                       alt="Application icon"/>
+                  <span>
+                    Paste {getMultipleItemsIndicator()} to {props.appName} with Formatting...
+                  </span>
                 </CommandItem>
                 {
                     canShowMultiplePaste() &&

@@ -30,7 +30,7 @@ import {
   getFirstSelectedHistoryItem,
   getHistoryItem,
   getSelectedHistoryItemIndices,
-  getSelectedHistoryItems, isTextItem, toBase64Icon
+  getSelectedHistoryItems, isTextItem, TextFormatOperation, toBase64Icon
 } from "@/data";
 import {CommandShortcut} from "@/components/ui/command";
 import PreviewToolBarMenu, {HideDropdownReason} from "@/app/PreviewToolBarMenu";
@@ -49,7 +49,7 @@ type PreviewToolBarProps = {
   onSaveImageAsFile: () => void
   onDeleteItem: () => void
   onRenameItem: () => void
-  onFormatText: () => void
+  onFormatText: (operation: TextFormatOperation) => void
   onRequestEditItem: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void

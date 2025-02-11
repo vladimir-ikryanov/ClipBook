@@ -26,7 +26,7 @@ import {
   removeSelectedHistoryItemIndex,
   setFilterQuery,
   setPreviewVisibleState,
-  setSelectedHistoryItemIndex,
+  setSelectedHistoryItemIndex, TextFormatOperation,
   updateHistoryItem, updateHistoryItemTypes
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
@@ -63,7 +63,7 @@ import {
 import {HideActionsReason} from "@/app/Commands";
 import {FixedSizeList as List} from "react-window";
 import {Clip, ClipType, updateClip} from "@/db";
-import {isUrl} from "@/lib/utils";
+import {formatText, isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
 import {getTrialLicenseDaysLeft, isTrialLicense, isTrialLicenseExpired} from "@/licensing";
@@ -92,6 +92,7 @@ type HistoryPaneProps = {
   onResetZoom: () => void
 }
 
+let clipboardContentToSkip = ""
 let lastPastedItemIDs: Set<number> = new Set()
 let treatDigitNumbersAsColor = prefShouldTreatDigitNumbersAsColor()
 
@@ -129,6 +130,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   imageHeight: number,
                                   imageSizeInBytes: number,
                                   imageText: string) {
+    if (content === clipboardContentToSkip) {
+      clipboardContentToSkip = ""
+      return
+    }
     let item = findItem(content, imageFileName)
     if (item) {
       item.numberOfCopies++
@@ -530,11 +535,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
     return previewPanelRef.current ? previewPanelRef.current.getSize() > 0 : false
   }
 
-  function pasteItem(item: Clip) {
+  function pasteItem(item: Clip, keepHistory: boolean = false) {
     // Remember the last pasted item to be able to skip it when it's added to
     // the system clipboard during paste.
-    if (!prefShouldUpdateHistoryAfterAction()) {
+    if (!prefShouldUpdateHistoryAfterAction() || keepHistory) {
       lastPastedItemIDs.add(item.id!)
+      clipboardContentToSkip = item.content
     }
     let imageFileName = item.imageFileName ? item.imageFileName : ""
     let imageText = item.imageText ? item.imageText : ""
@@ -572,6 +578,18 @@ export default function HistoryPane(props: HistoryPaneProps) {
     })
     // Clear the search query in the search field after paste.
     handleSearchQueryChange("")
+  }
+
+  function handlePasteWithTransformation(operation: TextFormatOperation) {
+    let items = getSelectedHistoryItems()
+    items.forEach(item => {
+      if (isTextItem(item)) {
+        let originalContent = item.content
+        item.content = formatText(originalContent, operation)
+        pasteItem(item, true)
+        item.content = originalContent
+      }
+    })
   }
 
   async function handleMerge() {
@@ -621,7 +639,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleHideActions(reason: HideActionsReason) {
-    if (reason !== "editContent" && reason !== "renameItem") {
+    if (reason !== "editContent" && reason !== "renameItem" && reason !== "pasteWithTransformation") {
       focusSearchField()
     }
   }
@@ -647,8 +665,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }, 100);
   }
 
-  function handleFormatText() {
-
+  async function handleFormatTextAndSave(operation: TextFormatOperation) {
+    let items = getSelectedHistoryItems()
+    items.forEach(item => {
+      item.content = formatText(item.content, operation)
+    })
+    await handleEditHistoryItems(items)
   }
 
   function handleEditContent() {
@@ -688,6 +710,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   function copyItemToClipboard(item: Clip) {
     if (!prefShouldUpdateHistoryAfterAction()) {
       lastPastedItemIDs.add(item.id!)
+      clipboardContentToSkip = item.content
     }
     let imageFileName = item.imageFileName ? item.imageFileName : ""
     let imageText = item.imageText ? item.imageText : ""
@@ -958,6 +981,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onPaste={handlePaste}
                               onPasteWithTab={handlePasteWithTab}
                               onPasteWithReturn={handlePasteWithReturn}
+                              onPasteWithTransformation={handlePasteWithTransformation}
                               onPasteByIndex={handlePasteByIndex}
                               onMerge={handleMerge}
                               onClose={handleClose}
@@ -1012,7 +1036,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                          onPreviewLink={handlePreviewLink}
                          onDeleteItem={handleDeleteItem}
                          onRenameItem={handleRenameItem}
-                         onFormatText={handleFormatText}
+                         onFormatText={handleFormatTextAndSave}
                          onToggleFavorite={handleToggleFavorite}/>
           </ResizablePanel>
         </ResizablePanelGroup>

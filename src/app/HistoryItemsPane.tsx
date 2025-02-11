@@ -13,7 +13,7 @@ import {
   addSelectedHistoryItemIndex,
   getSelectedHistoryItemIndices,
   removeSelectedHistoryItemIndex,
-  setSelectedHistoryItemIndex
+  setSelectedHistoryItemIndex, TextFormatOperation
 } from "@/data";
 
 type HistoryItemsPaneProps = {
@@ -32,6 +32,7 @@ type HistoryItemsPaneProps = {
   onPaste: () => void
   onPasteWithTab: () => void
   onPasteWithReturn: () => void
+  onPasteWithTransformation: (operation: TextFormatOperation) => void
   onPasteByIndex: (index: number) => void
   onMerge: () => void
   onClose: () => void
@@ -198,6 +199,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    onPaste={props.onPaste}
                    onPasteWithTab={props.onPasteWithTab}
                    onPasteWithReturn={props.onPasteWithReturn}
+                   onPasteWithTransformation={props.onPasteWithTransformation}
                    onMerge={props.onMerge}
                    onClose={props.onClose}
                    onHideActions={props.onHideActions}

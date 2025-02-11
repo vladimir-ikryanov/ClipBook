@@ -7,7 +7,7 @@ import {
   getFirstSelectedHistoryItem, getHistoryItem,
   getInfoVisibleState,
   getSelectedHistoryItems,
-  setInfoVisibleState
+  setInfoVisibleState, TextFormatOperation
 } from "@/data";
 import PreviewTextPane from "@/app/PreviewTextPane";
 import PreviewImagePane from "@/app/PreviewImagePane";
@@ -41,7 +41,7 @@ type PreviewPaneProps = {
   onToggleFavorite: () => void
   onDeleteItem: () => void
   onRenameItem: () => void
-  onFormatText: () => void
+  onFormatText: (operation: TextFormatOperation) => void
 }
 
 export default function PreviewPane(props: PreviewPaneProps) {

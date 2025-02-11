@@ -8,6 +8,8 @@ import {ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import Commands, {HideActionsReason} from "@/app/Commands";
+import TextFormatCommands from "@/app/TextFormatCommands";
+import {TextFormatOperation} from "@/data";
 
 declare const openSettingsLicense: () => void;
 
@@ -24,6 +26,7 @@ type SearchBarProps = {
   onPaste: () => void
   onPasteWithTab: () => void
   onPasteWithReturn: () => void
+  onPasteWithTransformation: (operation: TextFormatOperation) => void
   onMerge: () => void
   onClose: () => void
   onHideActions: (reason: HideActionsReason) => void
@@ -74,6 +77,12 @@ export default function SearchBar(props: SearchBarProps) {
 
   function handleClickTrial() {
     openSettingsLicense()
+  }
+
+  function showTransformationOptionsDialog() {
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "pasteWithTransformation"}}));
+    }, 100);
   }
 
   function getTrialBadgeText() {
@@ -180,12 +189,15 @@ export default function SearchBar(props: SearchBarProps) {
                       onPaste={props.onPaste}
                       onPasteWithTab={props.onPasteWithTab}
                       onPasteWithReturn={props.onPasteWithReturn}
+                      onPasteWithTransformation={showTransformationOptionsDialog}
                       onMerge={props.onMerge}
                       onToggleFavorite={props.onToggleFavorite}
                       onTogglePreview={props.onTogglePreview}
                       onDeleteItem={props.onDeleteItem}
                       onDeleteItems={props.onDeleteItems}
                       onDeleteAllItems={props.onDeleteAllItems}/>
+            <TextFormatCommands
+                onPasteWithTransformation={props.onPasteWithTransformation}/>
           </div>
           <div className={props.isPreviewVisible ? "hidden" : ""}>
             <Tooltip>

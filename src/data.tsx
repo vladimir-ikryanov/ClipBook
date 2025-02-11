@@ -17,6 +17,16 @@ export enum SortHistoryType {
   NumberOfCopies
 }
 
+export enum TextFormatOperation {
+  ToLowerCase,
+  ToUpperCase,
+  CapitalizeWords,
+  ToSentenceCase,
+  RemoveEmptyLines,
+  StripAllWhitespaces,
+  TrimSurroundingWhitespaces
+}
+
 let history: Clip[];
 let filterQuery = "";
 let lastSelectedItemIndex = -1;

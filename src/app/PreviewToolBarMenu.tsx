@@ -2,15 +2,24 @@ import '../app.css';
 import React, {KeyboardEvent, MouseEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {
-  DownloadIcon, Edit3Icon, EllipsisVerticalIcon, EyeIcon,
-  PenIcon, RefreshCwIcon,
-  TrashIcon, TypeIcon,
+  DownloadIcon,
+  Edit3Icon,
+  EllipsisVerticalIcon,
+  EyeIcon,
+  PenIcon,
+  RefreshCwIcon,
+  TrashIcon,
+  TypeIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem, DropdownMenuPortal,
-  DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -25,7 +34,8 @@ import ShortcutLabel from "@/app/ShortcutLabel";
 import {
   getFirstSelectedHistoryItem,
   getSelectedHistoryItemIndices,
-  isTextItem
+  isTextItem,
+  TextFormatOperation
 } from "@/data";
 import {CommandShortcut} from "@/components/ui/command";
 
@@ -54,7 +64,7 @@ type PreviewToolBarMenuProps = {
   onSaveImageAsFile: () => void
   onDeleteItem: () => void
   onRenameItem: () => void
-  onFormatText: () => void
+  onFormatText: (operation: TextFormatOperation) => void
   onRequestEditItem: () => void
   onCopyToClipboard: () => void
   onCopyTextFromImage: () => void
@@ -120,10 +130,10 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
     props.onUpdateLinkPreview()
   }
 
-  function handleFormatText() {
+  function handleFormatText(operation: TextFormatOperation) {
     closeReason = "formatText"
     handleOpenDropdownChange(false)
-    props.onFormatText()
+    props.onFormatText(operation)
   }
 
   function canShowEditContent() {
@@ -166,38 +176,37 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
     return (
         <>
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger className="py-2">
               <TypeIcon className="mr-2 h-4 w-4"/>
               <span className="mr-12">Format Text</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem onClick={handleFormatText}>
+              <DropdownMenuSubContent className="p-1.5 bg-actions-background">
+                <DropdownMenuItem className="px-2.5 py-2" onClick={() => handleFormatText(TextFormatOperation.ToLowerCase)}>
                   make lower case
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleFormatText}>
+                <DropdownMenuItem className="px-2.5 py-2" onClick={() => handleFormatText(TextFormatOperation.ToUpperCase)}>
                   MAKE UPPER CASE
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleFormatText}>
+                <DropdownMenuItem className="px-2.5 py-2"
+                    onClick={() => handleFormatText(TextFormatOperation.CapitalizeWords)}>
                   Capitalize Words
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleFormatText}>
-                  Title Case
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleFormatText}>
+                <DropdownMenuItem className="px-2.5 py-2"
+                    onClick={() => handleFormatText(TextFormatOperation.ToSentenceCase)}>
                   Sentence case
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleFormatText}>
-                  StripAllWhitespaces
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleFormatText}>
-                  Strip Extra Whitespaces
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleFormatText}>
+                <DropdownMenuItem className="px-2.5 py-2"
+                    onClick={() => handleFormatText(TextFormatOperation.RemoveEmptyLines)}>
                   Remove empty lines
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleFormatText}>
-                  Strip Surrounding Whitespaces
+                <DropdownMenuItem className="px-2.5 py-2"
+                    onClick={() => handleFormatText(TextFormatOperation.StripAllWhitespaces)}>
+                  StripAllWhitespaces
+                </DropdownMenuItem>
+                <DropdownMenuItem className="px-2.5 py-2"
+                    onClick={() => handleFormatText(TextFormatOperation.TrimSurroundingWhitespaces)}>
+                  Trim Surrounding Whitespaces
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
