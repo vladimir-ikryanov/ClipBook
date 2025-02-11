@@ -136,8 +136,6 @@ export function formatText(text: string, operation: TextFormatOperation) {
       return text.replace(/^\s*\n/gm, "")
     case TextFormatOperation.StripAllWhitespaces:
       return text.replace(/\s/g, "")
-    case TextFormatOperation.StripExtraWhitespaces:
-      return text.replace(/\s+/g, " ")
     case TextFormatOperation.TrimSurroundingWhitespaces:
       return text.trim()
     default:
