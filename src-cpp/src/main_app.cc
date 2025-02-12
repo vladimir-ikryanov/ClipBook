@@ -17,13 +17,13 @@ using namespace molybden;
 namespace fs = std::filesystem;
 
 std::string kKeyboardShortcutsUrl =
-    "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=app&utm_medium=help";
+    "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=clipbook";
 std::string kProductUpdatesUrl =
-    "https://clipbook.app/tags/updates/?utm_source=app&utm_medium=help";
+    "https://clipbook.app/blog/?utm_source=clipbook";
 std::string kContactSupportUrl =
-    "mailto:vladimir.ikryanov@clipbook.app?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.%";
+    "mailto:vladimir.ikryanov@clipbook.app?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.";
 std::string kFeatureRequestUrl =
-    "https://clipbook.app/roadmap/?utm_source=app&utm_medium=help";
+    "https://feedback.clipbook.app/?utm_source=clipbook";
 int32_t kUpdateCheckIntervalInHours = 48;
 
 MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSettings> &settings)
