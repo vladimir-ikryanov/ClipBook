@@ -1074,10 +1074,11 @@ void MainApp::createTray() {
     tray_->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
   }
   tray_->onClicked += [this](const TrayClicked& event) {
-    if (event.mouse_button == MouseButton::kPrimary) {
+    if (event.mouse_button == MouseButton::kPrimary && !event.key_modifiers.alt_down) {
       show();
     }
-    if (event.mouse_button == MouseButton::kSecondary) {
+    if ((event.mouse_button == MouseButton::kSecondary) ||
+        (event.mouse_button == MouseButton::kPrimary && event.key_modifiers.alt_down)) {
       tray_->openMenu(CustomMenu::create(
           {
               open_app_item_,
