@@ -1,5 +1,4 @@
 import * as React from "react";
-import {KeyboardIcon, KeyRoundIcon, ListIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 import {useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -95,25 +94,6 @@ export default function License() {
   (window as any).licenseActivationCompleted = licenseActivationCompleted;
   (window as any).licenseDeactivationCompleted = licenseDeactivationCompleted;
 
-  function renderSidebarLicenseItem() {
-    return (
-        <div
-            className="flex flex-row gap-x-2 py-2 px-2 m-4 bg-settings-sidebarSelection rounded-sm shadow">
-          {
-            isActivated ? <KeyRoundIcon
-                    className="h-5 w-5 mt-0.5 text-settings-titleLicenseActivatedLabel"/> :
-                <KeyRoundIcon className="h-5 w-5 mt-0.5"/>
-          }
-          <div className="">License</div>
-          <div className="grow"></div>
-          {
-              !isActivated &&
-              <div className="rounded bg-settings-sidebarLabel text-xs px-1.5 py-1">Trial</div>
-          }
-        </div>
-    )
-  }
-
   function renderTitle() {
     if (isActivated) {
       return <span
@@ -124,43 +104,7 @@ export default function License() {
   }
 
   return (
-      <div className="flex h-screen select-none">
-        <div className="flex bg-secondary">
-          <div className="flex flex-col w-52 gap-y-1">
-            <div className="flex draggable p-6"></div>
-            <div
-                className="flex flex-row gap-x-2 p-0 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings" className="flex flex-row py-2 px-2 gap-x-2 w-full cursor-default">
-                <SettingsIcon className="h-5 w-5 mt-0.5"/>
-                <span className="">General</span>
-              </a>
-            </div>
-            <div
-                className="flex flex-row p-0 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings/history" className="flex flex-row py-2 px-2 gap-x-2 w-full">
-                <ListIcon className="h-5 w-5 mt-0.5"/>
-                <span className="">History</span>
-              </a>
-            </div>
-            <div
-                className="flex flex-row p-0 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings/shortcuts" className="flex flex-row py-2 px-2 gap-x-2 w-full">
-                <KeyboardIcon className="h-5 w-5 mt-0.5"/>
-                <span className="">Shortcuts</span>
-              </a>
-            </div>
-            <div
-                className="flex flex-row p-0 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings/privacy" className="flex flex-row py-2 px-2 gap-x-2 w-full">
-                <ShieldCheckIcon className="h-5 w-5 mt-0.5"/>
-                <span className="">Privacy</span>
-              </a>
-            </div>
-            <div className="flex flex-grow"></div>
-            {renderSidebarLicenseItem()}
-          </div>
-        </div>
-
+      <div className="flex select-none">
         <div className="flex flex-col flex-grow">
           <div className="flex pt-8 px-8 border-b border-b-border draggable sticky items-center">
             <span className="text-2xl pb-3 font-semibold">ClipBook License</span>

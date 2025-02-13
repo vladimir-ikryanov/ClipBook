@@ -7,7 +7,7 @@ export function isLicenseActivated(): boolean {
 }
 
 export function isTrialLicense(): boolean {
-  return isTrial()
+  return true
 }
 
 export function isTrialLicenseExpired(): boolean {

@@ -1,7 +1,6 @@
 import * as React from "react";
 import {Switch} from "@/components/ui/switch";
 import {Label} from "@/components/ui/label";
-import {KeyboardIcon, KeyRoundIcon, ListIcon, SettingsIcon, ShieldCheckIcon} from "lucide-react";
 import {useEffect, useState} from "react";
 import {
   prefGetAppsToIgnore,
@@ -11,7 +10,6 @@ import {
   prefSetIgnoreTransientContent,
 } from "@/pref";
 import IgnoreAppsPane from "@/settings/IgnoreAppsPane";
-import {isLicenseActivated} from "@/licensing";
 
 declare const closeSettingsWindow: () => void;
 declare const selectAppsToIgnore: () => string[];
@@ -62,63 +60,8 @@ export default function Privacy() {
   // Attach the function to the window object
   (window as any).addAppToIgnore = addAppToIgnore;
 
-  function renderLicenseItem() {
-    return (
-        <div
-            className="flex flex-row p-0 m-4 hover:bg-background hover:rounded-sm hover:shadow">
-          <a href="/settings/license" className="flex flex-row py-2 px-2 gap-x-2 w-full">
-            {
-              isLicenseActivated() ? <KeyRoundIcon
-                      className="h-5 w-5 mt-0.5 text-settings-titleLicenseActivatedLabel"/> :
-                  <KeyRoundIcon className="h-5 w-5 mt-0.5"/>
-            }
-            <div className="">License</div>
-            <div className="grow"></div>
-            {
-                !isLicenseActivated() &&
-                <div className="rounded bg-settings-sidebarLabel text-xs px-1.5 py-1">Trial</div>
-            }
-          </a>
-        </div>
-    )
-  }
-
   return (
       <div className="flex h-screen select-none">
-        <div className="flex bg-secondary">
-          <div className="flex flex-col w-52 gap-y-1">
-            <div className="flex draggable p-6"></div>
-            <div
-                className="flex flex-row gap-x-2 p-0 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings" className="flex flex-row py-2 px-2 gap-x-2 w-full cursor-default">
-                <SettingsIcon className="h-5 w-5 mt-0.5"/>
-                <span className="">General</span>
-              </a>
-            </div>
-            <div
-                className="flex flex-row p-0 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings/history" className="flex flex-row py-2 px-2 gap-x-2 w-full">
-                <ListIcon className="h-5 w-5 mt-0.5"/>
-                <span className="">History</span>
-              </a>
-            </div>
-            <div
-                className="flex flex-row p-0 mx-4 hover:bg-background hover:rounded-sm hover:shadow">
-              <a href="/settings/shortcuts" className="flex flex-row py-2 px-2 gap-x-2 w-full">
-                <KeyboardIcon className="h-5 w-5 mt-0.5"/>
-                <span className="">Shortcuts</span>
-              </a>
-            </div>
-            <div
-                className="flex flex-row gap-x-2 py-2 px-2 mx-4 bg-settings-sidebarSelection rounded-sm shadow">
-              <ShieldCheckIcon className="h-5 w-5 mt-0.5"/>
-              <span className="">Privacy</span>
-            </div>
-            <div className="flex flex-grow"></div>
-            {renderLicenseItem()}
-          </div>
-        </div>
-
         <div className="flex flex-col flex-grow">
           <div className="flex pt-8 px-8 border-b border-b-border draggable sticky">
             <span className="text-2xl pb-3 font-semibold">Privacy</span>

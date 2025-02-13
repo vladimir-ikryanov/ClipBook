@@ -94,12 +94,10 @@ export default function ShortcutInput(props: ShortcutProps) {
     return shortcutToDisplayShortcut(shortcut)
   }
 
-  let style: string = "w-40 h-8 pl-10 text-base text-center caret-transparent border-none bg-neutral-100 dark:bg-neutral-700";
-
   return (
-      <div className="flex flex-row bg-neutral-100 dark:bg-neutral-700 shadow hover:shadow-md rounded-md">
+      <div className="flex flex-row bg-shortcut shadow hover:shadow-md rounded-md">
         <Input
-            className={isEditing ? style + " text-neutral-400" : style}
+            className={`w-40 h-8 pl-10 text-base text-center caret-transparent border-none bg-shortcut ${isEditing ? "text-neutral-400" : ""}`}
             title="Click to edit shortcut"
             readOnly={true}
             value={getInputValue()}

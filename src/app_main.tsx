@@ -11,10 +11,6 @@ import {
 } from "react-router-dom";
 import './index.css'
 import {ThemeProvider} from "@/app/ThemeProvider";
-import Privacy from "@/settings/Privacy";
-import Shortcuts from "@/settings/Shortcuts";
-import History from "@/settings/History";
-import License from "@/settings/License";
 
 const router = createBrowserRouter([
   {
@@ -35,23 +31,23 @@ const router = createBrowserRouter([
   },
   {
     path: "/settings",
-    element: <Settings/>,
+    element: <Settings selectedItemType={"General"}/>,
   },
   {
     path: "/settings/history",
-    element: <History/>,
+    element: <Settings selectedItemType={"History"}/>,
   },
   {
     path: "/settings/privacy",
-    element: <Privacy/>,
+    element: <Settings selectedItemType={"Privacy"}/>,
   },
   {
     path: "/settings/shortcuts",
-    element: <Shortcuts/>,
+    element: <Settings selectedItemType={"Shortcuts"}/>,
   },
   {
     path: "/settings/license",
-    element: <License/>,
+    element: <Settings selectedItemType={"License"}/>,
   },
 ]);
 

@@ -58,6 +58,9 @@ module.exports = {
           selection: "var(--actions-selection)",
           danger: "var(--actions-danger)",
         },
+        shortcut: {
+          DEFAULT: "var(--shortcut-input)",
+        },
         settings: {
           DEFAULT: "var(--settings)",
           border: "var(--settings-border)",
@@ -100,7 +103,17 @@ module.exports = {
           border: "var(--dialog-border)",
           overlay: "var(--dialog-overlay)",
           text: "var(--dialog-text)",
-        }
+        },
+				sidebar: {
+					DEFAULT: "var(--sidebar-background)",
+					foreground: "var(--sidebar-foreground)",
+					primary: "var(--sidebar-primary)",
+					"primary-foreground": "var(--sidebar-primary-foreground)",
+					accent: "var(--sidebar-accent)",
+					"accent-foreground": "var(--sidebar-accent-foreground)",
+					border: "var(--sidebar-border)",
+					ring: "var(--sidebar-ring)"
+				}
       },
       borderRadius: {
         lg: "var(--radius)",

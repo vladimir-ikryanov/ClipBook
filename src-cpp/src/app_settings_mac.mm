@@ -918,5 +918,5 @@ bool AppSettingsMac::shouldPasteOnClick() {
   if ([defaults objectForKey:prefPasteOnClick] != nil) {
     return [defaults boolForKey:prefPasteOnClick];
   }
-  return true;
+  return false;
 }

@@ -52,6 +52,7 @@
     --primary-button-background: #006fff;
     --primary-button-background-hover: #0064e1;
     --primary-button-text: white;
+    --shortcut-input: #F2F2F2;
     --secondary-button-background: #e8e8e8;
     --secondary-button-background-hover: #d8d8d8;
     --secondary-button-border: #e8e8e8;
@@ -66,6 +67,15 @@
     --dialog-border: #ffffff;
     --dialog-overlay: rgba(0, 0, 0, 0.3);
     --dialog-text: #414141;
+    /* Sidebar */
+    --sidebar-background: #F2F2F2;
+    --sidebar-foreground: #000000;
+    --sidebar-primary: #000000;
+    --sidebar-primary-foreground: #414141;
+    --sidebar-accent: #fafafa;
+    --sidebar-accent-foreground: #000000;
+    --sidebar-border: #e5e5e5;
+    --sidebar-ring: #d0d0d0;
 
     font-size: 14px;
   }
@@ -127,6 +137,7 @@
     --primary-button-background: #006fff;
     --primary-button-background-hover: #0064e1;
     --primary-button-text: white;
+    --shortcut-input: #3e3e3e;
     --secondary-button-background: #3e4144;
     --secondary-button-background-hover: #3a3c40;
     --secondary-button-text: white;
@@ -141,6 +152,15 @@
     --dialog-border: #3e4144;
     --dialog-overlay: rgba(0, 0, 0, 0.3);
     --dialog-text: #b8b8b8;
+    /* Sidebar */
+    --sidebar-background: #212121;
+    --sidebar-foreground: #DADADA;
+    --sidebar-primary: #f6f6f6;
+    --sidebar-primary-foreground: #808081;
+    --sidebar-accent: #3e4144;
+    --sidebar-accent-foreground: #DADADA;
+    --sidebar-border: #3e4144;
+    --sidebar-ring: #3e4144;
   }
 }
 
