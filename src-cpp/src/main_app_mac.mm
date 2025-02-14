@@ -498,7 +498,8 @@ molybden::Size MainAppMac::restoreWindowSize() {
 }
 
 void MainAppMac::moveToActiveScreenCenter() {
-  moveToScreen([NSScreen mainScreen]);
+  auto screen = [NSScreen mainScreen];
+  moveToScreen(screen);
 }
 
 NSRect MainAppMac::getActiveWindowBounds(NSRunningApplication *app) {

@@ -149,6 +149,9 @@ void MainApp::launch() {
   // Disable window animation to make the app feel faster.
   app_window_->setWindowAnimationEnabled(false);
 
+  // Move window to the active desktop when it becomes active.
+  app_window_->setWindowDisplayPolicy(WindowDisplayPolicy::kMoveToActiveDesktop);
+
   // Set the initial window size and position if it's the first run.
   if (first_run_ || !app_->isProduction()) {
     app_window_->setSize(820, 540);
