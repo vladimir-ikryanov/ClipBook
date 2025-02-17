@@ -194,7 +194,7 @@ ClipBook will check for updates automatically and notify you when a new version 
               <Label htmlFor="showIcon" className="flex flex-col text-base">
                 <span className="">Sound effects</span>
                 <span className="text-neutral-500 font-normal text-sm">
-                  Play a sound when a new item is added to the&nbsp;history.
+                  Play a sound when an item is added to the&nbsp;history.
                 </span>
               </Label>
               <Switch id="showIcon" checked={playSoundOnCopy}
