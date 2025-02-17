@@ -1,9 +1,9 @@
 import '../app.css';
 import {Input} from "@/components/ui/input"
-import React from "react";
-import {SearchIcon, XIcon} from "lucide-react";
+import React, {useState} from "react";
+import {PinIcon, SearchIcon, XIcon} from "lucide-react";
 import {Button} from "@/components/ui/button";
-import {prefGetTogglePreviewShortcut} from "@/pref";
+import {prefGetTogglePreviewShortcut, prefSetAlwaysDisplay, prefShouldAlwaysDisplay} from "@/pref";
 import {ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
@@ -28,7 +28,6 @@ type SearchBarProps = {
   onPasteWithReturn: () => void
   onPasteWithTransformation: (operation: TextFormatOperation) => void
   onMerge: () => void
-  onClose: () => void
   onHideActions: (reason: HideActionsReason) => void
   onToggleFavorite: () => void
   onTogglePreview: () => void
@@ -49,6 +48,8 @@ type SearchBarProps = {
 }
 
 export default function SearchBar(props: SearchBarProps) {
+  const [alwaysDisplay, setAlwaysDisplay] = useState(prefShouldAlwaysDisplay())
+
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     props.onSearchQueryChange(e.target.value)
   }
@@ -77,6 +78,12 @@ export default function SearchBar(props: SearchBarProps) {
 
   function handleClickTrial() {
     openSettingsLicense()
+  }
+
+  function handleAlwaysDisplayChange() {
+    let display = !alwaysDisplay;
+    setAlwaysDisplay(display)
+    prefSetAlwaysDisplay(display)
   }
 
   function showTransformationOptionsDialog() {
@@ -168,6 +175,22 @@ export default function SearchBar(props: SearchBarProps) {
               <TooltipContent className="flex items-center">
                 <div className="select-none mr-2">Clear search</div>
                 <ShortcutLabel shortcut="Escape"/>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="toolbar" size="toolbar" onClick={handleAlwaysDisplayChange}>
+                  <PinIcon
+                      className={`h-5 w-5 rotate-45 ${alwaysDisplay ? "text-toolbar-buttonSelected" : ""}`}
+                      strokeWidth={2}/>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="flex items-center">
+                <div className="select-none mr-2">
+                  {alwaysDisplay ? "Hide when not focused" : "Always display"}
+                </div>
               </TooltipContent>
             </Tooltip>
           </div>

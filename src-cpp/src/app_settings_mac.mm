@@ -35,6 +35,7 @@ NSString *prefUpdateHistoryAfterAction = @"update_history_after_action";
 NSString *prefIsFeedbackProvided = @"is_feedback_provided";
 NSString *prefPasteOnClick = @"paste_on_click";
 NSString *prefPlaySoundOnCopy = @"play_sound_on_copy";
+NSString *prefAlwaysDisplay = @"always_display";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
@@ -932,6 +933,20 @@ bool AppSettingsMac::shouldPlaySoundOnCopy() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:prefPlaySoundOnCopy] != nil) {
     return [defaults boolForKey:prefPlaySoundOnCopy];
+  }
+  return false;
+}
+
+void AppSettingsMac::saveAlwaysDisplay(bool display) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:display forKey:prefAlwaysDisplay];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldAlwaysDisplay() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefAlwaysDisplay] != nil) {
+    return [defaults boolForKey:prefAlwaysDisplay];
   }
   return false;
 }

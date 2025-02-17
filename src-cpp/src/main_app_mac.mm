@@ -226,7 +226,7 @@ void MainAppMac::enableOpenAppShortcut() {
         closeAppShortcut2 == openAppShortcut ||
         closeAppShortcut3 == openAppShortcut) {
       if (app_window_visible_) {
-        hide();
+        hide(true);
       } else {
         show();
       }
@@ -301,6 +301,10 @@ void MainAppMac::show() {
 }
 
 void MainAppMac::hide() {
+  MainApp::hide();
+}
+
+void MainAppMac::hide(bool force) {
   // Do not hide the window at some conditions.
   if (auto_hide_disabled_) {
     return;
@@ -308,7 +312,7 @@ void MainAppMac::hide() {
   // Save the window bounds before hiding the window.
   saveWindowBounds();
   // Hide the window.
-  MainApp::hide();
+  MainApp::hide(force);
   // Activate the previously active app.
   if (active_app_) {
     [active_app_ activateWithOptions:NSApplicationActivateIgnoringOtherApps];

@@ -35,7 +35,6 @@ type HistoryItemsPaneProps = {
   onPasteWithTransformation: (operation: TextFormatOperation) => void
   onPasteByIndex: (index: number) => void
   onMerge: () => void
-  onClose: () => void
   onEditHistoryItem: (item: Clip) => void
   onHideActions: (reason: HideActionsReason) => void
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
@@ -201,7 +200,6 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    onPasteWithReturn={props.onPasteWithReturn}
                    onPasteWithTransformation={props.onPasteWithTransformation}
                    onMerge={props.onMerge}
-                   onClose={props.onClose}
                    onHideActions={props.onHideActions}
                    onEditContent={props.onEditContent}
                    onRenameItem={props.onRenameItem}

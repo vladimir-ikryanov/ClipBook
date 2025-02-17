@@ -193,7 +193,11 @@ void MainApp::show() {
 }
 
 void MainApp::hide() {
-  if (!auto_hide_disabled_) {
+  hide(false);
+}
+
+void MainApp::hide(bool force) {
+  if ((!auto_hide_disabled_ && !settings_->shouldAlwaysDisplay()) || force) {
     app_hide_time_ = getCurrentTimeMillis();
 
     app_window_->hide();
@@ -585,7 +589,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
     previewLink(url);
   });
   window->putProperty("hideAppWindow", [this]() {
-    hide();
+    hide(true);
   });
   window->putProperty("closeSettingsWindow", [this]() {
     if (settings_window_) {
@@ -594,7 +598,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
     }
   });
   window->putProperty("openSettingsWindow", [this]() {
-    hide();
+    hide(true);
     activate();
     showSettingsWindow();
   });
@@ -696,7 +700,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
 #endif
   });
   window->putProperty("openSettingsLicense", [this]() {
-    hide();
+    hide(true);
     showSettingsWindow("/settings/license");
   });
   window->putProperty("sendFeedback", [this](std::string text) {
@@ -809,6 +813,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("shouldPlaySoundOnCopy", [this]() -> bool {
     return settings_->shouldPlaySoundOnCopy();
+  });
+  window->putProperty("setAlwaysDisplay", [this](bool display) -> void {
+    settings_->saveAlwaysDisplay(display);
+  });
+  window->putProperty("shouldAlwaysDisplay", [this]() -> bool {
+    return settings_->shouldAlwaysDisplay();
   });
 
   // Application shortcuts.

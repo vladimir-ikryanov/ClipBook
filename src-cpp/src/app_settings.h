@@ -94,6 +94,9 @@ class AppSettings {
   virtual void savePlaySoundOnCopy(bool play) = 0;
   virtual bool shouldPlaySoundOnCopy() = 0;
 
+  virtual void saveAlwaysDisplay(bool display) = 0;
+  virtual bool shouldAlwaysDisplay() = 0;
+
   // Shortcuts.
 
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;

@@ -78,7 +78,6 @@ declare const copyToClipboard: (text: string, imageFileName: string, imageText: 
 declare const copyToClipboardAfterMerge: (text: string) => void;
 declare const deleteImage: (imageFileName: string) => void;
 declare const clearEntireHistory: () => void;
-declare const hideAppWindow: () => void;
 declare const openInBrowser: (url: string) => void;
 declare const previewLink: (url: string) => void;
 declare const openSettingsWindow: () => void;
@@ -614,10 +613,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
-  function handleClose() {
-    hideAppWindow()
-  }
-
   async function handleToggleFavorite() {
     let items = getSelectedHistoryItems()
     let favorite = items.some(item => !item.favorite)
@@ -987,7 +982,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onPasteWithTransformation={handlePasteWithTransformation}
                               onPasteByIndex={handlePasteByIndex}
                               onMerge={handleMerge}
-                              onClose={handleClose}
                               onHideActions={handleHideActions}
                               onHideClipDropdownMenu={handleHideClipDropdownMenu}
                               onEditContent={handleEditContent}

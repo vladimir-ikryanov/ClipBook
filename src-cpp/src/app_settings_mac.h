@@ -90,6 +90,9 @@ class AppSettingsMac : public AppSettings {
   void savePlaySoundOnCopy(bool play) override;
   bool shouldPlaySoundOnCopy() override;
 
+  void saveAlwaysDisplay(bool display) override;
+  bool shouldAlwaysDisplay() override;
+
   // Shortcuts.
 
   void saveOpenAppShortcut(std::string shortcut) override;

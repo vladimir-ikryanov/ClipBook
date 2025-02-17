@@ -42,6 +42,8 @@ declare const shouldPasteOnClick: () => boolean;
 declare const setPasteOnClick: (paste: boolean) => void;
 declare const shouldPlaySoundOnCopy: () => boolean;
 declare const setPlaySoundOnCopy: (play: boolean) => void;
+declare const shouldAlwaysDisplay: () => boolean;
+declare const setAlwaysDisplay: (display: boolean) => void;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -550,4 +552,12 @@ export function prefShouldPlaySoundOnCopy() {
 
 export function prefSetPlaySoundOnCopy(play: boolean) {
   setPlaySoundOnCopy(play)
+}
+
+export function prefShouldAlwaysDisplay() {
+  return shouldAlwaysDisplay()
+}
+
+export function prefSetAlwaysDisplay(display: boolean) {
+  setAlwaysDisplay(display)
 }
