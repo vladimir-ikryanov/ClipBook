@@ -87,6 +87,9 @@ class AppSettingsMac : public AppSettings {
   void savePasteOnClick(bool paste) override;
   bool shouldPasteOnClick() override;
 
+  void savePlaySoundOnCopy(bool play) override;
+  bool shouldPlaySoundOnCopy() override;
+
   // Shortcuts.
 
   void saveOpenAppShortcut(std::string shortcut) override;

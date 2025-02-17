@@ -17,6 +17,7 @@ const buttonVariants = cva(
           tool: "focus:outline-none",
           link: "text-primary underline-offset-4 hover:underline",
           toolbar: "rounded-sm text-toolbar-button hover:bg-accent hover:text-accent-foreground",
+          copy: "rounded-sm text-toolbar-button hover:bg-accent hover:text-accent-foreground disabled:opacity-100",
           dropdown: "rounded-sm text-toolbar-button hover:bg-accent hover:text-accent-foreground outline-none select-none",
           menu: "rounded-sm hover:text-accent-foreground",
           primary: "bg-settings-primaryButton text-settings-primaryButtonText hover:bg-settings-primaryButtonHover outline-none",

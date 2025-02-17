@@ -2,6 +2,7 @@ import '../app.css';
 import React, {KeyboardEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {
+  CheckIcon,
   ChevronDown,
   ClipboardIcon,
   CopyIcon,
@@ -62,6 +63,8 @@ type PreviewToolBarProps = {
 
 export default function PreviewToolBar(props: PreviewToolBarProps) {
   const [pasteOptionsMenuOpen, setPasteOptionsMenuOpen] = useState(false)
+  const [isCopying, setIsCopying] = useState(false)
+  const [showCheckIcon, setShowCheckIcon] = useState(false)
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
@@ -91,6 +94,23 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
   function handleCopyToClipboard() {
     props.onCopyToClipboard()
+
+    if (isCopying) {
+      return
+    }
+
+    setIsCopying(true)
+
+    // Step 1: Fade out the Copy icon
+    setTimeout(() => {
+      setShowCheckIcon(true); // Step 2: Wait 200ms, then show Check icon
+    }, 150);
+
+    // Step 3: Reset after 1 seconds
+    setTimeout(() => {
+      setShowCheckIcon(false);
+      setIsCopying(false);
+    }, 1000);
   }
 
   function handleToggleInfo() {
@@ -240,8 +260,27 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 canShowCopyToClipboard() &&
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="toolbar" size="toolbar" onClick={handleCopyToClipboard}>
-                      <CopyIcon className="h-5 w-5" strokeWidth={2}/>
+                    <Button
+                        variant="copy"
+                        size="toolbar"
+                        onClick={handleCopyToClipboard}
+                        disabled={isCopying}
+                        className="relative"
+                    >
+                      <div className="relative w-5 h-5">
+                        <CopyIcon
+                            className={`absolute inset-0 h-5 w-5 transition-opacity duration-150 ${
+                                isCopying ? "opacity-0" : "opacity-100"
+                            }`}
+                            strokeWidth={2}
+                        />
+                        <CheckIcon
+                            className={`absolute inset-0 h-5 w-5 !text-checked transition-opacity duration-150 ${
+                                showCheckIcon ? "opacity-100" : "opacity-0"
+                            }`}
+                            strokeWidth={3}
+                        />
+                      </div>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">

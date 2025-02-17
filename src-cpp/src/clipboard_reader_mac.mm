@@ -235,6 +235,10 @@ ClipboardReaderMac::~ClipboardReaderMac() {
 void ClipboardReaderMac::start(const std::shared_ptr<MainApp> &app) {
   app_ = app;
 
+  auto resources = app_->app()->getPath(molybden::PathKey::kAppResources) + "/sound.aiff";
+  auto *sound_file_path = [NSString stringWithUTF8String:resources.c_str()];
+  sound_ = [[NSSound alloc] initWithContentsOfFile:sound_file_path byReference:YES];
+
   // Initialize the last change count on start to ignore the initial clipboard content.
   last_change_count_ = [[NSPasteboard generalPasteboard] changeCount];
 
@@ -279,6 +283,10 @@ void ClipboardReaderMac::copyToClipboardAfterMerge(std::string text) {
 }
 
 void ClipboardReaderMac::addClipboardData(const std::shared_ptr<ClipboardData> &data) {
+  if (app_->settings()->shouldPlaySoundOnCopy()) {
+    [sound_ play];
+  }
+
   auto frame = app_->browser()->mainFrame();
   auto window = frame->executeJavaScript("window");
   window.asJsObject()->call("addClipboardData",
@@ -309,9 +317,11 @@ void ClipboardReaderMac::mergeClipboardData(const std::shared_ptr<ClipboardData>
 void ClipboardReaderMac::readClipboardData() {
   // Let the user press Command+C second time and do not read the clipboard
   // if the time since the last Command+C is less than 0.5 seconds.
-  CFAbsoluteTime currentTime = CFAbsoluteTimeGetCurrent();
-  if (currentTime - lastTapTime < 0.5) {
-    return;
+  if (app_->settings()->isCopyAndMergeEnabled()) {
+    CFAbsoluteTime currentTime = CFAbsoluteTimeGetCurrent();
+    if (currentTime - lastTapTime < 0.5) {
+      return;
+    }
   }
   std::lock_guard<std::mutex> guard(mutex_);
   std::shared_ptr<ClipboardData> data = std::make_shared<ClipboardData>();

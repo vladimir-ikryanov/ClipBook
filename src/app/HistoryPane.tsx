@@ -247,7 +247,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
-  async function activateApp() {
+  async function activateApp(clearSearch: boolean) {
+    if (clearSearch && searchQuery.length > 0) {
+      handleSearchQueryChange("")
+    }
     await updateHistoryItemsIfNecessary()
     focusSearchField()
     if (getVisibleHistoryLength() > 0) {
@@ -715,13 +718,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
     let imageFileName = item.imageFileName ? item.imageFileName : ""
     let imageText = item.imageText ? item.imageText : ""
     copyToClipboard(item.content, imageFileName, imageText)
-    hideAppWindow()
   }
 
   function handleCopyToClipboard() {
     if (getSelectedHistoryItemIndices().length === 1) {
       copyItemToClipboard(getFirstSelectedHistoryItem())
     }
+    focusSearchField()
   }
 
   function handleCopyToClipboardByIndex(index: number) {

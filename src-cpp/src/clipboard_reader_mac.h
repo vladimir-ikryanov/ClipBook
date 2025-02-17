@@ -44,6 +44,7 @@ class ClipboardReaderMac {
   bool copy_and_merge_requested_ = false;
 #ifdef __OBJC__
   id monitor_ = nil;
+  NSSound *sound_ = nil;
 #endif
   std::mutex mutex_;
 };

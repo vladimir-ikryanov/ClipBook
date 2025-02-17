@@ -34,6 +34,7 @@ NSString *prefShowPreviewForLinks = @"show_preview_for_links";
 NSString *prefUpdateHistoryAfterAction = @"update_history_after_action";
 NSString *prefIsFeedbackProvided = @"is_feedback_provided";
 NSString *prefPasteOnClick = @"paste_on_click";
+NSString *prefPlaySoundOnCopy = @"play_sound_on_copy";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
@@ -315,7 +316,7 @@ bool AppSettingsMac::isCopyAndMergeEnabled() {
   if ([defaults objectForKey:prefCopyAndMergeEnabled] != nil) {
     return [defaults boolForKey:prefCopyAndMergeEnabled];
   }
-  return true;
+  return false;
 }
 
 void AppSettingsMac::saveCopyAndMergeSeparator(std::string separator) {
@@ -917,6 +918,20 @@ bool AppSettingsMac::shouldPasteOnClick() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:prefPasteOnClick] != nil) {
     return [defaults boolForKey:prefPasteOnClick];
+  }
+  return false;
+}
+
+void AppSettingsMac::savePlaySoundOnCopy(bool play) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:play forKey:prefPlaySoundOnCopy];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldPlaySoundOnCopy() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefPlaySoundOnCopy] != nil) {
+    return [defaults boolForKey:prefPlaySoundOnCopy];
   }
   return false;
 }

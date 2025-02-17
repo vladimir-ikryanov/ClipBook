@@ -101,6 +101,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   bool checking_for_updates_;
   bool app_paused_;
   bool after_system_reboot_;
+  long long app_hide_time_;
   std::string save_images_dir_;
   std::shared_ptr<molybden::App> app_;
   std::shared_ptr<molybden::Tray> tray_;

@@ -25,6 +25,7 @@
     --ring: #fafafa;
     --radius: 0.75rem;
     --search-highlight: #3b82f6;
+    --checked: #1ba123;
     /* Preview */
     --preview-background: #eeeeee;
     --preview-border: #dfdfdf;
@@ -110,6 +111,7 @@
     --input: #707070;
     --ring: #282828;
     --search-highlight: #06b6d4;
+    --checked: #15cf20;
     /* Preview */
     --preview-background: #212121;
     --preview-border: #2d2f32;

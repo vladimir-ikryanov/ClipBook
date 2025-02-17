@@ -40,6 +40,8 @@ declare const setUpdateHistoryAfterAction: (update: boolean) => void;
 declare const shouldUpdateHistoryAfterAction: () => boolean;
 declare const shouldPasteOnClick: () => boolean;
 declare const setPasteOnClick: (paste: boolean) => void;
+declare const shouldPlaySoundOnCopy: () => boolean;
+declare const setPlaySoundOnCopy: (play: boolean) => void;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -540,4 +542,12 @@ export function prefShouldPasteOnClick() {
 
 export function prefSetPasteOnClick(paste: boolean) {
   setPasteOnClick(paste)
+}
+
+export function prefShouldPlaySoundOnCopy() {
+  return shouldPlaySoundOnCopy()
+}
+
+export function prefSetPlaySoundOnCopy(play: boolean) {
+  setPlaySoundOnCopy(play)
 }

@@ -24,6 +24,7 @@ module.exports = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         searchHighlight: "var(--search-highlight)",
+        checked: "var(--checked)",
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",

@@ -34,6 +34,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSetti
       checking_for_updates_(false),
       app_paused_(false),
       after_system_reboot_(false),
+      app_hide_time_(0),
       settings_(settings) {
   request_interceptor_ = std::make_shared<UrlRequestInterceptor>(
       app_->profile()->path(), app_->getPath(molybden::PathKey::kAppResources));
@@ -129,9 +130,7 @@ void MainApp::launch() {
 
   // Hide the window when the focus is lost.
   app_window_->onFocusLost += [this](const FocusLost &event) {
-    if (app()->isProduction()) {
-      hide();
-    }
+    hide();
   };
 
   // Hide all standard window buttons.
@@ -175,7 +174,15 @@ void MainApp::show() {
   app_window_->show();
   auto frame = app_window_->mainFrame();
   if (frame) {
-    frame->executeJavaScript("activateApp()");
+    // Check if the app was hidden more than 30 seconds ago.
+    auto current_time = getCurrentTimeMillis();
+    if (current_time - app_hide_time_ > 30000) {
+      // If the app was hidden more than 30 seconds ago,
+      // activate the app and clear search field.
+      frame->executeJavaScript("activateApp(true)");
+    } else {
+      frame->executeJavaScript("activateApp(false)");
+    }
   }
   app_window_visible_ = true;
 
@@ -187,12 +194,15 @@ void MainApp::show() {
 
 void MainApp::hide() {
   if (!auto_hide_disabled_) {
+    app_hide_time_ = getCurrentTimeMillis();
+
+    app_window_->hide();
+    app_window_visible_ = false;
+
     auto frame = app_window_->mainFrame();
     if (frame) {
       frame->executeJavaScript("closeCommandsPopup()");
     }
-    app_window_->hide();
-    app_window_visible_ = false;
   }
 }
 
@@ -793,6 +803,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("getOpenWindowStrategy", [this]() -> std::string {
     return settings_->getOpenWindowStrategy();
+  });
+  window->putProperty("setPlaySoundOnCopy", [this](bool play) -> void {
+    settings_->savePlaySoundOnCopy(play);
+  });
+  window->putProperty("shouldPlaySoundOnCopy", [this]() -> bool {
+    return settings_->shouldPlaySoundOnCopy();
   });
 
   // Application shortcuts.

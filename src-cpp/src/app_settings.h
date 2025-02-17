@@ -91,6 +91,9 @@ class AppSettings {
   virtual void savePasteOnClick(bool paste) = 0;
   virtual bool shouldPasteOnClick() = 0;
 
+  virtual void savePlaySoundOnCopy(bool play) = 0;
+  virtual bool shouldPlaySoundOnCopy() = 0;
+
   // Shortcuts.
 
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;

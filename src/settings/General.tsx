@@ -10,9 +10,9 @@ import {
   prefGetShowIconInMenuBar,
   prefGetTheme,
   prefSetCheckForUpdatesAutomatically,
-  prefSetOpenAtLogin, prefSetOpenWindowStrategy,
+  prefSetOpenAtLogin, prefSetOpenWindowStrategy, prefSetPlaySoundOnCopy,
   prefSetShowIconInMenuBar,
-  prefSetTheme,
+  prefSetTheme, prefShouldPlaySoundOnCopy,
 } from "@/pref";
 import {
   ChevronsUpDown,
@@ -46,6 +46,7 @@ export default function General() {
   const [checkForUpdatesAutomatically, setCheckForUpdatesAutomatically] = useState(prefGetCheckForUpdatesAutomatically())
   const [showIconInMenuBar, setShowIconInMenuBar] = useState(prefGetShowIconInMenuBar())
   const [openWindowStrategy, setOpenWindowStrategy] = useState(prefGetOpenWindowStrategy())
+  const [playSoundOnCopy, setPlaySoundOnCopy] = useState(prefShouldPlaySoundOnCopy())
   const [checkingForUpdates, setCheckingForUpdates] = useState(false)
 
   useEffect(() => {
@@ -83,6 +84,11 @@ export default function General() {
   function handleOpenWindowStrategyChange(value: string) {
     setOpenWindowStrategy(value as OpenWindowStrategy)
     prefSetOpenWindowStrategy(value as OpenWindowStrategy)
+  }
+
+  function handlePlaySoundOnCopyChange(play: boolean) {
+    setPlaySoundOnCopy(play)
+    prefSetPlaySoundOnCopy(play)
   }
 
   function handleCheckForUpdates() {
@@ -182,6 +188,17 @@ ClipBook will check for updates automatically and notify you when a new version 
                   </div>
                 </div>
               </RadioGroup>
+            </div>
+
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label htmlFor="showIcon" className="flex flex-col text-base">
+                <span className="">Sound effects</span>
+                <span className="text-neutral-500 font-normal text-sm">
+                  Play a sound when a new item is added to the&nbsp;history.
+                </span>
+              </Label>
+              <Switch id="showIcon" checked={playSoundOnCopy}
+                      onCheckedChange={handlePlaySoundOnCopyChange}/>
             </div>
 
             <div className="flex items-center justify-between space-x-20 py-1">
