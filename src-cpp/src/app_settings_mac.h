@@ -179,6 +179,27 @@ class AppSettingsMac : public AppSettings {
   void saveRenameItemShortcut(std::string shortcut) override;
   std::string getRenameItemShortcut() override;
 
+  void saveMakeLowerCaseShortcut(std::string shortcut) override;
+  std::string getMakeLowerCaseShortcut() override;
+
+  void saveMakeUpperCaseShortcut(std::string shortcut) override;
+  std::string getMakeUpperCaseShortcut() override;
+
+  void saveCapitalizeShortcut(std::string shortcut) override;
+  std::string getCapitalizeShortcut() override;
+
+  void saveSentenceCaseShortcut(std::string shortcut) override;
+  std::string getSentenceCaseShortcut() override;
+
+  void saveRemoveEmptyLinesShortcut(std::string shortcut) override;
+  std::string getRemoveEmptyLinesShortcut() override;
+
+  void saveStripAllWhitespacesShortcut(std::string shortcut) override;
+  std::string getStripAllWhitespacesShortcut() override;
+
+  void saveTrimSurroundingWhitespacesShortcut(std::string shortcut) override;
+  std::string getTrimSurroundingWhitespacesShortcut() override;
+
  private:
   static molybden::Rect getWindowBoundsForScreen(int screen_id);
 };

@@ -994,6 +994,48 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getRenameItemShortcut", [this]() -> std::string {
     return settings_->getRenameItemShortcut();
   });
+  window->putProperty("saveMakeLowerCaseShortcut", [this](std::string shortcut) -> void {
+    settings_->saveMakeLowerCaseShortcut(shortcut);
+  });
+  window->putProperty("getMakeLowerCaseShortcut", [this]() -> std::string {
+      return settings_->getMakeLowerCaseShortcut();
+  });
+  window->putProperty("saveMakeUpperCaseShortcut", [this](std::string shortcut) -> void {
+      settings_->saveMakeUpperCaseShortcut(shortcut);
+  });
+  window->putProperty("getMakeUpperCaseShortcut", [this]() -> std::string {
+      return settings_->getMakeUpperCaseShortcut();
+  });
+  window->putProperty("saveCapitalizeShortcut", [this](std::string shortcut) -> void {
+      settings_->saveCapitalizeShortcut(shortcut);
+  });
+  window->putProperty("getCapitalizeShortcut", [this]() -> std::string {
+      return settings_->getCapitalizeShortcut();
+  });
+  window->putProperty("saveSentenceCaseShortcut", [this](std::string shortcut) -> void {
+      settings_->saveSentenceCaseShortcut(shortcut);
+  });
+  window->putProperty("getSentenceCaseShortcut", [this]() -> std::string {
+      return settings_->getSentenceCaseShortcut();
+  });
+  window->putProperty("saveRemoveEmptyLinesShortcut", [this](std::string shortcut) -> void {
+      settings_->saveRemoveEmptyLinesShortcut(shortcut);
+  });
+  window->putProperty("getRemoveEmptyLinesShortcut", [this]() -> std::string {
+      return settings_->getRemoveEmptyLinesShortcut();
+  });
+  window->putProperty("saveStripAllWhitespacesShortcut", [this](std::string shortcut) -> void {
+      settings_->saveStripAllWhitespacesShortcut(shortcut);
+  });
+  window->putProperty("getStripAllWhitespacesShortcut", [this]() -> std::string {
+      return settings_->getStripAllWhitespacesShortcut();
+  });
+  window->putProperty("saveTrimSurroundingWhitespacesShortcut", [this](std::string shortcut) -> void {
+      settings_->saveTrimSurroundingWhitespacesShortcut(shortcut);
+  });
+  window->putProperty("getTrimSurroundingWhitespacesShortcut", [this]() -> std::string {
+      return settings_->getTrimSurroundingWhitespacesShortcut();
+  });
 
   window->putProperty("selectAppsToIgnore", [this]() {
     selectAppsToIgnore();

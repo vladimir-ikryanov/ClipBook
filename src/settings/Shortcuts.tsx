@@ -2,47 +2,48 @@ import * as React from "react";
 import {useEffect, useState} from "react";
 import ShortcutInput from "@/settings/ShortcutInput";
 import {
+  prefGetCapitalizeShortcut,
   prefGetClearHistoryShortcut,
   prefGetCloseAppShortcut,
   prefGetCloseAppShortcut2,
   prefGetCloseAppShortcut3,
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
-  prefGetEditHistoryItemShortcut,
+  prefGetEditHistoryItemShortcut, prefGetMakeLowerCaseShortcut, prefGetMakeUpperCaseShortcut,
   prefGetOpenAppShortcut,
   prefGetOpenInBrowserShortcut,
   prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
-  prefGetPauseResumeShortcut,
+  prefGetPauseResumeShortcut, prefGetRemoveEmptyLinesShortcut,
   prefGetRenameItemShortcut,
   prefGetSaveImageAsFileShortcut,
   prefGetSelectNextItemShortcut,
-  prefGetSelectPreviousItemShortcut,
-  prefGetShowMoreActionsShortcut,
+  prefGetSelectPreviousItemShortcut, prefGetSentenceCaseShortcut,
+  prefGetShowMoreActionsShortcut, prefGetStripAllWhitespacesShortcut,
   prefGetToggleFavoriteShortcut,
-  prefGetTogglePreviewShortcut,
+  prefGetTogglePreviewShortcut, prefGetTrimSurroundingWhitespacesShortcut,
   prefGetZoomUIInShortcut,
   prefGetZoomUIOutShortcut,
-  prefGetZoomUIResetShortcut,
+  prefGetZoomUIResetShortcut, prefSetCapitalizeShortcut,
   prefSetClearHistoryShortcut,
   prefSetCloseAppShortcut,
   prefSetCloseAppShortcut2,
   prefSetCloseAppShortcut3,
   prefSetCopyToClipboardShortcut,
   prefSetDeleteHistoryItemShortcut,
-  prefSetEditHistoryItemShortcut,
+  prefSetEditHistoryItemShortcut, prefSetMakeLowerCaseShortcut, prefSetMakeUpperCaseShortcut,
   prefSetOpenAppShortcut,
   prefSetOpenInBrowserShortcut,
   prefSetOpenSettingsShortcut,
   prefSetPasteSelectedItemToActiveAppShortcut,
-  prefSetPauseResumeShortcut,
+  prefSetPauseResumeShortcut, prefSetRemoveEmptyLinesShortcut,
   prefSetRenameItemShortcut,
   prefSetSaveImageAsFileShortcut,
   prefSetSelectNextItemShortcut,
-  prefSetSelectPreviousItemShortcut,
-  prefSetShowMoreActionsShortcut,
+  prefSetSelectPreviousItemShortcut, prefSetSentenceCaseShortcut,
+  prefSetShowMoreActionsShortcut, prefSetStripAllWhitespacesShortcut,
   prefSetToggleFavoriteShortcut,
-  prefSetTogglePreviewShortcut,
+  prefSetTogglePreviewShortcut, prefSetTrimSurroundingWhitespacesShortcut,
   prefSetZoomUIInShortcut,
   prefSetZoomUIOutShortcut,
   prefSetZoomUIResetShortcut
@@ -75,6 +76,13 @@ export default function Shortcuts() {
   const [saveImageAsFileShortcut, setSaveImageAsFileShortcut] = useState(prefGetSaveImageAsFileShortcut());
   const [pauseResumeShortcut, setPauseResumeShortcut] = useState(prefGetPauseResumeShortcut());
   const [renameItemShortcut, setRenameItemShortcut] = useState(prefGetRenameItemShortcut());
+  const [makeLowerCaseShortcut, setMakeLowerCaseShortcut] = useState(prefGetMakeLowerCaseShortcut());
+  const [makeUpperCaseShortcut, setMakeUpperCaseShortcut] = useState(prefGetMakeUpperCaseShortcut());
+  const [capitalizeShortcut, setCapitalizeShortcut] = useState(prefGetCapitalizeShortcut());
+  const [sentenceCaseShortcut, setSentenceCaseShortcut] = useState(prefGetSentenceCaseShortcut());
+  const [removeEmptyLinesShortcut, setRemoveEmptyLinesShortcut] = useState(prefGetRemoveEmptyLinesShortcut());
+  const [stripAllWhitespacesShortcut, setStripAllWhitespacesShortcut] = useState(prefGetStripAllWhitespacesShortcut());
+  const [trimSurroundingWhitespacesShortcut, setTrimSurroundingWhitespacesShortcut] = useState(prefGetTrimSurroundingWhitespacesShortcut());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -198,6 +206,41 @@ export default function Shortcuts() {
   function handlePauseResumeShortcutChange(shortcut: string) {
     setPauseResumeShortcut(shortcut)
     prefSetPauseResumeShortcut(shortcut)
+  }
+
+  function handleMakeLowerCaseShortcutChange(shortcut: string) {
+    setMakeLowerCaseShortcut(shortcut)
+    prefSetMakeLowerCaseShortcut(shortcut)
+  }
+
+  function handleMakeUpperCaseShortcutChange(shortcut: string) {
+    setMakeUpperCaseShortcut(shortcut)
+    prefSetMakeUpperCaseShortcut(shortcut)
+  }
+
+  function handleCapitalizeShortcutChange(shortcut: string) {
+    setCapitalizeShortcut(shortcut)
+    prefSetCapitalizeShortcut(shortcut)
+  }
+
+  function handleSentenceCaseShortcutChange(shortcut: string) {
+    setSentenceCaseShortcut(shortcut)
+    prefSetSentenceCaseShortcut(shortcut)
+  }
+
+  function handleRemoveEmptyLinesShortcutChange(shortcut: string) {
+    setRemoveEmptyLinesShortcut(shortcut)
+    prefSetRemoveEmptyLinesShortcut(shortcut)
+  }
+
+  function handleStripAllWhitespacesShortcutChange(shortcut: string) {
+    setStripAllWhitespacesShortcut(shortcut)
+    prefSetStripAllWhitespacesShortcut(shortcut)
+  }
+
+  function handleTrimSurroundingWhitespacesShortcutChange(shortcut: string) {
+    setTrimSurroundingWhitespacesShortcut(shortcut)
+    prefSetTrimSurroundingWhitespacesShortcut(shortcut)
   }
 
   return (
@@ -342,6 +385,49 @@ export default function Shortcuts() {
               <ShortcutInput shortcut={openSettingsShortcut}
                              defaultShortcut="MetaLeft + Comma"
                              onSave={handleOpenSettingsShortcutChange}/>
+            </div>
+            <hr/>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Make lower case</span>
+              <ShortcutInput shortcut={makeLowerCaseShortcut}
+                             defaultShortcut="ShiftLeft + MetaLeft + KeyL"
+                             onSave={handleMakeLowerCaseShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Make upper case</span>
+              <ShortcutInput shortcut={makeUpperCaseShortcut}
+                             defaultShortcut="ShiftLeft + MetaLeft + KeyU"
+                             onSave={handleMakeUpperCaseShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Capitalize words</span>
+              <ShortcutInput shortcut={capitalizeShortcut}
+                             defaultShortcut="ShiftLeft + MetaLeft + KeyA"
+                             onSave={handleCapitalizeShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Sentence case</span>
+              <ShortcutInput shortcut={sentenceCaseShortcut}
+                             defaultShortcut="ShiftLeft + MetaLeft + KeyS"
+                             onSave={handleSentenceCaseShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Remove empty lines</span>
+              <ShortcutInput shortcut={removeEmptyLinesShortcut}
+                             defaultShortcut="ShiftLeft + MetaLeft + KeyR"
+                             onSave={handleRemoveEmptyLinesShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Strip all whitespaces</span>
+              <ShortcutInput shortcut={stripAllWhitespacesShortcut}
+                             defaultShortcut="ShiftLeft + MetaLeft + KeyT"
+                             onSave={handleStripAllWhitespacesShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Trim surrounding whitespaces</span>
+              <ShortcutInput shortcut={trimSurroundingWhitespacesShortcut}
+                             defaultShortcut="ShiftLeft + MetaLeft + KeyM"
+                             onSave={handleTrimSurroundingWhitespacesShortcutChange}/>
             </div>
             <div className="grow"></div>
           </div>

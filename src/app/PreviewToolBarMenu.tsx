@@ -14,7 +14,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuSub,
@@ -23,10 +23,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  prefGetCapitalizeShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
+  prefGetMakeLowerCaseShortcut,
+  prefGetMakeUpperCaseShortcut,
+  prefGetRemoveEmptyLinesShortcut,
   prefGetRenameItemShortcut,
   prefGetSaveImageAsFileShortcut,
+  prefGetSentenceCaseShortcut,
+  prefGetStripAllWhitespacesShortcut,
+  prefGetTrimSurroundingWhitespacesShortcut,
   prefShouldShowPreviewForLinks
 } from "@/pref";
 import {ClipType} from "@/db";
@@ -175,43 +182,57 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
   function renderFormatOptions() {
     return (
         <>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="py-2">
-              <TypeIcon className="mr-2 h-4 w-4"/>
-              <span className="mr-12">Format Text</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent className="p-1.5 bg-actions-background">
-                <DropdownMenuItem className="px-2.5 py-2" onClick={() => handleFormatText(TextFormatOperation.ToLowerCase)}>
-                  make lower case
-                </DropdownMenuItem>
-                <DropdownMenuItem className="px-2.5 py-2" onClick={() => handleFormatText(TextFormatOperation.ToUpperCase)}>
-                  MAKE UPPER CASE
-                </DropdownMenuItem>
-                <DropdownMenuItem className="px-2.5 py-2"
-                    onClick={() => handleFormatText(TextFormatOperation.CapitalizeWords)}>
-                  Capitalize Words
-                </DropdownMenuItem>
-                <DropdownMenuItem className="px-2.5 py-2"
-                    onClick={() => handleFormatText(TextFormatOperation.ToSentenceCase)}>
-                  Sentence case
-                </DropdownMenuItem>
-                <DropdownMenuItem className="px-2.5 py-2"
-                    onClick={() => handleFormatText(TextFormatOperation.RemoveEmptyLines)}>
-                  Remove empty lines
-                </DropdownMenuItem>
-                <DropdownMenuItem className="px-2.5 py-2"
-                    onClick={() => handleFormatText(TextFormatOperation.StripAllWhitespaces)}>
-                  StripAllWhitespaces
-                </DropdownMenuItem>
-                <DropdownMenuItem className="px-2.5 py-2"
-                    onClick={() => handleFormatText(TextFormatOperation.TrimSurroundingWhitespaces)}>
-                  Trim Surrounding Whitespaces
-                </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
           <DropdownMenuSeparator/>
+          <DropdownMenuLabel>Format Text</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.ToLowerCase)}>
+            <div className="mr-2 h-4 w-4"></div>
+            <span className="mr-12">make lower case</span>
+            <CommandShortcut className="flex flex-row">
+              <ShortcutLabel shortcut={prefGetMakeLowerCaseShortcut()}/>
+            </CommandShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.ToUpperCase)}>
+            <div className="mr-2 h-4 w-4"></div>
+            <span className="mr-12">MAKE UPPER CASE</span>
+            <CommandShortcut className="flex flex-row">
+              <ShortcutLabel shortcut={prefGetMakeUpperCaseShortcut()}/>
+            </CommandShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.CapitalizeWords)}>
+            <div className="mr-2 h-4 w-4"></div>
+            <span className="mr-12">Capitalize Words</span>
+            <CommandShortcut className="flex flex-row">
+              <ShortcutLabel shortcut={prefGetCapitalizeShortcut()}/>
+            </CommandShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.ToSentenceCase)}>
+            <div className="mr-2 h-4 w-4"></div>
+            <span className="mr-12">Sentence case</span>
+            <CommandShortcut className="flex flex-row">
+              <ShortcutLabel shortcut={prefGetSentenceCaseShortcut()}/>
+            </CommandShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.RemoveEmptyLines)}>
+            <div className="mr-2 h-4 w-4"></div>
+            <span className="mr-12">Remove empty lines</span>
+            <CommandShortcut className="flex flex-row">
+              <ShortcutLabel shortcut={prefGetRemoveEmptyLinesShortcut()}/>
+            </CommandShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.StripAllWhitespaces)}>
+            <div className="mr-2 h-4 w-4"></div>
+            <span className="mr-12">StripAllWhitespaces</span>
+            <CommandShortcut className="flex flex-row">
+              <ShortcutLabel shortcut={prefGetStripAllWhitespacesShortcut()}/>
+            </CommandShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.TrimSurroundingWhitespaces)}>
+            <div className="mr-2 h-4 w-4"></div>
+            <span className="mr-12">Trim Surrounding Whitespaces</span>
+            <CommandShortcut className="flex flex-row">
+              <ShortcutLabel shortcut={prefGetTrimSurroundingWhitespacesShortcut()}/>
+            </CommandShortcut>
+          </DropdownMenuItem>
         </>
     )
   }
@@ -280,11 +301,6 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
           {
               canSaveImageAsFile() && <DropdownMenuSeparator/>
           }
-
-          {
-              canFormatText() && renderFormatOptions()
-          }
-
           <DropdownMenuItem onClick={handleDeleteItem}>
             <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
             <span className="mr-12 text-actions-danger">
@@ -294,6 +310,9 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
               <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
+          {
+              canFormatText() && renderFormatOptions()
+          }
         </DropdownMenuContent>
       </DropdownMenu>
   )

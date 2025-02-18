@@ -70,6 +70,13 @@ NSString *prefNavigateToPrevGroupOfItemsShortcut = @"app.navigate_to_prev_group_
 NSString *prefSaveImageAsFileShortcut = @"app.save_image_as_file_shortcut";
 NSString *prefPauseResumeShortcut = @"app.pause_resume_shortcut";
 NSString *prefRenameItemShortcut = @"app.rename_item_shortcut";
+NSString *prefMakeLowerCaseShortcut = @"app.make_lower_case_shortcut";
+NSString *prefMakeUpperCaseShortcut = @"app.make_upper_case_shortcut";
+NSString *prefCapitalizeShortcut = @"app.capitalize_shortcut";
+NSString *prefSentenceCaseShortcut = @"app.sentence_case_shortcut";
+NSString *prefRemoveEmptyLinesShortcut = @"app.remove_empty_lines_shortcut";
+NSString *prefStripAllWhitespacesShortcut = @"app.strip_all_whitespaces_shortcut";
+NSString *prefTrimSurroundingWhitespacesShortcut = @"app.trim_surrounding_whitespaces_shortcut";
 
 AppSettingsMac::AppSettingsMac() = default;
 
@@ -949,4 +956,109 @@ bool AppSettingsMac::shouldAlwaysDisplay() {
     return [defaults boolForKey:prefAlwaysDisplay];
   }
   return false;
+}
+
+void AppSettingsMac::saveMakeLowerCaseShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefMakeLowerCaseShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getMakeLowerCaseShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefMakeLowerCaseShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ShiftLeft + MetaLeft + KeyL";
+}
+
+void AppSettingsMac::saveMakeUpperCaseShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefMakeUpperCaseShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getMakeUpperCaseShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefMakeUpperCaseShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ShiftLeft + MetaLeft + KeyU";
+}
+
+void AppSettingsMac::saveCapitalizeShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefCapitalizeShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getCapitalizeShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefCapitalizeShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ShiftLeft + MetaLeft + KeyA";
+}
+
+void AppSettingsMac::saveSentenceCaseShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefSentenceCaseShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getSentenceCaseShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefSentenceCaseShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ShiftLeft + MetaLeft + KeyS";
+}
+
+void AppSettingsMac::saveRemoveEmptyLinesShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefRemoveEmptyLinesShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getRemoveEmptyLinesShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefRemoveEmptyLinesShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ShiftLeft + MetaLeft + KeyR";
+}
+
+void AppSettingsMac::saveStripAllWhitespacesShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefStripAllWhitespacesShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getStripAllWhitespacesShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefStripAllWhitespacesShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ShiftLeft + MetaLeft + KeyT";
+}
+
+void AppSettingsMac::saveTrimSurroundingWhitespacesShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefTrimSurroundingWhitespacesShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getTrimSurroundingWhitespacesShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefTrimSurroundingWhitespacesShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ShiftLeft + MetaLeft + KeyM";
 }

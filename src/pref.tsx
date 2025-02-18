@@ -44,6 +44,8 @@ declare const shouldPlaySoundOnCopy: () => boolean;
 declare const setPlaySoundOnCopy: (play: boolean) => void;
 declare const shouldAlwaysDisplay: () => boolean;
 declare const setAlwaysDisplay: (display: boolean) => void;
+declare const setFeedbackProvided: (provided: boolean) => void;
+declare const isFeedbackProvided: () => boolean;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -99,8 +101,20 @@ declare const savePauseResumeShortcut: (shortcut: string) => void;
 declare const getPauseResumeShortcut: () => string;
 declare const saveRenameItemShortcut: (shortcut: string) => void;
 declare const getRenameItemShortcut: () => string;
-declare const setFeedbackProvided: (provided: boolean) => void;
-declare const isFeedbackProvided: () => boolean;
+declare const saveMakeLowerCaseShortcut: (shortcut: string) => void;
+declare const getMakeLowerCaseShortcut: () => string;
+declare const saveMakeUpperCaseShortcut: (shortcut: string) => void;
+declare const getMakeUpperCaseShortcut: () => string;
+declare const saveCapitalizeShortcut: (shortcut: string) => void;
+declare const getCapitalizeShortcut: () => string;
+declare const saveSentenceCaseShortcut: (shortcut: string) => void;
+declare const getSentenceCaseShortcut: () => string;
+declare const saveRemoveEmptyLinesShortcut: (shortcut: string) => void;
+declare const getRemoveEmptyLinesShortcut: () => string;
+declare const saveStripAllWhitespacesShortcut: (shortcut: string) => void;
+declare const getStripAllWhitespacesShortcut: () => string;
+declare const saveTrimSurroundingWhitespacesShortcut: (shortcut: string) => void;
+declare const getTrimSurroundingWhitespacesShortcut: () => string;
 
 export enum OpenWindowStrategy {
   ACTIVE_SCREEN_LAST_POSITION = "activeScreenLastPosition",
@@ -560,4 +574,60 @@ export function prefShouldAlwaysDisplay() {
 
 export function prefSetAlwaysDisplay(display: boolean) {
   setAlwaysDisplay(display)
+}
+
+export function prefGetMakeLowerCaseShortcut() {
+  return getMakeLowerCaseShortcut()
+}
+
+export function prefSetMakeLowerCaseShortcut(shortcut: string) {
+  saveMakeLowerCaseShortcut(shortcut)
+}
+
+export function prefGetMakeUpperCaseShortcut() {
+  return getMakeUpperCaseShortcut()
+}
+
+export function prefSetMakeUpperCaseShortcut(shortcut: string) {
+  saveMakeUpperCaseShortcut(shortcut)
+}
+
+export function prefGetCapitalizeShortcut() {
+  return getCapitalizeShortcut()
+}
+
+export function prefSetCapitalizeShortcut(shortcut: string) {
+  saveCapitalizeShortcut(shortcut)
+}
+
+export function prefGetSentenceCaseShortcut() {
+  return getSentenceCaseShortcut()
+}
+
+export function prefSetSentenceCaseShortcut(shortcut: string) {
+  saveSentenceCaseShortcut(shortcut)
+}
+
+export function prefGetRemoveEmptyLinesShortcut() {
+  return getRemoveEmptyLinesShortcut()
+}
+
+export function prefSetRemoveEmptyLinesShortcut(shortcut: string) {
+  saveRemoveEmptyLinesShortcut(shortcut)
+}
+
+export function prefGetStripAllWhitespacesShortcut() {
+  return getStripAllWhitespacesShortcut()
+}
+
+export function prefSetStripAllWhitespacesShortcut(shortcut: string) {
+  saveStripAllWhitespacesShortcut(shortcut)
+}
+
+export function prefGetTrimSurroundingWhitespacesShortcut() {
+  return getTrimSurroundingWhitespacesShortcut()
+}
+
+export function prefSetTrimSurroundingWhitespacesShortcut(shortcut: string) {
+  saveTrimSurroundingWhitespacesShortcut(shortcut)
 }

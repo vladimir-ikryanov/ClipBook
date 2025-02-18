@@ -9,10 +9,12 @@ import {
   addSelectedHistoryItemIndex,
   clear,
   clearSelection,
-  deleteHistoryItem, findItem,
+  deleteHistoryItem,
+  findItem,
   findItemByImageFileName,
   getFirstSelectedHistoryItem,
-  getFirstSelectedHistoryItemIndex, getHistoryItem,
+  getFirstSelectedHistoryItemIndex,
+  getHistoryItem,
   getHistoryItemIndex,
   getHistoryItems,
   getLastSelectedItemIndex,
@@ -26,11 +28,14 @@ import {
   removeSelectedHistoryItemIndex,
   setFilterQuery,
   setPreviewVisibleState,
-  setSelectedHistoryItemIndex, TextFormatOperation,
-  updateHistoryItem, updateHistoryItemTypes
+  setSelectedHistoryItemIndex,
+  TextFormatOperation,
+  updateHistoryItem,
+  updateHistoryItemTypes
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
+  prefGetCapitalizeShortcut,
   prefGetClearHistoryShortcut,
   prefGetCopyAndMergeSeparator,
   prefGetCopyTextFromImageShortcut,
@@ -40,6 +45,7 @@ import {
   prefGetEditHistoryItemShortcut,
   prefGetKeepFavoritesOnClearHistory,
   prefGetLicenseKey,
+  prefGetMakeLowerCaseShortcut, prefGetMakeUpperCaseShortcut,
   prefGetNavigateToFirstItemShortcut,
   prefGetNavigateToLastItemShortcut,
   prefGetNavigateToNextGroupOfItemsShortcut,
@@ -48,13 +54,14 @@ import {
   prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetQuickPasteModifier,
-  prefGetQuickPasteShortcuts, prefGetRenameItemShortcut,
+  prefGetQuickPasteShortcuts, prefGetRemoveEmptyLinesShortcut,
+  prefGetRenameItemShortcut,
   prefGetSaveImageAsFileShortcut,
   prefGetSelectNextItemShortcut,
-  prefGetSelectPreviousItemShortcut,
-  prefGetShowMoreActionsShortcut,
+  prefGetSelectPreviousItemShortcut, prefGetSentenceCaseShortcut,
+  prefGetShowMoreActionsShortcut, prefGetStripAllWhitespacesShortcut,
   prefGetToggleFavoriteShortcut,
-  prefGetTogglePreviewShortcut,
+  prefGetTogglePreviewShortcut, prefGetTrimSurroundingWhitespacesShortcut,
   prefSetDisplayThankYouDialog,
   prefShouldDisplayThankYouMessage,
   prefShouldTreatDigitNumbersAsColor,
@@ -313,7 +320,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       }
       // Paste the selected item to the active app when the paste shortcut is pressed.
       if (isShortcutMatch(prefGetPasteSelectedItemToActiveAppShortcut(), e)) {
-        handlePaste()
+        await handlePaste()
         e.preventDefault()
       }
       // Delete the active item when the delete shortcut is pressed.
@@ -378,13 +385,42 @@ export default function HistoryPane(props: HistoryPaneProps) {
       let shortcuts = prefGetQuickPasteShortcuts();
       let quickPasteShortcut = isQuickPasteShortcut(shortcuts, e);
       if (quickPasteShortcut.match) {
-        handlePasteByIndex(quickPasteShortcut.index)
+        await handlePasteByIndex(quickPasteShortcut.index)
         e.preventDefault()
       }
 
       // Dispatch the rename item request.
       if (isShortcutMatch(prefGetRenameItemShortcut(), e)) {
         handleRenameItem()
+        e.preventDefault()
+      }
+
+      if (isShortcutMatch(prefGetMakeLowerCaseShortcut(), e)) {
+        await handleFormatTextAndSave(TextFormatOperation.ToLowerCase)
+        e.preventDefault()
+      }
+      if (isShortcutMatch(prefGetMakeUpperCaseShortcut(), e)) {
+        await handleFormatTextAndSave(TextFormatOperation.ToUpperCase)
+        e.preventDefault()
+      }
+      if (isShortcutMatch(prefGetCapitalizeShortcut(), e)) {
+        await handleFormatTextAndSave(TextFormatOperation.CapitalizeWords)
+        e.preventDefault()
+      }
+      if (isShortcutMatch(prefGetSentenceCaseShortcut(), e)) {
+        await handleFormatTextAndSave(TextFormatOperation.ToSentenceCase)
+        e.preventDefault()
+      }
+      if (isShortcutMatch(prefGetRemoveEmptyLinesShortcut(), e)) {
+        await handleFormatTextAndSave(TextFormatOperation.RemoveEmptyLines)
+        e.preventDefault()
+      }
+      if (isShortcutMatch(prefGetStripAllWhitespacesShortcut(), e)) {
+        await handleFormatTextAndSave(TextFormatOperation.StripAllWhitespaces)
+        e.preventDefault()
+      }
+      if (isShortcutMatch(prefGetTrimSurroundingWhitespacesShortcut(), e)) {
+        await handleFormatTextAndSave(TextFormatOperation.TrimSurroundingWhitespaces)
         e.preventDefault()
       }
     }

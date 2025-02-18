@@ -182,6 +182,27 @@ class AppSettings {
 
   virtual void saveRenameItemShortcut(std::string shortcut) = 0;
   virtual std::string getRenameItemShortcut() = 0;
+
+  virtual void saveMakeLowerCaseShortcut(std::string shortcut) = 0;
+  virtual std::string getMakeLowerCaseShortcut() = 0;
+
+  virtual void saveMakeUpperCaseShortcut(std::string shortcut) = 0;
+  virtual std::string getMakeUpperCaseShortcut() = 0;
+
+  virtual void saveCapitalizeShortcut(std::string shortcut) = 0;
+  virtual std::string getCapitalizeShortcut() = 0;
+
+  virtual void saveSentenceCaseShortcut(std::string shortcut) = 0;
+  virtual std::string getSentenceCaseShortcut() = 0;
+
+  virtual void saveRemoveEmptyLinesShortcut(std::string shortcut) = 0;
+  virtual std::string getRemoveEmptyLinesShortcut() = 0;
+
+  virtual void saveStripAllWhitespacesShortcut(std::string shortcut) = 0;
+  virtual std::string getStripAllWhitespacesShortcut() = 0;
+
+  virtual void saveTrimSurroundingWhitespacesShortcut(std::string shortcut) = 0;
+  virtual std::string getTrimSurroundingWhitespacesShortcut() = 0;
 };
 
 
