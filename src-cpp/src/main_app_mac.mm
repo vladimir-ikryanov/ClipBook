@@ -133,6 +133,12 @@ static std::map<std::string, KeyCode> kKeyCodes = {
     {"BracketRight", KeyCode::CLOSE_BRACE},
 };
 
+void copyCustomClip(NSPasteboard *pasteboard) {
+  NSString *str = @"ClipBook";
+  NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
+  [pasteboard setData:data forType:@"com.clipbook.data"];
+}
+
 std::vector<std::string> split(const std::string &str, const std::string &delimiter) {
   std::vector<std::string> result;
   size_t pos = 0;
@@ -391,9 +397,11 @@ void MainAppMac::copyToClipboard(const std::string &text,
     // Paste the image text if it is not empty.
     if (!imageText.empty()) {
       [pasteboard setString:[NSString stringWithUTF8String:imageText.c_str()] forType:NSPasteboardTypeString];
+      copyCustomClip(pasteboard);
     }
   } else {
     [pasteboard setString:[NSString stringWithUTF8String:text.c_str()] forType:NSPasteboardTypeString];
+    copyCustomClip(pasteboard);
   }
 }
 

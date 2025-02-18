@@ -15,6 +15,10 @@ namespace fs = std::filesystem;
 static int kCheckInterval = 500;
 static int kCopyToClipboardAfterMergeDelay = 500;
 
+bool hasCustomClip(NSPasteboard *pasteboard) {
+  return [pasteboard availableTypeFromArray:@[@"com.clipbook.data"]] != nil;
+}
+
 void extractTextFromImage(NSImage *image,
                           const std::string &imageFileName,
                           const std::shared_ptr<MainApp> &app,
@@ -346,6 +350,12 @@ bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> 
   last_change_count_ = changeCount;
 
   if (app_->isPaused()) {
+    return false;
+  }
+
+  // If the clipboard contains the custom clip, it means that ClipBook put
+  // this data and should not read it again.
+  if (hasCustomClip(pasteboard)) {
     return false;
   }
 

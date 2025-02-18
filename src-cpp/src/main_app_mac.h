@@ -60,7 +60,7 @@ class MainAppMac : public MainApp {
   bool moveToActiveWindowCenter();
   bool moveToScreenWithMousePointer();
   void moveToMousePointerLocation();
-  molybden::Shortcut createShortcut(const std::string &shortcut);
+  static molybden::Shortcut createShortcut(const std::string &shortcut);
   long getSystemBootTime() override;
 
   static void addAppToLoginItems();

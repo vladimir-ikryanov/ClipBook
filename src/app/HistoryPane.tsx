@@ -91,8 +91,6 @@ type HistoryPaneProps = {
   onResetZoom: () => void
 }
 
-let clipboardContentToSkip = ""
-let lastPastedItemIDs: Set<number> = new Set()
 let treatDigitNumbersAsColor = prefShouldTreatDigitNumbersAsColor()
 
 export default function HistoryPane(props: HistoryPaneProps) {
@@ -129,16 +127,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   imageHeight: number,
                                   imageSizeInBytes: number,
                                   imageText: string) {
-    if (content === clipboardContentToSkip) {
-      clipboardContentToSkip = ""
-      return
-    }
     let item = findItem(content, imageFileName)
     if (item) {
       item.numberOfCopies++
-      if (!lastPastedItemIDs.delete(item.id!)) {
-        item.lastTimeCopy = new Date()
-      }
+      item.lastTimeCopy = new Date()
       await updateClip(item.id!, item)
     } else {
       item = await addHistoryItem(
@@ -351,7 +343,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       }
       // Copy the active item to the clipboard when the copy to clipboard shortcut is pressed.
       if (isShortcutMatch(prefGetCopyToClipboardShortcut(), e)) {
-        handleCopyToClipboard()
+        await handleCopyToClipboard()
         e.preventDefault()
       }
       // Copy text from the active item (image) when the copy text from image shortcut is pressed.
@@ -537,61 +529,72 @@ export default function HistoryPane(props: HistoryPaneProps) {
     return previewPanelRef.current ? previewPanelRef.current.getSize() > 0 : false
   }
 
-  function pasteItem(item: Clip, keepHistory: boolean = false) {
-    // Remember the last pasted item to be able to skip it when it's added to
-    // the system clipboard during paste.
-    if (!prefShouldUpdateHistoryAfterAction() || keepHistory) {
-      lastPastedItemIDs.add(item.id!)
-      clipboardContentToSkip = item.content
+  async function pasteItem(item: Clip, keepHistory: boolean = false) {
+    item.numberOfCopies++
+    if (prefShouldUpdateHistoryAfterAction() && !keepHistory) {
+      item.lastTimeCopy = new Date()
     }
+    await updateClip(item.id!, item)
+
     let imageFileName = item.imageFileName ? item.imageFileName : ""
     let imageText = item.imageText ? item.imageText : ""
     pasteItemInFrontApp(item.content, imageFileName, imageText)
+
+    setHistory([...getHistoryItems()])
+
+    // The added item might not be in the visible history list if it doesn't match the search query.
+    let index = getHistoryItemIndex(item)
+    if (index >= 0) {
+      clearSelection()
+      addSelectedHistoryItemIndex(index)
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
+      scrollToLastSelectedItem()
+    }
   }
 
-  function handlePaste() {
+  async function handlePaste() {
     let items = getSelectedHistoryItems()
-    items.forEach(item => {
-      pasteItem(item)
-    })
+    for (const item of items) {
+      await pasteItem(item)
+    }
     // Clear the search query in the search field after paste.
     handleSearchQueryChange("")
   }
 
-  function handlePasteWithTab() {
+  async function handlePasteWithTab() {
     let items = getSelectedHistoryItems()
-    items.forEach(item => {
-      pasteItem(item)
+    for (const item of items) {
+      await pasteItem(item)
       if (items.length > 1) {
         pressTab()
       }
-    })
+    }
     // Clear the search query in the search field after paste.
     handleSearchQueryChange("")
   }
 
-  function handlePasteWithReturn() {
+  async function handlePasteWithReturn() {
     let items = getSelectedHistoryItems()
-    items.forEach(item => {
-      pasteItem(item)
+    for (const item of items) {
+      await pasteItem(item)
       if (items.length > 1) {
         pressReturn()
       }
-    })
+    }
     // Clear the search query in the search field after paste.
     handleSearchQueryChange("")
   }
 
-  function handlePasteWithTransformation(operation: TextFormatOperation) {
+  async function handlePasteWithTransformation(operation: TextFormatOperation) {
     let items = getSelectedHistoryItems()
-    items.forEach(item => {
+    for (const item of items) {
       if (isTextItem(item)) {
         let originalContent = item.content
         item.content = formatText(originalContent, operation)
-        pasteItem(item, true)
+        await pasteItem(item, true)
         item.content = originalContent
       }
-    })
+    }
   }
 
   async function handleMerge() {
@@ -605,9 +608,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
     await addClipboardData(content, "ClipBook.app", "", "", 0, 0, 0, "")
   }
 
-  function handlePasteByIndex(index: number) {
+  async function handlePasteByIndex(index: number) {
     if (index < history.length) {
-      pasteItem(history[index])
+      await pasteItem(history[index])
       handleSearchQueryChange("")
       setQuickPasteModifierPressed(false)
     }
@@ -705,25 +708,38 @@ export default function HistoryPane(props: HistoryPaneProps) {
     handleRenameItem()
   }
 
-  function copyItemToClipboard(item: Clip) {
-    if (!prefShouldUpdateHistoryAfterAction()) {
-      lastPastedItemIDs.add(item.id!)
-      clipboardContentToSkip = item.content
+  async function copyItemToClipboard(item: Clip) {
+    item.numberOfCopies++
+    if (prefShouldUpdateHistoryAfterAction()) {
+      item.lastTimeCopy = new Date()
     }
+    await updateClip(item.id!, item)
+
     let imageFileName = item.imageFileName ? item.imageFileName : ""
     let imageText = item.imageText ? item.imageText : ""
     copyToClipboard(item.content, imageFileName, imageText)
+
+    setHistory([...getHistoryItems()])
+
+    // The added item might not be in the visible history list if it doesn't match the search query.
+    let index = getHistoryItemIndex(item)
+    if (index >= 0) {
+      clearSelection()
+      addSelectedHistoryItemIndex(index)
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
+      scrollToLastSelectedItem()
+    }
   }
 
-  function handleCopyToClipboard() {
+  async function handleCopyToClipboard() {
     if (getSelectedHistoryItemIndices().length === 1) {
-      copyItemToClipboard(getFirstSelectedHistoryItem())
+      await copyItemToClipboard(getFirstSelectedHistoryItem())
     }
     focusSearchField()
   }
 
-  function handleCopyToClipboardByIndex(index: number) {
-    copyItemToClipboard(getHistoryItem(index))
+  async function handleCopyToClipboardByIndex(index: number) {
+    await copyItemToClipboard(getHistoryItem(index))
   }
 
   function copyTextFromImage(item: Clip) {
