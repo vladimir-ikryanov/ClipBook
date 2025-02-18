@@ -124,7 +124,7 @@ export default function History() {
           <div className="flex flex-col px-8 pb-6 gap-4 flex-grow overflow-y-auto">
             <div className="flex items-center justify-between space-x-20 pt-6 pb-1">
               <Label htmlFor="updateHistoryAfterAction" className="flex flex-col text-base">
-                <span className="">Update history after paste</span>
+                <span className="">Update history after paste or copy</span>
                 <span className="text-neutral-500 font-normal text-sm mt-1">
                   Move the item to the top of the history list after paste or copy&nbsp;action.
                 </span>

@@ -305,6 +305,9 @@ void ClipboardReaderMac::addClipboardData(const std::shared_ptr<ClipboardData> &
 }
 
 void ClipboardReaderMac::mergeClipboardData(const std::shared_ptr<ClipboardData> &data) {
+  if (app_->settings()->shouldPlaySoundOnCopy()) {
+    [sound_ play];
+  }
   auto frame = app_->browser()->mainFrame();
   auto window = frame->executeJavaScript("window");
   window.asJsObject()->call("mergeClipboardData",
