@@ -192,7 +192,7 @@ ClipBook will check for updates automatically and notify you when a new version 
 
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="showIcon" className="flex flex-col text-base">
-                <span className="">Sound effects</span>
+                <span className="">Play sound</span>
                 <span className="text-neutral-500 font-normal text-sm">
                   Play a sound when an item is added to the&nbsp;history.
                 </span>
