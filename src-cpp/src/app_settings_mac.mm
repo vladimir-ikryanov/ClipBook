@@ -941,7 +941,7 @@ bool AppSettingsMac::shouldPlaySoundOnCopy() {
   if ([defaults objectForKey:prefPlaySoundOnCopy] != nil) {
     return [defaults boolForKey:prefPlaySoundOnCopy];
   }
-  return false;
+  return true;
 }
 
 void AppSettingsMac::saveAlwaysDisplay(bool display) {
