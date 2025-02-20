@@ -372,13 +372,14 @@ void MainAppMac::paste(const std::string &text,
   }
   // Hide the browser window and activate the previously active app.
   hide();
-  copyToClipboard(text, imageFileName, imageText);
+  copyToClipboard(text, imageFileName, imageText, true);
   paste();
 }
 
 void MainAppMac::copyToClipboard(const std::string &text,
                                  const std::string &imageFileName,
-                                 const std::string &imageText) {
+                                 const std::string &imageText,
+                                 bool ghost) {
   auto pasteboard = [NSPasteboard generalPasteboard];
   // Clear the pasteboard and set the new text.
   [pasteboard clearContents];
@@ -397,11 +398,15 @@ void MainAppMac::copyToClipboard(const std::string &text,
     // Paste the image text if it is not empty.
     if (!imageText.empty()) {
       [pasteboard setString:[NSString stringWithUTF8String:imageText.c_str()] forType:NSPasteboardTypeString];
-      copyCustomClip(pasteboard);
+      if (ghost) {
+        copyCustomClip(pasteboard);
+      }
     }
   } else {
     [pasteboard setString:[NSString stringWithUTF8String:text.c_str()] forType:NSPasteboardTypeString];
-    copyCustomClip(pasteboard);
+    if (ghost) {
+      copyCustomClip(pasteboard);
+    }
   }
 }
 
@@ -765,7 +770,7 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text, const st
     }
     if (result.button.type == MessageDialogButtonType::kNone) {
       hide();
-      copyToClipboard(text, imageFileName, imageText);
+      copyToClipboard(text, imageFileName, imageText, false);
     }
   });
 }

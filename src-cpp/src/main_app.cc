@@ -570,8 +570,8 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
     sendKey(Key::kTab);
   });
   window->putProperty("copyToClipboard",
-                      [this](std::string text, std::string imageFileName, std::string imageText) {
-                        copyToClipboard(text, imageFileName, imageText);
+                      [this](std::string text, std::string imageFileName, std::string imageText, bool ghost) {
+                        copyToClipboard(text, imageFileName, imageText, ghost);
                       });
   window->putProperty("copyToClipboardAfterMerge", [this](std::string text) {
     copyToClipboardAfterMerge(std::move(text));

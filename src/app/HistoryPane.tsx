@@ -81,7 +81,7 @@ import {HideDropdownReason} from "@/app/PreviewToolBarMenu";
 declare const pasteItemInFrontApp: (text: string, imageFileName: string, imageText: string) => void;
 declare const pressReturn: () => void;
 declare const pressTab: () => void;
-declare const copyToClipboard: (text: string, imageFileName: string, imageText: string) => void;
+declare const copyToClipboard: (text: string, imageFileName: string, imageText: string, ghost: boolean) => void;
 declare const copyToClipboardAfterMerge: (text: string) => void;
 declare const deleteImage: (imageFileName: string) => void;
 declare const clearEntireHistory: () => void;
@@ -753,7 +753,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
     let imageFileName = item.imageFileName ? item.imageFileName : ""
     let imageText = item.imageText ? item.imageText : ""
-    copyToClipboard(item.content, imageFileName, imageText)
+    copyToClipboard(item.content, imageFileName, imageText, true)
 
     setHistory([...getHistoryItems()])
 
@@ -780,7 +780,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function copyTextFromImage(item: Clip) {
     if (item.type === ClipType.Image) {
-      copyToClipboard(item.content, "", "")
+      console.log(item.content)
+      copyToClipboard(item.content, "", "", false)
     }
   }
 

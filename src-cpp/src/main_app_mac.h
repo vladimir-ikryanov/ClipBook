@@ -28,7 +28,8 @@ class MainAppMac : public MainApp {
   void sendKey(Key key) override;
   void copyToClipboard(const std::string &text,
                        const std::string &imageFileName,
-                       const std::string &imageText) override;
+                       const std::string &imageText,
+                       bool ghost) override;
   void copyToClipboardAfterMerge(std::string text) override;
   void setOpenAtLogin(bool open) override;
   AppInfo getAppInfo() override;
