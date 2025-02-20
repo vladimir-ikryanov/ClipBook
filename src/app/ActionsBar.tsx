@@ -26,7 +26,7 @@ export default function ActionsBar(props: ActionsBarProps) {
         </div>
 
         <div className="flex">
-          <Button variant="ghost" className="p-1 h-8 rounded-sm outline-none" onClick={props.onPaste}>
+          <Button variant="ghost" className="p-1 h-8 rounded-sm outline-none group" onClick={props.onPaste}>
             <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
             <p className="pl-2 pr-1 text-">Paste to {props.appName}</p>
           </Button>

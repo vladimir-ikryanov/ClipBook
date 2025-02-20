@@ -53,6 +53,12 @@ module.exports = {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",
         },
+        "shortcut-label": {
+          DEFAULT: "var(--shortcut-label)",
+          text: "var(--shortcut-label-text)",
+          hover: "var(--shortcut-label-hover)",
+          "hover-text": "var(--shortcut-label-hover-text)",
+        },
         actions: {
           DEFAULT: "var(--actions-background)",
           background: "var(--actions-background)",

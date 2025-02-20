@@ -5,19 +5,23 @@
 @layer base {
   :root {
     --background: #fafafa;
-    --foreground: #000000;
+    --foreground: #252525;
     --card: #d0d0d0;
     --card-foreground: #616161;
+    --shortcut-label: #e3e3e3;
+    --shortcut-label-text: #858585;
+    --shortcut-label-hover: #d0d0d0;
+    --shortcut-label-hover-text: #616161;
     --popover: #eeeeee;
-    --popover-foreground: #000000;
-    --primary: #000000;
+    --popover-foreground: #252525;
+    --primary: #252525;
     --primary-foreground: #414141;
     --secondary: #F2F2F2;
     --secondary-foreground: #888888;
     --muted: #fafafa;
-    --muted-foreground: #000000;
+    --muted-foreground: #252525;
     --accent: #e2e2e2;
-    --accent-foreground: black;
+    --accent-foreground: #252525;
     --destructive: #fafafa;
     --destructive-foreground: #fafafa;
     --border: #e7e7e7;
@@ -58,7 +62,7 @@
     --secondary-button-background-hover: #d8d8d8;
     --secondary-button-border: #e8e8e8;
     --secondary-button-border-hover: #d8d8d8;
-    --secondary-button-text: black;
+    --secondary-button-text: #252525;
     /* Skeleton */
     --skeleton-background: #ffffff;
     --skeleton-foreground: #dadada;
@@ -88,6 +92,10 @@
     --foreground: #DADADA;
     --card: #3e4144;
     --card-foreground: #e3e3e3;
+    --shortcut-label: #3e4144;
+    --shortcut-label-text: #e3e3e3;
+    --shortcut-label-hover: #3e4144;
+    --shortcut-label-hover-text: #e3e3e3;
     /* History item hover background */
     --popover: #2e2e2e;
     --popover-foreground: #DADADA;

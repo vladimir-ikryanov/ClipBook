@@ -12,11 +12,10 @@ export default function ShortcutLabel(props: ShortcutLabelProps) {
       <div className="flex">
         {
           props.shortcut.split(" + ").map((key, index) => (
-              <div key={key + index} className={index === 0 ?
-                  "flex h-6 px-2 rounded bg-card justify-center items-center" :
-                  "flex h-6 px-2 rounded bg-card justify-center items-center ml-1"}>
+              <div key={key + index}
+                   className={`flex h-6 px-2 rounded bg-shortcut-label group-hover:bg-shortcut-label-hover group-focus:bg-shortcut-label-hover group-data-[selected='true']:bg-shortcut-label-hover justify-center items-center ${index === 0 ? "" : "ml-1"}`}>
                 <span
-                    className="text-sm text-card-foreground">{shortcutToDisplayShortcut(key)}</span>
+                    className="text-sm text-shortcut-label-text group-hover:text-shortcut-label-hover-text group-focus:text-shortcut-label-hover-text group-data-[selected='true']:text-shortcut-label-hover-text">{shortcutToDisplayShortcut(key)}</span>
               </div>
           ))
         }
