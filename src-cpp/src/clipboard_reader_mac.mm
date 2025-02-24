@@ -293,15 +293,35 @@ void ClipboardReaderMac::addClipboardData(const std::shared_ptr<ClipboardData> &
 
   auto frame = app_->browser()->mainFrame();
   auto window = frame->executeJavaScript("window");
-  window.asJsObject()->call("addClipboardData",
-                            data->content,
-                            data->active_app_info.path,
-                            data->image_info.file_name,
-                            data->image_info.thumb_file_name,
-                            data->image_info.width,
-                            data->image_info.height,
-                            data->image_info.size_in_bytes,
-                            data->image_info.text);
+  if (data->file_paths.empty()) {
+    window.asJsObject()->call("addClipboardData",
+                              data->content,
+                              data->active_app_info.path,
+                              data->image_info.file_name,
+                              data->image_info.thumb_file_name,
+                              data->image_info.width,
+                              data->image_info.height,
+                              data->image_info.size_in_bytes,
+                              data->image_info.text,
+                              "", "", "", 0, false);
+  } else {
+    for (const auto &file_path : data->file_paths) {
+      window.asJsObject()->call("addClipboardData",
+                                file_path.file_path,
+                                data->active_app_info.path,
+                                data->image_info.file_name,
+                                data->image_info.thumb_file_name,
+                                data->image_info.width,
+                                data->image_info.height,
+                                data->image_info.size_in_bytes,
+                                data->image_info.text,
+                                file_path.file_path,
+                                file_path.image_file_name,
+                                file_path.thumb_file_name,
+                                file_path.size_in_bytes,
+                                file_path.folder);
+    }
+  }
 }
 
 void ClipboardReaderMac::mergeClipboardData(const std::shared_ptr<ClipboardData> &data) {
@@ -310,15 +330,35 @@ void ClipboardReaderMac::mergeClipboardData(const std::shared_ptr<ClipboardData>
   }
   auto frame = app_->browser()->mainFrame();
   auto window = frame->executeJavaScript("window");
-  window.asJsObject()->call("mergeClipboardData",
-                            data->content,
-                            data->active_app_info.path,
-                            data->image_info.file_name,
-                            data->image_info.thumb_file_name,
-                            data->image_info.width,
-                            data->image_info.height,
-                            data->image_info.size_in_bytes,
-                            data->image_info.text);
+  if (data->file_paths.empty()) {
+    window.asJsObject()->call("mergeClipboardData",
+                              data->content,
+                              data->active_app_info.path,
+                              data->image_info.file_name,
+                              data->image_info.thumb_file_name,
+                              data->image_info.width,
+                              data->image_info.height,
+                              data->image_info.size_in_bytes,
+                              data->image_info.text,
+                              "", "", "", 0, false);
+  } else {
+    for (const auto &file_path : data->file_paths) {
+      window.asJsObject()->call("mergeClipboardData",
+                                data->content,
+                                data->active_app_info.path,
+                                data->image_info.file_name,
+                                data->image_info.thumb_file_name,
+                                data->image_info.width,
+                                data->image_info.height,
+                                data->image_info.size_in_bytes,
+                                data->image_info.text,
+                                file_path.file_path,
+                                file_path.image_file_name,
+                                file_path.thumb_file_name,
+                                file_path.size_in_bytes,
+                                file_path.folder);
+    }
+  }
 }
 
 void ClipboardReaderMac::readClipboardData() {
@@ -343,47 +383,9 @@ void ClipboardReaderMac::readClipboardData() {
   copy_and_merge_requested_ = false;
 }
 
-bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> &data) {
-  // Check if the clipboard has changed.
+bool ClipboardReaderMac::readImageData(const std::shared_ptr<ClipboardData> &data) {
   NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-  auto changeCount = [pasteboard changeCount];
-  if (changeCount == last_change_count_) {
-    return false;
-  }
-  last_change_count_ = changeCount;
-
-  if (app_->isPaused()) {
-    return false;
-  }
-
-  // If the clipboard contains the custom clip, it means that ClipBook put
-  // this data and should not read it again.
-  if (hasCustomClip(pasteboard)) {
-    return false;
-  }
-
-  // Check if the active app should be ignored.
-  auto settings = app_->settings();
-  data->active_app_info = app_->getActiveAppInfo();
-  auto active_app_path = data->active_app_info.path;
-  if (!active_app_path.empty()) {
-    auto apps_to_ignore = settings->getAppsToIgnore();
-    if (apps_to_ignore.find(active_app_path) != std::string::npos) {
-      return false;
-    }
-  }
-
-  // Check if the clipboard has transient or confidential content.
-  bool ignore_transient_content = settings->shouldIgnoreTransientContent();
-  bool ignore_confidential_content = settings->shouldIgnoreConfidentialContent();
   NSArray *types = [pasteboard types];
-  if (ignore_transient_content && [types containsObject:@"org.nspasteboard.TransientType"]) {
-    return false;
-  }
-  if (ignore_confidential_content && [types containsObject:@"org.nspasteboard.ConcealedType"]) {
-    return false;
-  }
-
   // Read image content in the PNG and TIFF formats.
   if ([types containsObject:NSPasteboardTypePNG] || [types containsObject:NSPasteboardTypeTIFF]) {
     // Make sure the images directory exists.
@@ -458,19 +460,14 @@ bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> 
 
     // Release resources.
     [image release];
-
-    if ([types containsObject:NSPasteboardTypeString]) {
-      auto pasteboard_string = [pasteboard stringForType:NSPasteboardTypeString];
-      if (pasteboard_string) {
-        const char *content = [pasteboard_string UTF8String];
-        if (content != nullptr && !isEmptyOrSpaces(content)) {
-          data->image_info.text = content;
-        }
-      }
-    }
     return true;
   }
+  return false;
+}
 
+bool ClipboardReaderMac::readTextData(const std::shared_ptr<ClipboardData> &data) {
+  NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+  NSArray *types = [pasteboard types];
   // Read text content.
   if ([types containsObject:NSPasteboardTypeString]) {
     auto pasteboard_string = [pasteboard stringForType:NSPasteboardTypeString];
@@ -483,4 +480,119 @@ bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> 
     }
   }
   return false;
+}
+
+bool ClipboardReaderMac::readFilesData(const std::shared_ptr<ClipboardData> &data) {
+  NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+  NSArray *types = [pasteboard types];
+  bool success = false;
+  if ([types containsObject:NSPasteboardTypeFileURL]) {
+    NSArray<NSURL *> *fileURLs = [pasteboard readObjectsForClasses:@[[NSURL class]] options:nil];
+    if (fileURLs.count > 0) {
+      for (NSURL *fileURL in fileURLs) {
+        FilePathInfo file_path_info;
+        NSString *filePath = [fileURL path];
+        file_path_info.file_path = filePath.UTF8String;
+        // Get file image and save it to the Images directory.
+        fs::path imagesDir = app_->getImagesDir();
+        if (!fs::exists(imagesDir)) {
+          fs::create_directories(imagesDir);
+        }
+        NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
+        NSImage *image = [workspace iconForFile:filePath];
+        [image setSize:NSMakeSize(256, 256)];
+
+        NSData *image_data = [image TIFFRepresentation];
+        NSBitmapImageRep *image_rep = [NSBitmapImageRep imageRepWithData:image_data];
+        NSDictionary *props = @{};
+        NSData *png_data = [image_rep representationUsingType:NSBitmapImageFileTypePNG properties:props];
+        int creation_time_in_ms = (int) [[NSDate date] timeIntervalSince1970];
+        NSString *image_filename = [NSString stringWithFormat:@"file_image_%d.png", creation_time_in_ms];
+        NSString *images_dir = [NSString stringWithUTF8String:imagesDir.c_str()];
+        NSString *image_path = [images_dir stringByAppendingPathComponent:image_filename];
+        [png_data writeToFile:image_path atomically:YES];
+        file_path_info.image_file_name = [image_filename UTF8String];
+        [png_data release];
+        [image_rep release];
+        [image_data release];
+
+        // Save image thumbnail to file.
+        [image setSize:NSMakeSize(48, 48)];
+        NSData *thumbnail_data = [image TIFFRepresentation];
+        NSBitmapImageRep *thumbnail_image_rep = [NSBitmapImageRep imageRepWithData:thumbnail_data];
+        NSDictionary *thumbnail_props = @{};
+        NSData *thumbnail_png_data = [thumbnail_image_rep representationUsingType:NSBitmapImageFileTypePNG properties:thumbnail_props];
+        NSString *thumbnail_filename = [NSString stringWithFormat:@"file_thumb_%d.png", creation_time_in_ms];
+        NSString *thumbnail_path = [images_dir stringByAppendingPathComponent:thumbnail_filename];
+        [thumbnail_png_data writeToFile:thumbnail_path atomically:YES];
+        file_path_info.thumb_file_name = [thumbnail_filename UTF8String];
+        [thumbnail_png_data release];
+        [thumbnail_image_rep release];
+        [thumbnail_data release];
+
+        // Read file size in bytes.
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        NSDictionary *attr = [fileManager attributesOfItemAtPath:filePath error:nil];
+        if (attr) {
+          unsigned long long fileSize = [attr fileSize];
+          file_path_info.size_in_bytes = static_cast<int>(fileSize);
+        }
+        // Check if it's a folder.
+        BOOL isDirectory = NO;
+        BOOL exists = [fileManager fileExistsAtPath:filePath isDirectory:&isDirectory];
+        file_path_info.folder = exists && isDirectory;
+
+        data->file_paths.emplace_back(file_path_info);
+        success = true;
+      }
+    }
+  }
+  return success;
+}
+
+bool ClipboardReaderMac::readClipboardData(const std::shared_ptr<ClipboardData> &data) {
+  // Check if the clipboard has changed.
+  NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+  auto changeCount = [pasteboard changeCount];
+  if (changeCount == last_change_count_) {
+    return false;
+  }
+  last_change_count_ = changeCount;
+
+  if (app_->isPaused()) {
+    return false;
+  }
+
+  // If the clipboard contains the custom clip, it means that ClipBook put
+  // this data and should not read it again.
+  if (hasCustomClip(pasteboard)) {
+    return false;
+  }
+
+  // Check if the active app should be ignored.
+  auto settings = app_->settings();
+  data->active_app_info = app_->getActiveAppInfo();
+  auto active_app_path = data->active_app_info.path;
+  if (!active_app_path.empty()) {
+    auto apps_to_ignore = settings->getAppsToIgnore();
+    if (apps_to_ignore.find(active_app_path) != std::string::npos) {
+      return false;
+    }
+  }
+
+  // Check if the clipboard has transient or confidential content.
+  bool ignore_transient_content = settings->shouldIgnoreTransientContent();
+  bool ignore_confidential_content = settings->shouldIgnoreConfidentialContent();
+  NSArray *types = [pasteboard types];
+  if (ignore_transient_content && [types containsObject:@"org.nspasteboard.TransientType"]) {
+    return false;
+  }
+  if (ignore_confidential_content && [types containsObject:@"org.nspasteboard.ConcealedType"]) {
+    return false;
+  }
+
+  bool has_image = readImageData(data);
+  bool has_text = readTextData(data);
+  bool has_files = readFilesData(data);
+  return has_image || has_text || has_files;
 }

@@ -24,17 +24,19 @@ class MainAppMac : public MainApp {
   void paste() override;
   void paste(const std::string &text,
              const std::string &imageFileName,
-             const std::string &imageText) override;
+             const std::string &imageText,
+             const std::string &filePath) override;
   void sendKey(Key key) override;
   void copyToClipboard(const std::string &text,
                        const std::string &imageFileName,
                        const std::string &imageText,
+                       const std::string &filePath,
                        bool ghost) override;
   void copyToClipboardAfterMerge(std::string text) override;
   void setOpenAtLogin(bool open) override;
   AppInfo getAppInfo() override;
   AppInfo getActiveAppInfo() override;
-  std::string getAppIconAsBase64(const std::string& app_path) override;
+  std::string getFileIconAsBase64(const std::string& app_path, bool large) override;
   std::string getAppNameFromPath(const std::string &app_path) override;
 
  protected:
@@ -48,7 +50,8 @@ class MainAppMac : public MainApp {
   bool isAccessibilityAccessGranted();
   void showAccessibilityAccessDialog(const std::string &text,
                                      const std::string &imageFileName,
-                                     const std::string &imageText);
+                                     const std::string &imageText,
+                                     const std::string &filePath);
   void showSystemAccessibilityPreferencesDialog();
 
  private:

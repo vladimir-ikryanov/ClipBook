@@ -17,6 +17,7 @@ import PreviewColorPane from "@/app/PreviewColorPane";
 import PreviewLinkPane from "@/app/PreviewLinkPane";
 import {prefShouldShowPreviewForLinks} from "@/pref";
 import {HideDropdownReason} from "@/app/PreviewToolBarMenu";
+import PreviewFilePane from "@/app/PreviewFilePane";
 
 type PreviewPaneProps = {
   selectedItemIndices: number[]
@@ -74,6 +75,12 @@ export default function PreviewPane(props: PreviewPaneProps) {
       }
       if (item.type === ClipType.Image) {
         return <PreviewImagePane item={item}/>
+      }
+      if (item.type === ClipType.File) {
+        return <PreviewFilePane filePath={item.filePath}
+                                imageFileName={item.filePathFileName}
+                                fileSizeInBytes={item.fileSizeInBytes}
+                                isFolder={item.fileFolder}/>
       }
       if (item.type === ClipType.Link && prefShouldShowPreviewForLinks()) {
         return <PreviewLinkPane item={item}

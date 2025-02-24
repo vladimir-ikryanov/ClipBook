@@ -18,10 +18,19 @@ struct ImageInfo {
   std::string text;
 };
 
+struct FilePathInfo {
+  std::string file_path;
+  std::string image_file_name;
+  std::string thumb_file_name;
+  int size_in_bytes = 0;
+  bool folder = false;
+};
+
 struct ClipboardData {
   AppInfo active_app_info;
   std::string content;
   ImageInfo image_info;
+  std::vector<FilePathInfo> file_paths;
 };
 
 class ClipboardReaderMac {
@@ -35,6 +44,9 @@ class ClipboardReaderMac {
  private:
   void readClipboardData();
   bool readClipboardData(const std::shared_ptr<ClipboardData> &data);
+  bool readImageData(const std::shared_ptr<ClipboardData> &data);
+  static bool readTextData(const std::shared_ptr<ClipboardData> &data);
+  bool readFilesData(const std::shared_ptr<ClipboardData> &data);
   void addClipboardData(const std::shared_ptr<ClipboardData>& data);
   void mergeClipboardData(const std::shared_ptr<ClipboardData>& data);
 

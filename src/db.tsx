@@ -1,12 +1,12 @@
 import Dexie, {Table} from 'dexie';
-import {getClipType} from "@/lib/utils";
 
 export enum ClipType {
   Text,
   Link,
   Email,
   Color,
-  Image
+  Image,
+  File
 }
 
 export class LinkPreviewDetails {
@@ -28,7 +28,7 @@ export class LinkPreviewDetails {
 
 export class Clip {
   id?: number;
-  name?: string;
+  name: string = "";
   content: string;
   type: ClipType = ClipType.Text;
   sourceApp: string;
@@ -36,18 +36,22 @@ export class Clip {
   firstTimeCopy: Date = new Date();
   lastTimeCopy: Date = new Date();
   numberOfCopies: number = 1;
-  imageFileName?: string;
+  imageFileName: string = "";
   imageThumbFileName?: string;
-  imageWidth?: number;
-  imageHeight?: number;
-  imageSizeInBytes?: number;
-  imageText?: string;
+  imageWidth: number = 0;
+  imageHeight: number = 0;
+  imageSizeInBytes: number = 0;
+  imageText: string = "";
+  filePath: string = "";
+  filePathFileName: string = "";
+  filePathThumbFileName: string = "";
+  fileSizeInBytes: number = 0;
+  fileFolder: boolean = false;
 
-  constructor(content: string, sourceApp: string, imageFileName?: string) {
+  constructor(type: ClipType, content: string, sourceApp: string) {
+    this.type = type;
     this.content = content;
     this.sourceApp = sourceApp;
-    this.imageFileName = imageFileName;
-    this.type = imageFileName ? ClipType.Image : getClipType(content);
   }
 }
 
@@ -58,7 +62,7 @@ class AppDatabase extends Dexie {
   constructor() {
     super('ClipBookDB');
     this.version(1).stores({
-      history: '++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText',
+      history: '++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder',
       linkPreviews: '++id, url, title, description, imageFileName, faviconFileName'
     });
   }

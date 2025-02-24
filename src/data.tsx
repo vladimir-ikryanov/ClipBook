@@ -1,15 +1,8 @@
 import {addClip, Clip, ClipType, deleteAllClips, deleteClip, getAllClips, updateClip} from "@/db";
 import {prefGetClearHistoryOnMacReboot} from "@/pref";
-import {getClipType, isColor} from "@/lib/utils";
+import {getClipType} from "@/lib/utils";
 
 declare const isAfterSystemReboot: () => boolean;
-
-export type HistoryItem = {
-  content: string
-  sourceApp: {
-    path: string
-  }
-}
 
 export enum SortHistoryType {
   TimeOfFirstCopy,
@@ -38,73 +31,6 @@ let sortType = SortHistoryType.TimeOfLastCopy;
 
 loadSettings()
 await loadHistory()
-// await loadHistoryForPromo()
-
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// noinspection JSUnusedLocalSymbols
-async function loadHistoryForPromo() {
-  await deleteAllClips()
-  await addClip(new Clip("Get it. Try it. Use it if you like it.", "/Applications/Arc.app"))
-  await sleep(500)
-  await addClip(new Clip("<section class=\"section-sm text-center\">\n" +
-      "  <div class=\"container\">\n" +
-      "    <div class=\"row justify-center\">\n" +
-      "      <div class=\"sm:col-10 md:col-8 lg:col-6\">\n" +
-      "        <span\n" +
-      "          class=\"text-[8rem] block font-bold text-dark dark:text-darkmode-dark\">\n" +
-      "          404\n" +
-      "        </span>\n" +
-      "        <h1 class=\"h2 mb-4\">Page not found</h1>\n" +
-      "        <div class=\"content\">\n" +
-      "          <p>\n" +
-      "            The page you are looking for might have been removed, had its name\n" +
-      "            changed, or is temporarily unavailable.\n" +
-      "          </p>\n" +
-      "        </div>\n" +
-      "        <a\n" +
-      "          href=\"{{ site.BaseURL | relLangURL }}\"\n" +
-      "          class=\"btn btn-primary mt-8\">\n" +
-      "          Back to home\n" +
-      "        </a>\n" +
-      "      </div>\n" +
-      "    </div>\n" +
-      "  </div>\n" +
-      "</section>", "/Applications/Visual Studio Code.app"))
-  await sleep(500)
-  await addClip(new Clip("john.doe@mail.com", "/System/Applications/Mail.app"))
-  await sleep(500)
-  await addClip(new Clip("rgb(255, 100, 3)", "/Applications/Safari.app"))
-  await sleep(500)
-  await addClip(new Clip("hsl(330, 100%, 50%)", "/Applications/Safari.app"))
-  await sleep(500)
-  await addClip(new Clip("#65a30d", "/Applications/Safari.app"))
-  await sleep(500)
-  await addClip(new Clip("https://clipbook.app", "/Applications/Safari.app"))
-  await addClip(new Clip("https://github.com/vladimir-ikryanov/ClipBook", "/Applications/Safari.app"))
-  await sleep(500)
-  await addClip(new Clip("🔒 All data is securely stored on your Mac and never leave it", "/System/Applications/Notes.app"))
-  await sleep(500)
-  await addClip(new Clip("✏️ Edit and preview history items", "/System/Applications/Notes.app"))
-  await sleep(500)
-  await addClip(new Clip("⭐️ Add items to favorites", "/System/Applications/Notes.app"))
-  await sleep(500)
-  await addClip(new Clip("🔎 Type to search", "/System/Applications/Notes.app"))
-  await sleep(500)
-  await addClip(new Clip("⌛️ Unlimited clipboard history", "/System/Applications/Notes.app"))
-  await sleep(500)
-  await addClip(new Clip("Keep everything you copy and quickly access your macOS clipboard history whenever you need it.\n" +
-      "\n" +
-      "ClipBook runs in background and remembers everything you copy. You will never loose what you have already copied.\n" +
-      "\n" +
-      "Your clipboard history is always at your hands. To open your macOS clipboard history just press the following global keyboard shortcut.", "/System/Applications/Notes.app"))
-  await sleep(500)
-  await addClip(new Clip("Standard clipboard stores only one entry and overwrites the previous one. It is easy to accidentally overwrite. It is inconvenient and wastes a lot of time because of such a limitation. If you copy a lot, if you are annoyed by wasting time searching for information that was copied just a couple of minutes or hours ago, if you are tired of constantly switching applications for copying and pasting, then the clipboard history app is for you. Once you try it, you will no longer be able to imagine working on a Mac without this application.", "/System/Applications/Notes.app"))
-  await addClip(new Clip("Clipboard history app for your Mac", "/System/Applications/Notes.app"))
-  history = await getAllClips()
-}
 
 async function loadHistory() {
   // Clear history on Mac reboot.
@@ -115,32 +41,6 @@ async function loadHistory() {
   }
 
   history = await getAllClips()
-  if (localStorage.getItem("history")) {
-    let items: HistoryItem[] = JSON.parse(localStorage.getItem("history")!)
-    for (let i = 0; i < items.length; i++) {
-      await addClip(new Clip(items[i].content, items[i].sourceApp.path))
-    }
-    localStorage.removeItem("history")
-  }
-  // Migrate old format history items to new format.
-  if (localStorage.getItem("historyItems")) {
-    let items: string[] = JSON.parse(localStorage.getItem("historyItems")!);
-    // Convert old format history items to new format.
-    for (let i = 0; i < items.length; i++) {
-      await addClip(new Clip(items[i], ""))
-    }
-    history = await getAllClips()
-    localStorage.removeItem("historyItems")
-  }
-  // Update clip type of the wrong color items.
-  for (let i = 0; i < history.length; i++) {
-    let clip = history[i];
-    if (clip.type == ClipType.Color) {
-      clip.type = isColor(clip.content) ? ClipType.Color : ClipType.Text
-      await updateClip(clip.id!, clip)
-    }
-  }
-
   sortHistory(sortType, history)
 }
 
@@ -182,7 +82,11 @@ export function isTextItem(item: Clip): boolean {
       item.type === ClipType.Color
 }
 
-export function findItem(content: string, imageFileName: string): Clip | undefined {
+export function findItem(content: string, imageFileName: string, fileName: string): Clip | undefined {
+  if (fileName.length > 0) {
+    // Content is a file path in this case.
+    return findItemByFilePath(content)
+  }
   if (imageFileName.length > 0) {
     return findItemByImageFileName(imageFileName)
   }
@@ -193,6 +97,17 @@ function findItemByContent(content: string): Clip | undefined {
   for (let i = 0; i < history.length; i++) {
     if (isTextItem(history[i])) {
       if (history[i].content === content) {
+        return history[i]
+      }
+    }
+  }
+  return undefined
+}
+
+export function findItemByFilePath(filePath: string): Clip | undefined {
+  for (let i = 0; i < history.length; i++) {
+    if (history[i].type === ClipType.File) {
+      if (history[i].content === filePath) {
         return history[i]
       }
     }
@@ -262,13 +177,26 @@ export async function addHistoryItem(content: string,
                                      imageWidth: number,
                                      imageHeight: number,
                                      imageSizeInBytes: number,
-                                     imageText: string): Promise<Clip> {
-  let item = new Clip(content, sourceAppPath, imageFileName)
+                                     imageText: string,
+                                     filePath: string,
+                                     filePathFileName: string,
+                                     filePathThumbFileName: string,
+                                     fileSizeInBytes: number,
+                                     isFolder: boolean): Promise<Clip> {
+  let type = getClipType(content, imageFileName, filePath)
+  let item = new Clip(type, content, sourceAppPath)
+  item.content = content
+  item.imageFileName = imageFileName
+  item.filePath = filePath
+  item.filePathFileName = filePathFileName
+  item.filePathThumbFileName = filePathThumbFileName
+  item.fileSizeInBytes = fileSizeInBytes
   item.imageWidth = imageWidth
   item.imageHeight = imageHeight
   item.imageSizeInBytes = imageSizeInBytes
   item.imageThumbFileName = imageThumbFileName
   item.imageText = imageText
+  item.fileFolder = isFolder
   await addClip(item)
   history.push(item)
   return item
@@ -427,9 +355,10 @@ export async function updateHistoryItemTypes(): Promise<boolean> {
   for (let i = 0; i < history.length; i++) {
     let clip = history[i];
     let oldType = clip.type;
-    clip.type = clip.imageFileName ? ClipType.Image : getClipType(clip.content);
+    let newType = getClipType(clip.content, clip.imageFileName, clip.filePath)
+    clip.type = newType
     await updateClip(clip.id!, clip)
-    if (oldType !== clip.type) {
+    if (oldType !== newType) {
       historyUpdated = true
     }
   }

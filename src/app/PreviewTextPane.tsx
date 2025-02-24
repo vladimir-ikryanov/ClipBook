@@ -1,7 +1,7 @@
 import '../app.css';
 import React, {useEffect} from "react";
 import {Clip} from "@/db";
-import {getClipType} from "@/lib/utils";
+import {getClipTypeFromText} from "@/lib/utils";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {prefGetEditHistoryItemShortcut} from "@/pref";
 
@@ -35,7 +35,7 @@ export default function PreviewTextPane(props: PreviewTextPaneProps) {
     let content = (document.getElementById('preview') as HTMLTextAreaElement).value;
     setContent(content)
     props.item.content = content
-    props.item.type = getClipType(content)
+    props.item.type = getClipTypeFromText(content)
     props.onEditHistoryItem(props.item)
   }
 

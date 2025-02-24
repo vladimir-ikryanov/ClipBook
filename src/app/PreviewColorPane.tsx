@@ -1,6 +1,6 @@
 import '../app.css';
 import React, {useEffect, useState} from "react";
-import {getClipType, toCSSColor} from "@/lib/utils";
+import {getClipTypeFromText, toCSSColor} from "@/lib/utils";
 import namer from 'color-namer';
 import {Clip} from "@/db";
 import {isShortcutMatch} from "@/lib/shortcuts";
@@ -42,7 +42,7 @@ export default function PreviewColorPane(props: PreviewColorPaneProps) {
 
   function handleFinishEditing() {
     props.item.content = content
-    props.item.type = getClipType(content)
+    props.item.type = getClipTypeFromText(content)
     props.onEditHistoryItem(props.item)
     props.onFinishEditing()
   }
@@ -58,7 +58,7 @@ export default function PreviewColorPane(props: PreviewColorPaneProps) {
     let content = (document.getElementById('preview') as HTMLTextAreaElement).value;
     setContent(content)
     props.item.content = content
-    props.item.type = getClipType(content)
+    props.item.type = getClipTypeFromText(content)
   }
 
   if (props.editMode) {

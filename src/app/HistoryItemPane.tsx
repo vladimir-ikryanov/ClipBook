@@ -2,11 +2,11 @@ import '../app.css';
 import React, {CSSProperties, KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
 import {getFilterQuery} from "@/data";
 import {Clip, ClipType, updateClip} from "@/db";
-import {hasModifiers, toCSSColor} from "@/lib/utils";
+import {getFileNameFromPath, hasModifiers, toCSSColor} from "@/lib/utils";
 import {
-  FileIcon,
+  FileIcon, FolderIcon,
   LinkIcon,
-  MailIcon, PenIcon, PenLineIcon,
+  MailIcon, PenLineIcon,
   StarIcon
 } from "lucide-react";
 import HistoryItemMenu, {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
@@ -178,6 +178,10 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     if (props.item.type === ClipType.Email) {
       return <MailIcon className="h-5 w-5 text-primary-foreground"/>
     }
+    if (props.item.type === ClipType.File) {
+      return <img src={"clipbook://images/" + props.item.filePathThumbFileName}
+                  alt={props.item.filePathThumbFileName} className="h-5 w-5"/>
+    }
     if (props.item.type === ClipType.Image) {
       return <img src={"clipbook://images/" + props.item.imageThumbFileName}
                   alt={props.item.imageThumbFileName} className="h-5 w-5"/>
@@ -299,6 +303,9 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
         return props.item.imageText
       }
       return "Image (" + props.item.imageWidth + "x" + props.item.imageHeight + ")"
+    }
+    if (props.item.type === ClipType.File) {
+      return getFileNameFromPath(props.item.filePath)
     }
     let content = props.item.content
     if (content.length > 256) {

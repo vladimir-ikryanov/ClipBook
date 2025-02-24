@@ -63,7 +63,18 @@ export function isEmail(email: string): boolean {
   return emailRegex.test(email);
 }
 
-export function getClipType(str: string): ClipType {
+export function getClipType(content: string, imageFileName: string, filePath: string) {
+  let type = getClipTypeFromText(content)
+  if (imageFileName) {
+    type = ClipType.Image
+  }
+  if (filePath) {
+    type = ClipType.File
+  }
+  return type;
+}
+
+export function getClipTypeFromText(str: string): ClipType {
   if (isUrl(str)) {
     return ClipType.Link
   }
@@ -141,4 +152,8 @@ export function formatText(text: string, operation: TextFormatOperation) {
     default:
       return text
   }
+}
+
+export function getFileNameFromPath(path: string) {
+  return path.replace(/^.*[\\/]/, '')
 }

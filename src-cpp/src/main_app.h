@@ -43,17 +43,19 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   virtual void paste() = 0;
   virtual void paste(const std::string &text,
                      const std::string &imageFileName,
-                     const std::string &imageText) = 0;
+                     const std::string &imageText,
+                     const std::string &filePath) = 0;
   virtual void sendKey(Key key) = 0;
   virtual void copyToClipboard(const std::string &text,
                                const std::string &imageFileName,
                                const std::string &imageText,
+                               const std::string &filePath,
                                bool ghost) = 0;
   virtual void copyToClipboardAfterMerge(std::string text) = 0;
   virtual void setOpenAtLogin(bool open) = 0;
   virtual AppInfo getAppInfo() = 0;
   virtual AppInfo getActiveAppInfo() = 0;
-  virtual std::string getAppIconAsBase64(const std::string& app_path) = 0;
+  virtual std::string getFileIconAsBase64(const std::string& app_path, bool large) = 0;
   virtual std::string getAppNameFromPath(const std::string &app_path) = 0;
 
  protected:

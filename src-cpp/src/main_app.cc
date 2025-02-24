@@ -560,8 +560,11 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
 
   // App window.
   window->putProperty("pasteItemInFrontApp",
-                      [this](std::string text, std::string imageFileName, std::string imageText) {
-                        paste(text, imageFileName, imageText);
+                      [this](std::string text,
+                             std::string imageFileName,
+                             std::string imageText,
+                             std::string filePath) {
+                        paste(text, imageFileName, imageText, filePath);
                       });
   window->putProperty("pressReturn", [this]() {
     sendKey(Key::kReturn);
@@ -570,8 +573,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
     sendKey(Key::kTab);
   });
   window->putProperty("copyToClipboard",
-                      [this](std::string text, std::string imageFileName, std::string imageText, bool ghost) {
-                        copyToClipboard(text, imageFileName, imageText, ghost);
+                      [this](std::string text,
+                             std::string imageFileName,
+                             std::string imageText,
+                             std::string filePath,
+                             bool ghost) {
+                        copyToClipboard(text, imageFileName, imageText, filePath, ghost);
                       });
   window->putProperty("copyToClipboardAfterMerge", [this](std::string text) {
     copyToClipboardAfterMerge(std::move(text));
@@ -1046,8 +1053,8 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("setAppsToIgnore", [this](std::string apps) -> void {
     settings_->saveAppsToIgnore(apps);
   });
-  window->putProperty("getAppIconAsBase64", [this](std::string app_path) -> std::string {
-    return getAppIconAsBase64(app_path);
+  window->putProperty("getFileIconAsBase64", [this](std::string app_path, bool large) -> std::string {
+    return getFileIconAsBase64(app_path, large);
   });
   window->putProperty("getAppNameFromPath", [this](std::string app_path) -> std::string {
     return getAppNameFromPath(app_path);

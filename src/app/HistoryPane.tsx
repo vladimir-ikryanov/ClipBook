@@ -70,7 +70,7 @@ import {
 import {HideActionsReason} from "@/app/Commands";
 import {FixedSizeList as List} from "react-window";
 import {Clip, ClipType, updateClip} from "@/db";
-import {formatText, isUrl} from "@/lib/utils";
+import {formatText, getClipType, isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
 import {getTrialLicenseDaysLeft, isTrialLicense, isTrialLicenseExpired} from "@/licensing";
@@ -78,10 +78,10 @@ import TrialExpiredMessage from "@/app/TrialExpiredMessage";
 import FreeLicenseMessage from "@/app/FreeLicenseMessage";
 import {HideDropdownReason} from "@/app/PreviewToolBarMenu";
 
-declare const pasteItemInFrontApp: (text: string, imageFileName: string, imageText: string) => void;
+declare const pasteItemInFrontApp: (text: string, imageFileName: string, imageText: string, filePath: string) => void;
 declare const pressReturn: () => void;
 declare const pressTab: () => void;
-declare const copyToClipboard: (text: string, imageFileName: string, imageText: string, ghost: boolean) => void;
+declare const copyToClipboard: (text: string, imageFileName: string, imageText: string, filePath: string, ghost: boolean) => void;
 declare const copyToClipboardAfterMerge: (text: string) => void;
 declare const deleteImage: (imageFileName: string) => void;
 declare const clearEntireHistory: () => void;
@@ -133,8 +133,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   imageWidth: number,
                                   imageHeight: number,
                                   imageSizeInBytes: number,
-                                  imageText: string) {
-    let item = findItem(content, imageFileName)
+                                  imageText: string,
+                                  filePath: string,
+                                  filePathFileName: string,
+                                  filePathThumbFileName: string,
+                                  fileSizeInBytes: number,
+                                  isFolder: boolean) {
+    let item = findItem(content, imageFileName, filePath)
     if (item) {
       item.numberOfCopies++
       item.lastTimeCopy = new Date()
@@ -148,7 +153,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
           imageWidth,
           imageHeight,
           imageSizeInBytes,
-          imageText)
+          imageText,
+          filePath,
+          filePathFileName,
+          filePathThumbFileName,
+          fileSizeInBytes,
+          isFolder)
     }
     setHistory([...getHistoryItems()])
 
@@ -169,7 +179,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                     imageWidth: number,
                                     imageHeight: number,
                                     imageSizeInBytes: number,
-                                    imageText: string) {
+                                    imageText: string,
+                                    filePath: string,
+                                    filePathFileName: string,
+                                    filePathThumbFileName: string,
+                                    fileSizeInBytes: number,
+                                    isFolder: boolean) {
     if (history.length > 0) {
       // Find the first non-favorite item to merge with.
       let targetItem = history[0]
@@ -182,7 +197,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
       }
 
       if (isTextItem(targetItem)) {
-        let item = new Clip(content, sourceAppPath, imageFileName)
+        let type = getClipType(content, imageFileName, filePath);
+        let item = new Clip(type, content, sourceAppPath)
         if (isTextItem(item)) {
           targetItem.content += prefGetCopyAndMergeSeparator() + content
 
@@ -208,7 +224,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
         imageWidth,
         imageHeight,
         imageSizeInBytes,
-        imageText)
+        imageText,
+        filePath,
+        filePathFileName,
+        filePathThumbFileName,
+        fileSizeInBytes,
+        isFolder)
   }
 
   async function clearHistory() {
@@ -572,9 +593,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
     await updateClip(item.id!, item)
 
-    let imageFileName = item.imageFileName ? item.imageFileName : ""
-    let imageText = item.imageText ? item.imageText : ""
-    pasteItemInFrontApp(item.content, imageFileName, imageText)
+    pasteItemInFrontApp(item.content, item.imageFileName, item.imageText, item.filePath)
 
     setHistory([...getHistoryItems()])
 
@@ -641,7 +660,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       content += item.content + "\n"
     }
     await handleDeleteItems()
-    await addClipboardData(content, "ClipBook.app", "", "", 0, 0, 0, "")
+    await addClipboardData(content, "ClipBook.app", "", "", 0, 0, 0, "", "", "", "", 0, false)
   }
 
   async function handlePasteByIndex(index: number) {
@@ -753,7 +772,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
     let imageFileName = item.imageFileName ? item.imageFileName : ""
     let imageText = item.imageText ? item.imageText : ""
-    copyToClipboard(item.content, imageFileName, imageText, true)
+    copyToClipboard(item.content, imageFileName, imageText, item.filePath, true)
 
     setHistory([...getHistoryItems()])
 
@@ -781,7 +800,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   function copyTextFromImage(item: Clip) {
     if (item.type === ClipType.Image) {
       console.log(item.content)
-      copyToClipboard(item.content, "", "", false)
+      copyToClipboard(item.content, "", "", "", false)
     }
   }
 
@@ -926,9 +945,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function handleMouseDoubleClick(index: number) {
     let item = getHistoryItem(index)
-    let imageFileName = item.imageFileName ? item.imageFileName : ""
-    let imageText = item.imageText ? item.imageText : ""
-    pasteItemInFrontApp(item.content, imageFileName, imageText)
+    pasteItemInFrontApp(item.content, item.imageFileName, item.imageText, item.filePath)
   }
 
   function handleFinishEditing() {

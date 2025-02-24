@@ -10,7 +10,7 @@ interface IgnoreAppsPaneProps {
 }
 
 declare const getAppNameFromPath: (appPath: string) => string;
-declare const getAppIconAsBase64: (appPath: string) => string;
+declare const getFileIconAsBase64: (appPath: string, large: boolean) => string;
 
 export default function IgnoreAppsPane(props: IgnoreAppsPaneProps) {
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
@@ -97,7 +97,7 @@ export default function IgnoreAppsPane(props: IgnoreAppsPaneProps) {
   }
 
   function getAppIcon(appPath: string): string {
-    return toBase64Icon(getAppIconAsBase64(appPath))
+    return toBase64Icon(getFileIconAsBase64(appPath, false))
   }
 
   function getAppName(appPath: string): string {

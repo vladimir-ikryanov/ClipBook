@@ -296,7 +296,7 @@ void MainAppMac::show() {
   if (active_app_) {
     auto app_path = [[active_app_ bundleURL] fileSystemRepresentation];
     app_name = getAppNameFromPath(app_path);
-    app_icon = getAppIconAsBase64(app_path);
+    app_icon = getFileIconAsBase64(app_path, false);
   }
   MainApp::setActiveAppInfo(app_name, app_icon);
 
@@ -365,25 +365,38 @@ void MainAppMac::paste() {
 
 void MainAppMac::paste(const std::string &text,
                        const std::string &imageFileName,
-                       const std::string &imageText) {
+                       const std::string &imageText,
+                       const std::string &filePath) {
   if (!isAccessibilityAccessGranted()) {
-    showAccessibilityAccessDialog(text, imageFileName, imageText);
+    showAccessibilityAccessDialog(text, imageFileName, imageText, filePath);
     return;
   }
   // Hide the browser window and activate the previously active app.
   hide();
-  copyToClipboard(text, imageFileName, imageText, true);
+  copyToClipboard(text, imageFileName, imageText, filePath, true);
   paste();
 }
 
 void MainAppMac::copyToClipboard(const std::string &text,
                                  const std::string &imageFileName,
                                  const std::string &imageText,
+                                 const std::string &filePath,
                                  bool ghost) {
   auto pasteboard = [NSPasteboard generalPasteboard];
   // Clear the pasteboard and set the new text.
   [pasteboard clearContents];
-  // Set the image data if the image file name is not empty.
+
+  NSMutableArray *items = [NSMutableArray array];
+
+  // Copy file.
+  if (!filePath.empty()) {
+    auto fileUrl = [NSURL fileURLWithPath:[NSString stringWithUTF8String:filePath.c_str()]];
+    NSPasteboardItem *fileItem = [[NSPasteboardItem alloc] init];
+    [fileItem setString:[fileUrl absoluteString] forType:NSPasteboardTypeFileURL];
+    [items addObject:fileItem];
+  }
+
+  // Copy image.
   if (!imageFileName.empty()) {
     fs::path imagesDir = getImagesDir();
     auto imageFilePath = [NSString stringWithUTF8String:imagesDir.append(imageFileName).c_str()];
@@ -391,22 +404,31 @@ void MainAppMac::copyToClipboard(const std::string &text,
     if (image) {
       NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithData:[image TIFFRepresentation]];
       NSData *data = [imageRep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
-      [pasteboard setData:data forType:NSPasteboardTypePNG];
+      NSPasteboardItem *imageItem = [[NSPasteboardItem alloc] init];
+      [imageItem setData:data forType:NSPasteboardTypePNG];
+      [items addObject:imageItem];
       [imageRep release];
       [image release];
     }
-    // Paste the image text if it is not empty.
-    if (!imageText.empty()) {
-      [pasteboard setString:[NSString stringWithUTF8String:imageText.c_str()] forType:NSPasteboardTypeString];
-      if (ghost) {
-        copyCustomClip(pasteboard);
-      }
-    }
-  } else {
-    [pasteboard setString:[NSString stringWithUTF8String:text.c_str()] forType:NSPasteboardTypeString];
-    if (ghost) {
-      copyCustomClip(pasteboard);
-    }
+  }
+
+  // Copy image text.
+  if (!imageText.empty()) {
+    NSPasteboardItem *textItem = [[NSPasteboardItem alloc] init];
+    [textItem setString:[NSString stringWithUTF8String:imageText.c_str()] forType:NSPasteboardTypeString];
+    [items addObject:textItem];
+  }
+
+  // Copy text.
+  if (!text.empty()) {
+    NSPasteboardItem *textItem = [[NSPasteboardItem alloc] init];
+    [textItem setString:[NSString stringWithUTF8String:text.c_str()] forType:NSPasteboardTypeString];
+    [items addObject:textItem];
+  }
+
+  [pasteboard writeObjects:items];
+  if (ghost) {
+    copyCustomClip(pasteboard);
   }
 }
 
@@ -752,7 +774,10 @@ bool MainAppMac::isAccessibilityAccessGranted() {
   return AXIsProcessTrusted();
 }
 
-void MainAppMac::showAccessibilityAccessDialog(const std::string &text, const std::string &imageFileName, const std::string &imageText) {
+void MainAppMac::showAccessibilityAccessDialog(const std::string &text,
+                                               const std::string &imageFileName,
+                                               const std::string &imageText,
+                                               const std::string &filePath) {
   MessageDialogOptions options;
   options.message = "Accessibility access required";
   options.informative_text = "ClipBook needs accessibility access to paste directly into other apps.";
@@ -762,7 +787,7 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text, const st
       MessageDialogButton("Cancel", MessageDialogButtonType::kCancel)
   };
   auto_hide_disabled_ = true;
-  MessageDialog::show(app_window_, options, [this, text, imageFileName, imageText](const MessageDialogResult &result) {
+  MessageDialog::show(app_window_, options, [this, text, imageFileName, imageText, filePath](const MessageDialogResult &result) {
     auto_hide_disabled_ = false;
     if (result.button.type == MessageDialogButtonType::kDefault) {
       hide();
@@ -770,7 +795,7 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text, const st
     }
     if (result.button.type == MessageDialogButtonType::kNone) {
       hide();
-      copyToClipboard(text, imageFileName, imageText, false);
+      copyToClipboard(text, imageFileName, imageText, filePath, false);
     }
   });
 }
@@ -779,7 +804,7 @@ void MainAppMac::showSystemAccessibilityPreferencesDialog() {
   [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"]];
 }
 
-std::string MainAppMac::getAppIconAsBase64(const std::string &app_path) {
+std::string MainAppMac::getFileIconAsBase64(const std::string &app_path, bool large) {
   std::string path = app_path;
   // Check if the given app_path is "ClipBook.app".
   if (app_path.find("ClipBook.app") != std::string::npos) {
@@ -788,8 +813,11 @@ std::string MainAppMac::getAppIconAsBase64(const std::string &app_path) {
 
   NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
   NSImage *image = [workspace iconForFile:[NSString stringWithUTF8String:path.c_str()]];
+  if (large) {
+    [image setSize:NSMakeSize(512, 512)];
+  }
   // Convert NSImage to NSData (using PNG format in this example).
-  CGImageRef cgRef = [image CGImageForProposedRect:NULL context:nil hints:nil];
+  CGImageRef cgRef = [image CGImageForProposedRect:nullptr context:nil hints:nil];
   NSBitmapImageRep *newRep = [[NSBitmapImageRep alloc] initWithCGImage:cgRef];
   [newRep setSize:[image size]];   // Ensure correct size
 

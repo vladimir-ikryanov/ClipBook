@@ -4,7 +4,7 @@ import {Clip, ClipType} from "@/db";
 import {toBase64Icon} from "@/data";
 
 declare const getAppNameFromPath: (appPath: string) => string;
-declare const getAppIconAsBase64: (appPath: string) => string;
+declare const getFileIconAsBase64: (appPath: string, large: boolean) => string;
 
 type ItemInfoPaneProps = {
   item: Clip
@@ -13,7 +13,7 @@ type ItemInfoPaneProps = {
 
 export default function ItemInfoPane(props: ItemInfoPaneProps) {
   function getSourceAppIcon(): string {
-    return toBase64Icon(getAppIconAsBase64(props.item.sourceApp))
+    return toBase64Icon(getFileIconAsBase64(props.item.sourceApp, false))
   }
 
   function getSourceAppName(): string {
@@ -33,6 +33,9 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
     if (props.item.type === ClipType.Image) {
       return "Image"
     }
+    if (props.item.type === ClipType.File) {
+      return props.item.fileFolder ? "Folder" : "File"
+    }
     return "Text"
   }
 
@@ -44,6 +47,10 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
     return props.item.type === ClipType.Image
   }
 
+  function isFile() {
+    return props.item.type === ClipType.File
+  }
+
   function isLink() {
     return props.item.type === ClipType.Link
   }
@@ -52,18 +59,17 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
     return props.item.imageWidth + "x" + props.item.imageHeight
   }
 
-  function getImageSizeLabel() {
-    let imageSizeInBytes = props.item.imageSizeInBytes;
-    if (!imageSizeInBytes) {
+  function getSizeLabel(sizeInBytes: number) {
+    if (!sizeInBytes) {
       return "Unknown"
     }
-    if (imageSizeInBytes < 1024) {
-      return imageSizeInBytes + " bytes"
+    if (sizeInBytes < 1024) {
+      return sizeInBytes + " bytes"
     }
-    if (imageSizeInBytes < 1024 * 1024) {
-      return (imageSizeInBytes / 1024).toFixed(2) + " KB"
+    if (sizeInBytes < 1024 * 1024) {
+      return (sizeInBytes / 1024).toFixed(2) + " KB"
     }
-    return (imageSizeInBytes / 1024 / 1024).toFixed(2) + " MB"
+    return (sizeInBytes / 1024 / 1024).toFixed(2) + " MB"
   }
 
   if (!props.display || !props.item) {
@@ -100,6 +106,22 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             </div>
         }
         {
+            isFile() &&
+            <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+              <div className="flex-none text-preview-infoLabel font-semibold mr-4">Path</div>
+              <div className="flex-grow"></div>
+              <div className="flex-auto text-foreground text-end break-all">{props.item.filePath}</div>
+            </div>
+        }
+        {
+            isFile() &&
+            <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+              <div className="flex-none text-preview-infoLabel font-semibold">File size</div>
+              <div className="flex-grow"></div>
+              <div className="flex-none text-foreground">{getSizeLabel(props.item.fileSizeInBytes)}</div>
+            </div>
+        }
+        {
             isImage() &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold">Image dimensions</div>
@@ -112,7 +134,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold">Image size</div>
               <div className="flex-grow"></div>
-              <div className="flex-none text-foreground">{getImageSizeLabel()}</div>
+              <div className="flex-none text-foreground">{getSizeLabel(props.item.imageSizeInBytes)}</div>
             </div>
         }
         {
