@@ -1,6 +1,8 @@
 #include "clipboard_reader_mac.h"
 
 #import <Cocoa/Cocoa.h>
+#import <CommonCrypto/CommonDigest.h>
+#import <QuickLookThumbnailing/QuickLookThumbnailing.h>
 #import <Vision/Vision.h>
 
 #include <filesystem>
@@ -142,85 +144,131 @@ std::string getThumbImageFileName(const std::string &imageFileName) {
 bool findIdenticalImage(NSImage *srcImage,
                         const fs::path &imagesDir,
                         const std::shared_ptr<ClipboardData> &data) {
-  CGImageRef srcCGImage = [srcImage CGImageForProposedRect:nullptr context:nil hints:nil];
-  size_t srcWidth = CGImageGetWidth(srcCGImage);
-  size_t srcHeight = CGImageGetHeight(srcCGImage);
+  @autoreleasepool {
 
-  auto images = findImages(imagesDir, "image_", "image_thumb_", ".png");
-  for (const auto &image_path : images) {
-    // Get file name without extension.
-    auto image_info_path = image_path.string().replace(image_path.string().find(".png"),
-                                                       4,
-                                                       ".info");
-    bool file_exists = fs::exists(image_info_path);
-    if (file_exists) {
-      std::ifstream input_file(image_info_path);
-      if (input_file.is_open()) {
-        std::string line;
-        int width = 0;
-        int height = 0;
-        int size_in_bytes = 0;
-        while (std::getline(input_file, line)) {
-          if (line.find("width: ") == 0) {
-            width = std::stoi(line.substr(7));
-          } else if (line.find("height: ") == 0) {
-            height = std::stoi(line.substr(8));
+    CGImageRef srcCGImage = [srcImage CGImageForProposedRect:nullptr context:nil hints:nil];
+    size_t srcWidth = CGImageGetWidth(srcCGImage);
+    size_t srcHeight = CGImageGetHeight(srcCGImage);
+
+    auto images = findImages(imagesDir, "image_", "image_thumb_", ".png");
+    for (const auto &image_path : images) {
+      // Get file name without extension.
+      auto image_info_path = image_path.string().replace(
+          image_path.string().find(".png"), 4, ".info");
+      bool file_exists = fs::exists(image_info_path);
+      if (file_exists) {
+        std::ifstream input_file(image_info_path);
+        if (input_file.is_open()) {
+          std::string line;
+          int width = 0;
+          int height = 0;
+          int size_in_bytes = 0;
+          while (std::getline(input_file, line)) {
+            if (line.find("width: ") == 0) {
+              width = std::stoi(line.substr(7));
+            } else if (line.find("height: ") == 0) {
+              height = std::stoi(line.substr(8));
+            }
+          }
+          input_file.close();
+
+          if (width != data->image_info.width || height != data->image_info.height) {
+            continue;
           }
         }
-        input_file.close();
+      }
 
-        if (width != data->image_info.width || height != data->image_info.height) {
-          continue;
+      // Compare image pixels.
+      auto imagePath = [NSString stringWithUTF8String:image_path.c_str()];
+      NSImage *dstImage = [[NSImage alloc] initWithContentsOfFile:imagePath];
+      CGImageRef dstCGImage = [dstImage CGImageForProposedRect:nullptr context:nil hints:nil];
+
+      size_t dstWidth = CGImageGetWidth(dstCGImage);
+      size_t dstHeight = CGImageGetHeight(dstCGImage);
+
+      if (!file_exists) {
+        const NSSize &dstImageSize = [dstImage size];
+        // Create image info file for old images.
+        std::string text_to_write =
+            "width: " + std::to_string(static_cast<int>(dstImageSize.width)) + "\n" +
+            "height: " + std::to_string(static_cast<int>(dstImageSize.height)) + "\n";
+        std::ofstream output_file(image_info_path);
+        if (output_file.is_open()) {
+          output_file << text_to_write;
+          output_file.close();
         }
       }
-    }
 
-    // Compare image pixels.
-    auto imagePath = [NSString stringWithUTF8String:image_path.c_str()];
-    NSImage *dstImage = [[NSImage alloc] initWithContentsOfFile:imagePath];
-    CGImageRef dstCGImage = [dstImage CGImageForProposedRect:nullptr context:nil hints:nil];
-
-    size_t dstWidth = CGImageGetWidth(dstCGImage);
-    size_t dstHeight = CGImageGetHeight(dstCGImage);
-
-    if (!file_exists) {
-      const NSSize &dstImageSize = [dstImage size];
-      // Create image info file for old images.
-      std::string text_to_write =
-          "width: " + std::to_string(static_cast<int>(dstImageSize.width)) + "\n" +
-          "height: " + std::to_string(static_cast<int>(dstImageSize.height)) + "\n";
-      std::ofstream output_file(image_info_path);
-      if (output_file.is_open()) {
-        output_file << text_to_write;
-        output_file.close();
+      if (srcWidth != dstWidth || srcHeight != dstHeight) {
+        continue;
       }
-    }
 
-    if (srcWidth != dstWidth || srcHeight != dstHeight) {
-      [dstImage release];
-      continue;
-    }
+      CFDataRef data1 = CGDataProviderCopyData(CGImageGetDataProvider(srcCGImage));
+      CFDataRef data2 = CGDataProviderCopyData(CGImageGetDataProvider(dstCGImage));
 
-    CFDataRef data1 = CGDataProviderCopyData(CGImageGetDataProvider(srcCGImage));
-    CFDataRef data2 = CGDataProviderCopyData(CGImageGetDataProvider(dstCGImage));
+      BOOL identical = CFDataGetLength(data1) == CFDataGetLength(data2) &&
+                       memcmp(CFDataGetBytePtr(data1),
+                              CFDataGetBytePtr(data2),
+                              CFDataGetLength(data1)) == 0;
 
-    BOOL identical = CFDataGetLength(data1) == CFDataGetLength(data2) &&
-                     memcmp(CFDataGetBytePtr(data1),
-                            CFDataGetBytePtr(data2),
-                            CFDataGetLength(data1)) == 0;
+      CFRelease(data1);
+      CFRelease(data2);
 
-    CFRelease(data1);
-    CFRelease(data2);
-
-    [dstImage release];
-
-    if (identical) {
-      data->image_info.file_name = image_path.filename().string();
-      data->image_info.thumb_file_name = getThumbImageFileName(data->image_info.file_name);
-      return true;
+      if (identical) {
+        data->image_info.file_name = image_path.filename().string();
+        data->image_info.thumb_file_name = getThumbImageFileName(data->image_info.file_name);
+        return true;
+      }
     }
   }
   return false;
+}
+
+NSImage *getThumbnailForFile(NSString *filePath, CGSize maxSize) {
+  @autoreleasepool {
+    NSURL *fileURL = [NSURL fileURLWithPath:filePath];
+
+    QLThumbnailGenerationRequest *request =
+        [[QLThumbnailGenerationRequest alloc] initWithFileAtURL:fileURL
+                                                           size:maxSize
+                                                          scale:[NSScreen mainScreen].backingScaleFactor
+                                            representationTypes:QLThumbnailGenerationRequestRepresentationTypeAll];
+
+    __block NSImage *thumbnailImage = nil;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+
+    [[QLThumbnailGenerator sharedGenerator]
+        generateBestRepresentationForRequest:request
+                           completionHandler:^(QLThumbnailRepresentation *_Nullable thumbnail,
+                                               NSError *_Nullable error) {
+                             if (thumbnail) {
+                               CGImageRef imageRef = thumbnail.CGImage;
+                               thumbnailImage = [[NSImage alloc] initWithCGImage:imageRef size:NSZeroSize];
+                             }
+                             dispatch_semaphore_signal(semaphore);
+                           }];
+
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+
+    // Release the request manually to avoid memory leaks
+    request = nil;
+
+    return thumbnailImage;
+  }
+}
+
+// Function to generate SHA256 hash of a file path
+NSString *getHashForPath(NSString *filePath) {
+  const char *ptr = [filePath UTF8String];
+  unsigned char hash[CC_SHA256_DIGEST_LENGTH];
+  CC_SHA256(ptr, (CC_LONG)strlen(ptr), hash);
+
+  NSMutableString *hashedString = [NSMutableString stringWithCapacity:CC_SHA256_DIGEST_LENGTH * 2];
+  for (unsigned char i : hash) {
+    [hashedString appendFormat:@"%02x", i];
+  }
+
+  return hashedString;
 }
 
 static CFAbsoluteTime lastTapTime = 0;
@@ -316,8 +364,8 @@ void ClipboardReaderMac::addClipboardData(const std::shared_ptr<ClipboardData> &
                                 data->image_info.size_in_bytes,
                                 data->image_info.text,
                                 file_path.file_path,
-                                file_path.image_file_name,
-                                file_path.thumb_file_name,
+                                file_path.file_preview_name,
+                                file_path.file_thumb_name,
                                 file_path.size_in_bytes,
                                 file_path.folder);
     }
@@ -353,8 +401,8 @@ void ClipboardReaderMac::mergeClipboardData(const std::shared_ptr<ClipboardData>
                                 data->image_info.size_in_bytes,
                                 data->image_info.text,
                                 file_path.file_path,
-                                file_path.image_file_name,
-                                file_path.thumb_file_name,
+                                file_path.file_preview_name,
+                                file_path.file_thumb_name,
                                 file_path.size_in_bytes,
                                 file_path.folder);
     }
@@ -386,6 +434,10 @@ void ClipboardReaderMac::readClipboardData() {
 bool ClipboardReaderMac::readImageData(const std::shared_ptr<ClipboardData> &data) {
   NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
   NSArray *types = [pasteboard types];
+  // If the clipboard contains a file URL, then skip reading the image data.
+  if ([types containsObject:NSPasteboardTypeFileURL]) {
+    return false;
+  }
   // Read image content in the PNG and TIFF formats.
   if ([types containsObject:NSPasteboardTypePNG] || [types containsObject:NSPasteboardTypeTIFF]) {
     // Make sure the images directory exists.
@@ -394,72 +446,65 @@ bool ClipboardReaderMac::readImageData(const std::shared_ptr<ClipboardData> &dat
       fs::create_directories(imagesDir);
     }
 
-    // Get image info.
-    NSData *png_data = nil;
-    if ([types containsObject:NSPasteboardTypePNG]) {
-      png_data = [pasteboard dataForType:NSPasteboardTypePNG];
-    } else {
-      NSData *tiff_data = [pasteboard dataForType:NSPasteboardTypeTIFF];
-      NSBitmapImageRep *image_rep = [NSBitmapImageRep imageRepWithData:tiff_data];
-      if (image_rep) {
-        png_data = [image_rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+    @autoreleasepool {
+      // Get image info.
+      NSData *png_data = nil;
+      if ([types containsObject:NSPasteboardTypePNG]) {
+        png_data = [pasteboard dataForType:NSPasteboardTypePNG];
+      } else {
+        NSData *tiff_data = [pasteboard dataForType:NSPasteboardTypeTIFF];
+        NSBitmapImageRep *image_rep = [NSBitmapImageRep imageRepWithData:tiff_data];
+        if (image_rep) {
+          png_data = [image_rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+        }
       }
+
+      if (!png_data) {
+        return false;
+      }
+
+      NSImage *image = [[NSImage alloc] initWithData:png_data];
+      data->image_info.width = static_cast<int>([image size].width);
+      data->image_info.height = static_cast<int>([image size].height);
+      data->image_info.size_in_bytes = [png_data length];
+
+      // Check if an identical image is already stored in the directory and use it.
+      if (findIdenticalImage(image, imagesDir, data)) {
+        return true;
+      }
+
+      int creation_time_in_ms = (int) [[NSDate date] timeIntervalSince1970];
+
+      // Save image to file.
+      NSString *image_filename = [NSString stringWithFormat:@"image_%d.png", creation_time_in_ms];
+      NSString *images_dir = [NSString stringWithUTF8String:imagesDir.c_str()];
+      NSString *image_path = [images_dir stringByAppendingPathComponent:image_filename];
+      [png_data writeToFile:image_path atomically:YES];
+      data->image_info.file_name = [image_filename UTF8String];
+
+      // Save image info to file.
+      std::string image_info_filename = "image_" + std::to_string(creation_time_in_ms) + ".info";
+      std::string text_to_write = "width: " + std::to_string(data->image_info.width) + "\n" +
+                                  "height: " + std::to_string(data->image_info.height) + "\n";
+      std::ofstream output_file(imagesDir / image_info_filename);
+      if (output_file.is_open()) {
+        output_file << text_to_write;
+        output_file.close();
+      }
+
+      // Save image thumbnail to file.
+      NSImage *thumb = createThumbnail(image, 48, 48);
+      NSData *tiff_data = [thumb TIFFRepresentation];
+      NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithData:tiff_data];
+      NSData *thumb_png_data = [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+      NSString *thumb_filename = [NSString stringWithFormat:@"image_thumb_%d.png", creation_time_in_ms];
+      NSString *thumb_path = [images_dir stringByAppendingPathComponent:thumb_filename];
+      [thumb_png_data writeToFile:thumb_path atomically:YES];
+      data->image_info.thumb_file_name = [thumb_filename UTF8String];
+
+      // Extract text from image.
+      extractTextFromImage(image, [image_filename UTF8String], app_, data);
     }
-
-    if (!png_data) {
-      return false;
-    }
-
-    NSImage *image = [[NSImage alloc] initWithData:png_data];
-    data->image_info.width = static_cast<int>([image size].width);
-    data->image_info.height = static_cast<int>([image size].height);
-    data->image_info.size_in_bytes = [png_data length];
-
-    // Check if an identical image is already stored in the directory and use it.
-    if (findIdenticalImage(image, imagesDir, data)) {
-      [image release];
-      return true;
-    }
-
-    int creation_time_in_ms = (int) [[NSDate date] timeIntervalSince1970];
-
-    // Save image to file.
-    NSString *image_filename = [NSString stringWithFormat:@"image_%d.png", creation_time_in_ms];
-    NSString *images_dir = [NSString stringWithUTF8String:imagesDir.c_str()];
-    NSString *image_path = [images_dir stringByAppendingPathComponent:image_filename];
-    [png_data writeToFile:image_path atomically:YES];
-    data->image_info.file_name = [image_filename UTF8String];
-
-    // Save image info to file.
-    std::string image_info_filename = "image_" + std::to_string(creation_time_in_ms) + ".info";
-    std::string text_to_write = "width: " + std::to_string(data->image_info.width) + "\n" +
-                                "height: " + std::to_string(data->image_info.height) + "\n";
-    std::ofstream output_file(imagesDir / image_info_filename);
-    if (output_file.is_open()) {
-      output_file << text_to_write;
-      output_file.close();
-    }
-
-    // Save image thumbnail to file.
-    NSImage *thumbnail = createThumbnail(image, 48, 48);
-    NSData *thumbnail_data = [thumbnail TIFFRepresentation];
-    NSBitmapImageRep *thumbnail_image_rep = [NSBitmapImageRep imageRepWithData:thumbnail_data];
-    NSDictionary *thumbnail_props = @{};
-    NSData *thumbnail_png_data = [thumbnail_image_rep representationUsingType:NSBitmapImageFileTypePNG properties:thumbnail_props];
-    NSString *thumbnail_filename = [NSString stringWithFormat:@"image_thumb_%d.png", creation_time_in_ms];
-    NSString *thumbnail_path = [images_dir stringByAppendingPathComponent:thumbnail_filename];
-    [thumbnail_png_data writeToFile:thumbnail_path atomically:YES];
-    data->image_info.thumb_file_name = [thumbnail_filename UTF8String];
-    [thumbnail_png_data release];
-    [thumbnail_image_rep release];
-    [thumbnail_data release];
-    [thumbnail release];
-
-    // Extract text from image.
-    extractTextFromImage(image, [image_filename UTF8String], app_, data);
-
-    // Release resources.
-    [image release];
     return true;
   }
   return false;
@@ -490,60 +535,63 @@ bool ClipboardReaderMac::readFilesData(const std::shared_ptr<ClipboardData> &dat
     NSArray<NSURL *> *fileURLs = [pasteboard readObjectsForClasses:@[[NSURL class]] options:nil];
     if (fileURLs.count > 0) {
       for (NSURL *fileURL in fileURLs) {
-        FilePathInfo file_path_info;
-        NSString *filePath = [fileURL path];
-        file_path_info.file_path = filePath.UTF8String;
-        // Get file image and save it to the Images directory.
-        fs::path imagesDir = app_->getImagesDir();
-        if (!fs::exists(imagesDir)) {
-          fs::create_directories(imagesDir);
+        @autoreleasepool {
+          FilePathInfo file_path_info;
+          NSString *filePath = [fileURL path];
+          file_path_info.file_path = filePath.UTF8String;
+          // Get file image and save it to the Images directory.
+          fs::path imagesDir = app_->getImagesDir();
+          if (!fs::exists(imagesDir)) {
+            fs::create_directories(imagesDir);
+          }
+          NSString *images_dir = [NSString stringWithUTF8String:imagesDir.c_str()];
+          NSString *file_path_hash = getHashForPath(filePath);
+
+          NSString *preview_file_name = [NSString stringWithFormat:@"file_preview_%@.png", file_path_hash];
+          NSString *preview_file_path = [images_dir stringByAppendingPathComponent:preview_file_name];
+          file_path_info.file_preview_name = [preview_file_name UTF8String];
+          // If the file preview does not exist, get the preview image and save it.
+          if (!fs::exists(preview_file_path.UTF8String)) {
+            NSImage *preview = getThumbnailForFile(filePath, CGSizeMake(1024, 1024));
+            if (preview) {
+              NSData *tiff_data = [preview TIFFRepresentation];
+              NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithData:tiff_data];
+              NSData *png_data = [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+              [png_data writeToFile:preview_file_path atomically:YES];
+              file_path_info.file_preview_name = [preview_file_name UTF8String];
+            }
+          }
+
+          NSString *file_thumb_name = [NSString stringWithFormat:@"file_thumb_%@.png", file_path_hash];
+          NSString *file_thumb_path = [images_dir stringByAppendingPathComponent:file_thumb_name];
+          file_path_info.file_thumb_name = [file_thumb_name UTF8String];
+          // If the file thumbnail does not exist, get the thumbnail and save it.
+          if (!fs::exists(file_thumb_path.UTF8String)) {
+            NSImage *thumb = getThumbnailForFile(filePath, CGSizeMake(48, 48));
+            if (thumb) {
+              NSData *tiff_data = [thumb TIFFRepresentation];
+              NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithData:tiff_data];
+              NSData *png_data = [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+              [png_data writeToFile:file_thumb_path atomically:YES];
+              file_path_info.file_thumb_name = [file_thumb_name UTF8String];
+            }
+          }
+
+          // Read file size in bytes.
+          NSFileManager *fileManager = [NSFileManager defaultManager];
+          NSDictionary *attr = [fileManager attributesOfItemAtPath:filePath error:nil];
+          if (attr) {
+            unsigned long long fileSize = [attr fileSize];
+            file_path_info.size_in_bytes = static_cast<int>(fileSize);
+          }
+          // Check if it's a folder.
+          BOOL isDirectory = NO;
+          BOOL exists = [fileManager fileExistsAtPath:filePath isDirectory:&isDirectory];
+          file_path_info.folder = exists && isDirectory;
+
+          data->file_paths.emplace_back(file_path_info);
+          success = true;
         }
-        NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-        NSImage *image = [workspace iconForFile:filePath];
-        [image setSize:NSMakeSize(256, 256)];
-
-        NSData *image_data = [image TIFFRepresentation];
-        NSBitmapImageRep *image_rep = [NSBitmapImageRep imageRepWithData:image_data];
-        NSDictionary *props = @{};
-        NSData *png_data = [image_rep representationUsingType:NSBitmapImageFileTypePNG properties:props];
-        int creation_time_in_ms = (int) [[NSDate date] timeIntervalSince1970];
-        NSString *image_filename = [NSString stringWithFormat:@"file_image_%d.png", creation_time_in_ms];
-        NSString *images_dir = [NSString stringWithUTF8String:imagesDir.c_str()];
-        NSString *image_path = [images_dir stringByAppendingPathComponent:image_filename];
-        [png_data writeToFile:image_path atomically:YES];
-        file_path_info.image_file_name = [image_filename UTF8String];
-        [png_data release];
-        [image_rep release];
-        [image_data release];
-
-        // Save image thumbnail to file.
-        [image setSize:NSMakeSize(48, 48)];
-        NSData *thumbnail_data = [image TIFFRepresentation];
-        NSBitmapImageRep *thumbnail_image_rep = [NSBitmapImageRep imageRepWithData:thumbnail_data];
-        NSDictionary *thumbnail_props = @{};
-        NSData *thumbnail_png_data = [thumbnail_image_rep representationUsingType:NSBitmapImageFileTypePNG properties:thumbnail_props];
-        NSString *thumbnail_filename = [NSString stringWithFormat:@"file_thumb_%d.png", creation_time_in_ms];
-        NSString *thumbnail_path = [images_dir stringByAppendingPathComponent:thumbnail_filename];
-        [thumbnail_png_data writeToFile:thumbnail_path atomically:YES];
-        file_path_info.thumb_file_name = [thumbnail_filename UTF8String];
-        [thumbnail_png_data release];
-        [thumbnail_image_rep release];
-        [thumbnail_data release];
-
-        // Read file size in bytes.
-        NSFileManager *fileManager = [NSFileManager defaultManager];
-        NSDictionary *attr = [fileManager attributesOfItemAtPath:filePath error:nil];
-        if (attr) {
-          unsigned long long fileSize = [attr fileSize];
-          file_path_info.size_in_bytes = static_cast<int>(fileSize);
-        }
-        // Check if it's a folder.
-        BOOL isDirectory = NO;
-        BOOL exists = [fileManager fileExistsAtPath:filePath isDirectory:&isDirectory];
-        file_path_info.folder = exists && isDirectory;
-
-        data->file_paths.emplace_back(file_path_info);
-        success = true;
       }
     }
   }

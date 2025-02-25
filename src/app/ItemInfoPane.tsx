@@ -51,6 +51,10 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
     return props.item.type === ClipType.File
   }
 
+  function isFolder() {
+    return props.item.fileFolder
+  }
+
   function isLink() {
     return props.item.type === ClipType.Link
   }
@@ -114,7 +118,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             </div>
         }
         {
-            isFile() &&
+            isFile() && !isFolder() &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold">File size</div>
               <div className="flex-grow"></div>

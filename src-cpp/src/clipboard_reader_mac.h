@@ -20,8 +20,8 @@ struct ImageInfo {
 
 struct FilePathInfo {
   std::string file_path;
-  std::string image_file_name;
-  std::string thumb_file_name;
+  std::string file_preview_name;
+  std::string file_thumb_name;
   int size_in_bytes = 0;
   bool folder = false;
 };

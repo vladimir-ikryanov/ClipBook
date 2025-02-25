@@ -164,7 +164,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
   function canShowMergeItems() {
     if (props.selectedItemIndices.length > 1) {
-      return getSelectedHistoryItems().every(item => isTextItem(item))
+      return getSelectedHistoryItems().every(item => isTextItem(item) || item.type === ClipType.File)
     }
     return false
   }

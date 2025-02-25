@@ -180,7 +180,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     }
     if (props.item.type === ClipType.File) {
       return <img src={"clipbook://images/" + props.item.filePathThumbFileName}
-                  alt={props.item.filePathThumbFileName} className="h-5 w-5"/>
+                  alt={props.item.filePathThumbFileName} className="h-5 w-5 object-contain"/>
     }
     if (props.item.type === ClipType.Image) {
       return <img src={"clipbook://images/" + props.item.imageThumbFileName}
