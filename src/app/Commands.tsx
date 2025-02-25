@@ -291,7 +291,7 @@ export default function Commands(props: CommandsProps) {
 
   function canShowMergeItems() {
     if (getSelectedHistoryItemIndices().length > 1) {
-      return getSelectedHistoryItems().every(item => isTextItem(item))
+      return getSelectedHistoryItems().every(item => isTextItem(item) || item.type === ClipType.File)
     }
     return false
   }
