@@ -853,8 +853,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
   async function deleteItem(item: Clip) {
     await deleteHistoryItem(item)
     if (item.type === ClipType.Image) {
-      deleteImage(item.imageFileName!)
-      deleteImage(item.imageThumbFileName!)
+      deleteImage(item.imageFileName)
+      deleteImage(item.imageThumbFileName)
+    }
+    if (item.type === ClipType.File) {
+      deleteImage(item.filePathFileName)
+      deleteImage(item.filePathThumbFileName)
     }
 
     // If the history is not empty, update the preview text to the new active item.

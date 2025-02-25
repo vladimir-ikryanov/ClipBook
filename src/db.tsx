@@ -37,7 +37,7 @@ export class Clip {
   lastTimeCopy: Date = new Date();
   numberOfCopies: number = 1;
   imageFileName: string = "";
-  imageThumbFileName?: string;
+  imageThumbFileName: string = "";
   imageWidth: number = 0;
   imageHeight: number = 0;
   imageSizeInBytes: number = 0;
