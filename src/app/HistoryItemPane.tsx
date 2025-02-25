@@ -283,7 +283,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     return <div className="flex flex-grow">
       <input type="text"
              id="animated-input"
-             className="py-0.5 px-1.5 ml-0.5 mr-0 bg-transparent outline-none text-justify font-normal w-full"
+             className="py-0.5 px-1.5 ml-0.5 mr-0 bg-transparent outline-none text-justify font-normal w-full placeholder:text-secondary-foreground"
              value={itemName}
              autoFocus={true}
              placeholder="Enter a name for this item"
