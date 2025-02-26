@@ -289,6 +289,16 @@ export default function Commands(props: CommandsProps) {
     return getSelectedHistoryItemIndices().length > 1
   }
 
+  function canPasteWithTransformation() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      if (item) {
+        return isTextItem(item)
+      }
+    }
+    return false
+  }
+
   function canShowMergeItems() {
     if (getSelectedHistoryItemIndices().length > 1) {
       return getSelectedHistoryItems().every(item => isTextItem(item) || item.type === ClipType.File)
@@ -395,13 +405,16 @@ export default function Commands(props: CommandsProps) {
                     <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
-                <CommandItem onSelect={handlePasteWithTransformation}>
-                  <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                       alt="Application icon"/>
-                  <span>
+                {
+                    canPasteWithTransformation() &&
+                    <CommandItem onSelect={handlePasteWithTransformation}>
+                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
+                           alt="Application icon"/>
+                      <span>
                     Paste {getMultipleItemsIndicator()} to {props.appName} with Formatting...
                   </span>
-                </CommandItem>
+                    </CommandItem>
+                }
                 {
                     canShowMultiplePaste() &&
                     <CommandItem onSelect={handlePasteWithReturn}>
