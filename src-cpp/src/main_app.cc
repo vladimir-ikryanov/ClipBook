@@ -665,7 +665,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
 #endif
   });
   window->putProperty("buyLicense", [this]() {
-    app_->desktop()->openUrl("https://clipbook.app/checkout/");
+    app_->desktop()->openUrl("https://clipbook.app/pricing/");
   });
   window->putProperty("helpWithActivation", [this]() {
     app_->desktop()->openUrl("mailto:vladimir.ikryanov@clipbook.app?subject=ClipBook%20Activation%20Error&body=License%20Key:%20" + settings_->getLicenseKey());
