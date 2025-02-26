@@ -8,7 +8,7 @@ project(ClipBook LANGUAGES CXX)
 include(node_modules/@molybden-apps/molybden/Molybden.cmake)
 
 # The official build flag is used to enable/disable certain features.
-set(OFFICIAL_BUILD TRUE)
+set(OFFICIAL_BUILD FALSE)
 
 # The source files of your app.
 set(APP_SOURCES
