@@ -709,8 +709,6 @@ void MainAppMac::removeAppFromLoginItems() {
 }
 
 bool MainAppMac::init() {
-  observer_ = [[ActiveAppObserver alloc] initWithOwner:this];
-
   bool open_at_login = settings_->shouldOpenAtLogin();
   bool app_in_login_items = isAppInLoginItems();
   if (open_at_login && !app_in_login_items) {
@@ -725,6 +723,7 @@ bool MainAppMac::init() {
 void MainAppMac::launch() {
   MainApp::launch();
   clipboard_reader_->start(shared_from_this());
+  observer_ = [[ActiveAppObserver alloc] initWithOwner:this];
 }
 
 bool MainAppMac::isAppInLoginItems() {
