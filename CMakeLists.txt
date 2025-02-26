@@ -36,6 +36,8 @@ endif ()
 
 if (OS_MAC)
     set(APP_SOURCES_MAC
+            src-cpp/src/active_app_observer.h
+            src-cpp/src/active_app_observer.mm
             src-cpp/src/main_app_mac.h
             src-cpp/src/main_app_mac.mm
             src-cpp/src/app_settings_mac.h

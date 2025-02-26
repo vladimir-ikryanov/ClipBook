@@ -204,8 +204,21 @@ bool isAppleSilicon() {
 
 MainAppMac::MainAppMac(const std::shared_ptr<App> &app,
                        const std::shared_ptr<AppSettings> &settings)
-    : MainApp(app, settings), active_app_(nullptr) {
+    : MainApp(app, settings) {
   clipboard_reader_ = std::make_shared<ClipboardReaderMac>();
+}
+
+void MainAppMac::onActiveAppChanged(NSNotification* notification) {
+  NSDictionary *userInfo = notification.userInfo;
+  NSRunningApplication *app = userInfo[NSWorkspaceApplicationKey];
+  if (app) {
+    std::string app_name;
+    std::string app_icon;
+    auto app_path = [[app bundleURL] fileSystemRepresentation];
+    app_name = getAppNameFromPath(app_path);
+    app_icon = getFileIconAsBase64(app_path, false);
+    setActiveAppInfo(app_name, app_icon);
+  }
 }
 
 molybden::Shortcut MainAppMac::createShortcut(const std::string &shortcut) {
@@ -289,17 +302,6 @@ void MainAppMac::activate() {
 }
 
 void MainAppMac::show() {
-  // Remember the active app to activate it after hiding the browser window.
-  active_app_ = [[NSWorkspace sharedWorkspace] frontmostApplication];
-  std::string app_name;
-  std::string app_icon;
-  if (active_app_) {
-    auto app_path = [[active_app_ bundleURL] fileSystemRepresentation];
-    app_name = getAppNameFromPath(app_path);
-    app_icon = getFileIconAsBase64(app_path, false);
-  }
-  MainApp::setActiveAppInfo(app_name, app_icon);
-
   // Restore the window bounds before showing the window.
   restoreWindowBounds();
   // Show the browser window.
@@ -319,12 +321,8 @@ void MainAppMac::hide(bool force) {
   saveWindowBounds();
   // Hide the window.
   MainApp::hide(force);
-  // Activate the previously active app.
-  if (active_app_) {
-    [active_app_ activateWithOptions:NSApplicationActivateIgnoringOtherApps];
-    // 150 milliseconds delay to let the target app process the activation.
-    usleep(150000);
-  }
+//  // 150 milliseconds delay to let the target app process the activation.
+//  usleep(150000);
 }
 
 void MainAppMac::sendKey(MainApp::Key key) {
@@ -711,6 +709,8 @@ void MainAppMac::removeAppFromLoginItems() {
 }
 
 bool MainAppMac::init() {
+  observer_ = [[ActiveAppObserver alloc] initWithOwner:this];
+
   bool open_at_login = settings_->shouldOpenAtLogin();
   bool app_in_login_items = isAppInLoginItems();
   if (open_at_login && !app_in_login_items) {

@@ -5,6 +5,7 @@
 
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
+#include "active_app_observer.h"
 #endif
 
 #include "clipboard_reader_mac.h"
@@ -13,6 +14,10 @@ class MainAppMac : public MainApp {
  public:
   explicit MainAppMac(const std::shared_ptr<molybden::App> &app,
                       const std::shared_ptr<AppSettings> &settings);
+
+#ifdef __OBJC__
+  void onActiveAppChanged(NSNotification* notification);
+#endif
 
   bool init() override;
   void launch() override;
@@ -77,7 +82,7 @@ class MainAppMac : public MainApp {
   molybden::Shortcut open_settings_shortcut_;
   std::shared_ptr<ClipboardReaderMac> clipboard_reader_;
 #ifdef __OBJC__
-  NSRunningApplication *active_app_{};
+  ActiveAppObserver* observer_{};
   NSPoint getInputCursorLocationOnScreen();
   void moveToScreen(NSScreen *screen);
   static NSRect getActiveWindowBounds(NSRunningApplication *app);

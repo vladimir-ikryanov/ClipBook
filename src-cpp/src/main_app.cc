@@ -223,10 +223,12 @@ std::shared_ptr<AppSettings> MainApp::settings() const {
 }
 
 void MainApp::setActiveAppInfo(const std::string &app_name, const std::string& app_icon) {
-  auto frame = app_window_->mainFrame();
-  if (frame) {
-    frame->executeJavaScript("setActiveAppInfo(\"" + app_name + "\", \"" + app_icon + "\")");
-  }
+  std::thread([this, app_name, app_icon]() {
+    auto frame = app_window_->mainFrame();
+    if (frame) {
+      frame->executeJavaScript("setActiveAppInfo(\"" + app_name + "\", \"" + app_icon + "\")");
+    }
+  }).detach();
 }
 
 void MainApp::clearHistory() {
