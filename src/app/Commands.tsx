@@ -313,8 +313,15 @@ export default function Commands(props: CommandsProps) {
 
   function canShowCopyTextFromImage() {
     if (getSelectedHistoryItemIndices().length === 1) {
-      let item = getFirstSelectedHistoryItem();
-      return item?.type === ClipType.Image && item?.content.length > 0
+      let item = getFirstSelectedHistoryItem()
+      if (item) {
+        if (item.type === ClipType.Image && item.content.length > 0) {
+          return true
+        }
+        if (item.imageText && item.imageText.length > 0) {
+          return true
+        }
+      }
     }
     return false
   }

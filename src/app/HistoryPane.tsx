@@ -11,7 +11,6 @@ import {
   clearSelection,
   deleteHistoryItem,
   findItem,
-  findItemByImageFileName,
   getFirstSelectedHistoryItem,
   getFirstSelectedHistoryItemIndex,
   getHistoryItem,
@@ -117,14 +116,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [trialDaysLeft, setTrialDaysLeft] = useState(getTrialLicenseDaysLeft());
   const [isTrialExpired, setIsTrialExpired] = useState(isTrialLicenseExpired());
   const [displayThankYouMessage, setDisplayThankYouMessage] = useState(prefShouldDisplayThankYouMessage());
-
-  async function setTextFromImage(imageFileName: string, text: string) {
-    let clip = findItemByImageFileName(imageFileName)
-    if (clip) {
-      clip.content = text
-      await updateHistoryItem(clip.id!, clip)
-    }
-  }
 
   async function addClipboardData(content: string,
                                   sourceAppPath: string,
@@ -798,9 +789,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function copyTextFromImage(item: Clip) {
-    if (item.type === ClipType.Image) {
-      console.log(item.content)
-      copyToClipboard(item.content, "", "", "", false)
+    if (item.type === ClipType.Image || (item.imageText && item.imageText.length > 0)) {
+      copyToClipboard(item.content, "", item.imageText, "", false)
     }
   }
 
@@ -1008,7 +998,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
   (window as any).addClipboardData = addClipboardData;
   (window as any).mergeClipboardData = mergeClipboardData;
   (window as any).copyToClipboardAfterMerge = copyToClipboardAfterMerge;
-  (window as any).setTextFromImage = setTextFromImage;
   (window as any).clearHistory = clearHistory;
   (window as any).activateApp = activateApp;
 

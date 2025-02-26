@@ -151,10 +151,19 @@ export function getHistoryItems(): Clip[] {
       // Search in image title.
       if (item.type === ClipType.Image) {
         let imageTitle = "Image (" + item.imageWidth + "x" + item.imageHeight + ")";
-        if (item.imageText && item.imageText.length > 0) {
-          imageTitle = item.imageText;
+        if (imageTitle.toLowerCase().includes(searchString)) {
+          return true;
         }
-        return imageTitle.toLowerCase().includes(searchString);
+      }
+      // Search in text from image.
+      if (item.imageText && item.imageText.toLowerCase().includes(searchString)) {
+        return true
+      }
+      // Search in file path.
+      if (item.type === ClipType.File) {
+        if (item.filePathFileName.toLowerCase().includes(searchString)) {
+          return true
+        }
       }
       return false
     }));

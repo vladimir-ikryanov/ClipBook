@@ -22,7 +22,6 @@ bool hasCustomClip(NSPasteboard *pasteboard) {
 }
 
 void extractTextFromImage(NSImage *image,
-                          const std::string &imageFileName,
                           const std::shared_ptr<MainApp> &app,
                           const std::shared_ptr<ClipboardData> &data) {
   // Convert NSImage to CGImage
@@ -63,13 +62,7 @@ void extractTextFromImage(NSImage *image,
       return;
     }
 
-    data->content = content;
-
-    auto frame = app->browser()->mainFrame();
-    if (frame) {
-      auto js_window = frame->executeJavaScript("window");
-      js_window.asJsObject()->call("setTextFromImage", imageFileName, content);
-    }
+    data->image_info.text = content;
   }];
 
   // Perform the request
@@ -503,7 +496,7 @@ bool ClipboardReaderMac::readImageData(const std::shared_ptr<ClipboardData> &dat
       data->image_info.thumb_file_name = [thumb_filename UTF8String];
 
       // Extract text from image.
-      extractTextFromImage(image, [image_filename UTF8String], app_, data);
+      extractTextFromImage(image, app_, data);
     }
     return true;
   }
@@ -539,6 +532,19 @@ bool ClipboardReaderMac::readFilesData(const std::shared_ptr<ClipboardData> &dat
           FilePathInfo file_path_info;
           NSString *filePath = [fileURL path];
           file_path_info.file_path = filePath.UTF8String;
+
+          // If the file is an image, read the image size and extract text from it.
+          if ([filePath hasSuffix:@".png"] || [filePath hasSuffix:@".jpg"] || [filePath hasSuffix:@".jpeg"] ||
+              [filePath hasSuffix:@".gif"] || [filePath hasSuffix:@".bmp"] || [filePath hasSuffix:@".tiff"]) {
+              NSImage *image = [[NSImage alloc] initWithContentsOfFile:filePath];
+              if (image) {
+                auto size = [image size];
+                data->image_info.width = static_cast<int>(size.width);
+                data->image_info.height = static_cast<int>(size.height);
+                extractTextFromImage(image, app_, data);
+              }
+          }
+
           // Get file image and save it to the Images directory.
           fs::path imagesDir = app_->getImagesDir();
           if (!fs::exists(imagesDir)) {
@@ -583,6 +589,9 @@ bool ClipboardReaderMac::readFilesData(const std::shared_ptr<ClipboardData> &dat
           if (attr) {
             unsigned long long fileSize = [attr fileSize];
             file_path_info.size_in_bytes = static_cast<int>(fileSize);
+            if (data->image_info.width > 0 && data->image_info.height > 0) {
+              data->image_info.size_in_bytes = file_path_info.size_in_bytes;
+            }
           }
           // Check if it's a folder.
           BOOL isDirectory = NO;

@@ -149,6 +149,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   function canShowCopyTextFromImage() {
     if (props.selectedItemIndices.length === 1) {
       let item = getFirstSelectedHistoryItem()
+      if (item.imageText && item.imageText.length > 0) {
+        return true
+      }
       return item.type === ClipType.Image && item.content.length > 0
     }
     return false

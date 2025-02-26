@@ -43,6 +43,10 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
     return date.toDateString() + " at " + date.toLocaleTimeString()
   }
 
+  function canShowImageSize() {
+    return props.item.imageWidth > 0 && props.item.imageHeight > 0
+  }
+
   function isImage() {
     return props.item.type === ClipType.Image
   }
@@ -126,7 +130,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             </div>
         }
         {
-            isImage() &&
+            canShowImageSize() &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold">Image dimensions</div>
               <div className="flex-grow"></div>
