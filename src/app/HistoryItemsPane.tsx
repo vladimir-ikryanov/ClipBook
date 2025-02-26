@@ -50,6 +50,7 @@ type HistoryItemsPaneProps = {
   onCopyTextFromImageByIndex: (index: number) => void
   onSaveImageAsFile: () => void
   onOpenInBrowser: () => void
+  onShowInFinder: () => void
   onPreviewLink: () => void
   onZoomIn: () => void
   onZoomOut: () => void
@@ -207,6 +208,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    onCopyTextFromImage={props.onCopyTextFromImage}
                    onSaveImageAsFile={props.onSaveImageAsFile}
                    onOpenInBrowser={props.onOpenInBrowser}
+                   onShowInFinder={props.onShowInFinder}
                    onPreviewLink={props.onPreviewLink}
                    onZoomIn={props.onZoomIn}
                    onZoomOut={props.onZoomOut}

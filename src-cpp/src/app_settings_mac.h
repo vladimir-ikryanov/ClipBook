@@ -122,6 +122,9 @@ class AppSettingsMac : public AppSettings {
   void saveOpenInBrowserShortcut(std::string shortcut) override;
   std::string getOpenInBrowserShortcut() override;
 
+  void saveShowInFinderShortcut(std::string shortcut) override;
+  std::string getShowInFinderShortcut() override;
+
   void saveCopyToClipboardShortcut(std::string shortcut) override;
   std::string getCopyToClipboardShortcut() override;
 

@@ -51,6 +51,7 @@ NSString *prefSelectPreviousItemShortcut = @"app.select_previous_item_shortcut2"
 NSString *prefPasteSelectedItemToActiveAppShortcut = @"app.paste_selected_item_to_active_app_shortcut2";
 NSString *prefEditHistoryItemShortcut = @"app.edit_history_item_shortcut2";
 NSString *prefOpenInBrowserShortcut = @"app.open_in_browser_shortcut2";
+NSString *prefShowInFinderShortcut = @"app.show_in_finder_shortcut";
 NSString *prefCopyToClipboardShortcut = @"app.copy_to_clipboard_shortcut2";
 NSString *prefCopyImageFromTextShortcut = @"app.copy_image_from_text_shortcut";
 NSString *prefDeleteHistoryItemShortcut = @"app.delete_history_item_shortcut2";
@@ -550,6 +551,21 @@ std::string AppSettingsMac::getOpenInBrowserShortcut() {
   return "AltLeft + Enter";
 }
 
+void AppSettingsMac::saveShowInFinderShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefShowInFinderShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getShowInFinderShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefShowInFinderShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "MetaLeft + KeyO";
+}
+
 void AppSettingsMac::saveCopyToClipboardShortcut(std::string shortcut) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefCopyToClipboardShortcut];
@@ -697,7 +713,7 @@ std::string AppSettingsMac::getZoomUIResetShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "MetaLeft + KeyO";
+  return "MetaLeft + Digit0";
 }
 
 void AppSettingsMac::saveOpenSettingsShortcut(std::string shortcut) {

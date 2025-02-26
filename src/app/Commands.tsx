@@ -36,7 +36,7 @@ import {
   prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetRenameItemShortcut,
-  prefGetSaveImageAsFileShortcut,
+  prefGetSaveImageAsFileShortcut, prefGetShowInFinderShortcut,
   prefGetShowMoreActionsShortcut,
   prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut,
@@ -76,6 +76,7 @@ export type HideActionsReason =
     | "copyTextFromImage"
     | "saveImageAsFile"
     | "openInBrowser"
+    | "showInFinder"
     | "preview"
     | "zoomIn"
     | "zoomOut"
@@ -102,6 +103,7 @@ type CommandsProps = {
   onCopyTextFromImage: () => void
   onSaveImageAsFile: () => void
   onOpenInBrowser: () => void
+  onShowInFinder: () => void
   onPreviewLink: () => void
   onZoomIn: () => void
   onZoomOut: () => void
@@ -257,6 +259,12 @@ export default function Commands(props: CommandsProps) {
     props.onOpenInBrowser()
   }
 
+  function handleShowInFinder() {
+    closeReason = "showInFinder"
+    handleOpenChange(false)
+    props.onShowInFinder()
+  }
+
   function handlePreviewLink() {
     closeReason = "preview"
     handleOpenChange(false)
@@ -287,6 +295,14 @@ export default function Commands(props: CommandsProps) {
 
   function canShowMultiplePaste() {
     return getSelectedHistoryItemIndices().length > 1
+  }
+
+  function canShowInFinder() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      return item && item.type === ClipType.File
+    }
+    return false
   }
 
   function canPasteWithTransformation() {
@@ -468,6 +484,37 @@ export default function Commands(props: CommandsProps) {
                       <span>Open in Browser</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
+                      </CommandShortcut>
+                    </CommandItem>
+                }
+                {
+                    canShowInFinder() &&
+                    <CommandItem onSelect={handleShowInFinder}>
+                      <svg xmlns="http://www.w3.org/2000/svg"
+                           aria-label="Finder" role="img"
+                           viewBox="0 0 512 512" className="mr-2 h-5 w-5">
+                        <rect
+                            width="512" height="512"
+                            rx="15%"
+                            fill="url(#a)"/>
+                        <defs>
+                          <linearGradient id="a" x2="0" y1="100%">
+                            <stop offset="0" stop-color="#1e73f2"/>
+                            <stop offset="1" stop-color="#19d3fd"/>
+                          </linearGradient>
+                          <linearGradient id="b" x2="0" y1="100%">
+                            <stop offset="0" stop-color="#dbe9f4"/>
+                            <stop offset="1" stop-color="#f7f6f6"/>
+                          </linearGradient>
+                        </defs>
+                        <path fill="url(#b)"
+                              d="M435.2 0H274.4c-21.2 49.2-59.2 129.6-60.8 283.4a9.9 9.9 0 0010 10.1h58.7a9.9 9.9 0 019.9 10.2A933.3 933.3 0 00311.3 512h123.9a76.8 76.8 0 0076.8-76.8V76.8A76.8 76.8 0 00435.2 0z"/>
+                        <path fill="none" stroke="#000000" stroke-linecap="round" stroke-width="20"
+                              d="M371 149v34m-229-34v34m263.4 147.2a215.2 215.2 0 01-298.8 0"/>
+                      </svg>
+                      <span>Show in Finder</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetShowInFinderShortcut()}/>
                       </CommandShortcut>
                     </CommandItem>
                 }

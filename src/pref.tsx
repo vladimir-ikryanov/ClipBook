@@ -65,6 +65,8 @@ declare const saveEditHistoryItemShortcut: (shortcut: string) => void;
 declare const getEditHistoryItemShortcut: () => string;
 declare const saveOpenInBrowserShortcut: (shortcut: string) => void;
 declare const getOpenInBrowserShortcut: () => string;
+declare const saveShowInFinderShortcut: (shortcut: string) => void;
+declare const getShowInFinderShortcut: () => string;
 declare const saveCopyToClipboardShortcut: (shortcut: string) => void;
 declare const getCopyToClipboardShortcut: () => string;
 declare const saveCopyTextFromImageShortcut: (shortcut: string) => void;
@@ -259,6 +261,14 @@ export function prefGetOpenInBrowserShortcut() {
 
 export function prefSetOpenInBrowserShortcut(shortcut: string) {
   saveOpenInBrowserShortcut(shortcut)
+}
+
+export function prefGetShowInFinderShortcut() {
+  return getShowInFinderShortcut()
+}
+
+export function prefSetShowInFinderShortcut(shortcut: string) {
+  saveShowInFinderShortcut(shortcut)
 }
 
 export function prefGetCopyToClipboardShortcut() {

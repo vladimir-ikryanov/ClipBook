@@ -57,7 +57,7 @@ import {
   prefGetRenameItemShortcut,
   prefGetSaveImageAsFileShortcut,
   prefGetSelectNextItemShortcut,
-  prefGetSelectPreviousItemShortcut, prefGetSentenceCaseShortcut,
+  prefGetSelectPreviousItemShortcut, prefGetSentenceCaseShortcut, prefGetShowInFinderShortcut,
   prefGetShowMoreActionsShortcut, prefGetStripAllWhitespacesShortcut,
   prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut, prefGetTrimSurroundingWhitespacesShortcut,
@@ -85,6 +85,7 @@ declare const copyToClipboardAfterMerge: (text: string) => void;
 declare const deleteImage: (imageFileName: string) => void;
 declare const clearEntireHistory: () => void;
 declare const openInBrowser: (url: string) => void;
+declare const showInFinder: (filePath: string) => void;
 declare const previewLink: (url: string) => void;
 declare const openSettingsWindow: () => void;
 declare const saveImageAsFile: (imageFilePath: string, imageWidth: number, imageHeight: number) => void;
@@ -358,6 +359,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
       // Open the active item in the browser when the open in browser shortcut is pressed.
       if (isShortcutMatch(prefGetOpenInBrowserShortcut(), e)) {
         handleOpenInBrowser()
+        e.preventDefault()
+      }
+      if (isShortcutMatch(prefGetShowInFinderShortcut(), e)) {
+        handleShowInFinder()
         e.preventDefault()
       }
       // Copy the active item to the clipboard when the copy to clipboard shortcut is pressed.
@@ -816,6 +821,15 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
+  function handleShowInFinder() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      if (item.type === ClipType.File) {
+        showInFinder(item.filePath)
+      }
+    }
+  }
+
   function previewLinkInApp(item: Clip) {
     if (isUrl(item.content)) {
       previewLink(item.content)
@@ -1057,6 +1071,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onCopyTextFromImageByIndex={handleCopyTextFromImageByIndex}
                               onSaveImageAsFile={handleSaveImageAsFile}
                               onOpenInBrowser={handleOpenInBrowser}
+                              onShowInFinder={handleShowInFinder}
                               onPreviewLink={handlePreviewLink}
                               onZoomIn={props.onZoomIn}
                               onZoomOut={props.onZoomOut}

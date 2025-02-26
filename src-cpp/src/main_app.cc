@@ -594,6 +594,10 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("openInBrowser", [this](std::string url) {
     app_->desktop()->openUrl(url);
   });
+  window->putProperty("showInFinder", [this](std::string filePath) {
+    app_->desktop()->showPath(filePath);
+    hide();
+  });
   window->putProperty("previewLink", [this](std::string url) {
     previewLink(url);
   });
@@ -885,6 +889,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("getOpenInBrowserShortcut", [this]() -> std::string {
     return settings_->getOpenInBrowserShortcut();
+  });
+  window->putProperty("saveShowInFinderShortcut", [this](std::string shortcut) -> void {
+    settings_->saveShowInFinderShortcut(shortcut);
+  });
+  window->putProperty("getShowInFinderShortcut", [this]() -> std::string {
+    return settings_->getShowInFinderShortcut();
   });
   window->putProperty("saveCopyToClipboardShortcut", [this](std::string shortcut) -> void {
     settings_->saveCopyToClipboardShortcut(shortcut);

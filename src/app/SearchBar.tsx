@@ -37,6 +37,7 @@ type SearchBarProps = {
   onCopyTextFromImage: () => void
   onSaveImageAsFile: () => void
   onOpenInBrowser: () => void
+  onShowInFinder: () => void
   onPreviewLink: () => void
   onZoomIn: () => void
   onZoomOut: () => void
@@ -204,6 +205,7 @@ export default function SearchBar(props: SearchBarProps) {
                       onCopyTextFromImage={props.onCopyTextFromImage}
                       onSaveImageAsFile={props.onSaveImageAsFile}
                       onOpenInBrowser={props.onOpenInBrowser}
+                      onShowInFinder={props.onShowInFinder}
                       onPreviewLink={props.onPreviewLink}
                       onZoomIn={props.onZoomIn}
                       onZoomOut={props.onZoomOut}

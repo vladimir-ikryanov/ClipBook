@@ -40,7 +40,7 @@ import {
   prefSetRenameItemShortcut,
   prefSetSaveImageAsFileShortcut,
   prefSetSelectNextItemShortcut,
-  prefSetSelectPreviousItemShortcut, prefSetSentenceCaseShortcut,
+  prefSetSelectPreviousItemShortcut, prefSetSentenceCaseShortcut, prefSetShowInFinderShortcut,
   prefSetShowMoreActionsShortcut, prefSetStripAllWhitespacesShortcut,
   prefSetToggleFavoriteShortcut,
   prefSetTogglePreviewShortcut, prefSetTrimSurroundingWhitespacesShortcut,
@@ -63,6 +63,7 @@ export default function Shortcuts() {
   const [pasteSelectedItemToActiveAppShortcut, setPasteSelectedItemToActiveAppShortcut] = useState(prefGetPasteSelectedItemToActiveAppShortcut());
   const [editHistoryItemShortcut, setEditHistoryItemShortcut] = useState(prefGetEditHistoryItemShortcut());
   const [openInBrowserShortcut, setOpenInBrowserShortcut] = useState(prefGetOpenInBrowserShortcut());
+  const [showInFinderShortcut, setShowInFinderShortcut] = useState(prefGetOpenInBrowserShortcut());
   const [copyToClipboardShortcut, setCopyToClipboardShortcut] = useState(prefGetCopyToClipboardShortcut());
   const [deleteHistoryItemShortcut, setDeleteHistoryItemShortcut] = useState(prefGetDeleteHistoryItemShortcut());
   const [clearHistoryShortcut, setClearHistoryShortcut] = useState(prefGetClearHistoryShortcut());
@@ -145,6 +146,11 @@ export default function Shortcuts() {
   function handleOpenInBrowserShortcutChange(shortcut: string) {
     setOpenInBrowserShortcut(shortcut)
     prefSetOpenInBrowserShortcut(shortcut)
+  }
+
+  function handleShowInFinderShortcutChange(shortcut: string) {
+    setShowInFinderShortcut(shortcut)
+    prefSetShowInFinderShortcut(shortcut)
   }
 
   function handleCopyToClipboardShortcutChange(shortcut: string) {
@@ -307,6 +313,12 @@ export default function Shortcuts() {
                              onSave={handleOpenInBrowserShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
+              <span className="">Show in Finder</span>
+              <ShortcutInput shortcut={showInFinderShortcut}
+                             defaultShortcut="MetaLeft + KeyO"
+                             onSave={handleShowInFinderShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
               <span className="">Add to favorites</span>
               <ShortcutInput shortcut={toggleFavoriteShortcut}
                              defaultShortcut="MetaLeft + KeyS"
@@ -370,7 +382,7 @@ export default function Shortcuts() {
             <div className="flex items-center justify-between space-x-20">
               <span className="">Reset Zoom</span>
               <ShortcutInput shortcut={zoomUIResetShortcut}
-                             defaultShortcut="MetaLeft + KeyO"
+                             defaultShortcut="MetaLeft + Digit0"
                              onSave={handleZoomUIResetShortcutChange}/>
             </div>
             <hr/>
