@@ -20,10 +20,6 @@ void launch() {
   options.logging.log_file = getAppDataDir() + "/clipbook.log";
   // Register the custom URL scheme.
   options.schemes.emplace_back(kClipBookScheme);
-  // Allow displaying proprietary content when preview links.
-  options.enable_aac = true;
-  options.enable_h264 = true;
-  options.enable_widevine = true;
 
   App::init(options, [](std::shared_ptr<App> app) {
     std::shared_ptr<MainApp> main_app;
