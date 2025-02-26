@@ -16,6 +16,7 @@ class MainAppMac : public MainApp {
                       const std::shared_ptr<AppSettings> &settings);
 
 #ifdef __OBJC__
+  void setActiveAppInfo(NSRunningApplication* activeApp);
   void onActiveAppChanged(NSNotification* notification);
 #endif
 

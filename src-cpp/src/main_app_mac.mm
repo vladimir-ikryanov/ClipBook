@@ -208,17 +208,18 @@ MainAppMac::MainAppMac(const std::shared_ptr<App> &app,
   clipboard_reader_ = std::make_shared<ClipboardReaderMac>();
 }
 
-void MainAppMac::onActiveAppChanged(NSNotification* notification) {
-  NSDictionary *userInfo = notification.userInfo;
-  NSRunningApplication *app = userInfo[NSWorkspaceApplicationKey];
-  if (app) {
-    std::string app_name;
-    std::string app_icon;
-    auto app_path = [[app bundleURL] fileSystemRepresentation];
-    app_name = getAppNameFromPath(app_path);
-    app_icon = getFileIconAsBase64(app_path, false);
-    setActiveAppInfo(app_name, app_icon);
+void MainAppMac::setActiveAppInfo(NSRunningApplication* activeApp) {
+  if (activeApp) {
+    auto app_path = [[activeApp bundleURL] fileSystemRepresentation];
+    std::string app_name = getAppNameFromPath(app_path);
+    std::string app_icon = getFileIconAsBase64(app_path, false);
+    MainApp::setActiveAppInfo(app_name, app_icon);
   }
+}
+
+void MainAppMac::onActiveAppChanged(NSNotification *notification) {
+  NSDictionary *userInfo = notification.userInfo;
+  setActiveAppInfo(userInfo[NSWorkspaceApplicationKey]);
 }
 
 molybden::Shortcut MainAppMac::createShortcut(const std::string &shortcut) {
@@ -302,6 +303,8 @@ void MainAppMac::activate() {
 }
 
 void MainAppMac::show() {
+  // Update the active app info because it may be already active when the window is shown.
+  setActiveAppInfo([[NSWorkspace sharedWorkspace] frontmostApplication]);
   // Restore the window bounds before showing the window.
   restoreWindowBounds();
   // Show the browser window.
