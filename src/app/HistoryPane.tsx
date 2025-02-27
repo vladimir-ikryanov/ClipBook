@@ -68,7 +68,7 @@ import {
 } from "@/pref";
 import {HideActionsReason} from "@/app/Commands";
 import {FixedSizeList as List} from "react-window";
-import {Clip, ClipType, updateClip} from "@/db";
+import {Clip, ClipType, getFilePath, getImageFileName, getImageText, updateClip} from "@/db";
 import {formatText, getClipType, isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
@@ -589,7 +589,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
     await updateClip(item.id!, item)
 
-    pasteItemInFrontApp(item.content, item.imageFileName, item.imageText, item.filePath)
+    pasteItemInFrontApp(item.content, getImageFileName(item), getImageText(item), getFilePath(item))
 
     setHistory([...getHistoryItems()])
 
@@ -766,9 +766,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
     await updateClip(item.id!, item)
 
-    let imageFileName = item.imageFileName ? item.imageFileName : ""
-    let imageText = item.imageText ? item.imageText : ""
-    copyToClipboard(item.content, imageFileName, imageText, item.filePath, true)
+    copyToClipboard(item.content, getImageFileName(item), getImageText(item), getFilePath(item), true)
 
     setHistory([...getHistoryItems()])
 
@@ -794,8 +792,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function copyTextFromImage(item: Clip) {
-    if (item.type === ClipType.Image || (item.imageText && item.imageText.length > 0)) {
-      copyToClipboard(item.content, "", item.imageText, "", false)
+    if (item.type === ClipType.Image || (getImageText(item).length > 0)) {
+      copyToClipboard(item.content, "", getImageText(item), "", false)
     }
   }
 
@@ -825,7 +823,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (getSelectedHistoryItemIndices().length === 1) {
       let item = getFirstSelectedHistoryItem()
       if (item.type === ClipType.File) {
-        showInFinder(item.filePath)
+        showInFinder(getFilePath(item))
       }
     }
   }
@@ -953,7 +951,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function handleMouseDoubleClick(index: number) {
     let item = getHistoryItem(index)
-    pasteItemInFrontApp(item.content, item.imageFileName, item.imageText, item.filePath)
+    pasteItemInFrontApp(item.content, getImageFileName(item), getImageText(item), getFilePath(item))
   }
 
   function handleFinishEditing() {

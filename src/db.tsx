@@ -11,11 +11,11 @@ export enum ClipType {
 
 export class LinkPreviewDetails {
   id?: number;
-  url: string;
-  title: string;
-  description: string;
-  imageFileName: string;
-  faviconFileName: string;
+  url: string = "";
+  title: string = "";
+  description: string = "";
+  imageFileName: string = "";
+  faviconFileName: string = "";
 
   constructor(url: string, title: string, description: string, imageFileName: string, faviconFileName: string) {
     this.url = url
@@ -29,9 +29,9 @@ export class LinkPreviewDetails {
 export class Clip {
   id?: number;
   name: string = "";
-  content: string;
+  content: string = "";
   type: ClipType = ClipType.Text;
-  sourceApp: string;
+  sourceApp: string = "";
   favorite: boolean = false;
   firstTimeCopy: Date = new Date();
   lastTimeCopy: Date = new Date();
@@ -101,4 +101,16 @@ export async function deleteLinkPreviewDetails(url: string) {
 
 export async function getLinkPreviewDetails(url: string): Promise<LinkPreviewDetails | undefined> {
   return db.linkPreviews.where('url').equals(url).first()
+}
+
+export function getImageText(item: Clip): string {
+  return item.imageText || ""
+}
+
+export function getImageFileName(item: Clip): string {
+  return item.imageFileName || ""
+}
+
+export function getFilePath(item: Clip): string {
+  return item.filePath || ""
 }

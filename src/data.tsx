@@ -1,4 +1,13 @@
-import {addClip, Clip, ClipType, deleteAllClips, deleteClip, getAllClips, updateClip} from "@/db";
+import {
+  addClip,
+  Clip,
+  ClipType,
+  deleteAllClips,
+  deleteClip,
+  getAllClips,
+  getFilePath, getImageFileName, getImageText,
+  updateClip
+} from "@/db";
 import {prefGetClearHistoryOnMacReboot} from "@/pref";
 import {getClipType} from "@/lib/utils";
 
@@ -156,7 +165,7 @@ export function getHistoryItems(): Clip[] {
         }
       }
       // Search in text from image.
-      if (item.imageText && item.imageText.toLowerCase().includes(searchString)) {
+      if (getImageText(item).toLowerCase().includes(searchString)) {
         return true
       }
       // Search in file path.
@@ -364,7 +373,7 @@ export async function updateHistoryItemTypes(): Promise<boolean> {
   for (let i = 0; i < history.length; i++) {
     let clip = history[i];
     let oldType = clip.type;
-    let newType = getClipType(clip.content, clip.imageFileName, clip.filePath)
+    let newType = getClipType(clip.content, getImageFileName(clip), getFilePath(clip))
     clip.type = newType
     await updateClip(clip.id!, clip)
     if (oldType !== newType) {

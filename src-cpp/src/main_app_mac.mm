@@ -212,6 +212,12 @@ void MainAppMac::setActiveAppInfo(NSRunningApplication* activeApp) {
   if (activeApp) {
     auto app_path = [[activeApp bundleURL] fileSystemRepresentation];
     std::string app_name = getAppNameFromPath(app_path);
+    if (app_name == "ClipBook") {
+      should_activate_app_ = true;
+      return;
+    }
+    should_activate_app_ = false;
+    active_app_pid_ = activeApp.processIdentifier;
     std::string app_icon = getFileIconAsBase64(app_path, false);
     MainApp::setActiveAppInfo(app_name, app_icon);
   }
@@ -324,8 +330,18 @@ void MainAppMac::hide(bool force) {
   saveWindowBounds();
   // Hide the window.
   MainApp::hide(force);
-//  // 150 milliseconds delay to let the target app process the activation.
-//  usleep(150000);
+  // Activate the previously active app.
+  if (should_activate_app_ && active_app_pid_ != 0) {
+    auto runningApps = [[NSWorkspace sharedWorkspace] runningApplications];
+    for (NSRunningApplication *app in runningApps) {
+      if (app.processIdentifier == active_app_pid_) {
+        [app activateWithOptions:NSApplicationActivateIgnoringOtherApps];
+        break;
+      }
+    }
+    // 150 milliseconds delay to let the target app process the activation.
+    usleep(150000);
+  }
 }
 
 void MainAppMac::sendKey(MainApp::Key key) {

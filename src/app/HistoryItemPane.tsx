@@ -1,7 +1,7 @@
 import '../app.css';
 import React, {CSSProperties, KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
 import {getFilterQuery} from "@/data";
-import {Clip, ClipType, updateClip} from "@/db";
+import {Clip, ClipType, getFilePath, getImageText, updateClip} from "@/db";
 import {getFileNameFromPath, hasModifiers, toCSSColor} from "@/lib/utils";
 import {
   FileIcon, FolderIcon,
@@ -299,13 +299,14 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
       return props.item.name
     }
     if (props.item.type === ClipType.Image) {
-      if (props.item.imageText && props.item.imageText.length > 0) {
-        return props.item.imageText
+      let imageText = getImageText(props.item)
+      if (imageText.length > 0) {
+        return imageText
       }
       return "Image (" + props.item.imageWidth + "x" + props.item.imageHeight + ")"
     }
     if (props.item.type === ClipType.File) {
-      return getFileNameFromPath(props.item.filePath)
+      return getFileNameFromPath(getFilePath(props.item))
     }
     let content = props.item.content
     if (content.length > 256) {

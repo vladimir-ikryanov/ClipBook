@@ -23,7 +23,7 @@ import {
   prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut,
 } from "@/pref";
-import {ClipType} from "@/db";
+import {ClipType, getImageText} from "@/db";
 import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
@@ -149,7 +149,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   function canShowCopyTextFromImage() {
     if (props.selectedItemIndices.length === 1) {
       let item = getFirstSelectedHistoryItem()
-      if (item.imageText && item.imageText.length > 0) {
+      if (getImageText(item).length > 0) {
         return true
       }
       return item.type === ClipType.Image && item.content.length > 0

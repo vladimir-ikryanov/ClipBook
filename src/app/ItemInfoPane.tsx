@@ -1,6 +1,6 @@
 import '../app.css';
 import React from "react";
-import {Clip, ClipType} from "@/db";
+import {Clip, ClipType, getFilePath} from "@/db";
 import {toBase64Icon} from "@/data";
 
 declare const getAppNameFromPath: (appPath: string) => string;
@@ -118,7 +118,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold mr-4">Path</div>
               <div className="flex-grow"></div>
-              <div className="flex-auto text-foreground text-end break-all">{props.item.filePath}</div>
+              <div className="flex-auto text-foreground text-end break-all">{getFilePath(props.item)}</div>
             </div>
         }
         {

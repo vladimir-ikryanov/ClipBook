@@ -52,7 +52,7 @@ import {
   toBase64Icon,
   getSelectedHistoryItemIndices, getSelectedHistoryItems, isTextItem
 } from "@/data";
-import {ClipType} from "@/db";
+import {ClipType, getImageText} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {DialogTitle} from "@/components/ui/dialog";
@@ -344,7 +344,7 @@ export default function Commands(props: CommandsProps) {
         if (item.type === ClipType.Image && item.content.length > 0) {
           return true
         }
-        if (item.imageText && item.imageText.length > 0) {
+        if (getImageText(item).length > 0) {
           return true
         }
       }

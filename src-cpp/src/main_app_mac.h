@@ -82,8 +82,10 @@ class MainAppMac : public MainApp {
   molybden::Shortcut pause_resume_shortcut_;
   molybden::Shortcut open_settings_shortcut_;
   std::shared_ptr<ClipboardReaderMac> clipboard_reader_;
+  bool should_activate_app_ = false;
 #ifdef __OBJC__
-  ActiveAppObserver* observer_{};
+  ActiveAppObserver* observer_ = nullptr;
+  pid_t active_app_pid_ = 0;
   NSPoint getInputCursorLocationOnScreen();
   void moveToScreen(NSScreen *screen);
   static NSRect getActiveWindowBounds(NSRunningApplication *app);

@@ -593,6 +593,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("openInBrowser", [this](std::string url) {
     app_->desktop()->openUrl(url);
+    hide();
   });
   window->putProperty("showInFinder", [this](std::string filePath) {
     app_->desktop()->showPath(filePath);

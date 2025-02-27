@@ -1,7 +1,7 @@
 import '../app.css';
 import React, {useState} from "react";
 import PreviewToolBar from "@/app/PreviewToolBar";
-import {Clip, ClipType} from "@/db";
+import {Clip, ClipType, getFilePath} from "@/db";
 import ItemInfoPane from "@/app/ItemInfoPane";
 import {
   getFirstSelectedHistoryItem, getHistoryItem,
@@ -77,7 +77,7 @@ export default function PreviewPane(props: PreviewPaneProps) {
         return <PreviewImagePane item={item}/>
       }
       if (item.type === ClipType.File) {
-        return <PreviewFilePane filePath={item.filePath}
+        return <PreviewFilePane filePath={getFilePath(item)}
                                 imageFileName={item.filePathFileName}
                                 fileSizeInBytes={item.fileSizeInBytes}
                                 isFolder={item.fileFolder}/>
