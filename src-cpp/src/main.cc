@@ -20,6 +20,11 @@ void launch() {
   options.logging.log_file = getAppDataDir() + "/clipbook.log";
   // Register the custom URL scheme.
   options.schemes.emplace_back(kClipBookScheme);
+  // Disable internal Chromium traffic.
+  options.switches.emplace("--disable-background-networking");
+  options.switches.emplace("--disable-sync");
+  options.switches.emplace("--disable-features=OptimizationHintsFetching");
+  options.switches.emplace("--disable-component-update");
 
   App::init(options, [](std::shared_ptr<App> app) {
     std::shared_ptr<MainApp> main_app;
