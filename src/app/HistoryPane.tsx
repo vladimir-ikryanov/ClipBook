@@ -792,7 +792,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function copyTextFromImage(item: Clip) {
-    if (item.type === ClipType.Image) {
+    if (item.type === ClipType.Image || item.type === ClipType.File) {
       let imageText = getImageText(item)
       copyToClipboard(imageText.length > 0 ? imageText : item.content, "", "", false)
     }
