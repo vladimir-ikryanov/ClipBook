@@ -14,7 +14,7 @@ using namespace molybden;
 void launch() {
   AppOptions options;
   // Configure logging.
-  options.logging.enabled = true;
+  options.logging.enabled = false;
   options.logging.log_level = LogLevel::kError;
   options.logging.destination = Destination::kStandardOutput;
   options.logging.log_file = getAppDataDir() + "/clipbook.log";
