@@ -77,10 +77,10 @@ import TrialExpiredMessage from "@/app/TrialExpiredMessage";
 import FreeLicenseMessage from "@/app/FreeLicenseMessage";
 import {HideDropdownReason} from "@/app/PreviewToolBarMenu";
 
-declare const pasteItemInFrontApp: (text: string, imageFileName: string, imageText: string, filePath: string) => void;
+declare const pasteItemInFrontApp: (text: string, imageFileName: string, filePath: string) => void;
 declare const pressReturn: () => void;
 declare const pressTab: () => void;
-declare const copyToClipboard: (text: string, imageFileName: string, imageText: string, filePath: string, ghost: boolean) => void;
+declare const copyToClipboard: (text: string, imageFileName: string, filePath: string, ghost: boolean) => void;
 declare const copyToClipboardAfterMerge: (text: string) => void;
 declare const deleteImage: (imageFileName: string) => void;
 declare const clearEntireHistory: () => void;
@@ -589,7 +589,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
     await updateClip(item.id!, item)
 
-    pasteItemInFrontApp(item.content, getImageFileName(item), getImageText(item), getFilePath(item))
+    pasteItemInFrontApp(item.content, getImageFileName(item), getFilePath(item))
 
     setHistory([...getHistoryItems()])
 
@@ -766,7 +766,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
     await updateClip(item.id!, item)
 
-    copyToClipboard(item.content, getImageFileName(item), getImageText(item), getFilePath(item), true)
+    copyToClipboard(item.content, getImageFileName(item), getFilePath(item), true)
 
     setHistory([...getHistoryItems()])
 
@@ -792,8 +792,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function copyTextFromImage(item: Clip) {
-    if (item.type === ClipType.Image || (getImageText(item).length > 0)) {
-      copyToClipboard(item.content, "", getImageText(item), "", false)
+    if (item.type === ClipType.Image) {
+      let imageText = getImageText(item)
+      copyToClipboard(imageText.length > 0 ? imageText : item.content, "", "", false)
     }
   }
 
@@ -951,7 +952,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function handleMouseDoubleClick(index: number) {
     let item = getHistoryItem(index)
-    pasteItemInFrontApp(item.content, getImageFileName(item), getImageText(item), getFilePath(item))
+    pasteItemInFrontApp(item.content, getImageFileName(item), getFilePath(item))
   }
 
   function handleFinishEditing() {

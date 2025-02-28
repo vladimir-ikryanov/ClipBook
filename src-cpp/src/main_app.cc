@@ -564,9 +564,8 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("pasteItemInFrontApp",
                       [this](std::string text,
                              std::string imageFileName,
-                             std::string imageText,
                              std::string filePath) {
-                        paste(text, imageFileName, imageText, filePath);
+                        paste(text, imageFileName, filePath);
                       });
   window->putProperty("pressReturn", [this]() {
     sendKey(Key::kReturn);
@@ -577,10 +576,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("copyToClipboard",
                       [this](std::string text,
                              std::string imageFileName,
-                             std::string imageText,
                              std::string filePath,
                              bool ghost) {
-                        copyToClipboard(text, imageFileName, imageText, filePath, ghost);
+                        copyToClipboard(text, imageFileName, filePath, ghost);
                       });
   window->putProperty("copyToClipboardAfterMerge", [this](std::string text) {
     copyToClipboardAfterMerge(std::move(text));

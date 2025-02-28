@@ -30,12 +30,10 @@ class MainAppMac : public MainApp {
   void paste() override;
   void paste(const std::string &text,
              const std::string &imageFileName,
-             const std::string &imageText,
              const std::string &filePath) override;
   void sendKey(Key key) override;
   void copyToClipboard(const std::string &text,
                        const std::string &imageFileName,
-                       const std::string &imageText,
                        const std::string &filePath,
                        bool ghost) override;
   void copyToClipboardAfterMerge(std::string text) override;
@@ -56,7 +54,6 @@ class MainAppMac : public MainApp {
   bool isAccessibilityAccessGranted();
   void showAccessibilityAccessDialog(const std::string &text,
                                      const std::string &imageFileName,
-                                     const std::string &imageText,
                                      const std::string &filePath);
   void showSystemAccessibilityPreferencesDialog();
 

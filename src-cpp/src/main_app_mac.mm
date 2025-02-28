@@ -382,21 +382,19 @@ void MainAppMac::paste() {
 
 void MainAppMac::paste(const std::string &text,
                        const std::string &imageFileName,
-                       const std::string &imageText,
                        const std::string &filePath) {
   if (!isAccessibilityAccessGranted()) {
-    showAccessibilityAccessDialog(text, imageFileName, imageText, filePath);
+    showAccessibilityAccessDialog(text, imageFileName, filePath);
     return;
   }
   // Hide the browser window and activate the previously active app.
   hide();
-  copyToClipboard(text, imageFileName, imageText, filePath, true);
+  copyToClipboard(text, imageFileName, filePath, true);
   paste();
 }
 
 void MainAppMac::copyToClipboard(const std::string &text,
                                  const std::string &imageFileName,
-                                 const std::string &imageText,
                                  const std::string &filePath,
                                  bool ghost) {
   auto pasteboard = [NSPasteboard generalPasteboard];
@@ -427,13 +425,6 @@ void MainAppMac::copyToClipboard(const std::string &text,
       [imageRep release];
       [image release];
     }
-  }
-
-  // Copy image text.
-  if (!imageText.empty()) {
-    NSPasteboardItem *textItem = [[NSPasteboardItem alloc] init];
-    [textItem setString:[NSString stringWithUTF8String:imageText.c_str()] forType:NSPasteboardTypeString];
-    [items addObject:textItem];
   }
 
   // Copy text.
@@ -794,7 +785,6 @@ bool MainAppMac::isAccessibilityAccessGranted() {
 
 void MainAppMac::showAccessibilityAccessDialog(const std::string &text,
                                                const std::string &imageFileName,
-                                               const std::string &imageText,
                                                const std::string &filePath) {
   MessageDialogOptions options;
   options.message = "Accessibility access required";
@@ -805,7 +795,7 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text,
       MessageDialogButton("Cancel", MessageDialogButtonType::kCancel)
   };
   auto_hide_disabled_ = true;
-  MessageDialog::show(app_window_, options, [this, text, imageFileName, imageText, filePath](const MessageDialogResult &result) {
+  MessageDialog::show(app_window_, options, [this, text, imageFileName, filePath](const MessageDialogResult &result) {
     auto_hide_disabled_ = false;
     if (result.button.type == MessageDialogButtonType::kDefault) {
       hide();
@@ -813,7 +803,7 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text,
     }
     if (result.button.type == MessageDialogButtonType::kNone) {
       hide();
-      copyToClipboard(text, imageFileName, imageText, filePath, false);
+      copyToClipboard(text, imageFileName, filePath, false);
     }
   });
 }

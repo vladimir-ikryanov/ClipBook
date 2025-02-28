@@ -43,12 +43,10 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   virtual void paste() = 0;
   virtual void paste(const std::string &text,
                      const std::string &imageFileName,
-                     const std::string &imageText,
                      const std::string &filePath) = 0;
   virtual void sendKey(Key key) = 0;
   virtual void copyToClipboard(const std::string &text,
                                const std::string &imageFileName,
-                               const std::string &imageText,
                                const std::string &filePath,
                                bool ghost) = 0;
   virtual void copyToClipboardAfterMerge(std::string text) = 0;
