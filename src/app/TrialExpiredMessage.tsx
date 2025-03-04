@@ -16,7 +16,7 @@ import {prefIsFeedbackProvided, prefSetFeedbackProvided} from "@/pref";
 
 declare const buyLicense: () => void;
 declare const sendFeedback: (text: string) => void;
-declare const hideAppWindow: () => void;
+declare const openSettingsLicense: () => void;
 
 type TrialExpiredMessageProps = {
   visible: boolean
@@ -58,8 +58,8 @@ export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
     return features || need || value || other || feedback.length > 0
   }
 
-  function handleClose() {
-    hideAppWindow()
+  function handleActivate() {
+    openSettingsLicense()
   }
 
   function handleBuyLicense() {
@@ -143,7 +143,7 @@ export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
                 !feedbackProvided && <AlertDialogCancel onClick={handleFeedback} disabled={!canSendFeedback()}>Send Feedback</AlertDialogCancel>
               }
               {
-                feedbackProvided && <AlertDialogCancel onClick={handleClose}>Close</AlertDialogCancel>
+                feedbackProvided && <AlertDialogCancel onClick={handleActivate}>Activate License</AlertDialogCancel>
               }
               <AlertDialogAction onClick={handleBuyLicense}>Buy License</AlertDialogAction>
             </div>
