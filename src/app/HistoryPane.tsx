@@ -648,6 +648,24 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
+  async function handlePastePath() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      if (item.type === ClipType.File) {
+        pasteItemInFrontApp(getFilePath(item), "", "")
+      }
+    }
+  }
+
+  async function handleCopyPathToClipboard() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      if (item.type === ClipType.File) {
+        copyToClipboard(item.filePath, "", "", false)
+      }
+    }
+  }
+
   async function handleMerge() {
     let content = ""
     let indices = getSelectedHistoryItemIndices()
@@ -1056,6 +1074,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onPasteWithTab={handlePasteWithTab}
                               onPasteWithReturn={handlePasteWithReturn}
                               onPasteWithTransformation={handlePasteWithTransformation}
+                              onPastePath={handlePastePath}
                               onPasteByIndex={handlePasteByIndex}
                               onMerge={handleMerge}
                               onHideActions={handleHideActions}
@@ -1065,6 +1084,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onRenameItem={handleRenameItem}
                               onRenameItemByIndex={handleRenameItemByIndex}
                               onCopyToClipboard={handleCopyToClipboard}
+                              onCopyPathToClipboard={handleCopyPathToClipboard}
                               onCopyToClipboardByIndex={handleCopyToClipboardByIndex}
                               onCopyTextFromImage={handleCopyTextFromImage}
                               onCopyTextFromImageByIndex={handleCopyTextFromImageByIndex}

@@ -69,10 +69,12 @@ export type HideActionsReason =
     | "pasteWithTab"
     | "pasteWithReturn"
     | "pasteWithTransformation"
+    | "pastePath"
     | "merge"
     | "editContent"
     | "renameItem"
     | "copyToClipboard"
+    | "copyPathToClipboard"
     | "copyTextFromImage"
     | "saveImageAsFile"
     | "openInBrowser"
@@ -96,10 +98,12 @@ type CommandsProps = {
   onPasteWithTab: () => void
   onPasteWithReturn: () => void
   onPasteWithTransformation: () => void
+  onPastePath: () => void
   onMerge: () => void
   onEditContent: () => void
   onRenameItem: () => void
   onCopyToClipboard: () => void
+  onCopyPathToClipboard: () => void
   onCopyTextFromImage: () => void
   onSaveImageAsFile: () => void
   onOpenInBrowser: () => void
@@ -289,6 +293,18 @@ export default function Commands(props: CommandsProps) {
     props.onPasteWithTransformation()
   }
 
+  function handlePastePath() {
+    closeReason = "pastePath"
+    handleOpenChange(false)
+    props.onPastePath()
+  }
+
+  function handleCopyPathToClipboard() {
+    closeReason = "copyPathToClipboard"
+    handleOpenChange(false)
+    props.onCopyPathToClipboard()
+  }
+
   function canShowCopyToClipboard() {
     return getSelectedHistoryItemIndices().length === 1
   }
@@ -298,6 +314,18 @@ export default function Commands(props: CommandsProps) {
   }
 
   function canShowInFinder() {
+    return isFile()
+  }
+
+  function canShowCopyPath() {
+    return isFile()
+  }
+
+  function canShowPastePath() {
+    return isFile()
+  }
+
+  function isFile() {
     if (getSelectedHistoryItemIndices().length === 1) {
       let item = getFirstSelectedHistoryItem()
       return item && item.type === ClipType.File
@@ -448,6 +476,14 @@ export default function Commands(props: CommandsProps) {
                     </CommandItem>
                 }
                 {
+                    canShowPastePath() &&
+                    <CommandItem onSelect={handlePastePath}>
+                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
+                           alt="Application icon"/>
+                      <span>Paste Path to {props.appName}</span>
+                    </CommandItem>
+                }
+                {
                     canShowMergeItems() &&
                     <CommandItem onSelect={handleMerge}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -474,6 +510,13 @@ export default function Commands(props: CommandsProps) {
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
                       </CommandShortcut>
+                    </CommandItem>
+                }
+                {
+                    canShowCopyPath() &&
+                    <CommandItem onSelect={handleCopyPathToClipboard}>
+                      <CopyIcon className="mr-2 h-5 w-5"/>
+                      <span>Copy Path to Clipboard</span>
                     </CommandItem>
                 }
                 <CommandSeparator/>
