@@ -288,7 +288,7 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
               canSaveImageAsFile() &&
               <DropdownMenuItem onClick={handleSaveImageAsFile}>
                 <DownloadIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Save as File...</span>
+                <span className="mr-12">Save Image as File...</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetSaveImageAsFileShortcut()}/>
                 </CommandShortcut>
