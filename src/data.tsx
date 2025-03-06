@@ -5,7 +5,9 @@ import {
   deleteAllClips,
   deleteClip,
   getAllClips,
-  getFilePath, getImageFileName, getImageText,
+  getFilePath,
+  getImageFileName,
+  getImageText,
   updateClip
 } from "@/db";
 import {prefGetClearHistoryOnMacReboot} from "@/pref";
@@ -148,11 +150,6 @@ export function getHistoryItems(): Clip[] {
   if (filterQuery.length > 0) {
     let filteredHistory = Array.from(history.filter(item => {
       let searchString = filterQuery.toLowerCase();
-      // Search in content.
-      let contentHasText = item.content.toLowerCase().includes(searchString);
-      if (contentHasText) {
-        return true
-      }
       // Search in name.
       if (item.name && item.name.toLowerCase().includes(searchString)) {
         return true
@@ -174,7 +171,8 @@ export function getHistoryItems(): Clip[] {
           return true
         }
       }
-      return false
+      // Search in content.
+      return item.content.toLowerCase().includes(searchString);
     }));
     visibleHistoryLength = filteredHistory.length
     sortHistory(sortType, filteredHistory)

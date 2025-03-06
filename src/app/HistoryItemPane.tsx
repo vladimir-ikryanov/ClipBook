@@ -26,10 +26,12 @@ type HistoryItemPaneProps = {
   onMouseDoubleClick: (index: number) => void
   onPaste: () => void
   onPasteByIndex: (index: number) => void
+  onPastePathByIndex: (index: number) => void
   onEditHistoryItem: (item: Clip) => void
   onEditContent: (index: number) => void
   onRenameItem: (index: number) => void
   onCopyToClipboard: (index: number) => void
+  onCopyPathToClipboard: (index: number) => void
   onCopyTextFromImage: (index: number) => void
   onOpenInBrowser: (index: number) => void
   onPreviewLink: (index: number) => void
@@ -204,10 +206,12 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
                                 onOpenChange={handleDropdownMenuOpenChange}
                                 onHideClipDropdownMenu={props.onHideClipDropdownMenu}
                                 onPaste={props.onPasteByIndex}
+                                onPastePath={props.onPastePathByIndex}
                                 onEditHistoryItem={props.onEditHistoryItem}
                                 onEditContent={props.onEditContent}
                                 onRenameItem={props.onRenameItem}
                                 onCopyToClipboard={props.onCopyToClipboard}
+                                onCopyPathToClipboard={props.onCopyPathToClipboard}
                                 onCopyTextFromImage={props.onCopyTextFromImage}
                                 onOpenInBrowser={props.onOpenInBrowser}
                                 onPreviewLink={props.onPreviewLink}
@@ -299,10 +303,6 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
       return props.item.name
     }
     if (props.item.type === ClipType.Image) {
-      let imageText = getImageText(props.item)
-      if (imageText.length > 0) {
-        return imageText
-      }
       return "Image (" + props.item.imageWidth + "x" + props.item.imageHeight + ")"
     }
     if (props.item.type === ClipType.File) {

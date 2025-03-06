@@ -657,12 +657,28 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
+  async function handlePastePathByIndex(index: number) {
+    if (index < history.length) {
+      let item = history[index]
+      if (item.type === ClipType.File) {
+        pasteItemInFrontApp(getFilePath(item), "", "")
+      }
+    }
+  }
+
   async function handleCopyPathToClipboard() {
     if (getSelectedHistoryItemIndices().length === 1) {
       let item = getFirstSelectedHistoryItem()
       if (item.type === ClipType.File) {
         copyToClipboard(item.filePath, "", "", false)
       }
+    }
+  }
+
+  async function handleCopyPathToClipboardByIndex(index: number) {
+    let item = getHistoryItem(index)
+    if (item.type === ClipType.File) {
+      copyToClipboard(item.filePath, "", "", false)
     }
   }
 
@@ -1076,6 +1092,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onPasteWithTransformation={handlePasteWithTransformation}
                               onPastePath={handlePastePath}
                               onPasteByIndex={handlePasteByIndex}
+                              onPastePathByIndex={handlePastePathByIndex}
                               onMerge={handleMerge}
                               onHideActions={handleHideActions}
                               onHideClipDropdownMenu={handleHideClipDropdownMenu}
@@ -1086,6 +1103,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onCopyToClipboard={handleCopyToClipboard}
                               onCopyPathToClipboard={handleCopyPathToClipboard}
                               onCopyToClipboardByIndex={handleCopyToClipboardByIndex}
+                              onCopyPathToClipboardByIndex={handleCopyPathToClipboardByIndex}
                               onCopyTextFromImage={handleCopyTextFromImage}
                               onCopyTextFromImageByIndex={handleCopyTextFromImageByIndex}
                               onSaveImageAsFile={handleSaveImageAsFile}

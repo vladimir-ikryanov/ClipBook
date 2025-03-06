@@ -33,10 +33,12 @@ import {isTextItem, toBase64Icon} from "@/data";
 export type HideClipDropdownMenuReason =
     "cancel"
     | "paste"
+    | "pastePath"
     | "toggleFavorite"
     | "editContent"
     | "renameItem"
     | "copyToClipboard"
+    | "copyPathToClipboard"
     | "copyTextFromImage"
     | "openInBrowser"
     | "previewLink"
@@ -51,10 +53,12 @@ type HistoryItemMenuProps = {
   onOpenChange: (open: boolean) => void
   onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onPaste: (index: number) => void
+  onPastePath: (index: number) => void
   onEditHistoryItem: (item: Clip) => void
   onEditContent: (index: number) => void
   onRenameItem: (index: number) => void
   onCopyToClipboard: (index: number) => void
+  onCopyPathToClipboard: (index: number) => void
   onCopyTextFromImage: (index: number) => void
   onOpenInBrowser: (index: number) => void
   onPreviewLink: (index: number) => void
@@ -90,10 +94,22 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
     props.onPaste(props.index)
   }
 
+  function handlePastePath() {
+    closeReason = "pastePath"
+    handleOpenChange(false)
+    props.onPastePath(props.index)
+  }
+
   function handleCopyToClipboard() {
     closeReason = "copyToClipboard"
     handleOpenChange(false)
     props.onCopyToClipboard(props.index)
+  }
+
+  function handleCopyPathToClipboard() {
+    closeReason = "copyPathToClipboard"
+    handleOpenChange(false)
+    props.onCopyPathToClipboard(props.index)
   }
 
   function handleCopyTextFromImage() {
@@ -155,6 +171,14 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
                 <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
               </CommandShortcut>
             </DropdownMenuItem>
+            {
+                props.item.type === ClipType.File &&
+                <DropdownMenuItem onClick={handlePastePath}>
+                  <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
+                       alt="Application icon"/>
+                  <span className="mr-12">Paste Path to {props.appName}</span>
+                </DropdownMenuItem>
+            }
             <DropdownMenuItem onClick={handleCopyToClipboard}>
               <CopyIcon className="mr-2 h-4 w-4"/>
               <span className="mr-12">Copy to Clipboard</span>
@@ -162,6 +186,13 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
                 <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
               </CommandShortcut>
             </DropdownMenuItem>
+            {
+                props.item.type === ClipType.File &&
+                <DropdownMenuItem onClick={handleCopyPathToClipboard}>
+                  <CopyIcon className="mr-2 h-4 w-4"/>
+                  <span className="mr-12">Copy Path to Clipboard</span>
+                </DropdownMenuItem>
+            }
             <DropdownMenuSeparator/>
             {
               props.item.type === ClipType.Link &&
