@@ -36,6 +36,8 @@ NSString *prefIsFeedbackProvided = @"is_feedback_provided";
 NSString *prefPasteOnClick = @"paste_on_click";
 NSString *prefPlaySoundOnCopy = @"play_sound_on_copy";
 NSString *prefAlwaysDisplay = @"always_display";
+NSString *prefCopyOnDoubleClick = @"copy_on_double_click";
+NSString *prefCopyOnNumberAction = @"copy_on_number_action";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
@@ -1077,4 +1079,32 @@ std::string AppSettingsMac::getTrimSurroundingWhitespacesShortcut() {
     return {[shortcut UTF8String]};
   }
   return "ShiftLeft + MetaLeft + KeyM";
+}
+
+void AppSettingsMac::saveCopyOnDoubleClick(bool copy) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:copy forKey:prefCopyOnDoubleClick];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldCopyOnDoubleClick() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefCopyOnDoubleClick] != nil) {
+    return [defaults boolForKey:prefCopyOnDoubleClick];
+  }
+  return false;
+}
+
+void AppSettingsMac::saveCopyOnNumberAction(bool copy) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:copy forKey:prefCopyOnNumberAction];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldCopyOnNumberAction() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefCopyOnNumberAction] != nil) {
+    return [defaults boolForKey:prefCopyOnNumberAction];
+  }
+  return false;
 }

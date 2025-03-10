@@ -93,6 +93,12 @@ class AppSettingsMac : public AppSettings {
   void saveAlwaysDisplay(bool display) override;
   bool shouldAlwaysDisplay() override;
 
+  void saveCopyOnDoubleClick(bool copy) override;
+  bool shouldCopyOnDoubleClick() override;
+
+  void saveCopyOnNumberAction(bool copy) override;
+  bool shouldCopyOnNumberAction() override;
+
   // Shortcuts.
 
   void saveOpenAppShortcut(std::string shortcut) override;

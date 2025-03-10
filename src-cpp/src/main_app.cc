@@ -832,6 +832,18 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("shouldAlwaysDisplay", [this]() -> bool {
     return settings_->shouldAlwaysDisplay();
   });
+  window->putProperty("setCopyOnDoubleClick", [this](bool copy) -> void {
+    settings_->saveCopyOnDoubleClick(copy);
+  });
+  window->putProperty("shouldCopyOnDoubleClick", [this]() -> bool {
+    return settings_->shouldCopyOnDoubleClick();
+  });
+  window->putProperty("setCopyOnNumberAction", [this](bool copy) -> void {
+    settings_->saveCopyOnNumberAction(copy);
+  });
+  window->putProperty("shouldCopyOnNumberAction", [this]() -> bool {
+    return settings_->shouldCopyOnNumberAction();
+  });
 
   // Application shortcuts.
   window->putProperty("saveOpenAppShortcut", [this](std::string shortcut) -> void {

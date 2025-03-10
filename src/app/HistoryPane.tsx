@@ -61,7 +61,7 @@ import {
   prefGetShowMoreActionsShortcut, prefGetStripAllWhitespacesShortcut,
   prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut, prefGetTrimSurroundingWhitespacesShortcut,
-  prefSetDisplayThankYouDialog,
+  prefSetDisplayThankYouDialog, prefShouldAlwaysDisplay, prefShouldCopyOnDoubleClick,
   prefShouldDisplayThankYouMessage,
   prefShouldTreatDigitNumbersAsColor,
   prefShouldUpdateHistoryAfterAction
@@ -89,6 +89,7 @@ declare const showInFinder: (filePath: string) => void;
 declare const previewLink: (url: string) => void;
 declare const openSettingsWindow: () => void;
 declare const saveImageAsFile: (imageFilePath: string, imageWidth: number, imageHeight: number) => void;
+declare const hideAppWindow: () => void;
 
 type HistoryPaneProps = {
   appName: string
@@ -695,7 +696,15 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   async function handlePasteByIndex(index: number) {
     if (index < history.length) {
-      await pasteItem(history[index])
+      let item = history[index]
+      if (prefShouldCopyOnDoubleClick()) {
+        await copyItemToClipboard(item)
+        if (!prefShouldAlwaysDisplay()) {
+          hideAppWindow()
+        }
+      } else {
+        await pasteItem(item)
+      }
       handleSearchQueryChange("")
       setQuickPasteModifierPressed(false)
     }
@@ -984,9 +993,16 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
-  function handleMouseDoubleClick(index: number) {
+  async function handleMouseDoubleClick(index: number) {
     let item = getHistoryItem(index)
-    pasteItemInFrontApp(item.content, getImageFileName(item), getFilePath(item))
+    if (prefShouldCopyOnDoubleClick()) {
+      await copyItemToClipboard(item)
+      if (!prefShouldAlwaysDisplay()) {
+        hideAppWindow()
+      }
+    } else {
+      pasteItemInFrontApp(item.content, getImageFileName(item), getFilePath(item))
+    }
   }
 
   function handleFinishEditing() {

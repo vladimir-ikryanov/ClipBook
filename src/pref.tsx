@@ -46,6 +46,10 @@ declare const shouldAlwaysDisplay: () => boolean;
 declare const setAlwaysDisplay: (display: boolean) => void;
 declare const setFeedbackProvided: (provided: boolean) => void;
 declare const isFeedbackProvided: () => boolean;
+declare const setCopyOnDoubleClick: (copy: boolean) => void;
+declare const shouldCopyOnDoubleClick: () => boolean;
+declare const setCopyOnNumberAction: (copy: boolean) => void;
+declare const shouldCopyOnNumberAction: () => boolean;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -125,6 +129,16 @@ export enum OpenWindowStrategy {
   SCREEN_WITH_CURSOR = "screenWithCursor",
   MOUSE_CURSOR = "mouseCursor",
   INPUT_CURSOR = "inputCursor",
+}
+
+export enum DoubleClickStrategy {
+  COPY = "copy",
+  PASTE = "paste",
+}
+
+export enum NumberActionStrategy {
+  COPY = "copy",
+  PASTE = "paste",
 }
 
 export function prefGetTheme() {
@@ -640,4 +654,20 @@ export function prefGetTrimSurroundingWhitespacesShortcut() {
 
 export function prefSetTrimSurroundingWhitespacesShortcut(shortcut: string) {
   saveTrimSurroundingWhitespacesShortcut(shortcut)
+}
+
+export function prefSetCopyOnDoubleClick(copy: boolean) {
+  setCopyOnDoubleClick(copy)
+}
+
+export function prefShouldCopyOnDoubleClick() {
+  return shouldCopyOnDoubleClick()
+}
+
+export function prefSetCopyOnNumberAction(copy: boolean) {
+  setCopyOnNumberAction(copy)
+}
+
+export function prefShouldCopyOnNumberAction() {
+  return shouldCopyOnNumberAction()
 }

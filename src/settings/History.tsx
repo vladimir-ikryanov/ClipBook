@@ -3,7 +3,7 @@ import {Label} from "@/components/ui/label";
 import {Switch} from "@/components/ui/switch";
 import {useEffect, useState} from "react";
 import {
-  CopyAndMergeSeparator,
+  CopyAndMergeSeparator, DoubleClickStrategy, NumberActionStrategy,
   prefGetClearHistoryOnMacReboot,
   prefGetClearHistoryOnQuit,
   prefGetCopyAndMergeEnabled,
@@ -14,12 +14,17 @@ import {
   prefSetClearHistoryOnMacReboot,
   prefSetClearHistoryOnQuit,
   prefSetCopyAndMergeEnabled,
-  prefSetCopyAndMergeSeparator,
+  prefSetCopyAndMergeSeparator, prefSetCopyOnDoubleClick, prefSetCopyOnNumberAction,
   prefSetCopyToClipboardAfterMerge,
-  prefSetKeepFavoritesOnClearHistory, prefSetPasteOnClick,
+  prefSetKeepFavoritesOnClearHistory,
+  prefSetPasteOnClick,
   prefSetShowPreviewForLinks,
-  prefSetTreatDigitNumbersAsColor, prefSetUpdateHistoryAfterAction,
-  prefSetWarnOnClearHistory, prefShouldPasteOnClick,
+  prefSetTreatDigitNumbersAsColor,
+  prefSetUpdateHistoryAfterAction,
+  prefSetWarnOnClearHistory,
+  prefShouldCopyOnDoubleClick,
+  prefShouldCopyOnNumberAction,
+  prefShouldPasteOnClick,
   prefShouldShowPreviewForLinks,
   prefShouldTreatDigitNumbersAsColor,
   prefShouldUpdateHistoryAfterAction,
@@ -31,8 +36,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  DropdownMenu,
+  DropdownMenuContent, DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import {ChevronsUpDown} from "lucide-react";
+import {Button} from "@/components/ui/button";
 
 declare const closeSettingsWindow: () => void;
+
+const doubleClickStrategyLabels = {
+  [DoubleClickStrategy.COPY]: "Copy to clipboard",
+  [DoubleClickStrategy.PASTE]: "Paste to active app",
+}
+
+const numberActionStrategyLabels = {
+  [NumberActionStrategy.COPY]: "Copy to clipboard",
+  [NumberActionStrategy.PASTE]: "Paste to active app",
+}
 
 export default function History() {
   const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory())
@@ -46,6 +69,8 @@ export default function History() {
   const [showPreviewForLinks, setShowPreviewForLinks] = useState(prefShouldShowPreviewForLinks())
   const [updateHistoryAfterAction, setUpdateHistoryAfterAction] = useState(prefShouldUpdateHistoryAfterAction())
   const [pasteOnClick, setPasteOnClick] = useState(prefShouldPasteOnClick())
+  const [doubleClickStrategy, setDoubleClickStrategy] = useState(prefShouldCopyOnDoubleClick() ? DoubleClickStrategy.COPY : DoubleClickStrategy.PASTE)
+  const [numberActionStrategy, setNumberActionStrategy] = useState(prefShouldCopyOnNumberAction() ? NumberActionStrategy.COPY : NumberActionStrategy.PASTE)
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -114,6 +139,16 @@ export default function History() {
     prefSetPasteOnClick(pasteOnClick)
   }
 
+  function handleDoubleClickStrategyChange(doubleClickStrategy: string) {
+    setDoubleClickStrategy(doubleClickStrategy as DoubleClickStrategy)
+    prefSetCopyOnDoubleClick(doubleClickStrategy === DoubleClickStrategy.COPY)
+  }
+
+  function handleNumberActionStrategyChange(numberActionStrategy: string) {
+    setNumberActionStrategy(numberActionStrategy as NumberActionStrategy)
+    prefSetCopyOnNumberAction(numberActionStrategy === NumberActionStrategy.COPY)
+  }
+
   return (
       <div className="flex h-screen select-none">
         <div className="flex flex-col flex-grow">
@@ -144,6 +179,75 @@ export default function History() {
               </Label>
               <Switch id="pasteOnClick" checked={pasteOnClick}
                       onCheckedChange={handlePasteOnClickChange}/>
+            </div>
+
+            <div className="flex items-center justify-between space-x-10 pb-1">
+              <Label htmlFor="pasteOnClick" className="flex flex-col text-base">
+                <span className="">On double click</span>
+                <span className="text-neutral-500 font-normal text-sm mt-1">
+                  Select action for double click on history&nbsp;item.
+                </span>
+              </Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="dropdown" className="px-4 outline-none">
+                    {doubleClickStrategyLabels[doubleClickStrategy]}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="p-1.5 bg-actions-background" align="end">
+                  <DropdownMenuRadioGroup value={doubleClickStrategy}
+                                          onValueChange={handleDoubleClickStrategyChange}>
+                    <DropdownMenuRadioItem value={DoubleClickStrategy.PASTE}
+                                           className="py-2 pr-4 pl-10">
+                      <div className="flex flex-col">
+                        <span>{doubleClickStrategyLabels[DoubleClickStrategy.PASTE]}</span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={DoubleClickStrategy.COPY}
+                                           className="py-2 pr-4 pl-10">
+                      <div className="flex flex-col">
+                        <span>{doubleClickStrategyLabels[DoubleClickStrategy.COPY]}</span>
+                      </div>
+                    </DropdownMenuRadioItem>
+
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="flex items-center justify-between space-x-12 pb-1">
+              <Label htmlFor="pasteOnClick" className="flex flex-col text-base">
+                <span className="">On command number shortcut ⌘1-9</span>
+                <span className="text-neutral-500 font-normal text-sm mt-1">
+                  Select action for the command number shortcut&nbsp;⌘1-9.
+                </span>
+              </Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="dropdown" className="px-4 outline-none">
+                    {numberActionStrategyLabels[numberActionStrategy]}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="p-1.5 bg-actions-background" align="end">
+                  <DropdownMenuRadioGroup value={numberActionStrategy}
+                                          onValueChange={handleNumberActionStrategyChange}>
+                    <DropdownMenuRadioItem value={NumberActionStrategy.PASTE}
+                                           className="py-2 pr-4 pl-10">
+                      <div className="flex flex-col">
+                        <span>{numberActionStrategyLabels[NumberActionStrategy.PASTE]}</span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={NumberActionStrategy.COPY}
+                                           className="py-2 pr-4 pl-10">
+                      <div className="flex flex-col">
+                        <span>{numberActionStrategyLabels[NumberActionStrategy.COPY]}</span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <hr/>

@@ -97,6 +97,12 @@ class AppSettings {
   virtual void saveAlwaysDisplay(bool display) = 0;
   virtual bool shouldAlwaysDisplay() = 0;
 
+  virtual void saveCopyOnDoubleClick(bool copy) = 0;
+  virtual bool shouldCopyOnDoubleClick() = 0;
+
+  virtual void saveCopyOnNumberAction(bool copy) = 0;
+  virtual bool shouldCopyOnNumberAction() = 0;
+
   // Shortcuts.
 
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;
