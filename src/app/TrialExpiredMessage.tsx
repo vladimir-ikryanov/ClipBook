@@ -26,6 +26,7 @@ type TrialExpiredMessageProps = {
 export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
   const [feedbackProvided, setFeedbackProvided] = useState(false)
   const [feedback, setFeedback] = useState("")
+  const [email, setEmail] = useState("")
   const [features, setFeatures] = useState(false)
   const [need, setNeed] = useState(false)
   const [value, setValue] = useState(false)
@@ -50,6 +51,7 @@ export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
       text += "Reason:\n\n" + reason + "\n"
     }
     text += "Feedback:\n\n" + feedback
+    text += "\n\nEmail: " + email
     sendFeedback(text)
     setFeedbackProvided(true)
     prefSetFeedbackProvided(true)
@@ -69,6 +71,10 @@ export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
 
   function handleFeedbackChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
     setFeedback(event.target.value)
+  }
+
+  function handleEmailChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setEmail(event.target.value)
   }
 
   return (
@@ -128,7 +134,9 @@ export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
                       <textarea id="msg" value={feedback} onChange={handleFeedbackChange}
                                 className="flex h-24 p-2 bg-background border border-border rounded-md text-dialog-text text-sm outline-none"
                                 placeholder="Your feedback"></textarea>
-                      <input className="flex p-2 bg-background placeholder:text-settings-inputPlaceholder border border-border rounded-md text-dialog-text text-sm outline-none" type="email" placeholder="Email for response (optional)"/>
+                      <input id="email" value={email} onChange={handleEmailChange}
+                             className="flex p-2 bg-background placeholder:text-settings-inputPlaceholder border border-border rounded-md text-dialog-text text-sm outline-none"
+                             type="email" placeholder="Email for response (optional)"/>
                     </div>
                   </div>
               }
