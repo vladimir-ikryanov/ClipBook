@@ -13,6 +13,7 @@ import {
 import {Button} from "@/components/ui/button";
 import {Checkbox} from "@/components/ui/checkbox";
 import {prefIsFeedbackProvided, prefSetFeedbackProvided} from "@/pref";
+import {Input} from "@/components/ui/input";
 
 declare const buyLicense: () => void;
 declare const sendFeedback: (text: string) => void;
@@ -23,7 +24,7 @@ type TrialExpiredMessageProps = {
 }
 
 export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
-  const [feedbackProvided, setFeedbackProvided] = useState(prefIsFeedbackProvided())
+  const [feedbackProvided, setFeedbackProvided] = useState(false)
   const [feedback, setFeedback] = useState("")
   const [features, setFeatures] = useState(false)
   const [need, setNeed] = useState(false)
@@ -78,7 +79,7 @@ export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              <h1 className="text-xl mb-2">Your trial has ended</h1>
+              <h1 className="text-xl mb-2">Your trial has ended :(</h1>
             </AlertDialogTitle>
             <div className="text-[14px] text-dialog-text">
               <p>I hope you enjoyed using ClipBook. If you like it, please consider supporting the
@@ -123,15 +124,18 @@ export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
                         </label>
                       </div>
                     </div>
-                    <textarea id="msg" value={feedback} onChange={handleFeedbackChange}
-                              className="flex flex-grow h-32 p-2 bg-background border border-border rounded-md text-dialog-text text-sm outline-none"
-                              placeholder="Your feedback (optional)"></textarea>
+                    <div className="flex flex-col flex-grow space-y-2.5 mt-2.5">
+                      <textarea id="msg" value={feedback} onChange={handleFeedbackChange}
+                                className="flex h-24 p-2 bg-background border border-border rounded-md text-dialog-text text-sm outline-none"
+                                placeholder="Your feedback"></textarea>
+                      <input className="flex p-2 bg-background placeholder:text-settings-inputPlaceholder border border-border rounded-md text-dialog-text text-sm outline-none" type="email" placeholder="Email for response (optional)"/>
+                    </div>
                   </div>
               }
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <div className="flex flex-grow items-center space-x-2 px-2">
+            <div className="flex flex-grow items-center space-x-2">
               <img src="assets/photo.png" className="w-10 h-10 rounded-full" alt="Photo"/>
               <div className="flex flex-col">
                 <p className="text-sm text-secondary-foreground">Vladimir Ikryanov</p>
@@ -143,7 +147,7 @@ export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
                 !feedbackProvided && <AlertDialogCancel onClick={handleFeedback} disabled={!canSendFeedback()}>Send Feedback</AlertDialogCancel>
               }
               {
-                feedbackProvided && <AlertDialogCancel onClick={handleActivate}>Activate License</AlertDialogCancel>
+                <AlertDialogCancel onClick={handleActivate}>Activate License</AlertDialogCancel>
               }
               <AlertDialogAction onClick={handleBuyLicense}>Buy License</AlertDialogAction>
             </div>
