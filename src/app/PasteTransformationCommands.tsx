@@ -14,11 +14,11 @@ import ShortcutLabel from "@/app/ShortcutLabel";
 import {TextFormatOperation} from "@/data";
 import {DialogTitle} from "@/components/ui/dialog";
 
-type TextFormatCommandsProps = {
+type PasteTransformationCommandsProps = {
   onPasteWithTransformation: (operation: TextFormatOperation) => void
 }
 
-export default function TextFormatCommands(props: TextFormatCommandsProps) {
+export default function PasteTransformationCommands(props: PasteTransformationCommandsProps) {
   const [open, setOpen] = useState(false)
 
   function handleKeyDown(e: React.KeyboardEvent) {

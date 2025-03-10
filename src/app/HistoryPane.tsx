@@ -734,7 +734,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleHideActions(reason: HideActionsReason) {
-    if (reason !== "editContent" && reason !== "renameItem" && reason !== "pasteWithTransformation") {
+    if (reason !== "editContent" && reason !== "renameItem" && reason !== "pasteWithTransformation" && reason !== "formatText") {
       focusSearchField()
     }
   }
@@ -1109,6 +1109,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onPastePath={handlePastePath}
                               onPasteByIndex={handlePasteByIndex}
                               onPastePathByIndex={handlePastePathByIndex}
+                              onFormatText={handleFormatTextAndSave}
                               onMerge={handleMerge}
                               onHideActions={handleHideActions}
                               onHideClipDropdownMenu={handleHideClipDropdownMenu}

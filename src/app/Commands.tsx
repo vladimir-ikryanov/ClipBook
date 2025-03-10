@@ -12,7 +12,7 @@ import {
   SettingsIcon,
   StarIcon,
   StarOffIcon,
-  TrashIcon, Undo2Icon, ZoomIn, ZoomOut
+  TrashIcon, TypeIcon, Undo2Icon, ZoomIn, ZoomOut
 } from "lucide-react"
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -73,6 +73,7 @@ export type HideActionsReason =
     | "merge"
     | "editContent"
     | "renameItem"
+    | "formatText"
     | "copyToClipboard"
     | "copyPathToClipboard"
     | "copyTextFromImage"
@@ -102,6 +103,7 @@ type CommandsProps = {
   onMerge: () => void
   onEditContent: () => void
   onRenameItem: () => void
+  onFormatText: () => void
   onCopyToClipboard: () => void
   onCopyPathToClipboard: () => void
   onCopyTextFromImage: () => void
@@ -171,6 +173,12 @@ export default function Commands(props: CommandsProps) {
     closeReason = "renameItem"
     handleOpenChange(false)
     props.onRenameItem()
+  }
+
+  function handleFormatText() {
+    closeReason = "formatText"
+    handleOpenChange(false)
+    props.onFormatText()
   }
 
   function handleCopyToClipboard() {
@@ -363,6 +371,16 @@ export default function Commands(props: CommandsProps) {
 
   function canShowRenameItem() {
     return getSelectedHistoryItemIndices().length === 1
+  }
+
+  function canShowFormatText() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem();
+      if (item) {
+        return isTextItem(item)
+      }
+    }
+    return false
   }
 
   function canShowCopyTextFromImage() {
@@ -622,6 +640,13 @@ export default function Commands(props: CommandsProps) {
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
                       </CommandShortcut>
+                    </CommandItem>
+                }
+                {
+                    canShowFormatText() &&
+                    <CommandItem onSelect={handleFormatText}>
+                      <TypeIcon className="mr-2 h-5 w-5"/>
+                      <span>Format Text...</span>
                     </CommandItem>
                 }
                 <CommandSeparator/>

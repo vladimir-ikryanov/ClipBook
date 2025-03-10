@@ -8,8 +8,9 @@ import {ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import Commands, {HideActionsReason} from "@/app/Commands";
-import TextFormatCommands from "@/app/TextFormatCommands";
+import PasteTransformationCommands from "@/app/PasteTransformationCommands";
 import {TextFormatOperation} from "@/data";
+import FormatTextCommands from "@/app/FormatTextCommands";
 
 declare const openSettingsLicense: () => void;
 
@@ -28,6 +29,7 @@ type SearchBarProps = {
   onPasteWithReturn: () => void
   onPasteWithTransformation: (operation: TextFormatOperation) => void
   onPastePath: () => void
+  onFormatText: (operation: TextFormatOperation) => void
   onMerge: () => void
   onHideActions: (reason: HideActionsReason) => void
   onToggleFavorite: () => void
@@ -92,6 +94,12 @@ export default function SearchBar(props: SearchBarProps) {
   function showTransformationOptionsDialog() {
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "pasteWithTransformation"}}));
+    }, 100);
+  }
+
+  function showFormatOptionsDialog() {
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "formatText"}}));
     }, 100);
   }
 
@@ -203,6 +211,7 @@ export default function SearchBar(props: SearchBarProps) {
                       onHideActions={props.onHideActions}
                       onEditContent={props.onEditContent}
                       onRenameItem={props.onRenameItem}
+                      onFormatText={showFormatOptionsDialog}
                       onCopyToClipboard={props.onCopyToClipboard}
                       onCopyPathToClipboard={props.onCopyPathToClipboard}
                       onCopyTextFromImage={props.onCopyTextFromImage}
@@ -225,8 +234,9 @@ export default function SearchBar(props: SearchBarProps) {
                       onDeleteItem={props.onDeleteItem}
                       onDeleteItems={props.onDeleteItems}
                       onDeleteAllItems={props.onDeleteAllItems}/>
-            <TextFormatCommands
+            <PasteTransformationCommands
                 onPasteWithTransformation={props.onPasteWithTransformation}/>
+            <FormatTextCommands onFormatText={props.onFormatText}/>
           </div>
           <div className={props.isPreviewVisible ? "hidden" : ""}>
             <Tooltip>
