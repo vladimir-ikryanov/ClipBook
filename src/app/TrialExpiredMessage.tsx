@@ -154,9 +154,7 @@ export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
               {
                 !feedbackProvided && <AlertDialogCancel onClick={handleFeedback} disabled={!canSendFeedback()}>Send Feedback</AlertDialogCancel>
               }
-              {
-                <AlertDialogCancel onClick={handleActivate}>Activate License</AlertDialogCancel>
-              }
+              <AlertDialogCancel onClick={handleActivate}>Activate License</AlertDialogCancel>
               <AlertDialogAction onClick={handleBuyLicense}>Buy License</AlertDialogAction>
             </div>
           </AlertDialogFooter>
