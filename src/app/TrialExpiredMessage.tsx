@@ -13,7 +13,6 @@ import {
 import {Button} from "@/components/ui/button";
 import {Checkbox} from "@/components/ui/checkbox";
 import {prefIsFeedbackProvided, prefSetFeedbackProvided} from "@/pref";
-import {Input} from "@/components/ui/input";
 
 declare const buyLicense: () => void;
 declare const sendFeedback: (text: string) => void;
@@ -24,7 +23,7 @@ type TrialExpiredMessageProps = {
 }
 
 export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
-  const [feedbackProvided, setFeedbackProvided] = useState(false)
+  const [feedbackProvided, setFeedbackProvided] = useState(prefIsFeedbackProvided())
   const [feedback, setFeedback] = useState("")
   const [email, setEmail] = useState("")
   const [features, setFeatures] = useState(false)

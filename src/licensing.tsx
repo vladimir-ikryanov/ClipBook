@@ -11,8 +11,7 @@ export function isTrialLicense(): boolean {
 }
 
 export function isTrialLicenseExpired(): boolean {
-  return true
-  // return isTrial() && getTrialLicenseDaysLeft() <= 0
+  return isTrial() && getTrialLicenseDaysLeft() <= 0
 }
 
 export function getTrialLicenseDaysLeft(): number {
