@@ -1,6 +1,6 @@
 import '../app.css';
 import React, {CSSProperties, KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
-import {getFilterQuery} from "@/data";
+import {getFilterQuery, updateHistoryItem} from "@/data";
 import {Clip, ClipType, getFilePath, getImageText, updateClip} from "@/db";
 import {getFileNameFromPath, hasModifiers, toCSSColor} from "@/lib/utils";
 import {
@@ -71,7 +71,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   async function saveItemName(name: string) {
     setItemName(name)
     props.item.name = name
-    await updateClip(props.item.id!, props.item)
+    await updateHistoryItem(props.item.id!, props.item)
   }
 
   async function handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {

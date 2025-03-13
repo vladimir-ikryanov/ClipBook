@@ -101,6 +101,10 @@ export async function loadHistory() {
 
   history = await getAllClips()
   sortHistory(sortType, history)
+  requestHistoryUpdate()
+}
+
+export function requestHistoryUpdate() {
   historyUpdated = true
 }
 
@@ -191,6 +195,7 @@ async function deleteItem(item: Clip) {
   if (index !== -1) {
     history.splice(index, 1)
     await deleteClip(item.id!)
+    requestHistoryUpdate()
   }
 }
 
@@ -271,16 +276,18 @@ export async function addHistoryItem(content: string,
   item.fileFolder = isFolder
   await addClip(item)
   history.push(item)
-  historyUpdated = true
+  requestHistoryUpdate()
   return item
 }
 
 export async function deleteHistoryItem(item: Clip) {
   await deleteItem(item)
+  requestHistoryUpdate()
 }
 
 export async function updateHistoryItem(id: number, item: Clip) {
   await updateClip(id, item)
+  requestHistoryUpdate()
 }
 
 function getFavorites(): Clip[] {
@@ -297,12 +304,12 @@ export async function clear(keepFavorites: boolean): Promise<Clip[]> {
         }
       }
       history = favorites
-      historyUpdated = true
+      requestHistoryUpdate()
       return getHistoryItems()
     }
   }
   history = []
-  historyUpdated = true
+  requestHistoryUpdate()
   await deleteAllClips()
   return getHistoryItems()
 }
@@ -439,6 +446,9 @@ export async function updateHistoryItemTypes(): Promise<boolean> {
     if (oldType !== newType) {
       historyUpdated = true
     }
+  }
+  if (historyUpdated) {
+    requestHistoryUpdate()
   }
   return historyUpdated
 }

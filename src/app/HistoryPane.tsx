@@ -142,7 +142,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (item) {
       item.numberOfCopies++
       item.lastTimeCopy = new Date()
-      await updateClip(item.id!, item)
+      await updateHistoryItem(item.id!, item)
     } else {
       item = await addHistoryItem(
           content,
@@ -594,7 +594,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (prefShouldUpdateHistoryAfterAction() && !keepHistory) {
       item.lastTimeCopy = new Date()
     }
-    await updateClip(item.id!, item)
+    await updateHistoryItem(item.id!, item)
 
     pasteItemInFrontApp(item.content, getImageFileName(item), getFilePath(item))
 
@@ -813,7 +813,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (prefShouldUpdateHistoryAfterAction()) {
       item.lastTimeCopy = new Date()
     }
-    await updateClip(item.id!, item)
+    await updateHistoryItem(item.id!, item)
 
     copyToClipboard(item.content, getImageFileName(item), getFilePath(item), true)
 
