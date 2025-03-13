@@ -31,8 +31,11 @@ export enum TextFormatOperation {
   TrimSurroundingWhitespaces
 }
 
-let history: Clip[];
+let history: Clip[] = [];
+let filteredHistory: Clip[] = [];
 let filterQuery = "";
+let filterHistory = false;
+let historyUpdated = false;
 let lastSelectedItemIndex = -1;
 let selectedItemIndices: number[] = [];
 let visibleHistoryLength = 0;
@@ -40,10 +43,50 @@ let previewVisible = true;
 let infoVisible = true;
 let sortType = SortHistoryType.TimeOfLastCopy;
 
-loadSettings()
-await loadHistory()
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-async function loadHistory() {
+loadSettings()
+// await loadHistory()
+// await loadHistoryForPromo()
+
+// noinspection JSUnusedLocalSymbols
+async function loadHistoryForPromo() {
+  await deleteAllClips()
+  await addClip(new Clip(ClipType.Text, "Get it. Try it. Use it if you like it.", "/Applications/Arc.app"))
+  await sleep(500)
+  await addClip(new Clip(ClipType.Email, "vladimir.ikryanov@clipbook.app", "/System/Applications/Mail.app"))
+  await sleep(500)
+  await addClip(new Clip(ClipType.Color, "rgb(255 100 3 / 80%)", "/Applications/Sketch.app"))
+  await sleep(500)
+  await addClip(new Clip(ClipType.Color, "#ea3380", "/Applications/Sketch.app"))
+  await sleep(500)
+  await addClip(new Clip(ClipType.Link, "https://openai.com/index/sora-is-here", "/Applications/Safari.app"))
+  await addClip(new Clip(ClipType.Link, "https://github.com/vladimir-ikryanov/ClipBook", "/Applications/Safari.app"))
+  await sleep(500)
+  await addClip(new Clip(ClipType.Text, "🔒 All data is securely stored on your Mac and never leave it", "/System/Applications/Notes.app"))
+  await sleep(500)
+  await addClip(new Clip(ClipType.Text, "✏️ Edit and preview history items", "/System/Applications/Notes.app"))
+  await sleep(500)
+  await addClip(new Clip(ClipType.Text, "⭐️ Add items to favorites", "/System/Applications/Notes.app"))
+  await sleep(500)
+  await addClip(new Clip(ClipType.Text, "🔎 Type to search", "/System/Applications/Notes.app"))
+  await sleep(500)
+  await addClip(new Clip(ClipType.Text, "⌛️ Unlimited clipboard history", "/System/Applications/Notes.app"))
+  await sleep(500)
+  await addClip(new Clip(ClipType.Text, "Keep everything you copy and quickly access your macOS clipboard history whenever you need it.\n" +
+      "\n" +
+      "ClipBook runs in the background and remembers everything you copy. You will never lose what you have already copied.\n" +
+      "\n" +
+      "Your clipboard history is always at your hands. To open your macOS clipboard history just press the following global keyboard shortcut.", "/System/Applications/Notes.app"))
+  await sleep(500)
+  await addClip(new Clip(ClipType.Text, "Standard clipboard stores only one entry and overwrites the previous one. It is easy to accidentally overwrite. It is inconvenient and wastes a lot of time because of such a limitation. If you copy a lot, if you are annoyed by wasting time searching for information that was copied just a couple of minutes or hours ago, if you are tired of constantly switching applications for copying and pasting, then the clipboard history app is for you. Once you try it, you will no longer be able to imagine working on a Mac without this application.", "/System/Applications/Notes.app"))
+  await addClip(new Clip(ClipType.Text, "Clipboard history app for your Mac", "/System/Applications/Notes.app"))
+  history = await getAllClips()
+}
+
+export async function loadHistory() {
   // Clear history on Mac reboot.
   if (prefGetClearHistoryOnMacReboot() && isAfterSystemReboot()) {
     await deleteAllClips()
@@ -51,8 +94,14 @@ async function loadHistory() {
     return
   }
 
+  // Fill the history with 10000 items.
+  // for (let i = 0; i < 10000; i++) {
+  //   history[i] = new Clip(ClipType.Text, "Standard clipboard stores only one entry and overwrites the previous one. It is easy to accidentally overwrite. It is inconvenient and wastes a lot of time because of such a limitation. If you copy a lot, if you are annoyed by wasting time searching for information that was copied just a couple of minutes or hours ago, if you are tired of constantly switching applications for copying and pasting, then the clipboard history app is for you. Once you try it, you will no longer be able to imagine working on a Mac without this application.", "/Applications/Safari.app")
+  // }
+
   history = await getAllClips()
   sortHistory(sortType, history)
+  historyUpdated = true
 }
 
 function loadSettings() {
@@ -146,9 +195,12 @@ async function deleteItem(item: Clip) {
 }
 
 export function getHistoryItems(): Clip[] {
-  visibleHistoryLength = history.length
   if (filterQuery.length > 0) {
-    let filteredHistory = Array.from(history.filter(item => {
+    if (!filterHistory) {
+      return filteredHistory
+    }
+    filterHistory = false
+    filteredHistory = Array.from(history.filter(item => {
       let searchString = filterQuery.toLowerCase();
       // Search in name.
       if (item.name && item.name.toLowerCase().includes(searchString)) {
@@ -178,8 +230,12 @@ export function getHistoryItems(): Clip[] {
     sortHistory(sortType, filteredHistory)
     return filteredHistory
   }
-  sortHistory(sortType, history)
-  return Array.from(history)
+  if (historyUpdated) {
+    sortHistory(sortType, history)
+    historyUpdated = false
+    visibleHistoryLength = history.length
+  }
+  return history
 }
 
 export function isHistoryEmpty() {
@@ -215,6 +271,7 @@ export async function addHistoryItem(content: string,
   item.fileFolder = isFolder
   await addClip(item)
   history.push(item)
+  historyUpdated = true
   return item
 }
 
@@ -240,10 +297,12 @@ export async function clear(keepFavorites: boolean): Promise<Clip[]> {
         }
       }
       history = favorites
+      historyUpdated = true
       return getHistoryItems()
     }
   }
   history = []
+  historyUpdated = true
   await deleteAllClips()
   return getHistoryItems()
 }
@@ -328,7 +387,10 @@ export function getVisibleHistoryLength() {
 }
 
 export function setFilterQuery(query: string) {
-  filterQuery = query
+  if (filterQuery !== query) {
+    filterQuery = query
+    filterHistory = true
+  }
 }
 
 export function getFilterQuery(): string {

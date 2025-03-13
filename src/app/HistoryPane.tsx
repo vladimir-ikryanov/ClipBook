@@ -23,7 +23,7 @@ import {
   getVisibleHistoryLength,
   isHistoryEmpty,
   isHistoryItemSelected,
-  isTextItem,
+  isTextItem, loadHistory,
   removeSelectedHistoryItemIndex,
   setFilterQuery,
   setPreviewVisibleState,
@@ -102,7 +102,7 @@ type HistoryPaneProps = {
 let treatDigitNumbersAsColor = prefShouldTreatDigitNumbersAsColor()
 
 export default function HistoryPane(props: HistoryPaneProps) {
-  const [history, setHistory] = useState(getHistoryItems())
+  const [history, setHistory] = useState<Clip[]>([])
   const [searchQuery, setSearchQuery] = useState("")
 
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
@@ -118,6 +118,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [trialDaysLeft, setTrialDaysLeft] = useState(getTrialLicenseDaysLeft());
   const [isTrialExpired, setIsTrialExpired] = useState(isTrialLicenseExpired());
   const [displayThankYouMessage, setDisplayThankYouMessage] = useState(prefShouldDisplayThankYouMessage());
+
+  useEffect(() => {
+    loadHistory().then(() => {
+      setHistory(getHistoryItems())
+    })
+  }, []);
 
   async function addClipboardData(content: string,
                                   sourceAppPath: string,
