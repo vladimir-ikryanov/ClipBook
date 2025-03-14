@@ -209,7 +209,7 @@ async function deleteItem(item: Clip) {
 
 export function getHistoryItems(): Clip[] {
   if (filterQuery.length > 0) {
-    if (!filterHistory) {
+    if (!filterHistory && !historyUpdated) {
       return filteredHistory
     }
     filterHistory = false
@@ -241,6 +241,7 @@ export function getHistoryItems(): Clip[] {
     }));
     visibleHistoryLength = filteredHistory.length
     sortHistory(sortType, filteredHistory)
+    historyUpdated = false
     return filteredHistory
   }
   if (historyUpdated) {
