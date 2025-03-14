@@ -10,7 +10,7 @@ import {Clip} from "@/db";
 import {SearchIcon} from "lucide-react";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {
-  addSelectedHistoryItemIndex,
+  addSelectedHistoryItemIndex, AppInfo,
   getSelectedHistoryItemIndices,
   removeSelectedHistoryItemIndex,
   setSelectedHistoryItemIndex, TextFormatOperation
@@ -57,6 +57,7 @@ type HistoryItemsPaneProps = {
   onOpenInBrowser: () => void
   onShowInFinder: () => void
   onPreviewLink: () => void
+  onOpenInApp: (app: AppInfo | undefined) => void
   onZoomIn: () => void
   onZoomOut: () => void
   onResetZoom: () => void
@@ -220,6 +221,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    onOpenInBrowser={props.onOpenInBrowser}
                    onShowInFinder={props.onShowInFinder}
                    onPreviewLink={props.onPreviewLink}
+                   onOpenInApp={props.onOpenInApp}
                    onZoomIn={props.onZoomIn}
                    onZoomOut={props.onZoomOut}
                    onResetZoom={props.onResetZoom}

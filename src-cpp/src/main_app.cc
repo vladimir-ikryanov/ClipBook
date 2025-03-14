@@ -656,6 +656,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("isAfterSystemReboot", [this]() -> bool {
     return after_system_reboot_;
   });
+  window->putProperty("getDefaultAppInfo", [this](std::string filePath) -> std::string {
+    return getDefaultAppInfo(filePath);
+  });
+  window->putProperty("openInApp", [this](std::string filePath, std::string appPath) {
+    openInApp(filePath, appPath);
+  });
   window->putProperty("isFeedbackProvided", [this]() -> bool {
 #ifdef OFFICIAL_BUILD
     return settings_->isFeedbackProvided();
@@ -906,6 +912,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("getShowInFinderShortcut", [this]() -> std::string {
     return settings_->getShowInFinderShortcut();
+  });
+  window->putProperty("saveOpenInDefaultAppShortcut", [this](std::string shortcut) -> void {
+    settings_->saveOpenInDefaultAppShortcut(shortcut);
+  });
+  window->putProperty("getOpenInDefaultAppShortcut", [this]() -> std::string {
+    return settings_->getOpenInDefaultAppShortcut();
   });
   window->putProperty("saveCopyToClipboardShortcut", [this](std::string shortcut) -> void {
     settings_->saveCopyToClipboardShortcut(shortcut);

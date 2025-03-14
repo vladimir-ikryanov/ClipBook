@@ -71,6 +71,8 @@ declare const saveOpenInBrowserShortcut: (shortcut: string) => void;
 declare const getOpenInBrowserShortcut: () => string;
 declare const saveShowInFinderShortcut: (shortcut: string) => void;
 declare const getShowInFinderShortcut: () => string;
+declare const saveOpenInDefaultAppShortcut: (shortcut: string) => void;
+declare const getOpenInDefaultAppShortcut: () => string;
 declare const saveCopyToClipboardShortcut: (shortcut: string) => void;
 declare const getCopyToClipboardShortcut: () => string;
 declare const saveCopyTextFromImageShortcut: (shortcut: string) => void;
@@ -283,6 +285,14 @@ export function prefGetShowInFinderShortcut() {
 
 export function prefSetShowInFinderShortcut(shortcut: string) {
   saveShowInFinderShortcut(shortcut)
+}
+
+export function prefGetOpenInDefaultAppShortcut() {
+  return getOpenInDefaultAppShortcut()
+}
+
+export function prefSetOpenInDefaultAppShortcut(shortcut: string) {
+  saveOpenInDefaultAppShortcut(shortcut)
 }
 
 export function prefGetCopyToClipboardShortcut() {

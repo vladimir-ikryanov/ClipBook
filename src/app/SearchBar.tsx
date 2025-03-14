@@ -9,7 +9,7 @@ import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import Commands, {HideActionsReason} from "@/app/Commands";
 import PasteTransformationCommands from "@/app/PasteTransformationCommands";
-import {TextFormatOperation} from "@/data";
+import {AppInfo, TextFormatOperation} from "@/data";
 import FormatTextCommands from "@/app/FormatTextCommands";
 
 declare const openSettingsLicense: () => void;
@@ -42,6 +42,7 @@ type SearchBarProps = {
   onSaveImageAsFile: () => void
   onOpenInBrowser: () => void
   onShowInFinder: () => void
+  onOpenInApp: (app: AppInfo | undefined) => void
   onPreviewLink: () => void
   onZoomIn: () => void
   onZoomOut: () => void
@@ -218,6 +219,7 @@ export default function SearchBar(props: SearchBarProps) {
                       onSaveImageAsFile={props.onSaveImageAsFile}
                       onOpenInBrowser={props.onOpenInBrowser}
                       onShowInFinder={props.onShowInFinder}
+                      onOpenInApp={props.onOpenInApp}
                       onPreviewLink={props.onPreviewLink}
                       onZoomIn={props.onZoomIn}
                       onZoomOut={props.onZoomOut}

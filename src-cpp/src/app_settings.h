@@ -135,6 +135,9 @@ class AppSettings {
   virtual void saveShowInFinderShortcut(std::string shortcut) = 0;
   virtual std::string getShowInFinderShortcut() = 0;
 
+  virtual void saveOpenInDefaultAppShortcut(std::string shortcut) = 0;
+  virtual std::string getOpenInDefaultAppShortcut() = 0;
+
   virtual void saveCopyToClipboardShortcut(std::string shortcut) = 0;
   virtual std::string getCopyToClipboardShortcut() = 0;
 

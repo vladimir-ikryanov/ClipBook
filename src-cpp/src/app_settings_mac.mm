@@ -54,6 +54,7 @@ NSString *prefPasteSelectedItemToActiveAppShortcut = @"app.paste_selected_item_t
 NSString *prefEditHistoryItemShortcut = @"app.edit_history_item_shortcut2";
 NSString *prefOpenInBrowserShortcut = @"app.open_in_browser_shortcut2";
 NSString *prefShowInFinderShortcut = @"app.show_in_finder_shortcut";
+NSString *prefOpenInDefaultAppShortcut = @"app.open_in_default_app_shortcut";
 NSString *prefCopyToClipboardShortcut = @"app.copy_to_clipboard_shortcut2";
 NSString *prefCopyImageFromTextShortcut = @"app.copy_image_from_text_shortcut";
 NSString *prefDeleteHistoryItemShortcut = @"app.delete_history_item_shortcut2";
@@ -566,6 +567,21 @@ std::string AppSettingsMac::getShowInFinderShortcut() {
     return {[shortcut UTF8String]};
   }
   return "MetaLeft + KeyO";
+}
+
+void AppSettingsMac::saveOpenInDefaultAppShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefOpenInDefaultAppShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getOpenInDefaultAppShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefOpenInDefaultAppShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "AltLeft + MetaLeft + KeyO";
 }
 
 void AppSettingsMac::saveCopyToClipboardShortcut(std::string shortcut) {

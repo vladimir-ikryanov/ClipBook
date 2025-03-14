@@ -14,6 +14,8 @@ import {prefGetClearHistoryOnMacReboot} from "@/pref";
 import {getClipType} from "@/lib/utils";
 
 declare const isAfterSystemReboot: () => boolean;
+// Returns a string that contains the app name, path, and icon separated by '|'.
+declare const getDefaultAppInfo: (filePath: string) => string;
 
 export enum SortHistoryType {
   TimeOfFirstCopy,
@@ -29,6 +31,12 @@ export enum TextFormatOperation {
   RemoveEmptyLines,
   StripAllWhitespaces,
   TrimSurroundingWhitespaces
+}
+
+export type AppInfo = {
+  name: string
+  path: string
+  icon: string
 }
 
 let history: Clip[] = [];
@@ -451,4 +459,17 @@ export async function updateHistoryItemTypes(): Promise<boolean> {
     requestHistoryUpdate()
   }
   return historyUpdated
+}
+
+export function getDefaultApp(filePath: string) : AppInfo | undefined {
+  let appInfo = getDefaultAppInfo(filePath)
+  if (appInfo.length === 0) {
+    return undefined
+  }
+  let parts = appInfo.split('|')
+  return {
+    name: parts[0],
+    path: parts[1],
+    icon: parts[2]
+  }
 }

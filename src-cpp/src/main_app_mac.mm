@@ -32,6 +32,8 @@ static std::string kInputCursor = "inputCursor";
 // The minimum width and height of an active app window we can use to center the ClipBook window.
 static int kMinAppWindowSize = 200;
 
+static std::string kAppInfoSeparator = "|";
+
 static std::string kShortcutSeparator = " + ";
 static std::string kMetaLeft = "MetaLeft";
 static std::string kMetaRight = "MetaRight";
@@ -919,4 +921,35 @@ NSPoint MainAppMac::getInputCursorLocationOnScreen() {
 
   // Return the caret's position as an NSPoint
   return NSPointFromCGPoint(caretBounds.origin);
+}
+
+std::string MainAppMac::getDefaultAppInfo(const std::string &file_path) {
+  NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
+  // Get the default app path for the given file path.
+  NSURL *appUrl = [workspace URLForApplicationToOpenURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:file_path.c_str()]]];
+  if (appUrl) {
+    auto appPath = [appUrl fileSystemRepresentation];
+    auto appName = getAppNameFromPath(appPath);
+    auto appIcon = getFileIconAsBase64(appPath, false);
+    return appName + kAppInfoSeparator + appPath + kAppInfoSeparator + appIcon;
+  }
+  return "";
+}
+
+void MainAppMac::openInApp(const std::string &file_path, const std::string &app_path) {
+  NSString* nsFilePath = [NSString stringWithUTF8String:file_path.c_str()];
+  NSString* nsAppPath = [NSString stringWithUTF8String:app_path.c_str()];
+
+  NSURL* fileURL = [NSURL fileURLWithPath:nsFilePath];
+  NSURL* appURL = [NSURL fileURLWithPath:nsAppPath];
+
+  NSError* error = nil;
+  BOOL success = [[NSWorkspace sharedWorkspace] openURLs:@[fileURL]
+                                    withApplicationAtURL:appURL
+                                                 options:NSWorkspaceLaunchDefault
+                                           configuration:@{}
+                                                   error:&error];
+  if (!success) {
+    NSLog(@"Failed to open file: %@", error.localizedDescription);
+  }
 }

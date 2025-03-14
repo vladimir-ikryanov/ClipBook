@@ -6,11 +6,11 @@ import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
   addHistoryItem,
-  addSelectedHistoryItemIndex,
+  addSelectedHistoryItemIndex, AppInfo,
   clear,
   clearSelection,
   deleteHistoryItem,
-  findItem,
+  findItem, getDefaultApp,
   getFirstSelectedHistoryItem,
   getFirstSelectedHistoryItemIndex,
   getHistoryItem,
@@ -49,7 +49,7 @@ import {
   prefGetNavigateToLastItemShortcut,
   prefGetNavigateToNextGroupOfItemsShortcut,
   prefGetNavigateToPrevGroupOfItemsShortcut,
-  prefGetOpenInBrowserShortcut,
+  prefGetOpenInBrowserShortcut, prefGetOpenInDefaultAppShortcut,
   prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetQuickPasteModifier,
@@ -68,7 +68,7 @@ import {
 } from "@/pref";
 import {HideActionsReason} from "@/app/Commands";
 import {FixedSizeList as List} from "react-window";
-import {Clip, ClipType, getFilePath, getImageFileName, getImageText, updateClip} from "@/db";
+import {Clip, ClipType, getFilePath, getImageFileName, getImageText} from "@/db";
 import {formatText, getClipType, isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
@@ -90,6 +90,7 @@ declare const previewLink: (url: string) => void;
 declare const openSettingsWindow: () => void;
 declare const saveImageAsFile: (imageFilePath: string, imageWidth: number, imageHeight: number) => void;
 declare const hideAppWindow: () => void;
+declare const openInApp: (filePath: string, appPath: string) => void;
 
 type HistoryPaneProps = {
   appName: string
@@ -370,6 +371,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
       }
       if (isShortcutMatch(prefGetShowInFinderShortcut(), e)) {
         handleShowInFinder()
+        e.preventDefault()
+      }
+      if (isShortcutMatch(prefGetOpenInDefaultAppShortcut(), e)) {
+        handleOpenInDefaultApp()
         e.preventDefault()
       }
       // Copy the active item to the clipboard when the copy to clipboard shortcut is pressed.
@@ -890,6 +895,24 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
+  function handleOpenInDefaultApp() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      if (item.type === ClipType.File && !item.fileFolder) {
+        handleOpenInApp(getDefaultApp(getFilePath(item)))
+      }
+    }
+  }
+
+  function handleOpenInApp(appInfo: AppInfo | undefined) {
+    if (appInfo) {
+      let item = getFirstSelectedHistoryItem()
+      if (item.type === ClipType.File) {
+        openInApp(getFilePath(item), appInfo.path)
+      }
+    }
+  }
+
   function handleOpenInBrowserByIndex(index: number) {
     openItemInBrowser(getHistoryItem(index))
   }
@@ -1133,6 +1156,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onOpenInBrowser={handleOpenInBrowser}
                               onShowInFinder={handleShowInFinder}
                               onPreviewLink={handlePreviewLink}
+                              onOpenInApp={handleOpenInApp}
                               onZoomIn={props.onZoomIn}
                               onZoomOut={props.onZoomOut}
                               onResetZoom={props.onResetZoom}

@@ -50,6 +50,8 @@ class MainAppMac : public MainApp {
   void updateOpenSettingsShortcut() override;
   std::string getUserDataDir() override;
   std::string getUpdateServerUrl() override;
+  std::string getDefaultAppInfo(const std::string &file_path) override;
+  void openInApp(const std::string &file_path, const std::string &app_path) override;
 
   bool isAccessibilityAccessGranted();
   void showAccessibilityAccessDialog(const std::string &text,
