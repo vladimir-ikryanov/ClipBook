@@ -18,6 +18,7 @@ declare const isAfterSystemReboot: () => boolean;
 declare const getDefaultAppInfo: (filePath: string) => string;
 declare const getRecommendedAppsInfo: (filePath: string) => string;
 declare const getAllAppsInfo: () => string;
+declare const getImagesDir: () => string;
 
 export enum SortHistoryType {
   TimeOfFirstCopy,
@@ -505,4 +506,14 @@ function parseAppsInfo(appsInfo: string) {
 
 export function getAllApps(): AppInfo[] {
   return sortAppsAlphabetically(parseAppsInfo(getAllAppsInfo()))
+}
+
+export function getFileOrImagePath(item: Clip) {
+  if (item.type === ClipType.File) {
+    return getFilePath(item)
+  }
+  if (item.type === ClipType.Image) {
+    return getImagesDir() + "/" + getImageFileName(item)
+  }
+  return undefined
 }

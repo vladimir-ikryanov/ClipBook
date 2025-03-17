@@ -5,14 +5,19 @@ import {useEffect, useState} from "react"
 import {VisuallyHidden} from "@radix-ui/react-visually-hidden";
 
 import {
-  CommandDialog, CommandEmpty, CommandGroup, CommandInput,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
 import {
-  AppInfo, getAllApps,
-  getDefaultApp,
-  getFirstSelectedHistoryItem, getRecommendedApps,
+  AppInfo,
+  getAllApps,
+  getDefaultApp, getFileOrImagePath,
+  getFirstSelectedHistoryItem,
+  getRecommendedApps,
   toBase64Icon
 } from "@/data";
 import {DialogTitle} from "@/components/ui/dialog";
@@ -52,23 +57,25 @@ export default function OpenWithCommands(props: OpenWithCommandsProps) {
     setDefaultApp(undefined)
     if (open) {
       let item = getFirstSelectedHistoryItem()
-      if (item.type === ClipType.File && !item.fileFolder) {
-        let defaultAppInfo = getDefaultApp(item.filePath);
-        let defaultAppPath = defaultAppInfo ? defaultAppInfo.path : "";
-        setDefaultApp(defaultAppInfo)
+      if ((item.type === ClipType.File || item.type === ClipType.Image) && !item.fileFolder) {
+        let filePath = getFileOrImagePath(item)
+        if (filePath) {
+          let defaultAppInfo = getDefaultApp(filePath);
+          let defaultAppPath = defaultAppInfo ? defaultAppInfo.path : "";
+          setDefaultApp(defaultAppInfo)
 
-        let recommendedAppInfoList = getRecommendedApps(item.filePath);
-        // Remove default app from the recommended apps.
-        recommendedAppInfoList = recommendedAppInfoList.filter(app => app.path !== defaultAppPath)
+          let recommendedAppInfoList = getRecommendedApps(filePath);
+          // Remove default app from the recommended apps.
+          recommendedAppInfoList = recommendedAppInfoList.filter(app => app.path !== defaultAppPath)
 
-        let allAppInfoList = getAllApps();
-        // Remove default app and recommended apps from the all apps.
-        allAppInfoList = allAppInfoList.filter(app => app.path !== defaultAppPath)
-        allAppInfoList = allAppInfoList.filter(app => !recommendedAppInfoList.find(recommendedApp => recommendedApp.path === app.path))
+          let allAppInfoList = getAllApps();
+          // Remove default app and recommended apps from the all apps.
+          allAppInfoList = allAppInfoList.filter(app => app.path !== defaultAppPath)
+          allAppInfoList = allAppInfoList.filter(app => !recommendedAppInfoList.find(recommendedApp => recommendedApp.path === app.path))
 
-        setRecommendedApps(recommendedAppInfoList)
-        setOtherApps(allAppInfoList)
-
+          setRecommendedApps(recommendedAppInfoList)
+          setOtherApps(allAppInfoList)
+        }
       }
     }
     setOpen(open)

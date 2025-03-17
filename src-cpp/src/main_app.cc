@@ -668,6 +668,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("openInApp", [this](std::string filePath, std::string appPath) {
     openInApp(filePath, appPath);
   });
+  window->putProperty("getImagesDir", [this]() -> std::string {
+    return getImagesDir();
+  });
   window->putProperty("isFeedbackProvided", [this]() -> bool {
 #ifdef OFFICIAL_BUILD
     return settings_->isFeedbackProvided();

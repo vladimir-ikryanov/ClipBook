@@ -10,7 +10,7 @@ import {
   clear,
   clearSelection,
   deleteHistoryItem,
-  findItem, getDefaultApp,
+  findItem, getDefaultApp, getFileOrImagePath,
   getFirstSelectedHistoryItem,
   getFirstSelectedHistoryItemIndex,
   getHistoryItem,
@@ -907,8 +907,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
   function handleOpenInApp(appInfo: AppInfo | undefined) {
     if (appInfo) {
       let item = getFirstSelectedHistoryItem()
-      if (item.type === ClipType.File) {
-        openInApp(getFilePath(item), appInfo.path)
+      if (item.type === ClipType.File || item.type === ClipType.Image) {
+        let filePath = getFileOrImagePath(item);
+        if (filePath) {
+          openInApp(filePath, appInfo.path)
+        }
       }
     }
   }
@@ -916,8 +919,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
   function handleOpenWithApp(appPath: string) {
     if (getSelectedHistoryItemIndices().length === 1) {
       let item = getFirstSelectedHistoryItem()
-      if (item.type === ClipType.File) {
-        openInApp(getFilePath(item), appPath)
+      if (item.type === ClipType.File || item.type === ClipType.Image) {
+        let filePath = getFileOrImagePath(item);
+        if (filePath) {
+          openInApp(filePath, appPath)
+        }
       }
     }
   }

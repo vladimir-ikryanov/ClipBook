@@ -50,7 +50,12 @@ import {
   getFirstSelectedHistoryItem,
   getPreviewVisibleState,
   toBase64Icon,
-  getSelectedHistoryItemIndices, getSelectedHistoryItems, isTextItem, AppInfo, getDefaultApp
+  getSelectedHistoryItemIndices,
+  getSelectedHistoryItems,
+  isTextItem,
+  AppInfo,
+  getDefaultApp,
+  getFileOrImagePath
 } from "@/data";
 import {ClipType, getImageText} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
@@ -166,10 +171,13 @@ export default function Commands(props: CommandsProps) {
   function handleOpenChange(open: boolean) {
     setDefaultApp(undefined)
     if (open) {
-      if (isFile()) {
-        let item = getFirstSelectedHistoryItem()
+      let item = getFirstSelectedHistoryItem()
+      if (item.type === ClipType.File || item.type === ClipType.Image) {
         if (!item.fileFolder) {
-          setDefaultApp(getDefaultAppInfo())
+          let filePath = getFileOrImagePath(item);
+          if (filePath) {
+            setDefaultApp(getDefaultApp(filePath))
+          }
         }
       }
     }
@@ -371,14 +379,6 @@ export default function Commands(props: CommandsProps) {
       return item && item.type === ClipType.File
     }
     return false
-  }
-
-  function getDefaultAppInfo() : AppInfo | undefined {
-    if (isFile()) {
-      let item = getFirstSelectedHistoryItem()
-      return getDefaultApp(item.filePath)
-    }
-    return undefined
   }
 
   function canPasteWithTransformation() {
@@ -589,37 +589,6 @@ export default function Commands(props: CommandsProps) {
                     </CommandItem>
                 }
                 {
-                    canShowInFinder() &&
-                    <CommandItem onSelect={handleShowInFinder}>
-                      <img src={toBase64Icon(finderIcon)} className="mr-2 h-5 w-5"
-                           alt="App icon"/>
-                      <span>Show in Finder</span>
-                      <CommandShortcut className="flex flex-row">
-                        <ShortcutLabel shortcut={prefGetShowInFinderShortcut()}/>
-                      </CommandShortcut>
-                    </CommandItem>
-                }
-                {
-                    canOpenInDefaultApp() &&
-                    <CommandItem onSelect={handleOpenInDefaultApp}>
-                      {
-                        defaultApp ? <img src={toBase64Icon(defaultApp.icon)} className="mr-2 h-5 w-5"
-                                          alt="App icon"/> : null
-                      }
-                      <span>Open in {defaultApp?.name}</span>
-                      <CommandShortcut className="flex flex-row">
-                        <ShortcutLabel shortcut={prefGetOpenInDefaultAppShortcut()}/>
-                      </CommandShortcut>
-                    </CommandItem>
-                }
-                {
-                    canOpenInDefaultApp() &&
-                    <CommandItem onSelect={handleOpenWith}>
-                      <UploadIcon className="mr-2 h-5 w-5"/>
-                      <span>Open With...</span>
-                    </CommandItem>
-                }
-                {
                     canShowCopyTextFromImage() &&
                     <CommandItem onSelect={handleCopyTextFromImage}>
                       <ScanTextIcon className="mr-2 h-5 w-5"/>
@@ -690,6 +659,40 @@ export default function Commands(props: CommandsProps) {
                     </CommandItem>
                 }
                 <CommandSeparator/>
+                {
+                    canShowInFinder() &&
+                    <CommandItem onSelect={handleShowInFinder}>
+                      <img src={toBase64Icon(finderIcon)} className="mr-2 h-5 w-5"
+                           alt="App icon"/>
+                      <span>Show in Finder</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetShowInFinderShortcut()}/>
+                      </CommandShortcut>
+                    </CommandItem>
+                }
+                {
+                    canOpenInDefaultApp() &&
+                    <CommandItem onSelect={handleOpenInDefaultApp}>
+                      {
+                        defaultApp ? <img src={toBase64Icon(defaultApp.icon)} className="mr-2 h-5 w-5"
+                                          alt="App icon"/> : null
+                      }
+                      <span>Open in {defaultApp?.name}</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetOpenInDefaultAppShortcut()}/>
+                      </CommandShortcut>
+                    </CommandItem>
+                }
+                {
+                    canOpenInDefaultApp() &&
+                    <CommandItem onSelect={handleOpenWith}>
+                      <UploadIcon className="mr-2 h-5 w-5"/>
+                      <span>Open With...</span>
+                    </CommandItem>
+                }
+                {
+                  (canShowInFinder() || canOpenInDefaultApp()) && <CommandSeparator/>
+                }
                 <CommandItem onSelect={handleTogglePreview}>
                   {
                     getPreviewVisibleState() ?

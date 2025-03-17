@@ -928,7 +928,10 @@ std::string MainAppMac::getDefaultAppInfo(const std::string &file_path) {
   NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
   // Get the default app path for the given file path.
   NSURL *appUrl = [workspace URLForApplicationToOpenURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:file_path.c_str()]]];
-  return toAppInfo([appUrl fileSystemRepresentation]);
+  if (appUrl) {
+    return toAppInfo([appUrl fileSystemRepresentation]);
+  }
+  return "";
 }
 
 std::string MainAppMac::getRecommendedAppsInfo(const std::string &file_path) {
