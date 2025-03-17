@@ -16,6 +16,8 @@ import {getClipType} from "@/lib/utils";
 declare const isAfterSystemReboot: () => boolean;
 // Returns a string that contains the app name, path, and icon separated by '|'.
 declare const getDefaultAppInfo: (filePath: string) => string;
+declare const getRecommendedAppsInfo: (filePath: string) => string;
+declare const getAllAppsInfo: () => string;
 
 export enum SortHistoryType {
   TimeOfFirstCopy,
@@ -463,7 +465,18 @@ export async function updateHistoryItemTypes(): Promise<boolean> {
 }
 
 export function getDefaultApp(filePath: string) : AppInfo | undefined {
-  let appInfo = getDefaultAppInfo(filePath)
+  return parseAppInfo(getDefaultAppInfo(filePath))
+}
+
+export function getRecommendedApps(filePath: string): AppInfo[] {
+  return parseAppsInfo(getRecommendedAppsInfo(filePath))
+}
+
+function sortAppsAlphabetically(apps: AppInfo[]) : AppInfo[] {
+  return apps.sort((a, b) => a.name.localeCompare(b.name))
+}
+
+function parseAppInfo(appInfo: string) {
   if (appInfo.length === 0) {
     return undefined
   }
@@ -473,4 +486,23 @@ export function getDefaultApp(filePath: string) : AppInfo | undefined {
     path: parts[1],
     icon: parts[2]
   }
+}
+
+function parseAppsInfo(appsInfo: string) {
+  if (appsInfo.length === 0) {
+    return []
+  }
+  let apps: AppInfo[] = []
+  let parts = appsInfo.split('*')
+  for (let i = 0; i < parts.length; i++) {
+    let appInfo = parseAppInfo(parts[i]);
+    if (appInfo) {
+      apps.push(appInfo)
+    }
+  }
+  return apps
+}
+
+export function getAllApps(): AppInfo[] {
+  return sortAppsAlphabetically(parseAppsInfo(getAllAppsInfo()))
 }

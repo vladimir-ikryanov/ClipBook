@@ -745,7 +745,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleHideActions(reason: HideActionsReason) {
-    if (reason !== "editContent" && reason !== "renameItem" && reason !== "pasteWithTransformation" && reason !== "formatText") {
+    if (reason !== "editContent" && reason !== "renameItem" && reason !== "pasteWithTransformation" && reason !== "formatText" && reason !== "openWith") {
       focusSearchField()
     }
   }
@@ -909,6 +909,15 @@ export default function HistoryPane(props: HistoryPaneProps) {
       let item = getFirstSelectedHistoryItem()
       if (item.type === ClipType.File) {
         openInApp(getFilePath(item), appInfo.path)
+      }
+    }
+  }
+
+  function handleOpenWithApp(appPath: string) {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      if (item.type === ClipType.File) {
+        openInApp(getFilePath(item), appPath)
       }
     }
   }
@@ -1157,6 +1166,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                               onShowInFinder={handleShowInFinder}
                               onPreviewLink={handlePreviewLink}
                               onOpenInApp={handleOpenInApp}
+                              onOpenWithApp={handleOpenWithApp}
                               onZoomIn={props.onZoomIn}
                               onZoomOut={props.onZoomOut}
                               onResetZoom={props.onResetZoom}

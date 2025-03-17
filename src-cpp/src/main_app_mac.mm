@@ -33,6 +33,7 @@ static std::string kInputCursor = "inputCursor";
 static int kMinAppWindowSize = 200;
 
 static std::string kAppInfoSeparator = "|";
+static std::string kAppInfoListSeparator = "*";
 
 static std::string kShortcutSeparator = " + ";
 static std::string kMetaLeft = "MetaLeft";
@@ -927,13 +928,51 @@ std::string MainAppMac::getDefaultAppInfo(const std::string &file_path) {
   NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
   // Get the default app path for the given file path.
   NSURL *appUrl = [workspace URLForApplicationToOpenURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:file_path.c_str()]]];
-  if (appUrl) {
-    auto appPath = [appUrl fileSystemRepresentation];
-    auto appName = getAppNameFromPath(appPath);
-    auto appIcon = getFileIconAsBase64(appPath, false);
-    return appName + kAppInfoSeparator + appPath + kAppInfoSeparator + appIcon;
+  return toAppInfo([appUrl fileSystemRepresentation]);
+}
+
+std::string MainAppMac::getRecommendedAppsInfo(const std::string &file_path) {
+  std::string result;
+  NSURL* fileUrl = [NSURL fileURLWithPath:[NSString stringWithUTF8String:file_path.c_str()]];
+  NSArray<NSURL *> *appUrls = [[NSWorkspace sharedWorkspace] URLsForApplicationsToOpenURL:fileUrl];
+  if (appUrls) {
+    for (NSURL* appUrl in appUrls) {
+      auto appInfo = toAppInfo([appUrl fileSystemRepresentation]);
+      if (!appInfo.empty()) {
+        result += appInfo + kAppInfoListSeparator;
+      }
+    }
+    CFRelease(appUrls);
   }
-  return "";
+  return result;
+}
+
+std::string MainAppMac::toAppInfo(const std::string &appPath) {
+  auto appName = getAppNameFromPath(appPath);
+  if (appName.empty()) {
+    return "";
+  }
+  auto appIcon = getFileIconAsBase64(appPath, false);
+  if (appIcon.empty()) {
+    return "";
+  }
+  return appName + kAppInfoSeparator + appPath + kAppInfoSeparator + appIcon;
+}
+
+std::string MainAppMac::getAllAppsInfo() {
+  std::string result;
+  NSString *applicationsPath = @"/Applications";
+  NSArray<NSString *> *appList = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:applicationsPath error:nil];
+  for (NSString *appName in appList) {
+    if ([appName.pathExtension isEqualToString:@"app"]) {
+      NSString *fullPath = [applicationsPath stringByAppendingPathComponent:appName];
+      auto appInfo = toAppInfo([fullPath UTF8String]);
+      if (!appInfo.empty()) {
+        result += appInfo + kAppInfoListSeparator;
+      }
+    }
+  }
+  return result;
 }
 
 void MainAppMac::openInApp(const std::string &file_path, const std::string &app_path) {

@@ -11,6 +11,7 @@ import Commands, {HideActionsReason} from "@/app/Commands";
 import PasteTransformationCommands from "@/app/PasteTransformationCommands";
 import {AppInfo, TextFormatOperation} from "@/data";
 import FormatTextCommands from "@/app/FormatTextCommands";
+import OpenWithCommands from "@/app/OpenWithCommands";
 
 declare const openSettingsLicense: () => void;
 
@@ -43,6 +44,7 @@ type SearchBarProps = {
   onOpenInBrowser: () => void
   onShowInFinder: () => void
   onOpenInApp: (app: AppInfo | undefined) => void
+  onOpenWithApp: (appPath: string) => void
   onPreviewLink: () => void
   onZoomIn: () => void
   onZoomOut: () => void
@@ -101,6 +103,12 @@ export default function SearchBar(props: SearchBarProps) {
   function showFormatOptionsDialog() {
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "formatText"}}));
+    }, 100);
+  }
+
+  function showOpenWithDialog() {
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "openWith"}}));
     }, 100);
   }
 
@@ -225,6 +233,7 @@ export default function SearchBar(props: SearchBarProps) {
                       onZoomOut={props.onZoomOut}
                       onResetZoom={props.onResetZoom}
                       onOpenSettings={props.onOpenSettings}
+                      onOpenWith={showOpenWithDialog}
                       onPaste={props.onPaste}
                       onPastePath={props.onPastePath}
                       onPasteWithTab={props.onPasteWithTab}
@@ -239,6 +248,7 @@ export default function SearchBar(props: SearchBarProps) {
             <PasteTransformationCommands
                 onPasteWithTransformation={props.onPasteWithTransformation}/>
             <FormatTextCommands onFormatText={props.onFormatText}/>
+            <OpenWithCommands onOpenWithApp={props.onOpenWithApp}/>
           </div>
           <div className={props.isPreviewVisible ? "hidden" : ""}>
             <Tooltip>

@@ -58,6 +58,7 @@ type HistoryItemsPaneProps = {
   onShowInFinder: () => void
   onPreviewLink: () => void
   onOpenInApp: (app: AppInfo | undefined) => void
+  onOpenWithApp: (appPath: string) => void
   onZoomIn: () => void
   onZoomOut: () => void
   onResetZoom: () => void
@@ -222,6 +223,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    onShowInFinder={props.onShowInFinder}
                    onPreviewLink={props.onPreviewLink}
                    onOpenInApp={props.onOpenInApp}
+                   onOpenWithApp={props.onOpenWithApp}
                    onZoomIn={props.onZoomIn}
                    onZoomOut={props.onZoomOut}
                    onResetZoom={props.onResetZoom}

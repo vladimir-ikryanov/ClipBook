@@ -12,7 +12,7 @@ import {
   SettingsIcon,
   StarIcon,
   StarOffIcon,
-  TrashIcon, TypeIcon, Undo2Icon, ZoomIn, ZoomOut
+  TrashIcon, TypeIcon, Undo2Icon, UploadIcon, ZoomIn, ZoomOut
 } from "lucide-react"
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -81,6 +81,7 @@ export type HideActionsReason =
     | "openInBrowser"
     | "showInFinder"
     | "openInDefaultApp"
+    | "openWith"
     | "preview"
     | "zoomIn"
     | "zoomOut"
@@ -112,6 +113,7 @@ type CommandsProps = {
   onOpenInBrowser: () => void
   onShowInFinder: () => void
   onOpenInApp: (app: AppInfo | undefined) => void
+  onOpenWith: () => void
   onPreviewLink: () => void
   onZoomIn: () => void
   onZoomOut: () => void
@@ -295,6 +297,12 @@ export default function Commands(props: CommandsProps) {
     closeReason = "openInDefaultApp"
     handleOpenChange(false)
     props.onOpenInApp(defaultApp)
+  }
+
+  function handleOpenWith() {
+    closeReason = "openWith"
+    handleOpenChange(false)
+    props.onOpenWith()
   }
 
   function handlePreviewLink() {
@@ -602,6 +610,13 @@ export default function Commands(props: CommandsProps) {
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetOpenInDefaultAppShortcut()}/>
                       </CommandShortcut>
+                    </CommandItem>
+                }
+                {
+                    canOpenInDefaultApp() &&
+                    <CommandItem onSelect={handleOpenWith}>
+                      <UploadIcon className="mr-2 h-5 w-5"/>
+                      <span>Open With...</span>
                     </CommandItem>
                 }
                 {
