@@ -205,7 +205,7 @@ void MainApp::hide(bool force) {
 
     auto frame = app_window_->mainFrame();
     if (frame) {
-      frame->executeJavaScript("closeCommandsPopup()");
+      frame->executeJavaScript("onDidAppWindowHide()");
     }
   }
 }

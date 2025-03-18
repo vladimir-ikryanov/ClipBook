@@ -69,6 +69,15 @@ export default function PasteTransformationCommands(props: PasteTransformationCo
     return () => window.removeEventListener("onAction", handleAction);
   }, [])
 
+  useEffect(() => {
+    function handleAction(event: Event) {
+      handleOpenChange(false)
+    }
+
+    window.addEventListener("onDidAppWindowHide", handleAction);
+    return () => window.removeEventListener("onDidAppWindowHide", handleAction);
+  }, [])
+
   function handleOpenChange(open: boolean) {
     setOpen(open)
   }

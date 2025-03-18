@@ -816,46 +816,50 @@ void MainAppMac::showSystemAccessibilityPreferencesDialog() {
 }
 
 std::string MainAppMac::getFileIconAsBase64(const std::string &app_path, bool large) {
-  std::string path = app_path;
-  // Check if the given app_path is "ClipBook.app".
-  if (app_path.find("ClipBook.app") != std::string::npos) {
-    path = getAppInfo().path;
+  @autoreleasepool {
+    std::string path = app_path;
+    // Check if the given app_path is "ClipBook.app".
+    if (app_path.find("ClipBook.app") != std::string::npos) {
+      path = getAppInfo().path;
+    }
+
+    NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
+    NSImage *image = [workspace iconForFile:[NSString stringWithUTF8String:path.c_str()]];
+    if (large) {
+      [image setSize:NSMakeSize(512, 512)];
+    }
+    // Convert NSImage to NSData (using PNG format in this example).
+    CGImageRef cgRef = [image CGImageForProposedRect:nullptr context:nil hints:nil];
+    NSBitmapImageRep *newRep = [[NSBitmapImageRep alloc] initWithCGImage:cgRef];
+    [newRep setSize:[image size]];   // Ensure correct size
+
+    NSData *imageData = [newRep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+
+    // Base64 encode the data
+    NSString *base64String = [imageData base64EncodedStringWithOptions:0];
+
+    return [base64String UTF8String];
   }
-
-  NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-  NSImage *image = [workspace iconForFile:[NSString stringWithUTF8String:path.c_str()]];
-  if (large) {
-    [image setSize:NSMakeSize(512, 512)];
-  }
-  // Convert NSImage to NSData (using PNG format in this example).
-  CGImageRef cgRef = [image CGImageForProposedRect:nullptr context:nil hints:nil];
-  NSBitmapImageRep *newRep = [[NSBitmapImageRep alloc] initWithCGImage:cgRef];
-  [newRep setSize:[image size]];   // Ensure correct size
-
-  NSData *imageData = [newRep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
-
-  // Base64 encode the data
-  NSString *base64String = [imageData base64EncodedStringWithOptions:0];
-
-  return [base64String UTF8String];
 }
 
 std::string MainAppMac::getAppNameFromPath(const std::string &app_path) {
-  std::string path = app_path;
-  // Check if the given app_path is "ClipBook.app".
-  if (app_path.find("ClipBook.app") != std::string::npos) {
-    path = getAppInfo().path;
-  }
-
-  NSBundle *appBundle = [NSBundle bundleWithPath:[NSString stringWithUTF8String:path.c_str()]];
-  if (appBundle) {
-    NSString *appName = [[appBundle infoDictionary] objectForKey:@"CFBundleName"];
-    if (!appName) {
-      appName = [[appBundle infoDictionary] objectForKey:@"CFBundleDisplayName"];
+  @autoreleasepool {
+    std::string path = app_path;
+    // Check if the given app_path is "ClipBook.app".
+    if (app_path.find("ClipBook.app") != std::string::npos) {
+      path = getAppInfo().path;
     }
-    return appName ? [appName UTF8String] : "";
+
+    NSBundle *appBundle = [NSBundle bundleWithPath:[NSString stringWithUTF8String:path.c_str()]];
+    if (appBundle) {
+      NSString *appName = [[appBundle infoDictionary] objectForKey:@"CFBundleName"];
+      if (!appName) {
+        appName = [[appBundle infoDictionary] objectForKey:@"CFBundleDisplayName"];
+      }
+      return appName ? [appName UTF8String] : "";
+    }
+    return {};
   }
-  return {};
 }
 
 long MainAppMac::getSystemBootTime() {
@@ -935,19 +939,20 @@ std::string MainAppMac::getDefaultAppInfo(const std::string &file_path) {
 }
 
 std::string MainAppMac::getRecommendedAppsInfo(const std::string &file_path) {
-  std::string result;
-  NSURL* fileUrl = [NSURL fileURLWithPath:[NSString stringWithUTF8String:file_path.c_str()]];
-  NSArray<NSURL *> *appUrls = [[NSWorkspace sharedWorkspace] URLsForApplicationsToOpenURL:fileUrl];
-  if (appUrls) {
-    for (NSURL* appUrl in appUrls) {
-      auto appInfo = toAppInfo([appUrl fileSystemRepresentation]);
-      if (!appInfo.empty()) {
-        result += appInfo + kAppInfoListSeparator;
+  @autoreleasepool {
+    std::string result;
+    NSURL *fileUrl = [NSURL fileURLWithPath:[NSString stringWithUTF8String:file_path.c_str()]];
+    NSArray<NSURL *> *appUrls = [[NSWorkspace sharedWorkspace] URLsForApplicationsToOpenURL:fileUrl];
+    if (appUrls) {
+      for (NSURL *appUrl in appUrls) {
+        auto appInfo = toAppInfo([appUrl fileSystemRepresentation]);
+        if (!appInfo.empty()) {
+          result += appInfo + kAppInfoListSeparator;
+        }
       }
     }
-    CFRelease(appUrls);
+    return result;
   }
-  return result;
 }
 
 std::string MainAppMac::toAppInfo(const std::string &appPath) {
@@ -963,35 +968,39 @@ std::string MainAppMac::toAppInfo(const std::string &appPath) {
 }
 
 std::string MainAppMac::getAllAppsInfo() {
-  std::string result;
-  NSString *applicationsPath = @"/Applications";
-  NSArray<NSString *> *appList = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:applicationsPath error:nil];
-  for (NSString *appName in appList) {
-    if ([appName.pathExtension isEqualToString:@"app"]) {
-      NSString *fullPath = [applicationsPath stringByAppendingPathComponent:appName];
-      auto appInfo = toAppInfo([fullPath UTF8String]);
-      if (!appInfo.empty()) {
-        result += appInfo + kAppInfoListSeparator;
+  @autoreleasepool {
+    std::string result;
+    NSString *applicationsPath = @"/Applications";
+    NSArray<NSString *> *appList = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:applicationsPath error:nil];
+    for (NSString *appName in appList) {
+      if ([appName.pathExtension isEqualToString:@"app"]) {
+        NSString *fullPath = [applicationsPath stringByAppendingPathComponent:appName];
+        auto appInfo = toAppInfo([fullPath UTF8String]);
+        if (!appInfo.empty()) {
+          result += appInfo + kAppInfoListSeparator;
+        }
       }
     }
+    return result;
   }
-  return result;
 }
 
 void MainAppMac::openInApp(const std::string &file_path, const std::string &app_path) {
-  NSString* nsFilePath = [NSString stringWithUTF8String:file_path.c_str()];
-  NSString* nsAppPath = [NSString stringWithUTF8String:app_path.c_str()];
+  @autoreleasepool {
+    NSString *nsFilePath = [NSString stringWithUTF8String:file_path.c_str()];
+    NSString *nsAppPath = [NSString stringWithUTF8String:app_path.c_str()];
 
-  NSURL* fileURL = [NSURL fileURLWithPath:nsFilePath];
-  NSURL* appURL = [NSURL fileURLWithPath:nsAppPath];
+    NSURL *fileURL = [NSURL fileURLWithPath:nsFilePath];
+    NSURL *appURL = [NSURL fileURLWithPath:nsAppPath];
 
-  NSError* error = nil;
-  BOOL success = [[NSWorkspace sharedWorkspace] openURLs:@[fileURL]
-                                    withApplicationAtURL:appURL
-                                                 options:NSWorkspaceLaunchDefault
-                                           configuration:@{}
-                                                   error:&error];
-  if (!success) {
-    NSLog(@"Failed to open file: %@", error.localizedDescription);
+    NSError *error = nil;
+    BOOL success = [[NSWorkspace sharedWorkspace] openURLs:@[fileURL]
+                                      withApplicationAtURL:appURL
+                                                   options:NSWorkspaceLaunchDefault
+                                             configuration:@{}
+                                                     error:&error];
+    if (!success) {
+      NSLog(@"Failed to open file: %@", error.localizedDescription);
+    }
   }
 }

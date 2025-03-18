@@ -53,6 +53,15 @@ export default function OpenWithCommands(props: OpenWithCommandsProps) {
     return () => window.removeEventListener("onAction", handleAction);
   }, [])
 
+  useEffect(() => {
+    function handleAction(e: Event) {
+      handleOpenChange(false)
+    }
+
+    window.addEventListener("onDidAppWindowHide", handleAction);
+    return () => window.removeEventListener("onDidAppWindowHide", handleAction);
+  }, [])
+
   function handleOpenChange(open: boolean) {
     setDefaultApp(undefined)
     if (open) {
@@ -68,7 +77,8 @@ export default function OpenWithCommands(props: OpenWithCommandsProps) {
           // Remove default app from the recommended apps.
           recommendedAppInfoList = recommendedAppInfoList.filter(app => app.path !== defaultAppPath)
 
-          let allAppInfoList = getAllApps();
+          // Remember current time.
+          let allAppInfoList = getAllApps()
           // Remove default app and recommended apps from the all apps.
           allAppInfoList = allAppInfoList.filter(app => app.path !== defaultAppPath)
           allAppInfoList = allAppInfoList.filter(app => !recommendedAppInfoList.find(recommendedApp => recommendedApp.path === app.path))

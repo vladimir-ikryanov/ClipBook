@@ -135,12 +135,6 @@ export default function Commands(props: CommandsProps) {
   const [open, setOpen] = useState(false)
   const [defaultApp, setDefaultApp] = useState<AppInfo | undefined>(undefined)
 
-  function closeCommandsPopup() {
-    handleOpenChange(false)
-  }
-
-  (window as any).closeCommandsPopup = closeCommandsPopup
-
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       // Close the app window with the close app shortcut.
@@ -151,6 +145,15 @@ export default function Commands(props: CommandsProps) {
     }
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
+  }, [])
+
+  useEffect(() => {
+    function handleAction(e: Event) {
+      handleOpenChange(false)
+    }
+
+    window.addEventListener("onDidAppWindowHide", handleAction);
+    return () => window.removeEventListener("onDidAppWindowHide", handleAction);
   }, [])
 
   function handleKeyDown(e: React.KeyboardEvent) {

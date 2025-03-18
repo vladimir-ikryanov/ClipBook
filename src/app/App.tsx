@@ -61,6 +61,10 @@ export default function App() {
     setAppIcon(appIcon)
   }
 
+  function onDidAppWindowHide() {
+    window.dispatchEvent(new CustomEvent("onDidAppWindowHide"));
+  }
+
   function handleZoomIn() {
     zoomIn()
   }
@@ -75,6 +79,7 @@ export default function App() {
 
   // Attach the function to the window object
   (window as any).setActiveAppInfo = setActiveAppInfo;
+  (window as any).onDidAppWindowHide = onDidAppWindowHide;
 
   return (
       <ThemeProvider defaultTheme="system">
