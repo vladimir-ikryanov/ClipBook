@@ -994,12 +994,12 @@ void MainAppMac::openInApp(const std::string &file_path, const std::string &app_
     NSURL *appURL = [NSURL fileURLWithPath:nsAppPath];
 
     NSError *error = nil;
-    BOOL success = [[NSWorkspace sharedWorkspace] openURLs:@[fileURL]
-                                      withApplicationAtURL:appURL
-                                                   options:NSWorkspaceLaunchDefault
-                                             configuration:@{}
-                                                     error:&error];
-    if (!success) {
+    NSRunningApplication *app = [[NSWorkspace sharedWorkspace] openURLs:@[fileURL]
+                                                   withApplicationAtURL:appURL
+                                                                options:NSWorkspaceLaunchDefault
+                                                          configuration:@{}
+                                                                  error:&error];
+    if (app == nil) {
       NSLog(@"Failed to open file: %@", error.localizedDescription);
     }
   }
