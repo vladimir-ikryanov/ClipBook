@@ -4,9 +4,12 @@
 #include <utility>
 
 #include "url.h"
+#include "utils.h"
 
 HeadlessWebView::HeadlessWebView(std::shared_ptr<molybden::App> app, std::string images_dir) : images_dir_(std::move(images_dir)) {
   browser_ = molybden::Browser::create(std::move(app));
+  // Mute audio to avoid playing sounds on the web page while fetching link preview details.
+  browser_->media()->muteAudio();
 }
 
 HeadlessWebView::~HeadlessWebView() {
@@ -41,28 +44,29 @@ bool HeadlessWebView::fetchLinkPreviewDetails(const std::string &url, LinkPrevie
         "document.querySelector('meta[name=\"twitter:image\"]')?.getAttribute('content')").asString();
   }
   if (!image_url.empty()) {
-    details.imageFileName = download(image_url);
+    details.imageFileName = download(image_url, "preview_");
   }
 
   auto favicon_url = frame->executeJavaScript(
       "document.querySelector('link[rel=\"icon\"]')?.getAttribute('href')").asString();
   if (!favicon_url.empty()) {
-    details.faviconFileName = download(favicon_url);
+    details.faviconFileName = download(favicon_url, "favicon_");
   }
 
   return true;
 }
 
-std::string HeadlessWebView::download(const std::string &url) {
+std::string HeadlessWebView::download(const std::string &url, const std::string& file_name_prefix) {
   if (!URL(url).isValid()) {
     return "";
   }
 
   std::promise<std::string> promise;
   std::future<std::string> future = promise.get_future();
-  browser_->onStartDownload = [this, &promise](const molybden::StartDownloadArgs &args,
-                                               molybden::StartDownloadAction action) {
-    auto file = args.download->target().suggested_file_name;
+  browser_->onStartDownload = [this, &promise, &file_name_prefix]
+      (const molybden::StartDownloadArgs &args, molybden::StartDownloadAction action) {
+    // Get current time in milliseconds to generate a unique file name.
+    std::string file = file_name_prefix + std::to_string(getCurrentTimeMillis()) + ".png";
     auto path = images_dir_ + "/" + file;
     args.download->onDownloadFinished += [file, &promise](const molybden::DownloadFinished &event) {
       promise.set_value(file);

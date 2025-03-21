@@ -15,7 +15,7 @@ class HeadlessWebView {
   explicit HeadlessWebView(std::shared_ptr<molybden::App> app, std::string images_dir);
   ~HeadlessWebView();
 
-  std::string download(const std::string &url);
+  std::string download(const std::string &url, const std::string& file_name_prefix);
   bool fetchLinkPreviewDetails(const std::string &url, LinkPreviewDetails& details);
 
  private:
