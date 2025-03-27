@@ -1,7 +1,7 @@
 import {
   addClip,
   Clip,
-  ClipType,
+  ClipType, Collection,
   deleteAllClips,
   deleteClip,
   getAllClips,
@@ -19,6 +19,12 @@ declare const getDefaultAppInfo: (filePath: string) => string;
 declare const getRecommendedAppsInfo: (filePath: string) => string;
 declare const getAllAppsInfo: () => string;
 declare const getImagesDir: () => string;
+
+type FilterOptions = {
+  types: ClipType[]
+  favorites: boolean
+  collections: Collection[]
+}
 
 export enum SortHistoryType {
   TimeOfFirstCopy,
@@ -46,11 +52,18 @@ let history: Clip[] = [];
 let filteredHistory: Clip[] = [];
 let filterQuery = "";
 let filterHistory = false;
-let historyUpdated = false;
+let filterOptionsUpdated = false;
+let filterOptions: FilterOptions = {
+  types: [],
+  favorites: false,
+  collections: []
+};
+let shouldUpdateHistory = false;
 let lastSelectedItemIndex = -1;
 let selectedItemIndices: number[] = [];
 let visibleHistoryLength = 0;
 let previewVisible = true;
+let filterVisible = false;
 let infoVisible = true;
 let sortType = SortHistoryType.TimeOfLastCopy;
 
@@ -116,12 +129,15 @@ export async function loadHistory() {
 }
 
 export function requestHistoryUpdate() {
-  historyUpdated = true
+  shouldUpdateHistory = true
 }
 
 function loadSettings() {
   if (localStorage.getItem("previewVisible")) {
     previewVisible = localStorage.getItem("previewVisible") === "true"
+  }
+  if (localStorage.getItem("filterVisible")) {
+    filterVisible = localStorage.getItem("filterVisible") === "true"
   }
   if (localStorage.getItem("infoVisible")) {
     infoVisible = localStorage.getItem("infoVisible") === "true"
@@ -134,6 +150,11 @@ function loadSettings() {
 function savePreviewVisible(visible: boolean) {
   previewVisible = visible
   localStorage.setItem("previewVisible", visible.toString())
+}
+
+function saveFilterVisible(visible: boolean) {
+  filterVisible = visible
+  localStorage.setItem("filterVisible", visible.toString())
 }
 
 function saveInfoVisible(visible: boolean) {
@@ -210,46 +231,53 @@ async function deleteItem(item: Clip) {
   }
 }
 
+function hasText(searchString: string, item: Clip) {
+  // Search in name.
+  if (item.name && item.name.toLowerCase().includes(searchString)) {
+    return true
+  }
+  // Search in image title.
+  if (item.type === ClipType.Image) {
+    let imageTitle = "Image (" + item.imageWidth + "x" + item.imageHeight + ")";
+    if (imageTitle.toLowerCase().includes(searchString)) {
+      return true;
+    }
+  }
+  // Search in text from image.
+  if (getImageText(item).toLowerCase().includes(searchString)) {
+    return true
+  }
+  // Search in file path.
+  if (item.type === ClipType.File) {
+    if (item.filePathFileName.toLowerCase().includes(searchString)) {
+      return true
+    }
+  }
+  // Search in content.
+  return item.content.toLowerCase().includes(searchString)
+}
+
 export function getHistoryItems(): Clip[] {
-  if (filterQuery.length > 0) {
-    if (!filterHistory && !historyUpdated) {
+  if (filterQuery.length > 0 || filterOptionsUpdated) {
+    if (!filterHistory && !shouldUpdateHistory) {
       return filteredHistory
     }
     filterHistory = false
     filteredHistory = Array.from(history.filter(item => {
-      let searchString = filterQuery.toLowerCase();
-      // Search in name.
-      if (item.name && item.name.toLowerCase().includes(searchString)) {
-        return true
+      let keep = filter(item)
+      if (filterQuery.length > 0 && keep) {
+        return hasText(filterQuery.toLowerCase(), item)
       }
-      // Search in image title.
-      if (item.type === ClipType.Image) {
-        let imageTitle = "Image (" + item.imageWidth + "x" + item.imageHeight + ")";
-        if (imageTitle.toLowerCase().includes(searchString)) {
-          return true;
-        }
-      }
-      // Search in text from image.
-      if (getImageText(item).toLowerCase().includes(searchString)) {
-        return true
-      }
-      // Search in file path.
-      if (item.type === ClipType.File) {
-        if (item.filePathFileName.toLowerCase().includes(searchString)) {
-          return true
-        }
-      }
-      // Search in content.
-      return item.content.toLowerCase().includes(searchString);
+      return keep
     }));
     visibleHistoryLength = filteredHistory.length
     sortHistory(sortType, filteredHistory)
-    historyUpdated = false
+    shouldUpdateHistory = false
     return filteredHistory
   }
-  if (historyUpdated) {
+  if (shouldUpdateHistory) {
     sortHistory(sortType, history)
-    historyUpdated = false
+    shouldUpdateHistory = false
     visibleHistoryLength = history.length
   }
   return history
@@ -350,6 +378,16 @@ export function sortHistory(type: SortHistoryType, history: Clip[]) {
   })
 }
 
+function filter(item: Clip) {
+  if (filterOptions.favorites) {
+    return item.favorite
+  }
+  if (filterOptions.types.length > 0) {
+    return filterOptions.types.includes(item.type)
+  }
+  return true
+}
+
 export function getLastSelectedItemIndex(): number {
   return lastSelectedItemIndex
 }
@@ -430,6 +468,14 @@ export function setPreviewVisibleState(visible: boolean) {
 
 export function getPreviewVisibleState() {
   return previewVisible
+}
+
+export function setFilterVisibleState(visible: boolean) {
+  saveFilterVisible(visible)
+}
+
+export function getFilterVisibleState() {
+  return filterVisible
 }
 
 export function setInfoVisibleState(visible: boolean) {
@@ -516,4 +562,23 @@ export function getFileOrImagePath(item: Clip) {
     return getImagesDir() + "/" + getImageFileName(item)
   }
   return undefined
+}
+
+export function resetFilter() {
+  filterOptions.types = []
+  filterOptions.collections = []
+  filterOptions.favorites = false
+  shouldUpdateHistory = true
+  filterOptionsUpdated = true
+  filterHistory = true
+}
+
+export function filterByType(type: ClipType) {
+  resetFilter()
+  filterOptions.types = [type]
+}
+
+export function filterByFavorites() {
+  resetFilter()
+  filterOptions.favorites = true
 }

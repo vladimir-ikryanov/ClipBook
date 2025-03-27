@@ -23,6 +23,7 @@ type HistoryItemsPaneProps = {
   searchQuery: string
   onSearchQueryChange: (searchQuery: string) => void
   isPreviewVisible: boolean
+  isFilterVisible: boolean
   isQuickPasteModifierPressed: boolean
   isTrial: boolean
   trialDaysLeft: number
@@ -200,6 +201,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    onSearchQueryChange={props.onSearchQueryChange}
                    onShowHidePreview={props.onShowHidePreview}
                    isPreviewVisible={props.isPreviewVisible}
+                   isFilterVisible={props.isFilterVisible}
                    isTrial={props.isTrial}
                    trialDaysLeft={props.trialDaysLeft}
                    searchFieldRef={props.searchFieldRef}

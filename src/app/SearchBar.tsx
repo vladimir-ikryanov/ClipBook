@@ -1,15 +1,20 @@
 import '../app.css';
 import {Input} from "@/components/ui/input"
 import React, {useState} from "react";
-import {PinIcon, SearchIcon, XIcon} from "lucide-react";
+import {FilterIcon, ListFilterIcon, PinIcon, SearchIcon, XIcon} from "lucide-react";
 import {Button} from "@/components/ui/button";
-import {prefGetTogglePreviewShortcut, prefSetAlwaysDisplay, prefShouldAlwaysDisplay} from "@/pref";
+import {
+  prefGetToggleFilterShortcut,
+  prefGetTogglePreviewShortcut,
+  prefSetAlwaysDisplay,
+  prefShouldAlwaysDisplay
+} from "@/pref";
 import {ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import Commands, {HideActionsReason} from "@/app/Commands";
 import PasteTransformationCommands from "@/app/PasteTransformationCommands";
-import {AppInfo, TextFormatOperation} from "@/data";
+import {AppInfo, getFilterVisibleState, TextFormatOperation} from "@/data";
 import FormatTextCommands from "@/app/FormatTextCommands";
 import OpenWithCommands from "@/app/OpenWithCommands";
 
@@ -19,6 +24,7 @@ type SearchBarProps = {
   searchQuery: string
   onSearchQueryChange: (searchQuery: string) => void
   isPreviewVisible: boolean
+  isFilterVisible: boolean
   isTrial: boolean
   trialDaysLeft: number
   onShowHidePreview: () => void
@@ -78,6 +84,10 @@ export default function SearchBar(props: SearchBarProps) {
 
   const handleShowHidePreview = () => {
     props.onShowHidePreview()
+  }
+
+  function handleToggleFilter() {
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "toggleFilter"}}));
   }
 
   function handleClearSearch() {
@@ -161,7 +171,17 @@ export default function SearchBar(props: SearchBarProps) {
           <div
               className={props.searchQuery.length == 0 ? "flex-none relative" : "flex-auto relative"}>
             <div className="flex text-primary-foreground">
-              <SearchIcon className="absolute left-2 top-2.5 h-5 w-5 text-secondary-foreground"/>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button className="absolute" variant="toolbar" size="toolbar" onClick={handleToggleFilter}>
+                    <ListFilterIcon className={`h-5 w-5 ${props.isFilterVisible ? "text-toolbar-buttonSelected" : ""}`}/>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="flex items-center">
+                  <div className="select-none mr-2">{props.isFilterVisible ? "Hide filter options" : "Show filter options"}</div>
+                  <ShortcutLabel shortcut={prefGetToggleFilterShortcut()}/>
+                </TooltipContent>
+              </Tooltip>
             </div>
             <Input placeholder="Type to search..."
                    value={props.searchQuery}
@@ -258,7 +278,7 @@ export default function SearchBar(props: SearchBarProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
-                <div className="select-none mr-2">Show preview panel</div>
+                <div className="select-none mr-2">Show preview</div>
                 <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
               </TooltipContent>
             </Tooltip>

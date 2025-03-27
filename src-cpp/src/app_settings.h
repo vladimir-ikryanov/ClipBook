@@ -215,6 +215,9 @@ class AppSettings {
 
   virtual void saveTrimSurroundingWhitespacesShortcut(std::string shortcut) = 0;
   virtual std::string getTrimSurroundingWhitespacesShortcut() = 0;
+
+  virtual void saveToggleFilterShortcut(std::string shortcut) = 0;
+  virtual std::string getToggleFilterShortcut() = 0;
 };
 
 

@@ -66,6 +66,9 @@ export default function PreviewPane(props: PreviewPaneProps) {
   function renderContent() {
     if (props.selectedItemIndices.length === 1) {
       let item = getHistoryItem(props.selectedItemIndices[0])
+      if (!item) {
+        return null
+      }
       if (item.type === ClipType.Color) {
         return <PreviewColorPane item={item}
                                  colorText={item.content}

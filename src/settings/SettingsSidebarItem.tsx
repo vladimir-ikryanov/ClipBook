@@ -14,9 +14,9 @@ interface SettingsSidebarItemProps {
 export function SettingsSidebarItem(props: SettingsSidebarItemProps) {
   return (
       <SidebarMenuItem key={props.type}>
-        <SidebarMenuButton size="default" isActive={props.isSelected} onClick={props.onSelect} asChild>
+        <SidebarMenuButton size="sidebar" isActive={props.isSelected} onClick={props.onSelect} asChild>
           <a href={`#${props.url}`}>
-            <props.icon/>
+            <props.icon className="w-5 h-5"/>
             <span>{props.type}</span>
           </a>
         </SidebarMenuButton>

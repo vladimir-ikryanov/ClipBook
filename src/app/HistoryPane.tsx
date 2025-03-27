@@ -19,7 +19,7 @@ import {
   getLastSelectedItemIndex,
   getPreviewVisibleState,
   getSelectedHistoryItemIndices,
-  getSelectedHistoryItems,
+  getSelectedHistoryItems, getFilterVisibleState,
   getVisibleHistoryLength,
   isHistoryEmpty,
   isHistoryItemSelected,
@@ -30,7 +30,7 @@ import {
   setSelectedHistoryItemIndex,
   TextFormatOperation,
   updateHistoryItem,
-  updateHistoryItemTypes
+  updateHistoryItemTypes, setFilterVisibleState
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
@@ -59,7 +59,7 @@ import {
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut, prefGetSentenceCaseShortcut, prefGetShowInFinderShortcut,
   prefGetShowMoreActionsShortcut, prefGetStripAllWhitespacesShortcut,
-  prefGetToggleFavoriteShortcut,
+  prefGetToggleFavoriteShortcut, prefGetToggleFilterShortcut,
   prefGetTogglePreviewShortcut, prefGetTrimSurroundingWhitespacesShortcut,
   prefSetDisplayThankYouDialog, prefShouldAlwaysDisplay, prefShouldCopyOnDoubleClick,
   prefShouldDisplayThankYouMessage,
@@ -76,6 +76,10 @@ import {getTrialLicenseDaysLeft, isTrialLicense, isTrialLicenseExpired} from "@/
 import TrialExpiredMessage from "@/app/TrialExpiredMessage";
 import FreeLicenseMessage from "@/app/FreeLicenseMessage";
 import {HideDropdownReason} from "@/app/PreviewToolBarMenu";
+import {SidebarProvider} from "@/components/ui/sidebar";
+import * as React from "react";
+import AppSidebar from "@/app/AppSidebar";
+import {AppSidebarItemType} from "@/app/AppSidebarItem";
 
 declare const pasteItemInFrontApp: (text: string, imageFileName: string, filePath: string) => void;
 declare const pressReturn: () => void;
@@ -110,7 +114,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const searchFieldRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<List>(null);
   const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
-  const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState());
+  const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState())
+  const [filterVisible, setFilterVisible] = useState(getFilterVisibleState())
   const [quickPasteModifierPressed, setQuickPasteModifierPressed] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [hidePreviewOnEditFinish, setHidePreviewOnEditFinish] = useState(false);
@@ -119,6 +124,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [trialDaysLeft, setTrialDaysLeft] = useState(getTrialLicenseDaysLeft());
   const [isTrialExpired, setIsTrialExpired] = useState(isTrialLicenseExpired());
   const [displayThankYouMessage, setDisplayThankYouMessage] = useState(prefShouldDisplayThankYouMessage());
+  const [selectedItemType, setSelectedItemType] = useState<AppSidebarItemType>("All")
 
   useEffect(() => {
     loadHistory().then(() => {
@@ -409,6 +415,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
         handleSaveImageAsFile()
         e.preventDefault()
       }
+      // Toggle the filter when the corresponding shortcut is pressed.
+      if (isShortcutMatch(prefGetToggleFilterShortcut(), e)) {
+        handleToggleFilter()
+        e.preventDefault()
+      }
 
       // Paste using quick paste shortcuts.
       let shortcuts = prefGetQuickPasteShortcuts();
@@ -507,8 +518,15 @@ export default function HistoryPane(props: HistoryPaneProps) {
   useEffect(() => {
     function handleAction(event: Event) {
       const customEvent = event as CustomEvent<{ action: string }>;
-      if (customEvent.detail.action === "focusSearchInput") {
+      let actionName = customEvent.detail.action;
+      if (actionName === "focusSearchInput") {
         focusSearchField()
+      }
+      if (actionName === "toggleFilter") {
+        handleToggleFilter()
+      }
+      if (actionName === "filterHistory") {
+        handleFilterHistory()
       }
     }
 
@@ -1102,6 +1120,16 @@ export default function HistoryPane(props: HistoryPaneProps) {
     prefSetDisplayThankYouDialog(false)
   }
 
+  function handleToggleFilter() {
+    let visible = !getFilterVisibleState()
+    setFilterVisibleState(visible)
+    setFilterVisible(visible)
+  }
+
+  function handleFilterHistory() {
+    setHistory(getHistoryItems())
+  }
+
   (window as any).addClipboardData = addClipboardData;
   (window as any).mergeClipboardData = mergeClipboardData;
   (window as any).copyToClipboardAfterMerge = copyToClipboardAfterMerge;
@@ -1124,97 +1152,107 @@ export default function HistoryPane(props: HistoryPaneProps) {
     )
   }
 
+  function handleSidebarItemSelect(type: AppSidebarItemType) {
+    setSelectedItemType(type)
+  }
+
   return (
       <div className="w-full p-0 m-0">
         <TrialExpiredMessage visible={isTrialExpired}/>
         <FreeLicenseMessage visible={displayThankYouMessage} licenseKey={prefGetLicenseKey()}
                             onClose={handleCloseThankYouMessage}/>
-        <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel className="flex flex-col">
-            <HistoryItemsPane history={history}
-                              appName={props.appName}
-                              appIcon={props.appIcon}
-                              searchQuery={searchQuery}
-                              selectedItemIndices={selectedItemIndices}
-                              onSelectedItemsChange={handleSelectedItemsChange}
-                              onSearchQueryChange={handleSearchQueryChange}
-                              onShowHidePreview={handleTogglePreview}
-                              onMouseDoubleClick={handleMouseDoubleClick}
-                              isPreviewVisible={previewVisible}
-                              isQuickPasteModifierPressed={quickPasteModifierPressed}
-                              isTrial={isTrial}
-                              trialDaysLeft={trialDaysLeft}
-                              searchFieldRef={searchFieldRef}
-                              listRef={listRef}
-                              onPaste={handlePaste}
-                              onPasteWithTab={handlePasteWithTab}
-                              onPasteWithReturn={handlePasteWithReturn}
-                              onPasteWithTransformation={handlePasteWithTransformation}
-                              onPastePath={handlePastePath}
-                              onPasteByIndex={handlePasteByIndex}
-                              onPastePathByIndex={handlePastePathByIndex}
-                              onFormatText={handleFormatTextAndSave}
-                              onMerge={handleMerge}
-                              onHideActions={handleHideActions}
-                              onHideClipDropdownMenu={handleHideClipDropdownMenu}
-                              onEditContent={handleEditContent}
-                              onEditContentByIndex={handleEditContentByIndex}
-                              onRenameItem={handleRenameItem}
-                              onRenameItemByIndex={handleRenameItemByIndex}
-                              onCopyToClipboard={handleCopyToClipboard}
-                              onCopyPathToClipboard={handleCopyPathToClipboard}
-                              onCopyToClipboardByIndex={handleCopyToClipboardByIndex}
-                              onCopyPathToClipboardByIndex={handleCopyPathToClipboardByIndex}
-                              onCopyTextFromImage={handleCopyTextFromImage}
-                              onCopyTextFromImageByIndex={handleCopyTextFromImageByIndex}
-                              onSaveImageAsFile={handleSaveImageAsFile}
-                              onOpenInBrowser={handleOpenInBrowser}
-                              onShowInFinder={handleShowInFinder}
-                              onPreviewLink={handlePreviewLink}
-                              onOpenInApp={handleOpenInApp}
-                              onOpenWithApp={handleOpenWithApp}
-                              onZoomIn={props.onZoomIn}
-                              onZoomOut={props.onZoomOut}
-                              onResetZoom={props.onResetZoom}
-                              onOpenInBrowserByIndex={handleOpenInBrowserByIndex}
-                              onPreviewLinkByIndex={handlePreviewLinkByIndex}
-                              onOpenSettings={handleOpenSettings}
-                              onToggleFavorite={handleToggleFavorite}
-                              onTogglePreview={handleTogglePreview}
-                              onEditHistoryItem={handleEditHistoryItem}
-                              onDeleteItem={handleDeleteItem}
-                              onDeleteItemByIndex={handleDeleteItemByIndex}
-                              onDeleteItems={handleDeleteItems}
-                              onDeleteAllItems={handleDeleteAllItems}/>
-          </ResizablePanel>
-          <ResizableHandle/>
-          <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}
-                          className="transition-all duration-200 ease-out bg-secondary">
-            <PreviewPane selectedItemIndices={selectedItemIndices}
-                         appName={props.appName}
-                         appIcon={props.appIcon}
-                         visible={previewVisible}
-                         editMode={editMode}
-                         onHideDropdown={handleHideDropdown}
-                         onRequestEditItem={handleRequestEditItem}
-                         onSaveImageAsFile={handleSaveImageAsFile}
-                         onEditHistoryItem={handleEditHistoryItem}
-                         onFinishEditing={handleFinishEditing}
-                         onHidePreview={handleTogglePreview}
-                         onPaste={handlePaste}
-                         onPasteWithTab={handlePasteWithTab}
-                         onPasteWithReturn={handlePasteWithReturn}
-                         onMerge={handleMerge}
-                         onCopyToClipboard={handleCopyToClipboard}
-                         onCopyTextFromImage={handleCopyTextFromImage}
-                         onOpenInBrowser={handleOpenInBrowser}
-                         onPreviewLink={handlePreviewLink}
-                         onDeleteItem={handleDeleteItem}
-                         onRenameItem={handleRenameItem}
-                         onFormatText={handleFormatTextAndSave}
-                         onToggleFavorite={handleToggleFavorite}/>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+        <SidebarProvider className="">
+          <AppSidebar visible={filterVisible} onSelect={handleSidebarItemSelect} selectedItemType={selectedItemType}/>
+          <div className="w-full">
+            <ResizablePanelGroup direction="horizontal">
+              <ResizablePanel className="flex flex-col">
+                <HistoryItemsPane history={history}
+                                  appName={props.appName}
+                                  appIcon={props.appIcon}
+                                  searchQuery={searchQuery}
+                                  selectedItemIndices={selectedItemIndices}
+                                  onSelectedItemsChange={handleSelectedItemsChange}
+                                  onSearchQueryChange={handleSearchQueryChange}
+                                  onShowHidePreview={handleTogglePreview}
+                                  onMouseDoubleClick={handleMouseDoubleClick}
+                                  isPreviewVisible={previewVisible}
+                                  isFilterVisible={filterVisible}
+                                  isQuickPasteModifierPressed={quickPasteModifierPressed}
+                                  isTrial={isTrial}
+                                  trialDaysLeft={trialDaysLeft}
+                                  searchFieldRef={searchFieldRef}
+                                  listRef={listRef}
+                                  onPaste={handlePaste}
+                                  onPasteWithTab={handlePasteWithTab}
+                                  onPasteWithReturn={handlePasteWithReturn}
+                                  onPasteWithTransformation={handlePasteWithTransformation}
+                                  onPastePath={handlePastePath}
+                                  onPasteByIndex={handlePasteByIndex}
+                                  onPastePathByIndex={handlePastePathByIndex}
+                                  onFormatText={handleFormatTextAndSave}
+                                  onMerge={handleMerge}
+                                  onHideActions={handleHideActions}
+                                  onHideClipDropdownMenu={handleHideClipDropdownMenu}
+                                  onEditContent={handleEditContent}
+                                  onEditContentByIndex={handleEditContentByIndex}
+                                  onRenameItem={handleRenameItem}
+                                  onRenameItemByIndex={handleRenameItemByIndex}
+                                  onCopyToClipboard={handleCopyToClipboard}
+                                  onCopyPathToClipboard={handleCopyPathToClipboard}
+                                  onCopyToClipboardByIndex={handleCopyToClipboardByIndex}
+                                  onCopyPathToClipboardByIndex={handleCopyPathToClipboardByIndex}
+                                  onCopyTextFromImage={handleCopyTextFromImage}
+                                  onCopyTextFromImageByIndex={handleCopyTextFromImageByIndex}
+                                  onSaveImageAsFile={handleSaveImageAsFile}
+                                  onOpenInBrowser={handleOpenInBrowser}
+                                  onShowInFinder={handleShowInFinder}
+                                  onPreviewLink={handlePreviewLink}
+                                  onOpenInApp={handleOpenInApp}
+                                  onOpenWithApp={handleOpenWithApp}
+                                  onZoomIn={props.onZoomIn}
+                                  onZoomOut={props.onZoomOut}
+                                  onResetZoom={props.onResetZoom}
+                                  onOpenInBrowserByIndex={handleOpenInBrowserByIndex}
+                                  onPreviewLinkByIndex={handlePreviewLinkByIndex}
+                                  onOpenSettings={handleOpenSettings}
+                                  onToggleFavorite={handleToggleFavorite}
+                                  onTogglePreview={handleTogglePreview}
+                                  onEditHistoryItem={handleEditHistoryItem}
+                                  onDeleteItem={handleDeleteItem}
+                                  onDeleteItemByIndex={handleDeleteItemByIndex}
+                                  onDeleteItems={handleDeleteItems}
+                                  onDeleteAllItems={handleDeleteAllItems}/>
+              </ResizablePanel>
+              <ResizableHandle/>
+              <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}
+                              className="transition-all duration-200 ease-out bg-secondary">
+                <PreviewPane selectedItemIndices={selectedItemIndices}
+                             appName={props.appName}
+                             appIcon={props.appIcon}
+                             visible={previewVisible}
+                             editMode={editMode}
+                             onHideDropdown={handleHideDropdown}
+                             onRequestEditItem={handleRequestEditItem}
+                             onSaveImageAsFile={handleSaveImageAsFile}
+                             onEditHistoryItem={handleEditHistoryItem}
+                             onFinishEditing={handleFinishEditing}
+                             onHidePreview={handleTogglePreview}
+                             onPaste={handlePaste}
+                             onPasteWithTab={handlePasteWithTab}
+                             onPasteWithReturn={handlePasteWithReturn}
+                             onMerge={handleMerge}
+                             onCopyToClipboard={handleCopyToClipboard}
+                             onCopyTextFromImage={handleCopyTextFromImage}
+                             onOpenInBrowser={handleOpenInBrowser}
+                             onPreviewLink={handlePreviewLink}
+                             onDeleteItem={handleDeleteItem}
+                             onRenameItem={handleRenameItem}
+                             onFormatText={handleFormatTextAndSave}
+                             onToggleFavorite={handleToggleFavorite}/>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </div>
+        </SidebarProvider>
       </div>
   )
 }

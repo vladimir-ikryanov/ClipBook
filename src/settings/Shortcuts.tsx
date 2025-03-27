@@ -20,7 +20,7 @@ import {
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut, prefGetSentenceCaseShortcut,
   prefGetShowMoreActionsShortcut, prefGetStripAllWhitespacesShortcut,
-  prefGetToggleFavoriteShortcut,
+  prefGetToggleFavoriteShortcut, prefGetToggleFilterShortcut,
   prefGetTogglePreviewShortcut, prefGetTrimSurroundingWhitespacesShortcut,
   prefGetZoomUIInShortcut,
   prefGetZoomUIOutShortcut,
@@ -42,7 +42,7 @@ import {
   prefSetSelectNextItemShortcut,
   prefSetSelectPreviousItemShortcut, prefSetSentenceCaseShortcut, prefSetShowInFinderShortcut,
   prefSetShowMoreActionsShortcut, prefSetStripAllWhitespacesShortcut,
-  prefSetToggleFavoriteShortcut,
+  prefSetToggleFavoriteShortcut, prefSetToggleFilterShortcut,
   prefSetTogglePreviewShortcut, prefSetTrimSurroundingWhitespacesShortcut,
   prefSetZoomUIInShortcut,
   prefSetZoomUIOutShortcut,
@@ -85,6 +85,7 @@ export default function Shortcuts() {
   const [removeEmptyLinesShortcut, setRemoveEmptyLinesShortcut] = useState(prefGetRemoveEmptyLinesShortcut());
   const [stripAllWhitespacesShortcut, setStripAllWhitespacesShortcut] = useState(prefGetStripAllWhitespacesShortcut());
   const [trimSurroundingWhitespacesShortcut, setTrimSurroundingWhitespacesShortcut] = useState(prefGetTrimSurroundingWhitespacesShortcut());
+  const [toggleFilterShortcut, setToggleFilterShortcut] = useState(prefGetToggleFilterShortcut());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -142,6 +143,11 @@ export default function Shortcuts() {
   function handleRenameHistoryItemShortcutChange(shortcut: string) {
     setRenameItemShortcut(shortcut)
     prefSetRenameItemShortcut(shortcut)
+  }
+
+  function handleToggleFilterShortcutChange(shortcut: string) {
+    setToggleFilterShortcut(shortcut)
+    prefSetToggleFilterShortcut(shortcut)
   }
 
   function handleOpenInBrowserShortcutChange(shortcut: string) {
@@ -374,7 +380,13 @@ export default function Shortcuts() {
                              onSave={handleTogglePreviewShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Show more actions</span>
+              <span className="">Show/hide filter</span>
+              <ShortcutInput shortcut={toggleFilterShortcut}
+                             defaultShortcut="MetaLeft + KeyF"
+                             onSave={handleToggleFilterShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">Show Command Menu</span>
               <ShortcutInput shortcut={showMoreActionsShortcut}
                              defaultShortcut="MetaLeft + KeyK"
                              onSave={handleShowMoreActionsShortcutChange}/>

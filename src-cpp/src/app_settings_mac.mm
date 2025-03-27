@@ -81,6 +81,7 @@ NSString *prefSentenceCaseShortcut = @"app.sentence_case_shortcut";
 NSString *prefRemoveEmptyLinesShortcut = @"app.remove_empty_lines_shortcut";
 NSString *prefStripAllWhitespacesShortcut = @"app.strip_all_whitespaces_shortcut";
 NSString *prefTrimSurroundingWhitespacesShortcut = @"app.trim_surrounding_whitespaces_shortcut";
+NSString *prefToggleFilterShortcut = @"app.toggle_filter_shortcut";
 
 AppSettingsMac::AppSettingsMac() = default;
 
@@ -656,7 +657,7 @@ std::string AppSettingsMac::getSearchHistoryShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "MetaLeft + KeyF";
+  return "MetaLeft + Slash";
 }
 
 void AppSettingsMac::saveTogglePreviewShortcut(std::string shortcut) {
@@ -1123,4 +1124,19 @@ bool AppSettingsMac::shouldCopyOnNumberAction() {
     return [defaults boolForKey:prefCopyOnNumberAction];
   }
   return false;
+}
+
+void AppSettingsMac::saveToggleFilterShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefToggleFilterShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getToggleFilterShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefToggleFilterShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "MetaLeft + KeyF";
 }

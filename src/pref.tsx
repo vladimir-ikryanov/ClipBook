@@ -123,6 +123,8 @@ declare const saveStripAllWhitespacesShortcut: (shortcut: string) => void;
 declare const getStripAllWhitespacesShortcut: () => string;
 declare const saveTrimSurroundingWhitespacesShortcut: (shortcut: string) => void;
 declare const getTrimSurroundingWhitespacesShortcut: () => string;
+declare const saveToggleFilterShortcut: (shortcut: string) => void;
+declare const getToggleFilterShortcut: () => string;
 
 export enum OpenWindowStrategy {
   ACTIVE_SCREEN_LAST_POSITION = "activeScreenLastPosition",
@@ -664,6 +666,14 @@ export function prefGetTrimSurroundingWhitespacesShortcut() {
 
 export function prefSetTrimSurroundingWhitespacesShortcut(shortcut: string) {
   saveTrimSurroundingWhitespacesShortcut(shortcut)
+}
+
+export function prefGetToggleFilterShortcut() {
+  return getToggleFilterShortcut()
+}
+
+export function prefSetToggleFilterShortcut(shortcut: string) {
+  saveToggleFilterShortcut(shortcut)
 }
 
 export function prefSetCopyOnDoubleClick(copy: boolean) {

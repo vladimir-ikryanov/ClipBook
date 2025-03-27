@@ -9,6 +9,12 @@ export enum ClipType {
   File
 }
 
+export class Collection {
+  id?: number;
+  name: string = "";
+  color: string = "";
+}
+
 export class LinkPreviewDetails {
   id?: number;
   url: string = "";
@@ -113,4 +119,12 @@ export function getImageFileName(item: Clip): string {
 
 export function getFilePath(item: Clip): string {
   return item.filePath || ""
+}
+
+export function getAllCollections(): Collection[] {
+  return [
+    {id: 1, name: "Collection 1", color: "#FF0000"},
+    {id: 2, name: "Collection 2", color: "#00FF00"},
+    {id: 3, name: "Collection 3", color: "#0000FF"}
+  ]
 }

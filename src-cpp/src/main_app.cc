@@ -1089,6 +1089,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getTrimSurroundingWhitespacesShortcut", [this]() -> std::string {
       return settings_->getTrimSurroundingWhitespacesShortcut();
   });
+  window->putProperty("saveToggleFilterShortcut", [this](std::string shortcut) -> void {
+    settings_->saveToggleFilterShortcut(shortcut);
+  });
+  window->putProperty("getToggleFilterShortcut", [this]() -> std::string {
+    return settings_->getToggleFilterShortcut();
+  });
 
   window->putProperty("selectAppsToIgnore", [this]() {
     selectAppsToIgnore();
