@@ -453,16 +453,18 @@ export default function Commands(props: CommandsProps) {
     if (getSelectedHistoryItemIndices().length === 1) {
       let item = getFirstSelectedHistoryItem();
       let type = item?.type;
-      return type === ClipType.Text ||
+      return item && (type === ClipType.Text ||
           type === ClipType.Link ||
           type === ClipType.Email ||
-          type === ClipType.Color
+          type === ClipType.Color)
     }
     return false
   }
 
   function canAddToFavorites() {
-    return getSelectedHistoryItems().some(item => !item.favorite)
+    return getSelectedHistoryItems().some(item => {
+      return item && !item.favorite
+    })
   }
 
   function canShowDeleteItem() {

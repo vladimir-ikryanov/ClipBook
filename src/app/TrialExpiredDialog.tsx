@@ -18,11 +18,11 @@ declare const buyLicense: () => void;
 declare const sendFeedback: (text: string) => void;
 declare const openSettingsLicense: () => void;
 
-type TrialExpiredMessageProps = {
+type TrialExpiredDialogProps = {
   visible: boolean
 }
 
-export default function TrialExpiredMessage(props: TrialExpiredMessageProps) {
+export default function TrialExpiredDialog(props: TrialExpiredDialogProps) {
   const [feedbackProvided, setFeedbackProvided] = useState(prefIsFeedbackProvided())
   const [feedback, setFeedback] = useState("")
   const [email, setEmail] = useState("")

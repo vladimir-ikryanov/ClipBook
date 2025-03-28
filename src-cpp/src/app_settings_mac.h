@@ -15,9 +15,6 @@ class AppSettingsMac : public AppSettings {
   void saveLicenseKey(std::string key) override;
   std::string getLicenseKey() override;
 
-  void setShouldDisplayThankYouDialog(bool display) override;
-  bool shouldDisplayThankYouDialog() override;
-
   void saveTheme(std::string theme) override;
   std::string getTheme() override;
 

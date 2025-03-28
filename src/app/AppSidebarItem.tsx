@@ -9,7 +9,7 @@ import {
 import {SidebarMenuButton, SidebarMenuItem} from "@/components/ui/sidebar";
 import React from "react";
 
-export type AppSidebarItemType = "All" | "Text" | "Image" | "Link" | "Color" | "File" | "Email" | "Favorites" | "Settings" | "New Collection";
+export type AppSidebarItemType = "None" | "All" | "Text" | "Image" | "Link" | "Color" | "File" | "Email" | "Favorites" | "Settings" | "New Tag";
 
 interface AppSidebarItemProps {
   type: AppSidebarItemType
@@ -45,7 +45,7 @@ export function AppSidebarItem(props: AppSidebarItemProps) {
     if (props.type === "Favorites") {
       return <StarIcon className="h-5 w-5"/>
     }
-    if (props.type === "New Collection") {
+    if (props.type === "New Tag") {
       return <PlusIcon className="h-5 w-5"/>
     }
     if (props.type === "Settings") {

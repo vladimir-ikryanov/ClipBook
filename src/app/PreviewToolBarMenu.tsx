@@ -36,7 +36,7 @@ import {ClipType} from "@/db";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {
   getFirstSelectedHistoryItem,
-  getSelectedHistoryItemIndices,
+  getSelectedHistoryItemIndices, isImageItem, isLinkItem,
   isTextItem,
   TextFormatOperation
 } from "@/data";
@@ -148,12 +148,11 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
   }
 
   function canShowPreviewLink() {
-    return props.selectedItemIndices.length === 1 &&
-        getFirstSelectedHistoryItem().type === ClipType.Link
+    return props.selectedItemIndices.length === 1 && isLinkItem(getFirstSelectedHistoryItem())
   }
 
   function canSaveImageAsFile() {
-    return props.selectedItemIndices.length === 1 && getFirstSelectedHistoryItem().type === ClipType.Image
+    return props.selectedItemIndices.length === 1 && isImageItem(getFirstSelectedHistoryItem())
   }
 
   function canFormatText() {

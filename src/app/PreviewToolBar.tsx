@@ -134,7 +134,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   }
 
   function selectedItemsAreMarkedAsFavorite() {
-    return props.selectedItemIndices.every(index => getHistoryItem(index).favorite)
+    return props.selectedItemIndices.every(index => {
+      let item = getHistoryItem(index)
+      return item && item.favorite
+    })
   }
 
   function canShowCopyToClipboard() {
@@ -142,17 +145,24 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   }
 
   function canShowOpenInBrowser() {
-    return props.selectedItemIndices.length === 1 &&
-        getFirstSelectedHistoryItem().type === ClipType.Link
+    if (getSelectedHistoryItems().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      if (item) {
+        return item.type === ClipType.Link
+      }
+    }
+    return false
   }
 
   function canShowCopyTextFromImage() {
     if (props.selectedItemIndices.length === 1) {
       let item = getFirstSelectedHistoryItem()
-      if (getImageText(item).length > 0) {
-        return true
+      if (item) {
+        if (getImageText(item).length > 0) {
+          return true
+        }
+        return item.type === ClipType.Image && item.content.length > 0
       }
-      return item.type === ClipType.Image && item.content.length > 0
     }
     return false
   }
@@ -167,7 +177,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
   function canShowMergeItems() {
     if (props.selectedItemIndices.length > 1) {
-      return getSelectedHistoryItems().every(item => isTextItem(item) || item.type === ClipType.File)
+      return getSelectedHistoryItems().every(item => {
+        return item && (isTextItem(item) || item.type === ClipType.File)
+      })
     }
     return false
   }

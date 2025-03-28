@@ -9,48 +9,90 @@ import {
   SidebarMenu,
 } from "@/components/ui/sidebar";
 import {AppSidebarItem, AppSidebarItemType} from "@/app/AppSidebarItem";
-import {filterByFavorites, filterByType, resetFilter} from "@/data";
-import {ClipType, Collection, getAllCollections} from "@/db";
-import {AppSidebarCollectionItem} from "@/app/AppSidebarCollectionItem";
+import {
+  allTags,
+  deleteTag,
+  filterByFavorites,
+  filterByTag,
+  filterByType,
+  resetFilter
+} from "@/data";
+import {ClipType, Tag, getAllTags} from "@/db";
+import {AppSidebarTagItem} from "@/app/AppSidebarTagItem";
+import TagDialog from "@/app/TagDialog";
 
 interface AppSidebarProps {
-  selectedItemType: AppSidebarItemType
   visible: boolean
-  onSelect: (type: AppSidebarItemType) => void
+  selectedItemType: AppSidebarItemType
+  selectedTag?: Tag | undefined
+  onSelectType: (type: AppSidebarItemType) => void
+  onSelectTag: (tag: Tag) => void
 }
 
 export default function AppSidebar(props: AppSidebarProps) {
-  const [selectedItemType, setSelectedItemType] = useState<AppSidebarItemType>(props.selectedItemType)
+  const [tags, setTags] = useState<Tag[]>(allTags())
+  const [tagToEdit, setTagToEdit] = useState<Tag | undefined>(undefined)
+  const [tagDialogVisible, setTagDialogVisible] = useState(false)
 
-  function handleSelect(type: AppSidebarItemType) {
-    setSelectedItemType(type)
-    props.onSelect(type)
+  function handleSelectType(type: AppSidebarItemType) {
+    props.onSelectType(type)
   }
 
-  function handleCollectionSelect(collection: Collection) {
+  function handleSelectTag(tag: Tag) {
+    props.onSelectTag(tag)
+    filterByTag(tag)
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "filterHistory"}}));
+  }
 
+  function handleEditTag(tag: Tag) {
+    setTagToEdit(tag)
+    setTagDialogVisible(true)
+  }
+
+  function handleDeleteTag(tag: Tag) {
+    deleteTag(tag)
+    setTags([...allTags()])
   }
 
   function handleShowFavorites() {
-    handleSelect("Favorites")
+    handleSelectType("Favorites")
     filterByFavorites()
     window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "filterHistory"}}));
   }
 
   function handleShowAll() {
-    handleSelect("All")
+    handleSelectType("All")
     resetFilter()
     window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "filterHistory"}}));
   }
 
   function handleShowByType(clipType: ClipType, type: AppSidebarItemType) {
-    handleSelect(type)
+    handleSelectType(type)
     filterByType(clipType)
     window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "filterHistory"}}));
   }
 
-  function handleNewCollection() {
-    console.log("New Collection")
+  function handleNewTag() {
+    setTagDialogVisible(true)
+    setTagToEdit(undefined)
+  }
+
+  function handleTagDialogClose() {
+    setTagDialogVisible(false)
+  }
+
+  function handleTagCreated() {
+    handleTagDialogClose()
+    getAllTags().then((tags) => {
+      setTags(tags)
+    })
+  }
+
+  function handleTagUpdated() {
+    handleTagDialogClose()
+    getAllTags().then((tags) => {
+      setTags(tags)
+    })
   }
 
   return (
@@ -60,34 +102,34 @@ export default function AppSidebar(props: AppSidebarProps) {
         <SidebarHeader>
           <SidebarMenu>
             <AppSidebarItem type={"All"}
-                            selectedType={selectedItemType}
+                            selectedType={props.selectedItemType}
                             onSelect={() => handleShowAll()}/>
-            <AppSidebarItem type={"Favorites"}
-                            selectedType={selectedItemType}
-                            onSelect={() => handleShowFavorites()}/>
           </SidebarMenu>
         </SidebarHeader>
-        <SidebarContent className="select-none bg-secondary overflow-scroll no-scrollbars mt-2">
+        <SidebarContent className="select-none overflow-scroll no-scrollbars mt-2">
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
+                <AppSidebarItem type={"Favorites"}
+                                selectedType={props.selectedItemType}
+                                onSelect={() => handleShowFavorites()}/>
                 <AppSidebarItem type={"Text"}
-                                selectedType={selectedItemType}
+                                selectedType={props.selectedItemType}
                                 onSelect={() => handleShowByType(ClipType.Text, "Text")}/>
                 <AppSidebarItem type={"Image"}
-                                selectedType={selectedItemType}
+                                selectedType={props.selectedItemType}
                                 onSelect={() => handleShowByType(ClipType.Image, "Image")}/>
                 <AppSidebarItem type={"Link"}
-                                selectedType={selectedItemType}
+                                selectedType={props.selectedItemType}
                                 onSelect={() => handleShowByType(ClipType.Link, "Link")}/>
                 <AppSidebarItem type={"File"}
-                                selectedType={selectedItemType}
+                                selectedType={props.selectedItemType}
                                 onSelect={() => handleShowByType(ClipType.File, "File")}/>
                 <AppSidebarItem type={"Color"}
-                                selectedType={selectedItemType}
+                                selectedType={props.selectedItemType}
                                 onSelect={() => handleShowByType(ClipType.Color, "Color")}/>
                 <AppSidebarItem type={"Email"}
-                                selectedType={selectedItemType}
+                                selectedType={props.selectedItemType}
                                 onSelect={() => handleShowByType(ClipType.Email, "Email")}/>
 
               </SidebarMenu>
@@ -97,18 +139,25 @@ export default function AppSidebar(props: AppSidebarProps) {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                <AppSidebarItem type={"New Collection"}
-                                selectedType={selectedItemType}
+                <TagDialog visible={tagDialogVisible}
+                           tag={tagToEdit}
+                           onClose={handleTagDialogClose}
+                           onCreateTag={handleTagCreated}
+                           onUpdateTag={handleTagUpdated}/>
+                <AppSidebarItem type={"New Tag"}
+                                selectedType={props.selectedItemType}
                                 selectable={false}
-                                onSelect={handleNewCollection}/>
+                                onSelect={handleNewTag}/>
                 {
-                  getAllCollections().map(collection => {
-                    return <AppSidebarCollectionItem
-                        collection={collection}
-                        onSelect={() => handleCollectionSelect(collection)}/>
+                  tags.map((tag) => {
+                    return <AppSidebarTagItem key={tag.id}
+                                              tag={tag}
+                                              selectedTag={props.selectedTag}
+                                              onSelect={() => handleSelectTag(tag)}
+                                              onEditTag={() => handleEditTag(tag)}
+                                              onDeleteTag={() => handleDeleteTag(tag)}/>
                   })
                 }
-
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

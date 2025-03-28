@@ -160,7 +160,6 @@ void MainApp::launch() {
 #ifdef OFFICIAL_BUILD
   activateLicense([this](const std::string &licenseKey) {
     settings_->saveLicenseKey(licenseKey);
-    settings_->setShouldDisplayThankYouDialog(true);
     app_window_->navigation()->reloadIgnoringCache();
   }, [](const std::string &error) {
     LOG(ERROR) << "Failed to activate a license key: " << error;
@@ -732,16 +731,14 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
     hide(true);
     showSettingsWindow("/settings/license");
   });
+  window->putProperty("openSettingsTags", [this]() {
+    hide(true);
+    showSettingsWindow("/settings/tags");
+  });
   window->putProperty("sendFeedback", [this](std::string text) {
 #ifdef OFFICIAL_BUILD
     sendFeedback(text);
 #endif
-  });
-  window->putProperty("shouldDisplayThankYouDialog", [this]() -> bool {
-    return settings_->shouldDisplayThankYouDialog();
-  });
-  window->putProperty("saveDisplayThankYouDialog", [this](bool display) {
-    settings_->setShouldDisplayThankYouDialog(display);
   });
 
   window->putProperty("saveTheme", [this](std::string theme) -> void {

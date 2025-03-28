@@ -39,4 +39,21 @@ const RadioGroupItem = React.forwardRef<
 })
 RadioGroupItem.displayName = RadioGroupPrimitive.Item.displayName
 
-export { RadioGroup, RadioGroupItem }
+const RadioGroupColorItem = React.forwardRef<
+    React.ElementRef<typeof RadioGroupPrimitive.Item>,
+    React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
+>(({ className, ...props }, ref) => {
+  return (
+      <RadioGroupPrimitive.Item
+          ref={ref}
+          className={cn(
+              "aspect-square h-4 w-4 rounded-full text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:ring-offset-2 data-[state=checked]:ring-2 data-[state=checked]:ring-input",
+              className
+          )}
+          {...props}
+      ></RadioGroupPrimitive.Item>
+  )
+})
+RadioGroupColorItem.displayName = RadioGroupPrimitive.Item.displayName
+
+export { RadioGroup, RadioGroupItem, RadioGroupColorItem }

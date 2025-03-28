@@ -43,7 +43,6 @@ import {
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetKeepFavoritesOnClearHistory,
-  prefGetLicenseKey,
   prefGetMakeLowerCaseShortcut, prefGetMakeUpperCaseShortcut,
   prefGetNavigateToFirstItemShortcut,
   prefGetNavigateToLastItemShortcut,
@@ -61,20 +60,18 @@ import {
   prefGetShowMoreActionsShortcut, prefGetStripAllWhitespacesShortcut,
   prefGetToggleFavoriteShortcut, prefGetToggleFilterShortcut,
   prefGetTogglePreviewShortcut, prefGetTrimSurroundingWhitespacesShortcut,
-  prefSetDisplayThankYouDialog, prefShouldAlwaysDisplay, prefShouldCopyOnDoubleClick,
-  prefShouldDisplayThankYouMessage,
+  prefShouldAlwaysDisplay, prefShouldCopyOnDoubleClick,
   prefShouldTreatDigitNumbersAsColor,
   prefShouldUpdateHistoryAfterAction
 } from "@/pref";
 import {HideActionsReason} from "@/app/Commands";
 import {FixedSizeList as List} from "react-window";
-import {Clip, ClipType, getFilePath, getImageFileName, getImageText} from "@/db";
+import {Clip, ClipType, getFilePath, getImageFileName, getImageText, Tag} from "@/db";
 import {formatText, getClipType, isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
 import {getTrialLicenseDaysLeft, isTrialLicense, isTrialLicenseExpired} from "@/licensing";
-import TrialExpiredMessage from "@/app/TrialExpiredMessage";
-import FreeLicenseMessage from "@/app/FreeLicenseMessage";
+import TrialExpiredDialog from "@/app/TrialExpiredDialog";
 import {HideDropdownReason} from "@/app/PreviewToolBarMenu";
 import {SidebarProvider} from "@/components/ui/sidebar";
 import * as React from "react";
@@ -123,8 +120,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [isTrial, setIsTrial] = useState(isTrialLicense());
   const [trialDaysLeft, setTrialDaysLeft] = useState(getTrialLicenseDaysLeft());
   const [isTrialExpired, setIsTrialExpired] = useState(isTrialLicenseExpired());
-  const [displayThankYouMessage, setDisplayThankYouMessage] = useState(prefShouldDisplayThankYouMessage());
   const [selectedItemType, setSelectedItemType] = useState<AppSidebarItemType>("All")
+  const [selectedTag, setSelectedTag] = useState<Tag | undefined>(undefined)
 
   useEffect(() => {
     loadHistory().then(() => {
@@ -1115,11 +1112,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setSelectedItemIndices(getSelectedHistoryItemIndices())
   }
 
-  function handleCloseThankYouMessage() {
-    setDisplayThankYouMessage(false)
-    prefSetDisplayThankYouDialog(false)
-  }
-
   function handleToggleFilter() {
     let visible = !getFilterVisibleState()
     setFilterVisibleState(visible)
@@ -1152,17 +1144,25 @@ export default function HistoryPane(props: HistoryPaneProps) {
     )
   }
 
-  function handleSidebarItemSelect(type: AppSidebarItemType) {
+  function handleSidebarTypeSelect(type: AppSidebarItemType) {
     setSelectedItemType(type)
+    setSelectedTag(undefined)
+  }
+
+  function handleSidebarTagSelect(tag: Tag) {
+    setSelectedItemType("None")
+    setSelectedTag(tag)
   }
 
   return (
       <div className="w-full p-0 m-0">
-        <TrialExpiredMessage visible={isTrialExpired}/>
-        <FreeLicenseMessage visible={displayThankYouMessage} licenseKey={prefGetLicenseKey()}
-                            onClose={handleCloseThankYouMessage}/>
+        <TrialExpiredDialog visible={isTrialExpired}/>
         <SidebarProvider className="">
-          <AppSidebar visible={filterVisible} onSelect={handleSidebarItemSelect} selectedItemType={selectedItemType}/>
+          <AppSidebar visible={filterVisible}
+                      onSelectType={handleSidebarTypeSelect}
+                      onSelectTag={handleSidebarTagSelect}
+                      selectedTag={selectedTag}
+                      selectedItemType={selectedItemType}/>
           <div className="w-full">
             <ResizablePanelGroup direction="horizontal">
               <ResizablePanel className="flex flex-col">

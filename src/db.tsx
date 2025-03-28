@@ -9,10 +9,27 @@ export enum ClipType {
   File
 }
 
-export class Collection {
+export enum TagColor {
+  Blue = "#3b82f6",
+  Sky = "#0ea5e9",
+  Lime = "#84cc16",
+  Green = "#22c55e",
+  Yellow = "#eab308",
+  Orange = "#f97316",
+  Red = "#dc2626",
+  Pink = "#ec4899",
+  Purple = "#a855f7",
+}
+
+export class Tag {
   id?: number;
   name: string = "";
   color: string = "";
+
+  constructor(name: string, color: string) {
+    this.name = name
+    this.color = color
+  }
 }
 
 export class LinkPreviewDetails {
@@ -39,6 +56,7 @@ export class Clip {
   type: ClipType = ClipType.Text;
   sourceApp: string = "";
   favorite: boolean = false;
+  tags?: number[] = [];
   firstTimeCopy: Date = new Date();
   lastTimeCopy: Date = new Date();
   numberOfCopies: number = 1;
@@ -62,13 +80,15 @@ export class Clip {
 }
 
 class AppDatabase extends Dexie {
+  public tags!: Table<Tag, number>;
   public history!: Table<Clip, number>;
   public linkPreviews!: Table<LinkPreviewDetails, number>;
 
   constructor() {
     super('ClipBookDB');
     this.version(1).stores({
-      history: '++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder',
+      tags: '++id, name, color',
+      history: '++id, title, content, type, sourceApp, favorite, tags, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder',
       linkPreviews: '++id, url, title, description, imageFileName, faviconFileName'
     });
   }
@@ -110,21 +130,33 @@ export async function getLinkPreviewDetails(url: string): Promise<LinkPreviewDet
 }
 
 export function getImageText(item: Clip): string {
-  return item.imageText || ""
+  return item && (item.imageText || "")
 }
 
 export function getImageFileName(item: Clip): string {
-  return item.imageFileName || ""
+  return item && (item.imageFileName || "")
 }
 
 export function getFilePath(item: Clip): string {
-  return item.filePath || ""
+  return item && (item.filePath || "")
 }
 
-export function getAllCollections(): Collection[] {
-  return [
-    {id: 1, name: "Collection 1", color: "#FF0000"},
-    {id: 2, name: "Collection 2", color: "#00FF00"},
-    {id: 3, name: "Collection 3", color: "#0000FF"}
-  ]
+export async function getAllTags(): Promise<Tag[]> {
+  return db.tags.toArray()
+}
+
+export async function findTagById(id: number): Promise<Tag | undefined> {
+  return db.tags.get(id)
+}
+
+export function addTag(tag: Tag) {
+  return db.tags.add(tag)
+}
+
+export function removeTag(tag: Tag) {
+  db.tags.delete(tag.id!)
+}
+
+export function updateTag(tag: Tag) {
+  db.tags.update(tag.id!, tag)
 }

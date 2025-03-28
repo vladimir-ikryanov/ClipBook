@@ -1,17 +1,18 @@
 import {
   addClip,
   Clip,
-  ClipType, Collection,
+  ClipType, Tag,
   deleteAllClips,
   deleteClip,
   getAllClips,
   getFilePath,
   getImageFileName,
   getImageText,
-  updateClip
+  updateClip, getAllTags, addTag, findTagById, removeTag, updateTag
 } from "@/db";
 import {prefGetClearHistoryOnMacReboot} from "@/pref";
 import {getClipType} from "@/lib/utils";
+import React from "react";
 
 declare const isAfterSystemReboot: () => boolean;
 // Returns a string that contains the app name, path, and icon separated by '|'.
@@ -23,7 +24,7 @@ declare const getImagesDir: () => string;
 type FilterOptions = {
   types: ClipType[]
   favorites: boolean
-  collections: Collection[]
+  tags: Tag[]
 }
 
 export enum SortHistoryType {
@@ -56,7 +57,7 @@ let filterOptionsUpdated = false;
 let filterOptions: FilterOptions = {
   types: [],
   favorites: false,
-  collections: []
+  tags: []
 };
 let shouldUpdateHistory = false;
 let lastSelectedItemIndex = -1;
@@ -66,6 +67,7 @@ let previewVisible = true;
 let filterVisible = false;
 let infoVisible = true;
 let sortType = SortHistoryType.TimeOfLastCopy;
+let tags: Tag[] = [];
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -111,6 +113,7 @@ async function loadHistoryForPromo() {
 }
 
 export async function loadHistory() {
+  tags = await getAllTags()
   // Clear history on Mac reboot.
   if (prefGetClearHistoryOnMacReboot() && isAfterSystemReboot()) {
     await deleteAllClips()
@@ -172,10 +175,18 @@ function hasItem(item: Clip): number {
 }
 
 export function isTextItem(item: Clip): boolean {
-  return item.type === ClipType.Text ||
+  return item && (item.type === ClipType.Text ||
       item.type === ClipType.Link ||
       item.type === ClipType.Email ||
-      item.type === ClipType.Color
+      item.type === ClipType.Color)
+}
+
+export function isImageItem(item: Clip): boolean {
+  return item && item.type === ClipType.Image
+}
+
+export function isLinkItem(item: Clip): boolean {
+  return item && item.type === ClipType.Link
 }
 
 export function findItem(content: string, imageFileName: string, fileName: string): Clip | undefined {
@@ -385,6 +396,13 @@ function filter(item: Clip) {
   if (filterOptions.types.length > 0) {
     return filterOptions.types.includes(item.type)
   }
+  if (filterOptions.tags.length > 0) {
+    for (let i = 0; i < filterOptions.tags.length; i++) {
+      if (!getTags(item).includes(filterOptions.tags[i])) {
+        return false
+      }
+    }
+  }
   return true
 }
 
@@ -566,7 +584,7 @@ export function getFileOrImagePath(item: Clip) {
 
 export function resetFilter() {
   filterOptions.types = []
-  filterOptions.collections = []
+  filterOptions.tags = []
   filterOptions.favorites = false
   shouldUpdateHistory = true
   filterOptionsUpdated = true
@@ -578,7 +596,69 @@ export function filterByType(type: ClipType) {
   filterOptions.types = [type]
 }
 
+export function filterByTag(tag: Tag) {
+  resetFilter()
+  filterOptions.tags = [tag]
+}
+
 export function filterByFavorites() {
   resetFilter()
   filterOptions.favorites = true
 }
+
+export function getTags(item: Clip): Tag[] {
+  if (item && item.tags) {
+    const tags = item.tags.map(tagId => {
+      return allTags().find(tag => tag.id === tagId)
+    })
+    return tags.filter(tag => tag !== undefined) as Tag[]
+  }
+  return []
+}
+
+export function allTags(): Tag[] {
+  return tags
+}
+
+export function createTag(tag: Tag) {
+  addTag(tag).then(id => {
+    findTagById(id).then(tag => {
+      if (tag) {
+        tags.push(tag)
+      }
+    })
+  })
+}
+
+export function deleteTag(tag: Tag) {
+  let index = tags.findIndex(t => t.id === tag.id)
+  if (index !== -1) {
+    removeTag(tags[index])
+    tags.splice(index, 1)
+  }
+}
+
+export function editTag(tag: Tag) {
+  let index = tags.findIndex(t => t.id === tag.id)
+  if (index !== -1) {
+    tags[index] = tag
+    updateTag(tag)
+  }
+}
+
+const TagIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg width="24"
+         height="24"
+         viewBox="-3 -2 24 24"
+         version="1.1"
+         xmlns="http://www.w3.org/2000/svg"
+         {...props}>
+      <g id="Group" fill="currentColor" fillRule="inherit">
+        <path
+            d="M7.80018616,0 C8.91449833,0 10.0288115,0.464576006 10.7716866,1.20789766 L19.2218895,9.6631813 C20.2433414,10.6852484 20.2433414,12.3577223 19.3147469,13.2868748 L13.371748,19.233448 C12.3502951,20.2555161 10.7716866,20.2555161 9.7502327,19.233448 L1.30003107,10.7781639 C0.464296818,10.0348425 0,8.91985989 0,7.80487728 L0,1.67247367 C0,0.743321598 0.742874861,0 1.6714685,0 L7.80018616,0 Z M4.35578396,4.32420898 C3.76142468,4.91856826 3.76142468,5.8822149 4.35578396,6.47657418 C4.95014329,7.07093351 5.91379022,7.0709338 6.5081495,6.47657452 C7.10250883,5.88221519 7.10250883,4.91856796 6.5081495,4.32420864 C5.91379022,3.72984936 4.95014329,3.72984965 4.35578396,4.32420898 Z"
+            id="Combined-Shape"></path>
+      </g>
+    </svg>
+);
+
+export default TagIcon;

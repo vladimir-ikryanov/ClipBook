@@ -41,7 +41,6 @@ NSString *prefCopyOnNumberAction = @"copy_on_number_action";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
-NSString *prefDisplayThankYouDialog = @"display_thank_you_dialog";
 
 // Shortcuts.
 NSString *prefOpenAppShortcut = @"app.open_app_shortcut2";
@@ -897,17 +896,6 @@ std::string AppSettingsMac::getPauseResumeShortcut() {
     return {[shortcut UTF8String]};
   }
   return "";
-}
-
-void AppSettingsMac::setShouldDisplayThankYouDialog(bool display) {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setBool:display forKey:prefDisplayThankYouDialog];
-  [defaults synchronize];
-}
-
-bool AppSettingsMac::shouldDisplayThankYouDialog() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  return [defaults boolForKey:prefDisplayThankYouDialog];
 }
 
 void AppSettingsMac::saveOpenWindowStrategy(std::string strategy) {
