@@ -121,6 +121,16 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
   }
 
   function renderItems() {
+    if (props.history.length === 0) {
+      return <div className="flex h-screen draggable">
+          <div className="flex flex-col text-center m-auto">
+            <p className="text-center text-xl font-semibold text-foreground">
+              No items
+            </p>
+          </div>
+        </div>
+    }
+
     return <div className="flex h-full p-2">
       <div className="grid h-full w-full">
         <AutoSizer style={{}}>

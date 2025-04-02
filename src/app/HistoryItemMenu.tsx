@@ -1,19 +1,19 @@
 import '../app.css';
-import React, {KeyboardEvent, MouseEvent, useState} from 'react';
+import React, {KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
 import {
   CopyIcon,
   Edit3Icon,
   EllipsisVerticalIcon, EyeIcon,
-  GlobeIcon, PenIcon, ScanTextIcon,
+  GlobeIcon, PenIcon, PlusIcon, ScanTextIcon,
   StarIcon,
-  StarOffIcon,
+  StarOffIcon, TagsIcon,
   TrashIcon
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
+  DropdownMenuItem, DropdownMenuPortal,
+  DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import ShortcutLabel from "@/app/ShortcutLabel";
@@ -27,8 +27,12 @@ import {
   prefGetToggleFavoriteShortcut,
 } from "@/pref";
 import {CommandShortcut} from "@/components/ui/command";
-import {Clip, ClipType} from "@/db";
+import {Clip, ClipType, updateClip} from "@/db";
 import {isTextItem, toBase64Icon} from "@/data";
+import TagIcon, {allTags, Tag} from "@/tags";
+import {Checkbox} from "@/components/ui/checkbox";
+import {CheckedState} from "@radix-ui/react-checkbox";
+import {ActionName} from "@/actions";
 
 export type HideClipDropdownMenuReason =
     "cancel"
@@ -43,6 +47,7 @@ export type HideClipDropdownMenuReason =
     | "openInBrowser"
     | "previewLink"
     | "deleteItem"
+    | "newTag"
 
 type HistoryItemMenuProps = {
   item: Clip
@@ -65,8 +70,23 @@ type HistoryItemMenuProps = {
   onDeleteItem: (index: number) => void
 }
 
+type TagCheckedState = {
+  tag: Tag
+  checked: boolean
+}
+
 const HistoryItemMenu = (props: HistoryItemMenuProps) => {
   const [open, setOpen] = useState(props.open)
+  const [itemTags, setItemTags] = useState<TagCheckedState[]>([])
+
+  useEffect(() => {
+    let tags: TagCheckedState[] = []
+    allTags().forEach(tag => {
+      const checked = !!props.item.tags?.includes(tag.id)
+      tags.push({tag, checked})
+    })
+    setItemTags(tags)
+  }, [props.item.tags])
 
   let closeReason: HideClipDropdownMenuReason = "cancel"
 
@@ -155,10 +175,44 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
     props.onPreviewLink(props.index)
   }
 
+  function handleNewTag() {
+    closeReason = "newTag"
+    handleOpenChange(false)
+    window.dispatchEvent(new CustomEvent("onAction", {
+      detail: {
+        action: ActionName.NewTag,
+        itemId: props.item.id
+      }
+    }));
+  }
+
+  async function handleTagChecked(tag: Tag, checked: CheckedState) {
+    if (checked) {
+      props.item.tags = [...props.item.tags || [], tag.id]
+    } else {
+      props.item.tags = props.item.tags?.filter((t) => t !== tag.id)
+    }
+    await updateClip(props.item.id!, props.item)
+    let tags = itemTags.map(tagState => {
+      if (tagState.tag.id === tag.id) {
+        tagState.checked = !!checked
+      }
+      return tagState
+    })
+    setItemTags([...tags])
+    window.dispatchEvent(new CustomEvent("onAction", {
+      detail: {
+        action: ActionName.UpdateItem,
+        itemId: props.item.id
+      }
+    }));
+  }
+
   return (
       <div>
         <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-          <DropdownMenuTrigger className="ml-4 text-primary-foreground hover:text-accent-foreground" asChild>
+          <DropdownMenuTrigger className="ml-2 text-primary-foreground hover:text-accent-foreground"
+                               asChild>
             <EllipsisVerticalIcon className="h-5 w-5"/>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="p-1.5 bg-actions-background" align="start"
@@ -195,17 +249,17 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
             }
             <DropdownMenuSeparator/>
             {
-              props.item.type === ClipType.Link &&
-              <DropdownMenuItem onClick={handleOpenInBrowser}>
-                <GlobeIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Open in Browser</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
-                </CommandShortcut>
-              </DropdownMenuItem>
+                props.item.type === ClipType.Link &&
+                <DropdownMenuItem onClick={handleOpenInBrowser}>
+                  <GlobeIcon className="mr-2 h-4 w-4"/>
+                  <span className="mr-12">Open in Browser</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
+                  </CommandShortcut>
+                </DropdownMenuItem>
             }
             {
-              isTextItem(props.item) &&
+                isTextItem(props.item) &&
                 <DropdownMenuItem onClick={handleEditContent}>
                   <Edit3Icon className="mr-2 h-4 w-4"/>
                   <span className="mr-12">Edit Content...</span>
@@ -226,13 +280,46 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
             }
             <DropdownMenuItem onClick={handleToggleFavorite}>
               {
-                props.item.favorite ? <StarOffIcon className="mr-2 h-4 w-4"/> : <StarIcon className="mr-2 h-4 w-4"/>
+                props.item.favorite ? <StarOffIcon className="mr-2 h-4 w-4"/> :
+                    <StarIcon className="mr-2 h-4 w-4"/>
               }
               <span>{props.item.favorite ? "Remove from Favorites" : "Add to Favorites"}</span>
               <CommandShortcut className="flex flex-row">
                 <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
               </CommandShortcut>
             </DropdownMenuItem>
+            <DropdownMenuSeparator/>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <TagsIcon className="mr-2 h-4 w-4"/>
+                <span>Tags...</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent className="p-1.5 bg-actions-background">
+                  {
+                    itemTags.map((tagState: TagCheckedState) => {
+                      return (
+                          <DropdownMenuItem key={tagState.tag.id}>
+                            <Checkbox className="mr-2 border-checkbox"
+                                      checked={tagState.checked}
+                                      onCheckedChange={(checked) => handleTagChecked(tagState.tag, checked)}
+                                      onClick={(e) => {
+                                        e.stopPropagation(); // Prevent closing the menu
+                                      }}/>
+                            <TagIcon className="mr-2 h-4 w-4" style={{color: tagState.tag.color}}/>
+                            <span className="mr-12">{tagState.tag.name}</span>
+                          </DropdownMenuItem>
+                      )
+                    })
+                  }
+                  <DropdownMenuSeparator/>
+                  <DropdownMenuItem onClick={handleNewTag}>
+                    <PlusIcon className="mr-2 h-4 w-4"/>
+                    <span className="mr-12">New Tag...</span>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
             <DropdownMenuSeparator/>
             {
               <DropdownMenuItem onClick={handleRename}>

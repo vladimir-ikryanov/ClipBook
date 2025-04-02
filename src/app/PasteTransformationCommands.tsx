@@ -13,6 +13,7 @@ import {
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {TextFormatOperation} from "@/data";
 import {DialogTitle} from "@/components/ui/dialog";
+import {ActionName} from "@/actions";
 
 type PasteTransformationCommandsProps = {
   onPasteWithTransformation: (operation: TextFormatOperation) => void
@@ -60,7 +61,7 @@ export default function PasteTransformationCommands(props: PasteTransformationCo
   useEffect(() => {
     function handleAction(event: Event) {
       const customEvent = event as CustomEvent<{ action: string }>;
-      if (customEvent.detail.action === "pasteWithTransformation") {
+      if (customEvent.detail.action === ActionName.PasteWithTransformation) {
         setOpen(true)
       }
     }

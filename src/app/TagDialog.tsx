@@ -8,17 +8,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import {Button} from "@/components/ui/button";
-import {Tag, TagColor, updateTag} from "@/db";
+import TagIcon, {addTag, Tag, TagColor, updateTag} from "@/tags";
 import {Input} from "@/components/ui/input";
 import {RadioGroup, RadioGroupColorItem} from "@/components/ui/radio-group";
-import TagIcon, {createTag} from "@/data";
+import {ActionName} from "@/actions";
+import {Clip, updateClip} from "@/db";
+import {updateHistoryItem} from "@/data";
 
 type TagDialogProps = {
   tag?: Tag
+  item?: Clip
   visible: boolean
   onClose: () => void
-  onCreateTag: () => void
-  onUpdateTag: () => void
 }
 
 export default function TagDialog(props: TagDialogProps) {
@@ -43,35 +44,47 @@ export default function TagDialog(props: TagDialogProps) {
   }, [props.visible, props.tag])
 
   function handleCancel() {
-    setVisible(false)
     props.onClose()
   }
 
-  function handleCreate() {
-    setVisible(false)
+  async function handleSave() {
     if (props.tag) {
-      props.tag.name = tagName
-      props.tag.color = tagColor
-      updateTag(props.tag)
-      props.onUpdateTag()
+      updateTag(props.tag.id, tagName, tagColor)
+      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.UpdateTag, tagId: props.tag.id}}));
     } else {
-      createTag(new Tag(tagName, tagColor))
-      props.onCreateTag()
+      let tag = new Tag(tagName, tagColor)
+      addTag(tag)
+      if (props.item) {
+        if (props.item.tags) {
+          props.item.tags = [...props.item.tags, tag.id]
+        } else {
+          props.item.tags = [tag.id]
+        }
+        await updateHistoryItem(props.item.id!, props.item)
+        window.dispatchEvent(new CustomEvent("onAction", {
+          detail: {
+            action: ActionName.UpdateItem,
+            itemId: props.item.id
+          }
+        }));
+      }
     }
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.UpdateTags}}));
+    props.onClose()
   }
 
   function handleValueChange(e: React.ChangeEvent<HTMLInputElement>) {
     setTagName(e.target.value)
   }
 
-  function handleKeyDown(e: React.KeyboardEvent) {
+  async function handleKeyDown(e: React.KeyboardEvent) {
+    e.stopPropagation()
     if (e.key === "Enter" && tagName.length > 0) {
-      handleCreate()
+      await handleSave()
     }
     if (e.key === "Escape") {
       handleCancel()
     }
-    e.stopPropagation()
   }
 
   function handleColorChange(value: TagColor) {
@@ -119,7 +132,7 @@ export default function TagDialog(props: TagDialogProps) {
           </RadioGroup>
           <DialogFooter className="mx-auto">
             <Button variant="secondary" onClick={handleCancel}>Cancel</Button>
-            <Button variant="primary" onClick={handleCreate} disabled={tagName.length === 0}>
+            <Button variant="primary" onClick={handleSave} disabled={tagName.length === 0}>
               {
                 props.tag ? "Save" : "Create"
               }

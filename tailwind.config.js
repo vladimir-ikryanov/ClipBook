@@ -21,10 +21,12 @@ module.exports = {
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
+        tag: "var(--tag)",
         background: "var(--background)",
         foreground: "var(--foreground)",
         searchHighlight: "var(--search-highlight)",
         checked: "var(--checked)",
+        checkbox: "var(--checkbox)",
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",
@@ -91,6 +93,7 @@ module.exports = {
         toolbar: {
           DEFAULT: "var(--toolbar-background)",
           button: "var(--toolbar-button)",
+          buttonActive: "var(--toolbar-button-active)",
           buttonSelected: "var(--toolbar-button-selected)",
         },
         preview: {

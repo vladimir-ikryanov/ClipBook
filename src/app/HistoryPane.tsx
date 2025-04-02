@@ -66,7 +66,7 @@ import {
 } from "@/pref";
 import {HideActionsReason} from "@/app/Commands";
 import {FixedSizeList as List} from "react-window";
-import {Clip, ClipType, getFilePath, getImageFileName, getImageText, Tag} from "@/db";
+import {Clip, ClipType, getFilePath, getImageFileName, getImageText} from "@/db";
 import {formatText, getClipType, isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
@@ -77,6 +77,8 @@ import {SidebarProvider} from "@/components/ui/sidebar";
 import * as React from "react";
 import AppSidebar from "@/app/AppSidebar";
 import {AppSidebarItemType} from "@/app/AppSidebarItem";
+import {Tag} from "@/tags";
+import {ActionName} from "@/actions";
 
 declare const pasteItemInFrontApp: (text: string, imageFileName: string, filePath: string) => void;
 declare const pressReturn: () => void;
@@ -516,20 +518,56 @@ export default function HistoryPane(props: HistoryPaneProps) {
     function handleAction(event: Event) {
       const customEvent = event as CustomEvent<{ action: string }>;
       let actionName = customEvent.detail.action;
-      if (actionName === "focusSearchInput") {
+      if (actionName === ActionName.FocusSearchInput) {
         focusSearchField()
       }
-      if (actionName === "toggleFilter") {
+      if (actionName === ActionName.ToggleFilter) {
         handleToggleFilter()
       }
-      if (actionName === "filterHistory") {
+      if (actionName === ActionName.FilterHistory) {
         handleFilterHistory()
+      }
+      if (actionName === ActionName.UpdateTag) {
+        const deleteTagAction = event as CustomEvent<{ action: string, tagId: number }>
+        handleUpdateTag(deleteTagAction.detail.tagId).then(() => {})
+      }
+      if (actionName === ActionName.DeleteTag) {
+        const deleteTagAction = event as CustomEvent<{ action: string, tagId: number }>
+        handleDeleteTag(deleteTagAction.detail.tagId).then(() => {})
       }
     }
 
     window.addEventListener("onAction", handleAction);
     return () => window.removeEventListener("onAction", handleAction);
   }, []);
+
+  async function handleDeleteTag(tagId: number) {
+    getHistoryItems().forEach((item) => {
+      if (item.tags && item.tags.includes(tagId)) {
+        item.tags = item.tags.filter((id) => id !== tagId)
+        updateHistoryItem(item.id!, item)
+        window.dispatchEvent(new CustomEvent("onAction", {
+          detail: {
+            action: ActionName.UpdateItem,
+            itemId: item.id
+          }
+        }));
+      }
+    })
+  }
+
+  async function handleUpdateTag(tagId: number) {
+    getHistoryItems().forEach((item) => {
+      if (item.tags && item.tags.includes(tagId)) {
+        window.dispatchEvent(new CustomEvent("onAction", {
+          detail: {
+            action: ActionName.UpdateItem,
+            itemId: item.id
+          }
+        }));
+      }
+    })
+  }
 
   function selectNextItem(shiftKeyDown: boolean = false) {
     let index = getLastSelectedItemIndex()
@@ -766,7 +804,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleHideClipDropdownMenu(reason: HideClipDropdownMenuReason) {
-    if (reason !== "editContent" && reason !== "renameItem") {
+    if (reason !== "editContent" && reason !== ActionName.RenameItem) {
       focusSearchField()
     }
   }
@@ -781,7 +819,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setTimeout(() => {
       scrollToLastSelectedItem()
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "renameItem"}}));
+        window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.RenameItem}}));
       }, 100);
     }, 100);
   }
@@ -1119,7 +1157,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleFilterHistory() {
-    setHistory(getHistoryItems())
+    let history = getHistoryItems()
+    setHistory([... history])
+    if (history.length > 0) {
+      setSelectedHistoryItemIndex(0)
+    } else {
+      clearSelection()
+    }
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
   }
 
   (window as any).addClipboardData = addClipboardData;

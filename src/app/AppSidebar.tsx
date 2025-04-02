@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -10,16 +10,16 @@ import {
 } from "@/components/ui/sidebar";
 import {AppSidebarItem, AppSidebarItemType} from "@/app/AppSidebarItem";
 import {
-  allTags,
-  deleteTag,
   filterByFavorites,
   filterByTag,
-  filterByType,
+  filterByType, getHistoryItem, getHistoryItemById,
   resetFilter
 } from "@/data";
-import {ClipType, Tag, getAllTags} from "@/db";
+import {Clip, ClipType} from "@/db";
 import {AppSidebarTagItem} from "@/app/AppSidebarTagItem";
 import TagDialog from "@/app/TagDialog";
+import {allTags, removeTag, Tag} from "@/tags";
+import {ActionName} from "@/actions";
 
 interface AppSidebarProps {
   visible: boolean
@@ -32,7 +32,24 @@ interface AppSidebarProps {
 export default function AppSidebar(props: AppSidebarProps) {
   const [tags, setTags] = useState<Tag[]>(allTags())
   const [tagToEdit, setTagToEdit] = useState<Tag | undefined>(undefined)
+  const [itemForTag, setItemForTag] = useState<Clip | undefined>(undefined)
   const [tagDialogVisible, setTagDialogVisible] = useState(false)
+
+  useEffect(() => {
+    function handleAction(event: Event) {
+      const customEvent = event as CustomEvent<{ action: string }>;
+      if (customEvent.detail.action === ActionName.UpdateTags) {
+        setTags([...allTags()])
+      }
+      if (customEvent.detail.action === ActionName.NewTag) {
+        const newTagEvent = event as CustomEvent<{ action: string, itemId: number }>
+        handleNewTagForItem(newTagEvent.detail.itemId)
+      }
+    }
+
+    window.addEventListener("onAction", handleAction);
+    return () => window.removeEventListener("onAction", handleAction);
+  }, [])
 
   function handleSelectType(type: AppSidebarItemType) {
     props.onSelectType(type)
@@ -41,58 +58,56 @@ export default function AppSidebar(props: AppSidebarProps) {
   function handleSelectTag(tag: Tag) {
     props.onSelectTag(tag)
     filterByTag(tag)
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "filterHistory"}}));
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FilterHistory}}));
   }
 
   function handleEditTag(tag: Tag) {
     setTagToEdit(tag)
+    setItemForTag(undefined)
     setTagDialogVisible(true)
   }
 
   function handleDeleteTag(tag: Tag) {
-    deleteTag(tag)
-    setTags([...allTags()])
+    if (tag.id === props.selectedTag?.id) {
+      handleShowAll()
+    }
+    removeTag(tag)
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.DeleteTag, tagId: tag.id}}));
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.UpdateTags}}));
   }
 
   function handleShowFavorites() {
     handleSelectType("Favorites")
     filterByFavorites()
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "filterHistory"}}));
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FilterHistory}}));
   }
 
   function handleShowAll() {
     handleSelectType("All")
     resetFilter()
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "filterHistory"}}));
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FilterHistory}}));
   }
 
   function handleShowByType(clipType: ClipType, type: AppSidebarItemType) {
     handleSelectType(type)
     filterByType(clipType)
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "filterHistory"}}));
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FilterHistory}}));
   }
 
   function handleNewTag() {
-    setTagDialogVisible(true)
     setTagToEdit(undefined)
+    setItemForTag(undefined)
+    setTagDialogVisible(true)
+  }
+
+  function handleNewTagForItem(itemId: number) {
+    setTagToEdit(undefined)
+    setItemForTag(getHistoryItemById(itemId))
+    setTagDialogVisible(true)
   }
 
   function handleTagDialogClose() {
     setTagDialogVisible(false)
-  }
-
-  function handleTagCreated() {
-    handleTagDialogClose()
-    getAllTags().then((tags) => {
-      setTags(tags)
-    })
-  }
-
-  function handleTagUpdated() {
-    handleTagDialogClose()
-    getAllTags().then((tags) => {
-      setTags(tags)
-    })
   }
 
   return (
@@ -141,9 +156,8 @@ export default function AppSidebar(props: AppSidebarProps) {
               <SidebarMenu>
                 <TagDialog visible={tagDialogVisible}
                            tag={tagToEdit}
-                           onClose={handleTagDialogClose}
-                           onCreateTag={handleTagCreated}
-                           onUpdateTag={handleTagUpdated}/>
+                           item={itemForTag}
+                           onClose={handleTagDialogClose}/>
                 <AppSidebarItem type={"New Tag"}
                                 selectedType={props.selectedItemType}
                                 selectable={false}

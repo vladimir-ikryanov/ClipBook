@@ -1,7 +1,10 @@
 import '../app.css';
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Clip, ClipType, getFilePath} from "@/db";
-import {toBase64Icon} from "@/data";
+import {getHistoryItemById, toBase64Icon} from "@/data";
+import ItemTags from "@/app/ItemTags";
+import {getTags, Tag} from "@/tags";
+import {ActionName} from "@/actions";
 
 declare const getAppNameFromPath: (appPath: string) => string;
 declare const getFileIconAsBase64: (appPath: string, large: boolean) => string;
@@ -12,29 +15,74 @@ type ItemInfoPaneProps = {
 }
 
 export default function ItemInfoPane(props: ItemInfoPaneProps) {
-  function getSourceAppIcon(): string {
-    return toBase64Icon(getFileIconAsBase64(props.item.sourceApp, false))
+  if (!props.display || !props.item) {
+    return null
   }
 
-  function getSourceAppName(): string {
-    return getAppNameFromPath(props.item.sourceApp)
+  const [type, setType] = useState<ClipType>(props.item.type)
+  const [content, setContent] = useState<string>(props.item.content)
+  const [imageWidth, setImageWidth] = useState<number>(props.item.imageWidth)
+  const [imageHeight, setImageHeight] = useState<number>(props.item.imageHeight)
+  const [imageSizeInBytes, setImageSizeInBytes] = useState<number>(props.item.imageSizeInBytes)
+  const [fileSizeInBytes, setFileSizeInBytes] = useState<number>(props.item.fileSizeInBytes)
+  const [fileFolder, setFileFolder] = useState<boolean>(props.item.fileFolder)
+  const [filePath, setFilePath] = useState<string>(getFilePath(props.item))
+  const [sourceApp, setSourceApp] = useState<string>(props.item.sourceApp)
+  const [numberOfCopies, setNumberOfCopies] = useState<number>(props.item.numberOfCopies)
+  const [firstTimeCopy, setFirstTimeCopy] = useState<Date>(props.item.firstTimeCopy)
+  const [lastTimeCopy, setLastTimeCopy] = useState<Date>(props.item.lastTimeCopy)
+  const [tags, setTags] = useState<Tag[]>(getTags(props.item.tags))
+
+  function updateItem(item: Clip) {
+    setType(item.type)
+    setContent(item.content)
+    setSourceApp(item.sourceApp)
+    setFileFolder(item.fileFolder)
+    setImageWidth(item.imageWidth)
+    setImageHeight(item.imageHeight)
+    setFilePath(getFilePath(item))
+    setFileSizeInBytes(item.fileSizeInBytes)
+    setImageSizeInBytes(item.imageSizeInBytes)
+    setNumberOfCopies(item.numberOfCopies)
+    setFirstTimeCopy(item.firstTimeCopy)
+    setLastTimeCopy(item.lastTimeCopy)
+    setTags(getTags(item.tags))
   }
+
+  useEffect(() => {
+    function handleAction(event: Event) {
+      const customEvent = event as CustomEvent<{ action: string }>;
+      let actionName = customEvent.detail.action;
+      if (actionName === ActionName.UpdateItem) {
+        const updateItemAction = event as CustomEvent<{ action: string, itemId: number }>
+        let updatedItem = getHistoryItemById(updateItemAction.detail.itemId)
+        if (updatedItem && updatedItem.id === props.item.id) {
+          updateItem(updatedItem)
+        }
+      }
+    }
+
+    updateItem(props.item)
+
+    window.addEventListener("onAction", handleAction);
+    return () => window.removeEventListener("onAction", handleAction);
+  }, [props.item]);
 
   function getType(): string {
-    if (props.item.type === ClipType.Link) {
+    if (type === ClipType.Link) {
       return "Link"
     }
-    if (props.item.type === ClipType.Color) {
+    if (type === ClipType.Color) {
       return "Color"
     }
-    if (props.item.type === ClipType.Email) {
+    if (type === ClipType.Email) {
       return "Email"
     }
-    if (props.item.type === ClipType.Image) {
+    if (type === ClipType.Image) {
       return "Image"
     }
-    if (props.item.type === ClipType.File) {
-      return props.item.fileFolder ? "Folder" : "File"
+    if (type === ClipType.File) {
+      return fileFolder ? "Folder" : "File"
     }
     return "Text"
   }
@@ -44,27 +92,23 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
   }
 
   function canShowImageSize() {
-    return props.item.imageWidth > 0 && props.item.imageHeight > 0
+    return imageWidth > 0 && imageHeight > 0
   }
 
   function isImage() {
-    return props.item.type === ClipType.Image
+    return type === ClipType.Image
   }
 
   function isFile() {
-    return props.item.type === ClipType.File
+    return type === ClipType.File
   }
 
   function isFolder() {
-    return props.item.fileFolder
+    return fileFolder
   }
 
   function isLink() {
-    return props.item.type === ClipType.Link
-  }
-
-  function getImageDimensionsLabel() {
-    return props.item.imageWidth + "x" + props.item.imageHeight
+    return type === ClipType.Link
   }
 
   function getSizeLabel(sizeInBytes: number) {
@@ -80,10 +124,6 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
     return (sizeInBytes / 1024 / 1024).toFixed(2) + " MB"
   }
 
-  if (!props.display || !props.item) {
-    return <div></div>
-  }
-
   return (
       <div
           className="flex flex-col w-full p-4 border-t-solid border-t-preview-border border-t space-y-2 text-sm">
@@ -92,10 +132,10 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
           <div className="flex-grow"></div>
           <div className="flex flex-row items-center">
             {
-              props.item.sourceApp ?
+              sourceApp.length > 0 ?
                   <div className="flex">
-                    <img src={getSourceAppIcon()} className="h-5 w-5 mr-2" alt="Application icon"/>
-                    <span>{getSourceAppName()}</span>
+                    <img src={toBase64Icon(getFileIconAsBase64(sourceApp, false))} className="h-5 w-5 mr-2" alt="Application icon"/>
+                    <span>{getAppNameFromPath(sourceApp)}</span>
                   </div> : <span>Unknown</span>
             }
           </div>
@@ -106,11 +146,21 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
           <div className="flex-none text-foreground">{getType()}</div>
         </div>
         {
+            tags && tags.length > 0 &&
+            <div className="flex w-full border-b border-b-preview-infoBorder pb-1 items-center">
+              <div className="flex-none text-preview-infoLabel font-semibold">Tags</div>
+              <div className="flex-grow"></div>
+              <div className="flex text-foreground">
+                <ItemTags tags={tags}/>
+              </div>
+            </div>
+        }
+        {
             isLink() &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold mr-4">URL</div>
               <div className="flex-grow"></div>
-              <div className="flex-auto text-foreground text-end break-all">{props.item.content}</div>
+              <div className="flex-auto text-foreground text-end break-all">{content}</div>
             </div>
         }
         {
@@ -118,7 +168,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold mr-4">Path</div>
               <div className="flex-grow"></div>
-              <div className="flex-auto text-foreground text-end break-all">{getFilePath(props.item)}</div>
+              <div className="flex-auto text-foreground text-end break-all">{filePath}</div>
             </div>
         }
         {
@@ -126,7 +176,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold">File size</div>
               <div className="flex-grow"></div>
-              <div className="flex-none text-foreground">{getSizeLabel(props.item.fileSizeInBytes)}</div>
+              <div className="flex-none text-foreground">{getSizeLabel(fileSizeInBytes)}</div>
             </div>
         }
         {
@@ -134,7 +184,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold">Image dimensions</div>
               <div className="flex-grow"></div>
-              <div className="flex-none text-foreground">{getImageDimensionsLabel()}</div>
+              <div className="flex-none text-foreground">{imageWidth + "x" + imageHeight}</div>
             </div>
         }
         {
@@ -142,42 +192,42 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold">Image size</div>
               <div className="flex-grow"></div>
-              <div className="flex-none text-foreground">{getSizeLabel(props.item.imageSizeInBytes)}</div>
+              <div className="flex-none text-foreground">{getSizeLabel(imageSizeInBytes)}</div>
             </div>
         }
         {
-            props.item.numberOfCopies > 1 &&
+            numberOfCopies > 1 &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold">Number of copies</div>
               <div className="flex-grow"></div>
-              <div className="flex-none text-foreground">{props.item.numberOfCopies}</div>
+              <div className="flex-none text-foreground">{numberOfCopies}</div>
             </div>
         }
         {
-            props.item.numberOfCopies > 1 &&
+            numberOfCopies > 1 &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold">First copy time</div>
               <div className="flex-grow"></div>
               <div
-                  className="flex-none text-foreground">{getTimeString(props.item.firstTimeCopy)}</div>
+                  className="flex-none text-foreground">{getTimeString(firstTimeCopy)}</div>
             </div>
         }
         {
-            props.item.numberOfCopies > 1 &&
+            numberOfCopies > 1 &&
             <div className="flex w-full">
               <div className="flex-none text-preview-infoLabel font-semibold">Last copy time</div>
               <div className="flex-grow"></div>
               <div
-                  className="flex-none text-foreground">{getTimeString(props.item.lastTimeCopy)}</div>
+                  className="flex-none text-foreground">{getTimeString(lastTimeCopy)}</div>
             </div>
         }
         {
-            props.item.numberOfCopies === 1 &&
+            numberOfCopies === 1 &&
             <div className="flex w-full">
               <div className="flex-none text-preview-infoLabel font-semibold">Copy time</div>
               <div className="flex-grow"></div>
               <div
-                  className="flex-none text-foreground">{getTimeString(props.item.firstTimeCopy)}</div>
+                  className="flex-none text-foreground">{getTimeString(firstTimeCopy)}</div>
             </div>
         }
       </div>

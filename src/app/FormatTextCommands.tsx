@@ -21,6 +21,7 @@ import {
   prefGetSentenceCaseShortcut,
   prefGetStripAllWhitespacesShortcut, prefGetTrimSurroundingWhitespacesShortcut
 } from "@/pref";
+import {ActionName} from "@/actions";
 
 type FormatTextCommandsProps = {
   onFormatText: (operation: TextFormatOperation) => void
@@ -40,7 +41,7 @@ export default function FormatTextCommands(props: FormatTextCommandsProps) {
   useEffect(() => {
     function handleAction(event: Event) {
       const customEvent = event as CustomEvent<{ action: string }>;
-      if (customEvent.detail.action === "formatText") {
+      if (customEvent.detail.action === ActionName.FormatText) {
         setOpen(true)
       }
     }

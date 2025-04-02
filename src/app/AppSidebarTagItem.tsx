@@ -1,14 +1,13 @@
 import {Edit3Icon, TrashIcon} from "lucide-react";
 import {SidebarMenuButton, SidebarMenuItem} from "@/components/ui/sidebar";
 import React from "react";
-import {Tag} from "@/db";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger
 } from "@/components/ui/context-menu";
-import TagIcon from "@/data";
+import TagIcon, {Tag} from "@/tags";
 
 interface AppSidebarTagItemProps {
   tag: Tag

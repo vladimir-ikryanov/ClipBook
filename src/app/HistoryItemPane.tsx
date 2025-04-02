@@ -12,6 +12,8 @@ import {
 import HistoryItemMenu, {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {prefShouldPasteOnClick} from "@/pref";
+import TagIcon, {getTags} from "@/tags";
+import {ActionName} from "@/actions";
 
 type HistoryItemPaneProps = {
   item: Clip
@@ -45,14 +47,22 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   const [renameItemMode, setRenameItemMode] = useState(false)
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false)
   const [itemName, setItemName] = useState(props.item.name ? props.item.name : "")
+  const [itemTags, setItemTags] = useState(getTags(props.item.tags))
   const [originalItemName, setOriginalItemName] = useState(props.item.name ? props.item.name : "")
   const [pasteOnClick, setPasteOnClick] = useState(prefShouldPasteOnClick())
 
   useEffect(() => {
     function handleAction(event: Event) {
-      const customEvent = event as CustomEvent<{ action: string }>;
-      if (customEvent.detail.action === "renameItem" && !isMultipleItemsSelected() && isItemSelected()) {
+      const customEvent = event as CustomEvent<{ action: string }>
+      let action = customEvent.detail.action
+      if (action === ActionName.RenameItem && !isMultipleItemsSelected() && isItemSelected()) {
         setRenameItemMode(true)
+      }
+      if (action === ActionName.UpdateItem) {
+        const updateItemAction = event as CustomEvent<{ action: string, itemId: number }>
+        if (updateItemAction.detail.itemId === props.item.id) {
+          setItemTags(getTags(props.item.tags))
+        }
       }
     }
 
@@ -81,13 +91,13 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   async function handleFinishRename() {
     setRenameItemMode(false)
     setOriginalItemName(itemName)
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "focusSearchInput"}}));
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FocusSearchInput}}));
   }
 
   async function handleCancelRename() {
     setRenameItemMode(false)
     await saveItemName(originalItemName)
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "focusSearchInput"}}));
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FocusSearchInput}}));
   }
 
   function handleDropdownMenuOpenChange(open: boolean) {
@@ -224,7 +234,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   function renderFavoriteIcon() {
     if (props.item.favorite) {
       return (
-          <div className="ml-4 justify-center items-center text-primary-foreground">
+          <div className="ml-2 justify-center items-center text-primary-foreground">
             <StarIcon className="h-4 w-5"/>
           </div>
       )
@@ -241,6 +251,19 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     return <div className="flex flex-none ml-4">
       <ShortcutLabel shortcut={String(props.index + 1)}/>
     </div>
+  }
+
+  function renderTags() {
+    if (itemTags.length > 0) {
+      return <div className="flex space-x-1 ml-1">
+        {
+          itemTags.map((tag, index) => {
+            return <TagIcon key={index} id={"_" + tag.id} className="w-5 h-5" style={{ color: tag.color }}/>
+          })
+        }
+      </div>
+    }
+    return null
   }
 
   function escapeRegExp(string: string) {
@@ -273,7 +296,8 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
               index < parts.length - 1 &&
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                   strokeLinejoin="round" className="inline lucide lucide-corner-down-left text-secondary-foreground w-4 h-4">
+                   strokeLinejoin="round"
+                   className="inline lucide lucide-corner-down-left text-secondary-foreground w-4 h-4">
                 <polyline points="9 10 4 15 9 20"/>
                 <path d="M20 4v7a4 4 0 0 1-4 4H4"/>
               </svg>
@@ -349,6 +373,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
             renameItemMode ? renderInputField() : renderItemLabel(getItemLabel(), getFilterQuery())
           }
         </div>
+        {renderTags()}
         {renderActionsButton()}
       </div>
   )

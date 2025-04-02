@@ -8,6 +8,7 @@
     --foreground: #252525;
     --card: #d0d0d0;
     --card-foreground: #616161;
+    --tag: #e3e3e3;
     --shortcut-label: #e3e3e3;
     --shortcut-label-text: #858585;
     --shortcut-label-hover: #d0d0d0;
@@ -30,6 +31,7 @@
     --radius: 0.75rem;
     --search-highlight: #3b82f6;
     --checked: #1ba123;
+    --checkbox: #bfbfbf;
     /* Preview */
     --preview-background: #eeeeee;
     --preview-border: #dfdfdf;
@@ -38,6 +40,7 @@
     /* Toolbar */
     --toolbar-background: #eeeeee;
     --toolbar-button: #737373;
+    --toolbar-button-active: #252525;
     --toolbar-button-selected: #0064e1;
     /* Actions */
     --actions-background: #fafafa;
@@ -92,6 +95,7 @@
     --foreground: #DADADA;
     --card: #3e4144;
     --card-foreground: #e3e3e3;
+    --tag: #373737;
     --shortcut-label: #3e4144;
     --shortcut-label-text: #e3e3e3;
     --shortcut-label-hover: #3e4144;
@@ -120,6 +124,7 @@
     --ring: #282828;
     --search-highlight: #06b6d4;
     --checked: #15cf20;
+    --checkbox: #676767;
     /* Preview */
     --preview-background: #212121;
     --preview-border: #2d2f32;
@@ -128,6 +133,7 @@
     /* Toolbar */
     --toolbar-background: #212121;
     --toolbar-button: #808081;
+    --toolbar-button-active: #f6f6f6;
     --toolbar-button-selected: #06b6d4;
     /* Actions */
     --actions-background: #212121;

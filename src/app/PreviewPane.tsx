@@ -46,6 +46,15 @@ type PreviewPaneProps = {
 }
 
 export default function PreviewPane(props: PreviewPaneProps) {
+  if (!props.visible) {
+    return null
+  }
+
+  if (props.selectedItemIndices.length === 0) {
+    return <div
+        className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]"></div>
+  }
+
   const [displayInfo, setDisplayInfo] = useState(getInfoVisibleState())
   const [updateLinkPreview, setUpdateLinkPreview] = useState(false)
 
@@ -107,15 +116,6 @@ export default function PreviewPane(props: PreviewPaneProps) {
       return <ItemInfoPane item={getFirstSelectedHistoryItem()} display={displayInfo}/>
     }
     return <ItemsInfoPane items={getSelectedHistoryItems()} display={displayInfo}/>
-  }
-
-  if (props.selectedItemIndices.length === 0) {
-    return <div
-        className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]"></div>
-  }
-
-  if (!props.visible) {
-    return null
   }
 
   return (

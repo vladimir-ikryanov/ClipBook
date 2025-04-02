@@ -9,29 +9,6 @@ export enum ClipType {
   File
 }
 
-export enum TagColor {
-  Blue = "#3b82f6",
-  Sky = "#0ea5e9",
-  Lime = "#84cc16",
-  Green = "#22c55e",
-  Yellow = "#eab308",
-  Orange = "#f97316",
-  Red = "#dc2626",
-  Pink = "#ec4899",
-  Purple = "#a855f7",
-}
-
-export class Tag {
-  id?: number;
-  name: string = "";
-  color: string = "";
-
-  constructor(name: string, color: string) {
-    this.name = name
-    this.color = color
-  }
-}
-
 export class LinkPreviewDetails {
   id?: number;
   url: string = "";
@@ -80,15 +57,13 @@ export class Clip {
 }
 
 class AppDatabase extends Dexie {
-  public tags!: Table<Tag, number>;
   public history!: Table<Clip, number>;
   public linkPreviews!: Table<LinkPreviewDetails, number>;
 
   constructor() {
     super('ClipBookDB');
     this.version(1).stores({
-      tags: '++id, name, color',
-      history: '++id, title, content, type, sourceApp, favorite, tags, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder',
+      history: '++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder',
       linkPreviews: '++id, url, title, description, imageFileName, faviconFileName'
     });
   }
@@ -139,24 +114,4 @@ export function getImageFileName(item: Clip): string {
 
 export function getFilePath(item: Clip): string {
   return item && (item.filePath || "")
-}
-
-export async function getAllTags(): Promise<Tag[]> {
-  return db.tags.toArray()
-}
-
-export async function findTagById(id: number): Promise<Tag | undefined> {
-  return db.tags.get(id)
-}
-
-export function addTag(tag: Tag) {
-  return db.tags.add(tag)
-}
-
-export function removeTag(tag: Tag) {
-  db.tags.delete(tag.id!)
-}
-
-export function updateTag(tag: Tag) {
-  db.tags.update(tag.id!, tag)
 }

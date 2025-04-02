@@ -22,6 +22,7 @@ import {
 } from "@/data";
 import {DialogTitle} from "@/components/ui/dialog";
 import {ClipType} from "@/db";
+import {ActionName} from "@/actions";
 
 type OpenWithCommandsProps = {
   onOpenWithApp: (appPath: string) => void
@@ -44,7 +45,7 @@ export default function OpenWithCommands(props: OpenWithCommandsProps) {
   useEffect(() => {
     function handleAction(event: Event) {
       const customEvent = event as CustomEvent<{ action: string }>;
-      if (customEvent.detail.action === "openWith") {
+      if (customEvent.detail.action === ActionName.OpenWith) {
         handleOpenChange(true)
       }
     }

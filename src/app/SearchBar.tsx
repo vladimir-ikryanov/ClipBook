@@ -1,7 +1,7 @@
 import '../app.css';
 import {Input} from "@/components/ui/input"
-import React, {useState} from "react";
-import {FilterIcon, ListFilterIcon, PinIcon, SearchIcon, XIcon} from "lucide-react";
+import React, {useEffect, useState} from "react";
+import {ListFilterIcon, PinIcon, XIcon} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {
   prefGetToggleFilterShortcut,
@@ -14,9 +14,10 @@ import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import Commands, {HideActionsReason} from "@/app/Commands";
 import PasteTransformationCommands from "@/app/PasteTransformationCommands";
-import {AppInfo, getFilterVisibleState, TextFormatOperation} from "@/data";
+import {AppInfo, isFilterActive, TextFormatOperation} from "@/data";
 import FormatTextCommands from "@/app/FormatTextCommands";
 import OpenWithCommands from "@/app/OpenWithCommands";
+import {ActionName} from "@/actions";
 
 declare const openSettingsLicense: () => void;
 
@@ -63,6 +64,20 @@ type SearchBarProps = {
 
 export default function SearchBar(props: SearchBarProps) {
   const [alwaysDisplay, setAlwaysDisplay] = useState(prefShouldAlwaysDisplay())
+  const [filterActive, setFilterActive] = useState(isFilterActive())
+
+  useEffect(() => {
+    function handleAction(event: Event) {
+      const customEvent = event as CustomEvent<{ action: string }>;
+      let actionName = customEvent.detail.action;
+      if (actionName === ActionName.FilterHistory) {
+        setFilterActive(isFilterActive())
+      }
+    }
+
+    window.addEventListener("onAction", handleAction);
+    return () => window.removeEventListener("onAction", handleAction);
+  }, []);
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     props.onSearchQueryChange(e.target.value)
@@ -87,7 +102,7 @@ export default function SearchBar(props: SearchBarProps) {
   }
 
   function handleToggleFilter() {
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "toggleFilter"}}));
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.ToggleFilter}}));
   }
 
   function handleClearSearch() {
@@ -106,19 +121,19 @@ export default function SearchBar(props: SearchBarProps) {
 
   function showTransformationOptionsDialog() {
     setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "pasteWithTransformation"}}));
+      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.PasteWithTransformation}}));
     }, 100);
   }
 
   function showFormatOptionsDialog() {
     setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "formatText"}}));
+      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FormatText}}));
     }, 100);
   }
 
   function showOpenWithDialog() {
     setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: "openWith"}}));
+      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.OpenWith}}));
     }, 100);
   }
 
@@ -174,7 +189,9 @@ export default function SearchBar(props: SearchBarProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button className="absolute" variant="toolbar" size="toolbar" onClick={handleToggleFilter}>
-                    <ListFilterIcon className={`h-5 w-5 ${props.isFilterVisible ? "text-toolbar-buttonSelected" : ""}`}/>
+                    <ListFilterIcon className={`h-5 w-5 ${filterActive ? 
+                        "text-toolbar-buttonSelected" : 
+                        (props.isFilterVisible ? "text-toolbar-buttonActive" : "")}`}/>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="flex items-center">
