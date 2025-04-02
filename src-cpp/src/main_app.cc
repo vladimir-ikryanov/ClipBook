@@ -18,13 +18,11 @@ namespace fs = std::filesystem;
 
 std::string kKeyboardShortcutsUrl =
     "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=clipbook";
-std::string kProductUpdatesUrl =
-    "https://clipbook.app/blog/?utm_source=clipbook";
+std::string kChangelogUrl = "https://clipbook.app/changelog/?utm_source=clipbook";
 std::string kContactSupportUrl =
     "mailto:vladimir.ikryanov@clipbook.app?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.";
-std::string kFeatureRequestUrl =
-    "https://feedback.clipbook.app/?utm_source=clipbook";
-int32_t kUpdateCheckIntervalInHours = 48;
+std::string kFeedbackUrl = "https://feedback.clipbook.app/?utm_source=clipbook";
+int32_t kUpdateCheckIntervalInHours = 24;
 
 MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSettings> &settings)
     : app_(app),
@@ -1213,11 +1211,11 @@ void MainApp::createTray() {
                     app_->desktop()->openUrl(kKeyboardShortcutsUrl);
                   }),
                   menu::Separator(),
-                  menu::Item("Product Updates", [this](const CustomMenuItemActionArgs &args) {
-                    app_->desktop()->openUrl(kProductUpdatesUrl);
+                  menu::Item("Changelog", [this](const CustomMenuItemActionArgs &args) {
+                    app_->desktop()->openUrl(kChangelogUrl);
                   }),
-                  menu::Item("Feature Request", [this](const CustomMenuItemActionArgs &args) {
-                    app_->desktop()->openUrl(kFeatureRequestUrl);
+                  menu::Item("Feedback", [this](const CustomMenuItemActionArgs &args) {
+                    app_->desktop()->openUrl(kFeedbackUrl);
                   }),
                   menu::Separator(),
                   menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
