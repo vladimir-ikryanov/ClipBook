@@ -143,13 +143,13 @@ export default function License() {
                   !isActivated &&
                   <div className="grid grid-cols-2 space-x-2">
                     <Button onClick={handleActivateLicense} disabled={licenseKeyInvalid}
-                            variant="secondary">Activate</Button>
-                    <Button onClick={handleBuyLicense} variant="primary">Buy License</Button>
+                            variant="primary">Activate</Button>
+                    <Button onClick={handleBuyLicense} variant="secondary">Buy License</Button>
                   </div>
               }
               {
                   isActivated &&
-                  <Button onClick={handleDeactivateLicense} variant="secondary">Deactivate</Button>
+                  <Button onClick={handleDeactivateLicense} variant="primary">Deactivate</Button>
               }
             </div>
           </div>

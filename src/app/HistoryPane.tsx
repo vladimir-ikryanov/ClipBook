@@ -526,6 +526,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       }
       if (actionName === ActionName.FilterHistory) {
         handleFilterHistory()
+        focusSearchField()
       }
       if (actionName === ActionName.UpdateTag) {
         const deleteTagAction = event as CustomEvent<{ action: string, tagId: number }>

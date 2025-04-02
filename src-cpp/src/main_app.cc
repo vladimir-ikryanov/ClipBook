@@ -106,7 +106,9 @@ void MainApp::launch() {
     createTray();
   }
 
-  app_window_ = Browser::create(app_);
+  BrowserOptions options;
+  options.window_type = WindowType::kFloating;
+  app_window_ = Browser::create(app_, options);
   app_window_->settings()->disableOverscrollHistoryNavigation();
   app_window_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
     initJavaScriptApi(args.window);
@@ -169,7 +171,6 @@ void MainApp::launch() {
 
 void MainApp::show() {
   app_window_->show();
-  app_window_->focus();
   auto frame = app_window_->mainFrame();
   if (frame) {
     // Check if the app was hidden more than 30 seconds ago.
@@ -499,7 +500,6 @@ void MainApp::showSettingsWindow(const std::string &section) {
   if (settings_window_ && !settings_window_->isClosed()) {
     settings_window_->navigation()->loadUrl(app_->baseUrl() + section);
     settings_window_->show();
-    settings_window_->focus();
     return;
   }
 
@@ -525,7 +525,6 @@ void MainApp::showSettingsWindow(const std::string &section) {
   settings_window_->setSize(700, 760);
   settings_window_->centerWindow();
   settings_window_->show();
-  settings_window_->focus();
 }
 
 void MainApp::showWelcomeWindow() {
@@ -544,7 +543,6 @@ void MainApp::showWelcomeWindow() {
   welcome_window_->setSize(500, 700);
   welcome_window_->centerWindow();
   welcome_window_->show();
-  welcome_window_->focus();
 }
 
 void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &window) {
@@ -1308,7 +1306,6 @@ void MainApp::previewLink(const std::string &url) {
   }
   preview_window_->navigation()->loadUrl(url);
   preview_window_->show();
-  preview_window_->focus();
 }
 
 void MainApp::saveImageAsFile(const std::string &imageFileName, int imageWidth, int imageHeight) {
