@@ -104,9 +104,7 @@ void MainApp::launch() {
     createTray();
   }
 
-  BrowserOptions options;
-  options.window_type = WindowType::kFloating;
-  app_window_ = Browser::create(app_, options);
+  app_window_ = Browser::create(app_);
   app_window_->settings()->disableOverscrollHistoryNavigation();
   app_window_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
     initJavaScriptApi(args.window);
@@ -143,6 +141,8 @@ void MainApp::launch() {
   // Display the window always on top of other windows.
   app_window_->setAlwaysOnTop(true);
 
+  app_window_->setActivationIndependenceEnabled(true);
+
   // Disable window animation to make the app feel faster.
   app_window_->setWindowAnimationEnabled(false);
 
@@ -169,6 +169,7 @@ void MainApp::launch() {
 
 void MainApp::show() {
   app_window_->show();
+  app_window_->focus();
   auto frame = app_window_->mainFrame();
   if (frame) {
     // Check if the app was hidden more than 30 seconds ago.
@@ -564,6 +565,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
                              std::string filePath) {
                         paste(text, imageFileName, filePath);
                       });
+  window->putProperty("pasteFilesInFrontApp", [this](std::string filePaths) {
+    paste(filePaths);
+  });
   window->putProperty("pressReturn", [this]() {
     sendKey(Key::kReturn);
   });

@@ -32,6 +32,7 @@ static std::string kInputCursor = "inputCursor";
 // The minimum width and height of an active app window we can use to center the ClipBook window.
 static int kMinAppWindowSize = 200;
 
+static std::string kFilePathsSeparator = ":";
 static std::string kAppInfoSeparator = "|";
 static std::string kAppInfoListSeparator = "*";
 
@@ -383,6 +384,17 @@ void MainAppMac::paste() {
   sendKey(Key::kCmdV);
 }
 
+void MainAppMac::paste(const std::string &filePaths) {
+  if (!isAccessibilityAccessGranted()) {
+    showAccessibilityAccessDialog(filePaths);
+    return;
+  }
+  // Hide the browser window and activate the previously active app.
+  hide();
+  copyToClipboard(filePaths, true);
+  paste();
+}
+
 void MainAppMac::paste(const std::string &text,
                        const std::string &imageFileName,
                        const std::string &filePath) {
@@ -394,6 +406,32 @@ void MainAppMac::paste(const std::string &text,
   hide();
   copyToClipboard(text, imageFileName, filePath, true);
   paste();
+}
+
+void MainAppMac::copyToClipboard(const std::string &filePaths, bool ghost) {
+  if (filePaths.empty()) {
+    return;
+  }
+
+  auto pasteboard = [NSPasteboard generalPasteboard];
+  // Clear the pasteboard and set the new text.
+  [pasteboard clearContents];
+
+  NSMutableArray *items = [NSMutableArray array];
+
+  // Copy files.
+  auto paths = split(filePaths, kFilePathsSeparator);
+  for (const auto &path : paths) {
+    auto fileUrl = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];
+    NSPasteboardItem *fileItem = [[NSPasteboardItem alloc] init];
+    [fileItem setString:[fileUrl absoluteString] forType:NSPasteboardTypeFileURL];
+    [items addObject:fileItem];
+  }
+
+  [pasteboard writeObjects:items];
+  if (ghost) {
+    copyCustomClip(pasteboard);
+  }
 }
 
 void MainAppMac::copyToClipboard(const std::string &text,
@@ -786,6 +824,29 @@ bool MainAppMac::isAccessibilityAccessGranted() {
   return AXIsProcessTrusted();
 }
 
+void MainAppMac::showAccessibilityAccessDialog(const std::string &filePaths) {
+  MessageDialogOptions options;
+  options.message = "Accessibility access required";
+  options.informative_text = "ClipBook needs accessibility access to paste directly into other apps.";
+  options.buttons = {
+      MessageDialogButton("Enable Accessibility Access", MessageDialogButtonType::kDefault),
+      MessageDialogButton("Copy to Clipboard"),
+      MessageDialogButton("Cancel", MessageDialogButtonType::kCancel)
+  };
+  auto_hide_disabled_ = true;
+  MessageDialog::show(app_window_, options, [this, filePaths](const MessageDialogResult &result) {
+    auto_hide_disabled_ = false;
+    if (result.button.type == MessageDialogButtonType::kDefault) {
+      hide();
+      showSystemAccessibilityPreferencesDialog();
+    }
+    if (result.button.type == MessageDialogButtonType::kNone) {
+      hide();
+      copyToClipboard(filePaths, true);
+    }
+  });
+}
+
 void MainAppMac::showAccessibilityAccessDialog(const std::string &text,
                                                const std::string &imageFileName,
                                                const std::string &filePath) {
@@ -806,7 +867,7 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text,
     }
     if (result.button.type == MessageDialogButtonType::kNone) {
       hide();
-      copyToClipboard(text, imageFileName, filePath, false);
+      copyToClipboard(text, imageFileName, filePath, true);
     }
   });
 }

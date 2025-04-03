@@ -24,7 +24,7 @@ export default function PreviewItemsPane(props: PreviewItemsPaneProps) {
     return (
         <div key={index}
              id={last ? "last" : ""}
-             className={`flex-grow py-2 px-4 font-mono text-sm whitespace-pre-wrap ${last ? "" : "border-b border-b-preview-border"}`}>
+             className={`flex-grow py-2 px-4 font-mono text-sm break-all whitespace-pre-wrap ${last ? "" : "border-b border-b-preview-border"}`}>
           {item.content}
         </div>
     )

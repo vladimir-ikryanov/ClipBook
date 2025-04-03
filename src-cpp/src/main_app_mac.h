@@ -28,10 +28,12 @@ class MainAppMac : public MainApp {
   void hide(bool force) override;
   void activate() override;
   void paste() override;
+  void paste(const std::string &filePaths) override;
   void paste(const std::string &text,
              const std::string &imageFileName,
              const std::string &filePath) override;
   void sendKey(Key key) override;
+  void copyToClipboard(const std::string &filePaths, bool ghost) override;
   void copyToClipboard(const std::string &text,
                        const std::string &imageFileName,
                        const std::string &filePath,
@@ -56,6 +58,7 @@ class MainAppMac : public MainApp {
   void openInApp(const std::string &file_path, const std::string &app_path) override;
 
   bool isAccessibilityAccessGranted();
+  void showAccessibilityAccessDialog(const std::string &filePaths);
   void showAccessibilityAccessDialog(const std::string &text,
                                      const std::string &imageFileName,
                                      const std::string &filePath);

@@ -81,6 +81,7 @@ import {Tag} from "@/tags";
 import {ActionName} from "@/actions";
 
 declare const pasteItemInFrontApp: (text: string, imageFileName: string, filePath: string) => void;
+declare const pasteFilesInFrontApp: (filePaths: string) => void;
 declare const pressReturn: () => void;
 declare const pressTab: () => void;
 declare const copyToClipboard: (text: string, imageFileName: string, filePath: string, ghost: boolean) => void;
@@ -669,8 +670,42 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
+  async function pasteFileItems(items: Clip[], keepHistory: boolean = false) {
+    let filePaths = []
+    for (const item of items) {
+      item.numberOfCopies++
+      if (prefShouldUpdateHistoryAfterAction() && !keepHistory) {
+        item.lastTimeCopy = new Date()
+      }
+      await updateHistoryItem(item.id!, item)
+      filePaths.push(getFilePath(item))
+    }
+    setHistory([...getHistoryItems()])
+
+    pasteFilesInFrontApp(filePaths.join(":"))
+
+    clearSelection()
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
+    scrollToLastSelectedItem()
+  }
+
   async function handlePaste() {
     let items = getSelectedHistoryItems()
+
+    let filePaths = []
+    for (const item of items) {
+      if (item.type === ClipType.File) {
+        filePaths.push(getFilePath(item))
+      }
+    }
+
+    if (filePaths.length === items.length) {
+      await pasteFileItems(items)
+      // Clear the search query in the search field after paste.
+      handleSearchQueryChange("")
+      return
+    }
+
     for (const item of items) {
       await pasteItem(item)
     }
