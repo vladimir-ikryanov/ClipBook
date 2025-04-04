@@ -30,7 +30,7 @@ export default function StatusBar(props: StatusBarProps) {
 
   return (
       <div
-          className={`group flex items-center justify-between px-1.5 pb-2 pt-1.5 border-t-solid border-t-border border-t ${updateAvailable ? "bg-gradient-to-r from-green-900/20 from-[0%] via-20% via-green-900/60 to-transparent to-80%" : ""}`}>
+          className={`group flex items-center justify-between px-1.5 pb-2 pt-1.5 border-t-solid border-t-border border-t ${updateAvailable ? "bg-gradient-to-r from-status-bar-highlight-green-start from-[0%] via-20% via-status-bar-highlight-green-middle to-transparent to-80%" : ""}`}>
         {
           updateAvailable ? (
               <div className="flex text-sm items-center h-8">
@@ -39,7 +39,7 @@ export default function StatusBar(props: StatusBarProps) {
                     <Button variant="ghost"
                             className="p-0 ml-1 h-6 w-6 rounded-sm outline-none bg-transparent hover:bg-green-700/10"
                             onClick={() => setUpdateAvailable(false)}>
-                      <div className="rounded-full bg-green-700 w-2 h-2 group-hover:hidden"></div>
+                      <div className="rounded-full bg-status-bar-green w-2 h-2 group-hover:hidden"></div>
                       <div className="hidden group-hover:flex">
                         <XIcon className="x-4 h-4"/>
                       </div>
@@ -52,7 +52,7 @@ export default function StatusBar(props: StatusBarProps) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="ghost"
-                            className="px-2 h-8 rounded-sm outline-none hover:bg-green-800/60"
+                            className="px-2 h-8 rounded-sm outline-none hover:bg-status-bar-green-button"
                             onClick={() => restartApp()}>
                       Update ClipBook
                     </Button>

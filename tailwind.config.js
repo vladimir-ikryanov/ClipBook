@@ -27,6 +27,13 @@ module.exports = {
         searchHighlight: "var(--search-highlight)",
         checked: "var(--checked)",
         checkbox: "var(--checkbox)",
+        "status-bar": {
+          DEFAULT: "var(--status-bar-highlight-green-middle)",
+          "green": "var(--status-bar-green)",
+          "green-button": "var(--status-bar-green-button)",
+          "highlight-green-start": "var(--status-bar-highlight-green-start)",
+          "highlight-green-middle": "var(--status-bar-highlight-green-middle)",
+        },
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",

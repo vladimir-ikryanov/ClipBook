@@ -32,6 +32,11 @@
     --search-highlight: #3b82f6;
     --checked: #1ba123;
     --checkbox: #bfbfbf;
+    /* Status bar */
+    --status-bar-green: rgba(27, 161, 35);
+    --status-bar-green-button: rgb(105, 193, 120, 0.25);
+    --status-bar-highlight-green-start: rgba(27, 161, 35, 0.1);
+    --status-bar-highlight-green-middle: rgba(27, 161, 35, 0.25);
     /* Preview */
     --preview-background: #eeeeee;
     --preview-border: #dfdfdf;
@@ -125,6 +130,11 @@
     --search-highlight: #06b6d4;
     --checked: #15cf20;
     --checkbox: #676767;
+    /* Status bar */
+    --status-bar-green: rgb(0, 191, 11);
+    --status-bar-green-button: rgba(0, 193, 33, 0.2);
+    --status-bar-highlight-green-start: rgba(27, 161, 35, 0.05);
+    --status-bar-highlight-green-middle: rgba(27, 161, 35, 0.25);
     /* Preview */
     --preview-background: #212121;
     --preview-border: #2d2f32;
