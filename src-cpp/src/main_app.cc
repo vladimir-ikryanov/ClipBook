@@ -32,6 +32,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSetti
       checking_for_updates_(false),
       app_paused_(false),
       after_system_reboot_(false),
+      update_available_(false),
       app_hide_time_(0),
       settings_(settings) {
   request_interceptor_ = std::make_shared<UrlRequestInterceptor>(
@@ -294,6 +295,13 @@ void MainApp::checkForUpdates(bool user_initiated) {
   }, user_initiated);
 }
 
+void MainApp::notifyUpdateAvailable() {
+  auto frame = app_window_->mainFrame();
+  if (frame) {
+    frame->executeJavaScript("updateAvailable()");
+  }
+}
+
 void MainApp::checkForUpdates(const std::function<void()> &complete, bool user_initiated) {
   auto url = getUpdateServerUrl();
   app_->checkForUpdate(url, [this, complete, user_initiated](const CheckForUpdateResult &result) {
@@ -307,7 +315,19 @@ void MainApp::checkForUpdates(const std::function<void()> &complete, bool user_i
     } else {
       auto app_update = result.app_update;
       if (app_update) {
-        showUpdateAvailableDialog(app_update, complete);
+        if (settings_->shouldCheckForUpdatesAutomatically()) {
+          app_update->onAppUpdateInstalled += [this, complete](const AppUpdateInstalled &event) {
+            update_available_ = true;
+            complete();
+            notifyUpdateAvailable();
+          };
+          app_update->onAppUpdateFailed += [complete](const AppUpdateFailed &event) {
+            complete();
+          };
+          app_update->install();
+        } else {
+          showUpdateAvailableDialog(app_update, complete);
+        }
       } else {
         if (user_initiated) {
           showUpToDateDialog(complete);
@@ -333,6 +353,8 @@ void MainApp::showUpdateAvailableDialog(const std::shared_ptr<molybden::AppUpdat
     if (result.button.type == MessageDialogButtonType::kDefault) {
       app_update->onAppUpdateInstalled += [this, complete](const AppUpdateInstalled &event) {
         showRestartRequiredDialog(event.app_update->version(), complete);
+        update_available_ = true;
+        notifyUpdateAvailable();
       };
       app_update->onAppUpdateFailed += [this, complete](const AppUpdateFailed &event) {
         showUpdateFailedDialog(event.message, complete);
@@ -740,7 +762,16 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
     sendFeedback(text);
 #endif
   });
+  window->putProperty("restartApp", [this]() {
+    std::thread([this]() {
+      app_->restart();
+    }).detach();
+  });
+  window->putProperty("isUpdateAvailable", [this]() -> bool {
+    return update_available_;
+  });
 
+  // Settings window.
   window->putProperty("saveTheme", [this](std::string theme) -> void {
     setTheme(theme);
     settings_->saveTheme(theme);

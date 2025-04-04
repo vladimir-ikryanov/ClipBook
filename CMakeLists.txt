@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 # The official build flag is used to enable/disable certain features.
-set(OFFICIAL_BUILD TRUE)
+set(OFFICIAL_BUILD FALSE)
 
 # Set deployment target for macOS
 set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS deployment version" FORCE)

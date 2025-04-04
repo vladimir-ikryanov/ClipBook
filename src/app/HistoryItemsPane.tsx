@@ -1,7 +1,7 @@
 import '../app.css';
 import React from "react";
 import SearchBar from "@/app/SearchBar";
-import ActionsBar from "@/app/ActionsBar";
+import StatusBar from "@/app/StatusBar";
 import {FixedSizeList as List} from "react-window";
 import AutoSizer, {Size} from "react-virtualized-auto-sizer";
 import {HideActionsReason} from "@/app/Commands";
@@ -200,8 +200,8 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
     return <div className="flex flex-col h-screen">
       {renderItems()}
       <div className="grow"></div>
-      <ActionsBar appName={props.appName}
-                  onPaste={props.onPaste}/>
+      <StatusBar appName={props.appName}
+                 onPaste={props.onPaste}/>
     </div>
   }
 

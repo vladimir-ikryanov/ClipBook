@@ -122,9 +122,9 @@ Launch ClipBook automatically at&nbsp;login.
 
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="checkForUpdates" className="flex flex-col text-base">
-                <span className="">Check for updates automatically</span>
+                <span className="">Automatic updates</span>
                 <span className="text-neutral-500 font-normal text-sm">
-ClipBook will check for updates automatically and notify you when a new version is&nbsp;available.
+Download and install new updates when&nbsp;available.
             </span>
               </Label>
               <Switch id="checkForUpdates" checked={checkForUpdatesAutomatically}
