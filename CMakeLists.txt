@@ -1,14 +1,17 @@
 cmake_minimum_required(VERSION 3.21)
 
+# The official build flag is used to enable/disable certain features.
+set(OFFICIAL_BUILD TRUE)
+
+# Set deployment target for macOS
+set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS deployment version" FORCE)
+
 # Configures your project.
 project(ClipBook LANGUAGES CXX)
 
 # Imports the Molybden app configuration and setups the auxiliary targets, resources, etc.
 # Important: Do not move this include above the project declaration.
 include(node_modules/@molybden-apps/molybden/Molybden.cmake)
-
-# The official build flag is used to enable/disable certain features.
-set(OFFICIAL_BUILD TRUE)
 
 # The source files of your app.
 set(APP_SOURCES
