@@ -66,7 +66,7 @@ import {
 } from "@/pref";
 import {HideActionsReason} from "@/app/Commands";
 import {FixedSizeList as List} from "react-window";
-import {Clip, ClipType, getFilePath, getImageFileName, getImageText} from "@/db";
+import {addClip, Clip, ClipType, getFilePath, getImageFileName, getImageText} from "@/db";
 import {formatText, getClipType, isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
@@ -294,7 +294,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (selectedItemIndices.length === 0) {
       return
     }
-    let index = getLastSelectedItemIndex()
+    scrollToIndex(getLastSelectedItemIndex())
+  }
+
+  function scrollToIndex(index: number) {
     if (listRef.current && index >= 0) {
       listRef.current.scrollToItem(index, "auto")
     }
@@ -860,6 +863,38 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }, 100);
   }
 
+  async function handleSplitItem() {
+    let selectedItem = getFirstSelectedHistoryItem()
+    if (isTextItem(selectedItem)) {
+      // Check if the item content has text with line breaks and has at least two lines.
+      let text = selectedItem.content
+      let lines = text.split(/\r?\n/).filter(line => line.trim() !== "")
+      if (lines.length > 1) {
+        let items = []
+        for (let i = 0; i < lines.length; i++) {
+          // Create a new item for each line.
+          let item = await addHistoryItem(lines[i], selectedItem.sourceApp, "", "", 0, 0, 0, "", "", "", "", 0, false)
+          let now = new Date()
+          // Add one millisecond to the time to make sure the items are not identical.
+          now.setMilliseconds(now.getMilliseconds() - (i * 100))
+          item.firstTimeCopy = now
+          item.lastTimeCopy = now
+          items.push(item)
+        }
+        setHistory([...getHistoryItems()])
+
+        clearSelection()
+        for (let i = 0; i < items.length; i++) {
+          let item = items[i]
+          let index = getHistoryItemIndex(item)
+          addSelectedHistoryItemIndex(index)
+        }
+        setSelectedItemIndices(getSelectedHistoryItemIndices())
+        scrollToIndex(getHistoryItemIndex(items[0]))
+      }
+    }
+  }
+
   async function handleFormatTextAndSave(operation: TextFormatOperation) {
     let items = getSelectedHistoryItems()
     items.forEach(item => {
@@ -1278,6 +1313,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   onEditContentByIndex={handleEditContentByIndex}
                                   onRenameItem={handleRenameItem}
                                   onRenameItemByIndex={handleRenameItemByIndex}
+                                  onSplit={handleSplitItem}
                                   onCopyToClipboard={handleCopyToClipboard}
                                   onCopyPathToClipboard={handleCopyPathToClipboard}
                                   onCopyToClipboardByIndex={handleCopyToClipboardByIndex}

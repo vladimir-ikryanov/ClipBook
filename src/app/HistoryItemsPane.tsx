@@ -47,6 +47,7 @@ type HistoryItemsPaneProps = {
   onEditContent: () => void
   onEditContentByIndex: (index: number) => void
   onRenameItem: () => void
+  onSplit: () => void
   onRenameItemByIndex: (index: number) => void
   onCopyToClipboard: () => void
   onCopyPathToClipboard: () => void
@@ -227,6 +228,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    onHideActions={props.onHideActions}
                    onEditContent={props.onEditContent}
                    onRenameItem={props.onRenameItem}
+                   onSplit={props.onSplit}
                    onCopyToClipboard={props.onCopyToClipboard}
                    onCopyPathToClipboard={props.onCopyPathToClipboard}
                    onCopyTextFromImage={props.onCopyTextFromImage}

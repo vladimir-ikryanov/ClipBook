@@ -12,7 +12,7 @@ import {
   SettingsIcon,
   StarIcon,
   StarOffIcon,
-  TrashIcon, TypeIcon, Undo2Icon, UploadIcon, ZoomIn, ZoomOut
+  TrashIcon, TypeIcon, Undo2Icon, UnfoldVerticalIcon, UploadIcon, ZoomIn, ZoomOut
 } from "lucide-react"
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -79,6 +79,7 @@ export type HideActionsReason =
     | "editContent"
     | "renameItem"
     | "formatText"
+    | "split"
     | "copyToClipboard"
     | "copyPathToClipboard"
     | "copyTextFromImage"
@@ -111,6 +112,7 @@ type CommandsProps = {
   onEditContent: () => void
   onRenameItem: () => void
   onFormatText: () => void
+  onSplit: () => void
   onCopyToClipboard: () => void
   onCopyPathToClipboard: () => void
   onCopyTextFromImage: () => void
@@ -206,6 +208,12 @@ export default function Commands(props: CommandsProps) {
     closeReason = "formatText"
     handleOpenChange(false)
     props.onFormatText()
+  }
+
+  function handleSplit() {
+    closeReason = "split"
+    handleOpenChange(false)
+    props.onSplit()
   }
 
   function handleCopyToClipboard() {
@@ -418,9 +426,19 @@ export default function Commands(props: CommandsProps) {
 
   function canShowFormatText() {
     if (getSelectedHistoryItemIndices().length === 1) {
-      let item = getFirstSelectedHistoryItem();
-      if (item) {
-        return isTextItem(item)
+      return isTextItem(getFirstSelectedHistoryItem())
+    }
+    return false
+  }
+
+  function canShowSplit() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      if (isTextItem(item)) {
+        // Check if the item content has text with line breaks and has at least two lines.
+        let text = item.content
+        let lines = text.split(/\r?\n/).filter(line => line.trim() !== "")
+        return lines.length > 1
       }
     }
     return false
@@ -661,6 +679,13 @@ export default function Commands(props: CommandsProps) {
                     <CommandItem onSelect={handleFormatText}>
                       <TypeIcon className="mr-2 h-5 w-5"/>
                       <span>Format Text...</span>
+                    </CommandItem>
+                }
+                {
+                    canShowSplit() &&
+                    <CommandItem onSelect={handleSplit}>
+                      <UnfoldVerticalIcon className="mr-2 h-5 w-5"/>
+                      <span>Split</span>
                     </CommandItem>
                 }
                 <CommandSeparator/>

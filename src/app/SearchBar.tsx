@@ -44,6 +44,7 @@ type SearchBarProps = {
   onTogglePreview: () => void
   onEditContent: () => void
   onRenameItem: () => void
+  onSplit: () => void
   onCopyToClipboard: () => void
   onCopyPathToClipboard: () => void
   onCopyTextFromImage: () => void
@@ -258,6 +259,7 @@ export default function SearchBar(props: SearchBarProps) {
                       onEditContent={props.onEditContent}
                       onRenameItem={props.onRenameItem}
                       onFormatText={showFormatOptionsDialog}
+                      onSplit={props.onSplit}
                       onCopyToClipboard={props.onCopyToClipboard}
                       onCopyPathToClipboard={props.onCopyPathToClipboard}
                       onCopyTextFromImage={props.onCopyTextFromImage}
