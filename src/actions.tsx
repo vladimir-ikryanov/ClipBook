@@ -1,4 +1,5 @@
 export enum ActionName {
+  UpdateApps = "updateApps",
   UpdateItem = "updateItem",
   RenameItem = "renameItem",
   FilterHistory = "filterHistory",

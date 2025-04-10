@@ -10,9 +10,12 @@ import {
 } from "@/components/ui/sidebar";
 import {AppSidebarItem, AppSidebarItemType} from "@/app/AppSidebarItem";
 import {
+  AppInfo,
+  filterByApp,
   filterByFavorites,
   filterByTag,
-  filterByType, getHistoryItem, getHistoryItemById,
+  filterByType,
+  getHistoryItemById,
   resetFilter
 } from "@/data";
 import {Clip, ClipType} from "@/db";
@@ -20,13 +23,16 @@ import {AppSidebarTagItem} from "@/app/AppSidebarTagItem";
 import TagDialog from "@/app/TagDialog";
 import {allTags, removeTag, Tag} from "@/tags";
 import {ActionName} from "@/actions";
+import {AppSidebarSourceItems} from "@/app/AppSidebarSourceItems";
 
 interface AppSidebarProps {
   visible: boolean
   selectedItemType: AppSidebarItemType
   selectedTag?: Tag | undefined
+  selectedApp?: AppInfo | undefined
   onSelectType: (type: AppSidebarItemType) => void
   onSelectTag: (tag: Tag) => void
+  onSelectApp: (app: AppInfo) => void
 }
 
 export default function AppSidebar(props: AppSidebarProps) {
@@ -61,6 +67,12 @@ export default function AppSidebar(props: AppSidebarProps) {
     window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FilterHistory}}));
   }
 
+  function handleSelectApp(app: AppInfo) {
+    props.onSelectApp(app)
+    filterByApp(app)
+    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FilterHistory}}));
+  }
+
   function handleEditTag(tag: Tag) {
     setTagToEdit(tag)
     setItemForTag(undefined)
@@ -72,7 +84,12 @@ export default function AppSidebar(props: AppSidebarProps) {
       handleShowAll()
     }
     removeTag(tag)
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.DeleteTag, tagId: tag.id}}));
+    window.dispatchEvent(new CustomEvent("onAction", {
+      detail: {
+        action: ActionName.DeleteTag,
+        tagId: tag.id
+      }
+    }));
     window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.UpdateTags}}));
   }
 
@@ -150,6 +167,7 @@ export default function AppSidebar(props: AppSidebarProps) {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+          <AppSidebarSourceItems selectedApp={props.selectedApp} selectedItemType={props.selectedItemType} onSelect={handleSelectApp}/>
           <div className="flex-grow"></div>
           <SidebarGroup>
             <SidebarGroupContent>

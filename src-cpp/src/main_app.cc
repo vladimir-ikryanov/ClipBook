@@ -682,6 +682,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getDefaultAppInfo", [this](std::string filePath) -> std::string {
     return getDefaultAppInfo(filePath);
   });
+  window->putProperty("getAppInfo", [this](std::string appPath) -> std::string {
+    return getAppInfo(appPath);
+  });
   window->putProperty("getRecommendedAppsInfo", [this](std::string filePath) -> std::string {
     return getRecommendedAppsInfo(filePath);
   });

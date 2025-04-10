@@ -30,7 +30,7 @@ import {
   setSelectedHistoryItemIndex,
   TextFormatOperation,
   updateHistoryItem,
-  updateHistoryItemTypes, setFilterVisibleState
+  updateHistoryItemTypes, setFilterVisibleState, getSourceApps, resetFilter
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
@@ -125,6 +125,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [isTrialExpired, setIsTrialExpired] = useState(isTrialLicenseExpired());
   const [selectedItemType, setSelectedItemType] = useState<AppSidebarItemType>("All")
   const [selectedTag, setSelectedTag] = useState<Tag | undefined>(undefined)
+  const [selectedApp, setSelectedApp] = useState<AppInfo | undefined>(undefined)
 
   useEffect(() => {
     loadHistory().then(() => {
@@ -539,6 +540,18 @@ export default function HistoryPane(props: HistoryPaneProps) {
       if (actionName === ActionName.DeleteTag) {
         const deleteTagAction = event as CustomEvent<{ action: string, tagId: number }>
         handleDeleteTag(deleteTagAction.detail.tagId).then(() => {})
+      }
+      if (actionName === ActionName.UpdateApps) {
+        if (selectedApp) {
+          console.log("selectedApp", selectedApp)
+          // let find = getSourceApps().find(value => value.path === selectedApp.path)
+          // console.log("find", find)
+          // if (!find) {
+          //   handleSidebarTypeSelect("All")
+          //   handleFilterHistory()
+          //   focusSearchField()
+          // }
+        }
       }
     }
 
@@ -1263,11 +1276,19 @@ export default function HistoryPane(props: HistoryPaneProps) {
   function handleSidebarTypeSelect(type: AppSidebarItemType) {
     setSelectedItemType(type)
     setSelectedTag(undefined)
+    setSelectedApp(undefined)
   }
 
   function handleSidebarTagSelect(tag: Tag) {
     setSelectedItemType("None")
     setSelectedTag(tag)
+    setSelectedApp(undefined)
+  }
+
+  function handleSidebarAppSelect(app: AppInfo) {
+    setSelectedItemType("None")
+    setSelectedTag(undefined)
+    setSelectedApp(app)
   }
 
   return (
@@ -1277,7 +1298,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
           <AppSidebar visible={filterVisible}
                       onSelectType={handleSidebarTypeSelect}
                       onSelectTag={handleSidebarTagSelect}
+                      onSelectApp={handleSidebarAppSelect}
                       selectedTag={selectedTag}
+                      selectedApp={selectedApp}
                       selectedItemType={selectedItemType}/>
           <div className="w-full">
             <ResizablePanelGroup direction="horizontal">

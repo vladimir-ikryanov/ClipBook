@@ -52,6 +52,7 @@ class MainAppMac : public MainApp {
   void updateOpenSettingsShortcut() override;
   std::string getUserDataDir() override;
   std::string getUpdateServerUrl() override;
+  std::string getAppInfo(const std::string &app_path) override;
   std::string getDefaultAppInfo(const std::string &file_path) override;
   std::string getRecommendedAppsInfo(const std::string &file_path) override;
   std::string getAllAppsInfo() override;
@@ -75,7 +76,6 @@ class MainAppMac : public MainApp {
   bool moveToScreenWithMousePointer();
   void moveToMousePointerLocation();
   static molybden::Shortcut createShortcut(const std::string &shortcut);
-  std::string toAppInfo(const std::string &appPath);
 
   static void addAppToLoginItems();
   static void removeAppFromLoginItems();

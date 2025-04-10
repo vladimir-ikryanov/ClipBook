@@ -1,4 +1,6 @@
 import {
+  ChevronDownIcon,
+  ChevronUpIcon,
   FileIcon, FilesIcon,
   HistoryIcon,
   ImageIcon,
@@ -9,7 +11,7 @@ import {
 import {SidebarMenuButton, SidebarMenuItem} from "@/components/ui/sidebar";
 import React from "react";
 
-export type AppSidebarItemType = "None" | "All" | "Text" | "Image" | "Link" | "Color" | "File" | "Email" | "Favorites" | "Settings" | "New Tag";
+export type AppSidebarItemType = "None" | "All" | "Text" | "Image" | "Link" | "Color" | "File" | "Email" | "Favorites" | "Settings" | "New Tag" | "Show Apps" | "Hide Apps";
 
 interface AppSidebarItemProps {
   type: AppSidebarItemType
@@ -50,6 +52,12 @@ export function AppSidebarItem(props: AppSidebarItemProps) {
     }
     if (props.type === "Settings") {
       return <SettingsIcon className="h-5 w-5"/>
+    }
+    if (props.type === "Hide Apps") {
+      return <ChevronUpIcon className="h-5 w-5"/>
+    }
+    if (props.type === "Show Apps") {
+      return <ChevronDownIcon className="h-5 w-5"/>
     }
   }
 

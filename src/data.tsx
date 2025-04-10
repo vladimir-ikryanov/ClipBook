@@ -12,19 +12,22 @@ import {
 } from "@/db";
 import {prefGetClearHistoryOnMacReboot} from "@/pref";
 import {getClipType} from "@/lib/utils";
-import {getTags, loadTags, Tag} from "@/tags";
+import {loadTags, Tag} from "@/tags";
+import {ActionName} from "@/actions";
 
+declare const getImagesDir: () => string;
 declare const isAfterSystemReboot: () => boolean;
 // Returns a string that contains the app name, path, and icon separated by '|'.
+declare const getAppInfo: (appPath: string) => string;
 declare const getDefaultAppInfo: (filePath: string) => string;
 declare const getRecommendedAppsInfo: (filePath: string) => string;
 declare const getAllAppsInfo: () => string;
-declare const getImagesDir: () => string;
 
 type FilterOptions = {
   types: ClipType[]
   favorites: boolean
   tags: Tag[]
+  apps: AppInfo[]
 }
 
 export enum SortHistoryType {
@@ -49,6 +52,12 @@ export type AppInfo = {
   icon: string
 }
 
+let unknownAppInfo: AppInfo = {
+  name: "Unknown",
+  path: "",
+  icon: ""
+}
+
 let history: Clip[] = [];
 let filteredHistory: Clip[] = [];
 let filterQuery = "";
@@ -57,7 +66,8 @@ let filterOptionsUpdated = false;
 let filterOptions: FilterOptions = {
   types: [],
   favorites: false,
-  tags: []
+  tags: [],
+  apps: []
 };
 let shouldUpdateHistory = false;
 let lastSelectedItemIndex = -1;
@@ -67,6 +77,7 @@ let previewVisible = true;
 let filterVisible = false;
 let infoVisible = true;
 let sortType = SortHistoryType.TimeOfLastCopy;
+let sourceApps: AppInfo[] = [];
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -129,11 +140,13 @@ export async function loadHistory() {
 
   history = await getAllClips()
   sortHistory(sortType, history)
+  loadSourceApps(history)
   requestHistoryUpdate()
 }
 
 export function requestHistoryUpdate() {
   shouldUpdateHistory = true
+  loadSourceApps(history)
 }
 
 function loadSettings() {
@@ -149,6 +162,42 @@ function loadSettings() {
   if (localStorage.getItem("sortType")) {
     sortType = parseInt(localStorage.getItem("sortType")!)
   }
+}
+
+function loadSourceApps(history: Clip[]) {
+  for (let i = 0; i < history.length; i++) {
+    let appPath = history[i].sourceApp
+    if (appPath && appPath.length > 0) {
+      let appInfo = getAppInfoByPath(appPath)
+      if (!appInfo) {
+        appInfo = parseAppInfo(getAppInfo(appPath))
+        if (appInfo) {
+          sourceApps.push(appInfo)
+        }
+      }
+    } else {
+      let appInfo = getAppInfoByPath(unknownAppInfo.path)
+      if (!appInfo) {
+        sourceApps.push(unknownAppInfo)
+      }
+    }
+  }
+
+  sortAppsAlphabetically(sourceApps)
+  window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.UpdateApps}}))
+}
+
+function getAppInfoByPath(appPath: string): AppInfo | undefined {
+  for (let i = 0; i < sourceApps.length; i++) {
+    if (sourceApps[i].path === appPath) {
+      return sourceApps[i]
+    }
+  }
+  return undefined
+}
+
+export function getSourceApps(): AppInfo[] {
+  return sourceApps
 }
 
 function savePreviewVisible(visible: boolean) {
@@ -397,6 +446,17 @@ function filter(item: Clip) {
   if (filterOptions.types.length > 0) {
     return filterOptions.types.includes(item.type)
   }
+  if (filterOptions.apps.length > 0) {
+    if (!item.sourceApp) {
+      return false
+    }
+    for (let i = 0; i < filterOptions.apps.length; i++) {
+      if (item.sourceApp === filterOptions.apps[i].path) {
+        return true
+      }
+    }
+    return false
+  }
   if (filterOptions.tags.length > 0) {
     if (!item.tags) {
       return false
@@ -598,6 +658,7 @@ export function getFileOrImagePath(item: Clip) {
 export function resetFilter() {
   filterOptions.types = []
   filterOptions.tags = []
+  filterOptions.apps = []
   filterOptions.favorites = false
   shouldUpdateHistory = true
   filterOptionsUpdated = true
@@ -619,6 +680,11 @@ export function filterByFavorites() {
   filterOptions.favorites = true
 }
 
+export function filterByApp(app: AppInfo) {
+  resetFilter()
+  filterOptions.apps = [app]
+}
+
 export function isFilterActive(): boolean {
-  return filterOptions.types.length > 0 || filterOptions.favorites || filterOptions.tags.length > 0
+  return filterOptions.types.length > 0 || filterOptions.favorites || filterOptions.tags.length > 0 || filterOptions.apps.length > 0
 }

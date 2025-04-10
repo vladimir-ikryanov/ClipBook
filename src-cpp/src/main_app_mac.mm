@@ -989,12 +989,24 @@ NSPoint MainAppMac::getInputCursorLocationOnScreen() {
   return NSPointFromCGPoint(caretBounds.origin);
 }
 
+std::string MainAppMac::getAppInfo(const std::string &app_path) {
+  auto appName = getAppNameFromPath(app_path);
+  if (appName.empty()) {
+    return "";
+  }
+  auto appIcon = getFileIconAsBase64(app_path, false);
+  if (appIcon.empty()) {
+    return "";
+  }
+  return appName + kAppInfoSeparator + app_path + kAppInfoSeparator + appIcon;
+}
+
 std::string MainAppMac::getDefaultAppInfo(const std::string &file_path) {
   NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
   // Get the default app path for the given file path.
   NSURL *appUrl = [workspace URLForApplicationToOpenURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:file_path.c_str()]]];
   if (appUrl) {
-    return toAppInfo([appUrl fileSystemRepresentation]);
+    return getAppInfo([appUrl fileSystemRepresentation]);
   }
   return "";
 }
@@ -1006,7 +1018,7 @@ std::string MainAppMac::getRecommendedAppsInfo(const std::string &file_path) {
     NSArray<NSURL *> *appUrls = [[NSWorkspace sharedWorkspace] URLsForApplicationsToOpenURL:fileUrl];
     if (appUrls) {
       for (NSURL *appUrl in appUrls) {
-        auto appInfo = toAppInfo([appUrl fileSystemRepresentation]);
+        auto appInfo = getAppInfo([appUrl fileSystemRepresentation]);
         if (!appInfo.empty()) {
           result += appInfo + kAppInfoListSeparator;
         }
@@ -1014,18 +1026,6 @@ std::string MainAppMac::getRecommendedAppsInfo(const std::string &file_path) {
     }
     return result;
   }
-}
-
-std::string MainAppMac::toAppInfo(const std::string &appPath) {
-  auto appName = getAppNameFromPath(appPath);
-  if (appName.empty()) {
-    return "";
-  }
-  auto appIcon = getFileIconAsBase64(appPath, false);
-  if (appIcon.empty()) {
-    return "";
-  }
-  return appName + kAppInfoSeparator + appPath + kAppInfoSeparator + appIcon;
 }
 
 std::string MainAppMac::getAllAppsInfo() {
@@ -1036,7 +1036,7 @@ std::string MainAppMac::getAllAppsInfo() {
     for (NSString *appName in appList) {
       if ([appName.pathExtension isEqualToString:@"app"]) {
         NSString *fullPath = [applicationsPath stringByAppendingPathComponent:appName];
-        auto appInfo = toAppInfo([fullPath UTF8String]);
+        auto appInfo = getAppInfo([fullPath UTF8String]);
         if (!appInfo.empty()) {
           result += appInfo + kAppInfoListSeparator;
         }

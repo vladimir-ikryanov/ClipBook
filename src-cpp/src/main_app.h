@@ -98,6 +98,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   virtual void updateOpenSettingsShortcut() = 0;
   virtual std::string getUserDataDir() = 0;
   virtual std::string getUpdateServerUrl() = 0;
+  virtual std::string getAppInfo(const std::string &app_path) = 0;
   virtual std::string getDefaultAppInfo(const std::string &file_path) = 0;
   virtual std::string getRecommendedAppsInfo(const std::string &file_path) = 0;
   virtual std::string getAllAppsInfo() = 0;
