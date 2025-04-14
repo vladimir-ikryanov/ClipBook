@@ -296,10 +296,12 @@ void MainApp::checkForUpdates(bool user_initiated) {
 }
 
 void MainApp::notifyUpdateAvailable() {
-  auto frame = app_window_->mainFrame();
-  if (frame) {
-    frame->executeJavaScript("updateAvailable()");
-  }
+  std::thread([this]() {
+    auto frame = app_window_->mainFrame();
+    if (frame) {
+      frame->executeJavaScript("updateAvailable()");
+    }
+  }).detach();
 }
 
 void MainApp::checkForUpdates(const std::function<void()> &complete, bool user_initiated) {
