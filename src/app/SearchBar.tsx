@@ -33,6 +33,7 @@ type SearchBarProps = {
   appName: string
   appIcon: string
   onPaste: () => void
+  onPasteObject: () => void
   onPasteWithTab: () => void
   onPasteWithReturn: () => void
   onPasteWithTransformation: (operation: TextFormatOperation) => void
@@ -46,6 +47,7 @@ type SearchBarProps = {
   onRenameItem: () => void
   onSplit: () => void
   onCopyToClipboard: () => void
+  onCopyObjectToClipboard: () => void
   onCopyPathToClipboard: () => void
   onCopyTextFromImage: () => void
   onSaveImageAsFile: () => void
@@ -185,7 +187,7 @@ export default function SearchBar(props: SearchBarProps) {
       <div className="flex flex-col border-b-solid border-b-border border-b">
         <div className="flex m-2">
           <div
-              className={props.searchQuery.length == 0 ? "flex-none relative" : "flex-auto relative"}>
+              className={props.searchQuery.length == 0 ? "flex" : "flex-auto"}>
             <div className="flex text-primary-foreground">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -203,13 +205,13 @@ export default function SearchBar(props: SearchBarProps) {
             </div>
             <Input placeholder="Type to search..."
                    value={props.searchQuery}
-                   className="w-full h-10 pl-10 text-lg placeholder:text-secondary-foreground border-none"
+                   className={`${props.searchQuery.length > 0 ? "w-full" : "w-48"} h-10 pl-10 text-lg placeholder:text-secondary-foreground border-none`}
                    onChange={handleOnChange}
                    onKeyDown={handleKeyDown}
                    ref={props.searchFieldRef}/>
           </div>
           <div
-              className={props.searchQuery.length == 0 ? "flex-auto draggable" : "flex-none"}></div>
+              className={props.searchQuery.length == 0 ? "flex-grow draggable" : "flex-none"}></div>
           <div className={props.isTrial ? "" : "hidden"}>
             <Tooltip>
               <TooltipTrigger asChild>{renderTrialBadge()}
@@ -261,6 +263,7 @@ export default function SearchBar(props: SearchBarProps) {
                       onFormatText={showFormatOptionsDialog}
                       onSplit={props.onSplit}
                       onCopyToClipboard={props.onCopyToClipboard}
+                      onCopyObjectToClipboard={props.onCopyObjectToClipboard}
                       onCopyPathToClipboard={props.onCopyPathToClipboard}
                       onCopyTextFromImage={props.onCopyTextFromImage}
                       onSaveImageAsFile={props.onSaveImageAsFile}
@@ -274,6 +277,7 @@ export default function SearchBar(props: SearchBarProps) {
                       onOpenSettings={props.onOpenSettings}
                       onOpenWith={showOpenWithDialog}
                       onPaste={props.onPaste}
+                      onPasteObject={props.onPasteObject}
                       onPastePath={props.onPastePath}
                       onPasteWithTab={props.onPasteWithTab}
                       onPasteWithReturn={props.onPasteWithReturn}

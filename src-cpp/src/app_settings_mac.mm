@@ -50,11 +50,13 @@ NSString *prefCloseAppShortcut3 = @"app.close_app_shortcut4";
 NSString *prefSelectNextItemShortcut = @"app.select_next_item_shortcut2";
 NSString *prefSelectPreviousItemShortcut = @"app.select_previous_item_shortcut2";
 NSString *prefPasteSelectedItemToActiveAppShortcut = @"app.paste_selected_item_to_active_app_shortcut2";
+NSString *prefPasteSelectedObjectToActiveAppShortcut = @"app.paste_selected_object_to_active_app_shortcut2";
 NSString *prefEditHistoryItemShortcut = @"app.edit_history_item_shortcut2";
 NSString *prefOpenInBrowserShortcut = @"app.open_in_browser_shortcut2";
 NSString *prefShowInFinderShortcut = @"app.show_in_finder_shortcut";
 NSString *prefOpenInDefaultAppShortcut = @"app.open_in_default_app_shortcut";
 NSString *prefCopyToClipboardShortcut = @"app.copy_to_clipboard_shortcut2";
+NSString *prefCopyObjectToClipboardShortcut = @"app.copy_object_to_clipboard_shortcut2";
 NSString *prefCopyImageFromTextShortcut = @"app.copy_image_from_text_shortcut";
 NSString *prefDeleteHistoryItemShortcut = @"app.delete_history_item_shortcut2";
 NSString *prefClearHistoryShortcut = @"app.clear_history_shortcut2";
@@ -524,6 +526,21 @@ std::string AppSettingsMac::getPasteSelectedItemToActiveAppShortcut() {
   return "Enter";
 }
 
+void AppSettingsMac::savePasteSelectedObjectToActiveAppShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefPasteSelectedObjectToActiveAppShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getPasteSelectedObjectToActiveAppShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefPasteSelectedObjectToActiveAppShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ShiftLeft + Enter";
+}
+
 void AppSettingsMac::saveEditHistoryItemShortcut(std::string shortcut) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefEditHistoryItemShortcut];
@@ -597,6 +614,21 @@ std::string AppSettingsMac::getCopyToClipboardShortcut() {
     return {[shortcut UTF8String]};
   }
   return "MetaLeft + KeyC";
+}
+
+void AppSettingsMac::saveCopyObjectToClipboardShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefCopyObjectToClipboardShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getCopyObjectToClipboardShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefCopyObjectToClipboardShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ShiftLeft + MetaLeft + KeyC";
 }
 
 void AppSettingsMac::saveCopyTextFromImageShortcut(std::string shortcut) {

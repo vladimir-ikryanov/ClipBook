@@ -27,14 +27,14 @@ import {
   CommandShortcut,
 } from "@/components/ui/command"
 import {
-  prefGetClearHistoryShortcut,
+  prefGetClearHistoryShortcut, prefGetCopyObjectToClipboardShortcut,
   prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetOpenInBrowserShortcut, prefGetOpenInDefaultAppShortcut,
   prefGetOpenSettingsShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut, prefGetPasteSelectedObjectToActiveAppShortcut,
   prefGetRenameItemShortcut,
   prefGetSaveImageAsFileShortcut, prefGetShowInFinderShortcut,
   prefGetShowMoreActionsShortcut,
@@ -57,7 +57,7 @@ import {
   getDefaultApp,
   getFileOrImagePath
 } from "@/data";
-import {ClipType, getImageText} from "@/db";
+import {ClipType, getHTML, getImageText, getRTF} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {DialogTitle} from "@/components/ui/dialog";
@@ -71,6 +71,7 @@ export type HideActionsReason =
     | "togglePreview"
     | "toggleFavorite"
     | "paste"
+    | "pasteObject"
     | "pasteWithTab"
     | "pasteWithReturn"
     | "pasteWithTransformation"
@@ -81,6 +82,7 @@ export type HideActionsReason =
     | "formatText"
     | "split"
     | "copyToClipboard"
+    | "copyObjectToClipboard"
     | "copyPathToClipboard"
     | "copyTextFromImage"
     | "saveImageAsFile"
@@ -104,6 +106,7 @@ type CommandsProps = {
   onTogglePreview: () => void
   onToggleFavorite: () => void
   onPaste: () => void
+  onPasteObject: () => void
   onPasteWithTab: () => void
   onPasteWithReturn: () => void
   onPasteWithTransformation: () => void
@@ -114,6 +117,7 @@ type CommandsProps = {
   onFormatText: () => void
   onSplit: () => void
   onCopyToClipboard: () => void
+  onCopyObjectToClipboard: () => void
   onCopyPathToClipboard: () => void
   onCopyTextFromImage: () => void
   onSaveImageAsFile: () => void
@@ -222,10 +226,22 @@ export default function Commands(props: CommandsProps) {
     props.onCopyToClipboard()
   }
 
+  function handleCopyObjectToClipboard() {
+    closeReason = "copyObjectToClipboard"
+    handleOpenChange(false)
+    props.onCopyObjectToClipboard()
+  }
+
   function handlePaste() {
     closeReason = "paste"
     handleOpenChange(false)
     props.onPaste()
+  }
+
+  function handlePasteObject() {
+    closeReason = "pasteObject"
+    handleOpenChange(false)
+    props.onPasteObject()
   }
 
   function handlePasteWithTab() {
@@ -364,6 +380,10 @@ export default function Commands(props: CommandsProps) {
     return getSelectedHistoryItemIndices().length === 1
   }
 
+  function canShowCopyObjectToClipboard() {
+    return isObjectSelected()
+  }
+
   function canShowMultiplePaste() {
     return getSelectedHistoryItemIndices().length > 1
   }
@@ -397,6 +417,20 @@ export default function Commands(props: CommandsProps) {
       let item = getFirstSelectedHistoryItem()
       if (item) {
         return isTextItem(item)
+      }
+    }
+    return false
+  }
+
+  function canPasteObject() {
+    return isObjectSelected()
+  }
+
+  function isObjectSelected() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      if (item && item.type === ClipType.Text) {
+        return getRTF(item).length > 0 || getHTML(item).length > 0
       }
     }
     return false
@@ -501,6 +535,33 @@ export default function Commands(props: CommandsProps) {
     return ""
   }
 
+  function getItemLabel(): string {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      if (item) {
+        return ClipType[item.type]
+      }
+    }
+    return ""
+  }
+
+  function getObjectLabel() {
+    if (canPasteObject()) {
+      let item = getFirstSelectedHistoryItem()
+      if (item && item.type === ClipType.Text) {
+        let label = "Text"
+        if (getHTML(item).length > 0) {
+          label += " + HTML"
+        }
+        if (getRTF(item).length > 0) {
+          label += " + RTF"
+        }
+        return <span>{label}</span>
+      }
+    }
+    return null
+  }
+
   return (
       <>
         <Tooltip>
@@ -525,19 +586,32 @@ export default function Commands(props: CommandsProps) {
                 <CommandItem onSelect={handlePaste}>
                   <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                        alt="Application icon"/>
-                  <span>Paste {getMultipleItemsIndicator()} to {props.appName}</span>
+                  <span>Paste {getItemLabel()} {getMultipleItemsIndicator()} to {props.appName}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
+                {
+                    canPasteObject() &&
+                    <CommandItem onSelect={handlePasteObject}>
+                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
+                           alt="Application icon"/>
+                      <span>
+                        Paste {getObjectLabel()} {getMultipleItemsIndicator()} to {props.appName}
+                      </span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetPasteSelectedObjectToActiveAppShortcut()}/>
+                      </CommandShortcut>
+                    </CommandItem>
+                }
                 {
                     canPasteWithTransformation() &&
                     <CommandItem onSelect={handlePasteWithTransformation}>
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                            alt="Application icon"/>
                       <span>
-                    Paste {getMultipleItemsIndicator()} to {props.appName} with Formatting...
-                  </span>
+                        Paste {getItemLabel()} {getMultipleItemsIndicator()} to {props.appName} with Formatting...
+                      </span>
                     </CommandItem>
                 }
                 {
@@ -561,7 +635,7 @@ export default function Commands(props: CommandsProps) {
                     <CommandItem onSelect={handlePastePath}>
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                            alt="Application icon"/>
-                      <span>Paste Path to {props.appName}</span>
+                      <span>Paste File Path to {props.appName}</span>
                     </CommandItem>
                 }
                 {
@@ -587,9 +661,19 @@ export default function Commands(props: CommandsProps) {
                     canShowCopyToClipboard() &&
                     <CommandItem onSelect={handleCopyToClipboard}>
                       <CopyIcon className="mr-2 h-5 w-5"/>
-                      <span>Copy to Clipboard</span>
+                      <span>Copy {getItemLabel()} to Clipboard</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
+                      </CommandShortcut>
+                    </CommandItem>
+                }
+                {
+                    canShowCopyObjectToClipboard() &&
+                    <CommandItem onSelect={handleCopyObjectToClipboard}>
+                      <CopyIcon className="mr-2 h-5 w-5"/>
+                      <span>Copy {getObjectLabel()} to Clipboard</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetCopyObjectToClipboardShortcut()}/>
                       </CommandShortcut>
                     </CommandItem>
                 }
@@ -597,7 +681,7 @@ export default function Commands(props: CommandsProps) {
                     canShowCopyPath() &&
                     <CommandItem onSelect={handleCopyPathToClipboard}>
                       <CopyIcon className="mr-2 h-5 w-5"/>
-                      <span>Copy Path to Clipboard</span>
+                      <span>Copy File Path to Clipboard</span>
                     </CommandItem>
                 }
                 <CommandSeparator/>

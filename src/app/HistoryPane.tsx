@@ -30,13 +30,13 @@ import {
   setSelectedHistoryItemIndex,
   TextFormatOperation,
   updateHistoryItem,
-  updateHistoryItemTypes, setFilterVisibleState, getSourceApps, resetFilter
+  updateHistoryItemTypes, setFilterVisibleState
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
   prefGetCapitalizeShortcut,
   prefGetClearHistoryShortcut,
-  prefGetCopyAndMergeSeparator,
+  prefGetCopyAndMergeSeparator, prefGetCopyObjectToClipboardShortcut,
   prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardAfterMerge,
   prefGetCopyToClipboardShortcut,
@@ -50,7 +50,7 @@ import {
   prefGetNavigateToPrevGroupOfItemsShortcut,
   prefGetOpenInBrowserShortcut, prefGetOpenInDefaultAppShortcut,
   prefGetOpenSettingsShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut, prefGetPasteSelectedObjectToActiveAppShortcut,
   prefGetQuickPasteModifier,
   prefGetQuickPasteShortcuts, prefGetRemoveEmptyLinesShortcut,
   prefGetRenameItemShortcut,
@@ -66,7 +66,7 @@ import {
 } from "@/pref";
 import {HideActionsReason} from "@/app/Commands";
 import {FixedSizeList as List} from "react-window";
-import {addClip, Clip, ClipType, getFilePath, getImageFileName, getImageText} from "@/db";
+import {Clip, ClipType, getFilePath, getHTML, getImageFileName, getImageText, getRTF} from "@/db";
 import {formatText, getClipType, isUrl} from "@/lib/utils";
 import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
@@ -80,11 +80,11 @@ import {AppSidebarItemType} from "@/app/AppSidebarItem";
 import {Tag} from "@/tags";
 import {ActionName} from "@/actions";
 
-declare const pasteItemInFrontApp: (text: string, imageFileName: string, filePath: string) => void;
+declare const pasteItemInFrontApp: (text: string, rtf: string, html: string, imageFileName: string, filePath: string) => void;
 declare const pasteFilesInFrontApp: (filePaths: string) => void;
 declare const pressReturn: () => void;
 declare const pressTab: () => void;
-declare const copyToClipboard: (text: string, imageFileName: string, filePath: string, ghost: boolean) => void;
+declare const copyToClipboard: (text: string, rtf: string, html: string, imageFileName: string, filePath: string, ghost: boolean) => void;
 declare const copyToClipboardAfterMerge: (text: string) => void;
 declare const deleteImage: (imageFileName: string) => void;
 declare const clearEntireHistory: () => void;
@@ -145,7 +145,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   filePathFileName: string,
                                   filePathThumbFileName: string,
                                   fileSizeInBytes: number,
-                                  isFolder: boolean) {
+                                  isFolder: boolean,
+                                  rtf: string,
+                                  html: string) {
     let item = findItem(content, imageFileName, filePath)
     if (item) {
       item.numberOfCopies++
@@ -165,7 +167,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
           filePathFileName,
           filePathThumbFileName,
           fileSizeInBytes,
-          isFolder)
+          isFolder,
+          rtf,
+          html)
     }
     setHistory([...getHistoryItems()])
 
@@ -236,7 +240,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
         filePathFileName,
         filePathThumbFileName,
         fileSizeInBytes,
-        isFolder)
+        isFolder,
+        "",
+        "")
   }
 
   async function clearHistory() {
@@ -354,6 +360,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
         await handlePaste()
         e.preventDefault()
       }
+      // Paste the selected object to the active app when the paste shortcut is pressed.
+      if (isShortcutMatch(prefGetPasteSelectedObjectToActiveAppShortcut(), e)) {
+        await handlePasteObject()
+        e.preventDefault()
+      }
       // Delete the active item when the delete shortcut is pressed.
       if (isShortcutMatch(prefGetDeleteHistoryItemShortcut(), e)) {
         await handleDeleteItems()
@@ -390,6 +401,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
       // Copy the active item to the clipboard when the copy to clipboard shortcut is pressed.
       if (isShortcutMatch(prefGetCopyToClipboardShortcut(), e)) {
         await handleCopyToClipboard()
+        e.preventDefault()
+      }
+      // Copy the active object item to the clipboard when the copy to clipboard shortcut is pressed.
+      if (isShortcutMatch(prefGetCopyObjectToClipboardShortcut(), e)) {
+        await handleCopyObjectToClipboard()
         e.preventDefault()
       }
       // Copy text from the active item (image) when the copy text from image shortcut is pressed.
@@ -541,18 +557,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
         const deleteTagAction = event as CustomEvent<{ action: string, tagId: number }>
         handleDeleteTag(deleteTagAction.detail.tagId).then(() => {})
       }
-      if (actionName === ActionName.UpdateApps) {
-        if (selectedApp) {
-          console.log("selectedApp", selectedApp)
-          // let find = getSourceApps().find(value => value.path === selectedApp.path)
-          // console.log("find", find)
-          // if (!find) {
-          //   handleSidebarTypeSelect("All")
-          //   handleFilterHistory()
-          //   focusSearchField()
-          // }
-        }
-      }
     }
 
     window.addEventListener("onAction", handleAction);
@@ -665,14 +669,16 @@ export default function HistoryPane(props: HistoryPaneProps) {
     return previewPanelRef.current ? previewPanelRef.current.getSize() > 0 : false
   }
 
-  async function pasteItem(item: Clip, keepHistory: boolean = false) {
+  async function pasteItem(item: Clip, keepHistory: boolean = false, pasteObject: boolean = false) {
     item.numberOfCopies++
     if (prefShouldUpdateHistoryAfterAction() && !keepHistory) {
       item.lastTimeCopy = new Date()
     }
     await updateHistoryItem(item.id!, item)
 
-    pasteItemInFrontApp(item.content, getImageFileName(item), getFilePath(item))
+    let rtf = pasteObject ? getRTF(item) : ""
+    let html = pasteObject ? getHTML(item) : ""
+    pasteItemInFrontApp(item.content, rtf, html, getImageFileName(item), getFilePath(item))
 
     setHistory([...getHistoryItems()])
 
@@ -729,6 +735,16 @@ export default function HistoryPane(props: HistoryPaneProps) {
     handleSearchQueryChange("")
   }
 
+  async function handlePasteObject() {
+    let items = getSelectedHistoryItems()
+    for (const item of items) {
+      if (item.type === ClipType.Text) {
+        await pasteItem(item, false, true)
+      }
+    }
+    handleSearchQueryChange("")
+  }
+
   async function handlePasteWithTab() {
     let items = getSelectedHistoryItems()
     for (const item of items) {
@@ -769,7 +785,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (getSelectedHistoryItemIndices().length === 1) {
       let item = getFirstSelectedHistoryItem()
       if (item.type === ClipType.File) {
-        pasteItemInFrontApp(getFilePath(item), "", "")
+        pasteItemInFrontApp(getFilePath(item), "", "", "", "")
       }
     }
   }
@@ -778,7 +794,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (index < history.length) {
       let item = history[index]
       if (item.type === ClipType.File) {
-        pasteItemInFrontApp(getFilePath(item), "", "")
+        pasteItemInFrontApp(getFilePath(item), "", "", "", "")
       }
     }
   }
@@ -787,7 +803,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (getSelectedHistoryItemIndices().length === 1) {
       let item = getFirstSelectedHistoryItem()
       if (item.type === ClipType.File) {
-        copyToClipboard(item.filePath, "", "", false)
+        copyToClipboard(item.filePath, "", "", "", "", false)
       }
     }
   }
@@ -795,7 +811,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   async function handleCopyPathToClipboardByIndex(index: number) {
     let item = getHistoryItem(index)
     if (item.type === ClipType.File) {
-      copyToClipboard(item.filePath, "", "", false)
+      copyToClipboard(item.filePath, "", "", "", "", false)
     }
   }
 
@@ -807,7 +823,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       content += item.content + "\n"
     }
     await handleDeleteItems()
-    await addClipboardData(content, "ClipBook.app", "", "", 0, 0, 0, "", "", "", "", 0, false)
+    await addClipboardData(content, "ClipBook.app", "", "", 0, 0, 0, "", "", "", "", 0, false, "", "")
   }
 
   async function handlePasteByIndex(index: number) {
@@ -886,7 +902,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
         let items = []
         for (let i = 0; i < lines.length; i++) {
           // Create a new item for each line.
-          let item = await addHistoryItem(lines[i], selectedItem.sourceApp, "", "", 0, 0, 0, "", "", "", "", 0, false)
+          let item = await addHistoryItem(lines[i], selectedItem.sourceApp, "", "", 0, 0, 0, "", "", "", "", 0, false, "", "")
           let now = new Date()
           // Add one millisecond to the time to make sure the items are not identical.
           now.setMilliseconds(now.getMilliseconds() - (i * 100))
@@ -950,14 +966,16 @@ export default function HistoryPane(props: HistoryPaneProps) {
     handleRenameItem()
   }
 
-  async function copyItemToClipboard(item: Clip) {
+  async function copyItemToClipboard(item: Clip, pasteObject: boolean = false) {
     item.numberOfCopies++
     if (prefShouldUpdateHistoryAfterAction()) {
       item.lastTimeCopy = new Date()
     }
     await updateHistoryItem(item.id!, item)
 
-    copyToClipboard(item.content, getImageFileName(item), getFilePath(item), true)
+    let rtf = pasteObject ? getRTF(item) : ""
+    let html = pasteObject ? getHTML(item) : ""
+    copyToClipboard(item.content, rtf, html, getImageFileName(item), getFilePath(item), true)
 
     setHistory([...getHistoryItems()])
 
@@ -978,6 +996,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
     focusSearchField()
   }
 
+  async function handleCopyObjectToClipboard() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      await copyItemToClipboard(item, true)
+    }
+    focusSearchField()
+  }
+
   async function handleCopyToClipboardByIndex(index: number) {
     await copyItemToClipboard(getHistoryItem(index))
   }
@@ -985,7 +1011,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   function copyTextFromImage(item: Clip) {
     if (item.type === ClipType.Image || item.type === ClipType.File) {
       let imageText = getImageText(item)
-      copyToClipboard(imageText.length > 0 ? imageText : item.content, "", "", false)
+      copyToClipboard(imageText.length > 0 ? imageText : item.content, "", "", "", "", false)
     }
   }
 
@@ -1182,7 +1208,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
         hideAppWindow()
       }
     } else {
-      pasteItemInFrontApp(item.content, getImageFileName(item), getFilePath(item))
+      pasteItemInFrontApp(item.content, "", "", getImageFileName(item), getFilePath(item))
     }
   }
 
@@ -1322,6 +1348,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   searchFieldRef={searchFieldRef}
                                   listRef={listRef}
                                   onPaste={handlePaste}
+                                  onPasteObject={handlePasteObject}
                                   onPasteWithTab={handlePasteWithTab}
                                   onPasteWithReturn={handlePasteWithReturn}
                                   onPasteWithTransformation={handlePasteWithTransformation}
@@ -1338,6 +1365,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   onRenameItemByIndex={handleRenameItemByIndex}
                                   onSplit={handleSplitItem}
                                   onCopyToClipboard={handleCopyToClipboard}
+                                  onCopyObjectToClipboard={handleCopyObjectToClipboard}
                                   onCopyPathToClipboard={handleCopyPathToClipboard}
                                   onCopyToClipboardByIndex={handleCopyToClipboardByIndex}
                                   onCopyPathToClipboardByIndex={handleCopyPathToClipboardByIndex}

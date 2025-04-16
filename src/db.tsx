@@ -48,6 +48,8 @@ export class Clip {
   filePathThumbFileName: string = "";
   fileSizeInBytes: number = 0;
   fileFolder: boolean = false;
+  rtf: string = "";
+  html: string = "";
 
   constructor(type: ClipType, content: string, sourceApp: string) {
     this.type = type;
@@ -63,7 +65,7 @@ class AppDatabase extends Dexie {
   constructor() {
     super('ClipBookDB');
     this.version(1).stores({
-      history: '++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder',
+      history: '++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder, rtf, html',
       linkPreviews: '++id, url, title, description, imageFileName, faviconFileName'
     });
   }
@@ -114,4 +116,12 @@ export function getImageFileName(item: Clip): string {
 
 export function getFilePath(item: Clip): string {
   return item && (item.filePath || "")
+}
+
+export function getRTF(item: Clip): string {
+  return item && (item.rtf || "")
+}
+
+export function getHTML(item: Clip): string {
+  return item && (item.html || "")
 }

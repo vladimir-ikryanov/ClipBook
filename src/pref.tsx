@@ -63,6 +63,8 @@ declare const saveSelectPreviousItemShortcut: (shortcut: string) => void;
 declare const getSelectPreviousItemShortcut: () => string;
 declare const savePasteSelectedItemToActiveAppShortcut: (shortcut: string) => void;
 declare const getPasteSelectedItemToActiveAppShortcut: () => string;
+declare const savePasteSelectedObjectToActiveAppShortcut: (shortcut: string) => void;
+declare const getPasteSelectedObjectToActiveAppShortcut: () => string;
 declare const saveEditHistoryItemShortcut: (shortcut: string) => void;
 declare const getEditHistoryItemShortcut: () => string;
 declare const saveOpenInBrowserShortcut: (shortcut: string) => void;
@@ -73,6 +75,8 @@ declare const saveOpenInDefaultAppShortcut: (shortcut: string) => void;
 declare const getOpenInDefaultAppShortcut: () => string;
 declare const saveCopyToClipboardShortcut: (shortcut: string) => void;
 declare const getCopyToClipboardShortcut: () => string;
+declare const saveCopyObjectToClipboardShortcut: (shortcut: string) => void;
+declare const getCopyObjectToClipboardShortcut: () => string;
 declare const saveCopyTextFromImageShortcut: (shortcut: string) => void;
 declare const getCopyTextFromImageShortcut: () => string;
 declare const saveDeleteHistoryItemShortcut: (shortcut: string) => void;
@@ -263,6 +267,14 @@ export function prefSetPasteSelectedItemToActiveAppShortcut(shortcut: string) {
   savePasteSelectedItemToActiveAppShortcut(shortcut)
 }
 
+export function prefGetPasteSelectedObjectToActiveAppShortcut() {
+  return getPasteSelectedObjectToActiveAppShortcut()
+}
+
+export function prefSetPasteSelectedObjectToActiveAppShortcut(shortcut: string) {
+  savePasteSelectedObjectToActiveAppShortcut(shortcut)
+}
+
 export function prefGetEditHistoryItemShortcut() {
   return getEditHistoryItemShortcut()
 }
@@ -301,6 +313,14 @@ export function prefGetCopyToClipboardShortcut() {
 
 export function prefSetCopyToClipboardShortcut(shortcut: string) {
   saveCopyToClipboardShortcut(shortcut)
+}
+
+export function prefGetCopyObjectToClipboardShortcut() {
+  return getCopyObjectToClipboardShortcut()
+}
+
+export function prefSetCopyObjectToClipboardShortcut(shortcut: string) {
+  saveCopyObjectToClipboardShortcut(shortcut)
 }
 
 export function prefGetDeleteHistoryItemShortcut() {

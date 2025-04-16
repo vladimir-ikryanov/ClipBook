@@ -1,13 +1,14 @@
 import '../app.css';
-import React, {KeyboardEvent, useState} from "react";
+import React, {KeyboardEvent, useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {
   CheckIcon,
   ChevronDown,
   ClipboardIcon,
   CopyIcon,
-  GlobeIcon, ScanTextIcon,
-  StarIcon
+  GlobeIcon,
+  ScanTextIcon,
+  StarIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -23,7 +24,7 @@ import {
   prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut,
 } from "@/pref";
-import {ClipType, getImageText} from "@/db";
+import {Clip, ClipType, getImageText} from "@/db";
 import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
@@ -35,6 +36,7 @@ import {
 } from "@/data";
 import {CommandShortcut} from "@/components/ui/command";
 import PreviewToolBarMenu, {HideDropdownReason} from "@/app/PreviewToolBarMenu";
+import TextTypeToggle from "@/app/TextTypeToggle";
 
 type PreviewToolBarProps = {
   selectedItemIndices: number[]
@@ -62,9 +64,18 @@ type PreviewToolBarProps = {
 }
 
 export default function PreviewToolBar(props: PreviewToolBarProps) {
+  const [selectedItem, setSelectedItem] = useState<Clip>()
   const [pasteOptionsMenuOpen, setPasteOptionsMenuOpen] = useState(false)
   const [isCopying, setIsCopying] = useState(false)
   const [showCheckIcon, setShowCheckIcon] = useState(false)
+
+  useEffect(() => {
+    if (props.selectedItemIndices.length === 1) {
+      setSelectedItem(getFirstSelectedHistoryItem())
+    } else {
+      setSelectedItem(undefined)
+    }
+  }, [props.selectedItemIndices])
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
@@ -333,12 +344,17 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 </Tooltip>
             }
           </div>
-          <div className="flex-auto text-sm pt-2.5 items-center justify-center text-center text-toolbar-button draggable">
+          <div className="flex-grow draggable"></div>
+          <TextTypeToggle item={selectedItem}/>
+          <div className="draggable">
             {
                 canShowNumberOfSelectedItems() &&
-                props.selectedItemIndices.length + " items"
+                <div className="text-sm pt-2.5 items-center justify-center text-center text-toolbar-button">
+                  {props.selectedItemIndices.length + " items"}
+                </div>
             }
           </div>
+          <div className="flex-grow draggable"></div>
           <div className="">
             <Tooltip>
               <TooltipTrigger asChild>

@@ -12,4 +12,5 @@ export enum ActionName {
   NewTag = "newTag",
   UpdateTag = "updateTag",
   DeleteTag = "deleteTag",
+  SwitchTextType = "switchTextType",
 }

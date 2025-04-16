@@ -1,6 +1,6 @@
 import '../app.css';
 import React, {useEffect, useState} from "react";
-import {Clip, ClipType, getFilePath} from "@/db";
+import {Clip, ClipType, getFilePath, getHTML, getRTF} from "@/db";
 import {getHistoryItemById, toBase64Icon} from "@/data";
 import ItemTags from "@/app/ItemTags";
 import {getTags, Tag} from "@/tags";
@@ -21,6 +21,8 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
 
   const [type, setType] = useState<ClipType>(props.item.type)
   const [content, setContent] = useState<string>(props.item.content)
+  const [rtf, setRtf] = useState<string>(getRTF(props.item))
+  const [html, setHtml] = useState<string>(getHTML(props.item))
   const [imageWidth, setImageWidth] = useState<number>(props.item.imageWidth)
   const [imageHeight, setImageHeight] = useState<number>(props.item.imageHeight)
   const [imageSizeInBytes, setImageSizeInBytes] = useState<number>(props.item.imageSizeInBytes)
@@ -36,6 +38,8 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
   function updateItem(item: Clip) {
     setType(item.type)
     setContent(item.content)
+    setRtf(getRTF(props.item))
+    setHtml(getHTML(props.item))
     setSourceApp(item.sourceApp)
     setFileFolder(item.fileFolder)
     setImageWidth(item.imageWidth)
@@ -68,23 +72,33 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
     return () => window.removeEventListener("onAction", handleAction);
   }, [props.item]);
 
-  function getType(): string {
+  function getTypes(): string[] {
     if (type === ClipType.Link) {
-      return "Link"
+      return ["Link"]
     }
     if (type === ClipType.Color) {
-      return "Color"
+      return ["Color"]
     }
     if (type === ClipType.Email) {
-      return "Email"
+      return ["Email"]
     }
     if (type === ClipType.Image) {
-      return "Image"
+      return ["Image"]
     }
     if (type === ClipType.File) {
-      return fileFolder ? "Folder" : "File"
+      return fileFolder ? ["Folder"] : ["File"]
     }
-    return "Text"
+    if (type === ClipType.Text) {
+      let result = ["Text"]
+      if (html.length > 0) {
+        result.push("HTML")
+      }
+      if (rtf.length > 0) {
+        result.push("RTF")
+      }
+      return result
+    }
+    return ["Unknown"]
   }
 
   function getTimeString(date: Date): string {
@@ -141,9 +155,24 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
           </div>
         </div>
         <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-          <div className="flex-none text-preview-infoLabel font-semibold">Type</div>
+          <div className="flex-none text-preview-infoLabel font-semibold">
+            {
+              getTypes().length > 1 ? "Types" : "Type"
+            }
+          </div>
           <div className="flex-grow"></div>
-          <div className="flex-none text-foreground">{getType()}</div>
+          <div className="flex-none text-foreground">
+            {
+              getTypes().map((type, index) => {
+                return (
+                    <span key={index}>
+                      {type}
+                      {index < getTypes().length - 1 ? <span className="text-border px-1.5">|</span> : ""}
+                    </span>
+                )
+              })
+            }
+          </div>
         </div>
         {
             tags && tags.length > 0 &&

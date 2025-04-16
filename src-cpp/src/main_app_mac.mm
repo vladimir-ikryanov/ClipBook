@@ -396,6 +396,8 @@ void MainAppMac::paste(const std::string &filePaths) {
 }
 
 void MainAppMac::paste(const std::string &text,
+                       const std::string &rtf,
+                       const std::string &html,
                        const std::string &imageFileName,
                        const std::string &filePath) {
   if (!isAccessibilityAccessGranted()) {
@@ -404,7 +406,7 @@ void MainAppMac::paste(const std::string &text,
   }
   // Hide the browser window and activate the previously active app.
   hide();
-  copyToClipboard(text, imageFileName, filePath, true);
+  copyToClipboard(text, rtf, html, imageFileName, filePath, true);
   paste();
 }
 
@@ -435,6 +437,8 @@ void MainAppMac::copyToClipboard(const std::string &filePaths, bool ghost) {
 }
 
 void MainAppMac::copyToClipboard(const std::string &text,
+                                 const std::string &rtf,
+                                 const std::string &html,
                                  const std::string &imageFileName,
                                  const std::string &filePath,
                                  bool ghost) {
@@ -470,8 +474,20 @@ void MainAppMac::copyToClipboard(const std::string &text,
 
   // Copy text.
   if (!text.empty()) {
+    // Copy plain text.
     NSPasteboardItem *textItem = [[NSPasteboardItem alloc] init];
     [textItem setString:[NSString stringWithUTF8String:text.c_str()] forType:NSPasteboardTypeString];
+
+    // Copy RTF text.
+    if (!rtf.empty()) {
+      [textItem setString:[NSString stringWithUTF8String:rtf.c_str()] forType:NSPasteboardTypeRTF];
+    }
+
+    // Copy HTML text.
+    if (!html.empty()) {
+      [textItem setString:[NSString stringWithUTF8String:html.c_str()] forType:NSPasteboardTypeHTML];
+    }
+
     [items addObject:textItem];
   }
 
@@ -867,7 +883,7 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text,
     }
     if (result.button.type == MessageDialogButtonType::kNone) {
       hide();
-      copyToClipboard(text, imageFileName, filePath, true);
+      copyToClipboard(text, "", "", imageFileName, filePath, true);
     }
   });
 }

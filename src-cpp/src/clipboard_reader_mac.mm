@@ -336,7 +336,7 @@ void ClipboardReaderMac::addClipboardData(const std::shared_ptr<ClipboardData> &
   auto window = frame->executeJavaScript("window");
   if (data->file_paths.empty()) {
     window.asJsObject()->call("addClipboardData",
-                              data->content,
+                              data->text,
                               data->active_app_info.path,
                               data->image_info.file_name,
                               data->image_info.thumb_file_name,
@@ -344,7 +344,13 @@ void ClipboardReaderMac::addClipboardData(const std::shared_ptr<ClipboardData> &
                               data->image_info.height,
                               data->image_info.size_in_bytes,
                               data->image_info.text,
-                              "", "", "", 0, false);
+                              "",
+                              "",
+                              "",
+                              0,
+                              false,
+                              data->rtf,
+                              data->html);
   } else {
     for (const auto &file_path : data->file_paths) {
       window.asJsObject()->call("addClipboardData",
@@ -360,7 +366,9 @@ void ClipboardReaderMac::addClipboardData(const std::shared_ptr<ClipboardData> &
                                 file_path.file_preview_name,
                                 file_path.file_thumb_name,
                                 file_path.size_in_bytes,
-                                file_path.folder);
+                                file_path.folder,
+                                "",
+                                "");
     }
   }
 }
@@ -373,7 +381,7 @@ void ClipboardReaderMac::mergeClipboardData(const std::shared_ptr<ClipboardData>
   auto window = frame->executeJavaScript("window");
   if (data->file_paths.empty()) {
     window.asJsObject()->call("mergeClipboardData",
-                              data->content,
+                              data->text,
                               data->active_app_info.path,
                               data->image_info.file_name,
                               data->image_info.thumb_file_name,
@@ -385,7 +393,7 @@ void ClipboardReaderMac::mergeClipboardData(const std::shared_ptr<ClipboardData>
   } else {
     for (const auto &file_path : data->file_paths) {
       window.asJsObject()->call("mergeClipboardData",
-                                data->content,
+                                data->text,
                                 data->active_app_info.path,
                                 data->image_info.file_name,
                                 data->image_info.thumb_file_name,
@@ -503,21 +511,27 @@ bool ClipboardReaderMac::readImageData(const std::shared_ptr<ClipboardData> &dat
   return false;
 }
 
-bool ClipboardReaderMac::readTextData(const std::shared_ptr<ClipboardData> &data) {
+std::string ClipboardReaderMac::readPasteboard(NSPasteboardType type) {
   NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
   NSArray *types = [pasteboard types];
   // Read text content.
-  if ([types containsObject:NSPasteboardTypeString]) {
-    auto pasteboard_string = [pasteboard stringForType:NSPasteboardTypeString];
-    if (pasteboard_string) {
-      const char *content = [pasteboard_string UTF8String];
-      if (content != nullptr && !isEmptyOrSpaces(content)) {
-        data->content = content;
-        return true;
+  if ([types containsObject:type]) {
+    auto string = [pasteboard stringForType:type];
+    if (string) {
+      const char *text = [string UTF8String];
+      if (text != nullptr && !isEmptyOrSpaces(text)) {
+        return text;
       }
     }
   }
-  return false;
+  return "";
+}
+
+bool ClipboardReaderMac::readTextData(const std::shared_ptr<ClipboardData> &data) {
+  data->text = readPasteboard(NSPasteboardTypeString);
+  data->rtf = readPasteboard(NSPasteboardTypeRTF);
+  data->html = readPasteboard(NSPasteboardTypeHTML);
+  return !data->text.empty();
 }
 
 bool ClipboardReaderMac::readFilesData(const std::shared_ptr<ClipboardData> &data) {

@@ -585,9 +585,11 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   // App window.
   window->putProperty("pasteItemInFrontApp",
                       [this](std::string text,
+                             std::string rtf,
+                             std::string html,
                              std::string imageFileName,
                              std::string filePath) {
-                        paste(text, imageFileName, filePath);
+                        paste(text, rtf, html, imageFileName, filePath);
                       });
   window->putProperty("pasteFilesInFrontApp", [this](std::string filePaths) {
     paste(filePaths);
@@ -600,10 +602,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("copyToClipboard",
                       [this](std::string text,
+                             std::string rtf,
+                             std::string html,
                              std::string imageFileName,
                              std::string filePath,
                              bool ghost) {
-                        copyToClipboard(text, imageFileName, filePath, ghost);
+                        copyToClipboard(text, rtf, html, imageFileName, filePath, ghost);
                       });
   window->putProperty("copyToClipboardAfterMerge", [this](std::string text) {
     copyToClipboardAfterMerge(std::move(text));
@@ -939,6 +943,13 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getPasteSelectedItemToActiveAppShortcut", [this]() -> std::string {
     return settings_->getPasteSelectedItemToActiveAppShortcut();
   });
+  window->putProperty("savePasteSelectedObjectToActiveAppShortcut",
+                      [this](std::string shortcut) -> void {
+                        settings_->savePasteSelectedObjectToActiveAppShortcut(shortcut);
+                      });
+  window->putProperty("getPasteSelectedObjectToActiveAppShortcut", [this]() -> std::string {
+    return settings_->getPasteSelectedObjectToActiveAppShortcut();
+  });
   window->putProperty("saveEditHistoryItemShortcut", [this](std::string shortcut) -> void {
     settings_->saveEditHistoryItemShortcut(shortcut);
   });
@@ -968,6 +979,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("getCopyToClipboardShortcut", [this]() -> std::string {
     return settings_->getCopyToClipboardShortcut();
+  });
+  window->putProperty("saveCopyObjectToClipboardShortcut", [this](std::string shortcut) -> void {
+    settings_->saveCopyObjectToClipboardShortcut(shortcut);
+  });
+  window->putProperty("getCopyObjectToClipboardShortcut", [this]() -> std::string {
+    return settings_->getCopyObjectToClipboardShortcut();
   });
   window->putProperty("saveCopyTextFromImageShortcut", [this](std::string shortcut) -> void {
     settings_->saveCopyTextFromImageShortcut(shortcut);

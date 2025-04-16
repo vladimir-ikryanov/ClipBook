@@ -30,11 +30,15 @@ class MainAppMac : public MainApp {
   void paste() override;
   void paste(const std::string &filePaths) override;
   void paste(const std::string &text,
+             const std::string &rtf,
+             const std::string &html,
              const std::string &imageFileName,
              const std::string &filePath) override;
   void sendKey(Key key) override;
   void copyToClipboard(const std::string &filePaths, bool ghost) override;
   void copyToClipboard(const std::string &text,
+                       const std::string &rtf,
+                       const std::string &html,
                        const std::string &imageFileName,
                        const std::string &filePath,
                        bool ghost) override;

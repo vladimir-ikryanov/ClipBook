@@ -123,6 +123,9 @@ class AppSettings {
   virtual void savePasteSelectedItemToActiveAppShortcut(std::string shortcut) = 0;
   virtual std::string getPasteSelectedItemToActiveAppShortcut() = 0;
 
+  virtual void savePasteSelectedObjectToActiveAppShortcut(std::string shortcut) = 0;
+  virtual std::string getPasteSelectedObjectToActiveAppShortcut() = 0;
+
   virtual void saveEditHistoryItemShortcut(std::string shortcut) = 0;
   virtual std::string getEditHistoryItemShortcut() = 0;
 
@@ -137,6 +140,9 @@ class AppSettings {
 
   virtual void saveCopyToClipboardShortcut(std::string shortcut) = 0;
   virtual std::string getCopyToClipboardShortcut() = 0;
+
+  virtual void saveCopyObjectToClipboardShortcut(std::string shortcut) = 0;
+  virtual std::string getCopyObjectToClipboardShortcut() = 0;
 
   virtual void saveCopyTextFromImageShortcut(std::string shortcut) = 0;
   virtual std::string getCopyTextFromImageShortcut() = 0;

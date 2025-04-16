@@ -12,11 +12,13 @@ const toggleVariants = cva(
           default: "bg-transparent",
           outline:
               "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
+          toolbar: "rounded-sm text-toolbar-button  outline-none select-none cursor-default data-[state=on]:bg-accent data-[state=on]:text-foreground",
         },
         size: {
           default: "h-10 px-3",
           sm: "h-9 px-2.5",
           lg: "h-11 px-5",
+          toolbar: "h-8 px-2",
         },
       },
       defaultVariants: {

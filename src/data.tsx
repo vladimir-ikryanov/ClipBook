@@ -360,10 +360,14 @@ export async function addHistoryItem(content: string,
                                      filePathFileName: string,
                                      filePathThumbFileName: string,
                                      fileSizeInBytes: number,
-                                     isFolder: boolean): Promise<Clip> {
+                                     isFolder: boolean,
+                                     rtf: string,
+                                     html: string): Promise<Clip> {
   let type = getClipType(content, imageFileName, filePath)
   let item = new Clip(type, content, sourceAppPath)
   item.content = content
+  item.rtf = rtf
+  item.html = html
   item.imageFileName = imageFileName
   item.filePath = filePath
   item.filePathFileName = filePathFileName
