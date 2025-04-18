@@ -280,7 +280,7 @@ export default function Shortcuts() {
             <span className="text-2xl pb-3 font-semibold">Shortcuts</span>
           </div>
 
-          <div className="flex flex-col px-8 pb-4 gap-4 flex-grow overflow-y-auto">
+          <div className="flex flex-col px-8 pb-4 gap-4 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent">
             <div className="flex items-center justify-between space-x-20 pt-6">
               <span className="">Open ClipBook</span>
               <ShortcutInput shortcut={openAppShortcut}

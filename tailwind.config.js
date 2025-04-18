@@ -34,6 +34,13 @@ module.exports = {
           "highlight-green-start": "var(--status-bar-highlight-green-start)",
           "highlight-green-middle": "var(--status-bar-highlight-green-middle)",
         },
+        scrollbar: {
+          DEFAULT: "var(--scrollbar)",
+        },
+        switch: {
+          checked: "var(--switch-checked)",
+          unchecked: "var(--switch-unchecked)",
+        },
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",
@@ -153,5 +160,8 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+      require("tailwindcss-animate"),
+      require("tailwind-scrollbar"),
+  ],
 }

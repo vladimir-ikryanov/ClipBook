@@ -581,7 +581,7 @@ export default function Commands(props: CommandsProps) {
               <DialogTitle></DialogTitle>
             </VisuallyHidden>
             <CommandInput placeholder="Type a command or search..." autoFocus={true}/>
-            <div className="max-h-[70vh] overflow-y-auto mb-1.5">
+            <div className="max-h-[70vh] overflow-y-auto mb-1.5 scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent">
               <CommandList>
                 <CommandItem onSelect={handlePaste}>
                   <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"

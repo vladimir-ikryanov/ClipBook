@@ -42,6 +42,7 @@
     "react-window": "^1.8.10",
     "shadcn": "^2.3.0",
     "tailwind-merge": "^2.6.0",
+    "tailwind-scrollbar": "^2.0.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {

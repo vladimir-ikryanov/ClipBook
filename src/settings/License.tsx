@@ -113,7 +113,7 @@ export default function License() {
             </div>
           </div>
 
-          <div className="flex flex-col px-8 pb-8 gap-4 flex-grow overflow-y-auto">
+          <div className="flex flex-col px-8 pb-8 gap-4 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent">
             <div className="flex flex-col pt-6 pb-1">
               {
                   !isActivated &&

@@ -15,6 +15,9 @@
     --shortcut-label-hover-text: #616161;
     --popover: #eeeeee;
     --popover-foreground: #252525;
+    --scrollbar: #979797;
+    --switch-checked: #006FFF;
+    --switch-unchecked: #616161;
     --primary: #252525;
     --primary-foreground: #414141;
     --secondary: #F2F2F2;
@@ -46,7 +49,7 @@
     --toolbar-background: #eeeeee;
     --toolbar-button: #737373;
     --toolbar-button-active: #252525;
-    --toolbar-button-selected: #0064e1;
+    --toolbar-button-selected: #006fff;
     /* Actions */
     --actions-background: #fafafa;
     --actions-selection: #e2e2e2;
@@ -105,6 +108,9 @@
     --shortcut-label-text: #e3e3e3;
     --shortcut-label-hover: #3e4144;
     --shortcut-label-hover-text: #e3e3e3;
+    --scrollbar: #121212;
+    --switch-checked: #006FFF;
+    --switch-unchecked: #3e4144;
     /* History item hover background */
     --popover: #2e2e2e;
     --popover-foreground: #DADADA;
@@ -144,7 +150,7 @@
     --toolbar-background: #212121;
     --toolbar-button: #808081;
     --toolbar-button-active: #f6f6f6;
-    --toolbar-button-selected: #06b6d4;
+    --toolbar-button-selected: #006fff;
     /* Actions */
     --actions-background: #212121;
     --actions-selection: #333333;

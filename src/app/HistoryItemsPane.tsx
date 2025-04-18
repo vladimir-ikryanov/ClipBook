@@ -140,7 +140,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
           {(sizeProps: Size) => {
             return (
                 <List
-                    className=""
+                    className="scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent"
                     ref={props.listRef}
                     style={{}}
                     height={sizeProps.height}

@@ -156,7 +156,7 @@ export default function History() {
             <span className="text-2xl pb-3 font-semibold">History</span>
           </div>
 
-          <div className="flex flex-col px-8 pb-6 gap-4 flex-grow overflow-y-auto">
+          <div className="flex flex-col px-8 pb-6 gap-4 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent">
             <div className="flex items-center justify-between space-x-20 pt-6 pb-1">
               <Label htmlFor="updateHistoryAfterAction" className="flex flex-col text-base">
                 <span className="">Update history after paste/copy</span>
