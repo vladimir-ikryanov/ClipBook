@@ -1247,7 +1247,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   async function handleEditHistoryItem(item: Clip) {
     await updateHistoryItem(item.id!, item)
-    setHistory(getHistoryItems())
+    setHistory([...getHistoryItems()])
   }
 
   async function handleEditHistoryItems(items: Clip[]) {
