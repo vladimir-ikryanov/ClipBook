@@ -1,6 +1,7 @@
 import mitt, {Emitter} from 'mitt';
 import {TextType} from "@/app/TextTypeToggle";
 import {TextFormatOperation} from "@/data";
+import {Clip} from "@/db";
 
 export type Events = {
   AddTagToItemWithId?: number;
@@ -13,6 +14,7 @@ export type Events = {
   DeleteTagById: number;
   UpdateTagById: number;
   DeleteItemByIndex: number;
+  RenameItemByIndex: number;
   UpdateItemById?: number;
   RenameSelectedItem: void;
   ShowFormatTextCommands: void;
@@ -21,6 +23,15 @@ export type Events = {
   NotifyAppWindowDidHide: void;
   PasteWithTransformation: TextFormatOperation;
   FormatText: TextFormatOperation;
+  OpenLinkItemInBrowserByIndex: number;
+  PreviewLinkItemByIndex: number;
+  CopyToClipboardByIndex: number;
+  CopyTextFromImageByIndex: number;
+  CopyPathToClipboardByIndex: number;
+  PasteByIndex: number;
+  PastePathByIndex: number;
+  EditContentByIndex: number;
+  EditItem: Clip;
 };
 
 export const emitter: Emitter<Events> = mitt<Events>();

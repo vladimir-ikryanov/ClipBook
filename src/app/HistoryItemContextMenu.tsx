@@ -42,36 +42,11 @@ import {
   ContextMenuTrigger
 } from "@/components/ui/context-menu";
 
-export type HideClipContextMenuReason =
-    "cancel"
-    | "paste"
-    | "pastePath"
-    | "toggleFavorite"
-    | "editContent"
-    | "renameItem"
-    | "copyToClipboard"
-    | "copyPathToClipboard"
-    | "copyTextFromImage"
-    | "openInBrowser"
-    | "previewLink"
-    | "deleteItem"
-    | "newTag"
-
 type HistoryItemContextMenuProps = {
   item: Clip
   index: number
   appName: string
   appIcon: string
-  onPaste: (index: number) => void
-  onPastePath: (index: number) => void
-  onEditHistoryItem: (item: Clip) => void
-  onEditContent: (index: number) => void
-  onRenameItem: (index: number) => void
-  onCopyToClipboard: (index: number) => void
-  onCopyPathToClipboard: (index: number) => void
-  onCopyTextFromImage: (index: number) => void
-  onOpenInBrowser: (index: number) => void
-  onPreviewLink: (index: number) => void
   children: React.ReactNode
 }
 
@@ -92,8 +67,6 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
     setItemTags(tags)
   }, [props.item.tags])
 
-  let closeReason: HideClipContextMenuReason = "cancel"
-
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
       e.stopPropagation()
@@ -105,44 +78,36 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   }
 
   function handlePaste() {
-    closeReason = "paste"
-    props.onPaste(props.index)
+    emitter.emit("PasteByIndex", props.index)
   }
 
   function handlePastePath() {
-    closeReason = "pastePath"
-    props.onPastePath(props.index)
+    emitter.emit("PastePathByIndex", props.index)
   }
 
   function handleCopyToClipboard() {
-    closeReason = "copyToClipboard"
-    props.onCopyToClipboard(props.index)
+    emitter.emit("CopyToClipboardByIndex", props.index)
   }
 
   function handleCopyPathToClipboard() {
-    closeReason = "copyPathToClipboard"
-    props.onCopyPathToClipboard(props.index)
+    emitter.emit("CopyPathToClipboardByIndex", props.index)
   }
 
   function handleCopyTextFromImage() {
-    closeReason = "copyTextFromImage"
-    props.onCopyTextFromImage(props.index)
+    emitter.emit("CopyTextFromImageByIndex", props.index)
   }
 
   function handleToggleFavorite() {
-    closeReason = "toggleFavorite"
     props.item.favorite = !props.item.favorite
-    props.onEditHistoryItem(props.item)
+    emitter.emit("EditItem", props.item)
   }
 
   function handleEditContent() {
-    closeReason = "editContent"
-    props.onEditContent(props.index)
+    emitter.emit("EditContentByIndex", props.index)
   }
 
   function handleRename() {
-    closeReason = "renameItem"
-    props.onRenameItem(props.index)
+    emitter.emit("RenameItemByIndex", props.index)
   }
 
   function handleDeleteItem() {
@@ -150,17 +115,14 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   }
 
   function handleOpenInBrowser() {
-    closeReason = "openInBrowser"
-    props.onOpenInBrowser(props.index)
+    emitter.emit("OpenLinkItemInBrowserByIndex", props.index)
   }
 
   function handlePreviewLink() {
-    closeReason = "previewLink"
-    props.onPreviewLink(props.index)
+    emitter.emit("PreviewLinkItemByIndex", props.index)
   }
 
   function handleNewTag() {
-    closeReason = "newTag"
     emitter.emit("AddTagToItemWithId", props.item.id)
   }
 

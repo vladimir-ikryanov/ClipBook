@@ -26,16 +26,6 @@ type HistoryItemPaneProps = {
   onItemSelected(index: number, metaKeyDown: boolean, shiftKeyDown: boolean): void
   onMouseDoubleClick: (index: number) => void
   onPaste: () => void
-  onPasteByIndex: (index: number) => void
-  onPastePathByIndex: (index: number) => void
-  onEditHistoryItem: (item: Clip) => void
-  onEditContent: (index: number) => void
-  onRenameItem: (index: number) => void
-  onCopyToClipboard: (index: number) => void
-  onCopyPathToClipboard: (index: number) => void
-  onCopyTextFromImage: (index: number) => void
-  onOpenInBrowser: (index: number) => void
-  onPreviewLink: (index: number) => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>
   style: CSSProperties
 }
@@ -132,7 +122,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
         if (props.selectedItemIndices.length >= 1) {
           props.onPaste()
         } else {
-          props.onPasteByIndex(props.index)
+          emitter.emit("PasteByIndex", props.index)
         }
       }
     }
@@ -348,16 +338,6 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
                               index={props.index}
                               appName={props.appName}
                               appIcon={props.appIcon}
-                              onPaste={props.onPasteByIndex}
-                              onPastePath={props.onPastePathByIndex}
-                              onEditHistoryItem={props.onEditHistoryItem}
-                              onEditContent={props.onEditContent}
-                              onRenameItem={props.onRenameItem}
-                              onCopyToClipboard={props.onCopyToClipboard}
-                              onCopyPathToClipboard={props.onCopyPathToClipboard}
-                              onCopyTextFromImage={props.onCopyTextFromImage}
-                              onOpenInBrowser={props.onOpenInBrowser}
-                              onPreviewLink={props.onPreviewLink}
                               children={renderItemPane()}
       />
   )

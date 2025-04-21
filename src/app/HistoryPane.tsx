@@ -535,56 +535,48 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }, [quickPasteModifierPressed]);
 
   useEffect(() => {
-    function handleToggleFilterEvent() {
-      handleToggleFilter()
-    }
-
-    function handleFocusSearchInput() {
-      focusSearchField()
-    }
-
-    async function handleDeleteTagEvent(tagId: number) {
-      await handleDeleteTag(tagId)
-    }
-
-    async function handleUpdateTagEvent(tagId: number) {
-      await handleUpdateTag(tagId)
-    }
-
-    async function handleDeleteItemByIndexEvent(itemIndex: number) {
-      await handleDeleteItemByIndex(itemIndex)
-    }
-
     function handleFilterHistoryEvent() {
       handleFilterHistory()
       focusSearchField()
     }
 
-    async function handlePasteWithTransformationEvent(operation: TextFormatOperation) {
-      await handlePasteWithTransformation(operation)
-    }
-
-    async function handleFormatTextEvent(operation: TextFormatOperation) {
-      await handleFormatTextAndSave(operation)
-    }
-
-    emitter.on("ToggleFilter", handleToggleFilterEvent)
-    emitter.on("FocusSearchInput", handleFocusSearchInput)
-    emitter.on("DeleteTagById", handleDeleteTagEvent)
-    emitter.on("UpdateTagById", handleUpdateTagEvent)
-    emitter.on("DeleteItemByIndex", handleDeleteItemByIndexEvent)
+    emitter.on("ToggleFilter", handleToggleFilter)
+    emitter.on("FocusSearchInput", focusSearchField)
+    emitter.on("DeleteTagById", handleDeleteTag)
+    emitter.on("UpdateTagById", handleUpdateTag)
+    emitter.on("DeleteItemByIndex", handleDeleteItemByIndex)
+    emitter.on("RenameItemByIndex", handleRenameItemByIndex)
     emitter.on("FilterHistory", handleFilterHistoryEvent)
-    emitter.on("PasteWithTransformation", handlePasteWithTransformationEvent)
-    emitter.on("FormatText", handleFormatTextEvent)
+    emitter.on("PasteWithTransformation", handlePasteWithTransformation)
+    emitter.on("FormatText", handleFormatTextAndSave)
+    emitter.on("OpenLinkItemInBrowserByIndex", handleOpenInBrowserByIndex)
+    emitter.on("PreviewLinkItemByIndex", handlePreviewLinkByIndex)
+    emitter.on("CopyTextFromImageByIndex", handleCopyTextFromImageByIndex)
+    emitter.on("CopyPathToClipboardByIndex", handleCopyPathToClipboardByIndex)
+    emitter.on("CopyToClipboardByIndex", handleCopyToClipboardByIndex)
+    emitter.on("PasteByIndex", handlePasteByIndex)
+    emitter.on("PastePathByIndex", handlePastePathByIndex)
+    emitter.on("EditContentByIndex", handleEditContentByIndex)
+    emitter.on("EditItem", handleEditHistoryItem)
     return () => {
-      emitter.off("ToggleFilter", handleToggleFilterEvent)
-      emitter.off("FocusSearchInput", handleFocusSearchInput)
-      emitter.off("DeleteTagById", handleDeleteTagEvent)
-      emitter.off("UpdateTagById", handleUpdateTagEvent)
-      emitter.off("DeleteItemByIndex", handleDeleteItemByIndexEvent)
+      emitter.off("ToggleFilter", handleToggleFilter)
+      emitter.off("FocusSearchInput", focusSearchField)
+      emitter.off("DeleteTagById", handleDeleteTag)
+      emitter.off("UpdateTagById", handleUpdateTag)
+      emitter.off("DeleteItemByIndex", handleDeleteItemByIndex)
+      emitter.off("RenameItemByIndex", handleRenameItemByIndex)
       emitter.off("FilterHistory", handleFilterHistoryEvent)
-      emitter.off("PasteWithTransformation", handlePasteWithTransformationEvent)
-      emitter.off("FormatText", handleFormatTextEvent)
+      emitter.off("PasteWithTransformation", handlePasteWithTransformation)
+      emitter.off("FormatText", handleFormatTextAndSave)
+      emitter.off("OpenLinkItemInBrowserByIndex", handleOpenInBrowserByIndex)
+      emitter.off("PreviewLinkItemByIndex", handlePreviewLinkByIndex)
+      emitter.off("CopyTextFromImageByIndex", handleCopyTextFromImageByIndex)
+      emitter.off("CopyPathToClipboardByIndex", handleCopyPathToClipboardByIndex)
+      emitter.off("CopyToClipboardByIndex", handleCopyToClipboardByIndex)
+      emitter.off("PasteByIndex", handlePasteByIndex)
+      emitter.off("PastePathByIndex", handlePastePathByIndex)
+      emitter.off("EditContentByIndex", handleEditContentByIndex)
+      emitter.off("EditItem", handleEditHistoryItem)
     };
   }, []);
 
@@ -1363,22 +1355,15 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   onPasteWithTab={handlePasteWithTab}
                                   onPasteWithReturn={handlePasteWithReturn}
                                   onPastePath={handlePastePath}
-                                  onPasteByIndex={handlePasteByIndex}
-                                  onPastePathByIndex={handlePastePathByIndex}
                                   onMerge={handleMerge}
                                   onHideActions={handleHideActions}
                                   onEditContent={handleEditContent}
-                                  onEditContentByIndex={handleEditContentByIndex}
                                   onRenameItem={handleRenameItem}
-                                  onRenameItemByIndex={handleRenameItemByIndex}
                                   onSplit={handleSplitItem}
                                   onCopyToClipboard={handleCopyToClipboard}
                                   onCopyObjectToClipboard={handleCopyObjectToClipboard}
                                   onCopyPathToClipboard={handleCopyPathToClipboard}
-                                  onCopyToClipboardByIndex={handleCopyToClipboardByIndex}
-                                  onCopyPathToClipboardByIndex={handleCopyPathToClipboardByIndex}
                                   onCopyTextFromImage={handleCopyTextFromImage}
-                                  onCopyTextFromImageByIndex={handleCopyTextFromImageByIndex}
                                   onSaveImageAsFile={handleSaveImageAsFile}
                                   onOpenInBrowser={handleOpenInBrowser}
                                   onShowInFinder={handleShowInFinder}
@@ -1388,12 +1373,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   onZoomIn={props.onZoomIn}
                                   onZoomOut={props.onZoomOut}
                                   onResetZoom={props.onResetZoom}
-                                  onOpenInBrowserByIndex={handleOpenInBrowserByIndex}
-                                  onPreviewLinkByIndex={handlePreviewLinkByIndex}
                                   onOpenSettings={handleOpenSettings}
                                   onToggleFavorite={handleToggleFavorite}
                                   onTogglePreview={handleTogglePreview}
-                                  onEditHistoryItem={handleEditHistoryItem}
                                   onDeleteItem={handleDeleteItem}
                                   onDeleteItems={handleDeleteItems}
                                   onDeleteAllItems={handleDeleteAllItems}/>
