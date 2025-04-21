@@ -545,23 +545,6 @@ export default function Commands(props: CommandsProps) {
     return ""
   }
 
-  function getObjectLabel() {
-    if (canPasteObject()) {
-      let item = getFirstSelectedHistoryItem()
-      if (item && item.type === ClipType.Text) {
-        let label = "Text"
-        if (getHTML(item).length > 0) {
-          label += " + HTML"
-        }
-        if (getRTF(item).length > 0) {
-          label += " + RTF"
-        }
-        return <span>{label}</span>
-      }
-    }
-    return null
-  }
-
   return (
       <>
         <Tooltip>
@@ -597,7 +580,7 @@ export default function Commands(props: CommandsProps) {
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                            alt="Application icon"/>
                       <span>
-                        Paste {getObjectLabel()} {getMultipleItemsIndicator()} to {props.appName}
+                        Paste {getMultipleItemsIndicator()} to {props.appName}
                       </span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetPasteSelectedObjectToActiveAppShortcut()}/>
@@ -635,7 +618,7 @@ export default function Commands(props: CommandsProps) {
                     <CommandItem onSelect={handlePastePath}>
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                            alt="Application icon"/>
-                      <span>Paste File Path to {props.appName}</span>
+                      <span>Paste Path to {props.appName}</span>
                     </CommandItem>
                 }
                 {
@@ -671,7 +654,7 @@ export default function Commands(props: CommandsProps) {
                     canShowCopyObjectToClipboard() &&
                     <CommandItem onSelect={handleCopyObjectToClipboard}>
                       <CopyIcon className="mr-2 h-5 w-5"/>
-                      <span>Copy {getObjectLabel()} to Clipboard</span>
+                      <span>Copy to Clipboard</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetCopyObjectToClipboardShortcut()}/>
                       </CommandShortcut>
@@ -681,7 +664,7 @@ export default function Commands(props: CommandsProps) {
                     canShowCopyPath() &&
                     <CommandItem onSelect={handleCopyPathToClipboard}>
                       <CopyIcon className="mr-2 h-5 w-5"/>
-                      <span>Copy File Path to Clipboard</span>
+                      <span>Copy Path to Clipboard</span>
                     </CommandItem>
                 }
                 <CommandSeparator/>

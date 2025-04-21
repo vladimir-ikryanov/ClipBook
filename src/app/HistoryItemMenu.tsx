@@ -28,7 +28,11 @@ import {
 } from "@/pref";
 import {CommandShortcut} from "@/components/ui/command";
 import {Clip, ClipType, updateClip} from "@/db";
-import {isTextItem, toBase64Icon} from "@/data";
+import {
+  getHistoryItem,
+  isTextItem,
+  toBase64Icon
+} from "@/data";
 import TagIcon, {allTags, Tag} from "@/tags";
 import {Checkbox} from "@/components/ui/checkbox";
 import {CheckedState} from "@radix-ui/react-checkbox";
@@ -208,6 +212,14 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
     }));
   }
 
+  function getItemLabel(): string {
+    let item = getHistoryItem(props.index)
+    if (item) {
+      return ClipType[item.type]
+    }
+    return ""
+  }
+
   return (
       <div>
         <DropdownMenu open={open} onOpenChange={handleOpenChange}>
@@ -220,7 +232,7 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
             <DropdownMenuItem onClick={handlePaste}>
               <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                    alt="Application icon"/>
-              <span className="mr-12">Paste to {props.appName}</span>
+              <span className="mr-12">Paste {getItemLabel()} to {props.appName}</span>
               <CommandShortcut className="flex flex-row">
                 <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
               </CommandShortcut>
@@ -235,7 +247,7 @@ const HistoryItemMenu = (props: HistoryItemMenuProps) => {
             }
             <DropdownMenuItem onClick={handleCopyToClipboard}>
               <CopyIcon className="mr-2 h-4 w-4"/>
-              <span className="mr-12">Copy to Clipboard</span>
+              <span className="mr-12">Copy {getItemLabel()} to Clipboard</span>
               <CommandShortcut className="flex flex-row">
                 <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
               </CommandShortcut>
