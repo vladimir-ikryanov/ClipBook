@@ -114,7 +114,7 @@ export default function PasteTransformationCommands() {
   }
 
   return (
-      <div className="" onKeyDown={handleKeyDown}>
+      <div onKeyDown={handleKeyDown}>
         <CommandDialog open={open} onOpenChange={handleOpenChange}>
           <VisuallyHidden>
             <DialogTitle></DialogTitle>

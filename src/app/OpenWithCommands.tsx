@@ -24,11 +24,7 @@ import {DialogTitle} from "@/components/ui/dialog";
 import {ClipType} from "@/db";
 import {emitter} from "@/actions";
 
-type OpenWithCommandsProps = {
-  onOpenWithApp: (appPath: string) => void
-}
-
-export default function OpenWithCommands(props: OpenWithCommandsProps) {
+export default function OpenWithCommands() {
   const [open, setOpen] = useState(false)
   const [defaultApp, setDefaultApp] = useState<AppInfo | undefined>(undefined)
   const [recommendedApps, setRecommendedApps] = useState<AppInfo[]>([])
@@ -90,13 +86,13 @@ export default function OpenWithCommands(props: OpenWithCommandsProps) {
 
   function handleOpenWithDefaultApp() {
     if (defaultApp) {
-      props.onOpenWithApp(defaultApp.path)
+      emitter.emit("OpenFileItemWithApp", defaultApp.path)
     }
     handleOpenChange(false)
   }
 
   function handleOpenWithApp(appPath: string) {
-    props.onOpenWithApp(appPath)
+    emitter.emit("OpenFileItemWithApp", appPath)
     handleOpenChange(false)
   }
 

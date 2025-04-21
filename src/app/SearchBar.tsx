@@ -52,7 +52,6 @@ type SearchBarProps = {
   onOpenInBrowser: () => void
   onShowInFinder: () => void
   onOpenInApp: (app: AppInfo | undefined) => void
-  onOpenWithApp: (appPath: string) => void
   onPreviewLink: () => void
   onZoomIn: () => void
   onZoomOut: () => void
@@ -284,7 +283,7 @@ export default function SearchBar(props: SearchBarProps) {
                       onDeleteAllItems={props.onDeleteAllItems}/>
             <PasteTransformationCommands/>
             <FormatTextCommands/>
-            <OpenWithCommands onOpenWithApp={props.onOpenWithApp}/>
+            <OpenWithCommands/>
           </div>
           <div className={props.isPreviewVisible ? "hidden" : ""}>
             <Tooltip>

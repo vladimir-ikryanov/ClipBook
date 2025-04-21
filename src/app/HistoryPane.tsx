@@ -558,6 +558,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     emitter.on("PastePathByIndex", handlePastePathByIndex)
     emitter.on("EditContentByIndex", handleEditContentByIndex)
     emitter.on("EditItem", handleEditHistoryItem)
+    emitter.on("OpenFileItemWithApp", handleOpenWithApp)
     return () => {
       emitter.off("ToggleFilter", handleToggleFilter)
       emitter.off("FocusSearchInput", focusSearchField)
@@ -577,6 +578,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       emitter.off("PastePathByIndex", handlePastePathByIndex)
       emitter.off("EditContentByIndex", handleEditContentByIndex)
       emitter.off("EditItem", handleEditHistoryItem)
+      emitter.off("OpenFileItemWithApp", handleOpenWithApp)
     };
   }, []);
 
@@ -1369,7 +1371,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   onShowInFinder={handleShowInFinder}
                                   onPreviewLink={handlePreviewLink}
                                   onOpenInApp={handleOpenInApp}
-                                  onOpenWithApp={handleOpenWithApp}
                                   onZoomIn={props.onZoomIn}
                                   onZoomOut={props.onZoomOut}
                                   onResetZoom={props.onResetZoom}

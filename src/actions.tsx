@@ -32,6 +32,7 @@ export type Events = {
   PastePathByIndex: number;
   EditContentByIndex: number;
   EditItem: Clip;
+  OpenFileItemWithApp: string;
 };
 
 export const emitter: Emitter<Events> = mitt<Events>();
