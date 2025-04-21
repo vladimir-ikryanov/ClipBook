@@ -56,6 +56,7 @@ type TagCheckedState = {
 }
 
 const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
+  const [focusSearchOnClose, setFocusSearchOnClose] = useState(true)
   const [itemTags, setItemTags] = useState<TagCheckedState[]>([])
 
   useEffect(() => {
@@ -103,10 +104,12 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   }
 
   function handleEditContent() {
+    setFocusSearchOnClose(false)
     emitter.emit("EditContentByIndex", props.index)
   }
 
   function handleRename() {
+    setFocusSearchOnClose(false)
     emitter.emit("RenameItemByIndex", props.index)
   }
 
@@ -122,7 +125,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
     emitter.emit("PreviewLinkItemByIndex", props.index)
   }
 
-  function handleNewTag() {
+  function handleAssignTag() {
     emitter.emit("AddTagToItemWithId", props.item.id)
   }
 
@@ -151,8 +154,14 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
     return ""
   }
 
+  function handleOpenChange(open: boolean) {
+    if (!open && focusSearchOnClose) {
+      emitter.emit("FocusSearchInput")
+    }
+  }
+
   return (
-      <ContextMenu>
+      <ContextMenu onOpenChange={handleOpenChange}>
         <ContextMenuTrigger asChild>
           {props.children}
         </ContextMenuTrigger>
@@ -254,7 +263,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
                   })
                 }
                 <ContextMenuSeparator/>
-                <ContextMenuItem onClick={handleNewTag}>
+                <ContextMenuItem onClick={handleAssignTag}>
                   <PlusIcon className="mr-2 h-4 w-4"/>
                   <span className="mr-12">New Tag...</span>
                 </ContextMenuItem>
