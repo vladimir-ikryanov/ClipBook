@@ -56,7 +56,8 @@ type TagCheckedState = {
 }
 
 const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
-  const [focusSearchOnClose, setFocusSearchOnClose] = useState(true)
+  let focusSearchOnClose = true
+
   const [itemTags, setItemTags] = useState<TagCheckedState[]>([])
 
   useEffect(() => {
@@ -104,12 +105,12 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   }
 
   function handleEditContent() {
-    setFocusSearchOnClose(false)
+    focusSearchOnClose = false
     emitter.emit("EditContentByIndex", props.index)
   }
 
   function handleRename() {
-    setFocusSearchOnClose(false)
+    focusSearchOnClose = false
     emitter.emit("RenameItemByIndex", props.index)
   }
 
