@@ -118,7 +118,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   }
 
   function handleOpenInBrowser() {
-    emitter.emit("OpenLinkItemInBrowserByIndex", props.index)
+    emitter.emit("OpenInBrowserByIndex", props.index)
   }
 
   function handlePreviewLink() {

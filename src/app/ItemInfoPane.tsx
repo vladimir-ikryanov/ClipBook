@@ -11,11 +11,11 @@ declare const getFileIconAsBase64: (appPath: string, large: boolean) => string;
 
 type ItemInfoPaneProps = {
   item: Clip
-  display: boolean
+  visible: boolean
 }
 
 export default function ItemInfoPane(props: ItemInfoPaneProps) {
-  if (!props.display || !props.item) {
+  if (!props.visible || !props.item) {
     return null
   }
 

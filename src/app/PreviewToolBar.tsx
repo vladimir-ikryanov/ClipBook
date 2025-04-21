@@ -32,35 +32,19 @@ import {
   getFirstSelectedHistoryItem,
   getHistoryItem,
   getSelectedHistoryItemIndices,
-  getSelectedHistoryItems, isTextItem, TextFormatOperation, toBase64Icon
+  getSelectedHistoryItems, getSelectedItemTextTypes, isTextItem, toBase64Icon
 } from "@/data";
 import {CommandShortcut} from "@/components/ui/command";
-import PreviewToolBarMenu, {HideDropdownReason} from "@/app/PreviewToolBarMenu";
+import PreviewToolBarMenu from "@/app/PreviewToolBarMenu";
 import TextTypeToggle from "@/app/TextTypeToggle";
+import {emitter} from "@/actions";
 
 type PreviewToolBarProps = {
   selectedItemIndices: number[]
   appName: string
   appIcon: string
   displayInfo: boolean
-  onPaste: () => void
-  onPasteWithReturn: () => void
-  onPasteWithTab: () => void
-  onMerge: () => void
-  onToggleInfo: () => void
-  onHidePreview: () => void
-  onSaveImageAsFile: () => void
-  onDeleteItem: () => void
-  onRenameItem: () => void
-  onFormatText: (operation: TextFormatOperation) => void
   onRequestEditItem: () => void
-  onCopyToClipboard: () => void
-  onCopyTextFromImage: () => void
-  onToggleFavorite: () => void
-  onOpenInBrowser: () => void
-  onPreviewLink: () => void
-  onUpdateLinkPreview: () => void
-  onHideDropdown: (reason: HideDropdownReason) => void
 }
 
 export default function PreviewToolBar(props: PreviewToolBarProps) {
@@ -84,27 +68,27 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   }
 
   function handleHidePreview() {
-    props.onHidePreview()
+    emitter.emit("TogglePreview")
   }
 
   function handlePaste() {
-    props.onPaste()
+    emitter.emit("Paste")
   }
 
   function handlePasteWithReturn() {
-    props.onPasteWithReturn()
+    emitter.emit("PasteWithReturn")
   }
 
   function handlePasteWithTab() {
-    props.onPasteWithTab()
+    emitter.emit("PasteWithTab")
   }
 
   function handleMerge() {
-    props.onMerge()
+    emitter.emit("Merge")
   }
 
   function handleCopyToClipboard() {
-    props.onCopyToClipboard()
+    emitter.emit("CopyToClipboard")
 
     if (isCopying) {
       return
@@ -124,24 +108,20 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
     }, 1000);
   }
 
-  function handleToggleInfo() {
-    props.onToggleInfo()
+  function handleToggleDetails() {
+    emitter.emit("ToggleDetails")
   }
 
   function handleOpenInBrowser() {
-    props.onOpenInBrowser()
-  }
-
-  function handleUpdateLinkPreview() {
-    props.onUpdateLinkPreview()
+    emitter.emit("OpenInBrowser")
   }
 
   function handleCopyTextFromImage() {
-    props.onCopyTextFromImage()
+    emitter.emit("CopyTextFromImage")
   }
 
   function handleToggleFavorite() {
-    props.onToggleFavorite()
+    emitter.emit("ToggleFavorite")
   }
 
   function selectedItemsAreMarkedAsFavorite() {
@@ -226,13 +206,16 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
             </Tooltip>
             {
                 canShowPasteOptions() &&
-                <DropdownMenu open={pasteOptionsMenuOpen} onOpenChange={handlePasteOptionsMenuOpenChange}>
+                <DropdownMenu open={pasteOptionsMenuOpen}
+                              onOpenChange={handlePasteOptionsMenuOpenChange}>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="dropdown" size="dropdown" className={pasteOptionsMenuOpen ? "bg-accent" : ""}>
+                    <Button variant="dropdown" size="dropdown"
+                            className={pasteOptionsMenuOpen ? "bg-accent" : ""}>
                       <ChevronDown className="h-4 w-4" strokeWidth={2.5}/>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="p-1.5 bg-actions-background" align="start" onKeyDown={handleKeyDown}>
+                  <DropdownMenuContent className="p-1.5 bg-actions-background" align="start"
+                                       onKeyDown={handleKeyDown}>
                     <DropdownMenuItem onClick={handlePaste}>
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                            alt="Application icon"/>
@@ -244,13 +227,15 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     <DropdownMenuItem onClick={handlePasteWithReturn}>
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                            alt="Application icon"/>
-                      <span className="mr-2">Paste {getMultipleItemsIndicator()} to {props.appName} with Return</span>
+                      <span
+                          className="mr-2">Paste {getMultipleItemsIndicator()} to {props.appName} with Return</span>
                       <span className="w-16"></span>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handlePasteWithTab}>
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                            alt="Application icon"/>
-                      <span className="mr-2">Paste {getMultipleItemsIndicator()} to {props.appName} with Tab</span>
+                      <span
+                          className="mr-2">Paste {getMultipleItemsIndicator()} to {props.appName} with Tab</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -277,7 +262,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
-                    <div className="select-none mr-2">Merge {props.selectedItemIndices.length} items</div>
+                    <div
+                        className="select-none mr-2">Merge {props.selectedItemIndices.length} items
+                    </div>
                   </TooltipContent>
                 </Tooltip>
             }
@@ -345,11 +332,12 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
             }
           </div>
           <div className="flex-grow draggable"></div>
-          <TextTypeToggle item={selectedItem}/>
+          <TextTypeToggle item={selectedItem} types={getSelectedItemTextTypes(selectedItem)}/>
           <div className="draggable">
             {
                 canShowNumberOfSelectedItems() &&
-                <div className="text-sm pt-2.5 items-center justify-center text-center text-toolbar-button">
+                <div
+                    className="text-sm pt-2.5 items-center justify-center text-center text-toolbar-button">
                   {props.selectedItemIndices.length + " items"}
                 </div>
             }
@@ -381,28 +369,11 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                                 appName={props.appName}
                                 appIcon={props.appIcon}
                                 displayInfo={props.displayInfo}
-                                onPaste={props.onPaste}
-                                onPasteWithReturn={props.onPasteWithReturn}
-                                onPasteWithTab={props.onPasteWithTab}
-                                onMerge={props.onMerge}
-                                onToggleInfo={handleToggleInfo}
-                                onHidePreview={props.onHidePreview}
-                                onSaveImageAsFile={props.onSaveImageAsFile}
                                 onRequestEditItem={props.onRequestEditItem}
-                                onRenameItem={props.onRenameItem}
-                                onFormatText={props.onFormatText}
-                                onDeleteItem={props.onDeleteItem}
-                                onCopyToClipboard={props.onCopyToClipboard}
-                                onCopyTextFromImage={props.onCopyTextFromImage}
-                                onOpenInBrowser={props.onOpenInBrowser}
-                                onToggleFavorite={props.onToggleFavorite}
-                                onPreviewLink={props.onPreviewLink}
-                                onUpdateLinkPreview={handleUpdateLinkPreview}
-                                onHideDropdown={props.onHideDropdown}/>
-
+            />
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="toolbar" size="toolbar" onClick={handleToggleInfo}>
+                <Button variant="toolbar" size="toolbar" onClick={handleToggleDetails}>
                   {
                     props.displayInfo ? <HideInfoPaneIcon className="h-5 w-5"/> :
                         <ShowInfoPaneIcon className="h-5 w-5"/>

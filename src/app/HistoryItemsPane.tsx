@@ -4,12 +4,11 @@ import SearchBar from "@/app/SearchBar";
 import StatusBar from "@/app/StatusBar";
 import {FixedSizeList as List} from "react-window";
 import AutoSizer, {Size} from "react-virtualized-auto-sizer";
-import {HideActionsReason} from "@/app/Commands";
 import HistoryItemPane from "@/app/HistoryItemPane";
 import {Clip} from "@/db";
 import {SearchIcon} from "lucide-react";
 import {
-  addSelectedHistoryItemIndex, AppInfo,
+  addSelectedHistoryItemIndex,
   getSelectedHistoryItemIndices,
   removeSelectedHistoryItemIndex,
   setSelectedHistoryItemIndex,
@@ -28,35 +27,6 @@ type HistoryItemsPaneProps = {
   trialDaysLeft: number
   selectedItemIndices: number[]
   onSelectedItemsChange: () => void
-  onShowHidePreview: () => void
-  onPaste: () => void
-  onPasteObject: () => void
-  onPasteWithTab: () => void
-  onPasteWithReturn: () => void
-  onPastePath: () => void
-  onMerge: () => void
-  onHideActions: (reason: HideActionsReason) => void
-  onTogglePreview: () => void
-  onToggleFavorite: () => void
-  onEditContent: () => void
-  onRenameItem: () => void
-  onSplit: () => void
-  onCopyToClipboard: () => void
-  onCopyObjectToClipboard: () => void
-  onCopyPathToClipboard: () => void
-  onCopyTextFromImage: () => void
-  onSaveImageAsFile: () => void
-  onOpenInBrowser: () => void
-  onShowInFinder: () => void
-  onPreviewLink: () => void
-  onOpenInApp: (app: AppInfo | undefined) => void
-  onZoomIn: () => void
-  onZoomOut: () => void
-  onResetZoom: () => void
-  onOpenSettings: () => void
-  onDeleteItem: () => void
-  onDeleteItems: () => void
-  onDeleteAllItems: () => void
   onMouseDoubleClick: (index: number) => void
   searchFieldRef?: React.Ref<HTMLInputElement>
   listRef?: React.Ref<List>
@@ -142,7 +112,6 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                                          appName={props.appName}
                                          appIcon={props.appIcon}
                                          isQuickPasteModifierPressed={props.isQuickPasteModifierPressed}
-                                         onPaste={props.onPaste}
                                          onItemSelected={handleItemSelected}
                                          onMouseDoubleClick={handleMouseDoubleClick}/>
                     )
@@ -175,8 +144,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
     return <div className="flex flex-col h-screen">
       {renderItems()}
       <div className="grow"></div>
-      <StatusBar appName={props.appName}
-                 onPaste={props.onPaste}/>
+      <StatusBar appName={props.appName}/>
     </div>
   }
 
@@ -184,7 +152,6 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
       <div className="flex flex-col h-screen">
         <SearchBar searchQuery={props.searchQuery}
                    onSearchQueryChange={props.onSearchQueryChange}
-                   onShowHidePreview={props.onShowHidePreview}
                    isPreviewVisible={props.isPreviewVisible}
                    isFilterVisible={props.isFilterVisible}
                    isTrial={props.isTrial}
@@ -192,34 +159,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    searchFieldRef={props.searchFieldRef}
                    appName={props.appName}
                    appIcon={props.appIcon}
-                   onPaste={props.onPaste}
-                   onPasteObject={props.onPasteObject}
-                   onPasteWithTab={props.onPasteWithTab}
-                   onPasteWithReturn={props.onPasteWithReturn}
-                   onPastePath={props.onPastePath}
-                   onMerge={props.onMerge}
-                   onHideActions={props.onHideActions}
-                   onEditContent={props.onEditContent}
-                   onRenameItem={props.onRenameItem}
-                   onSplit={props.onSplit}
-                   onCopyToClipboard={props.onCopyToClipboard}
-                   onCopyObjectToClipboard={props.onCopyObjectToClipboard}
-                   onCopyPathToClipboard={props.onCopyPathToClipboard}
-                   onCopyTextFromImage={props.onCopyTextFromImage}
-                   onSaveImageAsFile={props.onSaveImageAsFile}
-                   onOpenInBrowser={props.onOpenInBrowser}
-                   onShowInFinder={props.onShowInFinder}
-                   onPreviewLink={props.onPreviewLink}
-                   onOpenInApp={props.onOpenInApp}
-                   onZoomIn={props.onZoomIn}
-                   onZoomOut={props.onZoomOut}
-                   onResetZoom={props.onResetZoom}
-                   onOpenSettings={props.onOpenSettings}
-                   onToggleFavorite={props.onToggleFavorite}
-                   onTogglePreview={props.onTogglePreview}
-                   onDeleteItem={props.onDeleteItem}
-                   onDeleteItems={props.onDeleteItems}
-                   onDeleteAllItems={props.onDeleteAllItems}/>
+        />
         {renderHistoryItems()}
       </div>
   )

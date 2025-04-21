@@ -40,7 +40,9 @@ export default function FormatTextCommands() {
 
   useEffect(() => {
     function handleShowFormatTextCommandsEvent() {
-      setOpen(true)
+      setTimeout(() => {
+        setOpen(true)
+      }, 100);
     }
 
     function handleAppWindowDidHide() {

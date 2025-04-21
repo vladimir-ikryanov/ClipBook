@@ -12,9 +12,9 @@ import {
 import {ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
-import Commands, {HideActionsReason} from "@/app/Commands";
+import Commands from "@/app/Commands";
 import PasteTransformationCommands from "@/app/PasteTransformationCommands";
-import {AppInfo, isFilterActive} from "@/data";
+import {isFilterActive} from "@/data";
 import FormatTextCommands from "@/app/FormatTextCommands";
 import OpenWithCommands from "@/app/OpenWithCommands";
 import {emitter} from "@/actions";
@@ -28,38 +28,9 @@ type SearchBarProps = {
   isFilterVisible: boolean
   isTrial: boolean
   trialDaysLeft: number
-  onShowHidePreview: () => void
   searchFieldRef?: React.Ref<HTMLInputElement>
   appName: string
   appIcon: string
-  onPaste: () => void
-  onPasteObject: () => void
-  onPasteWithTab: () => void
-  onPasteWithReturn: () => void
-  onPastePath: () => void
-  onMerge: () => void
-  onHideActions: (reason: HideActionsReason) => void
-  onToggleFavorite: () => void
-  onTogglePreview: () => void
-  onEditContent: () => void
-  onRenameItem: () => void
-  onSplit: () => void
-  onCopyToClipboard: () => void
-  onCopyObjectToClipboard: () => void
-  onCopyPathToClipboard: () => void
-  onCopyTextFromImage: () => void
-  onSaveImageAsFile: () => void
-  onOpenInBrowser: () => void
-  onShowInFinder: () => void
-  onOpenInApp: (app: AppInfo | undefined) => void
-  onPreviewLink: () => void
-  onZoomIn: () => void
-  onZoomOut: () => void
-  onResetZoom: () => void
-  onOpenSettings: () => void
-  onDeleteItem: () => void
-  onDeleteItems: () => void
-  onDeleteAllItems: () => void
 }
 
 export default function SearchBar(props: SearchBarProps) {
@@ -94,7 +65,7 @@ export default function SearchBar(props: SearchBarProps) {
   }
 
   const handleShowHidePreview = () => {
-    props.onShowHidePreview()
+    emitter.emit("TogglePreview")
   }
 
   function handleToggleFilter() {
@@ -113,24 +84,6 @@ export default function SearchBar(props: SearchBarProps) {
     let display = !alwaysDisplay;
     setAlwaysDisplay(display)
     prefSetAlwaysDisplay(display)
-  }
-
-  function showTransformationOptionsDialog() {
-    setTimeout(() => {
-      emitter.emit("ShowPasteTransformationCommands")
-    }, 100);
-  }
-
-  function showFormatOptionsDialog() {
-    setTimeout(() => {
-      emitter.emit("ShowFormatTextCommands")
-    }, 100);
-  }
-
-  function showOpenWithDialog() {
-    setTimeout(() => {
-      emitter.emit("ShowOpenWithCommands")
-    }, 100);
   }
 
   function getTrialBadgeText() {
@@ -184,14 +137,16 @@ export default function SearchBar(props: SearchBarProps) {
             <div className="flex text-primary-foreground">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button className="absolute" variant="toolbar" size="toolbar" onClick={handleToggleFilter}>
-                    <ListFilterIcon className={`h-5 w-5 ${filterActive ? 
-                        "text-toolbar-buttonSelected" : 
+                  <Button className="absolute" variant="toolbar" size="toolbar"
+                          onClick={handleToggleFilter}>
+                    <ListFilterIcon className={`h-5 w-5 ${filterActive ?
+                        "text-toolbar-buttonSelected" :
                         (props.isFilterVisible ? "text-toolbar-buttonActive" : "")}`}/>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="flex items-center">
-                  <div className="select-none mr-2">{props.isFilterVisible ? "Hide filter options" : "Show filter options"}</div>
+                  <div
+                      className="select-none mr-2">{props.isFilterVisible ? "Hide filter options" : "Show filter options"}</div>
                   <ShortcutLabel shortcut={prefGetToggleFilterShortcut()}/>
                 </TooltipContent>
               </Tooltip>
@@ -248,39 +203,7 @@ export default function SearchBar(props: SearchBarProps) {
             </Tooltip>
           </div>
           <div>
-            <Commands appName={props.appName}
-                      appIcon={props.appIcon}
-                      onHideActions={props.onHideActions}
-                      onEditContent={props.onEditContent}
-                      onRenameItem={props.onRenameItem}
-                      onFormatText={showFormatOptionsDialog}
-                      onSplit={props.onSplit}
-                      onCopyToClipboard={props.onCopyToClipboard}
-                      onCopyObjectToClipboard={props.onCopyObjectToClipboard}
-                      onCopyPathToClipboard={props.onCopyPathToClipboard}
-                      onCopyTextFromImage={props.onCopyTextFromImage}
-                      onSaveImageAsFile={props.onSaveImageAsFile}
-                      onOpenInBrowser={props.onOpenInBrowser}
-                      onShowInFinder={props.onShowInFinder}
-                      onOpenInApp={props.onOpenInApp}
-                      onPreviewLink={props.onPreviewLink}
-                      onZoomIn={props.onZoomIn}
-                      onZoomOut={props.onZoomOut}
-                      onResetZoom={props.onResetZoom}
-                      onOpenSettings={props.onOpenSettings}
-                      onOpenWith={showOpenWithDialog}
-                      onPaste={props.onPaste}
-                      onPasteObject={props.onPasteObject}
-                      onPastePath={props.onPastePath}
-                      onPasteWithTab={props.onPasteWithTab}
-                      onPasteWithReturn={props.onPasteWithReturn}
-                      onPasteWithTransformation={showTransformationOptionsDialog}
-                      onMerge={props.onMerge}
-                      onToggleFavorite={props.onToggleFavorite}
-                      onTogglePreview={props.onTogglePreview}
-                      onDeleteItem={props.onDeleteItem}
-                      onDeleteItems={props.onDeleteItems}
-                      onDeleteAllItems={props.onDeleteAllItems}/>
+            <Commands appName={props.appName} appIcon={props.appIcon}/>
             <PasteTransformationCommands/>
             <FormatTextCommands/>
             <OpenWithCommands/>

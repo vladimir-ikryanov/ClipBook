@@ -57,6 +57,17 @@ export default function App() {
     return () => document.removeEventListener("keydown", down)
   }, [])
 
+  useEffect(() => {
+    emitter.on("ZoomIn", handleZoomIn)
+    emitter.on("ZoomOut", handleZoomOut)
+    emitter.on("ResetZoom", handleResetZoom)
+    return () => {
+      emitter.off("ZoomIn", handleZoomIn)
+      emitter.off("ZoomOut", handleZoomOut)
+      emitter.off("ResetZoom", handleResetZoom)
+    };
+  }, []);
+
   function setActiveAppInfo(appName: string, appIcon: string): void {
     setAppName(appName)
     setAppIcon(appIcon)
@@ -68,14 +79,17 @@ export default function App() {
 
   function handleZoomIn() {
     zoomIn()
+    emitter.emit("FocusSearchInput")
   }
 
   function handleZoomOut() {
     zoomOut()
+    emitter.emit("FocusSearchInput")
   }
 
   function handleResetZoom() {
     resetZoom()
+    emitter.emit("FocusSearchInput")
   }
 
   // Attach the function to the window object
@@ -85,11 +99,7 @@ export default function App() {
   return (
       <ThemeProvider defaultTheme="system">
         <TooltipProvider delayDuration={250}>
-          <HistoryPane appName={appName}
-                       appIcon={appIcon}
-                       onZoomIn={handleZoomIn}
-                       onZoomOut={handleZoomOut}
-                       onResetZoom={handleResetZoom}/>
+          <HistoryPane appName={appName} appIcon={appIcon}/>
         </TooltipProvider>
       </ThemeProvider>
   )

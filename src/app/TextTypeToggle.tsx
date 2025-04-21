@@ -1,48 +1,25 @@
 import '../app.css';
 import React, {useEffect, useState} from "react";
-import {Clip, ClipType, getHTML, getRTF} from "@/db";
+import {Clip} from "@/db";
 import {ToggleGroup, ToggleGroupItem} from "@/components/ui/toggle-group";
 import {emitter} from "@/actions";
-
-export enum TextType {
-  Text = "Text",
-  HTML = "HTML",
-  RTF = "RTF"
-}
+import {TextType} from "@/data";
 
 type TextTypeToggleProps = {
   item: Clip | undefined
+  types: TextType[]
 }
 
 export default function TextTypeToggle(props: TextTypeToggleProps) {
-  let textItemTypes = getSelectedItemTextTypes(props.item)
-  if (textItemTypes.length <= 1) {
-    return null
-  }
-
-  const [types, setTypes] = useState<TextType[]>(textItemTypes)
-  const [selectedType, setSelectedType] = useState<TextType>(textItemTypes[0])
+  const [types, setTypes] = useState<TextType[]>(props.types)
+  const [selectedType, setSelectedType] = useState<TextType>(props.types.length >= 1 ? props.types[0] : TextType.Text)
 
   useEffect(() => {
     if (props.item) {
-      setTypes(getSelectedItemTextTypes(props.item))
+      setTypes(props.types)
       setSelectedType(TextType.Text)
     }
   }, [props.item]);
-
-  function getSelectedItemTextTypes(item: Clip | undefined): TextType[] {
-    if (item && item.type === ClipType.Text) {
-      let types: TextType[] = [TextType.Text]
-      if (getHTML(item).length > 0) {
-        types.push(TextType.HTML)
-      }
-      if (getRTF(item).length > 0) {
-        types.push(TextType.RTF)
-      }
-      return types
-    }
-    return []
-  }
 
   function handleSelectTextType(value: TextType) {
     // Do not allow clear selection as we need to have at least one selected type.
@@ -54,7 +31,7 @@ export default function TextTypeToggle(props: TextTypeToggleProps) {
   }
 
   return (
-      <div className="content-center">
+      <div className="content-center" hidden={types.length <= 1}>
         <ToggleGroup type="single" value={selectedType} onValueChange={handleSelectTextType}
                      className="p-1 content-center items-center rounded-lg">
           {

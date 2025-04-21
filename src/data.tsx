@@ -5,9 +5,9 @@ import {
   deleteAllClips,
   deleteClip,
   getAllClips,
-  getFilePath,
+  getFilePath, getHTML,
   getImageFileName,
-  getImageText,
+  getImageText, getRTF,
   updateClip
 } from "@/db";
 import {prefGetClearHistoryOnMacReboot} from "@/pref";
@@ -22,6 +22,12 @@ declare const getAppInfo: (appPath: string) => string;
 declare const getDefaultAppInfo: (filePath: string) => string;
 declare const getRecommendedAppsInfo: (filePath: string) => string;
 declare const getAllAppsInfo: () => string;
+
+export enum TextType {
+  Text = "Text",
+  HTML = "HTML",
+  RTF = "RTF"
+}
 
 type FilterOptions = {
   types: ClipType[]
@@ -509,7 +515,7 @@ export function removeSelectedHistoryItemIndex(index: number) {
 }
 
 export function getSelectedHistoryItemIndices(): number[] {
-  return Array.from(selectedItemIndices)
+  return [...selectedItemIndices]
 }
 
 export function getFirstSelectedHistoryItem(): Clip {
@@ -573,11 +579,11 @@ export function getFilterVisibleState() {
   return filterVisible
 }
 
-export function setInfoVisibleState(visible: boolean) {
+export function setDetailsVisibleState(visible: boolean) {
   saveInfoVisible(visible)
 }
 
-export function getInfoVisibleState() {
+export function getDetailsVisibleState() {
   return infoVisible
 }
 
@@ -691,4 +697,18 @@ export function filterByApp(app: AppInfo) {
 
 export function isFilterActive(): boolean {
   return filterOptions.types.length > 0 || filterOptions.favorites || filterOptions.tags.length > 0 || filterOptions.apps.length > 0
+}
+
+export function getSelectedItemTextTypes(item: Clip | undefined): TextType[] {
+  if (item && item.type === ClipType.Text) {
+    let types: TextType[] = [TextType.Text]
+    if (getHTML(item).length > 0) {
+      types.push(TextType.HTML)
+    }
+    if (getRTF(item).length > 0) {
+      types.push(TextType.RTF)
+    }
+    return types
+  }
+  return []
 }

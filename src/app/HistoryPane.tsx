@@ -30,7 +30,7 @@ import {
   setSelectedHistoryItemIndex,
   TextFormatOperation,
   updateHistoryItem,
-  updateHistoryItemTypes, setFilterVisibleState
+  updateHistoryItemTypes, setFilterVisibleState, getDetailsVisibleState, setDetailsVisibleState
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
@@ -64,14 +64,12 @@ import {
   prefShouldTreatDigitNumbersAsColor,
   prefShouldUpdateHistoryAfterAction
 } from "@/pref";
-import {HideActionsReason} from "@/app/Commands";
 import {FixedSizeList as List} from "react-window";
 import {Clip, ClipType, getFilePath, getHTML, getImageFileName, getImageText, getRTF} from "@/db";
 import {formatText, getClipType, isUrl} from "@/lib/utils";
 import {ClipboardIcon} from "lucide-react";
 import {getTrialLicenseDaysLeft, isTrialLicense, isTrialLicenseExpired} from "@/licensing";
 import TrialExpiredDialog from "@/app/TrialExpiredDialog";
-import {HideDropdownReason} from "@/app/PreviewToolBarMenu";
 import {SidebarProvider} from "@/components/ui/sidebar";
 import * as React from "react";
 import AppSidebar from "@/app/AppSidebar";
@@ -98,9 +96,6 @@ declare const openInApp: (filePath: string, appPath: string) => void;
 type HistoryPaneProps = {
   appName: string
   appIcon: string
-  onZoomIn: () => void
-  onZoomOut: () => void
-  onResetZoom: () => void
 }
 
 let treatDigitNumbersAsColor = prefShouldTreatDigitNumbersAsColor()
@@ -114,6 +109,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const listRef = useRef<List>(null);
   const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
   const [previewVisible, setPreviewVisible] = useState(getPreviewVisibleState())
+  const [detailsVisible, setDetailsVisible] = useState(getDetailsVisibleState())
   const [filterVisible, setFilterVisible] = useState(getFilterVisibleState())
   const [quickPasteModifierPressed, setQuickPasteModifierPressed] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -541,44 +537,94 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
 
     emitter.on("ToggleFilter", handleToggleFilter)
+    emitter.on("ToggleFavorite", handleToggleFavorite)
+    emitter.on("TogglePreview", handleTogglePreview)
+    emitter.on("ToggleDetails", handleToggleDetails)
     emitter.on("FocusSearchInput", focusSearchField)
     emitter.on("DeleteTagById", handleDeleteTag)
     emitter.on("UpdateTagById", handleUpdateTag)
+    emitter.on("DeleteItem", handleDeleteItem)
     emitter.on("DeleteItemByIndex", handleDeleteItemByIndex)
+    emitter.on("DeleteItems", handleDeleteItems)
+    emitter.on("DeleteAllItems", handleDeleteAllItems)
+    emitter.on("RenameItem", handleRenameItem)
     emitter.on("RenameItemByIndex", handleRenameItemByIndex)
     emitter.on("FilterHistory", handleFilterHistoryEvent)
     emitter.on("PasteWithTransformation", handlePasteWithTransformation)
     emitter.on("FormatText", handleFormatTextAndSave)
-    emitter.on("OpenLinkItemInBrowserByIndex", handleOpenInBrowserByIndex)
+    emitter.on("OpenInApp", handleOpenInApp)
+    emitter.on("OpenInBrowser", handleOpenInBrowser)
+    emitter.on("OpenInBrowserByIndex", handleOpenInBrowserByIndex)
+    emitter.on("PreviewLinkItem", handlePreviewLink)
     emitter.on("PreviewLinkItemByIndex", handlePreviewLinkByIndex)
+    emitter.on("CopyTextFromImage", handleCopyTextFromImage)
     emitter.on("CopyTextFromImageByIndex", handleCopyTextFromImageByIndex)
+    emitter.on("CopyPathToClipboard", handleCopyPathToClipboard)
     emitter.on("CopyPathToClipboardByIndex", handleCopyPathToClipboardByIndex)
+    emitter.on("CopyToClipboard", handleCopyToClipboard)
     emitter.on("CopyToClipboardByIndex", handleCopyToClipboardByIndex)
+    emitter.on("CopyObjectToClipboard", handleCopyObjectToClipboard)
+    emitter.on("Paste", handlePaste)
+    emitter.on("PastePath", handlePastePath)
+    emitter.on("PasteWithReturn", handlePasteWithReturn)
+    emitter.on("PasteWithTab", handlePasteWithTab)
     emitter.on("PasteByIndex", handlePasteByIndex)
     emitter.on("PastePathByIndex", handlePastePathByIndex)
+    emitter.on("PasteObject", handlePasteObject)
+    emitter.on("EditContent", handleEditContent)
     emitter.on("EditContentByIndex", handleEditContentByIndex)
     emitter.on("EditItem", handleEditHistoryItem)
     emitter.on("OpenFileItemWithApp", handleOpenWithApp)
+    emitter.on("OpenSettings", handleOpenSettings)
+    emitter.on("SaveImageAsFile", handleSaveImageAsFile)
+    emitter.on("ShowInFinder", handleShowInFinder)
+    emitter.on("Split", handleSplit)
+    emitter.on("Merge", handleMerge)
     return () => {
       emitter.off("ToggleFilter", handleToggleFilter)
+      emitter.off("ToggleFavorite", handleToggleFavorite)
+      emitter.off("TogglePreview", handleTogglePreview)
+      emitter.off("ToggleDetails", handleToggleDetails)
       emitter.off("FocusSearchInput", focusSearchField)
       emitter.off("DeleteTagById", handleDeleteTag)
       emitter.off("UpdateTagById", handleUpdateTag)
+      emitter.off("DeleteItem", handleDeleteItem)
       emitter.off("DeleteItemByIndex", handleDeleteItemByIndex)
+      emitter.off("DeleteItems", handleDeleteItems)
+      emitter.off("DeleteAllItems", handleDeleteAllItems)
+      emitter.off("RenameItem", handleRenameItem)
       emitter.off("RenameItemByIndex", handleRenameItemByIndex)
       emitter.off("FilterHistory", handleFilterHistoryEvent)
       emitter.off("PasteWithTransformation", handlePasteWithTransformation)
       emitter.off("FormatText", handleFormatTextAndSave)
-      emitter.off("OpenLinkItemInBrowserByIndex", handleOpenInBrowserByIndex)
+      emitter.off("OpenInApp", handleOpenInApp)
+      emitter.off("OpenInBrowser", handleOpenInBrowser)
+      emitter.off("OpenInBrowserByIndex", handleOpenInBrowserByIndex)
+      emitter.off("PreviewLinkItem", handlePreviewLink)
       emitter.off("PreviewLinkItemByIndex", handlePreviewLinkByIndex)
+      emitter.off("CopyTextFromImage", handleCopyTextFromImage)
       emitter.off("CopyTextFromImageByIndex", handleCopyTextFromImageByIndex)
+      emitter.off("CopyPathToClipboard", handleCopyPathToClipboard)
       emitter.off("CopyPathToClipboardByIndex", handleCopyPathToClipboardByIndex)
+      emitter.off("CopyToClipboard", handleCopyToClipboard)
       emitter.off("CopyToClipboardByIndex", handleCopyToClipboardByIndex)
+      emitter.off("CopyObjectToClipboard", handleCopyObjectToClipboard)
+      emitter.off("Paste", handlePaste)
+      emitter.off("PastePath", handlePastePath)
+      emitter.off("PasteWithReturn", handlePasteWithReturn)
+      emitter.off("PasteWithTab", handlePasteWithTab)
       emitter.off("PasteByIndex", handlePasteByIndex)
       emitter.off("PastePathByIndex", handlePastePathByIndex)
+      emitter.off("PasteObject", handlePasteObject)
+      emitter.off("EditContent", handleEditContent)
       emitter.off("EditContentByIndex", handleEditContentByIndex)
       emitter.off("EditItem", handleEditHistoryItem)
       emitter.off("OpenFileItemWithApp", handleOpenWithApp)
+      emitter.off("OpenSettings", handleOpenSettings)
+      emitter.off("SaveImageAsFile", handleSaveImageAsFile)
+      emitter.off("ShowInFinder", handleShowInFinder)
+      emitter.off("Split", handleSplit)
+      emitter.off("Merge", handleMerge)
     };
   }, []);
 
@@ -798,6 +844,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
         pasteItemInFrontApp(getFilePath(item), "", "", "", "")
       }
     }
+    focusSearchField()
   }
 
   async function handlePastePathByIndex(index: number) {
@@ -816,6 +863,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
         copyToClipboard(item.filePath, "", "", "", "", false)
       }
     }
+    focusSearchField()
   }
 
   async function handleCopyPathToClipboardByIndex(index: number) {
@@ -834,6 +882,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
     await handleDeleteItems()
     await addClipboardData(content, "ClipBook.app", "", "", 0, 0, 0, "", "", "", "", 0, false, "", "")
+    focusSearchField()
   }
 
   async function handlePasteByIndex(index: number) {
@@ -859,6 +908,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       item.favorite = favorite
     })
     await handleEditHistoryItems(items)
+    focusSearchField()
   }
 
   function handleTogglePreview(): void {
@@ -875,16 +925,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
     focusSearchField()
   }
 
-  function handleHideActions(reason: HideActionsReason) {
-    if (reason !== "editContent" && reason !== "renameItem" && reason !== "pasteWithTransformation" && reason !== "formatText" && reason !== "openWith") {
-      focusSearchField()
-    }
-  }
-
-  function handleHideDropdown(reason: HideDropdownReason) {
-    if (reason !== "editContent") {
-      focusSearchField()
-    }
+  function handleToggleDetails() {
+    let visible = !getDetailsVisibleState()
+    setDetailsVisible(visible)
+    setDetailsVisibleState(visible)
   }
 
   function handleRenameItem() {
@@ -896,7 +940,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }, 100);
   }
 
-  async function handleSplitItem() {
+  async function handleSplit() {
     let selectedItem = getFirstSelectedHistoryItem()
     if (isTextItem(selectedItem)) {
       // Check if the item content has text with line breaks and has at least two lines.
@@ -925,6 +969,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
         setSelectedItemIndices(getSelectedHistoryItemIndices())
         scrollToIndex(getHistoryItemIndex(items[0]))
       }
+      focusSearchField()
     }
   }
 
@@ -1023,6 +1068,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (getSelectedHistoryItemIndices().length === 1) {
       copyTextFromImage(getFirstSelectedHistoryItem())
     }
+    focusSearchField()
   }
 
   function handleCopyTextFromImageByIndex(index: number) {
@@ -1039,6 +1085,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (getSelectedHistoryItemIndices().length === 1) {
       openItemInBrowser(getFirstSelectedHistoryItem())
     }
+    focusSearchField()
   }
 
   function handleShowInFinder() {
@@ -1048,6 +1095,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
         showInFinder(getFilePath(item))
       }
     }
+    focusSearchField()
   }
 
   function previewLinkInApp(item: Clip) {
@@ -1060,6 +1108,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (getSelectedHistoryItemIndices().length === 1) {
       previewLinkInApp(getFirstSelectedHistoryItem())
     }
+    focusSearchField()
   }
 
   function handleOpenInDefaultApp() {
@@ -1081,6 +1130,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
         }
       }
     }
+    focusSearchField()
   }
 
   function handleOpenWithApp(appPath: string) {
@@ -1105,6 +1155,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function handleOpenSettings() {
     openSettingsWindow()
+    focusSearchField()
   }
 
   async function deleteItem(item: Clip) {
@@ -1131,7 +1182,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function handleDeleteItemByIndex(index: number) {
-    console.log("handleDeleteItemByIndex", index)
     let item = getHistoryItem(index)
     let indices = getSelectedHistoryItemIndices()
     // If the item is selected, and it's the only selected item,
@@ -1161,25 +1211,25 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   async function handleDeleteItems() {
     let items = getSelectedHistoryItems()
-    if (items.length === 0) {
-      return
-    }
-    let nextSelectedItemIndex = getVisibleHistoryLength() - 1
-    clearSelection()
-    for (let item of items) {
-      let index = getHistoryItemIndex(item)
-      nextSelectedItemIndex = Math.min(index, nextSelectedItemIndex)
-      await deleteItem(item)
-    }
+    if (items.length > 0) {
+      let nextSelectedItemIndex = getVisibleHistoryLength() - 1
+      clearSelection()
+      for (let item of items) {
+        let index = getHistoryItemIndex(item)
+        nextSelectedItemIndex = Math.min(index, nextSelectedItemIndex)
+        await deleteItem(item)
+      }
 
-    let lastIndex = getVisibleHistoryLength() - 1
-    if (nextSelectedItemIndex >= lastIndex) {
-      nextSelectedItemIndex = lastIndex
+      let lastIndex = getVisibleHistoryLength() - 1
+      if (nextSelectedItemIndex >= lastIndex) {
+        nextSelectedItemIndex = lastIndex
+      }
+      if (nextSelectedItemIndex >= 0) {
+        setSelectedHistoryItemIndex(nextSelectedItemIndex)
+      }
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
     }
-    if (nextSelectedItemIndex >= 0) {
-      setSelectedHistoryItemIndex(nextSelectedItemIndex)
-    }
-    setSelectedItemIndices(getSelectedHistoryItemIndices())
+    focusSearchField()
   }
 
   function handleDeleteAllItems() {
@@ -1245,6 +1295,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (item.type === ClipType.Image) {
       saveImageAsFile(item.imageFileName!, item.imageWidth!, item.imageHeight!)
     }
+    focusSearchField()
   }
 
   async function handleEditHistoryItem(item: Clip) {
@@ -1255,6 +1306,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   async function handleEditHistoryItems(items: Clip[]) {
     for (let item of items) {
       await updateHistoryItem(item.id!, item)
+      emitter.emit("UpdateItemById", item.id)
     }
     setHistory(getHistoryItems())
     await selectItems(items)
@@ -1273,7 +1325,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function handleFilterHistory() {
     let history = getHistoryItems()
-    setHistory([... history])
+    setHistory([...history])
     if (history.length > 0) {
       setSelectedHistoryItemIndex(0)
     } else {
@@ -1343,7 +1395,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   selectedItemIndices={selectedItemIndices}
                                   onSelectedItemsChange={handleSelectedItemsChange}
                                   onSearchQueryChange={handleSearchQueryChange}
-                                  onShowHidePreview={handleTogglePreview}
                                   onMouseDoubleClick={handleMouseDoubleClick}
                                   isPreviewVisible={previewVisible}
                                   isFilterVisible={filterVisible}
@@ -1352,34 +1403,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   trialDaysLeft={trialDaysLeft}
                                   searchFieldRef={searchFieldRef}
                                   listRef={listRef}
-                                  onPaste={handlePaste}
-                                  onPasteObject={handlePasteObject}
-                                  onPasteWithTab={handlePasteWithTab}
-                                  onPasteWithReturn={handlePasteWithReturn}
-                                  onPastePath={handlePastePath}
-                                  onMerge={handleMerge}
-                                  onHideActions={handleHideActions}
-                                  onEditContent={handleEditContent}
-                                  onRenameItem={handleRenameItem}
-                                  onSplit={handleSplitItem}
-                                  onCopyToClipboard={handleCopyToClipboard}
-                                  onCopyObjectToClipboard={handleCopyObjectToClipboard}
-                                  onCopyPathToClipboard={handleCopyPathToClipboard}
-                                  onCopyTextFromImage={handleCopyTextFromImage}
-                                  onSaveImageAsFile={handleSaveImageAsFile}
-                                  onOpenInBrowser={handleOpenInBrowser}
-                                  onShowInFinder={handleShowInFinder}
-                                  onPreviewLink={handlePreviewLink}
-                                  onOpenInApp={handleOpenInApp}
-                                  onZoomIn={props.onZoomIn}
-                                  onZoomOut={props.onZoomOut}
-                                  onResetZoom={props.onResetZoom}
-                                  onOpenSettings={handleOpenSettings}
-                                  onToggleFavorite={handleToggleFavorite}
-                                  onTogglePreview={handleTogglePreview}
-                                  onDeleteItem={handleDeleteItem}
-                                  onDeleteItems={handleDeleteItems}
-                                  onDeleteAllItems={handleDeleteAllItems}/>
+                />
               </ResizablePanel>
               <ResizableHandle/>
               <ResizablePanel defaultSize={previewVisible ? 50 : 0} ref={previewPanelRef}
@@ -1389,24 +1413,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
                              appIcon={props.appIcon}
                              visible={previewVisible}
                              editMode={editMode}
-                             onHideDropdown={handleHideDropdown}
+                             detailsVisible={detailsVisible}
                              onRequestEditItem={handleRequestEditItem}
-                             onSaveImageAsFile={handleSaveImageAsFile}
                              onEditHistoryItem={handleEditHistoryItem}
                              onFinishEditing={handleFinishEditing}
-                             onHidePreview={handleTogglePreview}
-                             onPaste={handlePaste}
-                             onPasteWithTab={handlePasteWithTab}
-                             onPasteWithReturn={handlePasteWithReturn}
-                             onMerge={handleMerge}
-                             onCopyToClipboard={handleCopyToClipboard}
-                             onCopyTextFromImage={handleCopyTextFromImage}
-                             onOpenInBrowser={handleOpenInBrowser}
-                             onPreviewLink={handlePreviewLink}
-                             onDeleteItem={handleDeleteItem}
-                             onRenameItem={handleRenameItem}
-                             onFormatText={handleFormatTextAndSave}
-                             onToggleFavorite={handleToggleFavorite}/>
+                />
               </ResizablePanel>
             </ResizablePanelGroup>
           </div>

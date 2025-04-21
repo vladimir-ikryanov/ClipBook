@@ -9,13 +9,13 @@ import {
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {XIcon} from "lucide-react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {emitter} from "@/actions";
 
 declare const restartApp: () => void;
 declare const isUpdateAvailable: () => boolean;
 
 type StatusBarProps = {
   appName: string
-  onPaste: () => void
 }
 
 export default function StatusBar(props: StatusBarProps) {
@@ -23,6 +23,10 @@ export default function StatusBar(props: StatusBarProps) {
 
   function handleUpdateAvailable() {
     setUpdateAvailable(true)
+  }
+
+  function handlePaste() {
+    emitter.emit("Paste")
   }
 
   // Attach the function to the window object
@@ -76,8 +80,7 @@ export default function StatusBar(props: StatusBarProps) {
         }
 
         <div className="flex">
-          <Button variant="ghost" className="p-1 h-8 rounded-sm outline-none group"
-                  onClick={props.onPaste}>
+          <Button variant="ghost" className="p-1 h-8 rounded-sm outline-none group" onClick={handlePaste}>
             <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
             <p className="pl-2 pr-1 text-">Paste to {props.appName}</p>
           </Button>

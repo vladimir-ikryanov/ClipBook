@@ -25,7 +25,6 @@ type HistoryItemPaneProps = {
   isQuickPasteModifierPressed: boolean
   onItemSelected(index: number, metaKeyDown: boolean, shiftKeyDown: boolean): void
   onMouseDoubleClick: (index: number) => void
-  onPaste: () => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>
   style: CSSProperties
 }
@@ -120,7 +119,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
         props.onItemSelected(props.index, e.metaKey, e.shiftKey)
       } else {
         if (props.selectedItemIndices.length >= 1) {
-          props.onPaste()
+          emitter.emit("Paste")
         } else {
           emitter.emit("PasteByIndex", props.index)
         }

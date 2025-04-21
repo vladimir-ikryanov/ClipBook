@@ -40,7 +40,9 @@ export default function OpenWithCommands() {
 
   useEffect(() => {
     function handleShowOpenWithCommandsEvent() {
-      handleOpenChange(true)
+      setTimeout(() => {
+        handleOpenChange(true)
+      }, 100);
     }
 
     function handleAppWindowDidHideEvent() {

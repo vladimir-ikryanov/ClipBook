@@ -60,7 +60,9 @@ export default function PasteTransformationCommands() {
     }
 
     function handleShowPasteTransformationCommands() {
-      setOpen(true)
+      setTimeout(() => {
+        setOpen(true)
+      }, 100);
     }
 
     emitter.on("NotifyAppWindowDidHide", handleAppWindowDidHide)

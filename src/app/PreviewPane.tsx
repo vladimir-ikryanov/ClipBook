@@ -1,13 +1,12 @@
 import '../app.css';
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import PreviewToolBar from "@/app/PreviewToolBar";
 import {Clip, ClipType, getFilePath} from "@/db";
 import ItemInfoPane from "@/app/ItemInfoPane";
 import {
-  getFirstSelectedHistoryItem, getHistoryItem,
-  getInfoVisibleState,
+  getFirstSelectedHistoryItem,
+  getHistoryItem,
   getSelectedHistoryItems,
-  setInfoVisibleState, TextFormatOperation
 } from "@/data";
 import PreviewTextPane from "@/app/PreviewTextPane";
 import PreviewImagePane from "@/app/PreviewImagePane";
@@ -16,8 +15,8 @@ import PreviewItemsPane from "@/app/PreviewItemsPane";
 import PreviewColorPane from "@/app/PreviewColorPane";
 import PreviewLinkPane from "@/app/PreviewLinkPane";
 import {prefShouldShowPreviewForLinks} from "@/pref";
-import {HideDropdownReason} from "@/app/PreviewToolBarMenu";
 import PreviewFilePane from "@/app/PreviewFilePane";
+import {emitter} from "@/actions";
 
 type PreviewPaneProps = {
   selectedItemIndices: number[]
@@ -25,43 +24,25 @@ type PreviewPaneProps = {
   appIcon: string
   visible: boolean
   editMode: boolean
-  onHideDropdown: (reason: HideDropdownReason) => void
+  detailsVisible: boolean
   onRequestEditItem: () => void
-  onSaveImageAsFile: () => void
   onEditHistoryItem: (item: Clip) => void
   onFinishEditing: () => void
-  onPaste: () => void
-  onPasteWithReturn: () => void
-  onPasteWithTab: () => void
-  onMerge: () => void
-  onHidePreview: () => void
-  onCopyToClipboard: () => void
-  onCopyTextFromImage: () => void
-  onOpenInBrowser: () => void
-  onPreviewLink: () => void
-  onToggleFavorite: () => void
-  onDeleteItem: () => void
-  onRenameItem: () => void
-  onFormatText: (operation: TextFormatOperation) => void
 }
 
 export default function PreviewPane(props: PreviewPaneProps) {
-  if (!props.visible) {
-    return null
-  }
+  const [updateLinkPreview, setUpdateLinkPreview] = useState(false)
+
+  useEffect(() => {
+    emitter.on("UpdateLinkPreview", handleUpdateLinkPreview)
+    return () => {
+      emitter.off("UpdateLinkPreview", handleUpdateLinkPreview)
+    };
+  }, []);
 
   if (props.selectedItemIndices.length === 0) {
     return <div
         className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]"></div>
-  }
-
-  const [displayInfo, setDisplayInfo] = useState(getInfoVisibleState())
-  const [updateLinkPreview, setUpdateLinkPreview] = useState(false)
-
-  function handleToggleInfo() {
-    let visible = !displayInfo;
-    setDisplayInfo(visible)
-    setInfoVisibleState(visible)
   }
 
   function handleUpdateLinkPreview() {
@@ -111,11 +92,11 @@ export default function PreviewPane(props: PreviewPaneProps) {
     return <PreviewItemsPane items={getSelectedHistoryItems()}/>
   }
 
-  function renderInfo() {
+  function renderDetails() {
     if (props.selectedItemIndices.length === 1) {
-      return <ItemInfoPane item={getFirstSelectedHistoryItem()} display={displayInfo}/>
+      return <ItemInfoPane item={getFirstSelectedHistoryItem()} visible={props.detailsVisible}/>
     }
-    return <ItemsInfoPane items={getSelectedHistoryItems()} display={displayInfo}/>
+    return <ItemsInfoPane items={getSelectedHistoryItems()} display={props.detailsVisible}/>
   }
 
   return (
@@ -123,27 +104,11 @@ export default function PreviewPane(props: PreviewPaneProps) {
         <PreviewToolBar selectedItemIndices={props.selectedItemIndices}
                         appName={props.appName}
                         appIcon={props.appIcon}
-                        displayInfo={displayInfo}
-                        onPaste={props.onPaste}
-                        onPasteWithReturn={props.onPasteWithReturn}
-                        onPasteWithTab={props.onPasteWithTab}
-                        onMerge={props.onMerge}
-                        onToggleInfo={handleToggleInfo}
-                        onHidePreview={props.onHidePreview}
-                        onSaveImageAsFile={props.onSaveImageAsFile}
+                        displayInfo={props.detailsVisible}
                         onRequestEditItem={props.onRequestEditItem}
-                        onRenameItem={props.onRenameItem}
-                        onFormatText={props.onFormatText}
-                        onDeleteItem={props.onDeleteItem}
-                        onCopyToClipboard={props.onCopyToClipboard}
-                        onCopyTextFromImage={props.onCopyTextFromImage}
-                        onOpenInBrowser={props.onOpenInBrowser}
-                        onToggleFavorite={props.onToggleFavorite}
-                        onPreviewLink={props.onPreviewLink}
-                        onUpdateLinkPreview={handleUpdateLinkPreview}
-                        onHideDropdown={props.onHideDropdown}/>
+        />
         {renderContent()}
-        {renderInfo()}
+        {renderDetails()}
       </div>
   )
 }

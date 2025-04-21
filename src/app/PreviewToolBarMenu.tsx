@@ -32,7 +32,6 @@ import {
   prefGetTrimSurroundingWhitespacesShortcut,
   prefShouldShowPreviewForLinks
 } from "@/pref";
-import {ClipType} from "@/db";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {
   getFirstSelectedHistoryItem,
@@ -41,47 +40,18 @@ import {
   TextFormatOperation
 } from "@/data";
 import {CommandShortcut} from "@/components/ui/command";
-
-export type HideDropdownReason =
-    "cancel"
-    | "togglePreview"
-    | "editContent"
-    | "renameItem"
-    | "formatText"
-    | "previewLink"
-    | "updatePreview"
-    | "saveImageAsFile"
-    | "deleteItem"
+import {emitter} from "@/actions";
 
 type PreviewToolBarMenuProps = {
   selectedItemIndices: number[]
   appName: string
   appIcon: string
   displayInfo: boolean
-  onPaste: () => void
-  onPasteWithReturn: () => void
-  onPasteWithTab: () => void
-  onMerge: () => void
-  onToggleInfo: () => void
-  onHidePreview: () => void
-  onSaveImageAsFile: () => void
-  onDeleteItem: () => void
-  onRenameItem: () => void
-  onFormatText: (operation: TextFormatOperation) => void
   onRequestEditItem: () => void
-  onCopyToClipboard: () => void
-  onCopyTextFromImage: () => void
-  onToggleFavorite: () => void
-  onOpenInBrowser: () => void
-  onPreviewLink: () => void
-  onUpdateLinkPreview: () => void
-  onHideDropdown: (reason: HideDropdownReason) => void
 }
 
 export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
   const [openDropdown, setOpenDropdown] = useState(false)
-
-  let closeReason: HideDropdownReason = "cancel"
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
@@ -94,7 +64,6 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
   }
 
   function handleRequestEditItem() {
-    closeReason = "editContent"
     handleOpenDropdownChange(false)
     setTimeout(() => {
       props.onRequestEditItem()
@@ -102,41 +71,33 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
   }
 
   function handleRenameItem() {
-    closeReason = "renameItem"
     handleOpenDropdownChange(false)
-    setTimeout(() => {
-      props.onRenameItem()
-    }, 250)
+    emitter.emit("RenameItem")
   }
 
   function handleSaveImageAsFile() {
-    closeReason = "saveImageAsFile"
     handleOpenDropdownChange(false)
-    props.onSaveImageAsFile()
+    emitter.emit("SaveImageAsFile")
   }
 
   function handleDeleteItem() {
-    closeReason = "deleteItem"
     handleOpenDropdownChange(false)
-    props.onDeleteItem()
+    emitter.emit("DeleteItem")
   }
 
   function handlePreviewLink() {
-    closeReason = "previewLink"
     handleOpenDropdownChange(false)
-    props.onPreviewLink()
+    emitter.emit("PreviewLinkItem")
   }
 
   function handleUpdateLinkPreview() {
-    closeReason = "updatePreview"
     handleOpenDropdownChange(false)
-    props.onUpdateLinkPreview()
+    emitter.emit("UpdateLinkPreview")
   }
 
   function handleFormatText(operation: TextFormatOperation) {
-    closeReason = "formatText"
     handleOpenDropdownChange(false)
-    props.onFormatText(operation)
+    emitter.emit("FormatText", operation)
   }
 
   function canShowEditContent() {
@@ -161,9 +122,6 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
 
   function handleOpenDropdownChange(open: boolean) {
     setOpenDropdown(open)
-    if (!open) {
-      props.onHideDropdown(closeReason)
-    }
   }
 
   function getMultipleItemsIndicator(): string {
