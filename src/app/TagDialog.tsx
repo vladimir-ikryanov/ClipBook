@@ -11,8 +11,8 @@ import {Button} from "@/components/ui/button";
 import TagIcon, {addTag, Tag, TagColor, updateTag} from "@/tags";
 import {Input} from "@/components/ui/input";
 import {RadioGroup, RadioGroupColorItem} from "@/components/ui/radio-group";
-import {ActionName} from "@/actions";
-import {Clip, updateClip} from "@/db";
+import {emitter} from "@/actions";
+import {Clip} from "@/db";
 import {updateHistoryItem} from "@/data";
 
 type TagDialogProps = {
@@ -50,7 +50,7 @@ export default function TagDialog(props: TagDialogProps) {
   async function handleSave() {
     if (props.tag) {
       updateTag(props.tag.id, tagName, tagColor)
-      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.UpdateTag, tagId: props.tag.id}}));
+      emitter.emit("UpdateTagById", props.tag.id)
     } else {
       let tag = new Tag(tagName, tagColor)
       addTag(tag)
@@ -61,15 +61,10 @@ export default function TagDialog(props: TagDialogProps) {
           props.item.tags = [tag.id]
         }
         await updateHistoryItem(props.item.id!, props.item)
-        window.dispatchEvent(new CustomEvent("onAction", {
-          detail: {
-            action: ActionName.UpdateItem,
-            itemId: props.item.id
-          }
-        }));
+        emitter.emit("UpdateItemById", props.item.id)
       }
     }
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.UpdateTags}}));
+    emitter.emit("UpdateTags")
     props.onClose()
   }
 

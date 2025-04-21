@@ -14,10 +14,10 @@ import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import Commands, {HideActionsReason} from "@/app/Commands";
 import PasteTransformationCommands from "@/app/PasteTransformationCommands";
-import {AppInfo, isFilterActive, TextFormatOperation} from "@/data";
+import {AppInfo, isFilterActive} from "@/data";
 import FormatTextCommands from "@/app/FormatTextCommands";
 import OpenWithCommands from "@/app/OpenWithCommands";
-import {ActionName} from "@/actions";
+import {emitter} from "@/actions";
 
 declare const openSettingsLicense: () => void;
 
@@ -36,9 +36,7 @@ type SearchBarProps = {
   onPasteObject: () => void
   onPasteWithTab: () => void
   onPasteWithReturn: () => void
-  onPasteWithTransformation: (operation: TextFormatOperation) => void
   onPastePath: () => void
-  onFormatText: (operation: TextFormatOperation) => void
   onMerge: () => void
   onHideActions: (reason: HideActionsReason) => void
   onToggleFavorite: () => void
@@ -70,16 +68,12 @@ export default function SearchBar(props: SearchBarProps) {
   const [filterActive, setFilterActive] = useState(isFilterActive())
 
   useEffect(() => {
-    function handleAction(event: Event) {
-      const customEvent = event as CustomEvent<{ action: string }>;
-      let actionName = customEvent.detail.action;
-      if (actionName === ActionName.FilterHistory) {
-        setFilterActive(isFilterActive())
-      }
+    function handleFilterHistoryEvent() {
+      setFilterActive(isFilterActive())
     }
 
-    window.addEventListener("onAction", handleAction);
-    return () => window.removeEventListener("onAction", handleAction);
+    emitter.on("FilterHistory", handleFilterHistoryEvent)
+    return () => emitter.off("FilterHistory", handleFilterHistoryEvent);
   }, []);
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,7 +99,7 @@ export default function SearchBar(props: SearchBarProps) {
   }
 
   function handleToggleFilter() {
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.ToggleFilter}}));
+    emitter.emit("ToggleFilter")
   }
 
   function handleClearSearch() {
@@ -124,19 +118,19 @@ export default function SearchBar(props: SearchBarProps) {
 
   function showTransformationOptionsDialog() {
     setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.PasteWithTransformation}}));
+      emitter.emit("ShowPasteTransformationCommands")
     }, 100);
   }
 
   function showFormatOptionsDialog() {
     setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FormatText}}));
+      emitter.emit("ShowFormatTextCommands")
     }, 100);
   }
 
   function showOpenWithDialog() {
     setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.OpenWith}}));
+      emitter.emit("ShowOpenWithCommands")
     }, 100);
   }
 
@@ -288,9 +282,8 @@ export default function SearchBar(props: SearchBarProps) {
                       onDeleteItem={props.onDeleteItem}
                       onDeleteItems={props.onDeleteItems}
                       onDeleteAllItems={props.onDeleteAllItems}/>
-            <PasteTransformationCommands
-                onPasteWithTransformation={props.onPasteWithTransformation}/>
-            <FormatTextCommands onFormatText={props.onFormatText}/>
+            <PasteTransformationCommands/>
+            <FormatTextCommands/>
             <OpenWithCommands onOpenWithApp={props.onOpenWithApp}/>
           </div>
           <div className={props.isPreviewVisible ? "hidden" : ""}>

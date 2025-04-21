@@ -8,12 +8,11 @@ import {HideActionsReason} from "@/app/Commands";
 import HistoryItemPane from "@/app/HistoryItemPane";
 import {Clip} from "@/db";
 import {SearchIcon} from "lucide-react";
-import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {
   addSelectedHistoryItemIndex, AppInfo,
   getSelectedHistoryItemIndices,
   removeSelectedHistoryItemIndex,
-  setSelectedHistoryItemIndex, TextFormatOperation
+  setSelectedHistoryItemIndex,
 } from "@/data";
 
 type HistoryItemsPaneProps = {
@@ -34,15 +33,12 @@ type HistoryItemsPaneProps = {
   onPasteObject: () => void
   onPasteWithTab: () => void
   onPasteWithReturn: () => void
-  onPasteWithTransformation: (operation: TextFormatOperation) => void
   onPastePath: () => void
   onPasteByIndex: (index: number) => void
   onPastePathByIndex: (index: number) => void
   onMerge: () => void
-  onFormatText: (operation: TextFormatOperation) => void
   onEditHistoryItem: (item: Clip) => void
   onHideActions: (reason: HideActionsReason) => void
-  onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onTogglePreview: () => void
   onToggleFavorite: () => void
   onEditContent: () => void
@@ -70,7 +66,6 @@ type HistoryItemsPaneProps = {
   onOpenInBrowserByIndex: (index: number) => void
   onOpenSettings: () => void
   onDeleteItem: () => void
-  onDeleteItemByIndex: (index: number) => void
   onDeleteItems: () => void
   onDeleteAllItems: () => void
   onMouseDoubleClick: (index: number) => void
@@ -158,7 +153,6 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                                          appName={props.appName}
                                          appIcon={props.appIcon}
                                          isQuickPasteModifierPressed={props.isQuickPasteModifierPressed}
-                                         onHideClipDropdownMenu={props.onHideClipDropdownMenu}
                                          onPaste={props.onPaste}
                                          onPasteByIndex={props.onPasteByIndex}
                                          onPastePathByIndex={props.onPastePathByIndex}
@@ -171,8 +165,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                                          onCopyPathToClipboard={props.onCopyPathToClipboardByIndex}
                                          onCopyTextFromImage={props.onCopyTextFromImageByIndex}
                                          onOpenInBrowser={props.onOpenInBrowserByIndex}
-                                         onPreviewLink={props.onPreviewLinkByIndex}
-                                         onDeleteItem={props.onDeleteItemByIndex}/>
+                                         onPreviewLink={props.onPreviewLinkByIndex}/>
                     )
                   }
                 }
@@ -224,9 +217,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
                    onPasteObject={props.onPasteObject}
                    onPasteWithTab={props.onPasteWithTab}
                    onPasteWithReturn={props.onPasteWithReturn}
-                   onPasteWithTransformation={props.onPasteWithTransformation}
                    onPastePath={props.onPastePath}
-                   onFormatText={props.onFormatText}
                    onMerge={props.onMerge}
                    onHideActions={props.onHideActions}
                    onEditContent={props.onEditContent}

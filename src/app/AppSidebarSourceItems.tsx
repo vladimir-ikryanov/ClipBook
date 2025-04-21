@@ -4,10 +4,10 @@ import {
   SidebarMenu,
 } from "@/components/ui/sidebar";
 import React, {useEffect, useState} from "react";
-import {AppInfo, getSourceApps, toBase64Icon} from "@/data";
+import {AppInfo, getSourceApps} from "@/data";
 import {AppSidebarSourceItem} from "@/app/AppSidebarSourceItem";
 import {AppSidebarItem, AppSidebarItemType} from "@/app/AppSidebarItem";
-import {ActionName} from "@/actions";
+import {emitter} from "@/actions";
 
 interface AppSidebarSourceItemsProps {
   selectedApp?: AppInfo | undefined
@@ -25,15 +25,12 @@ export function AppSidebarSourceItems(props: AppSidebarSourceItemsProps) {
   const [expandApps, setExpandApps] = useState(false)
 
   useEffect(() => {
-    function handleAction(event: Event) {
-      const customEvent = event as CustomEvent<{ action: string }>;
-      if (customEvent.detail.action === ActionName.UpdateApps) {
-        setApps(getSourceApps())
-      }
+    function handleUpdateApps() {
+      setApps(getSourceApps())
     }
 
-    window.addEventListener("onAction", handleAction);
-    return () => window.removeEventListener("onAction", handleAction);
+    emitter.on("UpdateApps", handleUpdateApps)
+    return () => emitter.off("UpdateApps", handleUpdateApps);
   }, [])
 
   function handleToggleApps() {

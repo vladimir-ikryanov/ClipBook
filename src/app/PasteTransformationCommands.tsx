@@ -13,13 +13,9 @@ import {
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {TextFormatOperation} from "@/data";
 import {DialogTitle} from "@/components/ui/dialog";
-import {ActionName} from "@/actions";
+import {emitter} from "@/actions";
 
-type PasteTransformationCommandsProps = {
-  onPasteWithTransformation: (operation: TextFormatOperation) => void
-}
-
-export default function PasteTransformationCommands(props: PasteTransformationCommandsProps) {
+export default function PasteTransformationCommands() {
   const [open, setOpen] = useState(false)
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -59,63 +55,62 @@ export default function PasteTransformationCommands(props: PasteTransformationCo
   }
 
   useEffect(() => {
-    function handleAction(event: Event) {
-      const customEvent = event as CustomEvent<{ action: string }>;
-      if (customEvent.detail.action === ActionName.PasteWithTransformation) {
-        setOpen(true)
-      }
-    }
-
-    window.addEventListener("onAction", handleAction);
-    return () => window.removeEventListener("onAction", handleAction);
-  }, [])
-
-  useEffect(() => {
-    function handleAction(event: Event) {
+    function handleAppWindowDidHide() {
       handleOpenChange(false)
     }
 
-    window.addEventListener("onDidAppWindowHide", handleAction);
-    return () => window.removeEventListener("onDidAppWindowHide", handleAction);
+    function handleShowPasteTransformationCommands() {
+      setOpen(true)
+    }
+
+    emitter.on("NotifyAppWindowDidHide", handleAppWindowDidHide)
+    emitter.on("ShowPasteTransformationCommands", handleShowPasteTransformationCommands)
+    return () => {
+      emitter.off("NotifyAppWindowDidHide", handleAppWindowDidHide)
+      emitter.off("ShowPasteTransformationCommands", handleShowPasteTransformationCommands)
+    };
   }, [])
 
   function handleOpenChange(open: boolean) {
     setOpen(open)
+    if (!open) {
+      emitter.emit("FocusSearchInput")
+    }
   }
 
   function handleMakeUpperCase() {
     handleOpenChange(false)
-    props.onPasteWithTransformation(TextFormatOperation.ToUpperCase)
+    emitter.emit("PasteWithTransformation", TextFormatOperation.ToUpperCase)
   }
 
   function handleMakeLowerCase() {
     handleOpenChange(false)
-    props.onPasteWithTransformation(TextFormatOperation.ToLowerCase)
+    emitter.emit("PasteWithTransformation", TextFormatOperation.ToLowerCase)
   }
 
   function handleCapitalizeWords() {
     handleOpenChange(false)
-    props.onPasteWithTransformation(TextFormatOperation.CapitalizeWords)
+    emitter.emit("PasteWithTransformation", TextFormatOperation.CapitalizeWords)
   }
 
   function handleMakeSentenceCase() {
     handleOpenChange(false)
-    props.onPasteWithTransformation(TextFormatOperation.ToSentenceCase)
+    emitter.emit("PasteWithTransformation", TextFormatOperation.ToSentenceCase)
   }
 
   function handleRemoveEmptyLines() {
     handleOpenChange(false)
-    props.onPasteWithTransformation(TextFormatOperation.RemoveEmptyLines)
+    emitter.emit("PasteWithTransformation", TextFormatOperation.RemoveEmptyLines)
   }
 
   function handleStripAllWhitespaces() {
     handleOpenChange(false)
-    props.onPasteWithTransformation(TextFormatOperation.StripAllWhitespaces)
+    emitter.emit("PasteWithTransformation", TextFormatOperation.StripAllWhitespaces)
   }
 
   function handleTrimSurroundingWhitespaces() {
     handleOpenChange(false)
-    props.onPasteWithTransformation(TextFormatOperation.TrimSurroundingWhitespaces)
+    emitter.emit("PasteWithTransformation", TextFormatOperation.TrimSurroundingWhitespaces)
   }
 
   return (

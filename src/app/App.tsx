@@ -12,6 +12,7 @@ import {
 } from "@/pref";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {TooltipProvider} from "@/components/ui/tooltip";
+import {emitter} from "@/actions";
 
 declare const hideAppWindow: () => void;
 declare const zoomIn: () => void;
@@ -62,7 +63,7 @@ export default function App() {
   }
 
   function onDidAppWindowHide() {
-    window.dispatchEvent(new CustomEvent("onDidAppWindowHide"));
+    emitter.emit("NotifyAppWindowDidHide")
   }
 
   function handleZoomIn() {

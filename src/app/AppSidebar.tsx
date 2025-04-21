@@ -22,7 +22,7 @@ import {Clip, ClipType} from "@/db";
 import {AppSidebarTagItem} from "@/app/AppSidebarTagItem";
 import TagDialog from "@/app/TagDialog";
 import {allTags, removeTag, Tag} from "@/tags";
-import {ActionName} from "@/actions";
+import {emitter} from "@/actions";
 import {AppSidebarSourceItems} from "@/app/AppSidebarSourceItems";
 
 interface AppSidebarProps {
@@ -42,19 +42,22 @@ export default function AppSidebar(props: AppSidebarProps) {
   const [tagDialogVisible, setTagDialogVisible] = useState(false)
 
   useEffect(() => {
-    function handleAction(event: Event) {
-      const customEvent = event as CustomEvent<{ action: string }>;
-      if (customEvent.detail.action === ActionName.UpdateTags) {
-        setTags([...allTags()])
-      }
-      if (customEvent.detail.action === ActionName.NewTag) {
-        const newTagEvent = event as CustomEvent<{ action: string, itemId: number }>
-        handleNewTagForItem(newTagEvent.detail.itemId)
+    function handleAddTagToItemWithIdEvent(itemId?: number) {
+      if (itemId) {
+        handleNewTagForItem(itemId)
       }
     }
 
-    window.addEventListener("onAction", handleAction);
-    return () => window.removeEventListener("onAction", handleAction);
+    function handleUpdateTagsEvent() {
+      setTags([...allTags()])
+    }
+
+    emitter.on("UpdateTags", handleUpdateTagsEvent)
+    emitter.on("AddTagToItemWithId", handleAddTagToItemWithIdEvent)
+    return () => {
+      emitter.off("UpdateTags", handleUpdateTagsEvent)
+      emitter.off("AddTagToItemWithId", handleAddTagToItemWithIdEvent)
+    };
   }, [])
 
   function handleSelectType(type: AppSidebarItemType) {
@@ -64,13 +67,13 @@ export default function AppSidebar(props: AppSidebarProps) {
   function handleSelectTag(tag: Tag) {
     props.onSelectTag(tag)
     filterByTag(tag)
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FilterHistory}}));
+    emitter.emit("FilterHistory")
   }
 
   function handleSelectApp(app: AppInfo) {
     props.onSelectApp(app)
     filterByApp(app)
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FilterHistory}}));
+    emitter.emit("FilterHistory")
   }
 
   function handleEditTag(tag: Tag) {
@@ -84,31 +87,26 @@ export default function AppSidebar(props: AppSidebarProps) {
       handleShowAll()
     }
     removeTag(tag)
-    window.dispatchEvent(new CustomEvent("onAction", {
-      detail: {
-        action: ActionName.DeleteTag,
-        tagId: tag.id
-      }
-    }));
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.UpdateTags}}));
+    emitter.emit("DeleteTagById", tag.id)
+    emitter.emit("UpdateTags")
   }
 
   function handleShowFavorites() {
     handleSelectType("Favorites")
     filterByFavorites()
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FilterHistory}}));
+    emitter.emit("FilterHistory")
   }
 
   function handleShowAll() {
     handleSelectType("All")
     resetFilter()
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FilterHistory}}));
+    emitter.emit("FilterHistory")
   }
 
   function handleShowByType(clipType: ClipType, type: AppSidebarItemType) {
     handleSelectType(type)
     filterByType(clipType)
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FilterHistory}}));
+    emitter.emit("FilterHistory")
   }
 
   function handleNewTag() {

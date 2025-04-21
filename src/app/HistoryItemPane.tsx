@@ -1,19 +1,19 @@
 import '../app.css';
 import React, {CSSProperties, KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
 import {getFilterQuery, updateHistoryItem} from "@/data";
-import {Clip, ClipType, getFilePath, getImageText, updateClip} from "@/db";
+import {Clip, ClipType, getFilePath} from "@/db";
 import {getFileNameFromPath, hasModifiers, toCSSColor} from "@/lib/utils";
 import {
-  FileIcon, FolderIcon,
+  FileIcon,
   LinkIcon,
   MailIcon, PenLineIcon,
   StarIcon
 } from "lucide-react";
-import HistoryItemMenu, {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
+import HistoryItemContextMenu from "@/app/HistoryItemContextMenu";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {prefShouldPasteOnClick} from "@/pref";
 import TagIcon, {getTags} from "@/tags";
-import {ActionName} from "@/actions";
+import {emitter} from "@/actions";
 
 type HistoryItemPaneProps = {
   item: Clip
@@ -23,7 +23,6 @@ type HistoryItemPaneProps = {
   appName: string
   appIcon: string
   isQuickPasteModifierPressed: boolean
-  onHideClipDropdownMenu: (reason: HideClipDropdownMenuReason) => void
   onItemSelected(index: number, metaKeyDown: boolean, shiftKeyDown: boolean): void
   onMouseDoubleClick: (index: number) => void
   onPaste: () => void
@@ -37,37 +36,36 @@ type HistoryItemPaneProps = {
   onCopyTextFromImage: (index: number) => void
   onOpenInBrowser: (index: number) => void
   onPreviewLink: (index: number) => void
-  onDeleteItem: (index: number) => void
   tabsTriggerRef?: React.Ref<HTMLButtonElement>
   style: CSSProperties
 }
 
 const HistoryItemPane = (props: HistoryItemPaneProps) => {
-  const [mouseOver, setMouseOver] = useState(false)
   const [renameItemMode, setRenameItemMode] = useState(false)
-  const [actionsMenuOpen, setActionsMenuOpen] = useState(false)
   const [itemName, setItemName] = useState(props.item.name ? props.item.name : "")
   const [itemTags, setItemTags] = useState(getTags(props.item.tags))
   const [originalItemName, setOriginalItemName] = useState(props.item.name ? props.item.name : "")
   const [pasteOnClick, setPasteOnClick] = useState(prefShouldPasteOnClick())
 
   useEffect(() => {
-    function handleAction(event: Event) {
-      const customEvent = event as CustomEvent<{ action: string }>
-      let action = customEvent.detail.action
-      if (action === ActionName.RenameItem && !isMultipleItemsSelected() && isItemSelected()) {
-        setRenameItemMode(true)
-      }
-      if (action === ActionName.UpdateItem) {
-        const updateItemAction = event as CustomEvent<{ action: string, itemId: number }>
-        if (updateItemAction.detail.itemId === props.item.id) {
-          setItemTags(getTags(props.item.tags))
-        }
+    function handleUpdateItemByIdEvent(itemId?: number) {
+      if (itemId === props.item.id) {
+        setItemTags(getTags(props.item.tags))
       }
     }
 
-    window.addEventListener("onAction", handleAction);
-    return () => window.removeEventListener("onAction", handleAction);
+    function handleRenameSelectedItemEvent() {
+      if (!isMultipleItemsSelected() && isItemSelected()) {
+        setRenameItemMode(true)
+      }
+    }
+
+    emitter.on("UpdateItemById", handleUpdateItemByIdEvent)
+    emitter.on("RenameSelectedItem", handleRenameSelectedItemEvent)
+    return () => {
+      emitter.off("UpdateItemById", handleUpdateItemByIdEvent)
+      emitter.off("RenameSelectedItem", handleRenameSelectedItemEvent)
+    };
   }, [])
 
   function isItemSelected() {
@@ -91,17 +89,13 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   async function handleFinishRename() {
     setRenameItemMode(false)
     setOriginalItemName(itemName)
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FocusSearchInput}}));
+    emitter.emit("FocusSearchInput")
   }
 
   async function handleCancelRename() {
     setRenameItemMode(false)
     await saveItemName(originalItemName)
-    window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.FocusSearchInput}}));
-  }
-
-  function handleDropdownMenuOpenChange(open: boolean) {
-    setActionsMenuOpen(open)
+    emitter.emit("FocusSearchInput")
   }
 
   function handleFocus(event: React.FocusEvent<HTMLInputElement>) {
@@ -146,7 +140,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   }
 
   const handleMouseDown = (e: MouseEvent) => {
-    if (renameItemMode || pasteOnClick) {
+    if (renameItemMode || pasteOnClick || e.button !== 0) {
       return
     }
     // Check if this is e.metaKey double click event.
@@ -165,14 +159,11 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
           props.onItemSelected(props.index, e.metaKey, e.shiftKey)
         }
       }
-    } else {
-      setMouseOver(true)
     }
     e.preventDefault()
   }
 
   const handleMouseLeave = (e: MouseEvent) => {
-    setMouseOver(false)
     e.preventDefault()
   }
 
@@ -199,36 +190,6 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
                   alt={props.item.imageThumbFileName} className="h-5 w-5 object-contain"/>
     }
     return <FileIcon className="h-5 w-5 text-primary-foreground"/>
-  }
-
-  function renderActionsButton() {
-    if (props.isQuickPasteModifierPressed) {
-      return renderQuickPasteAlias()
-    }
-    if (mouseOver || actionsMenuOpen) {
-      if (props.selectedItemIndices.length === 1 ||
-          (isMultipleItemsSelected() && !props.selectedItemIndices.includes(props.index))) {
-        return <HistoryItemMenu item={props.item}
-                                index={props.index}
-                                appName={props.appName}
-                                appIcon={props.appIcon}
-                                open={actionsMenuOpen}
-                                onOpenChange={handleDropdownMenuOpenChange}
-                                onHideClipDropdownMenu={props.onHideClipDropdownMenu}
-                                onPaste={props.onPasteByIndex}
-                                onPastePath={props.onPastePathByIndex}
-                                onEditHistoryItem={props.onEditHistoryItem}
-                                onEditContent={props.onEditContent}
-                                onRenameItem={props.onRenameItem}
-                                onCopyToClipboard={props.onCopyToClipboard}
-                                onCopyPathToClipboard={props.onCopyPathToClipboard}
-                                onCopyTextFromImage={props.onCopyTextFromImage}
-                                onOpenInBrowser={props.onOpenInBrowser}
-                                onPreviewLink={props.onPreviewLink}
-                                onDeleteItem={props.onDeleteItem}/>
-      }
-    }
-    return renderFavoriteIcon()
   }
 
   function renderFavoriteIcon() {
@@ -258,7 +219,8 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
       return <div className="flex space-x-1 ml-1">
         {
           itemTags.map((tag, index) => {
-            return <TagIcon key={index} id={"_" + tag.id} className="w-5 h-5" style={{ color: tag.color }}/>
+            return <TagIcon key={index} id={"_" + tag.id} className="w-5 h-5"
+                            style={{color: tag.color}}/>
           })
         }
       </div>
@@ -356,26 +318,48 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     return result
   }
 
-  return (
-      <div
-          id={`tab-${props.index}`}
-          style={props.style}
-          className={`flex flex-row cursor-default select-none items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-popover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
-          onKeyDown={handleKeyDown}
-          onMouseUp={handleMouseUp}
-          onMouseDown={handleMouseDown}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}>
-        <div className="flex flex-none mr-1">{renderClipIcon()}</div>
+  function renderItemPane() {
+    return (
         <div
-            className="flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis">
-          {
-            renameItemMode ? renderInputField() : renderItemLabel(getItemLabel(), getFilterQuery())
-          }
+            id={`tab-${props.index}`}
+            style={props.style}
+            className={`flex flex-row cursor-default select-none items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-popover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
+            onKeyDown={handleKeyDown}
+            onMouseUp={handleMouseUp}
+            onMouseDown={handleMouseDown}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}>
+          <div className="flex flex-none mr-1">{renderClipIcon()}</div>
+          <div
+              className="flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis">
+            {
+              renameItemMode ? renderInputField() : renderItemLabel(getItemLabel(), getFilterQuery())
+            }
+          </div>
+          {renderTags()}
+          {renderFavoriteIcon()}
+          {renderQuickPasteAlias()}
         </div>
-        {renderTags()}
-        {renderActionsButton()}
-      </div>
+    )
+  }
+
+  return (
+      <HistoryItemContextMenu item={props.item}
+                              index={props.index}
+                              appName={props.appName}
+                              appIcon={props.appIcon}
+                              onPaste={props.onPasteByIndex}
+                              onPastePath={props.onPastePathByIndex}
+                              onEditHistoryItem={props.onEditHistoryItem}
+                              onEditContent={props.onEditContent}
+                              onRenameItem={props.onRenameItem}
+                              onCopyToClipboard={props.onCopyToClipboard}
+                              onCopyPathToClipboard={props.onCopyPathToClipboard}
+                              onCopyTextFromImage={props.onCopyTextFromImage}
+                              onOpenInBrowser={props.onOpenInBrowser}
+                              onPreviewLink={props.onPreviewLink}
+                              children={renderItemPane()}
+      />
   )
 }
 

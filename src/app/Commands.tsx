@@ -61,6 +61,7 @@ import {ClipType, getHTML, getImageText, getRTF} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {DialogTitle} from "@/components/ui/dialog";
+import {emitter} from "@/actions";
 
 declare const canZoomIn: () => boolean;
 declare const canZoomOut: () => boolean;
@@ -154,12 +155,12 @@ export default function Commands(props: CommandsProps) {
   }, [])
 
   useEffect(() => {
-    function handleAction(e: Event) {
+    function handleAppWindowDidHide() {
       handleOpenChange(false)
     }
 
-    window.addEventListener("onDidAppWindowHide", handleAction);
-    return () => window.removeEventListener("onDidAppWindowHide", handleAction);
+    emitter.on("NotifyAppWindowDidHide", handleAppWindowDidHide)
+    return () => emitter.off("NotifyAppWindowDidHide", handleAppWindowDidHide);
   }, [])
 
   function handleKeyDown(e: React.KeyboardEvent) {

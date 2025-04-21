@@ -4,7 +4,7 @@ import {Clip, getHTML, getRTF} from "@/db";
 import {getClipTypeFromText} from "@/lib/utils";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {prefGetEditHistoryItemShortcut} from "@/pref";
-import {ActionName} from "@/actions";
+import {emitter} from "@/actions";
 import {TextType} from "@/app/TextTypeToggle";
 
 type PreviewTextPaneProps = {
@@ -33,27 +33,21 @@ export default function PreviewTextPane(props: PreviewTextPaneProps) {
   }, [props.item]);
 
   useEffect(() => {
-    function handleAction(event: Event) {
-      const customEvent = event as CustomEvent<{ action: string }>;
-      let actionName = customEvent.detail.action;
-      if (actionName === ActionName.SwitchTextType) {
-        const action = event as CustomEvent<{ action: string, type: TextType }>
-        let type = action.detail.type
-        setSelectedTextType(type)
-        if (type === TextType.Text) {
-          setContent(props.item.content)
-        }
-        if (type === TextType.HTML) {
-          setContent(getHTML(props.item))
-        }
-        if (type === TextType.RTF) {
-          setContent(getRTF(props.item))
-        }
+    function handleSwitchTextType(type: TextType) {
+      setSelectedTextType(type)
+      if (type === TextType.Text) {
+        setContent(props.item.content)
+      }
+      if (type === TextType.HTML) {
+        setContent(getHTML(props.item))
+      }
+      if (type === TextType.RTF) {
+        setContent(getRTF(props.item))
       }
     }
 
-    window.addEventListener("onAction", handleAction);
-    return () => window.removeEventListener("onAction", handleAction);
+    emitter.on("SwitchTextType", handleSwitchTextType)
+    return () => emitter.off("SwitchTextType", handleSwitchTextType);
   }, [props.item]);
 
   function handleKeyDown(e: React.KeyboardEvent) {

@@ -5,7 +5,10 @@ import {useEffect, useState} from "react"
 import {VisuallyHidden} from "@radix-ui/react-visually-hidden";
 
 import {
-  CommandDialog, CommandEmpty, CommandGroup, CommandInput,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
   CommandShortcut,
@@ -19,15 +22,12 @@ import {
   prefGetMakeUpperCaseShortcut,
   prefGetRemoveEmptyLinesShortcut,
   prefGetSentenceCaseShortcut,
-  prefGetStripAllWhitespacesShortcut, prefGetTrimSurroundingWhitespacesShortcut
+  prefGetStripAllWhitespacesShortcut,
+  prefGetTrimSurroundingWhitespacesShortcut
 } from "@/pref";
-import {ActionName} from "@/actions";
+import {emitter} from "@/actions";
 
-type FormatTextCommandsProps = {
-  onFormatText: (operation: TextFormatOperation) => void
-}
-
-export default function FormatTextCommands(props: FormatTextCommandsProps) {
+export default function FormatTextCommands() {
   const [open, setOpen] = useState(false)
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -39,24 +39,20 @@ export default function FormatTextCommands(props: FormatTextCommandsProps) {
   }
 
   useEffect(() => {
-    function handleAction(event: Event) {
-      const customEvent = event as CustomEvent<{ action: string }>;
-      if (customEvent.detail.action === ActionName.FormatText) {
-        setOpen(true)
-      }
+    function handleShowFormatTextCommandsEvent() {
+      setOpen(true)
     }
 
-    window.addEventListener("onAction", handleAction);
-    return () => window.removeEventListener("onAction", handleAction);
-  }, [])
-
-  useEffect(() => {
-    function handleAction(event: Event) {
+    function handleAppWindowDidHide() {
       handleOpenChange(false)
     }
 
-    window.addEventListener("onDidAppWindowHide", handleAction);
-    return () => window.removeEventListener("onDidAppWindowHide", handleAction);
+    emitter.on("ShowFormatTextCommands", handleShowFormatTextCommandsEvent)
+    emitter.on("NotifyAppWindowDidHide", handleAppWindowDidHide)
+    return () => {
+      emitter.off("ShowFormatTextCommands", handleShowFormatTextCommandsEvent)
+      emitter.off("NotifyAppWindowDidHide", handleAppWindowDidHide)
+    };
   }, [])
 
   function handleOpenChange(open: boolean) {
@@ -65,37 +61,37 @@ export default function FormatTextCommands(props: FormatTextCommandsProps) {
 
   function handleMakeUpperCase() {
     handleOpenChange(false)
-    props.onFormatText(TextFormatOperation.ToUpperCase)
+    emitter.emit("FormatText", TextFormatOperation.ToUpperCase)
   }
 
   function handleMakeLowerCase() {
     handleOpenChange(false)
-    props.onFormatText(TextFormatOperation.ToLowerCase)
+    emitter.emit("FormatText", TextFormatOperation.ToLowerCase)
   }
 
   function handleCapitalizeWords() {
     handleOpenChange(false)
-    props.onFormatText(TextFormatOperation.CapitalizeWords)
+    emitter.emit("FormatText", TextFormatOperation.CapitalizeWords)
   }
 
   function handleMakeSentenceCase() {
     handleOpenChange(false)
-    props.onFormatText(TextFormatOperation.ToSentenceCase)
+    emitter.emit("FormatText", TextFormatOperation.ToSentenceCase)
   }
 
   function handleRemoveEmptyLines() {
     handleOpenChange(false)
-    props.onFormatText(TextFormatOperation.RemoveEmptyLines)
+    emitter.emit("FormatText", TextFormatOperation.RemoveEmptyLines)
   }
 
   function handleStripAllWhitespaces() {
     handleOpenChange(false)
-    props.onFormatText(TextFormatOperation.StripAllWhitespaces)
+    emitter.emit("FormatText", TextFormatOperation.StripAllWhitespaces)
   }
 
   function handleTrimSurroundingWhitespaces() {
     handleOpenChange(false)
-    props.onFormatText(TextFormatOperation.TrimSurroundingWhitespaces)
+    emitter.emit("FormatText", TextFormatOperation.TrimSurroundingWhitespaces)
   }
 
   return (

@@ -68,7 +68,6 @@ import {HideActionsReason} from "@/app/Commands";
 import {FixedSizeList as List} from "react-window";
 import {Clip, ClipType, getFilePath, getHTML, getImageFileName, getImageText, getRTF} from "@/db";
 import {formatText, getClipType, isUrl} from "@/lib/utils";
-import {HideClipDropdownMenuReason} from "@/app/HistoryItemMenu";
 import {ClipboardIcon} from "lucide-react";
 import {getTrialLicenseDaysLeft, isTrialLicense, isTrialLicenseExpired} from "@/licensing";
 import TrialExpiredDialog from "@/app/TrialExpiredDialog";
@@ -78,7 +77,7 @@ import * as React from "react";
 import AppSidebar from "@/app/AppSidebar";
 import {AppSidebarItemType} from "@/app/AppSidebarItem";
 import {Tag} from "@/tags";
-import {ActionName} from "@/actions";
+import {emitter} from "@/actions";
 
 declare const pasteItemInFrontApp: (text: string, rtf: string, html: string, imageFileName: string, filePath: string) => void;
 declare const pasteFilesInFrontApp: (filePaths: string) => void;
@@ -536,31 +535,57 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }, [quickPasteModifierPressed]);
 
   useEffect(() => {
-    function handleAction(event: Event) {
-      const customEvent = event as CustomEvent<{ action: string }>;
-      let actionName = customEvent.detail.action;
-      if (actionName === ActionName.FocusSearchInput) {
-        focusSearchField()
-      }
-      if (actionName === ActionName.ToggleFilter) {
-        handleToggleFilter()
-      }
-      if (actionName === ActionName.FilterHistory) {
-        handleFilterHistory()
-        focusSearchField()
-      }
-      if (actionName === ActionName.UpdateTag) {
-        const deleteTagAction = event as CustomEvent<{ action: string, tagId: number }>
-        handleUpdateTag(deleteTagAction.detail.tagId).then(() => {})
-      }
-      if (actionName === ActionName.DeleteTag) {
-        const deleteTagAction = event as CustomEvent<{ action: string, tagId: number }>
-        handleDeleteTag(deleteTagAction.detail.tagId).then(() => {})
-      }
+    function handleToggleFilterEvent() {
+      handleToggleFilter()
     }
 
-    window.addEventListener("onAction", handleAction);
-    return () => window.removeEventListener("onAction", handleAction);
+    function handleFocusSearchInput() {
+      focusSearchField()
+    }
+
+    async function handleDeleteTagEvent(tagId: number) {
+      await handleDeleteTag(tagId)
+    }
+
+    async function handleUpdateTagEvent(tagId: number) {
+      await handleUpdateTag(tagId)
+    }
+
+    async function handleDeleteItemByIndexEvent(itemIndex: number) {
+      await handleDeleteItemByIndex(itemIndex)
+    }
+
+    function handleFilterHistoryEvent() {
+      handleFilterHistory()
+      focusSearchField()
+    }
+
+    async function handlePasteWithTransformationEvent(operation: TextFormatOperation) {
+      await handlePasteWithTransformation(operation)
+    }
+
+    async function handleFormatTextEvent(operation: TextFormatOperation) {
+      await handleFormatTextAndSave(operation)
+    }
+
+    emitter.on("ToggleFilter", handleToggleFilterEvent)
+    emitter.on("FocusSearchInput", handleFocusSearchInput)
+    emitter.on("DeleteTagById", handleDeleteTagEvent)
+    emitter.on("UpdateTagById", handleUpdateTagEvent)
+    emitter.on("DeleteItemByIndex", handleDeleteItemByIndexEvent)
+    emitter.on("FilterHistory", handleFilterHistoryEvent)
+    emitter.on("PasteWithTransformation", handlePasteWithTransformationEvent)
+    emitter.on("FormatText", handleFormatTextEvent)
+    return () => {
+      emitter.off("ToggleFilter", handleToggleFilterEvent)
+      emitter.off("FocusSearchInput", handleFocusSearchInput)
+      emitter.off("DeleteTagById", handleDeleteTagEvent)
+      emitter.off("UpdateTagById", handleUpdateTagEvent)
+      emitter.off("DeleteItemByIndex", handleDeleteItemByIndexEvent)
+      emitter.off("FilterHistory", handleFilterHistoryEvent)
+      emitter.off("PasteWithTransformation", handlePasteWithTransformationEvent)
+      emitter.off("FormatText", handleFormatTextEvent)
+    };
   }, []);
 
   async function handleDeleteTag(tagId: number) {
@@ -568,12 +593,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       if (item.tags && item.tags.includes(tagId)) {
         item.tags = item.tags.filter((id) => id !== tagId)
         updateHistoryItem(item.id!, item)
-        window.dispatchEvent(new CustomEvent("onAction", {
-          detail: {
-            action: ActionName.UpdateItem,
-            itemId: item.id
-          }
-        }));
+        emitter.emit("UpdateItemById", item.id)
       }
     })
   }
@@ -581,12 +601,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   async function handleUpdateTag(tagId: number) {
     getHistoryItems().forEach((item) => {
       if (item.tags && item.tags.includes(tagId)) {
-        window.dispatchEvent(new CustomEvent("onAction", {
-          detail: {
-            action: ActionName.UpdateItem,
-            itemId: item.id
-          }
-        }));
+        emitter.emit("UpdateItemById", item.id)
       }
     })
   }
@@ -775,8 +790,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
       if (isTextItem(item)) {
         let originalContent = item.content
         item.content = formatText(originalContent, operation)
-        await pasteItem(item, true)
+        await pasteItem(item, false)
         item.content = originalContent
+        await updateHistoryItem(item.id!, item)
       }
     }
   }
@@ -871,12 +887,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
-  function handleHideClipDropdownMenu(reason: HideClipDropdownMenuReason) {
-    if (reason !== "editContent" && reason !== ActionName.RenameItem) {
-      focusSearchField()
-    }
-  }
-
   function handleHideDropdown(reason: HideDropdownReason) {
     if (reason !== "editContent") {
       focusSearchField()
@@ -887,7 +897,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setTimeout(() => {
       scrollToLastSelectedItem()
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.RenameItem}}));
+        emitter.emit("RenameSelectedItem")
       }, 100);
     }, 100);
   }
@@ -1127,6 +1137,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function handleDeleteItemByIndex(index: number) {
+    console.log("handleDeleteItemByIndex", index)
     let item = getHistoryItem(index)
     let indices = getSelectedHistoryItemIndices()
     // If the item is selected, and it's the only selected item,
@@ -1351,14 +1362,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   onPasteObject={handlePasteObject}
                                   onPasteWithTab={handlePasteWithTab}
                                   onPasteWithReturn={handlePasteWithReturn}
-                                  onPasteWithTransformation={handlePasteWithTransformation}
                                   onPastePath={handlePastePath}
                                   onPasteByIndex={handlePasteByIndex}
                                   onPastePathByIndex={handlePastePathByIndex}
-                                  onFormatText={handleFormatTextAndSave}
                                   onMerge={handleMerge}
                                   onHideActions={handleHideActions}
-                                  onHideClipDropdownMenu={handleHideClipDropdownMenu}
                                   onEditContent={handleEditContent}
                                   onEditContentByIndex={handleEditContentByIndex}
                                   onRenameItem={handleRenameItem}
@@ -1387,7 +1395,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
                                   onTogglePreview={handleTogglePreview}
                                   onEditHistoryItem={handleEditHistoryItem}
                                   onDeleteItem={handleDeleteItem}
-                                  onDeleteItemByIndex={handleDeleteItemByIndex}
                                   onDeleteItems={handleDeleteItems}
                                   onDeleteAllItems={handleDeleteAllItems}/>
               </ResizablePanel>

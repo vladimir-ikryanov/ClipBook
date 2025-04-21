@@ -2,7 +2,7 @@ import '../app.css';
 import React, {useEffect, useState} from "react";
 import {Clip, ClipType, getHTML, getRTF} from "@/db";
 import {ToggleGroup, ToggleGroupItem} from "@/components/ui/toggle-group";
-import {ActionName} from "@/actions";
+import {emitter} from "@/actions";
 
 export enum TextType {
   Text = "Text",
@@ -45,17 +45,12 @@ export default function TextTypeToggle(props: TextTypeToggleProps) {
   }
 
   function handleSelectTextType(value: TextType) {
-    // Do not allow clear selection.
+    // Do not allow clear selection as we need to have at least one selected type.
     if (!value) {
       return
     }
     setSelectedType(value)
-    window.dispatchEvent(new CustomEvent("onAction", {
-      detail: {
-        action: ActionName.SwitchTextType,
-        type: value
-      }
-    }));
+    emitter.emit("SwitchTextType", value)
   }
 
   return (

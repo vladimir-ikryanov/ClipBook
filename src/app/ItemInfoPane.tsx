@@ -4,7 +4,7 @@ import {Clip, ClipType, getFilePath, getHTML, getRTF} from "@/db";
 import {getHistoryItemById, toBase64Icon} from "@/data";
 import ItemTags from "@/app/ItemTags";
 import {getTags, Tag} from "@/tags";
-import {ActionName} from "@/actions";
+import {emitter} from "@/actions";
 
 declare const getAppNameFromPath: (appPath: string) => string;
 declare const getFileIconAsBase64: (appPath: string, large: boolean) => string;
@@ -54,22 +54,19 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
   }
 
   useEffect(() => {
-    function handleAction(event: Event) {
-      const customEvent = event as CustomEvent<{ action: string }>;
-      let actionName = customEvent.detail.action;
-      if (actionName === ActionName.UpdateItem) {
-        const updateItemAction = event as CustomEvent<{ action: string, itemId: number }>
-        let updatedItem = getHistoryItemById(updateItemAction.detail.itemId)
-        if (updatedItem && updatedItem.id === props.item.id) {
-          updateItem(updatedItem)
+    function handleUpdateItemByIdEvent(itemId?: number) {
+      if (itemId) {
+        let item = getHistoryItemById(itemId)
+        if (item && item.id === props.item.id) {
+          updateItem(item)
         }
       }
     }
 
     updateItem(props.item)
 
-    window.addEventListener("onAction", handleAction);
-    return () => window.removeEventListener("onAction", handleAction);
+    emitter.on("UpdateItemById", handleUpdateItemByIdEvent)
+    return () => emitter.off("UpdateItemById", handleUpdateItemByIdEvent);
   }, [props.item]);
 
   function getTypes(): string[] {
@@ -148,7 +145,8 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             {
               sourceApp.length > 0 ?
                   <div className="flex">
-                    <img src={toBase64Icon(getFileIconAsBase64(sourceApp, false))} className="h-5 w-5 mr-2" alt="Application icon"/>
+                    <img src={toBase64Icon(getFileIconAsBase64(sourceApp, false))}
+                         className="h-5 w-5 mr-2" alt="Application icon"/>
                     <span>{getAppNameFromPath(sourceApp)}</span>
                   </div> : <span>Unknown</span>
             }
@@ -167,7 +165,8 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
                 return (
                     <span key={index}>
                       {type}
-                      {index < getTypes().length - 1 ? <span className="text-border px-1.5">|</span> : ""}
+                      {index < getTypes().length - 1 ?
+                          <span className="text-border px-1.5">|</span> : ""}
                     </span>
                 )
               })

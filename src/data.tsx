@@ -13,7 +13,7 @@ import {
 import {prefGetClearHistoryOnMacReboot} from "@/pref";
 import {getClipType} from "@/lib/utils";
 import {loadTags, Tag} from "@/tags";
-import {ActionName} from "@/actions";
+import {emitter} from "@/actions";
 
 declare const getImagesDir: () => string;
 declare const isAfterSystemReboot: () => boolean;
@@ -184,7 +184,7 @@ function loadSourceApps(history: Clip[]) {
   }
 
   sortAppsAlphabetically(sourceApps)
-  window.dispatchEvent(new CustomEvent("onAction", {detail: {action: ActionName.UpdateApps}}))
+  emitter.emit("UpdateApps")
 }
 
 function getAppInfoByPath(appPath: string): AppInfo | undefined {

@@ -22,7 +22,7 @@ import {
 } from "@/data";
 import {DialogTitle} from "@/components/ui/dialog";
 import {ClipType} from "@/db";
-import {ActionName} from "@/actions";
+import {emitter} from "@/actions";
 
 type OpenWithCommandsProps = {
   onOpenWithApp: (appPath: string) => void
@@ -43,24 +43,20 @@ export default function OpenWithCommands(props: OpenWithCommandsProps) {
   }
 
   useEffect(() => {
-    function handleAction(event: Event) {
-      const customEvent = event as CustomEvent<{ action: string }>;
-      if (customEvent.detail.action === ActionName.OpenWith) {
-        handleOpenChange(true)
-      }
+    function handleShowOpenWithCommandsEvent() {
+      handleOpenChange(true)
     }
 
-    window.addEventListener("onAction", handleAction);
-    return () => window.removeEventListener("onAction", handleAction);
-  }, [])
-
-  useEffect(() => {
-    function handleAction(e: Event) {
+    function handleAppWindowDidHideEvent() {
       handleOpenChange(false)
     }
 
-    window.addEventListener("onDidAppWindowHide", handleAction);
-    return () => window.removeEventListener("onDidAppWindowHide", handleAction);
+    emitter.on("ShowOpenWithCommands", handleShowOpenWithCommandsEvent)
+    emitter.on("NotifyAppWindowDidHide", handleAppWindowDidHideEvent)
+    return () => {
+      emitter.off("ShowOpenWithCommands", handleShowOpenWithCommandsEvent)
+      emitter.off("NotifyAppWindowDidHide", handleAppWindowDidHideEvent)
+    };
   }, [])
 
   function handleOpenChange(open: boolean) {
