@@ -312,7 +312,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
         <div
             id={`tab-${props.index}`}
             style={props.style}
-            className={`flex flex-row cursor-default select-none items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-popover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
+            className={`flex flex-row cursor-default select-none items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-accent-hover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
             onKeyDown={handleKeyDown}
             onMouseUp={handleMouseUp}
             onMouseDown={handleMouseDown}

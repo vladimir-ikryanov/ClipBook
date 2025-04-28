@@ -30,7 +30,7 @@ export default function SettingsSidebar(props: SettingsSidebarProps) {
 
   return (
       <Sidebar className="!h-auto" collapsible="none" side="left">
-        <SidebarContent className="py-0 px-2 select-none bg-secondary">
+        <SidebarContent className="py-0 px-1 select-none border-r border-r-sidebar-border">
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>

@@ -33,7 +33,7 @@ export default function TextTypeToggle(props: TextTypeToggleProps) {
   return (
       <div className="content-center" hidden={types.length <= 1}>
         <ToggleGroup type="single" value={selectedType} onValueChange={handleSelectTextType}
-                     className="p-1 content-center items-center rounded-lg">
+                     className="p-1 content-center items-center rounded-lg hover:bg-secondary">
           {
             types.map((type, index) => {
               return <ToggleGroupItem value={type} key={index} variant="toolbar" size="toolbar"

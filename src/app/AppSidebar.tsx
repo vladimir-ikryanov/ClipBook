@@ -127,7 +127,7 @@ export default function AppSidebar(props: AppSidebarProps) {
 
   return (
       <Sidebar side="left"
-               className={`h-screen !w-[4rem] items-center py-1 border-r ${props.visible ? "" : "hidden"}`}
+               className={`h-screen !w-[4rem] bg-secondary items-center py-1 border-r ${props.visible ? "" : "hidden"}`}
                collapsible="none">
         <SidebarHeader>
           <SidebarMenu>

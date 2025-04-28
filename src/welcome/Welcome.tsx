@@ -6,7 +6,7 @@ export default function Welcome() {
       <div className="flex h-screen bg-background">
         <div className="flex flex-col text-center mx-auto">
           <div className="flex p-10 justify-center draggable"></div>
-          <img src="assets/logo.svg" className="h-44 w-44 mt-28 mx-auto text-secondary-foreground" alt=""/>
+          <img src="assets/logo_256x256@2x.png" className="h-44 w-44 mt-28 mx-auto text-secondary-foreground" alt=""/>
           <p className="text-center pt-8 text-3xl font-bold text-foreground">
             Welcome to ClipBook
           </p>
@@ -16,7 +16,7 @@ export default function Welcome() {
           </p>
           <div className="items-center pt-8">
             <Button onClick={() => window.location.href = "/accessibility"}
-                className="bg-gradient-to-b from-blue-500 to-blue-600 text-white p-5 hover:from-blue-600 hover:to-blue-700">Get
+                className="bg-settings-primary-button text-white p-5 hover:bg-settings-primary-button-hover m-2">Get
               Started</Button>
           </div>
         </div>

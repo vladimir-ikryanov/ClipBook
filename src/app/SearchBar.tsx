@@ -196,7 +196,7 @@ export default function SearchBar(props: SearchBarProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
-                <div className="select-none mr-2">
+                <div className="select-none">
                   {alwaysDisplay ? "Hide when not focused" : "Always display"}
                 </div>
               </TooltipContent>

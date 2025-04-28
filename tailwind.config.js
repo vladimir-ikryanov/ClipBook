@@ -23,6 +23,7 @@ module.exports = {
         ring: "var(--ring)",
         tag: "var(--tag)",
         background: "var(--background)",
+        "background-solid": "var(--background-solid)",
         foreground: "var(--foreground)",
         searchHighlight: "var(--search-highlight)",
         checked: "var(--checked)",
@@ -47,6 +48,7 @@ module.exports = {
         },
         secondary: {
           DEFAULT: "var(--secondary)",
+          solid: "var(--secondary-solid)",
           foreground: "var(--secondary-foreground)",
         },
         destructive: {
@@ -60,6 +62,7 @@ module.exports = {
         accent: {
           DEFAULT: "var(--accent)",
           foreground: "var(--accent-foreground)",
+          hover: "var(--accent-hover)",
         },
         popover: {
           DEFAULT: "var(--popover)",
@@ -95,14 +98,14 @@ module.exports = {
           tableRow: "var(--settings-table-row)",
           tableRow2: "var(--settings-table-row2)",
           inputPlaceholder: "var(--settings-input-placeholder)",
-          primaryButton: "var(--primary-button-background)",
-          primaryButtonHover: "var(--primary-button-background-hover)",
-          primaryButtonText: "var(--primary-button-text)",
-          secondaryButton: "var(--secondary-button-background)",
-          secondaryButtonHover: "var(--secondary-button-background-hover)",
-          secondaryButtonText: "var(--secondary-button-text)",
-          secondaryButtonBorder: "var(--secondary-button-border)",
-          secondaryButtonBorderHover: "var(--secondary-button-border-hover)",
+          "primary-button": "var(--primary-button-background)",
+          "primary-button-hover": "var(--primary-button-background-hover)",
+          "primary-button-text": "var(--primary-button-text)",
+          "secondary-button": "var(--secondary-button-background)",
+          "secondary-button-hover": "var(--secondary-button-background-hover)",
+          "secondary-button-text": "var(--secondary-button-text)",
+          "secondary-button-border": "var(--secondary-button-border)",
+          "secondary-button-border-hover": "var(--secondary-button-border-hover)",
         },
         toolbar: {
           DEFAULT: "var(--toolbar-background)",

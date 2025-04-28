@@ -149,7 +149,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
   }
 
   return (
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen bg-background">
         <SearchBar searchQuery={props.searchQuery}
                    onSearchQueryChange={props.onSearchQueryChange}
                    isPreviewVisible={props.isPreviewVisible}

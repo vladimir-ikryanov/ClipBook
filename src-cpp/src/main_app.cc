@@ -107,6 +107,7 @@ void MainApp::launch() {
 
   app_window_ = Browser::create(app_);
   app_window_->settings()->disableOverscrollHistoryNavigation();
+  app_window_->setVibrancy(VibrancyEffect::kSidebar);
   app_window_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
     initJavaScriptApi(args.window);
     action.proceed();
@@ -545,6 +546,7 @@ void MainApp::showSettingsWindow(const std::string &section) {
   settings_window_->setWindowButtonVisible(WindowButtonType::kMaximize, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kRestore, false);
   settings_window_->setWindowButtonVisible(WindowButtonType::kZoom, false);
+  settings_window_->setVibrancy(VibrancyEffect::kSidebar);
   settings_window_->setSize(700, 760);
   settings_window_->centerWindow();
   settings_window_->show();
@@ -552,6 +554,7 @@ void MainApp::showSettingsWindow(const std::string &section) {
 
 void MainApp::showWelcomeWindow() {
   welcome_window_ = Browser::create(app_);
+  welcome_window_->setVibrancy(VibrancyEffect::kSidebar);
   welcome_window_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
     initJavaScriptApi(args.window);
     action.proceed();

@@ -96,7 +96,7 @@ export default function PreviewTextPane(props: PreviewTextPaneProps) {
 
   return (
       <textarea id='preview'
-                className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text-sm  scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent"
+                className="preview h-full px-4 py-2 m-0 outline-none resize-none font-mono text-sm scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent"
                 value={content}
                 onBlur={finishEditing}
                 onChange={handleOnChange}

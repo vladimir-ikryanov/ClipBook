@@ -120,7 +120,7 @@ export default function PreviewLinkPane(props: PreviewLinkPaneProps) {
   if (props.editMode) {
     return (
         <textarea id='preview'
-                  className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text-sm"
+                  className="preview h-full px-4 py-2 m-0 outline-none resize-none font-mono text-sm"
                   autoFocus={true}
                   value={content}
                   onBlur={finishEditing}

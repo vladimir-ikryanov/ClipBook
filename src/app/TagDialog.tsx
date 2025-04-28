@@ -93,7 +93,7 @@ export default function TagDialog(props: TagDialogProps) {
             <DialogTitle className="mx-auto">{props.tag ? "Edit tag" : "New tag"}</DialogTitle>
             <DialogDescription className="mx-auto"></DialogDescription>
           </DialogHeader>
-          <div className="flex items-center bg-secondary rounded-lg">
+          <div className="flex items-center bg-secondary-solid rounded-lg">
             <TagIcon className="p-0.5 mt-0.5 ml-3 mr-1" style={{color: tagColor}}/>
             <Input id="tagName"
                    autoFocus={true}
@@ -101,7 +101,7 @@ export default function TagDialog(props: TagDialogProps) {
                    onChange={handleValueChange}
                    onKeyDown={handleKeyDown}
                    placeholder="Tag name"
-                   className="text-base placeholder:text-settings-inputPlaceholder border-none bg-secondary px-1"/>
+                   className="text-base placeholder:text-settings-inputPlaceholder border-none bg-secondary-solid px-1"/>
           </div>
           <RadioGroup value={tagColor}
                       onValueChange={handleColorChange}

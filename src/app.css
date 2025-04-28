@@ -49,8 +49,8 @@ a, button {
 .preview {
   border-top-width: 1px;
   border-top-style: solid;
-  border-top-color: var(--secondary);
-  background-color: var(--secondary);
+  border-top-color: transparent;
+  background-color: transparent;
   transition: background-color 150ms linear;
 }
 
@@ -58,7 +58,6 @@ a, button {
   border-top-width: 1px;
   border-top-style: solid;
   border-top-color: var(--preview-border);
-  background-color: var(--secondary);
   transition: background-color 250ms linear;
 }
 

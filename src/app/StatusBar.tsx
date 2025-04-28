@@ -34,10 +34,10 @@ export default function StatusBar(props: StatusBarProps) {
 
   return (
       <div
-          className={`group flex items-center justify-between px-1.5 pb-2 pt-1.5 border-t-solid border-t-border border-t ${updateAvailable ? "bg-gradient-to-r from-status-bar-highlight-green-start from-[0%] via-20% via-status-bar-highlight-green-middle to-transparent to-80%" : ""}`}>
+          className={`flex items-center justify-between px-1.5 pb-2 pt-1.5 border-t-solid border-t-border border-t ${updateAvailable ? "bg-gradient-to-r from-status-bar-highlight-green-start from-[0%] via-20% via-status-bar-highlight-green-middle to-transparent to-80%" : ""}`}>
         {
           updateAvailable ? (
-              <div className="flex text-sm items-center h-8">
+              <div className="group flex text-sm items-center h-8">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="ghost"

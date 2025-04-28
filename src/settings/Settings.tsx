@@ -23,7 +23,7 @@ export default function Settings(props: SettingsProps) {
   return (
       <SidebarProvider className="">
         <SettingsSidebar onSelect={handleSidebarItemSelect} selectedItemType={selectedItemType}/>
-        <div className="w-full">
+        <div className="w-full bg-background-solid">
           {
               selectedItemType === "General" && <General/>
           }

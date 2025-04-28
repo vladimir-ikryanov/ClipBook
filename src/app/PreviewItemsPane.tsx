@@ -35,7 +35,7 @@ export default function PreviewItemsPane(props: PreviewItemsPaneProps) {
     return (
         <div key={index}
              id={last ? "last" : ""}
-             className={`flex flex-grow m-0 bg-secondary items-center justify-center outline-none resize-none overflow-hidden ${last ? "" : "border-b border-b-preview-border"}`}>
+             className={`flex flex-grow m-0 items-center justify-center outline-none resize-none overflow-hidden ${last ? "" : "border-b border-b-preview-border"}`}>
           <img src={"clipbook://images/" + item.imageFileName} alt={item.content}
                className="max-h-full max-w-full object-contain"/>
         </div>

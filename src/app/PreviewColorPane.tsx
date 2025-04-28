@@ -64,7 +64,7 @@ export default function PreviewColorPane(props: PreviewColorPaneProps) {
   if (props.editMode) {
     return (
         <textarea id='preview'
-                  className="preview h-full px-4 py-2 m-0 bg-secondary outline-none resize-none font-mono text-sm"
+                  className="preview h-full px-4 py-2 m-0 outline-none resize-none font-mono text-sm"
                   value={content}
                   onBlur={handleFinishEditing}
                   onChange={handleOnChange}
@@ -73,7 +73,7 @@ export default function PreviewColorPane(props: PreviewColorPaneProps) {
   }
 
   return (
-      <div className="flex flex-grow m-0 bg-secondary items-center justify-center outline-none resize-none overflow-hidden">
+      <div className="flex flex-grow m-0 items-center justify-center outline-none resize-none overflow-hidden">
         <div className="flex flex-col justify-center items-center">
           <div className={`h-48 w-48 rounded-full border-[6px] border-accent`} style={{backgroundColor: cssColor}}></div>
           <div className="mt-6 font-mono">{props.colorText}</div>

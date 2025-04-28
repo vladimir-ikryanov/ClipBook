@@ -26,7 +26,7 @@ export default function Enjoy() {
           <img src="assets/tray.png" alt="" className="mx-20 my-10 rounded-xl"/>
           <div className="items-center">
             <Button onClick={openClipBook}
-                    className="bg-gradient-to-b from-blue-500 to-blue-600 text-white p-5 hover:from-blue-600 hover:to-blue-700 m-2">Open
+                    className="bg-settings-primary-button text-white p-5 hover:bg-settings-primary-button-hover m-2">Open
               ClipBook</Button>
           </div>
         </div>

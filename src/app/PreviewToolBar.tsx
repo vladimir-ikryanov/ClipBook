@@ -332,7 +332,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
             }
           </div>
           <div className="flex-grow draggable"></div>
-          <TextTypeToggle item={selectedItem} types={getSelectedItemTextTypes(selectedItem)}/>
+          {
+            !canShowNumberOfSelectedItems() &&
+              <TextTypeToggle item={selectedItem} types={getSelectedItemTextTypes(selectedItem)}/>
+          }
           <div className="draggable">
             {
                 canShowNumberOfSelectedItems() &&
