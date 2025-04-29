@@ -456,7 +456,7 @@ export default function Commands(props: CommandsProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent className="flex items-center">
-            <div className="select-none mr-2">Show more actions</div>
+            <div className="select-none mr-2 ml-1">Show more actions</div>
             <ShortcutLabel shortcut={prefGetShowMoreActionsShortcut()}/>
           </TooltipContent>
         </Tooltip>

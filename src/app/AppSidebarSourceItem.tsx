@@ -19,6 +19,7 @@ export function AppSidebarSourceItem(props: AppSidebarSourceItemProps) {
                            className="cursor-default justify-center"
                            tooltip={{
                              children: props.app.name,
+                             className: "px-2.5",
                              hidden: false,
                            }}>
           <div className="flex h-5 w-5">

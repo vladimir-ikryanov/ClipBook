@@ -198,7 +198,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
-                <div className="select-none mr-2">
+                <div className="select-none mr-2 ml-1">
                   Paste {getSelectedHistoryItemIndices().length > 1 ? getSelectedHistoryItemIndices().length + " Items" : ""} to {props.appName}
                 </div>
                 <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
@@ -263,7 +263,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
                     <div
-                        className="select-none mr-2">Merge {props.selectedItemIndices.length} items
+                        className="select-none mr-1 ml-1">Merge {props.selectedItemIndices.length} items
                     </div>
                   </TooltipContent>
                 </Tooltip>
@@ -297,7 +297,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
-                    <div className="select-none mr-2">Copy to Clipboard</div>
+                    <div className="select-none mr-2 ml-1">Copy to Clipboard</div>
                     <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
                   </TooltipContent>
                 </Tooltip>
@@ -311,7 +311,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
-                    <div className="select-none mr-2">Open in Browser</div>
+                    <div className="select-none mr-2 ml-1">Open in Browser</div>
                     <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
                   </TooltipContent>
                 </Tooltip>
@@ -325,7 +325,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
-                    <div className="select-none mr-2">Copy Text from Image</div>
+                    <div className="select-none mr-2 ml-1">Copy Text from Image</div>
                     <ShortcutLabel shortcut={prefGetCopyTextFromImageShortcut()}/>
                   </TooltipContent>
                 </Tooltip>
@@ -358,11 +358,11 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
               {
                 selectedItemsAreMarkedAsFavorite() ?
                     <TooltipContent className="flex items-center">
-                      <div className="select-none mr-2">Remove from favorites</div>
+                      <div className="select-none mr-2 ml-1">Remove from favorites</div>
                       <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
                     </TooltipContent> :
                     <TooltipContent className="flex items-center">
-                      <div className="select-none mr-2">Add to favorites</div>
+                      <div className="select-none mr-2 ml-1">Add to favorites</div>
                       <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
                     </TooltipContent>
               }
@@ -385,7 +385,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
                 <div
-                    className="select-none mr-1">{props.displayInfo ? "Hide details" : "Show details"}</div>
+                    className="select-none mr-1 ml-1">{props.displayInfo ? "Hide details" : "Show details"}</div>
               </TooltipContent>
             </Tooltip>
 
@@ -396,7 +396,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
-                <div className="select-none mr-2">Hide preview panel</div>
+                <div className="select-none mr-2 ml-1">Hide preview panel</div>
                 <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
               </TooltipContent>
             </Tooltip>

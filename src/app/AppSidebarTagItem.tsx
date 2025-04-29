@@ -38,6 +38,7 @@ export function AppSidebarTagItem(props: AppSidebarTagItemProps) {
                                className="cursor-default"
                                tooltip={{
                                  children: props.tag.name,
+                                 className: "px-2.5",
                                  hidden: false,
                                }}>
               <TagIcon className="h-5 w-5" style={{ color: props.tag.color }}/>

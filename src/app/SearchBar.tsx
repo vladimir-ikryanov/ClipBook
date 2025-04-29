@@ -146,7 +146,7 @@ export default function SearchBar(props: SearchBarProps) {
                 </TooltipTrigger>
                 <TooltipContent className="flex items-center">
                   <div
-                      className="select-none mr-2">{props.isFilterVisible ? "Hide filter options" : "Show filter options"}</div>
+                      className="select-none mr-2 ml-1">{props.isFilterVisible ? "Hide filter options" : "Show filter options"}</div>
                   <ShortcutLabel shortcut={prefGetToggleFilterShortcut()}/>
                 </TooltipContent>
               </Tooltip>
@@ -165,7 +165,7 @@ export default function SearchBar(props: SearchBarProps) {
               <TooltipTrigger asChild>{renderTrialBadge()}
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
-                <div className="select-none mr-2">
+                <div className="select-none mr-2 ml-1">
                   {
                     props.trialDaysLeft > 0 ? `Trial will expire in ${props.trialDaysLeft} ${props.trialDaysLeft > 1 ? "days" : "day"}` : "Trial expired"
                   }
@@ -181,7 +181,7 @@ export default function SearchBar(props: SearchBarProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
-                <div className="select-none mr-2">Clear search</div>
+                <div className="select-none mr-2 ml-1">Clear search</div>
                 <ShortcutLabel shortcut="Escape"/>
               </TooltipContent>
             </Tooltip>
@@ -195,7 +195,7 @@ export default function SearchBar(props: SearchBarProps) {
                       strokeWidth={2}/>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent className="flex items-center">
+              <TooltipContent className="flex items-center px-2.5">
                 <div className="select-none">
                   {alwaysDisplay ? "Hide when not focused" : "Always display"}
                 </div>
@@ -216,7 +216,7 @@ export default function SearchBar(props: SearchBarProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
-                <div className="select-none mr-2">Show preview</div>
+                <div className="select-none mr-2 ml-1">Show preview</div>
                 <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
               </TooltipContent>
             </Tooltip>

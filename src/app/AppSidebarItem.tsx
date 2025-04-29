@@ -70,6 +70,7 @@ export function AppSidebarItem(props: AppSidebarItemProps) {
                            className="cursor-default"
                            tooltip={{
                              children: props.type,
+                             className: "px-2.5",
                              hidden: false,
                            }}>
           {renderIcon()}
