@@ -782,6 +782,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("isUpdateAvailable", [this]() -> bool {
     return update_available_;
   });
+  window->putProperty("isFileExists", [](std::string filePath) -> bool {
+    return fs::exists(filePath);
+  });
 
   // Settings window.
   window->putProperty("saveTheme", [this](std::string theme) -> void {

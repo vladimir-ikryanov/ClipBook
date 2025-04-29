@@ -1,7 +1,7 @@
 import '../app.css';
 import React, {useEffect, useState} from "react";
 import {Clip, ClipType, getFilePath, getHTML, getRTF} from "@/db";
-import {getHistoryItemById, toBase64Icon} from "@/data";
+import {fileExists, getHistoryItemById, toBase64Icon} from "@/data";
 import ItemTags from "@/app/ItemTags";
 import {getTags, Tag} from "@/tags";
 import {emitter} from "@/actions";
@@ -196,7 +196,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold mr-4">Path</div>
               <div className="flex-grow"></div>
-              <div className="flex-auto text-foreground text-end break-all">{filePath}</div>
+              <div className={`${fileExists(filePath) ? "text-foreground" : "text-primary-foreground"} flex-auto text-end break-all`}>{filePath}</div>
             </div>
         }
         {

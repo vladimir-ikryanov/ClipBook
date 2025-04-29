@@ -55,7 +55,7 @@ import {
   isTextItem,
   AppInfo,
   getDefaultApp,
-  getFileOrImagePath
+  getFileOrImagePath, fileExists
 } from "@/data";
 import {ClipType, getHTML, getImageText, getRTF} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
@@ -313,6 +313,16 @@ export default function Commands(props: CommandsProps) {
     if (getSelectedHistoryItemIndices().length === 1) {
       let item = getFirstSelectedHistoryItem()
       return item && item.type === ClipType.File
+    }
+    return false
+  }
+
+  function isFileExists() {
+    if (isFile()) {
+      let item = getFirstSelectedHistoryItem()
+      if (item) {
+        return fileExists(item.filePath)
+      }
     }
     return false
   }
@@ -663,7 +673,7 @@ export default function Commands(props: CommandsProps) {
                 <CommandSeparator/>
                 {
                     canShowInFinder() &&
-                    <CommandItem onSelect={handleShowInFinder}>
+                    <CommandItem onSelect={handleShowInFinder} disabled={!isFileExists()}>
                       <img src={toBase64Icon(finderIcon)} className="mr-2 h-5 w-5"
                            alt="App icon"/>
                       <span>Show in Finder</span>

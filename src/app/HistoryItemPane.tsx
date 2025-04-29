@@ -1,6 +1,6 @@
 import '../app.css';
 import React, {CSSProperties, KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
-import {getFilterQuery, updateHistoryItem} from "@/data";
+import {fileExists, getFilterQuery, updateHistoryItem} from "@/data";
 import {Clip, ClipType, getFilePath} from "@/db";
 import {getFileNameFromPath, hasModifiers, toCSSColor} from "@/lib/utils";
 import {
@@ -307,6 +307,13 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     return result
   }
 
+  function isDisabled(): boolean {
+    if (props.item && props.item.type === ClipType.File) {
+      return fileExists(props.item.filePath)
+    }
+    return true
+  }
+
   function renderItemPane() {
     return (
         <div
@@ -320,7 +327,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
             onMouseLeave={handleMouseLeave}>
           <div className="flex flex-none mr-1">{renderClipIcon()}</div>
           <div
-              className="flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis">
+              className={`flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis ${isDisabled() ? "" : "text-primary-foreground"}`}>
             {
               renameItemMode ? renderInputField() : renderItemLabel(getItemLabel(), getFilterQuery())
             }

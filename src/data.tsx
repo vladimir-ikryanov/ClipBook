@@ -22,6 +22,7 @@ declare const getAppInfo: (appPath: string) => string;
 declare const getDefaultAppInfo: (filePath: string) => string;
 declare const getRecommendedAppsInfo: (filePath: string) => string;
 declare const getAllAppsInfo: () => string;
+declare const isFileExists: (filePath: string) => boolean;
 
 export enum TextType {
   Text = "Text",
@@ -711,4 +712,8 @@ export function getSelectedItemTextTypes(item: Clip | undefined): TextType[] {
     return types
   }
   return []
+}
+
+export function fileExists(filePath: string): boolean {
+  return isFileExists(filePath)
 }
