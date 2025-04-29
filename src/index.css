@@ -10,7 +10,7 @@
     --card: #d0d0d0;
     --card-foreground: #616161;
     --tag: #e3e3e3;
-    --shortcut-label: rgba(208, 208, 208, 0.5);
+    --shortcut-label: rgba(175, 175, 175, 0.3);
     --shortcut-label-text: #858585;
     --shortcut-label-hover: rgba(208, 208, 208, 0.9);
     --shortcut-label-hover-text: #616161;
@@ -20,7 +20,7 @@
     --switch-checked: #006FFF;
     --switch-unchecked: #616161;
     --primary: #252525;
-    --primary-foreground: #414141;
+    --primary-foreground: rgba(60, 60, 60, 0.8);
     --secondary: rgba(242, 242, 242, 0.5);
     --secondary-solid: #F2F2F2;
     --secondary-foreground: #888888;
@@ -108,7 +108,7 @@
     --card: #3E4144;
     --card-foreground: #e3e3e3;
     --tag: #373737;
-    --shortcut-label: rgba(62, 65, 68, 0.9);
+    --shortcut-label: rgba(90, 94, 97, 0.5);
     --shortcut-label-text: #e3e3e3;
     --shortcut-label-hover: rgba(79, 81, 83, 0.9);
     --shortcut-label-hover-text: #e3e3e3;
@@ -120,7 +120,7 @@
     --popover-foreground: #DADADA;
     --primary: #f6f6f6;
     /* History item icon */
-    --primary-foreground: #808081;
+    --primary-foreground: rgba(215, 215, 215, 0.5);
     /* Preview pane background */
     --secondary: rgba(33, 33, 33, 0.7);
     --secondary-solid: rgba(33, 33, 33);
@@ -136,7 +136,7 @@
     --accent-hover: rgba(83, 83, 83, 0.3);
     --destructive: #282828;
     --destructive-foreground: #2b2d30;
-    --border: rgba(86, 88, 90, 0.5);
+    --border: rgba(97, 99, 101, 0.4);
     --input: #707070;
     --ring: #282828;
     --search-highlight: #06b6d4;

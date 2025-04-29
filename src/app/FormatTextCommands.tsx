@@ -59,6 +59,9 @@ export default function FormatTextCommands() {
 
   function handleOpenChange(open: boolean) {
     setOpen(open)
+    if (!open) {
+      emitter.emit("FocusSearchInput")
+    }
   }
 
   function handleMakeUpperCase() {

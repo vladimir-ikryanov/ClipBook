@@ -100,19 +100,18 @@ export default function Commands(props: CommandsProps) {
   }, [])
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    // Close the app window with the close app shortcut.
     if (isShortcutMatch(prefGetShowMoreActionsShortcut(), e.nativeEvent)) {
       e.preventDefault()
-      handleOpenChange(false)
+      handleOpenChange(false, true)
     }
     e.stopPropagation()
   }
 
-  function handleClick() {
+  function show() {
     handleOpenChange(true)
   }
 
-  function handleOpenChange(open: boolean) {
+  function handleOpenChange(open: boolean, focusSearch: boolean = false) {
     setDefaultApp(undefined)
     if (open) {
       let item = getFirstSelectedHistoryItem()
@@ -123,6 +122,10 @@ export default function Commands(props: CommandsProps) {
             setDefaultApp(getDefaultApp(filePath))
           }
         }
+      }
+    } else {
+      if (focusSearch) {
+        emitter.emit("FocusSearchInput")
       }
     }
     setOpen(open)
@@ -451,7 +454,7 @@ export default function Commands(props: CommandsProps) {
       <>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="toolbar" size="toolbar" onClick={handleClick}>
+            <Button variant="toolbar" size="toolbar" onClick={show}>
               <CommandIcon className="h-5 w-5"/>
             </Button>
           </TooltipTrigger>
@@ -461,7 +464,7 @@ export default function Commands(props: CommandsProps) {
           </TooltipContent>
         </Tooltip>
         <div className="" onKeyDown={handleKeyDown}>
-          <CommandDialog open={open} onOpenChange={handleOpenChange}>
+          <CommandDialog open={open} onOpenChange={(open) => handleOpenChange(open, true)}>
             <VisuallyHidden>
               <DialogTitle></DialogTitle>
             </VisuallyHidden>

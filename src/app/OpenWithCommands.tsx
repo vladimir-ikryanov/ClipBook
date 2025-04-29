@@ -82,6 +82,8 @@ export default function OpenWithCommands() {
           setOtherApps(allAppInfoList)
         }
       }
+    } else {
+      emitter.emit("FocusSearchInput")
     }
     setOpen(open)
   }
