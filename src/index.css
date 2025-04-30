@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: rgba(250, 250, 250, 0.25);
+    --background: rgba(255, 255, 255, 0.25);
     --background-solid: #fafafa;
     --foreground: #252525;
     --card: #d0d0d0;
@@ -21,7 +21,7 @@
     --switch-unchecked: #616161;
     --primary: #252525;
     --primary-foreground: rgba(60, 60, 60, 0.8);
-    --secondary: rgba(242, 242, 242, 0.5);
+    --secondary: rgba(255, 255, 255, 0.5);
     --secondary-solid: #F2F2F2;
     --secondary-foreground: #888888;
     --muted: #fafafa;
