@@ -1114,8 +1114,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
   function handleOpenInDefaultApp() {
     if (getSelectedHistoryItemIndices().length === 1) {
       let item = getFirstSelectedHistoryItem()
-      if (item.type === ClipType.File && !item.fileFolder) {
-        handleOpenInApp(getDefaultApp(getFilePath(item)))
+      if ((item.type === ClipType.File && !item.fileFolder) || item.type === ClipType.Image) {
+        let filePath = getFileOrImagePath(item)
+        if (filePath) {
+          let defaultApp = getDefaultApp(filePath)
+          if (defaultApp) {
+            openInApp(filePath, defaultApp.path)
+          }
+        }
       }
     }
   }
@@ -1124,7 +1130,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (appInfo) {
       let item = getFirstSelectedHistoryItem()
       if (item.type === ClipType.File || item.type === ClipType.Image) {
-        let filePath = getFileOrImagePath(item);
+        let filePath = getFileOrImagePath(item)
         if (filePath) {
           openInApp(filePath, appInfo.path)
         }
