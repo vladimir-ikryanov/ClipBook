@@ -156,10 +156,46 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        blob: {
+          "0%": {
+            transform: "translate(0px, 0px) scale(1)",
+          },
+          "25%": {
+            transform: "translate(-20px, 200px) scale(1.8)",
+          },
+          "50%": {
+            transform: "translate(200px, 250px) scale(1.1)",
+          },
+          "75%": {
+            transform: "translate(250px, 150px) scale(1.5)",
+          },
+          "100%": {
+            transform: "translate(0px, 0px) scale(1)",
+          },
+        },
+        blob2: {
+          "0%": {
+            transform: "translate(0px, 0px) scale(1)",
+          },
+          "25%": {
+            transform: "translate(-50px, -150px) scale(1.5)",
+          },
+          "50%": {
+            transform: "translate(100px, -200px) scale(1)",
+          },
+          "75%": {
+            transform: "translate(100px, 200px) scale(1.5)",
+          },
+          "100%": {
+            transform: "translate(0px, 0px) scale(1)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        blob: "blob 20s infinite",
+        blob2: "blob2 15s infinite",
       },
     },
   },

@@ -1,7 +1,7 @@
 import {LucideIcon} from "lucide-react";
 import {SidebarMenuButton, SidebarMenuItem} from "@/components/ui/sidebar";
 
-export type SettingsSidebarItemType = "General" | "History" | "Privacy" | "Shortcuts" | "License";
+export type SettingsSidebarItemType = "General" | "History" | "Privacy" | "Shortcuts" | "License" | "About";
 
 interface SettingsSidebarItemProps {
   type: SettingsSidebarItemType;

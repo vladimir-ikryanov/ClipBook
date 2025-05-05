@@ -61,9 +61,15 @@ export function AppSidebarItem(props: AppSidebarItemProps) {
     }
   }
 
+  function handleSelect() {
+    if (props.type != props.selectedType) {
+      props.onSelect()
+    }
+  }
+
   return (
       <SidebarMenuItem key={props.type}>
-        <SidebarMenuButton onClick={props.onSelect}
+        <SidebarMenuButton onClick={handleSelect}
                            isActive={props.type === props.selectedType}
                            variant="sidebar"
                            size="sidebar"

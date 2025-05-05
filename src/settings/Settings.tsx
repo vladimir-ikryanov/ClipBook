@@ -8,6 +8,7 @@ import General from "@/settings/General";
 import SettingsSidebar from "@/settings/SettingsSidebar";
 import {SettingsSidebarItemType} from "@/settings/SettingsSidebarItem";
 import {useState} from "react";
+import About from "@/settings/About";
 
 interface SettingsProps {
   selectedItemType: SettingsSidebarItemType
@@ -38,6 +39,9 @@ export default function Settings(props: SettingsProps) {
           }
           {
               selectedItemType === "License" && <License/>
+          }
+          {
+              selectedItemType === "About" && <About/>
           }
         </div>
       </SidebarProvider>

@@ -6,11 +6,14 @@ import {useEffect, useRef, useState} from "react";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {
   addHistoryItem,
-  addSelectedHistoryItemIndex, AppInfo,
+  addSelectedHistoryItemIndex,
+  AppInfo,
   clear,
   clearSelection,
   deleteHistoryItem,
-  findItem, getDefaultApp, getFileOrImagePath,
+  findItem,
+  getDefaultApp,
+  getFileOrImagePath,
   getFirstSelectedHistoryItem,
   getFirstSelectedHistoryItemIndex,
   getHistoryItem,
@@ -19,18 +22,24 @@ import {
   getLastSelectedItemIndex,
   getPreviewVisibleState,
   getSelectedHistoryItemIndices,
-  getSelectedHistoryItems, getFilterVisibleState,
+  getSelectedHistoryItems,
+  getFilterVisibleState,
   getVisibleHistoryLength,
   isHistoryEmpty,
   isHistoryItemSelected,
-  isTextItem, loadHistory,
+  isTextItem,
+  loadHistory,
   removeSelectedHistoryItemIndex,
   setFilterQuery,
   setPreviewVisibleState,
   setSelectedHistoryItemIndex,
   TextFormatOperation,
   updateHistoryItem,
-  updateHistoryItemTypes, setFilterVisibleState, getDetailsVisibleState, setDetailsVisibleState
+  updateHistoryItemTypes,
+  setFilterVisibleState,
+  getDetailsVisibleState,
+  setDetailsVisibleState,
+  getFilterQuery, isFilterActive, resetFilter
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
@@ -300,9 +309,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function scrollToIndex(index: number) {
-    if (listRef.current && index >= 0) {
-      listRef.current.scrollToItem(index, "auto")
-    }
+    setTimeout(() => {
+      if (listRef.current && index >= 0) {
+        listRef.current.scrollToItem(index, "auto")
+      }
+    }, 50);
   }
 
   useEffect(() => {
@@ -578,6 +589,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     emitter.on("OpenSettings", handleOpenSettings)
     emitter.on("SaveImageAsFile", handleSaveImageAsFile)
     emitter.on("ShowInFinder", handleShowInFinder)
+    emitter.on("ShowInHistory", handleShowInHistory)
     emitter.on("Split", handleSplit)
     emitter.on("Merge", handleMerge)
     return () => {
@@ -623,6 +635,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       emitter.off("OpenSettings", handleOpenSettings)
       emitter.off("SaveImageAsFile", handleSaveImageAsFile)
       emitter.off("ShowInFinder", handleShowInFinder)
+      emitter.off("ShowInHistory", handleShowInHistory)
       emitter.off("Split", handleSplit)
       emitter.off("Merge", handleMerge)
     };
@@ -1098,6 +1111,24 @@ export default function HistoryPane(props: HistoryPaneProps) {
     focusSearchField()
   }
 
+  function handleShowInHistory(item: Clip) {
+    if (getFilterQuery().length > 0) {
+      // Clear the search query in the search field.
+      handleSearchQueryChange("", true)
+    }
+    if (isFilterActive()) {
+      handleSidebarTypeSelect("All")
+      resetFilter()
+      emitter.emit("FilterHistory")
+    }
+    let index = getHistoryItemIndex(item)
+    if (index >= 0) {
+      setSelectedHistoryItemIndex(index)
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
+      scrollToLastSelectedItem()
+    }
+  }
+
   function previewLinkInApp(item: Clip) {
     if (isUrl(item.content)) {
       previewLink(item.content)
@@ -1242,20 +1273,22 @@ export default function HistoryPane(props: HistoryPaneProps) {
     clearEntireHistory()
   }
 
-  function handleSearchQueryChange(searchQuery: string): void {
+  function handleSearchQueryChange(searchQuery: string, skipSelection: boolean = false): void {
     setSearchQuery(searchQuery)
     setFilterQuery(searchQuery)
     let items = getHistoryItems();
     setHistory(items)
 
-    if (items.length === 0) {
-      clearSelection()
-    } else {
-      setSelectedHistoryItemIndex(0)
+    if (!skipSelection) {
+      if (items.length === 0) {
+        clearSelection()
+      } else {
+        setSelectedHistoryItemIndex(0)
+      }
+      // The props.items array won't be updated until the next render, so we need to get the updated
+      // items right now to update the preview text.
+      setSelectedItemIndices(getSelectedHistoryItemIndices())
     }
-    // The props.items array won't be updated until the next render, so we need to get the updated
-    // items right now to update the preview text.
-    setSelectedItemIndices(getSelectedHistoryItemIndices())
     if (searchQuery == "") {
       focusSearchField()
     }

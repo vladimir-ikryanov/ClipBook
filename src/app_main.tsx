@@ -49,6 +49,10 @@ const router = createBrowserRouter([
     path: "/settings/license",
     element: <Settings selectedItemType={"License"}/>,
   },
+  {
+    path: "/settings/about",
+    element: <Settings selectedItemType={"About"}/>,
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

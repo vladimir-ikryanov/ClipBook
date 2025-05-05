@@ -27,11 +27,21 @@ export function AppSidebarTagItem(props: AppSidebarTagItemProps) {
     props.onDeleteTag(props.tag)
   }
 
+  function handleSelect() {
+    if (props.selectedTag) {
+      if (props.tag.id != props.selectedTag.id) {
+        props.onSelect()
+      }
+    } else {
+      props.onSelect()
+    }
+  }
+
   return (
       <ContextMenu>
         <ContextMenuTrigger>
           <SidebarMenuItem key={props.tag.id}>
-            <SidebarMenuButton onClick={props.onSelect}
+            <SidebarMenuButton onClick={handleSelect}
                                isActive={props.selectedTag ? props.tag.id === props.selectedTag.id : false}
                                variant="sidebar"
                                size="sidebar"

@@ -20,7 +20,7 @@ std::string kKeyboardShortcutsUrl =
     "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=clipbook";
 std::string kChangelogUrl = "https://clipbook.app/changelog/?utm_source=clipbook";
 std::string kContactSupportUrl =
-    "mailto:vladimir.ikryanov@clipbook.app?subject=ClipBook%20Support&body=Please%20describe%20your%20issue%20here.";
+    "https://clipbook.app/contacts/?utm_source=clipbook";
 std::string kFeedbackUrl = "https://feedback.clipbook.app/?utm_source=clipbook";
 int32_t kUpdateCheckIntervalInHours = 24;
 
@@ -469,39 +469,7 @@ void MainApp::showUpToDateDialog(const std::function<void()> &complete) {
 }
 
 void MainApp::showAboutDialog() {
-  MessageDialogOptions options;
-  options.title = "About " + app_->name();
-  options.message = app_->name();
-
-  std::string arch;
-#ifdef ARCH_MAC_X64
-  arch = "(Intel)";
-#endif
-#ifdef ARCH_MAC_ARM64
-  arch = "(Apple Silicon)";
-#endif
-#ifdef ARCH_MAC_UNIVERSAL
-  arch = "(Universal)";
-#endif
-
-  options.informative_text =
-      "Version " + app_->version() + " " + arch + "\n\n© 2025 ClipBook. All rights reserved.";
-  options.buttons = {
-      MessageDialogButton("Visit Website", MessageDialogButtonType::kNone),
-      MessageDialogButton("Close", MessageDialogButtonType::kDefault)
-  };
-  if (app_window_visible_) {
-    auto_hide_disabled_ = true;
-    MessageDialog::show(app_window_, options, [this](const MessageDialogResult &result) {
-      if (result.button.type == MessageDialogButtonType::kNone) {
-        app_->desktop()->openUrl("https://clipbook.app?utm_source=app&utm_medium=about");
-      }
-      auto_hide_disabled_ = false;
-    });
-  } else {
-    activate();
-    MessageDialog::show(app_, options);
-  }
+  showSettingsWindow("/settings/about");
 }
 
 void MainApp::setTheme(const std::string &theme) {
@@ -524,6 +492,7 @@ void MainApp::showSettingsWindow(const std::string &section) {
   if (settings_window_ && !settings_window_->isClosed()) {
     settings_window_->navigation()->loadUrl(app_->baseUrl() + section);
     settings_window_->show();
+    settings_window_->activate();
     return;
   }
 
@@ -903,6 +872,20 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("shouldCopyOnNumberAction", [this]() -> bool {
     return settings_->shouldCopyOnNumberAction();
+  });
+  window->putProperty("getArch", [this]() -> std::string {
+#ifdef ARCH_MAC_X64
+    return "Intel";
+#endif
+#ifdef ARCH_MAC_ARM64
+    return "Apple Silicon";
+#endif
+#ifdef ARCH_MAC_UNIVERSAL
+    return "Universal";
+#endif
+  });
+  window->putProperty("getVersion", [this]() -> std::string {
+    return app_->version();
   });
 
   // Application shortcuts.

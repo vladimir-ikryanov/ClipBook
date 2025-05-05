@@ -28,6 +28,7 @@ export type Events = {
   ShowOpenWithCommands: void;
   ShowPasteTransformationCommands: void;
   ShowInFinder: void;
+  ShowInHistory: Clip;
   Split: void;
   Merge: void;
   NotifyAppWindowDidHide: void;

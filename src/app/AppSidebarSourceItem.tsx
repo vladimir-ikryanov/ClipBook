@@ -10,9 +10,19 @@ interface AppSidebarSourceItemProps {
 }
 
 export function AppSidebarSourceItem(props: AppSidebarSourceItemProps) {
+  function handleSelect() {
+    if (props.selectedApp) {
+      if (props.app.path != props.selectedApp.path) {
+        props.onSelect()
+      }
+    } else {
+      props.onSelect()
+    }
+  }
+
   return (
       <SidebarMenuItem key={props.app.path} hidden={props.hidden}>
-        <SidebarMenuButton onClick={props.onSelect}
+        <SidebarMenuButton onClick={handleSelect}
                            isActive={props.selectedApp ? props.app.path === props.selectedApp.path : false}
                            variant="sidebar"
                            size="sidebar"

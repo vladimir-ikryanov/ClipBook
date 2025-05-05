@@ -8,6 +8,7 @@ import {
 import {SettingsSidebarItem, SettingsSidebarItemType} from "@/settings/SettingsSidebarItem";
 import {useState} from "react";
 import {
+  InfoIcon,
   KeyboardIcon,
   KeyRoundIcon,
   ListIcon,
@@ -60,6 +61,11 @@ export default function SettingsSidebar(props: SettingsSidebarProps) {
                                      icon={KeyRoundIcon}
                                      isSelected={selectedItemType === "License"}
                                      onSelect={() => handleSelect("License")}/>
+                <SettingsSidebarItem type={"About"}
+                                     url={"/"}
+                                     icon={InfoIcon}
+                                     isSelected={selectedItemType === "About"}
+                                     onSelect={() => handleSelect("About")}/>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

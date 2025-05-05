@@ -1,6 +1,7 @@
 import '../app.css';
 import React, {KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
 import {
+  ArrowUpLeftIcon,
   CopyIcon,
   Edit3Icon,
   EyeIcon,
@@ -22,7 +23,8 @@ import {
 import {CommandShortcut} from "@/components/ui/command";
 import {Clip, ClipType, updateClip} from "@/db";
 import {
-  getHistoryItem,
+  getFilterQuery,
+  getHistoryItem, getSelectedHistoryItemIndices, isFilterActive,
   isTextItem,
   toBase64Icon
 } from "@/data";
@@ -79,6 +81,17 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
     e.stopPropagation()
   }
 
+  function canShowInHistory() {
+    if (getSelectedHistoryItemIndices().length > 1) {
+      return false
+    }
+    let filterQuery = getFilterQuery()
+    if (filterQuery.length > 0) {
+      return true
+    }
+    return isFilterActive()
+  }
+
   function handlePaste() {
     emitter.emit("PasteByIndex", props.index)
   }
@@ -124,6 +137,10 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
 
   function handlePreviewLink() {
     emitter.emit("PreviewLinkItemByIndex", props.index)
+  }
+
+  function handleShowInHistory() {
+    emitter.emit("ShowInHistory", props.item)
   }
 
   function handleAssignTag() {
@@ -292,6 +309,16 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               </ContextMenuItem>
           }
           <ContextMenuSeparator/>
+          {
+            canShowInHistory() &&
+              <>
+                <ContextMenuItem onClick={handleShowInHistory}>
+                  <ArrowUpLeftIcon className="mr-2 h-4 w-4"/>
+                  <span className="mr-12">Show in History</span>
+                </ContextMenuItem>
+                <ContextMenuSeparator/>
+              </>
+          }
           <ContextMenuItem onClick={handleDeleteItem}>
             <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
             <span className="text-actions-danger">Delete</span>

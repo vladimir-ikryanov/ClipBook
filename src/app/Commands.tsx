@@ -4,6 +4,7 @@ import {Button} from "@/components/ui/button";
 import * as React from "react"
 import {useEffect, useState} from "react"
 import {
+  ArrowUpLeftIcon,
   CommandIcon,
   CopyIcon, DownloadIcon,
   Edit3Icon, EyeIcon,
@@ -55,7 +56,7 @@ import {
   isTextItem,
   AppInfo,
   getDefaultApp,
-  getFileOrImagePath, fileExists
+  getFileOrImagePath, fileExists, getFilterQuery, isFilterActive
 } from "@/data";
 import {ClipType, getHTML, getImageText, getRTF} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
@@ -236,6 +237,12 @@ export default function Commands(props: CommandsProps) {
     emitter.emit("OpenInBrowser")
   }
 
+  function handleShowInHistory() {
+    handleOpenChange(false)
+    let item = getFirstSelectedHistoryItem()
+    emitter.emit("ShowInHistory", item)
+  }
+
   function handleShowInFinder() {
     handleOpenChange(false)
     emitter.emit("ShowInFinder")
@@ -363,6 +370,17 @@ export default function Commands(props: CommandsProps) {
       return getFirstSelectedHistoryItem()?.type === ClipType.Link
     }
     return false
+  }
+
+  function canShowInHistory() {
+    if (getSelectedHistoryItemIndices().length > 1) {
+      return false
+    }
+    let filterQuery = getFilterQuery()
+    if (filterQuery.length > 0) {
+      return true
+    }
+    return isFilterActive()
   }
 
   function canShowPreview() {
@@ -583,6 +601,16 @@ export default function Commands(props: CommandsProps) {
                     </CommandItem>
                 }
                 <CommandSeparator/>
+                {
+                    canShowInHistory() &&
+                    <>
+                      <CommandItem onSelect={handleShowInHistory}>
+                        <ArrowUpLeftIcon className="mr-2 h-5 w-5"/>
+                        <span>Show in History</span>
+                      </CommandItem>
+                      <CommandSeparator/>
+                    </>
+                }
                 {
                     canShowOpenInBrowser() &&
                     <CommandItem onSelect={handleOpenInBrowser}>
