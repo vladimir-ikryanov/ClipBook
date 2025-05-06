@@ -42,7 +42,7 @@ export default function OpenWithCommands() {
     function handleShowOpenWithCommandsEvent() {
       setTimeout(() => {
         handleOpenChange(true)
-      }, 100);
+      }, 200);
     }
 
     function handleAppWindowDidHideEvent() {

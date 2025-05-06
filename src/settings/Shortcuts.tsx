@@ -345,7 +345,7 @@ export default function Shortcuts() {
             <div className="flex items-center justify-between space-x-20">
               <span className="">Open in Browser</span>
               <ShortcutInput shortcut={openInBrowserShortcut}
-                             defaultShortcut="AltLeft + Enter"
+                             defaultShortcut="MetaLeft + Enter"
                              onSave={handleOpenInBrowserShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">

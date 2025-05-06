@@ -8,7 +8,7 @@ import {
   GlobeIcon, PenIcon, PlusIcon, ScanTextIcon,
   StarIcon,
   StarOffIcon, TagsIcon,
-  TrashIcon
+  TrashIcon, UploadIcon
 } from "lucide-react";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {
@@ -16,14 +16,18 @@ import {
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
-  prefGetOpenInBrowserShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut, prefGetRenameItemShortcut,
+  prefGetOpenInBrowserShortcut, prefGetOpenInDefaultAppShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetRenameItemShortcut,
+  prefGetShowInFinderShortcut,
   prefGetToggleFavoriteShortcut,
 } from "@/pref";
 import {CommandShortcut} from "@/components/ui/command";
 import {Clip, ClipType, updateClip} from "@/db";
 import {
-  getFilterQuery,
+  AppInfo,
+  fileExists, FinderIcon, getDefaultApp, getFileOrImagePath,
+  getFilterQuery, getFirstSelectedHistoryItem,
   getHistoryItem, getSelectedHistoryItemIndices, isFilterActive,
   isTextItem,
   toBase64Icon
@@ -61,6 +65,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   let focusSearchOnClose = true
 
   const [itemTags, setItemTags] = useState<TagCheckedState[]>([])
+  const [defaultApp, setDefaultApp] = useState<AppInfo | undefined>(undefined)
 
   useEffect(() => {
     let tags: TagCheckedState[] = []
@@ -90,6 +95,32 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
       return true
     }
     return isFilterActive()
+  }
+
+  function isFile() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      return item && item.type === ClipType.File
+    }
+    return false
+  }
+
+  function isFileExists() {
+    if (isFile()) {
+      let item = getFirstSelectedHistoryItem()
+      if (item) {
+        return fileExists(item.filePath)
+      }
+    }
+    return false
+  }
+
+  function canShowInFinder() {
+    return isFile()
+  }
+
+  function canOpenInDefaultApp() {
+    return defaultApp !== undefined
   }
 
   function handlePaste() {
@@ -173,9 +204,35 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   }
 
   function handleOpenChange(open: boolean) {
-    if (!open && focusSearchOnClose) {
-      emitter.emit("FocusSearchInput")
+    setDefaultApp(undefined)
+    if (open) {
+      let item = getFirstSelectedHistoryItem()
+      if (item.type === ClipType.File || item.type === ClipType.Image) {
+        if (!item.fileFolder) {
+          let filePath = getFileOrImagePath(item);
+          if (filePath) {
+            setDefaultApp(getDefaultApp(filePath))
+          }
+        }
+      }
+    } else {
+      if (focusSearchOnClose) {
+        emitter.emit("FocusSearchInput")
+      }
     }
+  }
+
+  function handleShowInFinder() {
+    emitter.emit("ShowInFinder")
+  }
+
+  function handleOpenInDefaultApp() {
+    emitter.emit("OpenInApp", defaultApp)
+  }
+
+  function handleOpenWith() {
+    focusSearchOnClose = false
+    emitter.emit("ShowOpenWithCommands")
   }
 
   return (
@@ -306,6 +363,40 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               <ContextMenuItem onClick={handlePreviewLink}>
                 <EyeIcon className="mr-2 h-4 w-4"/>
                 <span className="mr-12">Preview</span>
+              </ContextMenuItem>
+          }
+          {
+            (canShowInFinder() || canOpenInDefaultApp()) && <ContextMenuSeparator/>
+          }
+          {
+              canShowInFinder() &&
+              <ContextMenuItem onSelect={handleShowInFinder} disabled={!isFileExists()}>
+                <img src={toBase64Icon(FinderIcon)} className="mr-2 h-5 w-5"
+                     alt="App icon"/>
+                <span>Show in Finder</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetShowInFinderShortcut()}/>
+                </CommandShortcut>
+              </ContextMenuItem>
+          }
+          {
+              canOpenInDefaultApp() &&
+                <ContextMenuItem onSelect={handleOpenInDefaultApp}>
+                  {
+                    defaultApp ? <img src={toBase64Icon(defaultApp.icon)} className="mr-2 h-5 w-5"
+                                      alt="App icon"/> : null
+                  }
+                  <span>Open in {defaultApp?.name}</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetOpenInDefaultAppShortcut()}/>
+                  </CommandShortcut>
+                </ContextMenuItem>
+          }
+          {
+              canOpenInDefaultApp() &&
+              <ContextMenuItem onSelect={handleOpenWith}>
+                <UploadIcon className="mr-2 h-5 w-5"/>
+                <span>Open With...</span>
               </ContextMenuItem>
           }
           <ContextMenuSeparator/>

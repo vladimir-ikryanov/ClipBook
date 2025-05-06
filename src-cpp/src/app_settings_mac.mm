@@ -568,7 +568,7 @@ std::string AppSettingsMac::getOpenInBrowserShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "AltLeft + Enter";
+  return "MetaLeft + Enter";
 }
 
 void AppSettingsMac::saveShowInFinderShortcut(std::string shortcut) {
