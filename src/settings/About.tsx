@@ -50,9 +50,9 @@ export default function About() {
   (window as any).setUpdateCheckInProgress = setUpdateCheckInProgress
 
   return (
-      <div className="flex flex-col relative min-h-screen">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-700 rounded-full filter blur-2xl opacity-15 animate-blob"></div>
-        <div className="absolute top-96 left-96 w-52 h-52 bg-blue-700 rounded-full filter blur-2xl opacity-15 animate-blob2"></div>
+      <div className="flex flex-col min-h-screen relative overflow-hidden">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-700 rounded-full filter blur-xl opacity-10 animate-blob"></div>
+        <div className="absolute top-96 left-96 w-52 h-52 bg-blue-700 rounded-full filter blur-xl opacity-5 animate-blob2"></div>
         <div className="flex draggable h-20"></div>
         <div className="flex flex-col relative flex-grow items-center justify-center">
           <img src="/assets/logo_256x256@2x.png" className="w-28 h-28"/>

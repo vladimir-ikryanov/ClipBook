@@ -161,13 +161,13 @@ module.exports = {
             transform: "translate(0px, 0px) scale(1)",
           },
           "25%": {
-            transform: "translate(-20px, 200px) scale(1.8)",
+            transform: "translate(-20px, 200px) scale(1.5)",
           },
           "50%": {
             transform: "translate(200px, 250px) scale(1.1)",
           },
           "75%": {
-            transform: "translate(250px, 150px) scale(1.5)",
+            transform: "translate(250px, 150px) scale(1.3)",
           },
           "100%": {
             transform: "translate(0px, 0px) scale(1)",
@@ -178,13 +178,13 @@ module.exports = {
             transform: "translate(0px, 0px) scale(1)",
           },
           "25%": {
-            transform: "translate(-50px, -150px) scale(1.5)",
+            transform: "translate(-50px, -150px) scale(1.3)",
           },
           "50%": {
             transform: "translate(100px, -200px) scale(1)",
           },
           "75%": {
-            transform: "translate(100px, 200px) scale(1.5)",
+            transform: "translate(100px, 200px) scale(1.3)",
           },
           "100%": {
             transform: "translate(0px, 0px) scale(1)",
