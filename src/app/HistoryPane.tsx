@@ -84,7 +84,7 @@ import * as React from "react";
 import AppSidebar from "@/app/AppSidebar";
 import {AppSidebarItemType} from "@/app/AppSidebarItem";
 import {Tag} from "@/tags";
-import {emitter} from "@/actions";
+import {emitter, OpenFileItemWithAppByIndexArgs, OpenInAppByIndexArgs} from "@/actions";
 
 declare const pasteItemInFrontApp: (text: string, rtf: string, html: string, imageFileName: string, filePath: string) => void;
 declare const pasteFilesInFrontApp: (filePaths: string) => void;
@@ -564,6 +564,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     emitter.on("PasteWithTransformation", handlePasteWithTransformation)
     emitter.on("FormatText", handleFormatTextAndSave)
     emitter.on("OpenInApp", handleOpenInApp)
+    emitter.on("OpenInAppByIndex", handleOpenInAppByIndex)
     emitter.on("OpenInBrowser", handleOpenInBrowser)
     emitter.on("OpenInBrowserByIndex", handleOpenInBrowserByIndex)
     emitter.on("PreviewLinkItem", handlePreviewLink)
@@ -586,9 +587,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
     emitter.on("EditContentByIndex", handleEditContentByIndex)
     emitter.on("EditItem", handleEditHistoryItem)
     emitter.on("OpenFileItemWithApp", handleOpenWithApp)
+    emitter.on("OpenFileItemWithAppByIndex", handleOpenWithAppByIndex)
     emitter.on("OpenSettings", handleOpenSettings)
     emitter.on("SaveImageAsFile", handleSaveImageAsFile)
     emitter.on("ShowInFinder", handleShowInFinder)
+    emitter.on("ShowInFinderByIndex", handleShowInFinderByIndex)
     emitter.on("ShowInHistory", handleShowInHistory)
     emitter.on("Split", handleSplit)
     emitter.on("Merge", handleMerge)
@@ -610,6 +613,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       emitter.off("PasteWithTransformation", handlePasteWithTransformation)
       emitter.off("FormatText", handleFormatTextAndSave)
       emitter.off("OpenInApp", handleOpenInApp)
+      emitter.off("OpenInAppByIndex", handleOpenInAppByIndex)
       emitter.off("OpenInBrowser", handleOpenInBrowser)
       emitter.off("OpenInBrowserByIndex", handleOpenInBrowserByIndex)
       emitter.off("PreviewLinkItem", handlePreviewLink)
@@ -632,9 +636,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
       emitter.off("EditContentByIndex", handleEditContentByIndex)
       emitter.off("EditItem", handleEditHistoryItem)
       emitter.off("OpenFileItemWithApp", handleOpenWithApp)
+      emitter.off("OpenFileItemWithAppByIndex", handleOpenWithAppByIndex)
       emitter.off("OpenSettings", handleOpenSettings)
       emitter.off("SaveImageAsFile", handleSaveImageAsFile)
       emitter.off("ShowInFinder", handleShowInFinder)
+      emitter.off("ShowInFinderByIndex", handleShowInFinderByIndex)
       emitter.off("ShowInHistory", handleShowInHistory)
       emitter.off("Split", handleSplit)
       emitter.off("Merge", handleMerge)
@@ -1111,6 +1117,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
     focusSearchField()
   }
 
+  function handleShowInFinderByIndex(index: number) {
+    let item = getHistoryItem(index)
+    if (item && item.type === ClipType.File) {
+      showInFinder(getFilePath(item))
+    }
+  }
+
   function handleShowInHistory(item: Clip) {
     if (getFilterQuery().length > 0) {
       // Clear the search query in the search field.
@@ -1170,6 +1183,19 @@ export default function HistoryPane(props: HistoryPaneProps) {
     focusSearchField()
   }
 
+  function handleOpenInAppByIndex(args: OpenInAppByIndexArgs) {
+    if (args.app) {
+      let item = getHistoryItem(args.index)
+      if (item.type === ClipType.File || item.type === ClipType.Image) {
+        let filePath = getFileOrImagePath(item)
+        if (filePath) {
+          openInApp(filePath, args.app.path)
+        }
+      }
+    }
+    focusSearchField()
+  }
+
   function handleOpenWithApp(appPath: string) {
     if (getSelectedHistoryItemIndices().length === 1) {
       let item = getFirstSelectedHistoryItem()
@@ -1178,6 +1204,16 @@ export default function HistoryPane(props: HistoryPaneProps) {
         if (filePath) {
           openInApp(filePath, appPath)
         }
+      }
+    }
+  }
+
+  function handleOpenWithAppByIndex(args: OpenFileItemWithAppByIndexArgs) {
+    let item = getHistoryItem(args.index)
+    if (item.type === ClipType.File || item.type === ClipType.Image) {
+      let filePath = getFileOrImagePath(item);
+      if (filePath) {
+        openInApp(filePath, args.appPath)
       }
     }
   }

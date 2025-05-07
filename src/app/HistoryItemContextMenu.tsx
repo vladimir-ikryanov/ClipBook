@@ -27,7 +27,7 @@ import {Clip, ClipType, updateClip} from "@/db";
 import {
   AppInfo,
   fileExists, FinderIcon, getDefaultApp, getFileOrImagePath,
-  getFilterQuery, getFirstSelectedHistoryItem,
+  getFilterQuery,
   getHistoryItem, getSelectedHistoryItemIndices, isFilterActive,
   isTextItem,
   toBase64Icon
@@ -98,19 +98,12 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   }
 
   function isFile() {
-    if (getSelectedHistoryItemIndices().length === 1) {
-      let item = getFirstSelectedHistoryItem()
-      return item && item.type === ClipType.File
-    }
-    return false
+    return props.item && props.item.type === ClipType.File
   }
 
   function isFileExists() {
     if (isFile()) {
-      let item = getFirstSelectedHistoryItem()
-      if (item) {
-        return fileExists(item.filePath)
-      }
+      return fileExists(props.item.filePath)
     }
     return false
   }
@@ -206,10 +199,9 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   function handleOpenChange(open: boolean) {
     setDefaultApp(undefined)
     if (open) {
-      let item = getFirstSelectedHistoryItem()
-      if (item.type === ClipType.File || item.type === ClipType.Image) {
-        if (!item.fileFolder) {
-          let filePath = getFileOrImagePath(item);
+      if (props.item.type === ClipType.File || props.item.type === ClipType.Image) {
+        if (!props.item.fileFolder) {
+          let filePath = getFileOrImagePath(props.item);
           if (filePath) {
             setDefaultApp(getDefaultApp(filePath))
           }
@@ -223,16 +215,19 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   }
 
   function handleShowInFinder() {
-    emitter.emit("ShowInFinder")
+    emitter.emit("ShowInFinderByIndex", props.index)
   }
 
   function handleOpenInDefaultApp() {
-    emitter.emit("OpenInApp", defaultApp)
+    emitter.emit("OpenInAppByIndex", {
+      app: defaultApp,
+      index: props.index
+    })
   }
 
   function handleOpenWith() {
     focusSearchOnClose = false
-    emitter.emit("ShowOpenWithCommands")
+    emitter.emit("ShowOpenWithCommandsByIndex", props.index)
   }
 
   return (

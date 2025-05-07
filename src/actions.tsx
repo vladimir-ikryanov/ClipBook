@@ -2,6 +2,16 @@ import mitt, {Emitter} from 'mitt';
 import {AppInfo, TextFormatOperation, TextType} from "@/data";
 import {Clip} from "@/db";
 
+export type OpenFileItemWithAppByIndexArgs = {
+  appPath: string;
+  index: number;
+}
+
+export type OpenInAppByIndexArgs = {
+  app: AppInfo | undefined;
+  index: number;
+}
+
 export type Events = {
   AddTagToItemWithId?: number;
   FilterHistory: void;
@@ -26,8 +36,10 @@ export type Events = {
   SaveImageAsFile: void;
   ShowFormatTextCommands: void;
   ShowOpenWithCommands: void;
+  ShowOpenWithCommandsByIndex: number;
   ShowPasteTransformationCommands: void;
   ShowInFinder: void;
+  ShowInFinderByIndex: number;
   ShowInHistory: Clip;
   Split: void;
   Merge: void;
@@ -56,7 +68,9 @@ export type Events = {
   EditContentByIndex: number;
   EditItem: Clip;
   OpenFileItemWithApp: string;
+  OpenFileItemWithAppByIndex: OpenFileItemWithAppByIndexArgs;
   OpenInApp: AppInfo | undefined;
+  OpenInAppByIndex: OpenInAppByIndexArgs;
   OpenSettings: void;
   ZoomIn: void;
   ZoomOut: void;

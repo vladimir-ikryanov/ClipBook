@@ -16,16 +16,17 @@ import {
   AppInfo,
   getAllApps,
   getDefaultApp, getFileOrImagePath,
-  getFirstSelectedHistoryItem,
+  getFirstSelectedHistoryItem, getHistoryItem,
   getRecommendedApps,
   toBase64Icon
 } from "@/data";
 import {DialogTitle} from "@/components/ui/dialog";
-import {ClipType} from "@/db";
+import {Clip, ClipType} from "@/db";
 import {emitter} from "@/actions";
 
 export default function OpenWithCommands() {
   const [open, setOpen] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
   const [defaultApp, setDefaultApp] = useState<AppInfo | undefined>(undefined)
   const [recommendedApps, setRecommendedApps] = useState<AppInfo[]>([])
   const [otherApps, setOtherApps] = useState<AppInfo[]>([])
@@ -38,29 +39,43 @@ export default function OpenWithCommands() {
     e.stopPropagation()
   }
 
+  function handleShowOpenWithCommands() {
+    setTimeout(() => {
+      handleOpenChange(true)
+    }, 200);
+  }
+
+  function handleShowOpenWithCommandsByIndex(index: number) {
+    setTimeout(() => {
+      handleOpenChange(true, index)
+    }, 200);
+  }
+
+  function handleAppWindowDidHide() {
+    handleOpenChange(false)
+  }
+
   useEffect(() => {
-    function handleShowOpenWithCommandsEvent() {
-      setTimeout(() => {
-        handleOpenChange(true)
-      }, 200);
-    }
-
-    function handleAppWindowDidHideEvent() {
-      handleOpenChange(false)
-    }
-
-    emitter.on("ShowOpenWithCommands", handleShowOpenWithCommandsEvent)
-    emitter.on("NotifyAppWindowDidHide", handleAppWindowDidHideEvent)
+    emitter.on("ShowOpenWithCommands", handleShowOpenWithCommands)
+    emitter.on("ShowOpenWithCommandsByIndex", handleShowOpenWithCommandsByIndex)
+    emitter.on("NotifyAppWindowDidHide", handleAppWindowDidHide)
     return () => {
-      emitter.off("ShowOpenWithCommands", handleShowOpenWithCommandsEvent)
-      emitter.off("NotifyAppWindowDidHide", handleAppWindowDidHideEvent)
+      emitter.off("ShowOpenWithCommands", handleShowOpenWithCommands)
+      emitter.off("ShowOpenWithCommandsByIndex", handleShowOpenWithCommandsByIndex)
+      emitter.off("NotifyAppWindowDidHide", handleAppWindowDidHide)
     };
   }, [])
 
-  function handleOpenChange(open: boolean) {
+  function handleOpenChange(open: boolean, index: number = -1) {
     setDefaultApp(undefined)
     if (open) {
-      let item = getFirstSelectedHistoryItem()
+      let item: Clip;
+      setSelectedIndex(index)
+      if (index >= 0) {
+        item = getHistoryItem(index)
+      } else {
+        item = getFirstSelectedHistoryItem()
+      }
       if ((item.type === ClipType.File || item.type === ClipType.Image) && !item.fileFolder) {
         let filePath = getFileOrImagePath(item)
         if (filePath) {
@@ -90,13 +105,27 @@ export default function OpenWithCommands() {
 
   function handleOpenWithDefaultApp() {
     if (defaultApp) {
-      emitter.emit("OpenFileItemWithApp", defaultApp.path)
+      if (selectedIndex >= 0) {
+        emitter.emit("OpenFileItemWithAppByIndex", {
+          appPath: defaultApp.path,
+          index: selectedIndex
+        })
+      } else {
+        emitter.emit("OpenFileItemWithApp", defaultApp.path)
+      }
     }
     handleOpenChange(false)
   }
 
   function handleOpenWithApp(appPath: string) {
-    emitter.emit("OpenFileItemWithApp", appPath)
+    if (selectedIndex >= 0) {
+      emitter.emit("OpenFileItemWithAppByIndex", {
+        appPath: appPath,
+        index: selectedIndex
+      })
+    } else {
+      emitter.emit("OpenFileItemWithApp", appPath)
+    }
     handleOpenChange(false)
   }
 
