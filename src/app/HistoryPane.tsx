@@ -84,7 +84,12 @@ import * as React from "react";
 import AppSidebar from "@/app/AppSidebar";
 import {AppSidebarItemType} from "@/app/AppSidebarItem";
 import {Tag} from "@/tags";
-import {emitter, OpenFileItemWithAppByIndexArgs, OpenInAppByIndexArgs} from "@/actions";
+import {
+  emitter,
+  FormatTextByIndexArgs,
+  OpenFileItemWithAppByIndexArgs,
+  OpenInAppByIndexArgs
+} from "@/actions";
 
 declare const pasteItemInFrontApp: (text: string, rtf: string, html: string, imageFileName: string, filePath: string) => void;
 declare const pasteFilesInFrontApp: (filePaths: string) => void;
@@ -462,31 +467,52 @@ export default function HistoryPane(props: HistoryPaneProps) {
       }
 
       if (isShortcutMatch(prefGetMakeLowerCaseShortcut(), e)) {
-        await handleFormatTextAndSave(TextFormatOperation.ToLowerCase)
+        await handleFormatTextAndSave({
+          operation: TextFormatOperation.ToLowerCase,
+          index: -1
+        })
         e.preventDefault()
       }
       if (isShortcutMatch(prefGetMakeUpperCaseShortcut(), e)) {
-        await handleFormatTextAndSave(TextFormatOperation.ToUpperCase)
+        await handleFormatTextAndSave({
+          operation: TextFormatOperation.ToUpperCase,
+          index: -1
+        })
         e.preventDefault()
       }
       if (isShortcutMatch(prefGetCapitalizeShortcut(), e)) {
-        await handleFormatTextAndSave(TextFormatOperation.CapitalizeWords)
+        await handleFormatTextAndSave({
+          operation: TextFormatOperation.CapitalizeWords,
+          index: -1
+        })
         e.preventDefault()
       }
       if (isShortcutMatch(prefGetSentenceCaseShortcut(), e)) {
-        await handleFormatTextAndSave(TextFormatOperation.ToSentenceCase)
+        await handleFormatTextAndSave({
+          operation: TextFormatOperation.ToSentenceCase,
+          index: -1
+        })
         e.preventDefault()
       }
       if (isShortcutMatch(prefGetRemoveEmptyLinesShortcut(), e)) {
-        await handleFormatTextAndSave(TextFormatOperation.RemoveEmptyLines)
+        await handleFormatTextAndSave({
+          operation: TextFormatOperation.RemoveEmptyLines,
+          index: -1
+        })
         e.preventDefault()
       }
       if (isShortcutMatch(prefGetStripAllWhitespacesShortcut(), e)) {
-        await handleFormatTextAndSave(TextFormatOperation.StripAllWhitespaces)
+        await handleFormatTextAndSave({
+          operation: TextFormatOperation.StripAllWhitespaces,
+          index: -1
+        })
         e.preventDefault()
       }
       if (isShortcutMatch(prefGetTrimSurroundingWhitespacesShortcut(), e)) {
-        await handleFormatTextAndSave(TextFormatOperation.TrimSurroundingWhitespaces)
+        await handleFormatTextAndSave({
+          operation: TextFormatOperation.TrimSurroundingWhitespaces,
+          index: -1
+        })
         e.preventDefault()
       }
     }
@@ -992,10 +1018,18 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
-  async function handleFormatTextAndSave(operation: TextFormatOperation) {
-    let items = getSelectedHistoryItems()
+  async function handleFormatTextAndSave(args: FormatTextByIndexArgs) {
+    let items: Clip[] = []
+    if (args.index >= 0) {
+      let item = getHistoryItem(args.index)
+      if (item) {
+        items.push(item)
+      }
+    } else {
+      items = getSelectedHistoryItems()
+    }
     items.forEach(item => {
-      item.content = formatText(item.content, operation)
+      item.content = formatText(item.content, args.operation)
     })
     await handleEditHistoryItems(items)
   }

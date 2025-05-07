@@ -97,7 +97,10 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
 
   function handleFormatText(operation: TextFormatOperation) {
     handleOpenDropdownChange(false)
-    emitter.emit("FormatText", operation)
+    emitter.emit("FormatText", {
+      operation: operation,
+      index: -1
+    })
   }
 
   function canShowEditContent() {

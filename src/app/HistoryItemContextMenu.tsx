@@ -8,7 +8,7 @@ import {
   GlobeIcon, PenIcon, PlusIcon, ScanTextIcon,
   StarIcon,
   StarOffIcon, TagsIcon,
-  TrashIcon, UploadIcon
+  TrashIcon, TypeIcon, UploadIcon
 } from "lucide-react";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {
@@ -22,12 +22,12 @@ import {
   prefGetShowInFinderShortcut,
   prefGetToggleFavoriteShortcut,
 } from "@/pref";
-import {CommandShortcut} from "@/components/ui/command";
-import {Clip, ClipType, updateClip} from "@/db";
+import {CommandItem, CommandShortcut} from "@/components/ui/command";
+import {Clip, ClipType, getImageText, updateClip} from "@/db";
 import {
   AppInfo,
   fileExists, FinderIcon, getDefaultApp, getFileOrImagePath,
-  getFilterQuery,
+  getFilterQuery, getFirstSelectedHistoryItem,
   getHistoryItem, getSelectedHistoryItemIndices, isFilterActive,
   isTextItem,
   toBase64Icon
@@ -116,6 +116,22 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
     return defaultApp !== undefined
   }
 
+  function canShowCopyTextFromImage() {
+    if (props.item) {
+      if (props.item.type === ClipType.Image && props.item.content.length > 0) {
+        return true
+      }
+      if (getImageText(props.item).length > 0) {
+        return true
+      }
+    }
+    return false
+  }
+
+  function canShowFormatText() {
+    return isTextItem(props.item)
+  }
+
   function handlePaste() {
     emitter.emit("PasteByIndex", props.index)
   }
@@ -149,6 +165,11 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   function handleRename() {
     focusSearchOnClose = false
     emitter.emit("RenameItemByIndex", props.index)
+  }
+
+  function handleFormatText() {
+    focusSearchOnClose = false
+    emitter.emit("ShowFormatTextCommandsByIndex", props.index)
   }
 
   function handleDeleteItem() {
@@ -289,7 +310,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               </ContextMenuItem>
           }
           {
-              props.item.type === ClipType.Image && props.item.content.length > 0 &&
+              canShowCopyTextFromImage() &&
               <ContextMenuItem onClick={handleCopyTextFromImage}>
                 <ScanTextIcon className="mr-2 h-4 w-4"/>
                 <span className="mr-12">Copy Text from Image</span>
@@ -308,6 +329,20 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
             </CommandShortcut>
           </ContextMenuItem>
+          <ContextMenuItem onClick={handleRename}>
+            <PenIcon className="mr-2 h-4 w-4"/>
+            <span className="mr-12">Rename...</span>
+            <CommandShortcut className="flex flex-row">
+              <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
+            </CommandShortcut>
+          </ContextMenuItem>
+          {
+              canShowFormatText() &&
+              <ContextMenuItem onSelect={handleFormatText}>
+                <TypeIcon className="mr-2 h-5 w-5"/>
+                <span>Format Text...</span>
+              </ContextMenuItem>
+          }
           <ContextMenuSeparator/>
           <ContextMenuSub>
             <ContextMenuSubTrigger>
@@ -340,16 +375,6 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               </ContextMenuSubContent>
             </ContextMenuPortal>
           </ContextMenuSub>
-          <ContextMenuSeparator/>
-          {
-            <ContextMenuItem onClick={handleRename}>
-              <PenIcon className="mr-2 h-4 w-4"/>
-              <span className="mr-12">Rename...</span>
-              <CommandShortcut className="flex flex-row">
-                <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
-              </CommandShortcut>
-            </ContextMenuItem>
-          }
           {
               props.item.type === ClipType.Link && <ContextMenuSeparator/>
           }

@@ -12,6 +12,11 @@ export type OpenInAppByIndexArgs = {
   index: number;
 }
 
+export type FormatTextByIndexArgs = {
+  operation: TextFormatOperation;
+  index: number;
+}
+
 export type Events = {
   AddTagToItemWithId?: number;
   FilterHistory: void;
@@ -35,6 +40,7 @@ export type Events = {
   RenameSelectedItem: void;
   SaveImageAsFile: void;
   ShowFormatTextCommands: void;
+  ShowFormatTextCommandsByIndex: number;
   ShowOpenWithCommands: void;
   ShowOpenWithCommandsByIndex: number;
   ShowPasteTransformationCommands: void;
@@ -45,7 +51,7 @@ export type Events = {
   Merge: void;
   NotifyAppWindowDidHide: void;
   PasteWithTransformation: TextFormatOperation;
-  FormatText: TextFormatOperation;
+  FormatText: FormatTextByIndexArgs;
   OpenInBrowser: void;
   OpenInBrowserByIndex: number;
   PreviewLinkItem: void;

@@ -29,6 +29,7 @@ import {emitter} from "@/actions";
 
 export default function FormatTextCommands() {
   const [open, setOpen] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Escape") {
@@ -38,21 +39,30 @@ export default function FormatTextCommands() {
     e.stopPropagation()
   }
 
+  function handleShowFormatTextCommands() {
+    setTimeout(() => {
+      setOpen(true)
+    }, 100);
+  }
+
+  function handleShowFormatTextCommandsByIndex(index: number) {
+    setTimeout(() => {
+      setSelectedIndex(index)
+      setOpen(true)
+    }, 100);
+  }
+
+  function handleAppWindowDidHide() {
+    handleOpenChange(false)
+  }
+
   useEffect(() => {
-    function handleShowFormatTextCommandsEvent() {
-      setTimeout(() => {
-        setOpen(true)
-      }, 100);
-    }
-
-    function handleAppWindowDidHide() {
-      handleOpenChange(false)
-    }
-
-    emitter.on("ShowFormatTextCommands", handleShowFormatTextCommandsEvent)
+    emitter.on("ShowFormatTextCommands", handleShowFormatTextCommands)
+    emitter.on("ShowFormatTextCommandsByIndex", handleShowFormatTextCommandsByIndex)
     emitter.on("NotifyAppWindowDidHide", handleAppWindowDidHide)
     return () => {
-      emitter.off("ShowFormatTextCommands", handleShowFormatTextCommandsEvent)
+      emitter.off("ShowFormatTextCommands", handleShowFormatTextCommands)
+      emitter.off("ShowFormatTextCommandsByIndex", handleShowFormatTextCommandsByIndex)
       emitter.off("NotifyAppWindowDidHide", handleAppWindowDidHide)
     };
   }, [])
@@ -66,37 +76,58 @@ export default function FormatTextCommands() {
 
   function handleMakeUpperCase() {
     handleOpenChange(false)
-    emitter.emit("FormatText", TextFormatOperation.ToUpperCase)
+    emitter.emit("FormatText", {
+      operation: TextFormatOperation.ToUpperCase,
+      index: selectedIndex
+    })
   }
 
   function handleMakeLowerCase() {
     handleOpenChange(false)
-    emitter.emit("FormatText", TextFormatOperation.ToLowerCase)
+    emitter.emit("FormatText", {
+      operation: TextFormatOperation.ToLowerCase,
+      index: selectedIndex
+    })
   }
 
   function handleCapitalizeWords() {
     handleOpenChange(false)
-    emitter.emit("FormatText", TextFormatOperation.CapitalizeWords)
+    emitter.emit("FormatText", {
+      operation: TextFormatOperation.CapitalizeWords,
+      index: selectedIndex
+    })
   }
 
   function handleMakeSentenceCase() {
     handleOpenChange(false)
-    emitter.emit("FormatText", TextFormatOperation.ToSentenceCase)
+    emitter.emit("FormatText", {
+      operation: TextFormatOperation.ToSentenceCase,
+      index: selectedIndex
+    })
   }
 
   function handleRemoveEmptyLines() {
     handleOpenChange(false)
-    emitter.emit("FormatText", TextFormatOperation.RemoveEmptyLines)
+    emitter.emit("FormatText", {
+      operation: TextFormatOperation.RemoveEmptyLines,
+      index: selectedIndex
+    })
   }
 
   function handleStripAllWhitespaces() {
     handleOpenChange(false)
-    emitter.emit("FormatText", TextFormatOperation.StripAllWhitespaces)
+    emitter.emit("FormatText", {
+      operation: TextFormatOperation.StripAllWhitespaces,
+      index: selectedIndex
+    })
   }
 
   function handleTrimSurroundingWhitespaces() {
     handleOpenChange(false)
-    emitter.emit("FormatText", TextFormatOperation.TrimSurroundingWhitespaces)
+    emitter.emit("FormatText", {
+      operation: TextFormatOperation.TrimSurroundingWhitespaces,
+      index: selectedIndex
+    })
   }
 
   return (
