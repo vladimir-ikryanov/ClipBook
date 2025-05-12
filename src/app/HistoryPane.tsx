@@ -39,7 +39,7 @@ import {
   setFilterVisibleState,
   getDetailsVisibleState,
   setDetailsVisibleState,
-  getFilterQuery, isFilterActive, resetFilter
+  getFilterQuery, isFilterActive, resetFilter, setShouldUpdateHistory
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
@@ -568,8 +568,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }, [quickPasteModifierPressed]);
 
   useEffect(() => {
-    function handleFilterHistoryEvent() {
-      handleFilterHistory()
+    function handleFilterHistory() {
+      updateHistory()
+      focusSearchField()
+    }
+
+    function handleSortHistory() {
+      setShouldUpdateHistory()
+      updateHistory()
       focusSearchField()
     }
 
@@ -586,7 +592,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
     emitter.on("DeleteAllItems", handleDeleteAllItems)
     emitter.on("RenameItem", handleRenameItem)
     emitter.on("RenameItemByIndex", handleRenameItemByIndex)
-    emitter.on("FilterHistory", handleFilterHistoryEvent)
+    emitter.on("FilterHistory", handleFilterHistory)
+    emitter.on("SortHistory", handleSortHistory)
     emitter.on("PasteWithTransformation", handlePasteWithTransformation)
     emitter.on("FormatText", handleFormatTextAndSave)
     emitter.on("OpenInApp", handleOpenInApp)
@@ -635,7 +642,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
       emitter.off("DeleteAllItems", handleDeleteAllItems)
       emitter.off("RenameItem", handleRenameItem)
       emitter.off("RenameItemByIndex", handleRenameItemByIndex)
-      emitter.off("FilterHistory", handleFilterHistoryEvent)
+      emitter.off("FilterHistory", handleFilterHistory)
+      emitter.off("SortHistory", handleSortHistory)
       emitter.off("PasteWithTransformation", handlePasteWithTransformation)
       emitter.off("FormatText", handleFormatTextAndSave)
       emitter.off("OpenInApp", handleOpenInApp)
@@ -1432,7 +1440,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setFilterVisible(visible)
   }
 
-  function handleFilterHistory() {
+  function updateHistory() {
     let history = getHistoryItems()
     setHistory([...history])
     if (history.length > 0) {

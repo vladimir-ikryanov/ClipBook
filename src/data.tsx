@@ -86,6 +86,7 @@ let previewVisible = true;
 let filterVisible = false;
 let infoVisible = true;
 let sortType = SortHistoryType.TimeOfLastCopy;
+let sortOrderReverse = false;
 let sourceApps: AppInfo[] = [];
 
 function sleep(ms: number) {
@@ -171,6 +172,9 @@ function loadSettings() {
   if (localStorage.getItem("sortType")) {
     sortType = parseInt(localStorage.getItem("sortType")!)
   }
+  if (localStorage.getItem("sortOrderReverse")) {
+    sortOrderReverse = localStorage.getItem("sortOrderReverse") === "true"
+  }
 }
 
 function loadSourceApps(history: Clip[]) {
@@ -207,21 +211,6 @@ function getAppInfoByPath(appPath: string): AppInfo | undefined {
 
 export function getSourceApps(): AppInfo[] {
   return sourceApps
-}
-
-function savePreviewVisible(visible: boolean) {
-  previewVisible = visible
-  localStorage.setItem("previewVisible", visible.toString())
-}
-
-function saveFilterVisible(visible: boolean) {
-  filterVisible = visible
-  localStorage.setItem("filterVisible", visible.toString())
-}
-
-function saveInfoVisible(visible: boolean) {
-  infoVisible = visible
-  localStorage.setItem("infoVisible", visible.toString())
 }
 
 function hasItem(item: Clip): number {
@@ -450,6 +439,10 @@ export function sortHistory(type: SortHistoryType, history: Clip[]) {
     }
     return 0
   })
+  // Reverse order if needed.
+  if (sortOrderReverse) {
+    history.reverse()
+  }
 }
 
 function filter(item: Clip) {
@@ -567,7 +560,8 @@ export function getHistoryItemIndex(item: Clip): number {
 }
 
 export function setPreviewVisibleState(visible: boolean) {
-  savePreviewVisible(visible)
+  previewVisible = visible
+  localStorage.setItem("previewVisible", visible.toString())
 }
 
 export function getPreviewVisibleState() {
@@ -575,7 +569,8 @@ export function getPreviewVisibleState() {
 }
 
 export function setFilterVisibleState(visible: boolean) {
-  saveFilterVisible(visible)
+  filterVisible = visible
+  localStorage.setItem("filterVisible", visible.toString())
 }
 
 export function getFilterVisibleState() {
@@ -583,11 +578,30 @@ export function getFilterVisibleState() {
 }
 
 export function setDetailsVisibleState(visible: boolean) {
-  saveInfoVisible(visible)
+  infoVisible = visible
+  localStorage.setItem("infoVisible", visible.toString())
 }
 
 export function getDetailsVisibleState() {
   return infoVisible
+}
+
+export function saveSortType(type: SortHistoryType) {
+  sortType = type
+  localStorage.setItem("sortType", type.toString())
+}
+
+export function getSortType(): SortHistoryType {
+  return sortType
+}
+
+export function saveSortOrderReverse(reverse: boolean) {
+  sortOrderReverse = reverse
+  localStorage.setItem("sortOrderReverse", reverse.toString())
+}
+
+export function isSortOrderReverse(): boolean {
+  return sortOrderReverse
 }
 
 export function toBase64Icon(base64IconData: string): string {
@@ -666,6 +680,10 @@ export function getFileOrImagePath(item: Clip) {
     return getImagesDir() + "/" + getImageFileName(item)
   }
   return undefined
+}
+
+export function setShouldUpdateHistory() {
+  shouldUpdateHistory = true
 }
 
 export function resetFilter() {

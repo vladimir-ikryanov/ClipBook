@@ -18,6 +18,7 @@ import {isFilterActive} from "@/data";
 import FormatTextCommands from "@/app/FormatTextCommands";
 import OpenWithCommands from "@/app/OpenWithCommands";
 import {emitter} from "@/actions";
+import SortMenu from "@/app/SortMenu";
 
 declare const openSettingsLicense: () => void;
 
@@ -201,6 +202,9 @@ export default function SearchBar(props: SearchBarProps) {
                 </div>
               </TooltipContent>
             </Tooltip>
+          </div>
+          <div>
+            <SortMenu/>
           </div>
           <div>
             <Commands appName={props.appName} appIcon={props.appIcon}/>

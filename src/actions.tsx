@@ -20,6 +20,7 @@ export type FormatTextByIndexArgs = {
 export type Events = {
   AddTagToItemWithId?: number;
   FilterHistory: void;
+  SortHistory: void;
   ToggleFilter: void;
   ToggleFavorite: void;
   TogglePreview: void;
