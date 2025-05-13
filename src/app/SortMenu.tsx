@@ -1,7 +1,7 @@
 import '../app.css';
 import React, {KeyboardEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
-import {ArrowUpDownIcon,} from "lucide-react";
+import {ArrowDownUpIcon, ArrowUpDownIcon,} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -52,7 +52,9 @@ export default function SortMenu() {
       <DropdownMenu open={menuOpen} onOpenChange={handleMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <Button variant="dropdown" size="toolbar" className={menuOpen ? "bg-accent" : ""}>
-            <ArrowUpDownIcon className="h-5 w-5"/>
+            {
+              sortOrderReverse ? <ArrowUpDownIcon className="h-5 w-5"/> : <ArrowDownUpIcon className="h-5 w-5"/>
+            }
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="p-1.5 bg-actions-background" align="start"
@@ -65,6 +67,9 @@ export default function SortMenu() {
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.NumberOfCopies} onCheckedChange={() => handleSortTypeChange(SortHistoryType.NumberOfCopies)}>
             Number of Copies
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.Size} onCheckedChange={() => handleSortTypeChange(SortHistoryType.Size)}>
+            Size
           </DropdownMenuCheckboxItem>
           <DropdownMenuSeparator/>
           <DropdownMenuCheckboxItem checked={sortOrderReverse} onCheckedChange={handleSortOrderReverseChange}>

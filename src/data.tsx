@@ -42,7 +42,8 @@ type FilterOptions = {
 export enum SortHistoryType {
   TimeOfFirstCopy,
   TimeOfLastCopy,
-  NumberOfCopies
+  NumberOfCopies,
+  Size
 }
 
 export enum TextFormatOperation {
@@ -428,6 +429,9 @@ export function sortHistory(type: SortHistoryType, history: Clip[]) {
     case SortHistoryType.NumberOfCopies:
       history.sort((a, b) => b.numberOfCopies - a.numberOfCopies)
       break
+    case SortHistoryType.Size:
+      history.sort((a, b) => compareItemsSize(a, b))
+      break
   }
   // Move pinned items to the top.
   history.sort((a, b) => {
@@ -443,6 +447,20 @@ export function sortHistory(type: SortHistoryType, history: Clip[]) {
   if (sortOrderReverse) {
     history.reverse()
   }
+}
+
+function itemSize(item: Clip): number {
+  if (item.type === ClipType.Image) {
+    return item.imageSizeInBytes
+  }
+  if (item.type === ClipType.File) {
+    return item.fileSizeInBytes
+  }
+  return item.content.length
+}
+
+function compareItemsSize(a: Clip, b: Clip): number {
+  return itemSize(b) - itemSize(a)
 }
 
 function filter(item: Clip) {
