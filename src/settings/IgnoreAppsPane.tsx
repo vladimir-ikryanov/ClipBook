@@ -2,6 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import {Button} from "@/components/ui/button";
 import {MinusIcon, PlusIcon} from "lucide-react";
 import {toBase64Icon} from "@/data";
+import {prefIsAppsToIgnoreManaged} from "@/pref";
 
 interface IgnoreAppsPaneProps {
   apps: string[];
@@ -41,6 +42,9 @@ export default function IgnoreAppsPane(props: IgnoreAppsPaneProps) {
   };
 
   const handleItemClick = (index: number, e: React.MouseEvent<HTMLDivElement>) => {
+    if (prefIsAppsToIgnoreManaged()) {
+      return;
+    }
     if (e.shiftKey && lastSelectedIndex !== null) {
       handleShiftSelection(index);
     } else if (e.ctrlKey || e.metaKey) {
@@ -120,7 +124,7 @@ export default function IgnoreAppsPane(props: IgnoreAppsPaneProps) {
                   key={index}
                   className={`flex flex-row p-2 items-center ${
                       selectedIndices.includes(index) ? 'bg-settings-selection text-white' : index % 2 === 0 ? 'bg-settings-tableRow' : 'bg-settings-tableRow2'
-                  }`}
+                  } ${prefIsAppsToIgnoreManaged() ? 'opacity-50' : ''}`}
                   onClick={(e) => handleItemClick(index, e)}
                   title={item}
               >
@@ -129,12 +133,11 @@ export default function IgnoreAppsPane(props: IgnoreAppsPaneProps) {
               </div>
           ))}
           <div className="flex flex-row bg-secondary border-t border-t-settings-border">
-            <Button variant="tool" size="tool" onClick={handleAddApps}>
+            <Button variant="tool" size="tool" onClick={handleAddApps} disabled={prefIsAppsToIgnoreManaged()}>
               <PlusIcon className="h-4 w-4"></PlusIcon>
             </Button>
             <div className="border-l border-l-settings-border my-1.5"></div>
-            <Button variant="tool" size="tool" disabled={selectedIndices.length == 0}
-                    onClick={handleRemoveApps}>
+            <Button variant="tool" size="tool" onClick={handleRemoveApps} disabled={selectedIndices.length == 0 || prefIsAppsToIgnoreManaged()}>
               <MinusIcon className="h-4 w-4"></MinusIcon>
             </Button>
           </div>

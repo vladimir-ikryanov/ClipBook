@@ -133,7 +133,9 @@ module.exports = {
         },
 				sidebar: {
 					DEFAULT: "var(--sidebar-background)",
+					"background-secondary": "var(--sidebar-background-secondary)",
 					foreground: "var(--sidebar-foreground)",
+					"foreground-secondary": "var(--sidebar-foreground-secondary)",
 					primary: "var(--sidebar-primary)",
 					"primary-foreground": "var(--sidebar-primary-foreground)",
 					accent: "var(--sidebar-accent)",

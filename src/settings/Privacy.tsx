@@ -5,7 +5,10 @@ import {useEffect, useState} from "react";
 import {
   prefGetAppsToIgnore,
   prefGetIgnoreConfidentialContent,
-  prefGetIgnoreTransientContent, prefSetAppsToIgnore,
+  prefGetIgnoreTransientContent,
+  prefIsIgnoreConfidentialContentManaged,
+  prefIsIgnoreTransientContentManaged,
+  prefSetAppsToIgnore,
   prefSetIgnoreConfidentialContent,
   prefSetIgnoreTransientContent,
 } from "@/pref";
@@ -76,7 +79,8 @@ export default function Privacy() {
             </span>
               </Label>
               <Switch id="ignoreConfidential" checked={ignoreConfidentialContent}
-                      onCheckedChange={handleIgnoreConfidentialContentChange}/>
+                      onCheckedChange={handleIgnoreConfidentialContentChange}
+                      disabled={prefIsIgnoreConfidentialContentManaged()}/>
             </div>
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="ignoreTransient" className="flex flex-col text-base">
@@ -86,7 +90,8 @@ export default function Privacy() {
             </span>
               </Label>
               <Switch id="ignoreTransient" checked={ignoreTransientContent}
-                      onCheckedChange={handleIgnoreTransientContentChange}/>
+                      onCheckedChange={handleIgnoreTransientContentChange}
+                      disabled={prefIsIgnoreTransientContentManaged()}/>
             </div>
 
             <hr/>

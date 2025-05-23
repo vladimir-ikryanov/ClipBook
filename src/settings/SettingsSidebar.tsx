@@ -1,13 +1,14 @@
 import * as React from "react";
 import {
   Sidebar,
-  SidebarContent,
+  SidebarContent, SidebarFooter,
   SidebarGroup,
   SidebarGroupContent, SidebarMenu,
 } from "@/components/ui/sidebar";
 import {SettingsSidebarItem, SettingsSidebarItemType} from "@/settings/SettingsSidebarItem";
 import {useState} from "react";
 import {
+  CogIcon,
   InfoIcon,
   KeyboardIcon,
   KeyRoundIcon,
@@ -15,6 +16,7 @@ import {
   SettingsIcon,
   ShieldCheckIcon
 } from "lucide-react";
+import {prefIsDeviceManaged} from "@/pref";
 
 interface SettingsSidebarProps {
   selectedItemType: SettingsSidebarItemType
@@ -70,6 +72,16 @@ export default function SettingsSidebar(props: SettingsSidebarProps) {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+        {
+            !prefIsDeviceManaged() &&
+            <SidebarFooter className="border-r border-r-sidebar-border select-none">
+              <div
+                  className="flex flex-col items-center justify-center text-center px-2 py-4 w-full rounded-md bg-sidebar-background-secondary text-secondary-foreground space-y-2">
+                <CogIcon className="h-8 w-10 mt-1 text-sidebar-foreground-secondary" strokeWidth={1.5}/>
+                <span className="text-sm">Some settings are managed by your organization.</span>
+              </div>
+            </SidebarFooter>
+        }
       </Sidebar>
   )
 }

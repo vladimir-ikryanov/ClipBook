@@ -6,12 +6,14 @@
 #include "molybden.hpp"
 
 struct AppInfo {
-  std::string path = "";
+  std::string path;
 };
 
 class AppSettings {
  public:
   static std::shared_ptr<AppSettings> create();
+
+  virtual bool isDeviceManaged() = 0;
 
   virtual void saveLastSystemBootTime(long time) = 0;
   virtual long getLastSystemBootTime() = 0;
@@ -30,30 +32,41 @@ class AppSettings {
 
   virtual void saveIgnoreConfidentialContent(bool ignore) = 0;
   virtual bool shouldIgnoreConfidentialContent() = 0;
+  virtual bool isIgnoreConfidentialContentManaged() = 0;
 
   virtual void saveIgnoreTransientContent(bool ignore) = 0;
   virtual bool shouldIgnoreTransientContent() = 0;
+  virtual bool isIgnoreTransientContentManaged() = 0;
 
   virtual void saveOpenAtLogin(bool open) = 0;
   virtual bool shouldOpenAtLogin() = 0;
+  virtual bool isOpenAtLoginManaged() = 0;
 
   virtual void saveCheckForUpdatesAutomatically(bool value) = 0;
   virtual bool shouldCheckForUpdatesAutomatically() = 0;
+  virtual bool isCheckForUpdatesAutomaticallyManaged() = 0;
+
+  virtual bool isAllowCheckForUpdates() = 0;
 
   virtual void saveWarnOnClearHistory(bool warn) = 0;
   virtual bool shouldWarnOnClearHistory() = 0;
+  virtual bool isWarnOnClearHistoryManaged() = 0;
 
   virtual void saveKeepFavoritesOnClearHistory(bool keep) = 0;
   virtual bool shouldKeepFavoritesOnClearHistory() = 0;
+  virtual bool isKeepFavoritesOnClearHistoryManaged() = 0;
 
   virtual void saveShowIconInMenuBar(bool show) = 0;
   virtual bool shouldShowIconInMenuBar() = 0;
+  virtual bool isShowIconInMenuBarManaged() = 0;
 
   virtual void saveAppsToIgnore(std::string apps) = 0;
   virtual std::string getAppsToIgnore() = 0;
+  virtual bool isAppsToIgnoreManaged() = 0;
 
   virtual void saveCopyAndMergeEnabled(bool enabled) = 0;
   virtual bool isCopyAndMergeEnabled() = 0;
+  virtual bool isCopyAndMergeEnabledManaged() = 0;
 
   virtual void saveCopyAndMergeSeparator(std::string separator) = 0;
   virtual std::string getCopyAndMergeSeparator() = 0;
@@ -63,21 +76,27 @@ class AppSettings {
 
   virtual void saveClearHistoryOnQuit(bool clear) = 0;
   virtual bool shouldClearHistoryOnQuit() = 0;
+  virtual bool isClearHistoryOnQuitManaged() = 0;
 
   virtual void saveClearHistoryOnMacReboot(bool clear) = 0;
   virtual bool shouldClearHistoryOnMacReboot() = 0;
+  virtual bool isClearHistoryOnMacRebootManaged() = 0;
 
   virtual void saveOpenWindowStrategy(std::string strategy) = 0;
   virtual std::string getOpenWindowStrategy() = 0;
+  virtual bool isOpenWindowStrategyManaged() = 0;
 
   virtual void saveTreatDigitNumbersAsColor(bool treat) = 0;
   virtual bool shouldTreatDigitNumbersAsColor() = 0;
+  virtual bool isTreatDigitNumbersAsColorManaged() = 0;
 
   virtual void saveShowPreviewForLinks(bool show) = 0;
   virtual bool shouldShowPreviewForLinks() = 0;
+  virtual bool isShowPreviewForLinksManaged() = 0;
 
   virtual void saveUpdateHistoryAfterAction(bool update) = 0;
   virtual bool shouldUpdateHistoryAfterAction() = 0;
+  virtual bool isUpdateHistoryAfterActionManaged() = 0;
 
   virtual void saveLastUpdateCheckTime(long time) = 0;
   virtual long getLastUpdateCheckTime() = 0;
@@ -87,18 +106,24 @@ class AppSettings {
 
   virtual void savePasteOnClick(bool paste) = 0;
   virtual bool shouldPasteOnClick() = 0;
+  virtual bool isPasteOnClickManaged() = 0;
 
   virtual void savePlaySoundOnCopy(bool play) = 0;
   virtual bool shouldPlaySoundOnCopy() = 0;
+  virtual bool isPlaySoundOnCopyManaged() = 0;
 
   virtual void saveAlwaysDisplay(bool display) = 0;
   virtual bool shouldAlwaysDisplay() = 0;
 
   virtual void saveCopyOnDoubleClick(bool copy) = 0;
   virtual bool shouldCopyOnDoubleClick() = 0;
+  virtual bool isCopyOnDoubleClickManaged() = 0;
 
   virtual void saveCopyOnNumberAction(bool copy) = 0;
   virtual bool shouldCopyOnNumberAction() = 0;
+  virtual bool isCopyOnNumberActionManaged() = 0;
+
+  virtual bool allowCheckForUpdates() = 0;
 
   // Shortcuts.
 
@@ -222,6 +247,5 @@ class AppSettings {
   virtual void saveToggleFilterShortcut(std::string shortcut) = 0;
   virtual std::string getToggleFilterShortcut() = 0;
 };
-
 
 #endif // CLIPBOOK_APP_SETTINGS_H_

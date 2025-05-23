@@ -4,15 +4,22 @@ import {Switch} from "@/components/ui/switch";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {useEffect, useState} from "react";
 import {
-  OpenWindowStrategy,
+  OpenWindowStrategy, prefAllowCheckForUpdates,
   prefGetCheckForUpdatesAutomatically,
-  prefGetOpenAtLogin, prefGetOpenWindowStrategy,
+  prefGetOpenAtLogin,
+  prefGetOpenWindowStrategy,
   prefGetShowIconInMenuBar,
   prefGetTheme,
+  prefIsCheckForUpdatesAutomaticallyManaged,
+  prefIsOpenAtLoginManaged,
+  prefIsPlaySoundOnCopyManaged, prefIsShowIconInMenuBarManaged,
   prefSetCheckForUpdatesAutomatically,
-  prefSetOpenAtLogin, prefSetOpenWindowStrategy, prefSetPlaySoundOnCopy,
+  prefSetOpenAtLogin,
+  prefSetOpenWindowStrategy,
+  prefSetPlaySoundOnCopy,
   prefSetShowIconInMenuBar,
-  prefSetTheme, prefShouldPlaySoundOnCopy,
+  prefSetTheme,
+  prefShouldPlaySoundOnCopy,
 } from "@/pref";
 import {
   ChevronsUpDown,
@@ -117,7 +124,8 @@ Launch ClipBook automatically at&nbsp;login.
             </span>
               </Label>
               <Switch id="openAtLogin" checked={openAtLogin}
-                      onCheckedChange={handleOpenAtLoginChange}/>
+                      onCheckedChange={handleOpenAtLoginChange}
+                      disabled={prefIsOpenAtLoginManaged()}/>
             </div>
 
             <div className="flex items-center justify-between space-x-20 py-1">
@@ -128,12 +136,13 @@ Download and install new updates when&nbsp;available.
             </span>
               </Label>
               <Switch id="checkForUpdates" checked={checkForUpdatesAutomatically}
-                      onCheckedChange={handleCheckForUpdatesAutomaticallyChange}/>
+                      onCheckedChange={handleCheckForUpdatesAutomaticallyChange}
+                      disabled={prefIsCheckForUpdatesAutomaticallyManaged()}/>
             </div>
 
             <div className="flex items-center justify-between py-1 space-x-20">
               <Button variant="secondary" size="sm" className="px-4"
-                      onClick={handleCheckForUpdates} disabled={checkingForUpdates}>
+                      onClick={handleCheckForUpdates} disabled={checkingForUpdates || !prefAllowCheckForUpdates()}>
                 {
                   checkingForUpdates ? <RefreshCcwIcon className="animate-spin h-4 w-4 mr-2"/> : null
                 }
@@ -198,7 +207,8 @@ Download and install new updates when&nbsp;available.
                 </span>
               </Label>
               <Switch id="showIcon" checked={playSoundOnCopy}
-                      onCheckedChange={handlePlaySoundOnCopyChange}/>
+                      onCheckedChange={handlePlaySoundOnCopyChange}
+                      disabled={prefIsPlaySoundOnCopyManaged()}/>
             </div>
 
             <div className="flex items-center justify-between space-x-20 py-1">
@@ -213,7 +223,8 @@ Download and install new updates when&nbsp;available.
                 </span>
               </Label>
               <Switch id="showIcon" checked={showIconInMenuBar}
-                      onCheckedChange={handleShowIconChange}/>
+                      onCheckedChange={handleShowIconChange}
+                      disabled={prefIsShowIconInMenuBarManaged()}/>
             </div>
 
             <div className="flex items-center justify-between space-x-10 py-1">

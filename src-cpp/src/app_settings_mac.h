@@ -9,6 +9,8 @@ class AppSettingsMac : public AppSettings {
  public:
   AppSettingsMac();
 
+  bool isDeviceManaged() override;
+
   void saveLastSystemBootTime(long time) override;
   long getLastSystemBootTime() override;
 
@@ -26,30 +28,41 @@ class AppSettingsMac : public AppSettings {
 
   void saveIgnoreConfidentialContent(bool ignore) override;
   bool shouldIgnoreConfidentialContent() override;
+  bool isIgnoreConfidentialContentManaged() override;
 
   void saveIgnoreTransientContent(bool ignore) override;
   bool shouldIgnoreTransientContent() override;
+  bool isIgnoreTransientContentManaged() override;
 
   void saveOpenAtLogin(bool open) override;
   bool shouldOpenAtLogin() override;
+  bool isOpenAtLoginManaged() override;
 
   void saveCheckForUpdatesAutomatically(bool open) override;
   bool shouldCheckForUpdatesAutomatically() override;
+  bool isCheckForUpdatesAutomaticallyManaged() override;
+
+  bool isAllowCheckForUpdates() override;
 
   void saveWarnOnClearHistory(bool warn) override;
   bool shouldWarnOnClearHistory() override;
+  bool isWarnOnClearHistoryManaged() override;
 
   void saveKeepFavoritesOnClearHistory(bool keep) override;
   bool shouldKeepFavoritesOnClearHistory() override;
+  bool isKeepFavoritesOnClearHistoryManaged() override;
 
   void saveShowIconInMenuBar(bool show) override;
   bool shouldShowIconInMenuBar() override;
+  bool isShowIconInMenuBarManaged() override;
 
   void saveAppsToIgnore(std::string apps) override;
   std::string getAppsToIgnore() override;
+  bool isAppsToIgnoreManaged() override;
 
   void saveCopyAndMergeEnabled(bool enabled) override;
   bool isCopyAndMergeEnabled() override;
+  bool isCopyAndMergeEnabledManaged() override;
 
   void saveCopyAndMergeSeparator(std::string separator) override;
   std::string getCopyAndMergeSeparator() override;
@@ -59,21 +72,27 @@ class AppSettingsMac : public AppSettings {
 
   void saveClearHistoryOnQuit(bool clear) override;
   bool shouldClearHistoryOnQuit() override;
+  bool isClearHistoryOnQuitManaged() override;
 
   void saveClearHistoryOnMacReboot(bool clear) override;
   bool shouldClearHistoryOnMacReboot() override;
+  bool isClearHistoryOnMacRebootManaged() override;
 
   void saveOpenWindowStrategy(std::string strategy) override;
   std::string getOpenWindowStrategy() override;
+  bool isOpenWindowStrategyManaged() override;
 
   void saveTreatDigitNumbersAsColor(bool treat) override;
   bool shouldTreatDigitNumbersAsColor() override;
+  bool isTreatDigitNumbersAsColorManaged() override;
 
   void saveShowPreviewForLinks(bool show) override;
   bool shouldShowPreviewForLinks() override;
+  bool isShowPreviewForLinksManaged() override;
 
   void saveUpdateHistoryAfterAction(bool update) override;
   bool shouldUpdateHistoryAfterAction() override;
+  bool isUpdateHistoryAfterActionManaged() override;
 
   void saveLastUpdateCheckTime(long time) override;
   long getLastUpdateCheckTime() override;
@@ -83,18 +102,24 @@ class AppSettingsMac : public AppSettings {
 
   void savePasteOnClick(bool paste) override;
   bool shouldPasteOnClick() override;
+  bool isPasteOnClickManaged() override;
 
   void savePlaySoundOnCopy(bool play) override;
   bool shouldPlaySoundOnCopy() override;
+  bool isPlaySoundOnCopyManaged() override;
 
   void saveAlwaysDisplay(bool display) override;
   bool shouldAlwaysDisplay() override;
 
   void saveCopyOnDoubleClick(bool copy) override;
   bool shouldCopyOnDoubleClick() override;
+  bool isCopyOnDoubleClickManaged() override;
 
   void saveCopyOnNumberAction(bool copy) override;
   bool shouldCopyOnNumberAction() override;
+  bool isCopyOnNumberActionManaged() override;
+
+  bool allowCheckForUpdates() override;
 
   // Shortcuts.
 

@@ -3,18 +3,24 @@ import {Label} from "@/components/ui/label";
 import {Switch} from "@/components/ui/switch";
 import {useEffect, useState} from "react";
 import {
-  CopyAndMergeSeparator, DoubleClickStrategy, NumberActionStrategy,
+  CopyAndMergeSeparator,
+  DoubleClickStrategy,
+  NumberActionStrategy,
   prefGetClearHistoryOnMacReboot,
   prefGetClearHistoryOnQuit,
   prefGetCopyAndMergeEnabled,
   prefGetCopyAndMergeSeparator,
   prefGetCopyToClipboardAfterMerge,
   prefGetKeepFavoritesOnClearHistory,
-  prefGetWarnOnClearHistory,
+  prefGetWarnOnClearHistory, prefIsClearHistoryOnMacRebootManaged, prefIsClearHistoryOnQuitManaged,
+  prefIsKeepFavoritesOnClearHistoryManaged, prefIsShowPreviewForLinksManaged,
+  prefIsWarnOnClearHistoryManaged,
   prefSetClearHistoryOnMacReboot,
   prefSetClearHistoryOnQuit,
   prefSetCopyAndMergeEnabled,
-  prefSetCopyAndMergeSeparator, prefSetCopyOnDoubleClick, prefSetCopyOnNumberAction,
+  prefSetCopyAndMergeSeparator,
+  prefSetCopyOnDoubleClick,
+  prefSetCopyOnNumberAction,
   prefSetCopyToClipboardAfterMerge,
   prefSetKeepFavoritesOnClearHistory,
   prefSetPasteOnClick,
@@ -323,7 +329,8 @@ Automatically copy the merged text to the system clipboard after&nbsp;merging.
                 </span>
               </Label>
               <Switch id="showPreviewForLinks" checked={showPreviewForLinks}
-                      onCheckedChange={handleShowPreviewForLinksChange}/>
+                      onCheckedChange={handleShowPreviewForLinksChange}
+                      disabled={prefIsShowPreviewForLinksManaged()}/>
             </div>
 
             <hr/>
@@ -336,7 +343,8 @@ Display a confirmation dialog when clearing entire clipboard&nbsp;history.
             </span>
               </Label>
               <Switch id="warnOnClearAll" checked={warnOnClearHistory}
-                      onCheckedChange={handleWarnOnClearHistoryChange}/>
+                      onCheckedChange={handleWarnOnClearHistoryChange}
+                      disabled={prefIsWarnOnClearHistoryManaged()}/>
             </div>
 
             <div className="flex items-center justify-between space-x-20 py-1">
@@ -347,7 +355,8 @@ Do not remove items market as favorite when clearing entire clipboard&nbsp;histo
             </span>
               </Label>
               <Switch id="keepFavoritesOnClearAll" checked={keepFavoritesOnClearHistory}
-                      onCheckedChange={handleKeepFavoritesOnClearHistoryChange}/>
+                      onCheckedChange={handleKeepFavoritesOnClearHistoryChange}
+                      disabled={prefIsKeepFavoritesOnClearHistoryManaged()}/>
             </div>
 
             <hr/>
@@ -360,7 +369,8 @@ Clear the entire clipboard history when ClipBook is&nbsp;terminated.
             </span>
               </Label>
               <Switch id="clearHistoryOnQuit" checked={clearHistoryOnQuit}
-                      onCheckedChange={handleClearHistoryOnQuitChange}/>
+                      onCheckedChange={handleClearHistoryOnQuitChange}
+                      disabled={prefIsClearHistoryOnQuitManaged()}/>
             </div>
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="clearHistoryOnMacReboot" className="flex flex-col text-base">
@@ -370,7 +380,8 @@ Clear the entire clipboard history on Mac&nbsp;shutdown/restart.
             </span>
               </Label>
               <Switch id="clearHistoryOnMacReboot" checked={clearHistoryOnMacReboot}
-                      onCheckedChange={handleClearHistoryOnMacRebootChange}/>
+                      onCheckedChange={handleClearHistoryOnMacRebootChange}
+                      disabled={prefIsClearHistoryOnMacRebootManaged()}/>
             </div>
           </div>
         </div>

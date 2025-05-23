@@ -18,6 +18,7 @@ NSString *prefIgnoreConfidentialContent = @"privacy.ignore_confidential_content"
 NSString *prefIgnoreTransientContent = @"privacy.ignore_transient_content";
 NSString *prefOpenAtLogin = @"app.open_at_login";
 NSString *prefCheckForUpdatesAutomatically = @"app.check_for_updates_automatically";
+NSString *prefAllowCheckForUpdates = @"app.allow_check_for_updates";
 NSString *prefLastUpdateCheckTime = @"app.last_update_check_time";
 NSString *prefWarnOnClearHistory = @"app.warn_on_clear_history";
 NSString *prefKeepFavoritesOnClearHistory = @"app.keep_favorites_on_clear_history";
@@ -83,6 +84,50 @@ NSString *prefRemoveEmptyLinesShortcut = @"app.remove_empty_lines_shortcut";
 NSString *prefStripAllWhitespacesShortcut = @"app.strip_all_whitespaces_shortcut";
 NSString *prefTrimSurroundingWhitespacesShortcut = @"app.trim_surrounding_whitespaces_shortcut";
 NSString *prefToggleFilterShortcut = @"app.toggle_filter_shortcut";
+
+/**
+ * Checks if the device is managed by MDM.
+ */
+bool isDeviceManaged() {
+  CFStringRef domain = CFSTR("com.ikryanov.clipbook.managed");
+  CFPropertyListRef managedPrefs = CFPreferencesCopyAppValue(CFSTR(""), domain);
+  if (managedPrefs) {
+    CFRelease(managedPrefs);
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Checks if the given preference is managed by MDM.
+ */
+bool isManaged(NSString *prefName) {
+  CFStringRef domain = CFSTR("com.ikryanov.clipbook.managed");
+  CFPropertyListRef managedPrefs = CFPreferencesCopyAppValue((__bridge CFStringRef)prefName, domain);
+  if (managedPrefs) {
+    CFRelease(managedPrefs);
+    return true;
+  }
+  return false;
+}
+
+bool prefReadBoolValue(NSString *key, bool defaultValue) {
+  CFStringRef domain = CFSTR("com.ikryanov.clipbook.managed");
+  CFPropertyListRef managedPrefs = CFPreferencesCopyAppValue((__bridge CFStringRef)key, domain);
+  if (managedPrefs) {
+    if (CFGetTypeID(managedPrefs) == CFBooleanGetTypeID()) {
+      BOOL value = CFBooleanGetValue((CFBooleanRef)managedPrefs);
+      CFRelease(managedPrefs);
+      return value;
+    }
+    CFRelease(managedPrefs);
+  }
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:key] != nil) {
+    return [defaults boolForKey:key];
+  }
+  return defaultValue;
+}
 
 AppSettingsMac::AppSettingsMac() = default;
 
@@ -231,11 +276,11 @@ void AppSettingsMac::saveIgnoreConfidentialContent(bool ignore) {
 }
 
 bool AppSettingsMac::shouldIgnoreConfidentialContent() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefIgnoreConfidentialContent] != nil) {
-    return [defaults boolForKey:prefIgnoreConfidentialContent];
-  }
-  return true;
+  return prefReadBoolValue(prefIgnoreConfidentialContent, true);
+}
+
+bool AppSettingsMac::isIgnoreConfidentialContentManaged() {
+  return isManaged(prefIgnoreConfidentialContent);
 }
 
 void AppSettingsMac::saveIgnoreTransientContent(bool ignore) {
@@ -245,11 +290,11 @@ void AppSettingsMac::saveIgnoreTransientContent(bool ignore) {
 }
 
 bool AppSettingsMac::shouldIgnoreTransientContent() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefIgnoreTransientContent] != nil) {
-    return [defaults boolForKey:prefIgnoreTransientContent];
-  }
-  return true;
+  return prefReadBoolValue(prefIgnoreTransientContent, true);
+}
+
+bool AppSettingsMac::isIgnoreTransientContentManaged() {
+  return isManaged(prefIgnoreTransientContent);
 }
 
 void AppSettingsMac::saveOpenAtLogin(bool open) {
@@ -259,8 +304,11 @@ void AppSettingsMac::saveOpenAtLogin(bool open) {
 }
 
 bool AppSettingsMac::shouldOpenAtLogin() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  return [defaults boolForKey:prefOpenAtLogin];
+  return prefReadBoolValue(prefOpenAtLogin, false);
+}
+
+bool AppSettingsMac::isOpenAtLoginManaged() {
+  return isManaged(prefOpenAtLogin);
 }
 
 void AppSettingsMac::saveCheckForUpdatesAutomatically(bool open) {
@@ -270,11 +318,15 @@ void AppSettingsMac::saveCheckForUpdatesAutomatically(bool open) {
 }
 
 bool AppSettingsMac::shouldCheckForUpdatesAutomatically() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefCheckForUpdatesAutomatically] != nil) {
-    return [defaults boolForKey:prefCheckForUpdatesAutomatically];
-  }
-  return true;
+  return prefReadBoolValue(prefCheckForUpdatesAutomatically, true);
+}
+
+bool AppSettingsMac::isCheckForUpdatesAutomaticallyManaged() {
+  return isManaged(prefCheckForUpdatesAutomatically);
+}
+
+bool AppSettingsMac::isAllowCheckForUpdates() {
+  return prefReadBoolValue(prefAllowCheckForUpdates, true);
 }
 
 void AppSettingsMac::saveWarnOnClearHistory(bool warn) {
@@ -284,11 +336,11 @@ void AppSettingsMac::saveWarnOnClearHistory(bool warn) {
 }
 
 bool AppSettingsMac::shouldWarnOnClearHistory() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefWarnOnClearHistory] != nil) {
-    return [defaults boolForKey:prefWarnOnClearHistory];
-  }
-  return true;
+  return prefReadBoolValue(prefWarnOnClearHistory, true);
+}
+
+bool AppSettingsMac::isWarnOnClearHistoryManaged() {
+  return isManaged(prefWarnOnClearHistory);
 }
 
 void AppSettingsMac::saveKeepFavoritesOnClearHistory(bool keep) {
@@ -298,11 +350,11 @@ void AppSettingsMac::saveKeepFavoritesOnClearHistory(bool keep) {
 }
 
 bool AppSettingsMac::shouldKeepFavoritesOnClearHistory() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefKeepFavoritesOnClearHistory] != nil) {
-    return [defaults boolForKey:prefKeepFavoritesOnClearHistory];
-  }
-  return true;
+  return prefReadBoolValue(prefKeepFavoritesOnClearHistory, true);
+}
+
+bool AppSettingsMac::isKeepFavoritesOnClearHistoryManaged() {
+  return isManaged(prefKeepFavoritesOnClearHistory);
 }
 
 void AppSettingsMac::saveShowIconInMenuBar(bool show) {
@@ -312,11 +364,11 @@ void AppSettingsMac::saveShowIconInMenuBar(bool show) {
 }
 
 bool AppSettingsMac::shouldShowIconInMenuBar() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefShowIconInMenuBar] != nil) {
-    return [defaults boolForKey:prefShowIconInMenuBar];
-  }
-  return true;
+  return prefReadBoolValue(prefShowIconInMenuBar, true);
+}
+
+bool AppSettingsMac::isShowIconInMenuBarManaged() {
+  return isManaged(prefShowIconInMenuBar);
 }
 
 void AppSettingsMac::saveCopyAndMergeEnabled(bool enabled) {
@@ -330,6 +382,10 @@ bool AppSettingsMac::isCopyAndMergeEnabled() {
   if ([defaults objectForKey:prefCopyAndMergeEnabled] != nil) {
     return [defaults boolForKey:prefCopyAndMergeEnabled];
   }
+  return false;
+}
+
+bool AppSettingsMac::isCopyAndMergeEnabledManaged() {
   return false;
 }
 
@@ -369,11 +425,11 @@ void AppSettingsMac::saveTreatDigitNumbersAsColor(bool treat) {
 }
 
 bool AppSettingsMac::shouldTreatDigitNumbersAsColor() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefTreatDigitNumbersAsColor] == nil) {
-    return true;
-  }
-  return [defaults boolForKey:prefTreatDigitNumbersAsColor];
+  return prefReadBoolValue(prefTreatDigitNumbersAsColor, true);
+}
+
+bool AppSettingsMac::isTreatDigitNumbersAsColorManaged() {
+  return false;
 }
 
 void AppSettingsMac::saveShowPreviewForLinks(bool show) {
@@ -383,11 +439,11 @@ void AppSettingsMac::saveShowPreviewForLinks(bool show) {
 }
 
 bool AppSettingsMac::shouldShowPreviewForLinks() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefShowPreviewForLinks] == nil) {
-    return true;
-  }
-  return [defaults boolForKey:prefShowPreviewForLinks];
+  return prefReadBoolValue(prefShowPreviewForLinks, true);
+}
+
+bool AppSettingsMac::isShowPreviewForLinksManaged() {
+  return isManaged(prefShowPreviewForLinks);
 }
 
 void AppSettingsMac::saveUpdateHistoryAfterAction(bool update) {
@@ -397,11 +453,11 @@ void AppSettingsMac::saveUpdateHistoryAfterAction(bool update) {
 }
 
 bool AppSettingsMac::shouldUpdateHistoryAfterAction() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefUpdateHistoryAfterAction] == nil) {
-    return true;
-  }
-  return [defaults boolForKey:prefUpdateHistoryAfterAction];
+  return prefReadBoolValue(prefUpdateHistoryAfterAction, true);
+}
+
+bool AppSettingsMac::isUpdateHistoryAfterActionManaged() {
+  return isManaged(prefUpdateHistoryAfterAction);
 }
 
 void AppSettingsMac::saveLastUpdateCheckTime(long time) {
@@ -796,6 +852,10 @@ std::string AppSettingsMac::getAppsToIgnore() {
   return "";
 }
 
+bool AppSettingsMac::isAppsToIgnoreManaged() {
+  return isManaged(prefIgnoreApps);
+}
+
 void AppSettingsMac::saveToggleFavoriteShortcut(std::string shortcut) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefToggleFavoriteShortcut];
@@ -818,11 +878,11 @@ void AppSettingsMac::saveClearHistoryOnQuit(bool clear) {
 }
 
 bool AppSettingsMac::shouldClearHistoryOnQuit() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefClearHistoryOnQuit] != nil) {
-    return [defaults boolForKey:prefClearHistoryOnQuit];
-  }
-  return false;
+  return prefReadBoolValue(prefClearHistoryOnQuit, false);
+}
+
+bool AppSettingsMac::isClearHistoryOnQuitManaged() {
+  return isManaged(prefClearHistoryOnQuit);
 }
 
 void AppSettingsMac::saveClearHistoryOnMacReboot(bool clear) {
@@ -832,13 +892,12 @@ void AppSettingsMac::saveClearHistoryOnMacReboot(bool clear) {
 }
 
 bool AppSettingsMac::shouldClearHistoryOnMacReboot() {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefClearHistoryOnMacReboot] != nil) {
-    return [defaults boolForKey:prefClearHistoryOnMacReboot];
-  }
-  return false;
+  return prefReadBoolValue(prefClearHistoryOnMacReboot, false);
 }
 
+bool AppSettingsMac::isClearHistoryOnMacRebootManaged() {
+  return isManaged(prefClearHistoryOnMacReboot);
+}
 
 void AppSettingsMac::saveNavigateToFirstItemShortcut(std::string shortcut) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -945,6 +1004,10 @@ std::string AppSettingsMac::getOpenWindowStrategy() {
   return "activeScreenLastPosition";
 }
 
+bool AppSettingsMac::isOpenWindowStrategyManaged() {
+  return false;
+}
+
 void AppSettingsMac::saveRenameItemShortcut(std::string shortcut) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefRenameItemShortcut];
@@ -985,6 +1048,10 @@ bool AppSettingsMac::shouldPasteOnClick() {
   return false;
 }
 
+bool AppSettingsMac::isPasteOnClickManaged() {
+  return false;
+}
+
 void AppSettingsMac::savePlaySoundOnCopy(bool play) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults setBool:play forKey:prefPlaySoundOnCopy];
@@ -996,6 +1063,10 @@ bool AppSettingsMac::shouldPlaySoundOnCopy() {
   if ([defaults objectForKey:prefPlaySoundOnCopy] != nil) {
     return [defaults boolForKey:prefPlaySoundOnCopy];
   }
+  return false;
+}
+
+bool AppSettingsMac::isPlaySoundOnCopyManaged() {
   return false;
 }
 
@@ -1132,6 +1203,10 @@ bool AppSettingsMac::shouldCopyOnDoubleClick() {
   return false;
 }
 
+bool AppSettingsMac::isCopyOnDoubleClickManaged() {
+  return false;
+}
+
 void AppSettingsMac::saveCopyOnNumberAction(bool copy) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults setBool:copy forKey:prefCopyOnNumberAction];
@@ -1143,6 +1218,10 @@ bool AppSettingsMac::shouldCopyOnNumberAction() {
   if ([defaults objectForKey:prefCopyOnNumberAction] != nil) {
     return [defaults boolForKey:prefCopyOnNumberAction];
   }
+  return false;
+}
+
+bool AppSettingsMac::isCopyOnNumberActionManaged() {
   return false;
 }
 
@@ -1159,4 +1238,12 @@ std::string AppSettingsMac::getToggleFilterShortcut() {
     return {[shortcut UTF8String]};
   }
   return "MetaLeft + KeyF";
+}
+
+bool AppSettingsMac::allowCheckForUpdates() {
+  return prefReadBoolValue(prefAllowCheckForUpdates, true);
+}
+
+bool AppSettingsMac::isDeviceManaged() {
+  return ::isDeviceManaged();
 }

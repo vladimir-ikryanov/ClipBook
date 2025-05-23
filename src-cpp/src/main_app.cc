@@ -67,6 +67,7 @@ bool MainApp::init() {
       menu::Item("Check for Updates...", [this](const CustomMenuItemActionArgs &args) {
         checkForUpdates(true);
       });
+  check_for_updates_item_->setEnabled(settings_->isAllowCheckForUpdates());
 
   // Restore the application theme.
   setTheme(settings_->getTheme());
@@ -769,18 +770,31 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getLicenseKey", [this]() -> std::string {
     return settings_->getLicenseKey();
   });
-  window->putProperty("saveIgnoreConfidentialContent", [this](bool ignore) -> void {
-    settings_->saveIgnoreConfidentialContent(ignore);
+
+  window->putProperty("isDeviceManaged", [this]() -> bool {
+    return settings_->isDeviceManaged();
   });
+
   window->putProperty("saveIgnoreTransientContent", [this](bool ignore) -> void {
     settings_->saveIgnoreTransientContent(ignore);
-  });
-  window->putProperty("shouldIgnoreConfidentialContent", [this]() -> bool {
-    return settings_->shouldIgnoreConfidentialContent();
   });
   window->putProperty("shouldIgnoreTransientContent", [this]() -> bool {
     return settings_->shouldIgnoreTransientContent();
   });
+  window->putProperty("isIgnoreTransientContentManaged", [this]() -> bool {
+    return settings_->isIgnoreTransientContentManaged();
+  });
+
+  window->putProperty("saveIgnoreConfidentialContent", [this](bool ignore) -> void {
+    settings_->saveIgnoreConfidentialContent(ignore);
+  });
+  window->putProperty("shouldIgnoreConfidentialContent", [this]() -> bool {
+    return settings_->shouldIgnoreConfidentialContent();
+  });
+  window->putProperty("isIgnoreConfidentialContentManaged", [this]() -> bool {
+    return settings_->isIgnoreConfidentialContentManaged();
+  });
+
   window->putProperty("saveOpenAtLogin", [this](bool open) -> void {
     setOpenAtLogin(open);
     settings_->saveOpenAtLogin(open);
@@ -788,24 +802,44 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("shouldOpenAtLogin", [this]() -> bool {
     return settings_->shouldOpenAtLogin();
   });
+  window->putProperty("isOpenAtLoginManaged", [this]() -> bool {
+    return settings_->isOpenAtLoginManaged();
+  });
+
   window->putProperty("saveCheckForUpdatesAutomatically", [this](bool value) -> void {
     settings_->saveCheckForUpdatesAutomatically(value);
   });
   window->putProperty("shouldCheckForUpdatesAutomatically", [this]() -> bool {
     return settings_->shouldCheckForUpdatesAutomatically();
   });
+  window->putProperty("isCheckForUpdatesAutomaticallyManaged", [this]() -> bool {
+    return settings_->isCheckForUpdatesAutomaticallyManaged();
+  });
+
+  window->putProperty("allowCheckForUpdates", [this]() -> bool {
+    return settings_->allowCheckForUpdates();
+  });
+
   window->putProperty("saveWarnOnClearHistory", [this](bool warn) -> void {
     settings_->saveWarnOnClearHistory(warn);
   });
   window->putProperty("shouldWarnOnClearHistory", [this]() -> bool {
     return settings_->shouldWarnOnClearHistory();
   });
+  window->putProperty("isWarnOnClearHistoryManaged", [this]() -> bool {
+    return settings_->isWarnOnClearHistoryManaged();
+  });
+
   window->putProperty("saveKeepFavoritesOnClearHistory", [this](bool keep) -> void {
     settings_->saveKeepFavoritesOnClearHistory(keep);
   });
   window->putProperty("shouldKeepFavoritesOnClearHistory", [this]() -> bool {
       return settings_->shouldKeepFavoritesOnClearHistory();
   });
+  window->putProperty("isKeepFavoritesOnClearHistoryManaged", [this]() -> bool {
+      return settings_->isKeepFavoritesOnClearHistoryManaged();
+  });
+
   window->putProperty("saveShowIconInMenuBar", [this](bool show) -> void {
     setShowIconInMenuBar(show);
     settings_->saveShowIconInMenuBar(show);
@@ -813,66 +847,101 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("shouldShowIconInMenuBar", [this]() -> bool {
     return settings_->shouldShowIconInMenuBar();
   });
+  window->putProperty("isShowIconInMenuBarManaged", [this]() -> bool {
+    return settings_->isShowIconInMenuBarManaged();
+  });
+
   window->putProperty("saveCopyAndMergeEnabled", [this](bool enabled) -> void {
     settings_->saveCopyAndMergeEnabled(enabled);
   });
   window->putProperty("isCopyAndMergeEnabled", [this]() -> bool {
     return settings_->isCopyAndMergeEnabled();
   });
+  window->putProperty("isCopyAndMergeEnabledManaged", [this]() -> bool {
+    return settings_->isCopyAndMergeEnabledManaged();
+  });
+
   window->putProperty("saveCopyAndMergeSeparator", [this](std::string separator) -> void {
     settings_->saveCopyAndMergeSeparator(separator);
   });
   window->putProperty("getCopyAndMergeSeparator", [this]() -> std::string {
     return settings_->getCopyAndMergeSeparator();
   });
+
   window->putProperty("saveCopyToClipboardAfterMerge", [this](bool copy) -> void {
     settings_->saveCopyToClipboardAfterMerge(copy);
   });
   window->putProperty("shouldCopyToClipboardAfterMerge", [this]() -> bool {
     return settings_->shouldCopyToClipboardAfterMerge();
   });
+
   window->putProperty("saveClearHistoryOnQuit", [this](bool clear) -> void {
     settings_->saveClearHistoryOnQuit(clear);
   });
   window->putProperty("shouldClearHistoryOnQuit", [this]() -> bool {
     return settings_->shouldClearHistoryOnQuit();
   });
+  window->putProperty("isClearHistoryOnQuitManaged", [this]() -> bool {
+    return settings_->isClearHistoryOnQuitManaged();
+  });
+
   window->putProperty("saveClearHistoryOnMacReboot", [this](bool clear) -> void {
     settings_->saveClearHistoryOnMacReboot(clear);
   });
   window->putProperty("shouldClearHistoryOnMacReboot", [this]() -> bool {
       return settings_->shouldClearHistoryOnMacReboot();
   });
+  window->putProperty("isClearHistoryOnMacRebootManaged", [this]() -> bool {
+      return settings_->isClearHistoryOnMacRebootManaged();
+  });
+
   window->putProperty("saveOpenWindowStrategy", [this](std::string strategy) -> void {
     settings_->saveOpenWindowStrategy(std::move(strategy));
   });
   window->putProperty("getOpenWindowStrategy", [this]() -> std::string {
     return settings_->getOpenWindowStrategy();
   });
+  window->putProperty("isOpenWindowStrategyManaged", [this]() -> bool {
+    return settings_->isOpenWindowStrategyManaged();
+  });
+
   window->putProperty("setPlaySoundOnCopy", [this](bool play) -> void {
     settings_->savePlaySoundOnCopy(play);
   });
   window->putProperty("shouldPlaySoundOnCopy", [this]() -> bool {
     return settings_->shouldPlaySoundOnCopy();
   });
+  window->putProperty("isPlaySoundOnCopyManaged", [this]() -> bool {
+    return settings_->isPlaySoundOnCopyManaged();
+  });
+
   window->putProperty("setAlwaysDisplay", [this](bool display) -> void {
     settings_->saveAlwaysDisplay(display);
   });
   window->putProperty("shouldAlwaysDisplay", [this]() -> bool {
     return settings_->shouldAlwaysDisplay();
   });
+
   window->putProperty("setCopyOnDoubleClick", [this](bool copy) -> void {
     settings_->saveCopyOnDoubleClick(copy);
   });
   window->putProperty("shouldCopyOnDoubleClick", [this]() -> bool {
     return settings_->shouldCopyOnDoubleClick();
   });
+  window->putProperty("isCopyOnDoubleClickManaged", [this]() -> bool {
+    return settings_->isCopyOnDoubleClickManaged();
+  });
+
   window->putProperty("setCopyOnNumberAction", [this](bool copy) -> void {
     settings_->saveCopyOnNumberAction(copy);
   });
   window->putProperty("shouldCopyOnNumberAction", [this]() -> bool {
     return settings_->shouldCopyOnNumberAction();
   });
+  window->putProperty("isCopyOnNumberActionManaged", [this]() -> bool {
+    return settings_->isCopyOnNumberActionManaged();
+  });
+
   window->putProperty("getArch", [this]() -> std::string {
 #ifdef ARCH_MAC_X64
     return "Intel";
@@ -1144,40 +1213,61 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("setAppsToIgnore", [this](std::string apps) -> void {
     settings_->saveAppsToIgnore(apps);
   });
+  window->putProperty("isAppsToIgnoreManaged", [this]() -> bool {
+    return settings_->isAppsToIgnoreManaged();
+  });
+
   window->putProperty("getFileIconAsBase64", [this](std::string app_path, bool large) -> std::string {
     return getFileIconAsBase64(app_path, large);
   });
   window->putProperty("getAppNameFromPath", [this](std::string app_path) -> std::string {
     return getAppNameFromPath(app_path);
   });
+
   window->putProperty("setTreatDigitNumbersAsColor", [this](bool treat) -> void {
     settings_->saveTreatDigitNumbersAsColor(treat);
   });
   window->putProperty("shouldTreatDigitNumbersAsColor", [this]() -> bool {
     return settings_->shouldTreatDigitNumbersAsColor();
   });
+  window->putProperty("isTreatDigitNumbersAsColorManaged", [this]() -> bool {
+    return settings_->isTreatDigitNumbersAsColorManaged();
+  });
+
   window->putProperty("setShowPreviewForLinks", [this](bool show) -> void {
     settings_->saveShowPreviewForLinks(show);
   });
   window->putProperty("shouldShowPreviewForLinks", [this]() -> bool {
     return settings_->shouldShowPreviewForLinks();
   });
+  window->putProperty("isShowPreviewForLinksManaged", [this]() -> bool {
+    return settings_->isShowPreviewForLinksManaged();
+  });
+
   window->putProperty("fetchLinkPreviewDetails", [this](std::string url, std::shared_ptr<JsObject> callback) {
     std::thread([this, url, callback]() {
       fetchLinkPreviewDetails(url, callback);
     }).detach();
   });
+
   window->putProperty("setUpdateHistoryAfterAction", [this](bool update) -> void {
     settings_->saveUpdateHistoryAfterAction(update);
   });
   window->putProperty("shouldUpdateHistoryAfterAction", [this]() -> bool {
     return settings_->shouldUpdateHistoryAfterAction();
   });
+  window->putProperty("isUpdateHistoryAfterActionManaged", [this]() -> bool {
+    return settings_->isUpdateHistoryAfterActionManaged();
+  });
+
   window->putProperty("setPasteOnClick", [this](bool paste) -> void {
     settings_->savePasteOnClick(paste);
   });
   window->putProperty("shouldPasteOnClick", [this]() -> bool {
     return settings_->shouldPasteOnClick();
+  });
+  window->putProperty("isPasteOnClickManaged", [this]() -> bool {
+    return settings_->isPasteOnClickManaged();
   });
 
   // Settings window.

@@ -88,7 +88,9 @@
     --dialog-text: #414141;
     /* Sidebar */
     --sidebar-background: #F2F2F2;
+    --sidebar-background-secondary: rgba(236, 236, 236, 0.25);
     --sidebar-foreground: #000000;
+    --sidebar-foreground-secondary: #6e6e6e;
     --sidebar-primary: #000000;
     --sidebar-primary-foreground: #414141;
     --sidebar-accent: #006fff;
@@ -192,7 +194,9 @@
     --dialog-text: #b8b8b8;
     /* Sidebar */
     --sidebar-background: #212121;
+    --sidebar-background-secondary: rgba(58, 58, 58, 0.5);
     --sidebar-foreground: #DADADA;
+    --sidebar-foreground-secondary: #cccccc;
     --sidebar-primary: #f6f6f6;
     --sidebar-primary-foreground: #808081;
     --sidebar-accent: #006fff;

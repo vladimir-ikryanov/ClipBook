@@ -1,53 +1,98 @@
 declare const saveTheme: (theme: string) => void;
 declare const getTheme: () => string;
+
 declare const saveLicenseKey: (licenseKey: string) => void;
 declare const getLicenseKey: () => string;
+
 declare const saveOpenAtLogin: (openAtLogin: boolean) => void;
 declare const shouldOpenAtLogin: () => boolean;
+declare const isOpenAtLoginManaged: () => boolean;
+
 declare const saveCheckForUpdatesAutomatically: (value: boolean) => void;
 declare const shouldCheckForUpdatesAutomatically: () => boolean;
+declare const isCheckForUpdatesAutomaticallyManaged: () => boolean;
+
+declare const allowCheckForUpdates: () => boolean;
+
 declare const saveWarnOnClearHistory: (warn: boolean) => void;
 declare const shouldWarnOnClearHistory: () => boolean;
+declare const isWarnOnClearHistoryManaged: () => boolean;
+
 declare const saveKeepFavoritesOnClearHistory: (keep: boolean) => void;
 declare const shouldKeepFavoritesOnClearHistory: () => boolean;
+declare const isKeepFavoritesOnClearHistoryManaged: () => boolean;
+
 declare const saveIgnoreTransientContent: (ignore: boolean) => void;
 declare const saveIgnoreConfidentialContent: (ignore: boolean) => void;
+declare const isIgnoreTransientContentManaged: () => boolean;
+
 declare const shouldIgnoreTransientContent: () => boolean;
 declare const shouldIgnoreConfidentialContent: () => boolean;
+declare const isIgnoreConfidentialContentManaged: () => boolean;
+
 declare const saveShowIconInMenuBar: (showIcon: boolean) => void;
 declare const shouldShowIconInMenuBar: () => boolean;
+declare const isShowIconInMenuBarManaged: () => boolean;
+
 declare const setAppsToIgnore: (apps: string) => void;
 declare const getAppsToIgnore: () => string;
+declare const isAppsToIgnoreManaged: () => boolean;
+
 declare const saveCopyAndMergeEnabled: (enabled: boolean) => void;
 declare const isCopyAndMergeEnabled: () => boolean;
+declare const isCopyAndMergeEnabledManaged: () => boolean;
+
 declare const saveCopyAndMergeSeparator: (separator: string) => void;
 declare const getCopyAndMergeSeparator: () => string;
+
 declare const saveCopyToClipboardAfterMerge: (copy: boolean) => void;
 declare const shouldCopyToClipboardAfterMerge: () => boolean;
+
 declare const saveClearHistoryOnQuit: (clear: boolean) => void;
 declare const shouldClearHistoryOnQuit: () => boolean;
+declare const isClearHistoryOnQuitManaged: () => boolean;
+
 declare const saveClearHistoryOnMacReboot: (clear: boolean) => void;
 declare const shouldClearHistoryOnMacReboot: () => boolean;
+declare const isClearHistoryOnMacRebootManaged: () => boolean;
+
 declare const saveOpenWindowStrategy: (strategy: string) => void;
 declare const getOpenWindowStrategy: () => string;
+declare const isOpenWindowStrategyManaged: () => boolean;
+
 declare const setTreatDigitNumbersAsColor: (treat: boolean) => void;
 declare const shouldTreatDigitNumbersAsColor: () => boolean;
+declare const isTreatDigitNumbersAsColorManaged: () => boolean;
+
 declare const setShowPreviewForLinks: (show: boolean) => void;
 declare const shouldShowPreviewForLinks: () => boolean;
+declare const isShowPreviewForLinksManaged: () => boolean;
+
 declare const setUpdateHistoryAfterAction: (update: boolean) => void;
 declare const shouldUpdateHistoryAfterAction: () => boolean;
+declare const isUpdateHistoryAfterActionManaged: () => boolean;
+
 declare const shouldPasteOnClick: () => boolean;
 declare const setPasteOnClick: (paste: boolean) => void;
+declare const isPasteOnClickManaged: () => boolean;
+
 declare const shouldPlaySoundOnCopy: () => boolean;
 declare const setPlaySoundOnCopy: (play: boolean) => void;
+declare const isPlaySoundOnCopyManaged: () => boolean;
+
 declare const shouldAlwaysDisplay: () => boolean;
 declare const setAlwaysDisplay: (display: boolean) => void;
+
 declare const setFeedbackProvided: (provided: boolean) => void;
 declare const isFeedbackProvided: () => boolean;
+
 declare const setCopyOnDoubleClick: (copy: boolean) => void;
 declare const shouldCopyOnDoubleClick: () => boolean;
+declare const isCopyOnDoubleClickManaged: () => boolean;
+
 declare const setCopyOnNumberAction: (copy: boolean) => void;
 declare const shouldCopyOnNumberAction: () => boolean;
+declare const isCopyOnNumberActionManaged: () => boolean;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -128,6 +173,8 @@ declare const getTrimSurroundingWhitespacesShortcut: () => string;
 declare const saveToggleFilterShortcut: (shortcut: string) => void;
 declare const getToggleFilterShortcut: () => string;
 
+declare const isDeviceManaged: () => boolean;
+
 export enum OpenWindowStrategy {
   ACTIVE_SCREEN_LAST_POSITION = "activeScreenLastPosition",
   ACTIVE_SCREEN_CENTER = "activeScreenCenter",
@@ -145,6 +192,10 @@ export enum DoubleClickStrategy {
 export enum NumberActionStrategy {
   COPY = "copy",
   PASTE = "paste",
+}
+
+export function prefIsDeviceManaged() {
+  return isDeviceManaged()
 }
 
 export function prefGetTheme() {
@@ -171,12 +222,24 @@ export function prefSetOpenAtLogin(openAtLogin: boolean) {
   saveOpenAtLogin(openAtLogin)
 }
 
+export function prefIsOpenAtLoginManaged() {
+  return isOpenAtLoginManaged()
+}
+
 export function prefGetCheckForUpdatesAutomatically() {
   return shouldCheckForUpdatesAutomatically()
 }
 
 export function prefSetCheckForUpdatesAutomatically(checkForUpdatesAutomatically: boolean) {
   saveCheckForUpdatesAutomatically(checkForUpdatesAutomatically)
+}
+
+export function prefIsCheckForUpdatesAutomaticallyManaged() {
+  return isCheckForUpdatesAutomaticallyManaged()
+}
+
+export function prefAllowCheckForUpdates() {
+  return allowCheckForUpdates()
 }
 
 export function prefGetWarnOnClearHistory() {
@@ -187,12 +250,20 @@ export function prefSetWarnOnClearHistory(warn: boolean) {
   saveWarnOnClearHistory(warn)
 }
 
+export function prefIsWarnOnClearHistoryManaged() {
+  return isWarnOnClearHistoryManaged()
+}
+
 export function prefGetKeepFavoritesOnClearHistory() {
   return shouldKeepFavoritesOnClearHistory()
 }
 
 export function prefSetKeepFavoritesOnClearHistory(keep: boolean) {
   saveKeepFavoritesOnClearHistory(keep)
+}
+
+export function prefIsKeepFavoritesOnClearHistoryManaged() {
+  return isKeepFavoritesOnClearHistoryManaged()
 }
 
 export function prefGetIgnoreTransientContent() {
@@ -203,12 +274,20 @@ export function prefSetIgnoreTransientContent(ignore: boolean) {
   saveIgnoreTransientContent(ignore)
 }
 
+export function prefIsIgnoreTransientContentManaged() {
+  return isIgnoreTransientContentManaged()
+}
+
 export function prefGetIgnoreConfidentialContent() {
   return shouldIgnoreConfidentialContent()
 }
 
 export function prefSetIgnoreConfidentialContent(ignore: boolean) {
   saveIgnoreConfidentialContent(ignore)
+}
+
+export function prefIsIgnoreConfidentialContentManaged() {
+  return isIgnoreConfidentialContentManaged()
 }
 
 export function prefGetOpenAppShortcut() {
@@ -403,6 +482,10 @@ export function prefGetShowIconInMenuBar() {
   return shouldShowIconInMenuBar()
 }
 
+export function prefIsShowIconInMenuBarManaged() {
+  return isShowIconInMenuBarManaged()
+}
+
 export function prefGetAppsToIgnore(): string[] {
   let apps = getAppsToIgnore();
   if (apps === "") {
@@ -413,6 +496,10 @@ export function prefGetAppsToIgnore(): string[] {
 
 export function prefSetAppsToIgnore(apps: string[]) {
   setAppsToIgnore(apps.join(","))
+}
+
+export function prefIsAppsToIgnoreManaged() {
+  return isAppsToIgnoreManaged()
 }
 
 export function prefGetCopyTextFromImageShortcut() {
@@ -477,12 +564,20 @@ export function prefSetClearHistoryOnQuit(clear: boolean) {
   saveClearHistoryOnQuit(clear)
 }
 
+export function prefIsClearHistoryOnQuitManaged() {
+  return isClearHistoryOnQuitManaged()
+}
+
 export function prefGetClearHistoryOnMacReboot() {
   return shouldClearHistoryOnMacReboot()
 }
 
 export function prefSetClearHistoryOnMacReboot(clear: boolean) {
   saveClearHistoryOnMacReboot(clear)
+}
+
+export function prefIsClearHistoryOnMacRebootManaged() {
+  return isClearHistoryOnMacRebootManaged()
 }
 
 export function prefGetNavigateToFirstItemShortcut() {
@@ -558,6 +653,10 @@ export function prefShouldShowPreviewForLinks() {
   return shouldShowPreviewForLinks()
 }
 
+export function prefIsShowPreviewForLinksManaged() {
+  return isShowPreviewForLinksManaged()
+}
+
 export function prefGetSaveImageAsFileShortcut() {
   return getSaveImageAsFileShortcut()
 }
@@ -612,6 +711,10 @@ export function prefShouldPlaySoundOnCopy() {
 
 export function prefSetPlaySoundOnCopy(play: boolean) {
   setPlaySoundOnCopy(play)
+}
+
+export function prefIsPlaySoundOnCopyManaged() {
+  return isPlaySoundOnCopyManaged()
 }
 
 export function prefShouldAlwaysDisplay() {

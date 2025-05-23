@@ -2,6 +2,7 @@ import * as React from "react";
 import {useEffect, useState} from "react";
 import {RefreshCcwIcon} from "lucide-react";
 import {Button} from "@/components/ui/button";
+import {prefAllowCheckForUpdates} from "@/pref";
 
 declare const closeSettingsWindow: () => void;
 declare const checkForUpdates: () => void;
@@ -59,7 +60,7 @@ export default function About() {
           <h1 className="text-3xl font-semibold mb-3 mt-1">ClipBook</h1>
           <p className="text-secondary-foreground">Version {getVersion()} ({getArch()})</p>
           <Button variant="secondary" size="sm" className="px-4 mt-4"
-                  onClick={handleCheckForUpdates} disabled={checkingForUpdates}>
+                  onClick={handleCheckForUpdates} disabled={checkingForUpdates || !prefAllowCheckForUpdates()}>
             {
               checkingForUpdates ? <RefreshCcwIcon className="animate-spin h-4 w-4 mr-2"/> : null
             }
