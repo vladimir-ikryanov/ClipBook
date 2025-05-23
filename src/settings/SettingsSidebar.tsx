@@ -73,7 +73,7 @@ export default function SettingsSidebar(props: SettingsSidebarProps) {
           </SidebarGroup>
         </SidebarContent>
         {
-            !prefIsDeviceManaged() &&
+            prefIsDeviceManaged() &&
             <SidebarFooter className="border-r border-r-sidebar-border select-none">
               <div
                   className="flex flex-col items-center justify-center text-center px-2 py-4 w-full rounded-md bg-sidebar-background-secondary text-secondary-foreground space-y-2">
