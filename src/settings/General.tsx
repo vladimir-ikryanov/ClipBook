@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
+import CheckForUpdatesResult from "@/settings/CheckForUpdatesResult";
 
 declare const closeSettingsWindow: () => void;
 declare const checkForUpdates: () => void;
@@ -140,8 +141,8 @@ Download and install new updates when&nbsp;available.
                       disabled={prefIsCheckForUpdatesAutomaticallyManaged()}/>
             </div>
 
-            <div className="flex items-center justify-between py-1 space-x-20">
-              <Button variant="secondary" size="sm" className="px-4"
+            <div className="flex items-center py-1 space-x-4">
+              <Button variant="secondary" size="md" className="px-4"
                       onClick={handleCheckForUpdates} disabled={checkingForUpdates || !prefAllowCheckForUpdates()}>
                 {
                   checkingForUpdates ? <RefreshCcwIcon className="animate-spin h-4 w-4 mr-2"/> : null
@@ -150,6 +151,7 @@ Download and install new updates when&nbsp;available.
                   checkingForUpdates ? "Checking for updates..." : "Check for Updates..."
                 }
               </Button>
+              <CheckForUpdatesResult/>
             </div>
 
             <hr/>

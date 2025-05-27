@@ -3,6 +3,7 @@ import {useEffect, useState} from "react";
 import {RefreshCcwIcon} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {prefAllowCheckForUpdates} from "@/pref";
+import CheckForUpdatesResult from "@/settings/CheckForUpdatesResult";
 
 declare const closeSettingsWindow: () => void;
 declare const checkForUpdates: () => void;
@@ -48,6 +49,7 @@ export default function About() {
     openUrl("https://feedback.clipbook.app/board/all")
   }
 
+  // Attach the function to the window object
   (window as any).setUpdateCheckInProgress = setUpdateCheckInProgress
 
   return (
@@ -68,6 +70,9 @@ export default function About() {
               checkingForUpdates ? "Checking for updates..." : "Check for Updates..."
             }
           </Button>
+          <div className="justify-center text-center mt-4">
+            <CheckForUpdatesResult/>
+          </div>
         </div>
         <div className="flex flex-col items-center justify-center text-sm text-secondary-foreground p-6">
           <div className="flex">
