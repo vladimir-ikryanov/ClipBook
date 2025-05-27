@@ -9,6 +9,12 @@ struct AppInfo {
   std::string path;
 };
 
+static const std::string kEnglishUS = "en";
+static const std::string kEnglishGB = "en-GB";
+static const std::string kGerman = "de";
+static const std::string kItalian = "it";
+static const std::string kPortugueseBR = "pt-BR";
+
 class AppSettings {
  public:
   static std::shared_ptr<AppSettings> create();
@@ -20,6 +26,9 @@ class AppSettings {
 
   virtual void saveLicenseKey(std::string key) = 0;
   virtual std::string getLicenseKey() = 0;
+
+  virtual void saveLanguage(std::string code) = 0;
+  virtual std::string getLanguage() = 0;
 
   virtual void saveTheme(std::string theme) = 0;
   virtual std::string getTheme() = 0;

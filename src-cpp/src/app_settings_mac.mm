@@ -13,6 +13,7 @@ NSString *prefWindowBoundsWidth = @"window.bounds.width";
 NSString *prefWindowBoundsHeight = @"window.bounds.height";
 NSString *prefScreenNumber = @"screen_%@";
 NSString *prefScreenInfo = @"screen_%@_%@:%@_%@x%@";
+NSString *prefAppLanguage = @"app.language";
 NSString *prefAppTheme = @"app.theme";
 NSString *prefIgnoreConfidentialContent = @"privacy.ignore_confidential_content";
 NSString *prefIgnoreTransientContent = @"privacy.ignore_transient_content";
@@ -239,6 +240,21 @@ molybden::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id,
   auto width = [[value objectForKey:prefWindowBoundsWidth] unsignedIntValue];
   auto height = [[value objectForKey:prefWindowBoundsHeight] unsignedIntValue];
   return {molybden::Point(x, y), molybden::Size(width, height)};
+}
+
+void AppSettingsMac::saveLanguage(std::string code) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:code.c_str()] forKey:prefAppLanguage];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getLanguage() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *language = [defaults objectForKey:prefAppLanguage];
+  if (language != nil) {
+    return {[language UTF8String]};
+  }
+  return kEnglishUS;
 }
 
 void AppSettingsMac::saveTheme(std::string theme) {

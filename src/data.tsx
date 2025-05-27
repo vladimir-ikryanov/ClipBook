@@ -10,7 +10,7 @@ import {
   getImageText, getRTF,
   updateClip
 } from "@/db";
-import {prefGetClearHistoryOnMacReboot} from "@/pref";
+import {prefGetClearHistoryOnMacReboot, prefGetLanguage} from "@/pref";
 import {getClipType} from "@/lib/utils";
 import {loadTags, Tag} from "@/tags";
 import {emitter} from "@/actions";
@@ -67,6 +67,34 @@ let unknownAppInfo: AppInfo = {
   path: "",
   icon: ""
 }
+
+export enum LanguageCode {
+  EN_US = "en",
+  EN_GB = "en-GB",
+  DE = "de",
+  IT = "it",
+  PT_BR = "pt-BR",
+}
+
+export class Language {
+  code: LanguageCode;
+  name: string;
+  nativeName: string;
+
+  constructor(code: LanguageCode, name: string, nativeName: string) {
+    this.code = code;
+    this.name = name;
+    this.nativeName = nativeName;
+  }
+}
+
+export const supportedLanguages: Language[] = [
+  new Language(LanguageCode.EN_US, "English (US)", "English"),
+  new Language(LanguageCode.EN_GB, "English (UK)", "English (UK)"),
+  new Language(LanguageCode.DE, "German", "Deutsch"),
+  new Language(LanguageCode.IT, "Italian", "Italiano"),
+  new Language(LanguageCode.PT_BR, "Portuguese (Brazil)", "Português (Brasil)"),
+];
 
 let history: Clip[] = [];
 let filteredHistory: Clip[] = [];
@@ -754,4 +782,43 @@ export function getSelectedItemTextTypes(item: Clip | undefined): TextType[] {
 
 export function fileExists(filePath: string): boolean {
   return isFileExists(filePath)
+}
+
+export function getLanguageByCode(code: LanguageCode): Language | undefined {
+  return supportedLanguages.find(lang => lang.code === code);
+}
+
+function toLocale(languageCode: LanguageCode): string {
+  switch (languageCode) {
+    case LanguageCode.EN_US:
+      return "en-US";
+    case LanguageCode.EN_GB:
+      return "en-GB";
+    case LanguageCode.DE:
+      return "de-DE";
+    case LanguageCode.IT:
+      return "it-IT";
+    case LanguageCode.PT_BR:
+      return "pt-BR";
+    default:
+      return "en-US"; // Default to English (US)
+  }
+}
+
+export function formatDateTime(date: Date): string {
+  return new Intl.DateTimeFormat(toLocale(prefGetLanguage()), {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(date);
+}
+
+export function formatNumber(value: number): string {
+  return new Intl.NumberFormat(toLocale(prefGetLanguage()), {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  }).format(value);
 }

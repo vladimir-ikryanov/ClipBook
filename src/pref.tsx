@@ -1,3 +1,8 @@
+import {LanguageCode} from "@/data";
+
+declare const saveLanguage: (language: string) => void;
+declare const getLanguage: () => string;
+
 declare const saveTheme: (theme: string) => void;
 declare const getTheme: () => string;
 
@@ -196,6 +201,14 @@ export enum NumberActionStrategy {
 
 export function prefIsDeviceManaged() {
   return isDeviceManaged()
+}
+
+export function prefSetLanguage(language: LanguageCode) {
+  saveLanguage(language)
+}
+
+export function prefGetLanguage() : LanguageCode {
+  return getLanguage() as LanguageCode
 }
 
 export function prefGetTheme() {

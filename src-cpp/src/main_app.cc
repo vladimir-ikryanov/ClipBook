@@ -757,6 +757,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
 
   // Settings window.
+  window->putProperty("saveLanguage", [this](std::string language) -> void {
+    settings_->saveLanguage(std::move(language));
+  });
+  window->putProperty("getLanguage", [this]() -> std::string {
+    return settings_->getLanguage();
+  });
   window->putProperty("saveTheme", [this](std::string theme) -> void {
     setTheme(theme);
     settings_->saveTheme(theme);

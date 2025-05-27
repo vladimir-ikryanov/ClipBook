@@ -1,10 +1,11 @@
 import '../app.css';
 import React, {useEffect, useState} from "react";
 import {Clip, ClipType, getFilePath, getHTML, getRTF} from "@/db";
-import {fileExists, getHistoryItemById, toBase64Icon} from "@/data";
+import {fileExists, formatDateTime, formatNumber, getHistoryItemById, toBase64Icon} from "@/data";
 import ItemTags from "@/app/ItemTags";
 import {getTags, Tag} from "@/tags";
 import {emitter} from "@/actions";
+import {prefGetLanguage} from "@/pref";
 
 declare const getAppNameFromPath: (appPath: string) => string;
 declare const getFileIconAsBase64: (appPath: string, large: boolean) => string;
@@ -96,10 +97,6 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
       return result
     }
     return ["Unknown"]
-  }
-
-  function getTimeString(date: Date): string {
-    return date.toDateString() + " at " + date.toLocaleTimeString()
   }
 
   function canShowImageSize() {
@@ -228,7 +225,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold">Number of copies</div>
               <div className="flex-grow"></div>
-              <div className="flex-none text-foreground">{numberOfCopies}</div>
+              <div className="flex-none text-foreground">{formatNumber(numberOfCopies)}</div>
             </div>
         }
         {
@@ -237,7 +234,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
               <div className="flex-none text-preview-infoLabel font-semibold">First copy time</div>
               <div className="flex-grow"></div>
               <div
-                  className="flex-none text-foreground">{getTimeString(firstTimeCopy)}</div>
+                  className="flex-none text-foreground">{formatDateTime(firstTimeCopy)}</div>
             </div>
         }
         {
@@ -246,7 +243,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
               <div className="flex-none text-preview-infoLabel font-semibold">Last copy time</div>
               <div className="flex-grow"></div>
               <div
-                  className="flex-none text-foreground">{getTimeString(lastTimeCopy)}</div>
+                  className="flex-none text-foreground">{formatDateTime(lastTimeCopy)}</div>
             </div>
         }
         {
@@ -255,7 +252,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
               <div className="flex-none text-preview-infoLabel font-semibold">Copy time</div>
               <div className="flex-grow"></div>
               <div
-                  className="flex-none text-foreground">{getTimeString(firstTimeCopy)}</div>
+                  className="flex-none text-foreground">{formatDateTime(firstTimeCopy)}</div>
             </div>
         }
       </div>

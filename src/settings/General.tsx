@@ -1,19 +1,22 @@
 import * as React from "react";
+import {useEffect, useState} from "react";
 import {Label} from "@/components/ui/label";
 import {Switch} from "@/components/ui/switch";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
-import {useEffect, useState} from "react";
 import {
-  OpenWindowStrategy, prefAllowCheckForUpdates,
+  OpenWindowStrategy,
+  prefAllowCheckForUpdates,
   prefGetCheckForUpdatesAutomatically,
+  prefGetLanguage,
   prefGetOpenAtLogin,
   prefGetOpenWindowStrategy,
   prefGetShowIconInMenuBar,
   prefGetTheme,
   prefIsCheckForUpdatesAutomaticallyManaged,
   prefIsOpenAtLoginManaged,
-  prefIsPlaySoundOnCopyManaged, prefIsShowIconInMenuBarManaged,
-  prefSetCheckForUpdatesAutomatically,
+  prefIsPlaySoundOnCopyManaged,
+  prefIsShowIconInMenuBarManaged,
+  prefSetCheckForUpdatesAutomatically, prefSetLanguage,
   prefSetOpenAtLogin,
   prefSetOpenWindowStrategy,
   prefSetPlaySoundOnCopy,
@@ -21,10 +24,7 @@ import {
   prefSetTheme,
   prefShouldPlaySoundOnCopy,
 } from "@/pref";
-import {
-  ChevronsUpDown,
-  RefreshCcwIcon,
-} from "lucide-react";
+import {ChevronsUpDown, RefreshCcwIcon,} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
 import CheckForUpdatesResult from "@/settings/CheckForUpdatesResult";
+import {getLanguageByCode, LanguageCode} from "@/data";
 
 declare const closeSettingsWindow: () => void;
 declare const checkForUpdates: () => void;
@@ -49,6 +50,7 @@ const openWindowStrategyLabels = {
 }
 
 export default function General() {
+  const [languageCode, setLanguageCode] = useState(prefGetLanguage())
   const [theme, setTheme] = useState(prefGetTheme())
   const [openAtLogin, setOpenAtLogin] = useState(prefGetOpenAtLogin())
   const [checkForUpdatesAutomatically, setCheckForUpdatesAutomatically] = useState(prefGetCheckForUpdatesAutomatically())
@@ -105,6 +107,11 @@ export default function General() {
 
   function setUpdateCheckInProgress(inProgress: boolean) {
     setCheckingForUpdates(inProgress)
+  }
+
+  function handleLanguageCodeChange(languageCode: string) {
+    setLanguageCode(languageCode as LanguageCode)
+    prefSetLanguage(languageCode as LanguageCode)
   }
 
   (window as any).setUpdateCheckInProgress = setUpdateCheckInProgress
@@ -199,6 +206,58 @@ Download and install new updates when&nbsp;available.
                   </div>
                 </div>
               </RadioGroup>
+            </div>
+
+            <div className="flex items-center justify-between space-x-10 py-1">
+              <Label htmlFor="openWindowStrategy" className="flex flex-col text-base">
+                <span className="">Language</span>
+                <span className="text-neutral-500 font-normal text-sm">
+                  Change the language used in the user interface.
+                </span>
+              </Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="dropdown" className="px-4 outline-none">
+                    {getLanguageByCode(languageCode)?.nativeName}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="p-1.5 bg-actions-background" align="end">
+                  <DropdownMenuRadioGroup value={languageCode}
+                                          onValueChange={handleLanguageCodeChange}>
+                    <DropdownMenuRadioItem value={LanguageCode.EN_US} className="py-2 pr-4 pl-10">
+                      <div className="flex flex-col">
+                        <span>{getLanguageByCode(LanguageCode.EN_US)?.nativeName}</span>
+                        <span className="text-secondary-foreground">{getLanguageByCode(LanguageCode.EN_US)?.name}</span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={LanguageCode.EN_GB} className="py-2 pr-4 pl-10">
+                      <div className="flex flex-col">
+                        <span>{getLanguageByCode(LanguageCode.EN_GB)?.nativeName}</span>
+                        <span className="text-secondary-foreground">{getLanguageByCode(LanguageCode.EN_GB)?.name}</span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={LanguageCode.DE} className="py-2 pr-4 pl-10">
+                      <div className="flex flex-col">
+                        <span>{getLanguageByCode(LanguageCode.DE)?.nativeName}</span>
+                        <span className="text-secondary-foreground">{getLanguageByCode(LanguageCode.DE)?.name}</span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={LanguageCode.IT} className="py-2 pr-4 pl-10">
+                      <div className="flex flex-col">
+                        <span>{getLanguageByCode(LanguageCode.IT)?.nativeName}</span>
+                        <span className="text-secondary-foreground">{getLanguageByCode(LanguageCode.IT)?.name}</span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={LanguageCode.PT_BR} className="py-2 pr-4 pl-10">
+                      <div className="flex flex-col">
+                        <span>{getLanguageByCode(LanguageCode.PT_BR)?.nativeName}</span>
+                        <span className="text-secondary-foreground">{getLanguageByCode(LanguageCode.PT_BR)?.name}</span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div className="flex items-center justify-between space-x-20 py-1">

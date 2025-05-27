@@ -20,6 +20,9 @@ class AppSettingsMac : public AppSettings {
   void saveTheme(std::string theme) override;
   std::string getTheme() override;
 
+  void saveLanguage(std::string code) override;
+  std::string getLanguage() override;
+
   void saveWindowBounds(molybden::Rect window_bounds) override;
   molybden::Rect getWindowBounds() override;
 
