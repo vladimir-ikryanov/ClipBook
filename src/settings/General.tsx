@@ -35,6 +35,8 @@ import {
 import {Button} from "@/components/ui/button";
 import CheckForUpdatesResult from "@/settings/CheckForUpdatesResult";
 import {getLanguageByCode, LanguageCode} from "@/data";
+import { useTranslation } from 'react-i18next';
+import i18n from "i18next";
 
 declare const closeSettingsWindow: () => void;
 declare const checkForUpdates: () => void;
@@ -50,6 +52,8 @@ const openWindowStrategyLabels = {
 }
 
 export default function General() {
+  const { t } = useTranslation()
+
   const [languageCode, setLanguageCode] = useState(prefGetLanguage())
   const [theme, setTheme] = useState(prefGetTheme())
   const [openAtLogin, setOpenAtLogin] = useState(prefGetOpenAtLogin())
@@ -112,6 +116,7 @@ export default function General() {
   function handleLanguageCodeChange(languageCode: string) {
     setLanguageCode(languageCode as LanguageCode)
     prefSetLanguage(languageCode as LanguageCode)
+    i18n.changeLanguage(languageCode)
   }
 
   (window as any).setUpdateCheckInProgress = setUpdateCheckInProgress
@@ -210,7 +215,7 @@ Download and install new updates when&nbsp;available.
 
             <div className="flex items-center justify-between space-x-10 py-1">
               <Label htmlFor="openWindowStrategy" className="flex flex-col text-base">
-                <span className="">Language</span>
+                <span className="">{t('welcome')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
                   Change the language used in the user interface.
                 </span>

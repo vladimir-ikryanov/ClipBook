@@ -10,6 +10,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import './index.css'
+import './i18n'
 import {ThemeProvider} from "@/app/ThemeProvider";
 
 const router = createBrowserRouter([
