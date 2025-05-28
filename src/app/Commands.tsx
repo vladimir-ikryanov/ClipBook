@@ -720,7 +720,7 @@ export default function Commands(props: CommandsProps) {
                 }
                 {
                     canQuickLook() &&
-                    <CommandItem onSelect={handleQuickLook}>
+                    <CommandItem onSelect={handleQuickLook} disabled={isFile() && !isFileExists()}>
                       <EyeIcon className="mr-2 h-5 w-5"/>
                       <span>Quick Look</span>
                       <CommandShortcut className="flex flex-row">
