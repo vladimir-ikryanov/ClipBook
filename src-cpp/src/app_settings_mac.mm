@@ -671,7 +671,7 @@ std::string AppSettingsMac::getQuickLookShortcut() {
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }
-  return "Space";
+  return "MetaLeft + KeyL";
 }
 
 void AppSettingsMac::saveOpenInDefaultAppShortcut(std::string shortcut) {
