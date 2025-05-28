@@ -47,6 +47,8 @@ if (OS_MAC)
             src-cpp/src/app_settings_mac.mm
             src-cpp/src/clipboard_reader_mac.h
             src-cpp/src/clipboard_reader_mac.mm
+            src-cpp/src/quick_look_previewer_mac.h
+            src-cpp/src/quick_look_previewer_mac.mm
     )
     if (OFFICIAL_BUILD)
         set(LICENSING_SOURCES_MAC
@@ -72,5 +74,5 @@ set_property(TARGET molybden_lib PROPERTY CXX_STANDARD 20)
 target_include_directories(molybden_lib PRIVATE ${MOLYBDEN_SDK_DIR}/include)
 
 if (OS_MAC)
-    target_link_libraries(molybden_lib PRIVATE "-framework Cocoa -framework Vision -framework IOKit -framework QuickLookThumbnailing")
+    target_link_libraries(molybden_lib PRIVATE "-framework Cocoa -framework Vision -framework IOKit -framework QuickLookThumbnailing -framework QuickLook -framework Quartz")
 endif ()

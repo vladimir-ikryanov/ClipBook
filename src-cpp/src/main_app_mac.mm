@@ -1,8 +1,10 @@
 #include "main_app_mac.h"
 
+#include "quick_look_previewer_mac.h"
+
+#import <ApplicationServices/ApplicationServices.h>
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
-#import <ApplicationServices/ApplicationServices.h>
 
 #include <filesystem>
 #include <sys/sysctl.h>
@@ -1080,4 +1082,17 @@ void MainAppMac::openInApp(const std::string &file_path, const std::string &app_
       NSLog(@"Failed to open file: %@", error.localizedDescription);
     }
   }
+}
+
+void MainAppMac::preview(const std::string &file_path) {
+  auto_hide_disabled_ = true;
+  app_window_->setAlwaysOnTop(false);
+  NSString *filePath = [NSString stringWithUTF8String:file_path.c_str()];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [[QuickLookPreviewer shared] setOnCloseCallback:^{
+      auto_hide_disabled_ = false;
+      app_window_->setAlwaysOnTop(true);
+    }];
+    [[QuickLookPreviewer shared] previewFileAtPath:filePath];
+  });
 }

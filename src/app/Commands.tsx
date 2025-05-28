@@ -28,16 +28,21 @@ import {
   CommandShortcut,
 } from "@/components/ui/command"
 import {
-  prefGetClearHistoryShortcut, prefGetCopyObjectToClipboardShortcut,
+  prefGetClearHistoryShortcut,
+  prefGetCopyObjectToClipboardShortcut,
   prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
-  prefGetOpenInBrowserShortcut, prefGetOpenInDefaultAppShortcut,
+  prefGetOpenInBrowserShortcut,
+  prefGetOpenInDefaultAppShortcut,
   prefGetOpenSettingsShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut, prefGetPasteSelectedObjectToActiveAppShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetPasteSelectedObjectToActiveAppShortcut,
+  prefGetQuickLookShortcut,
   prefGetRenameItemShortcut,
-  prefGetSaveImageAsFileShortcut, prefGetShowInFinderShortcut,
+  prefGetSaveImageAsFileShortcut,
+  prefGetShowInFinderShortcut,
   prefGetShowMoreActionsShortcut,
   prefGetToggleFavoriteShortcut,
   prefGetTogglePreviewShortcut,
@@ -261,6 +266,11 @@ export default function Commands(props: CommandsProps) {
     emitter.emit("PreviewLinkItem")
   }
 
+  function handleQuickLook() {
+    handleOpenChange(false)
+    emitter.emit("QuickLookItem")
+  }
+
   function handleCopyTextFromImage() {
     handleOpenChange(false)
     emitter.emit("CopyTextFromImage")
@@ -306,8 +316,20 @@ export default function Commands(props: CommandsProps) {
     return false
   }
 
+  function isImage() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      return item && item.type === ClipType.Image
+    }
+    return false
+  }
+
   function canShowInFinder() {
     return isFile()
+  }
+
+  function canQuickLook() {
+    return isFile() || isImage()
   }
 
   function canOpenInDefaultApp() {
@@ -694,6 +716,16 @@ export default function Commands(props: CommandsProps) {
                     <CommandItem onSelect={handleSplit}>
                       <UnfoldVerticalIcon className="mr-2 h-5 w-5"/>
                       <span>Split</span>
+                    </CommandItem>
+                }
+                {
+                    canQuickLook() &&
+                    <CommandItem onSelect={handleQuickLook}>
+                      <EyeIcon className="mr-2 h-5 w-5"/>
+                      <span>Quick Look</span>
+                      <CommandShortcut className="flex flex-row">
+                        <ShortcutLabel shortcut={prefGetQuickLookShortcut()}/>
+                      </CommandShortcut>
                     </CommandItem>
                 }
                 <CommandSeparator/>

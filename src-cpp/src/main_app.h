@@ -61,6 +61,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   virtual AppInfo getActiveAppInfo() = 0;
   virtual std::string getFileIconAsBase64(const std::string& app_path, bool large) = 0;
   virtual std::string getAppNameFromPath(const std::string &app_path) = 0;
+  virtual void preview(const std::string &file_path) = 0;
 
  protected:
   void setActiveAppInfo(const std::string &app_name, const std::string& app_icon);

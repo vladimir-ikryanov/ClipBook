@@ -48,6 +48,7 @@ class MainAppMac : public MainApp {
   AppInfo getActiveAppInfo() override;
   std::string getFileIconAsBase64(const std::string& app_path, bool large) override;
   std::string getAppNameFromPath(const std::string &app_path) override;
+  void preview(const std::string &file_path) override;
 
  protected:
   void enableOpenAppShortcut() override;

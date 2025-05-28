@@ -159,6 +159,9 @@ class AppSettingsMac : public AppSettings {
   void saveShowInFinderShortcut(std::string shortcut) override;
   std::string getShowInFinderShortcut() override;
 
+  void saveQuickLookShortcut(std::string shortcut) override;
+  std::string getQuickLookShortcut() override;
+
   void saveOpenInDefaultAppShortcut(std::string shortcut) override;
   std::string getOpenInDefaultAppShortcut() override;
 

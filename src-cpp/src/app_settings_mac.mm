@@ -56,6 +56,7 @@ NSString *prefPasteSelectedObjectToActiveAppShortcut = @"app.paste_selected_obje
 NSString *prefEditHistoryItemShortcut = @"app.edit_history_item_shortcut2";
 NSString *prefOpenInBrowserShortcut = @"app.open_in_browser_shortcut2";
 NSString *prefShowInFinderShortcut = @"app.show_in_finder_shortcut";
+NSString *prefQuickLookShortcut = @"app.quick_look_shortcut";
 NSString *prefOpenInDefaultAppShortcut = @"app.open_in_default_app_shortcut";
 NSString *prefCopyToClipboardShortcut = @"app.copy_to_clipboard_shortcut2";
 NSString *prefCopyObjectToClipboardShortcut = @"app.copy_object_to_clipboard_shortcut2";
@@ -656,6 +657,21 @@ std::string AppSettingsMac::getShowInFinderShortcut() {
     return {[shortcut UTF8String]};
   }
   return "MetaLeft + KeyO";
+}
+
+void AppSettingsMac::saveQuickLookShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefQuickLookShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getQuickLookShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefQuickLookShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "Space";
 }
 
 void AppSettingsMac::saveOpenInDefaultAppShortcut(std::string shortcut) {

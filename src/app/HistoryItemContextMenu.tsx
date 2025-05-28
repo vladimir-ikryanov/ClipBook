@@ -17,7 +17,7 @@ import {
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetOpenInBrowserShortcut, prefGetOpenInDefaultAppShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut, prefGetQuickLookShortcut,
   prefGetRenameItemShortcut,
   prefGetShowInFinderShortcut,
   prefGetToggleFavoriteShortcut,
@@ -101,6 +101,10 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
     return props.item && props.item.type === ClipType.File
   }
 
+  function isImage() {
+    return props.item && props.item.type === ClipType.Image
+  }
+
   function isFileExists() {
     if (isFile()) {
       return fileExists(props.item.filePath)
@@ -130,6 +134,10 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
 
   function canShowFormatText() {
     return isTextItem(props.item)
+  }
+
+  function canShowQuickLook() {
+    return isFile() || isImage()
   }
 
   function handlePaste() {
@@ -170,6 +178,11 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   function handleFormatText() {
     focusSearchOnClose = false
     emitter.emit("ShowFormatTextCommandsByIndex", props.index)
+  }
+
+  function handleQuickLook() {
+    focusSearchOnClose = false
+    emitter.emit("QuickLookItemByIndex", props.index)
   }
 
   function handleDeleteItem() {
@@ -337,6 +350,16 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
             </CommandShortcut>
           </ContextMenuItem>
           {
+              canShowQuickLook() &&
+              <ContextMenuItem onClick={handleQuickLook}>
+                <EyeIcon className="mr-2 h-4 w-4"/>
+                <span className="mr-12">Quick Look</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetQuickLookShortcut()}/>
+                </CommandShortcut>
+              </ContextMenuItem>
+          }
+          {
               canShowFormatText() &&
               <ContextMenuItem onSelect={handleFormatText}>
                 <TypeIcon className="mr-2 h-5 w-5"/>
@@ -393,7 +416,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               <ContextMenuItem onSelect={handleShowInFinder} disabled={!isFileExists()}>
                 <img src={toBase64Icon(FinderIcon)} className="mr-2 h-5 w-5"
                      alt="App icon"/>
-                <span>Show in Finder</span>
+                <span className="mr-12">Show in Finder</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetShowInFinderShortcut()}/>
                 </CommandShortcut>
@@ -406,7 +429,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
                     defaultApp ? <img src={toBase64Icon(defaultApp.icon)} className="mr-2 h-5 w-5"
                                       alt="App icon"/> : null
                   }
-                  <span>Open in {defaultApp?.name}</span>
+                  <span className="mr-12">Open in {defaultApp?.name}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetOpenInDefaultAppShortcut()}/>
                   </CommandShortcut>
@@ -416,7 +439,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               canOpenInDefaultApp() &&
               <ContextMenuItem onSelect={handleOpenWith}>
                 <UploadIcon className="mr-2 h-5 w-5"/>
-                <span>Open With...</span>
+                <span className="mr-12">Open With...</span>
               </ContextMenuItem>
           }
           <ContextMenuSeparator/>
@@ -432,7 +455,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
           }
           <ContextMenuItem onClick={handleDeleteItem}>
             <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
-            <span className="text-actions-danger">Delete</span>
+            <span className="text-actions-danger mr-12">Delete</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
             </CommandShortcut>

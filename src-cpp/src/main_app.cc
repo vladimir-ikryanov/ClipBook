@@ -602,6 +602,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("previewLink", [this](std::string url) {
     previewLink(url);
   });
+  window->putProperty("previewFile", [this](std::string filePath) {
+    preview(filePath);
+  });
   window->putProperty("hideAppWindow", [this]() {
     hide(true);
   });
@@ -1031,6 +1034,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("getShowInFinderShortcut", [this]() -> std::string {
     return settings_->getShowInFinderShortcut();
+  });
+  window->putProperty("saveQuickLookShortcut", [this](std::string shortcut) -> void {
+    settings_->saveQuickLookShortcut(shortcut);
+  });
+  window->putProperty("getQuickLookShortcut", [this]() -> std::string {
+    return settings_->getQuickLookShortcut();
   });
   window->putProperty("saveOpenInDefaultAppShortcut", [this](std::string shortcut) -> void {
     settings_->saveOpenInDefaultAppShortcut(shortcut);

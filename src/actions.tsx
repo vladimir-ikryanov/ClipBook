@@ -57,6 +57,8 @@ export type Events = {
   OpenInBrowserByIndex: number;
   PreviewLinkItem: void;
   PreviewLinkItemByIndex: number;
+  QuickLookItem: void;
+  QuickLookItemByIndex: number;
   CopyToClipboard: void;
   CopyToClipboardByIndex: number;
   CopyTextFromImage: void;

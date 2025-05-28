@@ -39,37 +39,49 @@ import {
   setFilterVisibleState,
   getDetailsVisibleState,
   setDetailsVisibleState,
-  getFilterQuery, isFilterActive, resetFilter, setShouldUpdateHistory
+  getFilterQuery, isFilterActive, resetFilter, setShouldUpdateHistory, fileExists
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
   prefGetCapitalizeShortcut,
   prefGetClearHistoryShortcut,
-  prefGetCopyAndMergeSeparator, prefGetCopyObjectToClipboardShortcut,
+  prefGetCopyAndMergeSeparator,
+  prefGetCopyObjectToClipboardShortcut,
   prefGetCopyTextFromImageShortcut,
   prefGetCopyToClipboardAfterMerge,
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetKeepFavoritesOnClearHistory,
-  prefGetMakeLowerCaseShortcut, prefGetMakeUpperCaseShortcut,
+  prefGetMakeLowerCaseShortcut,
+  prefGetMakeUpperCaseShortcut,
   prefGetNavigateToFirstItemShortcut,
   prefGetNavigateToLastItemShortcut,
   prefGetNavigateToNextGroupOfItemsShortcut,
   prefGetNavigateToPrevGroupOfItemsShortcut,
-  prefGetOpenInBrowserShortcut, prefGetOpenInDefaultAppShortcut,
+  prefGetOpenInBrowserShortcut,
+  prefGetOpenInDefaultAppShortcut,
   prefGetOpenSettingsShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut, prefGetPasteSelectedObjectToActiveAppShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetPasteSelectedObjectToActiveAppShortcut,
+  prefGetQuickLookShortcut,
   prefGetQuickPasteModifier,
-  prefGetQuickPasteShortcuts, prefGetRemoveEmptyLinesShortcut,
+  prefGetQuickPasteShortcuts,
+  prefGetRemoveEmptyLinesShortcut,
   prefGetRenameItemShortcut,
   prefGetSaveImageAsFileShortcut,
   prefGetSelectNextItemShortcut,
-  prefGetSelectPreviousItemShortcut, prefGetSentenceCaseShortcut, prefGetShowInFinderShortcut,
-  prefGetShowMoreActionsShortcut, prefGetStripAllWhitespacesShortcut,
-  prefGetToggleFavoriteShortcut, prefGetToggleFilterShortcut,
-  prefGetTogglePreviewShortcut, prefGetTrimSurroundingWhitespacesShortcut,
-  prefShouldAlwaysDisplay, prefShouldCopyOnDoubleClick,
+  prefGetSelectPreviousItemShortcut,
+  prefGetSentenceCaseShortcut,
+  prefGetShowInFinderShortcut,
+  prefGetShowMoreActionsShortcut,
+  prefGetStripAllWhitespacesShortcut,
+  prefGetToggleFavoriteShortcut,
+  prefGetToggleFilterShortcut,
+  prefGetTogglePreviewShortcut,
+  prefGetTrimSurroundingWhitespacesShortcut,
+  prefShouldAlwaysDisplay,
+  prefShouldCopyOnDoubleClick,
   prefShouldTreatDigitNumbersAsColor,
   prefShouldUpdateHistoryAfterAction
 } from "@/pref";
@@ -102,6 +114,7 @@ declare const clearEntireHistory: () => void;
 declare const openInBrowser: (url: string) => void;
 declare const showInFinder: (filePath: string) => void;
 declare const previewLink: (url: string) => void;
+declare const previewFile: (filePath: string) => void;
 declare const openSettingsWindow: () => void;
 declare const saveImageAsFile: (imageFilePath: string, imageWidth: number, imageHeight: number) => void;
 declare const hideAppWindow: () => void;
@@ -515,6 +528,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
         })
         e.preventDefault()
       }
+      if (isShortcutMatch(prefGetQuickLookShortcut(), e)) {
+        handleQuickLook()
+        e.preventDefault()
+      }
     }
 
     document.addEventListener("keydown", down)
@@ -602,6 +619,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
     emitter.on("OpenInBrowserByIndex", handleOpenInBrowserByIndex)
     emitter.on("PreviewLinkItem", handlePreviewLink)
     emitter.on("PreviewLinkItemByIndex", handlePreviewLinkByIndex)
+    emitter.on("QuickLookItem", handleQuickLook)
+    emitter.on("QuickLookItemByIndex", handleQuickLookByIndex)
     emitter.on("CopyTextFromImage", handleCopyTextFromImage)
     emitter.on("CopyTextFromImageByIndex", handleCopyTextFromImageByIndex)
     emitter.on("CopyPathToClipboard", handleCopyPathToClipboard)
@@ -652,6 +671,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
       emitter.off("OpenInBrowserByIndex", handleOpenInBrowserByIndex)
       emitter.off("PreviewLinkItem", handlePreviewLink)
       emitter.off("PreviewLinkItemByIndex", handlePreviewLinkByIndex)
+      emitter.off("QuickLookItem", handleQuickLook)
+      emitter.off("QuickLookItemByIndex", handleQuickLookByIndex)
       emitter.off("CopyTextFromImage", handleCopyTextFromImage)
       emitter.off("CopyTextFromImageByIndex", handleCopyTextFromImageByIndex)
       emitter.off("CopyPathToClipboard", handleCopyPathToClipboard)
@@ -1197,6 +1218,21 @@ export default function HistoryPane(props: HistoryPaneProps) {
     focusSearchField()
   }
 
+  function quickLook(item: Clip) {
+    if (item.type === ClipType.Image || (item.type === ClipType.File && fileExists(item.filePath))) {
+      let filePath = getFileOrImagePath(item)
+      if (filePath) {
+        previewFile(filePath)
+      }
+    }
+  }
+
+  function handleQuickLook() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      quickLook(getFirstSelectedHistoryItem())
+    }
+  }
+
   function handleOpenInDefaultApp() {
     if (getSelectedHistoryItemIndices().length === 1) {
       let item = getFirstSelectedHistoryItem()
@@ -1266,6 +1302,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   function handlePreviewLinkByIndex(index: number) {
     previewLinkInApp(getHistoryItem(index))
+  }
+
+  function handleQuickLookByIndex(index: number) {
+    quickLook(getHistoryItem(index))
   }
 
   function handleOpenSettings() {
