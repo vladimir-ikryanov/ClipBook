@@ -50,20 +50,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {ChevronsUpDown} from "lucide-react";
 import {Button} from "@/components/ui/button";
+import { Trans, useTranslation } from 'react-i18next';
 
 declare const closeSettingsWindow: () => void;
 
-const doubleClickStrategyLabels = {
-  [DoubleClickStrategy.COPY]: "Copy to clipboard",
-  [DoubleClickStrategy.PASTE]: "Paste to active app",
-}
-
-const numberActionStrategyLabels = {
-  [NumberActionStrategy.COPY]: "Copy to clipboard",
-  [NumberActionStrategy.PASTE]: "Paste to active app",
-}
-
 export default function History() {
+  const { t } = useTranslation();
+
+  const doubleClickStrategyLabels = {
+    [DoubleClickStrategy.COPY]: t('settings.history.doubleClick.copy'),
+    [DoubleClickStrategy.PASTE]: t('settings.history.doubleClick.paste'),
+  }
+
+  const numberActionStrategyLabels = {
+    [NumberActionStrategy.COPY]: t('settings.history.numberAction.copy'),
+    [NumberActionStrategy.PASTE]: t('settings.history.numberAction.paste'),
+  }
+
   const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory())
   const [keepFavoritesOnClearHistory, setKeepFavoritesOnClearHistory] = useState(prefGetKeepFavoritesOnClearHistory())
   const [copyAndMergeEnabled, setCopyAndMergeEnabled] = useState(prefGetCopyAndMergeEnabled())
@@ -159,15 +162,15 @@ export default function History() {
       <div className="flex h-screen select-none">
         <div className="flex flex-col flex-grow">
           <div className="flex pt-8 px-8 border-b border-b-border draggable sticky">
-            <span className="text-2xl pb-3 font-semibold">History</span>
+            <span className="text-2xl pb-3 font-semibold">{t('settings.history.title')}</span>
           </div>
 
           <div className="flex flex-col px-8 pb-6 gap-4 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent">
             <div className="flex items-center justify-between space-x-20 pt-6 pb-1">
               <Label htmlFor="updateHistoryAfterAction" className="flex flex-col text-base">
-                <span className="">Update history after paste/copy</span>
+                <span className="">{t('settings.history.updateHistoryAfterAction.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm mt-1">
-                  Move the item to the top of the history list after paste or copy&nbsp;action.
+                  {t('settings.history.updateHistoryAfterAction.description')}
                 </span>
               </Label>
               <Switch id="updateHistoryAfterAction" checked={updateHistoryAfterAction}
@@ -178,9 +181,9 @@ export default function History() {
 
             <div className="flex items-center justify-between space-x-20 pb-1">
               <Label htmlFor="pasteOnClick" className="flex flex-col text-base">
-                <span className="">Paste on click</span>
+                <span className="">{t('settings.history.pasteOnClick.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm mt-1">
-                  Select history item on mouse over and paste on&nbsp;click.
+                  {t('settings.history.pasteOnClick.description')}
                 </span>
               </Label>
               <Switch id="pasteOnClick" checked={pasteOnClick}
@@ -189,9 +192,9 @@ export default function History() {
 
             <div className="flex items-center justify-between space-x-10 pb-1">
               <Label htmlFor="pasteOnClick" className="flex flex-col text-base">
-                <span className="">On double click</span>
+                <span className="">{t('settings.history.doubleClick.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm mt-1">
-                  Select action for double click on history&nbsp;item.
+                  {t('settings.history.doubleClick.description')}
                 </span>
               </Label>
               <DropdownMenu>
@@ -224,9 +227,9 @@ export default function History() {
 
             <div className="flex items-center justify-between space-x-12 pb-1">
               <Label htmlFor="pasteOnClick" className="flex flex-col text-base">
-                <span className="">On command number shortcut ⌘1-9</span>
+                <span className="">{t('settings.history.numberAction.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm mt-1">
-                  Select action for the command number shortcut&nbsp;⌘1-9.
+                  {t('settings.history.numberAction.description')}
                 </span>
               </Label>
               <DropdownMenu>
@@ -260,10 +263,15 @@ export default function History() {
 
             <div className="flex items-center justify-between space-x-20 pb-1">
               <Label htmlFor="copyAndMerge" className="flex flex-col text-base">
-                <span className="">Copy and merge</span>
+                <span className="">{t('settings.history.copyAndMerge.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm mt-1">
-Press <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd> to append the currently selected text to the previously copied text in the clipboard&nbsp;history.
-            </span>
+                  <Trans 
+                    i18nKey="settings.history.copyAndMerge.description"
+                    components={{
+                      kbd: <kbd />
+                    }}
+                  />
+                </span>
               </Label>
               <Switch id="copyAndMerge" checked={copyAndMergeEnabled}
                       onCheckedChange={handleCopyAndMergeChange}/>
@@ -271,9 +279,9 @@ Press <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd> to append the currently selected te
 
             <div className="flex items-center justify-between space-x-10 py-1">
               <Label className="flex flex-col text-base">
-                <span className="">Copy and merge separator</span>
+                <span className="">{t('settings.history.copyAndMergeSeparator.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
-                  Select how the appended text should be separated from the previously copied&nbsp;text.
+                  {t('settings.history.copyAndMergeSeparator.description')}
                 </span>
               </Label>
               <Select defaultValue={copyAndMergeSeparator}
@@ -283,17 +291,17 @@ Press <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd> to append the currently selected te
                   <SelectValue/>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={CopyAndMergeSeparator.LINE}>New line</SelectItem>
-                  <SelectItem value={CopyAndMergeSeparator.SPACE}>Space</SelectItem>
+                  <SelectItem value={CopyAndMergeSeparator.LINE}>{t('settings.history.copyAndMergeSeparator.line')}</SelectItem>
+                  <SelectItem value={CopyAndMergeSeparator.SPACE}>{t('settings.history.copyAndMergeSeparator.space')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="copyToClipboardAfterMerge" className="flex flex-col text-base">
-                <span className="">Paste back to system clipboard</span>
+                <span className="">{t('settings.history.copyToClipboardAfterMerge.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
-Automatically copy the merged text to the system clipboard after&nbsp;merging.
+                  {t('settings.history.copyToClipboardAfterMerge.description')}
                 </span>
               </Label>
               <Switch id="copyToClipboardAfterMerge"
@@ -307,10 +315,10 @@ Automatically copy the merged text to the system clipboard after&nbsp;merging.
             <div className="flex items-center justify-between space-x-12 pb-1">
               <Label htmlFor="digitToColor" className="flex flex-col text-base">
                 <span className="">
-                  Recognize 8-digit number as a color
+                  {t('settings.history.treatDigitNumbersAsColor.title')}
                 </span>
                 <span className="text-neutral-500 font-normal text-sm mt-1">
-                  Treat 8-digit, 6-digit, 4-digit, and 3-digit numbers as a hex color&nbsp;code.
+                  {t('settings.history.treatDigitNumbersAsColor.description')}
                 </span>
               </Label>
               <Switch id="digitToColor" checked={treatDigitNumbersAsColor}
@@ -322,10 +330,10 @@ Automatically copy the merged text to the system clipboard after&nbsp;merging.
             <div className="flex items-center justify-between space-x-12 pb-1">
               <Label htmlFor="showPreviewForLinks" className="flex flex-col text-base">
                 <span className="">
-                  Show preview for links
+                  {t('settings.history.showPreviewForLinks.title')}
                 </span>
                 <span className="text-neutral-500 font-normal text-sm mt-1">
-                  Fetch and display a favicon, title, description, and social card image for&nbsp;links.
+                  {t('settings.history.showPreviewForLinks.description')}
                 </span>
               </Label>
               <Switch id="showPreviewForLinks" checked={showPreviewForLinks}
@@ -337,10 +345,10 @@ Automatically copy the merged text to the system clipboard after&nbsp;merging.
 
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="warnOnClearAll" className="flex flex-col text-base">
-                <span className="">Warn when clearing entire history</span>
+                <span className="">{t('settings.history.warnOnClearAll.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
-Display a confirmation dialog when clearing entire clipboard&nbsp;history.
-            </span>
+                  {t('settings.history.warnOnClearAll.description')}
+                </span>
               </Label>
               <Switch id="warnOnClearAll" checked={warnOnClearHistory}
                       onCheckedChange={handleWarnOnClearHistoryChange}
@@ -349,10 +357,10 @@ Display a confirmation dialog when clearing entire clipboard&nbsp;history.
 
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="keepFavoritesOnClearAll" className="flex flex-col text-base">
-                <span className="">Keep favorites when clearing entire history</span>
+                <span className="">{t('settings.history.keepFavoritesOnClearAll.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
-Do not remove items market as favorite when clearing entire clipboard&nbsp;history.
-            </span>
+                  {t('settings.history.keepFavoritesOnClearAll.description')}
+                </span>
               </Label>
               <Switch id="keepFavoritesOnClearAll" checked={keepFavoritesOnClearHistory}
                       onCheckedChange={handleKeepFavoritesOnClearHistoryChange}
@@ -363,10 +371,10 @@ Do not remove items market as favorite when clearing entire clipboard&nbsp;histo
 
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="clearHistoryOnQuit" className="flex flex-col text-base">
-                <span className="">Clear entire history on quit</span>
+                <span className="">{t('settings.history.clearHistoryOnQuit.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
-Clear the entire clipboard history when ClipBook is&nbsp;terminated.
-            </span>
+                  {t('settings.history.clearHistoryOnQuit.description')}
+                </span>
               </Label>
               <Switch id="clearHistoryOnQuit" checked={clearHistoryOnQuit}
                       onCheckedChange={handleClearHistoryOnQuitChange}
@@ -374,10 +382,10 @@ Clear the entire clipboard history when ClipBook is&nbsp;terminated.
             </div>
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="clearHistoryOnMacReboot" className="flex flex-col text-base">
-                <span className="">Clear entire history on Mac restart</span>
+                <span className="">{t('settings.history.clearHistoryOnMacReboot.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
-Clear the entire clipboard history on Mac&nbsp;shutdown/restart.
-            </span>
+                  {t('settings.history.clearHistoryOnMacReboot.description')}
+                </span>
               </Label>
               <Switch id="clearHistoryOnMacReboot" checked={clearHistoryOnMacReboot}
                       onCheckedChange={handleClearHistoryOnMacRebootChange}

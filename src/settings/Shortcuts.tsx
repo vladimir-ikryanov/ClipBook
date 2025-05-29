@@ -1,6 +1,7 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
 import ShortcutInput from "@/settings/ShortcutInput";
+import { Trans, useTranslation } from 'react-i18next';
 import {
   prefGetCapitalizeShortcut,
   prefGetClearHistoryShortcut,
@@ -54,6 +55,8 @@ declare const closeSettingsWindow: () => void;
 declare const updateOpenSettingsShortcut: () => void;
 
 export default function Shortcuts() {
+  const { t } = useTranslation();
+
   const [openAppShortcut, setOpenAppShortcut] = useState(prefGetOpenAppShortcut());
   const [closeAppShortcut, setCloseAppShortcut] = useState(prefGetCloseAppShortcut());
   const [closeAppShortcut2, setCloseAppShortcut2] = useState(prefGetCloseAppShortcut2());
@@ -277,19 +280,19 @@ export default function Shortcuts() {
       <div className="flex h-screen select-none">
         <div className="flex flex-col flex-grow">
           <div className="flex pt-8 px-8 border-b border-b-border draggable sticky">
-            <span className="text-2xl pb-3 font-semibold">Shortcuts</span>
+            <span className="text-2xl pb-3 font-semibold">{t('settings.shortcuts.title')}</span>
           </div>
 
           <div className="flex flex-col px-8 pb-4 gap-4 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent">
             <div className="flex items-center justify-between space-x-20 pt-6">
-              <span className="">Open ClipBook</span>
+              <span className="">{t('settings.shortcuts.openApp')}</span>
               <ShortcutInput shortcut={openAppShortcut}
                              defaultShortcut="ShiftLeft + MetaLeft + KeyV"
                              onSave={handleOpenAppShortcutChange}/>
             </div>
             <hr/>
             <div className="flex items-center justify-between space-x-20">
-              <span>Close ClipBook</span>
+              <span>{t('settings.shortcuts.closeApp')}</span>
               <ShortcutInput shortcut={closeAppShortcut3}
                              defaultShortcut="ShiftLeft + MetaLeft + KeyV"
                              onSave={handleCloseAppShortcutChange3}/>
@@ -306,185 +309,185 @@ export default function Shortcuts() {
             </div>
             <hr/>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Select next history item</span>
+              <span className="">{t('settings.shortcuts.selectNextItem')}</span>
               <ShortcutInput shortcut={selectNextItemShortcut}
                              defaultShortcut="ArrowDown"
                              onSave={handleSelectNextItemShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Select previous history item</span>
+              <span className="">{t('settings.shortcuts.selectPreviousItem')}</span>
               <ShortcutInput shortcut={selectPreviousItemShortcut}
                              defaultShortcut="ArrowUp"
                              onSave={handleSelectPreviousItemShortcutChange}/>
             </div>
             <hr/>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Paste to active app</span>
+              <span className="">{t('settings.shortcuts.pasteSelectedItemToActiveApp')}</span>
               <ShortcutInput shortcut={pasteSelectedItemToActiveAppShortcut}
                              defaultShortcut="Enter"
                              onSave={handlePasteSelectedItemToActiveAppShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Alternative paste to active app</span>
+              <span className="">{t('settings.shortcuts.alternatePasteSelectedItemToActiveApp')}</span>
               <ShortcutInput shortcut={pasteSelectedObjectToActiveAppShortcut}
                              defaultShortcut="ShiftLeft + Enter"
                              onSave={handlePasteSelectedObjectToActiveAppShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Copy to Clipboard</span>
+              <span className="">{t('settings.shortcuts.copyToClipboard')}</span>
               <ShortcutInput shortcut={copyToClipboardShortcut}
                              defaultShortcut="MetaLeft + KeyC"
                              onSave={handleCopyToClipboardShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Alternative copy to Clipboard</span>
+              <span className="">{t('settings.shortcuts.alternateCopyToClipboard')}</span>
               <ShortcutInput shortcut={copyObjectToClipboardShortcut}
                              defaultShortcut="ShiftLeft + MetaLeft + KeyC"
                              onSave={handleCopyObjectToClipboardShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Open in Browser</span>
+              <span className="">{t('settings.shortcuts.openInBrowser')}</span>
               <ShortcutInput shortcut={openInBrowserShortcut}
                              defaultShortcut="MetaLeft + Enter"
                              onSave={handleOpenInBrowserShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Show in Finder</span>
+              <span className="">{t('settings.shortcuts.showInFinder')}</span>
               <ShortcutInput shortcut={showInFinderShortcut}
                              defaultShortcut="MetaLeft + KeyO"
                              onSave={handleShowInFinderShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Open in default app</span>
+              <span className="">{t('settings.shortcuts.openInDefaultApp')}</span>
               <ShortcutInput shortcut={openInDefaultAppShortcut}
                              defaultShortcut="AltLeft + MetaLeft + KeyO"
                              onSave={handleOpenInDefaultAppShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Add to favorites</span>
+              <span className="">{t('settings.shortcuts.addToFavorites')}</span>
               <ShortcutInput shortcut={toggleFavoriteShortcut}
                              defaultShortcut="MetaLeft + KeyS"
                              onSave={handleToggleFavoriteShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Save as file</span>
+              <span className="">{t('settings.shortcuts.saveAsFile')}</span>
               <ShortcutInput shortcut={saveImageAsFileShortcut}
                              defaultShortcut="ShiftLeft + MetaLeft + KeyS"
                              onSave={handleSaveImageAsFileShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Edit history item</span>
+              <span className="">{t('settings.shortcuts.editHistoryItem')}</span>
               <ShortcutInput shortcut={editHistoryItemShortcut}
                              defaultShortcut="MetaLeft + KeyE"
                              onSave={handleEditHistoryItemShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Rename history item</span>
+              <span className="">{t('settings.shortcuts.renameHistoryItem')}</span>
               <ShortcutInput shortcut={renameItemShortcut}
                              defaultShortcut="MetaLeft + KeyR"
                              onSave={handleRenameHistoryItemShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Delete history item</span>
+              <span className="">{t('settings.shortcuts.deleteHistoryItem')}</span>
               <ShortcutInput shortcut={deleteHistoryItemShortcut}
                              defaultShortcut="MetaLeft + Backspace"
                              onSave={handleDeleteHistoryItemShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Delete all history items</span>
+              <span className="">{t('settings.shortcuts.deleteAllHistoryItems')}</span>
               <ShortcutInput shortcut={clearHistoryShortcut}
                              defaultShortcut="ShiftLeft + MetaLeft + Backspace"
                              onSave={handleClearHistoryShortcutChange}/>
             </div>
 
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Show/hide preview</span>
+              <span className="">{t('settings.shortcuts.showHidePreview')}</span>
               <ShortcutInput shortcut={togglePreviewShortcut}
                              defaultShortcut="MetaLeft + KeyP"
                              onSave={handleTogglePreviewShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Show/hide filter</span>
+              <span className="">{t('settings.shortcuts.showHideFilter')}</span>
               <ShortcutInput shortcut={toggleFilterShortcut}
                              defaultShortcut="MetaLeft + KeyF"
                              onSave={handleToggleFilterShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Show Command Menu</span>
+              <span className="">{t('settings.shortcuts.showCommandMenu')}</span>
               <ShortcutInput shortcut={showMoreActionsShortcut}
                              defaultShortcut="MetaLeft + KeyK"
                              onSave={handleShowMoreActionsShortcutChange}/>
             </div>
             <hr/>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Zoom In</span>
+              <span className="">{t('settings.shortcuts.zoomIn')}</span>
               <ShortcutInput shortcut={zoomUIInShortcut} defaultShortcut="MetaLeft + Equal"
                              onSave={handleZoomUIInShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Zoom Out</span>
+              <span className="">{t('settings.shortcuts.zoomOut')}</span>
               <ShortcutInput shortcut={zoomUIOutShortcut}
                              defaultShortcut="MetaLeft + Minus"
                              onSave={handleZoomUIOutShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Reset Zoom</span>
+              <span className="">{t('settings.shortcuts.zoomReset')}</span>
               <ShortcutInput shortcut={zoomUIResetShortcut}
                              defaultShortcut="MetaLeft + Digit0"
                              onSave={handleZoomUIResetShortcutChange}/>
             </div>
             <hr/>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Pause/resume ClipBook</span>
+              <span className="">{t('settings.shortcuts.pauseResumeClipBook')}</span>
               <ShortcutInput shortcut={pauseResumeShortcut}
                              defaultShortcut=""
                              onSave={handlePauseResumeShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Open Settings</span>
+              <span className="">{t('settings.shortcuts.openSettings')}</span>
               <ShortcutInput shortcut={openSettingsShortcut}
                              defaultShortcut="MetaLeft + Comma"
                              onSave={handleOpenSettingsShortcutChange}/>
             </div>
             <hr/>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Make lower case</span>
+              <span className="">{t('settings.shortcuts.makeLowerCase')}</span>
               <ShortcutInput shortcut={makeLowerCaseShortcut}
                              defaultShortcut="ShiftLeft + MetaLeft + KeyL"
                              onSave={handleMakeLowerCaseShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Make upper case</span>
+              <span className="">{t('settings.shortcuts.makeUpperCase')}</span>
               <ShortcutInput shortcut={makeUpperCaseShortcut}
                              defaultShortcut="ShiftLeft + MetaLeft + KeyU"
                              onSave={handleMakeUpperCaseShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Capitalize words</span>
+              <span className="">{t('settings.shortcuts.capitalizeWords')}</span>
               <ShortcutInput shortcut={capitalizeShortcut}
                              defaultShortcut="ShiftLeft + MetaLeft + KeyA"
                              onSave={handleCapitalizeShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Sentence case</span>
+              <span className="">{t('settings.shortcuts.sentenceCase')}</span>
               <ShortcutInput shortcut={sentenceCaseShortcut}
                              defaultShortcut="ShiftLeft + MetaLeft + KeyS"
                              onSave={handleSentenceCaseShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Remove empty lines</span>
+              <span className="">{t('settings.shortcuts.removeEmptyLines')}</span>
               <ShortcutInput shortcut={removeEmptyLinesShortcut}
                              defaultShortcut="ShiftLeft + MetaLeft + KeyR"
                              onSave={handleRemoveEmptyLinesShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Strip all whitespaces</span>
+              <span className="">{t('settings.shortcuts.stripAllWhitespaces')}</span>
               <ShortcutInput shortcut={stripAllWhitespacesShortcut}
                              defaultShortcut="ShiftLeft + MetaLeft + KeyT"
                              onSave={handleStripAllWhitespacesShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
-              <span className="">Trim surrounding whitespaces</span>
+              <span className="">{t('settings.shortcuts.trimSurroundingWhitespaces')}</span>
               <ShortcutInput shortcut={trimSurroundingWhitespacesShortcut}
                              defaultShortcut="ShiftLeft + MetaLeft + KeyM"
                              onSave={handleTrimSurroundingWhitespacesShortcutChange}/>

@@ -13,6 +13,7 @@ import {
 import {Button} from "@/components/ui/button";
 import {Checkbox} from "@/components/ui/checkbox";
 import {prefIsFeedbackProvided, prefSetFeedbackProvided} from "@/pref";
+import { useTranslation } from 'react-i18next';
 
 declare const buyLicense: () => void;
 declare const sendFeedback: (text: string) => void;
@@ -23,6 +24,7 @@ type TrialExpiredDialogProps = {
 }
 
 export default function TrialExpiredDialog(props: TrialExpiredDialogProps) {
+  const { t } = useTranslation();
   const [feedbackProvided, setFeedbackProvided] = useState(prefIsFeedbackProvided())
   const [feedback, setFeedback] = useState("")
   const [email, setEmail] = useState("")
@@ -84,13 +86,12 @@ export default function TrialExpiredDialog(props: TrialExpiredDialogProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              <h1 className="text-xl mb-2">Your trial has ended :(</h1>
+              <h1 className="text-xl mb-2">{t('trial.expired.title')}</h1>
             </AlertDialogTitle>
             <div className="text-[14px] text-dialog-text">
-              <p>I hope you enjoyed using ClipBook. If you like it, please consider supporting the
-                development by purchasing a license.</p>
+              <p>{t('trial.expired.description')}</p>
               {
-                !feedbackProvided && <p className="mt-4">If you don't like it, please let me know why.</p>
+                !feedbackProvided && <p className="mt-4">{t('trial.expired.feedback')}</p>
               }
               {
                   !feedbackProvided &&

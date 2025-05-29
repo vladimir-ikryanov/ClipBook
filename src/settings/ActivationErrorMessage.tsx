@@ -12,6 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {Button} from "@/components/ui/button";
+import { useTranslation } from 'react-i18next';
 
 type ActivationErrorMessageProps = {
   visible: boolean
@@ -21,6 +22,8 @@ type ActivationErrorMessageProps = {
 }
 
 export default function ActivationErrorMessage(props: ActivationErrorMessageProps) {
+  const { t } = useTranslation();
+  
   function handleHelp() {
     props.onHelp()
   }
@@ -32,20 +35,20 @@ export default function ActivationErrorMessage(props: ActivationErrorMessageProp
   return (
       <AlertDialog open={props.visible}>
         <AlertDialogTrigger asChild>
-          <Button className="hidden">Show Dialog</Button>
+          <Button className="hidden">{t('settings.license.activationErrorMessage.title')}</Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              The license cannot be activated :(
+              {t('settings.license.activationErrorMessage.title')}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {props.message}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleHelp}>Help me</AlertDialogCancel>
-            <AlertDialogCancel onClick={handleClose}>Close</AlertDialogCancel>
+            <AlertDialogCancel onClick={handleHelp}>{t('settings.license.activationErrorMessage.help')}</AlertDialogCancel>
+            <AlertDialogCancel onClick={handleClose}>{t('settings.license.activationErrorMessage.close')}</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

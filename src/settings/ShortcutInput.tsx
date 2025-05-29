@@ -4,6 +4,7 @@ import {Input} from "@/components/ui/input";
 import {isModifierKey, keysToDisplayShortcut, shortcutToDisplayShortcut} from "@/lib/shortcuts";
 import {Button} from "@/components/ui/button";
 import {Undo2Icon} from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 declare const enableOpenAppShortcut: () => void;
 declare const disableOpenAppShortcut: () => void;
@@ -15,6 +16,8 @@ type ShortcutProps = {
 }
 
 export default function ShortcutInput(props: ShortcutProps) {
+  const { t } = useTranslation();
+  
   const [isEditing, setIsEditing] = useState(false);
   const [currentKeys, setCurrentKeys] = useState<string[]>([]);
   const [shortcut, setShortcut] = useState(props.shortcut);
@@ -98,7 +101,7 @@ export default function ShortcutInput(props: ShortcutProps) {
       <div className="flex flex-row bg-shortcut shadow hover:shadow-md rounded-md">
         <Input
             className={`w-40 h-8 pl-10 text-base text-center caret-transparent border-none bg-shortcut ${isEditing ? "text-neutral-400" : ""}`}
-            title="Click to edit shortcut"
+            title={t('settings.shortcuts.clickToEditShortcut')}
             readOnly={true}
             value={getInputValue()}
             onBlur={handleBlur}

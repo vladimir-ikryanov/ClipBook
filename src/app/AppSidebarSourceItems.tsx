@@ -67,7 +67,7 @@ export function AppSidebarSourceItems(props: AppSidebarSourceItemsProps) {
                                              onSelect={() => props.onSelect(app)}/>
               })
             }
-            <AppSidebarItem type={expandApps ? "Hide Apps" : "Show Apps"}
+            <AppSidebarItem type={expandApps ? "HideApps" : "ShowApps"}
                             selectedType={props.selectedItemType}
                             selectable={false}
                             onSelect={handleToggleApps}/>

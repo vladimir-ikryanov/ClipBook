@@ -5,6 +5,7 @@ import {Input} from "@/components/ui/input";
 import {prefGetLicenseKey, prefSetLicenseKey} from "@/pref";
 import {isLicenseActivated} from "@/licensing";
 import ActivationErrorMessage from "@/settings/ActivationErrorMessage";
+import { Trans, useTranslation } from 'react-i18next';
 
 declare const closeSettingsWindow: () => void;
 declare const buyLicense: () => void;
@@ -13,6 +14,8 @@ declare const activateLicense: (licenseKey: string) => void;
 declare const deactivateLicense: (licenseKey: string) => void;
 
 export default function License() {
+  const { t } = useTranslation();
+
   const [licenseKey, setLicenseKey] = useState(prefGetLicenseKey())
   const [licenseKeyInvalid, setLicenseKeyInvalid] = useState(isLicenseKeyFormatInvalid(licenseKey))
   const [isActivated, setIsActivated] = useState(isLicenseActivated())
@@ -97,17 +100,17 @@ export default function License() {
   function renderTitle() {
     if (isActivated) {
       return <span
-          className="text-sm rounded-sm border border-settings-titleLicenseActivatedLabel text-settings-titleLicenseActivatedLabel px-2 py-1 ml-4">Activated</span>
+          className="text-sm rounded-sm border border-settings-titleLicenseActivatedLabel text-settings-titleLicenseActivatedLabel px-2 py-1 ml-4">{t('settings.license.activated')}</span>
     }
     return <span
-        className="text-sm rounded-sm border border-settings-titleLicenseTrialLabel text-settings-titleLicenseTrialLabel px-2 py-1 ml-4">Trial</span>
+        className="text-sm rounded-sm border border-settings-titleLicenseTrialLabel text-settings-titleLicenseTrialLabel px-2 py-1 ml-4">{t('settings.license.trial')}</span>
   }
 
   return (
       <div className="flex select-none">
         <div className="flex flex-col flex-grow">
           <div className="flex pt-8 px-8 border-b border-b-border draggable sticky items-center">
-            <span className="text-2xl pb-3 font-semibold">ClipBook License</span>
+            <span className="text-2xl pb-3 font-semibold">{t('settings.license.title')}</span>
             <div className="pb-2.5">
               {renderTitle()}
             </div>
@@ -118,14 +121,10 @@ export default function License() {
               {
                   !isActivated &&
                   <p className="mb-6 text-pretty">
-                    You are currently using a <span
-                      className="text-searchHighlight">trial version</span> of ClipBook. To continue
-                    using
-                    ClipBook,
-                    please purchase a license key from online store and activate it.
+                    <Trans i18nKey="settings.license.trialDescription" components={{span: <span className="text-searchHighlight"/>}} />
                   </p>
               }
-              <p className="mb-2">License key:</p>
+              <p className="mb-2">{t('settings.license.licenseKey')}:</p>
               <Input id="licenseKey"
                      placeholder="XXXX-0000-0000-0000-0000000000000000"
                      onChange={handleLicenseKeyChange}
@@ -136,20 +135,20 @@ export default function License() {
               {
                   !isActivated &&
                   <p className="text-secondary-foreground text-sm text-pretty mb-4">
-                    You can find your license key in the email you received after purchasing ClipBook.
+                    {t('settings.license.licenseKeyDescription')}
                   </p>
               }
               {
                   !isActivated &&
                   <div className="grid grid-cols-2 space-x-2">
                     <Button onClick={handleActivateLicense} disabled={licenseKeyInvalid}
-                            variant="primary">Activate</Button>
-                    <Button onClick={handleBuyLicense} variant="secondary">Buy License</Button>
+                            variant="primary">{t('settings.license.activate')}</Button>
+                    <Button onClick={handleBuyLicense} variant="secondary">{t('settings.license.buyLicense')}</Button>
                   </div>
               }
               {
                   isActivated &&
-                  <Button onClick={handleDeactivateLicense} variant="primary">Deactivate</Button>
+                  <Button onClick={handleDeactivateLicense} variant="primary">{t('settings.license.deactivate')}</Button>
               }
             </div>
           </div>

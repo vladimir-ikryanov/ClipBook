@@ -17,6 +17,7 @@ import {
   ShieldCheckIcon
 } from "lucide-react";
 import {prefIsDeviceManaged} from "@/pref";
+import { useTranslation } from 'react-i18next';
 
 interface SettingsSidebarProps {
   selectedItemType: SettingsSidebarItemType
@@ -24,6 +25,8 @@ interface SettingsSidebarProps {
 }
 
 export default function SettingsSidebar(props: SettingsSidebarProps) {
+  const { t } = useTranslation();
+
   const [selectedItemType, setSelectedItemType] = useState<SettingsSidebarItemType>(props.selectedItemType)
 
   function handleSelect(type: SettingsSidebarItemType) {
@@ -78,7 +81,7 @@ export default function SettingsSidebar(props: SettingsSidebarProps) {
               <div
                   className="flex flex-col items-center justify-center text-center px-2 py-4 w-full rounded-md bg-sidebar-background-secondary text-secondary-foreground space-y-2">
                 <CogIcon className="h-8 w-10 mt-1 text-sidebar-foreground-secondary" strokeWidth={1.5}/>
-                <span className="text-sm">Some settings are managed by your organization.</span>
+                <span className="text-sm">{t('settings.sidebar.managedByOrganization')}</span>
               </div>
             </SidebarFooter>
         }

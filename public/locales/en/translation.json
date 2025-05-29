@@ -1,4 +1,264 @@
 {
-  "welcome": "Welcome to ClipBook en-US",
-  "save": "Save"
+  "welcome": {
+    "title": "Welcome to ClipBook",
+    "description": "ClipBook stores everything you copy and lets you quickly access your clipboard history whenever you need it.",
+    "getStarted": "Get Started"
+  },
+  "accessibility": {
+    "title": "Enable Accessibility Access",
+    "description": "To paste directly to other applications, allow ClipBook to access the accessibility features of your Mac in System Settings.",
+    "readMore": "accessibility features",
+    "doLater": "I'll Do It Later",
+    "allowAccess": "Allow Access"
+  },
+  "enjoy": {
+    "ready": "ClipBook is Ready",
+    "description": "ClipBook is running in the background. You can access your clipboard history using the <strong>⇧Shift + ⌘Cmd + V</strong> global shortcut, or by clicking the ClipBook icon in the menu bar and selecting <strong>Open ClipBook</strong>.",
+    "openClipBook": "Open ClipBook"
+  },
+  "settings": {
+    "sidebar": {
+      "general": "General",
+      "history": "History",
+      "shortcuts": "Shortcuts",
+      "privacy": "Privacy",
+      "license": "License",
+      "about": "About",
+      "managedByOrganization": "Some settings are managed by your organization."
+    },
+    "general": {
+      "title": "General",
+      "launchAtLogin": {
+        "title": "Launch at login",
+        "description": "Launch ClipBook automatically at login."
+      },
+      "automaticUpdates": {
+        "title": "Automatic updates",
+        "description": "Download and install new updates when available.",
+        "checkForUpdates": "Check for Updates...",
+        "checkingForUpdates": "Checking for updates..."
+      },
+      "appearance": {
+        "title": "Appearance",
+        "description": "Change how ClipBook looks on your device.",
+        "themes": {
+          "light": "Light",
+          "dark": "Dark",
+          "system": "System"
+        }
+      },
+      "language": {
+        "title": "Language",
+        "description": "Change the language used in the user interface."
+      },
+      "openWindow": {
+        "title": "Open window at",
+        "description": "Select where the ClipBook window should be opened if it's possible.",
+        "strategies": {
+          "lastLocation": "Last location on active screen",
+          "activeScreenCenter": "Center of the active screen",
+          "activeWindowCenter": "Center of the active window",
+          "screenWithCursor": "Screen with mouse pointer",
+          "mouseCursor": "Mouse pointer location",
+          "inputCursor": "Text caret location"
+        },
+        "descriptions": {
+          "lastLocation": "ClipBook window remembers its position on each screen and opens at<br/>the last position on the active screen.",
+          "activeScreenCenter": "Open at the center of the active screen.",
+          "activeWindowCenter": "Open at the center of the active window. If there is no active window,<br/>then open at the center of the active screen.",
+          "screenWithCursor": "Open at the center of the screen where the mouse pointer is located.",
+          "mouseCursor": "Open near the mouse pointer location.",
+          "inputCursor": "Open near the current text caret location. If the caret location cannot<br/>be determined, then open at the center of the active window."
+        }
+      },
+      "playSound": {
+        "title": "Play sound",
+        "description": "Play a sound when an item is added to the history."
+      },
+      "showIcon": {
+        "title": "Show icon in menu bar",
+        "description": "Display the ClipBook app icon in the menu bar.",
+        "hint": "You can always open <strong>Settings</strong> by pressing <kbd>⌘</kbd><kbd>,</kbd> inside the ClipBook window."
+      }
+    },
+    "history": {
+      "title": "History",
+      "updateHistoryAfterAction": {
+        "title": "Update history after paste/copy",
+        "description": "Move the item to the top of the history list after paste or copy action."
+      },
+      "pasteOnClick": {
+        "title": "Paste on click",
+        "description": "Select history item on mouse over and paste on click."
+      },
+      "doubleClick": {
+        "title": "On double click",
+        "description": "Select action for double click on history item.",
+        "copy": "Copy to clipboard",
+        "paste": "Paste to active app"
+      },
+      "numberAction": {
+        "title": "On command number shortcut ⌘1-9",
+        "description": "Select action for the command number shortcut ⌘1-9.",
+        "copy": "Copy to clipboard",
+        "paste": "Paste to active app"
+      },
+      "copyAndMerge": {
+        "title": "Copy and merge",
+        "description": "Press <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd> to append the currently selected text to the previously copied text in the clipboard history."
+      },
+      "copyAndMergeSeparator": {
+        "title": "Copy and merge separator",
+        "description": "Select how the appended text should be separated from the previously copied text.",
+        "line": "New line",
+        "space": "Space"
+      },
+      "copyToClipboardAfterMerge": {
+        "title": "Paste back to system clipboard",
+        "description": "Automatically copy the merged text to the system clipboard after merging."
+      },
+      "treatDigitNumbersAsColor": {
+        "title": "Treat 8-digit number as a color",
+        "description": "Treat 8-digit, 6-digit, 4-digit, and 3-digit numbers as a hex color code."
+      },
+      "showPreviewForLinks": {
+        "title": "Show preview for links",
+        "description": "Fetch and display a favicon, title, description, and social card image for links."
+      },
+      "warnOnClearAll": {
+        "title": "Warn when clearing entire history",
+        "description": "Display a confirmation dialog when clearing entire clipboard history."
+      },
+      "keepFavoritesOnClearAll": {
+        "title": "Keep favorites when clearing entire history",
+        "description": "Do not remove items market as favorite when clearing entire clipboard history."
+      },
+      "clearHistoryOnQuit": {
+        "title": "Clear entire history on quit",
+        "description": "Clear the entire clipboard history when ClipBook is terminated."
+      },
+      "clearHistoryOnMacReboot": {
+        "title": "Clear entire history on Mac shutdown/restart",
+        "description": "Clear the entire clipboard history on Mac shutdown/restart."
+      }
+    },
+    "shortcuts": {
+      "title": "Shortcuts",
+      "clickToEditShortcut": "Click to edit shortcut",
+      "openApp": "Open ClipBook",
+      "closeApp": "Close ClipBook",
+      "selectNextItem": "Select next item",
+      "selectPreviousItem": "Select previous item",
+      "pasteSelectedItemToActiveApp": "Paste to active app",
+      "alternatePasteSelectedItemToActiveApp": "Alternate paste to active app",
+      "copyToClipboard": "Copy to Clipboard",
+      "alternateCopyToClipboard": "Alternative copy to Clipboard",
+      "openInBrowser": "Open in Browser",
+      "showInFinder": "Show in Finder",
+      "openInDefaultApp": "Open in default app",
+      "addToFavorites": "Add to favorites",
+      "saveAsFile": "Save as file",
+      "editHistoryItem": "Edit history item",
+      "renameHistoryItem": "Rename history item",
+      "deleteHistoryItem": "Delete history item",
+      "deleteAllHistoryItems": "Delete all history items",
+      "showHidePreview": "Show/hide preview",
+      "showHideFilter": "Show/hide filter",
+      "showCommandMenu": "Show Command Menu",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "zoomReset": "Reset Zoom",
+      "pauseResumeClipBook": "Pause/resume ClipBook",
+      "openSettings": "Open Settings",
+      "makeLowerCase": "Make lower case",
+      "makeUpperCase": "Make upper case",
+      "capitalizeWords": "Capitalize words",
+      "sentenceCase": "Sentence case",
+      "removeEmptyLines": "Remove empty lines",
+      "stripAllWhitespaces": "Strip all whitespaces",
+      "trimSurroundingWhitespaces": "Trim surrounding whitespaces"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "ignoreConfidentialContent": {
+        "title": "Ignore confidential content",
+        "description": "Do not save passwords and other sensitive data copied to the clipboard."
+      },
+      "ignoreTransientContent": {
+        "title": "Ignore transient content",
+        "description": "Do not save data temporarily placed to the clipboard."
+      },
+      "ignoreApps": {
+        "title": "Ignore applications",
+        "description": "Do not save content copied from the following applications."
+      }
+    },
+    "license": {
+      "title": "ClipBook License",
+      "activated": "Activated",
+      "trial": "Trial",
+      "trialDescription": "You are currently using a <span>trial version</span> of ClipBook. To continue using ClipBook, please purchase a license key from online store and activate it.",
+      "licenseKey": "License key",
+      "licenseKeyDescription": "You can find your license key in the email you received after purchasing ClipBook.",
+      "activate": "Activate",
+      "buyLicense": "Buy License",
+      "deactivate": "Deactivate",
+      "activationErrorMessage": {
+        "title": "The license key cannot be activated :(",
+        "help": "Help me",
+        "close": "Close"
+      }
+    },
+    "about": {
+      "version": "Version {{version}} ({{arch}})",
+      "checkForUpdates": "Check for Updates...",
+      "checkingForUpdates": "Checking for updates...",
+      "checkForUpdatesResult": {
+        "newVersionAvailable": "New version available!",
+        "restartClipBookToInstallUpdate": "Restart ClipBook to install the update."
+      },
+      "links": {
+        "website": "Website",
+        "support": "Support",
+        "changelog": "Changelog",
+        "feedback": "Feedback"
+      },
+      "copyright": "© 2025 ClipBook. All rights reserved."
+    }
+  },
+  "preview": {
+    "toolbar": {
+      "openInBrowser": "Open in Browser",
+      "copyTextFromImage": "Copy Text from Image",
+      "selectedItems": "{{count}} items"
+    }
+  },
+  "trial": {
+    "expired": {
+      "title": "Your trial has ended :(",
+      "description": "I hope you enjoyed using ClipBook. If you like it, please consider supporting the development by purchasing a license.",
+      "feedback": "If you don't like it, please let me know why."
+    }
+  },
+  "app": {
+    "sidebar": {
+      "all": "All",
+      "favorites": "Favorites",
+      "text": "Text",
+      "image": "Images",
+      "link": "Links",
+      "file": "Files",
+      "color": "Colors",
+      "email": "Emails",
+      "newtag": "New Tag",
+      "showapps": "Show Apps",
+      "hideapps": "Hide Apps",
+      "tag": {
+        "contextMenu": {
+          "edit": "Edit...",
+          "delete": "Delete"
+        }
+      }
+    }
+  }
 }

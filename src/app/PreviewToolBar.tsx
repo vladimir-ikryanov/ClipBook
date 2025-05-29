@@ -38,6 +38,7 @@ import {CommandShortcut} from "@/components/ui/command";
 import PreviewToolBarMenu from "@/app/PreviewToolBarMenu";
 import TextTypeToggle from "@/app/TextTypeToggle";
 import {emitter} from "@/actions";
+import { useTranslation } from 'react-i18next';
 
 type PreviewToolBarProps = {
   selectedItemIndices: number[]
@@ -48,6 +49,7 @@ type PreviewToolBarProps = {
 }
 
 export default function PreviewToolBar(props: PreviewToolBarProps) {
+  const { t } = useTranslation();
   const [selectedItem, setSelectedItem] = useState<Clip>()
   const [pasteOptionsMenuOpen, setPasteOptionsMenuOpen] = useState(false)
   const [isCopying, setIsCopying] = useState(false)
@@ -311,7 +313,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
-                    <div className="select-none mr-2 ml-1">Open in Browser</div>
+                    <div className="select-none mr-2 ml-1">{t('preview.toolbar.openInBrowser')}</div>
                     <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
                   </TooltipContent>
                 </Tooltip>
@@ -325,7 +327,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
-                    <div className="select-none mr-2 ml-1">Copy Text from Image</div>
+                    <div className="select-none mr-2 ml-1">{t('preview.toolbar.copyTextFromImage')}</div>
                     <ShortcutLabel shortcut={prefGetCopyTextFromImageShortcut()}/>
                   </TooltipContent>
                 </Tooltip>
@@ -341,7 +343,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 canShowNumberOfSelectedItems() &&
                 <div
                     className="text-sm pt-2.5 items-center justify-center text-center text-toolbar-button">
-                  {props.selectedItemIndices.length + " items"}
+                  {t('preview.toolbar.selectedItems', { count: props.selectedItemIndices.length })}
                 </div>
             }
           </div>

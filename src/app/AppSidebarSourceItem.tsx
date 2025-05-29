@@ -33,7 +33,7 @@ export function AppSidebarSourceItem(props: AppSidebarSourceItemProps) {
                              hidden: false,
                            }}>
           <div className="flex h-5 w-5">
-            <img src={toBase64Icon(props.app.icon)} className="" alt="Application icon"/>
+            <img src={toBase64Icon(props.app.icon)} className="" alt="App icon"/>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>

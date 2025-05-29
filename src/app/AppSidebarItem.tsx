@@ -5,13 +5,15 @@ import {
   HistoryIcon,
   ImageIcon,
   LinkIcon,
-  MailIcon, PaletteIcon, PlusIcon,
-  SettingsIcon, StarIcon
+  MailIcon, 
+  PaletteIcon, 
+  PlusIcon,
+  StarIcon
 } from "lucide-react";
 import {SidebarMenuButton, SidebarMenuItem} from "@/components/ui/sidebar";
-import React from "react";
+import { useTranslation } from 'react-i18next';
 
-export type AppSidebarItemType = "None" | "All" | "Text" | "Image" | "Link" | "Color" | "File" | "Email" | "Favorites" | "Settings" | "New Tag" | "Show Apps" | "Hide Apps";
+export type AppSidebarItemType = "None" | "All" | "Text" | "Image" | "Link" | "Color" | "File" | "Email" | "Favorites" | "NewTag" | "ShowApps" | "HideApps";
 
 interface AppSidebarItemProps {
   type: AppSidebarItemType
@@ -21,6 +23,7 @@ interface AppSidebarItemProps {
 }
 
 export function AppSidebarItem(props: AppSidebarItemProps) {
+  const { t } = useTranslation();
 
   function renderIcon() {
     if (props.type === "All") {
@@ -47,16 +50,13 @@ export function AppSidebarItem(props: AppSidebarItemProps) {
     if (props.type === "Favorites") {
       return <StarIcon className="h-5 w-5"/>
     }
-    if (props.type === "New Tag") {
+    if (props.type === "NewTag") {
       return <PlusIcon className="h-5 w-5"/>
     }
-    if (props.type === "Settings") {
-      return <SettingsIcon className="h-5 w-5"/>
-    }
-    if (props.type === "Hide Apps") {
+    if (props.type === "HideApps") {
       return <ChevronUpIcon className="h-5 w-5"/>
     }
-    if (props.type === "Show Apps") {
+    if (props.type === "ShowApps") {
       return <ChevronDownIcon className="h-5 w-5"/>
     }
   }
@@ -75,7 +75,7 @@ export function AppSidebarItem(props: AppSidebarItemProps) {
                            size="sidebar"
                            className="cursor-default"
                            tooltip={{
-                             children: props.type,
+                             children: t(`app.sidebar.${props.type.toLowerCase().replace(" ", "")}`),
                              className: "px-2.5",
                              hidden: false,
                            }}>

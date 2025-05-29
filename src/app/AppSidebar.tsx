@@ -174,7 +174,7 @@ export default function AppSidebar(props: AppSidebarProps) {
                            tag={tagToEdit}
                            item={itemForTag}
                            onClose={handleTagDialogClose}/>
-                <AppSidebarItem type={"New Tag"}
+                <AppSidebarItem type={"NewTag"}
                                 selectedType={props.selectedItemType}
                                 selectable={false}
                                 onSelect={handleNewTag}/>

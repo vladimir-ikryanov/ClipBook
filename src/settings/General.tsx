@@ -37,19 +37,10 @@ import CheckForUpdatesResult from "@/settings/CheckForUpdatesResult";
 import {getLanguageByCode, LanguageCode} from "@/data";
 import { useTranslation } from 'react-i18next';
 import i18n from "i18next";
+import { Trans } from 'react-i18next';
 
 declare const closeSettingsWindow: () => void;
 declare const checkForUpdates: () => void;
-
-// The map of open strategy enum values to labels.
-const openWindowStrategyLabels = {
-  [OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION]: "Last location on active screen",
-  [OpenWindowStrategy.ACTIVE_SCREEN_CENTER]: "Center of the active screen",
-  [OpenWindowStrategy.ACTIVE_WINDOW_CENTER]: "Center of the active window",
-  [OpenWindowStrategy.SCREEN_WITH_CURSOR]: "Screen with mouse pointer",
-  [OpenWindowStrategy.MOUSE_CURSOR]: "Mouse pointer location",
-  [OpenWindowStrategy.INPUT_CURSOR]: "Text caret location",
-}
 
 export default function General() {
   const { t } = useTranslation()
@@ -62,6 +53,16 @@ export default function General() {
   const [openWindowStrategy, setOpenWindowStrategy] = useState(prefGetOpenWindowStrategy())
   const [playSoundOnCopy, setPlaySoundOnCopy] = useState(prefShouldPlaySoundOnCopy())
   const [checkingForUpdates, setCheckingForUpdates] = useState(false)
+
+  // The map of open strategy enum values to labels.
+  const openWindowStrategyLabels = {
+    [OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION]: t('settings.general.openWindow.strategies.lastLocation'),
+    [OpenWindowStrategy.ACTIVE_SCREEN_CENTER]: t('settings.general.openWindow.strategies.activeScreenCenter'),
+    [OpenWindowStrategy.ACTIVE_WINDOW_CENTER]: t('settings.general.openWindow.strategies.activeWindowCenter'),
+    [OpenWindowStrategy.SCREEN_WITH_CURSOR]: t('settings.general.openWindow.strategies.screenWithCursor'),
+    [OpenWindowStrategy.MOUSE_CURSOR]: t('settings.general.openWindow.strategies.mouseCursor'),
+    [OpenWindowStrategy.INPUT_CURSOR]: t('settings.general.openWindow.strategies.inputCursor'),
+  }
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -125,16 +126,16 @@ export default function General() {
       <div className="flex h-screen select-none">
         <div className="flex flex-col flex-grow">
           <div className="flex pt-8 px-8 border-b border-b-border draggable sticky">
-            <span className="text-2xl pb-3 font-semibold">General</span>
+            <span className="text-2xl pb-3 font-semibold">{t('settings.general.title')}</span>
           </div>
 
           <div className="flex flex-col px-8 pb-6 gap-4 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent">
             <div className="flex items-center justify-between space-x-20 pt-6 pb-1">
               <Label htmlFor="openAtLogin" className="flex flex-col text-base">
-                <span className="">Launch at login</span>
+                <span className="">{t('settings.general.launchAtLogin.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
-Launch ClipBook automatically at&nbsp;login.
-            </span>
+                  {t('settings.general.launchAtLogin.description')}
+                </span>
               </Label>
               <Switch id="openAtLogin" checked={openAtLogin}
                       onCheckedChange={handleOpenAtLoginChange}
@@ -143,10 +144,10 @@ Launch ClipBook automatically at&nbsp;login.
 
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="checkForUpdates" className="flex flex-col text-base">
-                <span className="">Automatic updates</span>
+                <span className="">{t('settings.general.automaticUpdates.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
-Download and install new updates when&nbsp;available.
-            </span>
+                  {t('settings.general.automaticUpdates.description')}
+                </span>
               </Label>
               <Switch id="checkForUpdates" checked={checkForUpdatesAutomatically}
                       onCheckedChange={handleCheckForUpdatesAutomaticallyChange}
@@ -160,7 +161,7 @@ Download and install new updates when&nbsp;available.
                   checkingForUpdates ? <RefreshCcwIcon className="animate-spin h-4 w-4 mr-2"/> : null
                 }
                 {
-                  checkingForUpdates ? "Checking for updates..." : "Check for Updates..."
+                  checkingForUpdates ? t('settings.general.automaticUpdates.checkingForUpdates') : t('settings.general.automaticUpdates.checkForUpdates')
                 }
               </Button>
               <CheckForUpdatesResult/>
@@ -170,8 +171,10 @@ Download and install new updates when&nbsp;available.
 
             <div className="flex justify-between space-x-10 py-1">
               <Label className="flex flex-col text-base">
-                <span className="">Appearance</span>
-                <span className="text-neutral-500 font-normal text-sm">Change how ClipBook looks on your&nbsp;device.</span>
+                <span className="">{t('settings.general.appearance.title')}</span>
+                <span className="text-neutral-500 font-normal text-sm">
+                  {t('settings.general.appearance.description')}
+                </span>
               </Label>
 
               <RadioGroup value={theme} onValueChange={handleThemeChange}>
@@ -183,7 +186,9 @@ Download and install new updates when&nbsp;available.
                         <img src="/assets/theme-light.svg"
                              className="mx-auto rounded-sm outline-neutral-400 outline-4"
                              alt=""/>
-                        <span className="block w-full pt-4 text-center">Light</span>
+                        <span className="block w-full pt-4 text-center">
+                          {t('settings.general.appearance.themes.light')}
+                        </span>
                       </div>
                     </Label>
                   </div>
@@ -194,7 +199,9 @@ Download and install new updates when&nbsp;available.
                         <img src="/assets/theme-dark.svg"
                              className="mx-auto rounded-sm outline-neutral-400 outline-4"
                              alt=""/>
-                        <span className="block w-full pt-4 text-center">Dark</span>
+                        <span className="block w-full pt-4 text-center">
+                          {t('settings.general.appearance.themes.dark')}
+                        </span>
                       </div>
                     </Label>
                   </div>
@@ -205,7 +212,9 @@ Download and install new updates when&nbsp;available.
                         <img src="/assets/theme-system.svg"
                              className="mx-auto rounded-sm outline-neutral-400 outline-4"
                              alt=""/>
-                        <span className="block w-full pt-4 text-center">System</span>
+                        <span className="block w-full pt-4 text-center">
+                          {t('settings.general.appearance.themes.system')}
+                        </span>
                       </div>
                     </Label>
                   </div>
@@ -215,9 +224,9 @@ Download and install new updates when&nbsp;available.
 
             <div className="flex items-center justify-between space-x-10 py-1">
               <Label htmlFor="openWindowStrategy" className="flex flex-col text-base">
-                <span className="">{t('welcome')}</span>
+                <span className="">{t('settings.general.language.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
-                  Change the language used in the user interface.
+                  {t('settings.general.language.description')}
                 </span>
               </Label>
               <DropdownMenu>
@@ -267,9 +276,9 @@ Download and install new updates when&nbsp;available.
 
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="showIcon" className="flex flex-col text-base">
-                <span className="">Play sound</span>
+                <span className="">{t('settings.general.playSound.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
-                  Play a sound when an item is added to the&nbsp;history.
+                  {t('settings.general.playSound.description')}
                 </span>
               </Label>
               <Switch id="showIcon" checked={playSoundOnCopy}
@@ -279,13 +288,19 @@ Download and install new updates when&nbsp;available.
 
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="showIcon" className="flex flex-col text-base">
-                <span className="">Show icon in menu bar</span>
+                <span className="">{t('settings.general.showIcon.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
-                  Display the ClipBook app icon in the menu&nbsp;bar.
+                  {t('settings.general.showIcon.description')}
                 </span>
                 <span
-                    className={`${showIconInMenuBar ? "text-neutral-500" : ""} font-normal text-sm`}>
-                  You can always open <strong>Settings</strong> by pressing <kbd>⌘</kbd><kbd>,</kbd> inside the ClipBook window.
+                  className={`${showIconInMenuBar ? "text-neutral-500" : ""} font-normal text-sm`}>
+                  <Trans
+                    i18nKey="settings.general.showIcon.hint"
+                    components={{
+                      strong: <strong />,
+                      kbd: <kbd />
+                    }}
+                  />
                 </span>
               </Label>
               <Switch id="showIcon" checked={showIconInMenuBar}
@@ -295,9 +310,9 @@ Download and install new updates when&nbsp;available.
 
             <div className="flex items-center justify-between space-x-10 py-1">
               <Label htmlFor="openWindowStrategy" className="flex flex-col text-base">
-                <span className="">Open window at</span>
+                <span className="">{t('settings.general.openWindow.title')}</span>
                 <span className="text-neutral-500 font-normal text-sm">
-                  Select where the ClipBook window should be opened if it's possible.
+                  {t('settings.general.openWindow.description')}
                 </span>
               </Label>
               <DropdownMenu>
@@ -315,7 +330,12 @@ Download and install new updates when&nbsp;available.
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION]}</span>
                         <span className="text-secondary-foreground">
-                          ClipBook window remembers its position on each screen and opens at<br/>the last position on the active screen.
+                          <Trans
+                            i18nKey="settings.general.openWindow.descriptions.lastLocation"
+                            components={{
+                              br: <br />
+                            }}
+                          />
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
@@ -324,7 +344,7 @@ Download and install new updates when&nbsp;available.
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_SCREEN_CENTER]}</span>
                         <span className="text-secondary-foreground">
-                          Open at the center of the active screen.
+                          {t('settings.general.openWindow.descriptions.activeScreenCenter')}
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
@@ -333,7 +353,12 @@ Download and install new updates when&nbsp;available.
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_WINDOW_CENTER]}</span>
                         <span className="text-secondary-foreground">
-                          Open at the center of the active window. If there is no active window,<br/>then open at the center of the active screen.
+                          <Trans
+                            i18nKey="settings.general.openWindow.descriptions.activeWindowCenter"
+                            components={{
+                              br: <br />
+                            }}
+                          />
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
@@ -360,7 +385,12 @@ Download and install new updates when&nbsp;available.
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.INPUT_CURSOR]}</span>
                         <span className="text-secondary-foreground">
-                          Open near the current text caret location. If the caret location cannot<br/>be determined, then open at the center of the active window.
+                          <Trans
+                            i18nKey="settings.general.openWindow.descriptions.inputCursor"
+                            components={{
+                              br: <br />
+                            }}
+                          />
                         </span>
                       </div>
                     </DropdownMenuRadioItem>

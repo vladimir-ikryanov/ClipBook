@@ -8,6 +8,7 @@ import {
   ContextMenuTrigger
 } from "@/components/ui/context-menu";
 import TagIcon, {Tag} from "@/tags";
+import { useTranslation } from 'react-i18next';
 
 interface AppSidebarTagItemProps {
   tag: Tag
@@ -18,6 +19,7 @@ interface AppSidebarTagItemProps {
 }
 
 export function AppSidebarTagItem(props: AppSidebarTagItemProps) {
+  const { t } = useTranslation();
 
   function handleEditTag() {
     props.onEditTag(props.tag)
@@ -58,11 +60,11 @@ export function AppSidebarTagItem(props: AppSidebarTagItemProps) {
         <ContextMenuContent>
           <ContextMenuItem onClick={handleEditTag}>
             <Edit3Icon className="mr-2 h-4 w-4"/>
-            <span className="mr-4">Edit...</span>
+            <span className="mr-4">{t('app.sidebar.tag.contextMenu.edit')}</span>
           </ContextMenuItem>
           <ContextMenuItem onClick={handleDeleteTag}>
             <TrashIcon className="mr-2 h-4 w-4"/>
-            <span className="mr-4">Delete</span>
+            <span className="mr-4">{t('app.sidebar.tag.contextMenu.delete')}</span>
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
