@@ -4,6 +4,7 @@ import React, {useEffect, useState} from "react";
 import {ListFilterIcon, PinIcon, XIcon} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {
+  prefGetLanguage,
   prefGetToggleFilterShortcut,
   prefGetTogglePreviewShortcut,
   prefSetAlwaysDisplay,
@@ -14,7 +15,7 @@ import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import Commands from "@/app/Commands";
 import PasteTransformationCommands from "@/app/PasteTransformationCommands";
-import {isFilterActive} from "@/data";
+import {isFilterActive, LanguageCode} from "@/data";
 import FormatTextCommands from "@/app/FormatTextCommands";
 import OpenWithCommands from "@/app/OpenWithCommands";
 import {emitter} from "@/actions";
@@ -161,7 +162,7 @@ export default function SearchBar(props: SearchBarProps) {
             </div>
             <Input placeholder={t('searchBar.typeToSearch')}
                    value={props.searchQuery}
-                   className={`${props.searchQuery.length > 0 ? "w-full" : "w-48"} h-10 pl-10 text-lg placeholder:text-secondary-foreground border-none`}
+                   className={`${props.searchQuery.length > 0 ? "w-full" : prefGetLanguage() === LanguageCode.DE ? "w-[225px]" : "w-48"} h-10 pl-10 text-lg placeholder:text-secondary-foreground border-none`}
                    onChange={handleOnChange}
                    onKeyDown={handleKeyDown}
                    ref={props.searchFieldRef}/>

@@ -319,12 +319,14 @@
     }
   },
   "commands": {
+    "items": " Items",
     "showMoreActions": "Show more actions",
     "noResultsFound": "No results found.",
     "typeCommandOrSearch": "Type a command or search...",
     "pasteItemToApp": "Paste {{itemLabel}} {{itemsLabel}} to {{appName}}",
     "pasteItemToAppWithFormatting": "Paste {{itemLabel}} {{itemsLabel}} to {{appName}} with Formatting...",
-    "pasteItemsToApp": "Paste {{itemsLabel}} to {{appName}}",
+    "pasteObjectToApp": "Paste to {{appName}}",
+    "pasteObjectsToApp": "Paste {{itemsLabel}} to {{appName}}",
     "pasteItemsToAppWithReturn": "Paste {{itemsLabel}} to {{appName}} with Return",
     "pasteItemsToAppWithTab": "Paste {{itemsLabel}} to {{appName}} with Tab",
     "pastePathToApp": "Paste Path to {{appName}}",

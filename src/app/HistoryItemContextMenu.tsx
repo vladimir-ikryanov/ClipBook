@@ -22,13 +22,12 @@ import {
   prefGetShowInFinderShortcut,
   prefGetToggleFavoriteShortcut,
 } from "@/pref";
-import {CommandItem, CommandShortcut} from "@/components/ui/command";
+import {CommandShortcut} from "@/components/ui/command";
 import {Clip, ClipType, getImageText, updateClip} from "@/db";
 import {
   AppInfo,
   fileExists, FinderIcon, getDefaultApp, getFileOrImagePath,
-  getFilterQuery, getFirstSelectedHistoryItem,
-  getHistoryItem, getSelectedHistoryItemIndices, isFilterActive,
+  getFilterQuery, getHistoryItem, getSelectedHistoryItemIndices, isFilterActive,
   isTextItem,
   toBase64Icon
 } from "@/data";
@@ -64,7 +63,7 @@ type TagCheckedState = {
 
 const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   let focusSearchOnClose = true
-  
+
   const { t } = useTranslation()
 
   const [itemTags, setItemTags] = useState<TagCheckedState[]>([])
@@ -365,7 +364,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
           {
               canShowFormatText() &&
               <ContextMenuItem onSelect={handleFormatText}>
-                <TypeIcon className="mr-2 h-5 w-5"/>
+                <TypeIcon className="mr-2 h-4 w-4"/>
                 <span>{t('historyItemContextMenu.formatText')}</span>
               </ContextMenuItem>
           }
