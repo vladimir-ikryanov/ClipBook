@@ -162,7 +162,7 @@ export default function SearchBar(props: SearchBarProps) {
             </div>
             <Input placeholder={t('searchBar.typeToSearch')}
                    value={props.searchQuery}
-                   className={`${props.searchQuery.length > 0 ? "w-full" : prefGetLanguage() === LanguageCode.DE ? "w-[225px]" : "w-48"} h-10 pl-10 text-lg placeholder:text-secondary-foreground border-none`}
+                   className={`${props.searchQuery.length > 0 ? "w-full" : (prefGetLanguage() === LanguageCode.DE || prefGetLanguage() === LanguageCode.IT) ? "w-[225px]" : "w-48"} h-10 pl-10 text-lg placeholder:text-secondary-foreground border-none`}
                    onChange={handleOnChange}
                    onKeyDown={handleKeyDown}
                    ref={props.searchFieldRef}/>
