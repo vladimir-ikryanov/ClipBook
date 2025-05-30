@@ -22,9 +22,9 @@
       "history": "History",
       "shortcuts": "Shortcuts",
       "privacy": "Privacy",
-      "license": "License",
+      "license": "Licence",
       "about": "About",
-      "managedByOrganization": "Some settings are managed by your organization."
+      "managedByOrganization": "Some settings are managed by your organisation."
     },
     "general": {
       "title": "General",
@@ -56,19 +56,19 @@
         "description": "Select where the ClipBook window should be opened if it's possible.",
         "strategies": {
           "lastLocation": "Last location on active screen",
-          "activeScreenCenter": "Center of the active screen",
-          "activeWindowCenter": "Center of the active window",
+          "activeScreenCenter": "Centre of the active screen",
+          "activeWindowCenter": "Centre of the active window",
           "screenWithCursor": "Screen with mouse pointer",
           "mouseCursor": "Mouse pointer location",
           "inputCursor": "Text caret location"
         },
         "descriptions": {
           "lastLocation": "ClipBook window remembers its position on each screen and opens at<br/>the last position on the active screen.",
-          "activeScreenCenter": "Open at the center of the active screen.",
-          "activeWindowCenter": "Open at the center of the active window. If there is no active window,<br/>then open at the center of the active screen.",
-          "screenWithCursor": "Open at the center of the screen where the mouse pointer is located.",
+          "activeScreenCenter": "Open at the centre of the active screen.",
+          "activeWindowCenter": "Open at the centre of the active window. If there is no active window,<br/>then open at the centre of the active screen.",
+          "screenWithCursor": "Open at the centre of the screen where the mouse pointer is located.",
           "mouseCursor": "Open near the mouse pointer location.",
-          "inputCursor": "Open near the current text caret location. If the caret location cannot<br/>be determined, then open at the center of the active window."
+          "inputCursor": "Open near the current text caret location. If the caret location cannot<br/>be determined, then open at the centre of the active window."
         }
       },
       "playSound": {
@@ -118,8 +118,8 @@
         "description": "Automatically copy the merged text to the system clipboard after merging."
       },
       "treatDigitNumbersAsColor": {
-        "title": "Treat 8-digit number as a color",
-        "description": "Treat 8-digit, 6-digit, 4-digit, and 3-digit numbers as a hex color code."
+        "title": "Treat 8-digit number as a colour",
+        "description": "Treat 8-digit, 6-digit, 4-digit, and 3-digit numbers as a hex colour code."
       },
       "showPreviewForLinks": {
         "title": "Show preview for links",
@@ -130,8 +130,8 @@
         "description": "Display a confirmation dialog when clearing entire clipboard history."
       },
       "keepFavoritesOnClearAll": {
-        "title": "Keep favorites when clearing entire history",
-        "description": "Do not remove items market as favorite when clearing entire clipboard history."
+        "title": "Keep favourites when clearing entire history",
+        "description": "Do not remove items marked as favourite when clearing entire clipboard history."
       },
       "clearHistoryOnQuit": {
         "title": "Clear entire history on quit",
@@ -156,7 +156,7 @@
       "openInBrowser": "Open in Browser",
       "showInFinder": "Show in Finder",
       "openInDefaultApp": "Open in default app",
-      "addToFavorites": "Add to favorites",
+      "addToFavorites": "Add to favourites",
       "saveAsFile": "Save as file",
       "editHistoryItem": "Edit history item",
       "renameHistoryItem": "Rename history item",
@@ -172,7 +172,7 @@
       "openSettings": "Open Settings",
       "makeLowerCase": "Make lower case",
       "makeUpperCase": "Make upper case",
-      "capitalizeWords": "Capitalize words",
+      "capitalizeWords": "Capitalise words",
       "sentenceCase": "Sentence case",
       "removeEmptyLines": "Remove empty lines",
       "stripAllWhitespaces": "Strip all whitespaces",
@@ -194,17 +194,17 @@
       }
     },
     "license": {
-      "title": "ClipBook License",
+      "title": "ClipBook Licence",
       "activated": "Activated",
       "trial": "Trial",
-      "trialDescription": "You are currently using a <span>trial version</span> of ClipBook. To continue using ClipBook, please purchase a license key from online store and activate it.",
-      "licenseKey": "License key",
-      "licenseKeyDescription": "You can find your license key in the email you received after purchasing ClipBook.",
+      "trialDescription": "You are currently using a <span>trial version</span> of ClipBook. To continue using ClipBook, please purchase a licence key from online store and activate it.",
+      "licenseKey": "Licence key",
+      "licenseKeyDescription": "You can find your licence key in the email you received after purchasing ClipBook.",
       "activate": "Activate",
-      "buyLicense": "Buy License",
+      "buyLicense": "Buy Licence",
       "deactivate": "Deactivate",
       "activationErrorMessage": {
-        "title": "The license key cannot be activated :(",
+        "title": "The licence key cannot be activated :(",
         "help": "Help me",
         "close": "Close"
       }
@@ -237,8 +237,8 @@
       "pasteToWithTab": "Paste {{indicator}} to {{appName}} with Tab",
       "mergeItems": "Merge {{count}} items",
       "copyToClipboard": "Copy to Clipboard",
-      "removeFromFavorites": "Remove from favorites",
-      "addToFavorites": "Add to favorites",
+      "removeFromFavorites": "Remove from favourites",
+      "addToFavorites": "Add to favourites",
       "hideDetails": "Hide details",
       "showDetails": "Show details",
       "hidePreviewPanel": "Hide preview panel"
@@ -247,7 +247,7 @@
       "formatText": "Format Text",
       "makeLowerCase": "make lower case",
       "makeUpperCase": "MAKE UPPER CASE",
-      "capitalizeWords": "Capitalize Words",
+      "capitalizeWords": "Capitalise Words",
       "sentenceCase": "Sentence case",
       "removeEmptyLines": "Remove empty lines",
       "stripAllWhitespaces": "Strip all whitespaces",
@@ -303,9 +303,9 @@
   "trial": {
     "expiredDialog": {
       "showDialog": "Show Dialog",
-      "title": "Your trial has ended :(",
-      "description": "I hope you enjoyed using ClipBook. If you like it, please consider supporting the development by purchasing a license.",
-      "feedback": "If you don't like it, please let me know why.",
+      "title": "Your trial has expired :(",
+      "description": "I hope you enjoyed using ClipBook. If you like it, please consider supporting the development by purchasing a licence.",
+      "feedback": "If you don't like it, let me know why.",
       "missingFeatures": "Missing features",
       "dontNeedItRightNow": "Don't need it right now",
       "wasntUsefulForMe": "Wasn't useful for me",
@@ -314,15 +314,15 @@
       "yourFeedback": "Your feedback",
       "founder": "Founder of ClipBook",
       "sendFeedback": "Send Feedback",
-      "activateLicense": "Activate License",
-      "buyLicense": "Buy License"
+      "activateLicense": "Activate Licence",
+      "buyLicense": "Buy Licence"
     }
   },
   "commands": {
     "items": " Items",
     "showMoreActions": "Show more actions",
     "noResultsFound": "No results found.",
-    "typeCommandOrSearch": "Type a command or search...",
+    "typeCommandOrSearch": "Type command or search...",
     "pasteItemToApp": "Paste {{itemLabel}} {{itemsLabel}} to {{appName}}",
     "pasteItemToAppWithFormatting": "Paste {{itemLabel}} {{itemsLabel}} to {{appName}} with Formatting...",
     "pasteObjectToApp": "Paste to {{appName}}",
@@ -338,8 +338,8 @@
     "copyTextFromImage": "Copy Text from Image",
     "saveImageAsFile": "Save as File...",
     "editContent": "Edit Content...",
-    "addToFavorites": "Add {{itemsLabel}} to Favorites",
-    "removeFromFavorites": "Remove {{itemsLabel}} from Favorites",
+    "addToFavorites": "Add {{itemsLabel}} to Favourites",
+    "removeFromFavorites": "Remove {{itemsLabel}} from Favourites",
     "previewLink": "Preview Link",
     "renameItem": "Rename...",
     "formatText": "Format Text...",
@@ -361,7 +361,7 @@
   "formatText": {
     "makeLowerCase": "make lower case",
     "makeUpperCase": "MAKE UPPER CASE",
-    "capitalizeWords": "Capitalize Words",
+    "capitalizeWords": "Capitalise Words",
     "sentenceCase": "Sentence case",
     "removeEmptyLines": "Remove empty lines",
     "stripAllWhitespaces": "StripAllWhitespaces",
@@ -375,8 +375,8 @@
     "openInBrowser": "Open in Browser",
     "editContent": "Edit Content...",
     "copyTextFromImage": "Copy Text from Image",
-    "addToFavorites": "Add to Favorites",
-    "removeFromFavorites": "Remove from Favorites",
+    "addToFavorites": "Add to Favourites",
+    "removeFromFavorites": "Remove from Favourites",
     "renameItem": "Rename...",
     "quickLook": "Quick Look",
     "formatText": "Format Text...",
@@ -392,12 +392,12 @@
   "app": {
     "sidebar": {
       "all": "All",
-      "favorites": "Favorites",
+      "favorites": "Favourites",
       "text": "Text",
       "image": "Images",
       "link": "Links",
       "file": "Files",
-      "color": "Colors",
+      "color": "Colours",
       "email": "Emails",
       "newtag": "New Tag",
       "showapps": "Show Apps",
@@ -416,7 +416,7 @@
     },
     "itemInfoPane": {
       "link": "Link",
-      "color": "Color",
+      "color": "Colour",
       "email": "Email",
       "image": "Image",
       "file": "File",
@@ -449,8 +449,8 @@
       "images": "images",
       "link": "link",
       "links": "links",
-      "color": "color",
-      "colors": "colors",
+      "color": "colour",
+      "colors": "colours",
       "email": "email",
       "emails": "emails",
       "file": "file",
@@ -470,7 +470,7 @@
       "formatTextWhenPasting": "Format text when pasting",
       "makeLowerCase": "make lower case",
       "makeUpperCase": "MAKE UPPER CASE",
-      "capitalizeWords": "Capitalize Words",
+      "capitalizeWords": "Capitalise Words",
       "sentenceCase": "Sentence case",
       "removeEmptyLines": "Remove empty lines",
       "stripAllWhitespaces": "StripAllWhitespaces",
