@@ -14,6 +14,7 @@ import ShortcutLabel from "@/app/ShortcutLabel";
 import {prefShouldPasteOnClick} from "@/pref";
 import TagIcon, {getTags} from "@/tags";
 import {emitter} from "@/actions";
+import {useTranslation} from "react-i18next";
 
 type HistoryItemPaneProps = {
   item: Clip
@@ -30,6 +31,8 @@ type HistoryItemPaneProps = {
 }
 
 const HistoryItemPane = (props: HistoryItemPaneProps) => {
+  const {t} = useTranslation()
+  
   const [renameItemMode, setRenameItemMode] = useState(false)
   const [itemName, setItemName] = useState(props.item.name ? props.item.name : "")
   const [itemTags, setItemTags] = useState(getTags(props.item.tags))
@@ -265,7 +268,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
              className="py-0.5 px-1.5 ml-0.5 mr-0 bg-transparent outline-none text-justify font-normal w-full placeholder:text-secondary-foreground"
              value={itemName}
              autoFocus={true}
-             placeholder="Enter a name for this item"
+             placeholder={t("app.history.renamePlaceholder")}
              onChange={handleNameChange}
              onFocus={handleFocus}
              onBlur={handleFinishRename}

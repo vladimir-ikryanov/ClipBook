@@ -26,8 +26,11 @@ import {
   prefGetTrimSurroundingWhitespacesShortcut
 } from "@/pref";
 import {emitter} from "@/actions";
+import { useTranslation } from 'react-i18next';
 
 export default function FormatTextCommands() {
+  const { t } = useTranslation()
+
   const [open, setOpen] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
 
@@ -141,49 +144,49 @@ export default function FormatTextCommands() {
             <CommandList>
               <CommandGroup heading="Format text">
                 <CommandItem onSelect={handleMakeLowerCase}>
-                  <span>make lower case</span>
+                  <span>{t('formatText.makeLowerCase')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetMakeLowerCaseShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleMakeUpperCase}>
-                  <span>MAKE UPPER CASE</span>
+                  <span>{t('formatText.makeUpperCase')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetMakeUpperCaseShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleCapitalizeWords}>
-                  <span>Capitalize Words</span>
+                  <span>{t('formatText.capitalizeWords')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetCapitalizeShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleMakeSentenceCase}>
-                  <span>Sentence case</span>
+                  <span>{t('formatText.sentenceCase')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetSentenceCaseShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleRemoveEmptyLines}>
-                  <span>Remove empty lines</span>
+                  <span>{t('formatText.removeEmptyLines')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetRemoveEmptyLinesShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleStripAllWhitespaces}>
-                  <span>StripAllWhitespaces</span>
+                  <span>{t('formatText.stripAllWhitespaces')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetStripAllWhitespacesShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleTrimSurroundingWhitespaces}>
-                  <span>Trim Surrounding Whitespaces</span>
+                  <span>{t('formatText.trimSurroundingWhitespaces')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetTrimSurroundingWhitespacesShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
               </CommandGroup>
-              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandEmpty>{t('commands.noResultsFound')}</CommandEmpty>
             </CommandList>
           </div>
         </CommandDialog>

@@ -13,6 +13,7 @@ import {
   removeSelectedHistoryItemIndex,
   setSelectedHistoryItemIndex,
 } from "@/data";
+import {useTranslation} from "react-i18next";
 
 type HistoryItemsPaneProps = {
   history: Clip[]
@@ -33,6 +34,8 @@ type HistoryItemsPaneProps = {
 }
 
 const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
+  const {t} = useTranslation()
+  
   function handleItemSelected(index: number, metaKeyDown: boolean, shiftKeyDown: boolean) {
     // Handle click without modifier keys: select a single item.
     if (!metaKeyDown && !shiftKeyDown) {
@@ -82,7 +85,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
       return <div className="flex h-screen draggable">
           <div className="flex flex-col text-center m-auto">
             <p className="text-center text-xl font-semibold text-foreground">
-              No items
+              {t("app.history.noItems")}
             </p>
           </div>
         </div>
@@ -130,7 +133,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
       <div>
         <SearchIcon className="h-16 w-16 m-auto text-secondary-foreground"/>
         <p className="text-center pt-4 text-2xl font-semibold text-primary-foreground">
-          No results
+          {t("app.history.noResults")}
         </p>
       </div>
     </div>

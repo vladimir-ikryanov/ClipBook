@@ -10,6 +10,7 @@ import ShortcutLabel from "@/app/ShortcutLabel";
 import {XIcon} from "lucide-react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {emitter} from "@/actions";
+import {useTranslation} from "react-i18next";
 
 declare const restartApp: () => void;
 declare const isUpdateAvailable: () => boolean;
@@ -19,6 +20,8 @@ type StatusBarProps = {
 }
 
 export default function StatusBar(props: StatusBarProps) {
+  const {t} = useTranslation()
+  
   const [updateAvailable, setUpdateAvailable] = useState(isUpdateAvailable)
 
   function handleUpdateAvailable() {
@@ -50,7 +53,7 @@ export default function StatusBar(props: StatusBarProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
-                    <div className="select-none mr-2">Hide notification</div>
+                    <div className="select-none mr-2">{t('statusBar.hideNotification')}</div>
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
@@ -58,12 +61,12 @@ export default function StatusBar(props: StatusBarProps) {
                     <Button variant="ghost"
                             className="px-2 h-8 rounded-sm outline-none hover:bg-status-bar-green-button"
                             onClick={() => restartApp()}>
-                      Update ClipBook
+                      {t('statusBar.updateClipBook')}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
                     <div className="select-none mr-2">
-                      <strong>New version available</strong><br/>Click to install the update
+                      <strong>{t('statusBar.newVersionAvailable')}</strong><br/>{t('statusBar.clickToInstallUpdate')}
                     </div>
                   </TooltipContent>
                 </Tooltip>
@@ -73,7 +76,7 @@ export default function StatusBar(props: StatusBarProps) {
                 <Button variant="info" className="p-1 h-8 rounded-sm outline-none">
                   <ShortcutLabel
                       shortcut={prefGetSelectNextItemShortcut() + " + " + prefGetSelectPreviousItemShortcut()}/>
-                  <p className="pl-2">Navigate</p>
+                  <p className="pl-2">{t('statusBar.navigate')}</p>
                 </Button>
               </div>
           )
@@ -82,7 +85,7 @@ export default function StatusBar(props: StatusBarProps) {
         <div className="flex">
           <Button variant="ghost" className="p-1 h-8 rounded-sm outline-none group" onClick={handlePaste}>
             <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
-            <p className="pl-2 pr-1 text-">Paste to {props.appName}</p>
+            <p className="pl-2 pr-1 text-">{t('statusBar.pasteTo', {appName: props.appName})}</p>
           </Button>
         </div>
       </div>

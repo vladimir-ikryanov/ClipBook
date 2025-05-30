@@ -68,6 +68,7 @@ import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {DialogTitle} from "@/components/ui/dialog";
 import {emitter} from "@/actions";
+import { useTranslation } from 'react-i18next';
 
 declare const canZoomIn: () => boolean;
 declare const canZoomOut: () => boolean;
@@ -79,6 +80,8 @@ type CommandsProps = {
 }
 
 export default function Commands(props: CommandsProps) {
+  const { t } = useTranslation()
+
   const [open, setOpen] = useState(false)
   const [defaultApp, setDefaultApp] = useState<AppInfo | undefined>(undefined)
 
@@ -507,7 +510,7 @@ export default function Commands(props: CommandsProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent className="flex items-center">
-            <div className="select-none mr-2 ml-1">Show more actions</div>
+            <div className="select-none mr-2 ml-1">{t('commands.showMoreActions')}</div>
             <ShortcutLabel shortcut={prefGetShowMoreActionsShortcut()}/>
           </TooltipContent>
         </Tooltip>
@@ -516,13 +519,13 @@ export default function Commands(props: CommandsProps) {
             <VisuallyHidden>
               <DialogTitle></DialogTitle>
             </VisuallyHidden>
-            <CommandInput placeholder="Type a command or search..." autoFocus={true}/>
+            <CommandInput placeholder={t('commands.typeCommandOrSearch')} autoFocus={true}/>
             <div className="max-h-[70vh] overflow-y-auto mb-1.5 scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent">
               <CommandList>
                 <CommandItem onSelect={handlePaste}>
                   <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                        alt="Application icon"/>
-                  <span>Paste {getItemLabel()} {getMultipleItemsIndicator()} to {props.appName}</span>
+                  <span>{t('commands.pasteItemToApp', {itemLabel: getItemLabel(), itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
                   </CommandShortcut>
@@ -533,7 +536,7 @@ export default function Commands(props: CommandsProps) {
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                            alt="Application icon"/>
                       <span>
-                        Paste {getMultipleItemsIndicator()} to {props.appName}
+                        {t('commands.pasteItemsToApp', {itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}
                       </span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetPasteSelectedObjectToActiveAppShortcut()}/>
@@ -546,7 +549,7 @@ export default function Commands(props: CommandsProps) {
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                            alt="Application icon"/>
                       <span>
-                        Paste {getItemLabel()} {getMultipleItemsIndicator()} to {props.appName} with Formatting...
+                        {t('commands.pasteItemToAppWithFormatting', {itemLabel: getItemLabel(), itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}
                       </span>
                     </CommandItem>
                 }
@@ -555,7 +558,7 @@ export default function Commands(props: CommandsProps) {
                     <CommandItem onSelect={handlePasteWithReturn}>
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                            alt="Application icon"/>
-                      <span>Paste {getMultipleItemsIndicator()} to {props.appName} with Return</span>
+                      <span>{t('commands.pasteItemsToAppWithReturn', {itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}</span>
                     </CommandItem>
                 }
                 {
@@ -563,7 +566,7 @@ export default function Commands(props: CommandsProps) {
                     <CommandItem onSelect={handlePasteWithTab}>
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                            alt="Application icon"/>
-                      <span>Paste {getMultipleItemsIndicator()} to {props.appName} with Tab</span>
+                      <span>{t('commands.pasteItemsToAppWithTab', {itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}</span>
                     </CommandItem>
                 }
                 {
@@ -571,7 +574,7 @@ export default function Commands(props: CommandsProps) {
                     <CommandItem onSelect={handlePastePath}>
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                            alt="Application icon"/>
-                      <span>Paste Path to {props.appName}</span>
+                      <span>{t('commands.pastePathToApp', {appName: props.appName})}</span>
                     </CommandItem>
                 }
                 {
@@ -590,14 +593,14 @@ export default function Commands(props: CommandsProps) {
                         <path d="m15 5-3 3-3-3"/>
                         <path d="m15 19-3-3-3 3"/>
                       </svg>
-                      <span>Merge {getMultipleItemsIndicator()}</span>
+                      <span>{t('commands.mergeItems', {itemsLabel: getMultipleItemsIndicator()})}</span>
                     </CommandItem>
                 }
                 {
                     canShowCopyToClipboard() &&
                     <CommandItem onSelect={handleCopyToClipboard}>
                       <CopyIcon className="mr-2 h-5 w-5"/>
-                      <span>Copy {getItemLabel()} to Clipboard</span>
+                      <span>{t('commands.copyItemToClipboard', {itemLabel: getItemLabel()})}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
                       </CommandShortcut>
@@ -607,7 +610,7 @@ export default function Commands(props: CommandsProps) {
                     canShowCopyObjectToClipboard() &&
                     <CommandItem onSelect={handleCopyObjectToClipboard}>
                       <CopyIcon className="mr-2 h-5 w-5"/>
-                      <span>Copy to Clipboard</span>
+                      <span>{t('commands.copyObjectToClipboard')}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetCopyObjectToClipboardShortcut()}/>
                       </CommandShortcut>
@@ -617,7 +620,7 @@ export default function Commands(props: CommandsProps) {
                     canShowCopyPath() &&
                     <CommandItem onSelect={handleCopyPathToClipboard}>
                       <CopyIcon className="mr-2 h-5 w-5"/>
-                      <span>Copy Path to Clipboard</span>
+                      <span>{t('commands.copyPathToClipboard')}</span>
                     </CommandItem>
                 }
                 <CommandSeparator/>
@@ -626,7 +629,7 @@ export default function Commands(props: CommandsProps) {
                     <>
                       <CommandItem onSelect={handleShowInHistory}>
                         <ArrowUpLeftIcon className="mr-2 h-5 w-5"/>
-                        <span>Show in History</span>
+                        <span>{t('commands.showInHistory')}</span>
                       </CommandItem>
                       <CommandSeparator/>
                     </>
@@ -635,7 +638,7 @@ export default function Commands(props: CommandsProps) {
                     canShowOpenInBrowser() &&
                     <CommandItem onSelect={handleOpenInBrowser}>
                       <GlobeIcon className="mr-2 h-5 w-5"/>
-                      <span>Open in Browser</span>
+                      <span>{t('commands.openInBrowser')}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
                       </CommandShortcut>
@@ -645,7 +648,7 @@ export default function Commands(props: CommandsProps) {
                     canShowCopyTextFromImage() &&
                     <CommandItem onSelect={handleCopyTextFromImage}>
                       <ScanTextIcon className="mr-2 h-5 w-5"/>
-                      <span>Copy Text from Image</span>
+                      <span>{t('commands.copyTextFromImage')}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetCopyTextFromImageShortcut()}/>
                       </CommandShortcut>
@@ -655,7 +658,7 @@ export default function Commands(props: CommandsProps) {
                     canShowSaveImageAsFile() &&
                     <CommandItem onSelect={handleSaveImageAsFile}>
                       <DownloadIcon className="mr-2 h-5 w-5"/>
-                      <span>Save as File...</span>
+                      <span>{t('commands.saveImageAsFile')}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetSaveImageAsFileShortcut()}/>
                       </CommandShortcut>
@@ -665,7 +668,7 @@ export default function Commands(props: CommandsProps) {
                     canShowEditContent() &&
                     <CommandItem onSelect={handleEditContent}>
                       <Edit3Icon className="mr-2 h-5 w-5"/>
-                      <span>Edit Content...</span>
+                      <span>{t('commands.editContent')}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
                       </CommandShortcut>
@@ -678,8 +681,8 @@ export default function Commands(props: CommandsProps) {
                         <StarOffIcon className="mr-2 h-5 w-5"/>
                   }
                   <span>{canAddToFavorites() ?
-                      `Add ${getMultipleItemsIndicator()} to Favorites` :
-                      `Remove ${getMultipleItemsIndicator()} from Favorites`}</span>
+                      t('commands.addToFavorites', {itemsLabel: getMultipleItemsIndicator()}) :
+                      t('commands.removeFromFavorites', {itemsLabel: getMultipleItemsIndicator()})}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
                   </CommandShortcut>
@@ -691,14 +694,14 @@ export default function Commands(props: CommandsProps) {
                     canShowPreview() &&
                     <CommandItem onSelect={handlePreviewLink}>
                       <EyeIcon className="mr-2 h-5 w-5"/>
-                      <span>Preview Link</span>
+                      <span>{t('commands.previewLink')}</span>
                     </CommandItem>
                 }
                 {
                     canShowRenameItem() &&
                     <CommandItem onSelect={handleRenameItem}>
                       <PenIcon className="mr-2 h-5 w-5"/>
-                      <span>Rename...</span>
+                      <span>{t('commands.renameItem')}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
                       </CommandShortcut>
@@ -708,21 +711,21 @@ export default function Commands(props: CommandsProps) {
                     canShowFormatText() &&
                     <CommandItem onSelect={handleFormatText}>
                       <TypeIcon className="mr-2 h-5 w-5"/>
-                      <span>Format Text...</span>
+                      <span>{t('commands.formatText')}</span>
                     </CommandItem>
                 }
                 {
                     canShowSplit() &&
                     <CommandItem onSelect={handleSplit}>
                       <UnfoldVerticalIcon className="mr-2 h-5 w-5"/>
-                      <span>Split</span>
+                      <span>{t('commands.split')}</span>
                     </CommandItem>
                 }
                 {
                     canQuickLook() &&
                     <CommandItem onSelect={handleQuickLook} disabled={isFile() && !isFileExists()}>
                       <EyeIcon className="mr-2 h-5 w-5"/>
-                      <span>Quick Look</span>
+                      <span>{t('commands.quickLook')}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetQuickLookShortcut()}/>
                       </CommandShortcut>
@@ -734,7 +737,7 @@ export default function Commands(props: CommandsProps) {
                     <CommandItem onSelect={handleShowInFinder} disabled={!isFileExists()}>
                       <img src={toBase64Icon(FinderIcon)} className="mr-2 h-5 w-5"
                            alt="App icon"/>
-                      <span>Show in Finder</span>
+                      <span>{t('commands.showInFinder')}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetShowInFinderShortcut()}/>
                       </CommandShortcut>
@@ -747,7 +750,7 @@ export default function Commands(props: CommandsProps) {
                         defaultApp ? <img src={toBase64Icon(defaultApp.icon)} className="mr-2 h-5 w-5"
                                           alt="App icon"/> : null
                       }
-                      <span>Open in {defaultApp?.name}</span>
+                      <span>{t('commands.openInApp', {appName: defaultApp?.name})}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetOpenInDefaultAppShortcut()}/>
                       </CommandShortcut>
@@ -757,7 +760,7 @@ export default function Commands(props: CommandsProps) {
                     canOpenInDefaultApp() &&
                     <CommandItem onSelect={handleOpenWith}>
                       <UploadIcon className="mr-2 h-5 w-5"/>
-                      <span>Open With...</span>
+                      <span>{t('commands.openWith')}</span>
                     </CommandItem>
                 }
                 {
@@ -769,28 +772,28 @@ export default function Commands(props: CommandsProps) {
                         <HidePreviewPaneIcon className="mr-2 h-5 w-5"/> :
                         <ShowPreviewPaneIcon className="mr-2 h-5 w-5"/>
                   }
-                  <span>{getPreviewVisibleState() ? "Hide Preview" : "Show Preview"}</span>
+                  <span>{getPreviewVisibleState() ? t('commands.hidePreview') : t('commands.showPreview')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleZoomIn} disabled={!canZoomIn()}>
                   <ZoomIn className="mr-2 h-5 w-5"/>
-                  <span>Zoom In</span>
+                  <span>{t('commands.zoomIn')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetZoomUIInShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleZoomOut} disabled={!canZoomOut()}>
                   <ZoomOut className="mr-2 h-5 w-5"/>
-                  <span>Zoom Out</span>
+                  <span>{t('commands.zoomOut')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetZoomUIOutShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleResetZoom} disabled={!canResetZoom()}>
                   <Undo2Icon className="mr-2 h-5 w-5"/>
-                  <span>Reset Zoom</span>
+                  <span>{t('commands.resetZoom')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetZoomUIResetShortcut()}/>
                   </CommandShortcut>
@@ -798,7 +801,7 @@ export default function Commands(props: CommandsProps) {
                 <CommandSeparator/>
                 <CommandItem onSelect={handleOpenSettings}>
                   <SettingsIcon className="mr-2 h-5 w-5"/>
-                  <span>{"Settings..."}</span>
+                  <span>{t('commands.settings')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetOpenSettingsShortcut()}/>
                   </CommandShortcut>
@@ -808,7 +811,7 @@ export default function Commands(props: CommandsProps) {
                     canShowDeleteItem() &&
                     <CommandItem onSelect={handleDeleteItem}>
                       <TrashIcon className="mr-2 h-5 w-5 text-actions-danger"/>
-                      <span className="text-actions-danger">Delete</span>
+                      <span className="text-actions-danger">{t('commands.deleteItem')}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
                       </CommandShortcut>
@@ -819,7 +822,7 @@ export default function Commands(props: CommandsProps) {
                     <CommandItem onSelect={handleDeleteItems}>
                       <TrashIcon className="mr-2 h-5 w-5 text-actions-danger"/>
                       <span className="text-actions-danger">
-                      Delete {getMultipleItemsIndicator()}
+                      {t('commands.deleteItems', {itemsLabel: getMultipleItemsIndicator()})}
                     </span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
@@ -828,12 +831,12 @@ export default function Commands(props: CommandsProps) {
                 }
                 <CommandItem onSelect={handleDeleteAllItems}>
                   <TrashIcon className="mr-2 h-5 w-5 text-actions-danger"/>
-                  <span className="text-actions-danger">Delete All...</span>
+                  <span className="text-actions-danger">{t('commands.deleteAllItems')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetClearHistoryShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
-                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandEmpty>{t('commands.noResultsFound')}</CommandEmpty>
               </CommandList>
             </div>
           </CommandDialog>

@@ -14,6 +14,7 @@ import {RadioGroup, RadioGroupColorItem} from "@/components/ui/radio-group";
 import {emitter} from "@/actions";
 import {Clip} from "@/db";
 import {updateHistoryItem} from "@/data";
+import {useTranslation} from "react-i18next";
 
 type TagDialogProps = {
   tag?: Tag
@@ -23,6 +24,8 @@ type TagDialogProps = {
 }
 
 export default function TagDialog(props: TagDialogProps) {
+  const {t} = useTranslation()
+  
   const [visible, setVisible] = useState<boolean>(props.visible)
   const [tagName, setTagName] = useState<string>(props.tag ? props.tag.name : "")
   const [tagColor, setTagColor] = useState<TagColor>(props.tag ? props.tag.color as TagColor : TagColor.Blue)
@@ -90,7 +93,7 @@ export default function TagDialog(props: TagDialogProps) {
       <Dialog open={visible}>
         <DialogContent onKeyDown={handleKeyDown} className="w-fit">
           <DialogHeader>
-            <DialogTitle className="mx-auto">{props.tag ? "Edit tag" : "New tag"}</DialogTitle>
+            <DialogTitle className="mx-auto">{props.tag ? t('tagDialog.editTag') : t('tagDialog.newTag')}</DialogTitle>
             <DialogDescription className="mx-auto"></DialogDescription>
           </DialogHeader>
           <div className="flex items-center bg-secondary-solid rounded-lg">
@@ -100,7 +103,7 @@ export default function TagDialog(props: TagDialogProps) {
                    value={tagName}
                    onChange={handleValueChange}
                    onKeyDown={handleKeyDown}
-                   placeholder="Tag name"
+                   placeholder={t('tagDialog.tagName')}
                    className="text-base placeholder:text-settings-inputPlaceholder border-none bg-secondary-solid px-1"/>
           </div>
           <RadioGroup value={tagColor}
@@ -126,10 +129,10 @@ export default function TagDialog(props: TagDialogProps) {
                                  style={{backgroundColor: TagColor.Purple}}/>
           </RadioGroup>
           <DialogFooter className="mx-auto">
-            <Button variant="secondary" onClick={handleCancel}>Cancel</Button>
+            <Button variant="secondary" onClick={handleCancel}>{t('tagDialog.cancel')}</Button>
             <Button variant="primary" onClick={handleSave} disabled={tagName.length === 0}>
               {
-                props.tag ? "Save" : "Create"
+                props.tag ? t('tagDialog.save') : t('tagDialog.create')
               }
             </Button>
           </DialogFooter>

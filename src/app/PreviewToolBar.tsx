@@ -49,7 +49,8 @@ type PreviewToolBarProps = {
 }
 
 export default function PreviewToolBar(props: PreviewToolBarProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
+
   const [selectedItem, setSelectedItem] = useState<Clip>()
   const [pasteOptionsMenuOpen, setPasteOptionsMenuOpen] = useState(false)
   const [isCopying, setIsCopying] = useState(false)
@@ -184,7 +185,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   function getMultipleItemsIndicator(): string {
     let indices = getSelectedHistoryItemIndices().length
     if (indices > 1) {
-      return indices + " Items"
+      return t('preview.toolbar.items', { count: indices })
     }
     return ""
   }
@@ -201,7 +202,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
                 <div className="select-none mr-2 ml-1">
-                  Paste {getSelectedHistoryItemIndices().length > 1 ? getSelectedHistoryItemIndices().length + " Items" : ""} to {props.appName}
+                  {t('preview.toolbar.pasteTo', { indicator: getMultipleItemsIndicator(), appName: props.appName })}
                 </div>
                 <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
               </TooltipContent>
@@ -221,7 +222,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     <DropdownMenuItem onClick={handlePaste}>
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                            alt="Application icon"/>
-                      <span>Paste {getMultipleItemsIndicator()} to {props.appName}</span>
+                      <span>{t('preview.toolbar.pasteTo', { indicator: getMultipleItemsIndicator(), appName: props.appName })}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
                       </CommandShortcut>
@@ -230,14 +231,14 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                            alt="Application icon"/>
                       <span
-                          className="mr-2">Paste {getMultipleItemsIndicator()} to {props.appName} with Return</span>
+                          className="mr-2">{t('preview.toolbar.pasteToWithReturn', { indicator: getMultipleItemsIndicator(), appName: props.appName })}</span>
                       <span className="w-16"></span>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handlePasteWithTab}>
                       <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                            alt="Application icon"/>
                       <span
-                          className="mr-2">Paste {getMultipleItemsIndicator()} to {props.appName} with Tab</span>
+                          className="mr-2">{t('preview.toolbar.pasteToWithTab', { indicator: getMultipleItemsIndicator(), appName: props.appName })}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -264,8 +265,8 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
-                    <div
-                        className="select-none mr-1 ml-1">Merge {props.selectedItemIndices.length} items
+                    <div className="select-none mr-1 ml-1">
+                      {t('preview.toolbar.mergeItems', { count: props.selectedItemIndices.length })}
                     </div>
                   </TooltipContent>
                 </Tooltip>
@@ -299,7 +300,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
-                    <div className="select-none mr-2 ml-1">Copy to Clipboard</div>
+                    <div className="select-none mr-2 ml-1">{t('preview.toolbar.copyToClipboard')}</div>
                     <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
                   </TooltipContent>
                 </Tooltip>
@@ -360,11 +361,11 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
               {
                 selectedItemsAreMarkedAsFavorite() ?
                     <TooltipContent className="flex items-center">
-                      <div className="select-none mr-2 ml-1">Remove from favorites</div>
+                      <div className="select-none mr-2 ml-1">{t('preview.toolbar.removeFromFavorites')}</div>
                       <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
                     </TooltipContent> :
                     <TooltipContent className="flex items-center">
-                      <div className="select-none mr-2 ml-1">Add to favorites</div>
+                      <div className="select-none mr-2 ml-1">{t('preview.toolbar.addToFavorites')}</div>
                       <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
                     </TooltipContent>
               }
@@ -387,7 +388,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
                 <div
-                    className="select-none mr-1 ml-1">{props.displayInfo ? "Hide details" : "Show details"}</div>
+                    className="select-none mr-1 ml-1">{props.displayInfo ? t('preview.toolbar.hideDetails') : t('preview.toolbar.showDetails')}</div>
               </TooltipContent>
             </Tooltip>
 
@@ -398,7 +399,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
-                <div className="select-none mr-2 ml-1">Hide preview panel</div>
+                <div className="select-none mr-2 ml-1">{t('preview.toolbar.hidePreviewPanel')}</div>
                 <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
               </TooltipContent>
             </Tooltip>

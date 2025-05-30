@@ -5,6 +5,7 @@ import {fileExists, formatDateTime, formatNumber, getHistoryItemById, toBase64Ic
 import ItemTags from "@/app/ItemTags";
 import {getTags, Tag} from "@/tags";
 import {emitter} from "@/actions";
+import {useTranslation} from "react-i18next";
 import {prefGetLanguage} from "@/pref";
 
 declare const getAppNameFromPath: (appPath: string) => string;
@@ -16,6 +17,8 @@ type ItemInfoPaneProps = {
 }
 
 export default function ItemInfoPane(props: ItemInfoPaneProps) {
+  const {t} = useTranslation()
+  
   if (!props.visible || !props.item) {
     return null
   }
@@ -72,31 +75,31 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
 
   function getTypes(): string[] {
     if (type === ClipType.Link) {
-      return ["Link"]
+      return [t("app.itemInfoPane.link")]
     }
     if (type === ClipType.Color) {
-      return ["Color"]
+      return [t("app.itemInfoPane.color")]
     }
     if (type === ClipType.Email) {
-      return ["Email"]
+      return [t("app.itemInfoPane.email")]
     }
     if (type === ClipType.Image) {
-      return ["Image"]
+      return [t("app.itemInfoPane.image")]
     }
     if (type === ClipType.File) {
-      return fileFolder ? ["Folder"] : ["File"]
+      return fileFolder ? [t("app.itemInfoPane.folder")] : [t("app.itemInfoPane.file")]
     }
     if (type === ClipType.Text) {
-      let result = ["Text"]
+      let result = [t("app.itemInfoPane.text")]
       if (html.length > 0) {
-        result.push("HTML")
+        result.push(t("app.itemInfoPane.html"))
       }
       if (rtf.length > 0) {
-        result.push("RTF")
+        result.push(t("app.itemInfoPane.rtf"))
       }
       return result
     }
-    return ["Unknown"]
+    return [t("app.itemInfoPane.unknown")]
   }
 
   function canShowImageSize() {
@@ -121,22 +124,22 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
 
   function getSizeLabel(sizeInBytes: number) {
     if (!sizeInBytes) {
-      return "Unknown"
+      return t("app.itemInfoPane.unknown")
     }
     if (sizeInBytes < 1024) {
-      return sizeInBytes + " bytes"
+      return sizeInBytes + t("app.itemInfoPane.bytes")
     }
     if (sizeInBytes < 1024 * 1024) {
-      return (sizeInBytes / 1024).toFixed(2) + " KB"
+      return (sizeInBytes / 1024).toFixed(2) + t("app.itemInfoPane.kb")
     }
-    return (sizeInBytes / 1024 / 1024).toFixed(2) + " MB"
+    return (sizeInBytes / 1024 / 1024).toFixed(2) + t("app.itemInfoPane.mb")
   }
 
   return (
       <div
           className="flex flex-col w-full p-4 border-t-solid border-t-preview-border border-t space-y-2 text-sm">
         <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-          <div className="flex-none text-preview-infoLabel font-semibold">Application</div>
+          <div className="flex-none text-preview-infoLabel font-semibold">{t("app.itemInfoPane.application")}</div>
           <div className="flex-grow"></div>
           <div className="flex flex-row items-center">
             {
@@ -145,14 +148,14 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
                     <img src={toBase64Icon(getFileIconAsBase64(sourceApp, false))}
                          className="h-5 w-5 mr-2" alt="Application icon"/>
                     <span>{getAppNameFromPath(sourceApp)}</span>
-                  </div> : <span>Unknown</span>
+                  </div> : <span>{t("app.itemInfoPane.unknown")}</span>
             }
           </div>
         </div>
         <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
           <div className="flex-none text-preview-infoLabel font-semibold">
             {
-              getTypes().length > 1 ? "Types" : "Type"
+              getTypes().length > 1 ? t("app.itemInfoPane.types") : t("app.itemInfoPane.type")
             }
           </div>
           <div className="flex-grow"></div>
@@ -173,7 +176,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
         {
             tags && tags.length > 0 &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1 items-center">
-              <div className="flex-none text-preview-infoLabel font-semibold">Tags</div>
+              <div className="flex-none text-preview-infoLabel font-semibold">{t("app.itemInfoPane.tags")}</div>
               <div className="flex-grow"></div>
               <div className="flex text-foreground">
                 <ItemTags tags={tags}/>
@@ -183,7 +186,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
         {
             isLink() &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-              <div className="flex-none text-preview-infoLabel font-semibold mr-4">URL</div>
+              <div className="flex-none text-preview-infoLabel font-semibold mr-4">{t("app.itemInfoPane.url")}</div>
               <div className="flex-grow"></div>
               <div className="flex-auto text-foreground text-end break-all">{content}</div>
             </div>
@@ -191,7 +194,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
         {
             isFile() &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-              <div className="flex-none text-preview-infoLabel font-semibold mr-4">Path</div>
+              <div className="flex-none text-preview-infoLabel font-semibold mr-4">{t("app.itemInfoPane.path")}</div>
               <div className="flex-grow"></div>
               <div className={`${fileExists(filePath) ? "text-foreground" : "text-primary-foreground"} flex-auto text-end break-all`}>{filePath}</div>
             </div>
@@ -199,7 +202,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
         {
             isFile() && !isFolder() &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-              <div className="flex-none text-preview-infoLabel font-semibold">File size</div>
+              <div className="flex-none text-preview-infoLabel font-semibold">{t("app.itemInfoPane.fileSize")}</div>
               <div className="flex-grow"></div>
               <div className="flex-none text-foreground">{getSizeLabel(fileSizeInBytes)}</div>
             </div>
@@ -207,7 +210,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
         {
             canShowImageSize() &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-              <div className="flex-none text-preview-infoLabel font-semibold">Image dimensions</div>
+              <div className="flex-none text-preview-infoLabel font-semibold">{t("app.itemInfoPane.imageDimensions")}</div>
               <div className="flex-grow"></div>
               <div className="flex-none text-foreground">{imageWidth + "x" + imageHeight}</div>
             </div>
@@ -215,7 +218,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
         {
             isImage() &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-              <div className="flex-none text-preview-infoLabel font-semibold">Image size</div>
+              <div className="flex-none text-preview-infoLabel font-semibold">{t("app.itemInfoPane.imageSize")}</div>
               <div className="flex-grow"></div>
               <div className="flex-none text-foreground">{getSizeLabel(imageSizeInBytes)}</div>
             </div>
@@ -223,15 +226,15 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
         {
             numberOfCopies > 1 &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-              <div className="flex-none text-preview-infoLabel font-semibold">Number of copies</div>
+              <div className="flex-none text-preview-infoLabel font-semibold">{t("app.itemInfoPane.numberOfCopies")}</div>
               <div className="flex-grow"></div>
-              <div className="flex-none text-foreground">{formatNumber(numberOfCopies)}</div>
+              <div className="flex-none text-foreground">{numberOfCopies}</div>
             </div>
         }
         {
             numberOfCopies > 1 &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-              <div className="flex-none text-preview-infoLabel font-semibold">First copy time</div>
+              <div className="flex-none text-preview-infoLabel font-semibold">{t("app.itemInfoPane.firstCopyTime")}</div>
               <div className="flex-grow"></div>
               <div
                   className="flex-none text-foreground">{formatDateTime(firstTimeCopy)}</div>
@@ -240,7 +243,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
         {
             numberOfCopies > 1 &&
             <div className="flex w-full">
-              <div className="flex-none text-preview-infoLabel font-semibold">Last copy time</div>
+              <div className="flex-none text-preview-infoLabel font-semibold">{t("app.itemInfoPane.lastCopyTime")}</div>
               <div className="flex-grow"></div>
               <div
                   className="flex-none text-foreground">{formatDateTime(lastTimeCopy)}</div>
@@ -249,7 +252,7 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
         {
             numberOfCopies === 1 &&
             <div className="flex w-full">
-              <div className="flex-none text-preview-infoLabel font-semibold">Copy time</div>
+              <div className="flex-none text-preview-infoLabel font-semibold">{t("app.itemInfoPane.copyTime")}</div>
               <div className="flex-grow"></div>
               <div
                   className="flex-none text-foreground">{formatDateTime(firstTimeCopy)}</div>

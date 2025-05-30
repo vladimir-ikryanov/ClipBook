@@ -24,7 +24,8 @@ type TrialExpiredDialogProps = {
 }
 
 export default function TrialExpiredDialog(props: TrialExpiredDialogProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
+
   const [feedbackProvided, setFeedbackProvided] = useState(prefIsFeedbackProvided())
   const [feedback, setFeedback] = useState("")
   const [email, setEmail] = useState("")
@@ -81,17 +82,17 @@ export default function TrialExpiredDialog(props: TrialExpiredDialogProps) {
   return (
       <AlertDialog open={props.visible}>
         <AlertDialogTrigger asChild>
-          <Button className="hidden">Show Dialog</Button>
+          <Button className="hidden">{t('trial.expiredDialog.showDialog')}</Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              <h1 className="text-xl mb-2">{t('trial.expired.title')}</h1>
+              <h1 className="text-xl mb-2">{t('trial.expiredDialog.title')}</h1>
             </AlertDialogTitle>
             <div className="text-[14px] text-dialog-text">
-              <p>{t('trial.expired.description')}</p>
+              <p>{t('trial.expiredDialog.description')}</p>
               {
-                !feedbackProvided && <p className="mt-4">{t('trial.expired.feedback')}</p>
+                !feedbackProvided && <p className="mt-4">{t('trial.expiredDialog.feedback')}</p>
               }
               {
                   !feedbackProvided &&
@@ -102,7 +103,7 @@ export default function TrialExpiredDialog(props: TrialExpiredDialogProps) {
                                   onCheckedChange={(checked) => setFeatures(!!checked)}/>
                         <label htmlFor="features"
                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                          Missing features
+                          {t('trial.expiredDialog.missingFeatures')}
                         </label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -110,7 +111,7 @@ export default function TrialExpiredDialog(props: TrialExpiredDialogProps) {
                                   onCheckedChange={(checked) => setNeed(!!checked)}/>
                         <label htmlFor="need"
                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                          Don't need it right now
+                          {t('trial.expiredDialog.dontNeedItRightNow')}
                         </label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -118,7 +119,7 @@ export default function TrialExpiredDialog(props: TrialExpiredDialogProps) {
                                   onCheckedChange={(checked) => setValue(!!checked)}/>
                         <label htmlFor="value"
                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                          Wasn't useful for me
+                          {t('trial.expiredDialog.wasntUsefulForMe')}
                         </label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -126,17 +127,17 @@ export default function TrialExpiredDialog(props: TrialExpiredDialogProps) {
                                   onCheckedChange={(checked) => setOther(!!checked)}/>
                         <label htmlFor="other"
                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                          Other (please specify)
+                          {t('trial.expiredDialog.other')}
                         </label>
                       </div>
                     </div>
                     <div className="flex flex-col flex-grow space-y-2.5 mt-2.5">
                       <textarea id="msg" value={feedback} onChange={handleFeedbackChange}
                                 className="flex h-24 p-2 bg-background border border-border rounded-md text-dialog-text text-sm outline-none"
-                                placeholder="Your feedback"></textarea>
+                                placeholder={t('trial.expiredDialog.yourFeedback')}></textarea>
                       <input id="email" value={email} onChange={handleEmailChange}
                              className="flex p-2 bg-background placeholder:text-settings-inputPlaceholder border border-border rounded-md text-dialog-text text-sm outline-none"
-                             type="email" placeholder="Email for response (optional)"/>
+                             type="email" placeholder={t('trial.expiredDialog.emailForResponse')}/>
                     </div>
                   </div>
               }
@@ -147,15 +148,15 @@ export default function TrialExpiredDialog(props: TrialExpiredDialogProps) {
               <img src="assets/photo.png" className="w-10 h-10 rounded-full" alt="Photo"/>
               <div className="flex flex-col">
                 <p className="text-sm text-secondary-foreground">Vladimir Ikryanov</p>
-                <p className="text-xs text-secondary-foreground mb-1">Founder of ClipBook</p>
+                <p className="text-xs text-secondary-foreground mb-1">{t('trial.expiredDialog.founder')}</p>
               </div>
             </div>
             <div className="flex space-x-3 items-center">
               {
-                !feedbackProvided && <AlertDialogCancel onClick={handleFeedback} disabled={!canSendFeedback()}>Send Feedback</AlertDialogCancel>
+                !feedbackProvided && <AlertDialogCancel onClick={handleFeedback} disabled={!canSendFeedback()}>{t('trial.expiredDialog.sendFeedback')}</AlertDialogCancel>
               }
-              <AlertDialogCancel onClick={handleActivate}>Activate License</AlertDialogCancel>
-              <AlertDialogAction onClick={handleBuyLicense}>Buy License</AlertDialogAction>
+              <AlertDialogCancel onClick={handleActivate}>{t('trial.expiredDialog.activateLicense')}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleBuyLicense}>{t('trial.expiredDialog.buyLicense')}</AlertDialogAction>
             </div>
           </AlertDialogFooter>
         </AlertDialogContent>

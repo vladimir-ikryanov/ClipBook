@@ -1,6 +1,7 @@
 import '../app.css';
 import React from "react";
 import {Clip, ClipType} from "@/db";
+import {useTranslation} from "react-i18next";
 
 type ItemsInfoPaneProps = {
   items: Clip[]
@@ -8,6 +9,8 @@ type ItemsInfoPaneProps = {
 }
 
 export default function ItemsInfoPane(props: ItemsInfoPaneProps) {
+  const {t} = useTranslation()
+  
   if (!props.display || props.items.length === 0) {
     return <div></div>
   }
@@ -63,6 +66,13 @@ export default function ItemsInfoPane(props: ItemsInfoPaneProps) {
       }
       result += emailItems
     }
+    let fileItems = getFileItems()
+    if (fileItems.length > 0) {
+      if (result.length > 0) {
+        result += ", "
+      }
+      result += fileItems
+    }
     return result
   }
 
@@ -78,36 +88,40 @@ export default function ItemsInfoPane(props: ItemsInfoPaneProps) {
   }
 
   function getTextItems(): string {
-    return getItems(ClipType.Text, "text", "texts")
+    return getItems(ClipType.Text, t("app.itemsInfoPane.text"), t("app.itemsInfoPane.texts"))
   }
 
   function getImageItems(): string {
-    return getItems(ClipType.Image, "image", "images")
+    return getItems(ClipType.Image, t("app.itemsInfoPane.image"), t("app.itemsInfoPane.images"))
   }
 
   function getLinkItems(): string {
-    return getItems(ClipType.Link, "link", "links")
+    return getItems(ClipType.Link, t("app.itemsInfoPane.link"), t("app.itemsInfoPane.links"))
   }
 
   function getColorItems(): string {
-    return getItems(ClipType.Color, "color", "colors")
+    return getItems(ClipType.Color, t("app.itemsInfoPane.color"), t("app.itemsInfoPane.colors"))
   }
 
   function getEmailItems(): string {
-    return getItems(ClipType.Email, "email", "emails")
+    return getItems(ClipType.Email, t("app.itemsInfoPane.email"), t("app.itemsInfoPane.emails"))
+  }
+
+  function getFileItems(): string {
+    return getItems(ClipType.File, t("app.itemsInfoPane.file"), t("app.itemsInfoPane.files"))
   }
 
   return (
       <div
           className="flex flex-col w-full p-4 border-t-solid border-t-preview-border border-t space-y-2 text-sm">
         <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
-          <div className="flex-none text-preview-infoLabel font-semibold">Items</div>
+          <div className="flex-none text-preview-infoLabel font-semibold">{t("app.itemsInfoPane.items")}</div>
           <div className="flex-grow"></div>
           <div className="flex-none text-foreground">{getSelectedTypes()}</div>
         </div>
         {
             <div className="flex w-full">
-              <div className="flex-none text-preview-infoLabel font-semibold">Copy time</div>
+              <div className="flex-none text-preview-infoLabel font-semibold">{t("app.itemsInfoPane.copyTime")}</div>
               <div className="flex-grow"></div>
               <div
                   className="flex-none text-foreground">{getCopyTimeRange()}</div>

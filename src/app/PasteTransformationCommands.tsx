@@ -14,8 +14,11 @@ import ShortcutLabel from "@/app/ShortcutLabel";
 import {TextFormatOperation} from "@/data";
 import {DialogTitle} from "@/components/ui/dialog";
 import {emitter} from "@/actions";
+import {useTranslation} from "react-i18next";
 
 export default function PasteTransformationCommands() {
+  const {t} = useTranslation()
+  
   const [open, setOpen] = useState(false)
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -121,54 +124,54 @@ export default function PasteTransformationCommands() {
           <VisuallyHidden>
             <DialogTitle></DialogTitle>
           </VisuallyHidden>
-          <CommandInput placeholder="Type a command or search..." autoFocus={true}/>
+          <CommandInput placeholder={t("app.pasteTransformationCommands.searchPlaceholder")} autoFocus={true}/>
           <div className="max-h-[70vh] overflow-y-auto mb-1.5">
             <CommandList>
-              <CommandGroup heading="Format text when pasting">
+              <CommandGroup heading={t("app.pasteTransformationCommands.formatTextWhenPasting")}>
                 <CommandItem onSelect={handleMakeLowerCase}>
-                  <span>make lower case</span>
+                  <span>{t("app.pasteTransformationCommands.makeLowerCase")}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut="1"/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleMakeUpperCase}>
-                  <span>MAKE UPPER CASE</span>
+                  <span>{t("app.pasteTransformationCommands.makeUpperCase")}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut="2"/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleCapitalizeWords}>
-                  <span>Capitalize Words</span>
+                  <span>{t("app.pasteTransformationCommands.capitalizeWords")}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut="3"/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleMakeSentenceCase}>
-                  <span>Sentence case</span>
+                    <span>{t("app.pasteTransformationCommands.sentenceCase")}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut="4"/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleRemoveEmptyLines}>
-                  <span>Remove empty lines</span>
+                  <span>{t("app.pasteTransformationCommands.removeEmptyLines")}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut="5"/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleStripAllWhitespaces}>
-                  <span>StripAllWhitespaces</span>
+                  <span>{t("app.pasteTransformationCommands.stripAllWhitespaces")}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut="6"/>
                   </CommandShortcut>
                 </CommandItem>
                 <CommandItem onSelect={handleTrimSurroundingWhitespaces}>
-                  <span>Trim Surrounding Whitespaces</span>
+                  <span>{t("app.pasteTransformationCommands.trimSurroundingWhitespaces")}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut="7"/>
                   </CommandShortcut>
                 </CommandItem>
               </CommandGroup>
-              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandEmpty>{t("app.pasteTransformationCommands.noResults")}</CommandEmpty>
             </CommandList>
           </div>
         </CommandDialog>

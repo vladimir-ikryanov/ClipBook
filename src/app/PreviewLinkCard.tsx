@@ -1,6 +1,7 @@
 import '../app.css';
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton"
+import {useTranslation} from "react-i18next";
 
 type PreviewLinkCardProps = {
   loading: boolean
@@ -11,11 +12,13 @@ type PreviewLinkCardProps = {
 }
 
 export default function PreviewLinkCard(props: PreviewLinkCardProps) {
+  const {t} = useTranslation()
+  
   if (props.loading) {
     return (
         <div className="flex flex-col mx-4 mt-0.5 mb-4 rounded-md bg-skeleton-background overflow-clip">
           <Skeleton className="flex h-52 w-full items-center justify-center rounded-none bg-skeleton-foreground">
-            <span className="text-skeleton-text">Loading preview...</span>
+            <span className="text-skeleton-text">{t("app.previewLinkCard.loadingPreview")}</span>
           </Skeleton>
           <div className="p-4">
             <Skeleton className="h-4 w-[50%] mt-2 rounded bg-skeleton-foreground"/>
@@ -47,8 +50,8 @@ export default function PreviewLinkCard(props: PreviewLinkCardProps) {
               </div>
         }
         <div className="p-4 space-y-1">
-          <div className="font-semibold text-sm">{props.title.length === 0 ? "No title" : props.title}</div>
-          <div className="text-secondary-foreground text-sm">{props.description.length === 0 ? "No description" : props.description}</div>
+          <div className="font-semibold text-sm">{props.title.length === 0 ? t("app.previewLinkCard.noTitle") : props.title}</div>
+          <div className="text-secondary-foreground text-sm">{props.description.length === 0 ? t("app.previewLinkCard.noDescription") : props.description}</div>
         </div>
       </div>
   )

@@ -23,8 +23,11 @@ import {
 import {DialogTitle} from "@/components/ui/dialog";
 import {Clip, ClipType} from "@/db";
 import {emitter} from "@/actions";
+import {useTranslation} from "react-i18next";
 
 export default function OpenWithCommands() {
+  const {t} = useTranslation()
+  
   const [open, setOpen] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [defaultApp, setDefaultApp] = useState<AppInfo | undefined>(undefined)
@@ -135,12 +138,12 @@ export default function OpenWithCommands() {
           <VisuallyHidden>
             <DialogTitle></DialogTitle>
           </VisuallyHidden>
-          <CommandInput placeholder="Search..." autoFocus={true}/>
+          <CommandInput placeholder={t("app.openWithCommands.searchPlaceholder")} autoFocus={true}/>
           <div className="max-h-[70vh] overflow-y-auto mb-1.5">
             <CommandList>
               {
                   defaultApp &&
-                  <CommandGroup heading="Default">
+                  <CommandGroup heading={t("app.openWithCommands.default")}>
                     <CommandItem onSelect={handleOpenWithDefaultApp}>
                       <img src={toBase64Icon(defaultApp.icon)} className="mr-2 h-5 w-5"
                            alt="App icon"/>
@@ -150,7 +153,7 @@ export default function OpenWithCommands() {
               }
               {
                   recommendedApps.length > 0 &&
-                  <CommandGroup heading="Recommended">
+                  <CommandGroup heading={t("app.openWithCommands.recommended")}>
                     {
                       recommendedApps.map(app => (
                           <CommandItem key={app.path} onSelect={() => handleOpenWithApp(app.path)}>
@@ -164,7 +167,7 @@ export default function OpenWithCommands() {
               }
               {
                   otherApps.length > 0 &&
-                  <CommandGroup heading="Other">
+                  <CommandGroup heading={t("app.openWithCommands.other")}>
                     {
                       otherApps.map(app => (
                           <CommandItem key={app.path} onSelect={() => handleOpenWithApp(app.path)}>
@@ -176,7 +179,7 @@ export default function OpenWithCommands() {
                     }
                   </CommandGroup>
               }
-              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandEmpty>{t("app.openWithCommands.noResults")}</CommandEmpty>
             </CommandList>
           </div>
         </CommandDialog>

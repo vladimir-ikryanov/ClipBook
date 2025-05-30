@@ -17,8 +17,11 @@ import {
   SortHistoryType
 } from "@/data";
 import {emitter} from "@/actions";
+import {useTranslation} from "react-i18next";
 
 export default function SortMenu() {
+  const {t} = useTranslation()
+  
   const [menuOpen, setMenuOpen] = useState(false)
   const [sortType, setSortType] = useState(getSortType())
   const [sortOrderReverse, setSortOrderReverse] = useState(isSortOrderReverse())
@@ -60,20 +63,20 @@ export default function SortMenu() {
         <DropdownMenuContent className="p-1.5 bg-actions-background" align="start"
                              onKeyDown={handleKeyDown}>
           <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.TimeOfLastCopy} onCheckedChange={() => handleSortTypeChange(SortHistoryType.TimeOfLastCopy)}>
-            Last Copy Time
+            {t('sortMenu.lastCopyTime')}
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.TimeOfFirstCopy} onCheckedChange={() => handleSortTypeChange(SortHistoryType.TimeOfFirstCopy)}>
-            First Copy Time
+            {t('sortMenu.firstCopyTime')}
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.NumberOfCopies} onCheckedChange={() => handleSortTypeChange(SortHistoryType.NumberOfCopies)}>
-            Number of Copies
+            {t('sortMenu.numberOfCopies')}
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.Size} onCheckedChange={() => handleSortTypeChange(SortHistoryType.Size)}>
-            Size
+            {t('sortMenu.size')}
           </DropdownMenuCheckboxItem>
           <DropdownMenuSeparator/>
           <DropdownMenuCheckboxItem checked={sortOrderReverse} onCheckedChange={handleSortOrderReverseChange}>
-            Reverse Order
+            {t('sortMenu.reverseOrder')}
           </DropdownMenuCheckboxItem>
         </DropdownMenuContent>
       </DropdownMenu>

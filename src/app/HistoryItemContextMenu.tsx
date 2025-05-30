@@ -36,6 +36,7 @@ import TagIcon, {allTags, Tag} from "@/tags";
 import {Checkbox} from "@/components/ui/checkbox";
 import {CheckedState} from "@radix-ui/react-checkbox";
 import {emitter} from "@/actions";
+import { useTranslation } from 'react-i18next';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -63,6 +64,8 @@ type TagCheckedState = {
 
 const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   let focusSearchOnClose = true
+  
+  const { t } = useTranslation()
 
   const [itemTags, setItemTags] = useState<TagCheckedState[]>([])
   const [defaultApp, setDefaultApp] = useState<AppInfo | undefined>(undefined)
@@ -274,7 +277,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
           <ContextMenuItem onClick={handlePaste}>
             <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                  alt="Application icon"/>
-            <span className="mr-12">Paste {getItemLabel()} to {props.appName}</span>
+            <span className="mr-12">{t('historyItemContextMenu.pasteItemToApp', {itemLabel: getItemLabel(), appName: props.appName})}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
             </CommandShortcut>
@@ -284,12 +287,12 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               <ContextMenuItem onClick={handlePastePath}>
                 <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                      alt="Application icon"/>
-                <span className="mr-12">Paste Path to {props.appName}</span>
+                <span className="mr-12">{t('historyItemContextMenu.pastePathToApp', {appName: props.appName})}</span>
               </ContextMenuItem>
           }
           <ContextMenuItem onClick={handleCopyToClipboard}>
             <CopyIcon className="mr-2 h-4 w-4"/>
-            <span className="mr-12">Copy {getItemLabel()} to Clipboard</span>
+            <span className="mr-12">{t('historyItemContextMenu.copyItemToClipboard', {itemLabel: getItemLabel()})}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
             </CommandShortcut>
@@ -298,7 +301,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               props.item.type === ClipType.File &&
               <ContextMenuItem onClick={handleCopyPathToClipboard}>
                 <CopyIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Copy Path to Clipboard</span>
+                <span className="mr-12">{t('historyItemContextMenu.copyPathToClipboard')}</span>
               </ContextMenuItem>
           }
           <ContextMenuSeparator/>
@@ -306,7 +309,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               props.item.type === ClipType.Link &&
               <ContextMenuItem onClick={handleOpenInBrowser}>
                 <GlobeIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Open in Browser</span>
+                <span className="mr-12">{t('historyItemContextMenu.openInBrowser')}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetOpenInBrowserShortcut()}/>
                 </CommandShortcut>
@@ -316,7 +319,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               isTextItem(props.item) &&
               <ContextMenuItem onClick={handleEditContent}>
                 <Edit3Icon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Edit Content...</span>
+                <span className="mr-12">{t('historyItemContextMenu.editContent')}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
                 </CommandShortcut>
@@ -326,7 +329,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               canShowCopyTextFromImage() &&
               <ContextMenuItem onClick={handleCopyTextFromImage}>
                 <ScanTextIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Copy Text from Image</span>
+                <span className="mr-12">{t('historyItemContextMenu.copyTextFromImage')}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetCopyTextFromImageShortcut()}/>
                 </CommandShortcut>
@@ -337,14 +340,14 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               props.item.favorite ? <StarOffIcon className="mr-2 h-4 w-4"/> :
                   <StarIcon className="mr-2 h-4 w-4"/>
             }
-            <span>{props.item.favorite ? "Remove from Favorites" : "Add to Favorites"}</span>
+            <span>{props.item.favorite ? t('historyItemContextMenu.removeFromFavorites') : t('historyItemContextMenu.addToFavorites')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
             </CommandShortcut>
           </ContextMenuItem>
           <ContextMenuItem onClick={handleRename}>
             <PenIcon className="mr-2 h-4 w-4"/>
-            <span className="mr-12">Rename...</span>
+            <span className="mr-12">{t('historyItemContextMenu.renameItem')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
             </CommandShortcut>
@@ -353,7 +356,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               canShowQuickLook() &&
               <ContextMenuItem onClick={handleQuickLook}>
                 <EyeIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Quick Look</span>
+                <span className="mr-12">{t('historyItemContextMenu.quickLook')}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetQuickLookShortcut()}/>
                 </CommandShortcut>
@@ -363,14 +366,14 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               canShowFormatText() &&
               <ContextMenuItem onSelect={handleFormatText}>
                 <TypeIcon className="mr-2 h-5 w-5"/>
-                <span>Format Text...</span>
+                <span>{t('historyItemContextMenu.formatText')}</span>
               </ContextMenuItem>
           }
           <ContextMenuSeparator/>
           <ContextMenuSub>
             <ContextMenuSubTrigger>
               <TagsIcon className="mr-2 h-4 w-4"/>
-              <span>Tags...</span>
+              <span>{t('historyItemContextMenu.tags')}</span>
             </ContextMenuSubTrigger>
             <ContextMenuPortal>
               <ContextMenuSubContent className="p-1.5 bg-actions-background">
@@ -393,7 +396,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
                 <ContextMenuSeparator/>
                 <ContextMenuItem onClick={handleAssignTag}>
                   <PlusIcon className="mr-2 h-4 w-4"/>
-                  <span className="mr-12">New Tag...</span>
+                  <span className="mr-12">{t('historyItemContextMenu.newTag')}</span>
                 </ContextMenuItem>
               </ContextMenuSubContent>
             </ContextMenuPortal>
@@ -405,7 +408,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               props.item.type === ClipType.Link &&
               <ContextMenuItem onClick={handlePreviewLink}>
                 <EyeIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Preview</span>
+                <span className="mr-12">{t('historyItemContextMenu.preview')}</span>
               </ContextMenuItem>
           }
           {
@@ -416,7 +419,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               <ContextMenuItem onSelect={handleShowInFinder} disabled={!isFileExists()}>
                 <img src={toBase64Icon(FinderIcon)} className="mr-2 h-5 w-5"
                      alt="App icon"/>
-                <span className="mr-12">Show in Finder</span>
+                <span className="mr-12">{t('historyItemContextMenu.showInFinder')}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetShowInFinderShortcut()}/>
                 </CommandShortcut>
@@ -429,7 +432,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
                     defaultApp ? <img src={toBase64Icon(defaultApp.icon)} className="mr-2 h-5 w-5"
                                       alt="App icon"/> : null
                   }
-                  <span className="mr-12">Open in {defaultApp?.name}</span>
+                  <span className="mr-12">{t('historyItemContextMenu.openInApp', {appName: defaultApp?.name})}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetOpenInDefaultAppShortcut()}/>
                   </CommandShortcut>
@@ -439,7 +442,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               canOpenInDefaultApp() &&
               <ContextMenuItem onSelect={handleOpenWith}>
                 <UploadIcon className="mr-2 h-5 w-5"/>
-                <span className="mr-12">Open With...</span>
+                <span className="mr-12">{t('historyItemContextMenu.openWith')}</span>
               </ContextMenuItem>
           }
           <ContextMenuSeparator/>
@@ -448,14 +451,14 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               <>
                 <ContextMenuItem onClick={handleShowInHistory}>
                   <ArrowUpLeftIcon className="mr-2 h-4 w-4"/>
-                  <span className="mr-12">Show in History</span>
+                  <span className="mr-12">{t('historyItemContextMenu.showInHistory')}</span>
                 </ContextMenuItem>
                 <ContextMenuSeparator/>
               </>
           }
           <ContextMenuItem onClick={handleDeleteItem}>
             <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
-            <span className="text-actions-danger mr-12">Delete</span>
+            <span className="text-actions-danger mr-12">{t('historyItemContextMenu.deleteItem')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
             </CommandShortcut>

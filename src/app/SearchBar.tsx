@@ -19,6 +19,7 @@ import FormatTextCommands from "@/app/FormatTextCommands";
 import OpenWithCommands from "@/app/OpenWithCommands";
 import {emitter} from "@/actions";
 import SortMenu from "@/app/SortMenu";
+import {useTranslation} from "react-i18next";
 
 declare const openSettingsLicense: () => void;
 
@@ -35,6 +36,8 @@ type SearchBarProps = {
 }
 
 export default function SearchBar(props: SearchBarProps) {
+  const {t} = useTranslation()
+  
   const [alwaysDisplay, setAlwaysDisplay] = useState(prefShouldAlwaysDisplay())
   const [filterActive, setFilterActive] = useState(isFilterActive())
 
@@ -89,12 +92,16 @@ export default function SearchBar(props: SearchBarProps) {
 
   function getTrialBadgeText() {
     if (props.trialDaysLeft <= 0) {
-      return "Trial ended"
+      return t('searchBar.trialEnded')
     }
     if (props.trialDaysLeft == 1) {
-      return "Trial ends tomorrow"
+      return t('searchBar.trialEndsTomorrow')
     }
-    return "Trial " + (props.trialDaysLeft > 0 ? `(${props.trialDaysLeft} ${props.trialDaysLeft > 1 ? "days" : "day"} left)` : " expired")
+    return t('searchBar.trial') + (props.trialDaysLeft > 0 ?
+      `(${props.trialDaysLeft > 1 ?
+        t('searchBar.trialDaysLeft', { count: props.trialDaysLeft })
+        : t('searchBar.trialDayLeft', { count: props.trialDaysLeft })})`
+      : t('searchBar.expired'))
   }
 
   function getTrialBadgeBgColor() {
@@ -147,12 +154,12 @@ export default function SearchBar(props: SearchBarProps) {
                 </TooltipTrigger>
                 <TooltipContent className="flex items-center">
                   <div
-                      className="select-none mr-2 ml-1">{props.isFilterVisible ? "Hide filter options" : "Show filter options"}</div>
+                      className="select-none mr-2 ml-1">{props.isFilterVisible ? t('searchBar.hideFilterOptions') : t('searchBar.showFilterOptions')}</div>
                   <ShortcutLabel shortcut={prefGetToggleFilterShortcut()}/>
                 </TooltipContent>
               </Tooltip>
             </div>
-            <Input placeholder="Type to search..."
+            <Input placeholder={t('searchBar.typeToSearch')}
                    value={props.searchQuery}
                    className={`${props.searchQuery.length > 0 ? "w-full" : "w-48"} h-10 pl-10 text-lg placeholder:text-secondary-foreground border-none`}
                    onChange={handleOnChange}
@@ -168,7 +175,7 @@ export default function SearchBar(props: SearchBarProps) {
               <TooltipContent className="flex items-center">
                 <div className="select-none mr-2 ml-1">
                   {
-                    props.trialDaysLeft > 0 ? `Trial will expire in ${props.trialDaysLeft} ${props.trialDaysLeft > 1 ? "days" : "day"}` : "Trial expired"
+                    props.trialDaysLeft > 0 ? t('searchBar.trialWillExpireIn', { count: props.trialDaysLeft }) : t('searchBar.trialExpired')
                   }
                 </div>
               </TooltipContent>
@@ -182,7 +189,7 @@ export default function SearchBar(props: SearchBarProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
-                <div className="select-none mr-2 ml-1">Clear search</div>
+                <div className="select-none mr-2 ml-1">{t('searchBar.clearSearch')}</div>
                 <ShortcutLabel shortcut="Escape"/>
               </TooltipContent>
             </Tooltip>
@@ -198,7 +205,7 @@ export default function SearchBar(props: SearchBarProps) {
               </TooltipTrigger>
               <TooltipContent className="flex items-center px-2.5">
                 <div className="select-none">
-                  {alwaysDisplay ? "Hide when not focused" : "Always display"}
+                  {alwaysDisplay ? t('searchBar.hideWhenNotFocused') : t('searchBar.alwaysDisplay')}
                 </div>
               </TooltipContent>
             </Tooltip>
@@ -220,7 +227,7 @@ export default function SearchBar(props: SearchBarProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="flex items-center">
-                <div className="select-none mr-2 ml-1">Show preview</div>
+                <div className="select-none mr-2 ml-1">{t('searchBar.showPreview')}</div>
                 <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
               </TooltipContent>
             </Tooltip>

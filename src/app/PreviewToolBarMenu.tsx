@@ -41,6 +41,7 @@ import {
 } from "@/data";
 import {CommandShortcut} from "@/components/ui/command";
 import {emitter} from "@/actions";
+import {useTranslation} from "react-i18next";
 
 type PreviewToolBarMenuProps = {
   selectedItemIndices: number[]
@@ -51,6 +52,8 @@ type PreviewToolBarMenuProps = {
 }
 
 export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
+  const {t} = useTranslation()
+  
   const [openDropdown, setOpenDropdown] = useState(false)
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -139,52 +142,52 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
     return (
         <>
           <DropdownMenuSeparator/>
-          <DropdownMenuLabel>Format Text</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('preview.toolbarMenu.formatText')}</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.ToLowerCase)}>
             <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">make lower case</span>
+            <span className="mr-12">{t('preview.toolbarMenu.makeLowerCase')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetMakeLowerCaseShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.ToUpperCase)}>
             <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">MAKE UPPER CASE</span>
+            <span className="mr-12">{t('preview.toolbarMenu.makeUpperCase')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetMakeUpperCaseShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.CapitalizeWords)}>
             <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">Capitalize Words</span>
+            <span className="mr-12">{t('preview.toolbarMenu.capitalizeWords')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetCapitalizeShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.ToSentenceCase)}>
             <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">Sentence case</span>
+            <span className="mr-12">{t('preview.toolbarMenu.sentenceCase')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetSentenceCaseShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.RemoveEmptyLines)}>
             <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">Remove empty lines</span>
+            <span className="mr-12">{t('preview.toolbarMenu.removeEmptyLines')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetRemoveEmptyLinesShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.StripAllWhitespaces)}>
             <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">StripAllWhitespaces</span>
+            <span className="mr-12">{t('preview.toolbarMenu.stripAllWhitespaces')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetStripAllWhitespacesShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.TrimSurroundingWhitespaces)}>
             <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">Trim Surrounding Whitespaces</span>
+            <span className="mr-12">{t('preview.toolbarMenu.trimSurroundingWhitespaces')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetTrimSurroundingWhitespacesShortcut()}/>
             </CommandShortcut>
@@ -208,7 +211,7 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
               canShowEditContent() &&
               <DropdownMenuItem onClick={handleRequestEditItem}>
                 <Edit3Icon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Edit Content...</span>
+                <span className="mr-12">{t('preview.toolbarMenu.editContent')}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
                 </CommandShortcut>
@@ -218,7 +221,7 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
               canShowRenameItem() &&
               <DropdownMenuItem onClick={handleRenameItem}>
                 <PenIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Rename...</span>
+                <span className="mr-12">{t('preview.toolbarMenu.rename')}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
                 </CommandShortcut>
@@ -231,14 +234,14 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
               canShowPreviewLink() &&
               <DropdownMenuItem onClick={handlePreviewLink}>
                 <EyeIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Preview</span>
+                <span className="mr-12">{t('preview.toolbarMenu.preview')}</span>
               </DropdownMenuItem>
           }
           {
               canShowPreviewLink() && prefShouldShowPreviewForLinks() &&
               <DropdownMenuItem onClick={handleUpdateLinkPreview}>
                 <RefreshCwIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Update</span>
+                <span className="mr-12">{t('preview.toolbarMenu.update')}</span>
               </DropdownMenuItem>
           }
           {
@@ -248,7 +251,7 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
               canSaveImageAsFile() &&
               <DropdownMenuItem onClick={handleSaveImageAsFile}>
                 <DownloadIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">Save as File...</span>
+                <span className="mr-12">{t('preview.toolbarMenu.saveAsFile')}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetSaveImageAsFileShortcut()}/>
                 </CommandShortcut>
@@ -260,8 +263,8 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
           <DropdownMenuItem onClick={handleDeleteItem}>
             <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
             <span className="mr-12 text-actions-danger">
-                    {"Delete " + getMultipleItemsIndicator()}
-                  </span>
+              {t('preview.toolbarMenu.delete', { indicator: getMultipleItemsIndicator() })}
+            </span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
             </CommandShortcut>
