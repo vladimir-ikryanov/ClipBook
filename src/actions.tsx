@@ -85,6 +85,7 @@ export type Events = {
   ZoomOut: void;
   ResetZoom: void;
   UpdateLinkPreview: void;
+  UpdateLanguage: void;
 };
 
 export const emitter: Emitter<Events> = mitt<Events>();

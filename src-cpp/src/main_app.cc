@@ -762,6 +762,16 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   // Settings window.
   window->putProperty("saveLanguage", [this](std::string language) -> void {
     settings_->saveLanguage(std::move(language));
+    std::thread([this]() {
+      auto settings_main_frame = settings_window_->mainFrame();
+      if (settings_main_frame) {
+        settings_main_frame->executeJavaScript("updateLanguage()");
+      }
+      auto app_main_frame = app_window_->mainFrame();
+      if (app_main_frame) {
+        app_main_frame->executeJavaScript("updateLanguage()");
+      }
+    }).detach();
   });
   window->putProperty("getLanguage", [this]() -> std::string {
     return settings_->getLanguage();

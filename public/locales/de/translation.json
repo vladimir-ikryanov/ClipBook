@@ -1,4 +1,485 @@
 {
-  "welcome": "Willkommen bei ClipBook DE",
-  "save": "Speichern"
+  "welcome": {
+    "title": "Willkommen bei ClipBook",
+    "description": "ClipBook speichert alles, was Sie kopieren, und ermöglicht Ihnen den schnellen Zugriff auf Ihren Zwischenablageverlauf, wann immer Sie ihn benötigen.",
+    "getStarted": "Loslegen"
+  },
+  "accessibility": {
+    "title": "Zugriff auf Barrierefreiheit aktivieren",
+    "description": "Um direkt in andere Anwendungen einzufügen, erlauben Sie ClipBook den Zugriff auf die Barrierefreiheitsfunktionen Ihres Macs in den Systemeinstellungen.",
+    "readMore": "Barrierefreiheitsfunktionen",
+    "doLater": "Ich mache es später",
+    "allowAccess": "Zugriff erlauben"
+  },
+  "enjoy": {
+    "ready": "ClipBook ist bereit",
+    "description": "ClipBook läuft im Hintergrund. Sie können auf Ihren Zwischenablageverlauf über die globale Tastenkombination <strong>⇧Shift + ⌘Cmd + V</strong> oder durch Klicken auf das ClipBook-Symbol in der Menüleiste und Auswahl von <strong>ClipBook öffnen</strong> zugreifen.",
+    "openClipBook": "ClipBook öffnen"
+  },
+  "settings": {
+    "sidebar": {
+      "general": "Allgemein",
+      "history": "Verlauf",
+      "shortcuts": "Tastenkombinationen",
+      "privacy": "Datenschutz",
+      "license": "Lizenz",
+      "about": "Über",
+      "managedByOrganization": "Einige Einstellungen werden von Ihrer Organisation verwaltet."
+    },
+    "general": {
+      "title": "Allgemein",
+      "launchAtLogin": {
+        "title": "Beim Anmelden starten",
+        "description": "ClipBook automatisch beim Anmelden starten."
+      },
+      "automaticUpdates": {
+        "title": "Automatische Updates",
+        "description": "Neue Updates automatisch herunterladen und installieren.",
+        "checkForUpdates": "Nach Updates suchen...",
+        "checkingForUpdates": "Suche nach Updates..."
+      },
+      "appearance": {
+        "title": "Erscheinungsbild",
+        "description": "Ändern Sie das Aussehen von ClipBook auf Ihrem Gerät.",
+        "themes": {
+          "light": "Hell",
+          "dark": "Dunkel",
+          "system": "System"
+        }
+      },
+      "language": {
+        "title": "Sprache",
+        "description": "Ändern Sie die in der Benutzeroberfläche verwendete Sprache."
+      },
+      "openWindow": {
+        "title": "Fenster öffnen bei",
+        "description": "Wählen Sie, wo das ClipBook-Fenster geöffnet werden soll, wenn möglich.",
+        "strategies": {
+          "lastLocation": "Letzte Position auf aktivem Bildschirm",
+          "activeScreenCenter": "Mitte des aktiven Bildschirms",
+          "activeWindowCenter": "Mitte des aktiven Fensters",
+          "screenWithCursor": "Bildschirm mit Mauszeiger",
+          "mouseCursor": "Mauszeigerposition",
+          "inputCursor": "Textcursorposition"
+        },
+        "descriptions": {
+          "lastLocation": "Das ClipBook-Fenster merkt sich seine Position auf jedem Bildschirm und öffnet sich an<br/>der letzten Position auf dem aktiven Bildschirm.",
+          "activeScreenCenter": "In der Mitte des aktiven Bildschirms öffnen.",
+          "activeWindowCenter": "In der Mitte des aktiven Fensters öffnen. Wenn kein aktives Fenster vorhanden ist,<br/>dann in der Mitte des aktiven Bildschirms öffnen.",
+          "screenWithCursor": "In der Mitte des Bildschirms öffnen, auf dem sich der Mauszeiger befindet.",
+          "mouseCursor": "In der Nähe der Mauszeigerposition öffnen.",
+          "inputCursor": "In der Nähe der aktuellen Textcursorposition öffnen. Wenn die Cursorposition nicht<br/>bestimmt werden kann, dann in der Mitte des aktiven Fensters öffnen."
+        }
+      },
+      "playSound": {
+        "title": "Ton abspielen",
+        "description": "Einen Ton abspielen, wenn ein Element zum Verlauf hinzugefügt wird."
+      },
+      "showIcon": {
+        "title": "Symbol in der Menüleiste anzeigen",
+        "description": "Das ClipBook-App-Symbol in der Menüleiste anzeigen.",
+        "hint": "Sie können <strong>Einstellungen</strong> jederzeit öffnen, indem Sie <kbd>⌘</kbd><kbd>,</kbd> im ClipBook-Fenster drücken."
+      }
+    },
+    "history": {
+      "title": "Verlauf",
+      "updateHistoryAfterAction": {
+        "title": "Verlauf nach Einfügen/Kopieren aktualisieren",
+        "description": "Element nach Einfügen oder Kopieren an den Anfang der Verlaufsliste verschieben."
+      },
+      "pasteOnClick": {
+        "title": "Bei Klick einfügen",
+        "description": "Verlaufselement bei Mausberührung auswählen und bei Klick einfügen."
+      },
+      "doubleClick": {
+        "title": "Bei Doppelklick",
+        "description": "Aktion für Doppelklick auf Verlaufselement auswählen.",
+        "copy": "In Zwischenablage kopieren",
+        "paste": "In aktive App einfügen"
+      },
+      "numberAction": {
+        "title": "Bei Befehlstastenkombination ⌘1-9",
+        "description": "Aktion für die Befehlstastenkombination ⌘1-9 auswählen.",
+        "copy": "In Zwischenablage kopieren",
+        "paste": "In aktive App einfügen"
+      },
+      "copyAndMerge": {
+        "title": "Kopieren und zusammenführen",
+        "description": "Drücken Sie <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd>, um den aktuell ausgewählten Text an den zuvor kopierten Text im Zwischenablageverlauf anzuhängen."
+      },
+      "copyAndMergeSeparator": {
+        "title": "Trennzeichen für Kopieren und Zusammenführen",
+        "description": "Wählen Sie, wie der angehängte Text vom zuvor kopierten Text getrennt werden soll.",
+        "line": "Neue Zeile",
+        "space": "Leerzeichen"
+      },
+      "copyToClipboardAfterMerge": {
+        "title": "Zurück in die System-Zwischenablage einfügen",
+        "description": "Den zusammengeführten Text nach dem Zusammenführen automatisch in die System-Zwischenablage kopieren."
+      },
+      "treatDigitNumbersAsColor": {
+        "title": "8-stellige Zahl als Farbe behandeln",
+        "description": "8-stellige, 6-stellige, 4-stellige und 3-stellige Zahlen als Hex-Farbcode behandeln."
+      },
+      "showPreviewForLinks": {
+        "title": "Vorschau für Links anzeigen",
+        "description": "Favicon, Titel, Beschreibung und Social-Card-Bild für Links abrufen und anzeigen."
+      },
+      "warnOnClearAll": {
+        "title": "Bei Löschen des gesamten Verlaufs warnen",
+        "description": "Bestätigungsdialog anzeigen, wenn der gesamte Zwischenablageverlauf gelöscht wird."
+      },
+      "keepFavoritesOnClearAll": {
+        "title": "Favoriten beim Löschen des gesamten Verlaufs behalten",
+        "description": "Als Favoriten markierte Elemente beim Löschen des gesamten Zwischenablageverlaufs nicht entfernen."
+      },
+      "clearHistoryOnQuit": {
+        "title": "Gesamten Verlauf beim Beenden löschen",
+        "description": "Den gesamten Zwischenablageverlauf beim Beenden von ClipBook löschen."
+      },
+      "clearHistoryOnMacReboot": {
+        "title": "Gesamten Verlauf beim Mac-Neustart löschen",
+        "description": "Den gesamten Zwischenablageverlauf beim Herunterfahren/Neustarten des Mac löschen."
+      }
+    },
+    "shortcuts": {
+      "title": "Tastenkombinationen",
+      "clickToEditShortcut": "Klicken Sie, um die Tastenkombination zu bearbeiten",
+      "openApp": "ClipBook öffnen",
+      "closeApp": "ClipBook schließen",
+      "selectNextItem": "Nächstes Element auswählen",
+      "selectPreviousItem": "Vorheriges Element auswählen",
+      "pasteSelectedItemToActiveApp": "In aktive App einfügen",
+      "alternatePasteSelectedItemToActiveApp": "Alternativ in aktive App einfügen",
+      "copyToClipboard": "In Zwischenablage kopieren",
+      "alternateCopyToClipboard": "Alternativ in Zwischenablage kopieren",
+      "openInBrowser": "Im Browser öffnen",
+      "showInFinder": "Im Finder anzeigen",
+      "openInDefaultApp": "In Standard-App öffnen",
+      "addToFavorites": "Zu Favoriten hinzufügen",
+      "saveAsFile": "Als Datei speichern",
+      "editHistoryItem": "Verlaufselement bearbeiten",
+      "renameHistoryItem": "Verlaufselement umbenennen",
+      "deleteHistoryItem": "Verlaufselement löschen",
+      "deleteAllHistoryItems": "Alle Verlaufselemente löschen",
+      "showHidePreview": "Vorschau ein-/ausblenden",
+      "showHideFilter": "Filter ein-/ausblenden",
+      "showCommandMenu": "Befehlsmenü anzeigen",
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "zoomReset": "Zoom zurücksetzen",
+      "pauseResumeClipBook": "ClipBook pausieren/fortsetzen",
+      "openSettings": "Einstellungen öffnen",
+      "makeLowerCase": "Kleinbuchstaben",
+      "makeUpperCase": "Großbuchstaben",
+      "capitalizeWords": "Wörter großschreiben",
+      "sentenceCase": "Satzschreibung",
+      "removeEmptyLines": "Leere Zeilen entfernen",
+      "stripAllWhitespaces": "Alle Leerzeichen entfernen",
+      "trimSurroundingWhitespaces": "Umgebende Leerzeichen entfernen"
+    },
+    "privacy": {
+      "title": "Datenschutz",
+      "ignoreConfidentialContent": {
+        "title": "Vertrauliche Inhalte ignorieren",
+        "description": "Passwörter und andere sensible Daten, die in die Zwischenablage kopiert wurden, nicht speichern."
+      },
+      "ignoreTransientContent": {
+        "title": "Vorübergehende Inhalte ignorieren",
+        "description": "Temporär in die Zwischenablage gelegte Daten nicht speichern."
+      },
+      "ignoreApps": {
+        "title": "Anwendungen ignorieren",
+        "description": "Inhalte, die aus den folgenden Anwendungen kopiert wurden, nicht speichern."
+      }
+    },
+    "license": {
+      "title": "ClipBook-Lizenz",
+      "activated": "Aktiviert",
+      "trial": "Testversion",
+      "trialDescription": "Sie verwenden derzeit eine <span>Testversion</span> von ClipBook. Um ClipBook weiterhin nutzen zu können, kaufen Sie bitte einen Lizenzschlüssel im Online-Shop und aktivieren Sie ihn.",
+      "licenseKey": "Lizenzschlüssel",
+      "licenseKeyDescription": "Sie finden Ihren Lizenzschlüssel in der E-Mail, die Sie nach dem Kauf von ClipBook erhalten haben.",
+      "activate": "Aktivieren",
+      "buyLicense": "Lizenz kaufen",
+      "deactivate": "Deaktivieren",
+      "activationErrorMessage": {
+        "title": "Der Lizenzschlüssel kann nicht aktiviert werden :(",
+        "help": "Hilfe",
+        "close": "Schließen"
+      }
+    },
+    "about": {
+      "version": "Version {{version}} ({{arch}})",
+      "checkForUpdates": "Nach Updates suchen...",
+      "checkingForUpdates": "Suche nach Updates...",
+      "checkForUpdatesResult": {
+        "newVersionAvailable": "Neue Version verfügbar!",
+        "restartClipBookToInstallUpdate": "Starten Sie ClipBook neu, um das Update zu installieren."
+      },
+      "links": {
+        "website": "Website",
+        "support": "Support",
+        "changelog": "Änderungsprotokoll",
+        "feedback": "Feedback"
+      },
+      "copyright": "© 2025 ClipBook. Alle Rechte vorbehalten."
+    }
+  },
+  "preview": {
+    "toolbar": {
+      "openInBrowser": "Im Browser öffnen",
+      "copyTextFromImage": "Text aus Bild kopieren",
+      "selectedItems": "{{count}} Elemente",
+      "items": "{{count}} Elemente",
+      "pasteTo": "{{indicator}} in {{appName}} einfügen",
+      "pasteToWithReturn": "{{indicator}} mit Return in {{appName}} einfügen",
+      "pasteToWithTab": "{{indicator}} mit Tab in {{appName}} einfügen",
+      "mergeItems": "{{count}} Elemente zusammenführen",
+      "copyToClipboard": "In Zwischenablage kopieren",
+      "removeFromFavorites": "Aus Favoriten entfernen",
+      "addToFavorites": "Zu Favoriten hinzufügen",
+      "hideDetails": "Details ausblenden",
+      "showDetails": "Details anzeigen",
+      "hidePreviewPanel": "Vorschaubereich ausblenden"
+    },
+    "toolbarMenu": {
+      "formatText": "Text formatieren",
+      "makeLowerCase": "Kleinbuchstaben",
+      "makeUpperCase": "Großbuchstaben",
+      "capitalizeWords": "Wörter großschreiben",
+      "sentenceCase": "Satzschreibung",
+      "removeEmptyLines": "Leere Zeilen entfernen",
+      "stripAllWhitespaces": "Alle Leerzeichen entfernen",
+      "trimSurroundingWhitespaces": "Umgebende Leerzeichen entfernen",
+      "editContent": "Inhalt bearbeiten...",
+      "rename": "Umbenennen...",
+      "preview": "Vorschau",
+      "update": "Aktualisieren",
+      "saveAsFile": "Als Datei speichern...",
+      "delete": "{{indicator}} löschen"
+    }
+  },
+  "searchBar": {
+    "trial": "Testversion ",
+    "expired": " abgelaufen",
+    "trialEnded": "Testversion beendet",
+    "trialEndsTomorrow": "Testversion endet morgen",
+    "trialDaysLeft": "{{count}} Tage übrig",
+    "trialDayLeft": "{{count}} Tag übrig",
+    "trialExpired": "Testversion abgelaufen",
+    "hideFilterOptions": "Filteroptionen ausblenden",
+    "showFilterOptions": "Filteroptionen anzeigen",
+    "trialWillExpireIn": "Testversion läuft in {{count}} Tagen ab",
+    "typeToSearch": "Tippen Sie zum Suchen...",
+    "clearSearch": "Suche löschen",
+    "hideWhenNotFocused": "Ausblenden, wenn nicht fokussiert",
+    "alwaysDisplay": "Immer anzeigen",
+    "showPreview": "Vorschau anzeigen"
+  },
+  "sortMenu": {
+    "lastCopyTime": "Letzte Kopierzeit",
+    "firstCopyTime": "Erste Kopierzeit",
+    "numberOfCopies": "Anzahl der Kopien",
+    "size": "Größe",
+    "reverseOrder": "Reihenfolge umkehren"
+  },
+  "statusBar": {
+    "hideNotification": "Benachrichtigung ausblenden",
+    "updateClipBook": "ClipBook aktualisieren",
+    "newVersionAvailable": "Neue Version verfügbar",
+    "clickToInstallUpdate": "Klicken Sie, um das Update zu installieren",
+    "navigate": "Navigieren",
+    "pasteTo": "In {{appName}} einfügen"
+  },
+  "tagDialog": {
+    "editTag": "Tag bearbeiten",
+    "newTag": "Neuer Tag",
+    "tagName": "Tagname",
+    "save": "Speichern",
+    "create": "Erstellen",
+    "cancel": "Abbrechen"
+  },
+  "trial": {
+    "expiredDialog": {
+      "showDialog": "Dialog anzeigen",
+      "title": "Ihre Testversion ist abgelaufen :(",
+      "description": "Ich hoffe, Sie hatten Spaß mit ClipBook. Wenn es Ihnen gefällt, erwägen Sie bitte, die Entwicklung durch den Kauf einer Lizenz zu unterstützen.",
+      "feedback": "Wenn es Ihnen nicht gefällt, lassen Sie mich wissen, warum.",
+      "missingFeatures": "Fehlende Funktionen",
+      "dontNeedItRightNow": "Brauche es jetzt nicht",
+      "wasntUsefulForMe": "War für mich nicht nützlich",
+      "other": "Anderes (bitte angeben)",
+      "emailForResponse": "E-Mail für Antwort (optional)",
+      "yourFeedback": "Ihr Feedback",
+      "founder": "Gründer von ClipBook",
+      "sendFeedback": "Feedback senden",
+      "activateLicense": "Lizenz aktivieren",
+      "buyLicense": "Lizenz kaufen"
+    }
+  },
+  "commands": {
+    "items": " Elemente",
+    "showMoreActions": "Weitere Aktionen anzeigen",
+    "noResultsFound": "Keine Ergebnisse gefunden.",
+    "typeCommandOrSearch": "Befehl eingeben oder suchen...",
+    "pasteItemToApp": "{{itemLabel}} {{itemsLabel}} in {{appName}} einfügen",
+    "pasteItemToAppWithFormatting": "{{itemLabel}} mit Formatierung in {{appName}} einfügen...",
+    "pasteItemsToApp": "{{itemsLabel}} in {{appName}} einfügen",
+    "pasteItemsToAppWithReturn": "{{itemsLabel}} mit Return in {{appName}} einfügen",
+    "pasteItemsToAppWithTab": "{{itemsLabel}} mit Tab in {{appName}} einfügen",
+    "pastePathToApp": "Pfad in {{appName}} einfügen",
+    "mergeItems": "{{itemsLabel}} zusammenführen",
+    "copyItemToClipboard": "{{itemLabel}} in Zwischenablage kopieren",
+    "copyObjectToClipboard": "In Zwischenablage kopieren",
+    "copyPathToClipboard": "Pfad in Zwischenablage kopieren",
+    "showInHistory": "Im Verlauf anzeigen",
+    "copyTextFromImage": "Text aus Bild kopieren",
+    "saveImageAsFile": "Als Datei speichern...",
+    "editContent": "Inhalt bearbeiten...",
+    "addToFavorites": "{{itemsLabel}} zu Favoriten hinzufügen",
+    "removeFromFavorites": "{{itemsLabel}} aus Favoriten entfernen",
+    "previewLink": "Link-Vorschau",
+    "renameItem": "Umbenennen...",
+    "formatText": "Text formatieren...",
+    "split": "Teilen",
+    "quickLook": "Schnellvorschau",
+    "showInFinder": "Im Finder anzeigen",
+    "openInApp": "In {{appName}} öffnen",
+    "openWith": "Öffnen mit...",
+    "hidePreview": "Vorschau ausblenden",
+    "showPreview": "Vorschau anzeigen",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "resetZoom": "Zoom zurücksetzen",
+    "settings": "Einstellungen...",
+    "deleteItem": "Löschen",
+    "deleteItems": "{{itemsLabel}} löschen",
+    "deleteAllItems": "Alle löschen"
+  },
+  "formatText": {
+    "makeLowerCase": "Kleinbuchstaben",
+    "makeUpperCase": "Großbuchstaben",
+    "capitalizeWords": "Wörter großschreiben",
+    "sentenceCase": "Satzschreibung",
+    "removeEmptyLines": "Leere Zeilen entfernen",
+    "stripAllWhitespaces": "Alle Leerzeichen entfernen",
+    "trimSurroundingWhitespaces": "Umgebende Leerzeichen entfernen"
+  },
+  "historyItemContextMenu": {
+    "pasteItemToApp": "{{itemLabel}} in {{appName}} einfügen",
+    "pastePathToApp": "Pfad in {{appName}} einfügen",
+    "copyItemToClipboard": "{{itemLabel}} in Zwischenablage kopieren",
+    "copyPathToClipboard": "Pfad in Zwischenablage kopieren",
+    "openInBrowser": "Im Browser öffnen",
+    "editContent": "Inhalt bearbeiten...",
+    "copyTextFromImage": "Text aus Bild kopieren",
+    "addToFavorites": "Zu Favoriten hinzufügen",
+    "removeFromFavorites": "Aus Favoriten entfernen",
+    "renameItem": "Umbenennen...",
+    "quickLook": "Schnellvorschau",
+    "formatText": "Text formatieren...",
+    "tags": "Tags...",
+    "newTag": "Neuer Tag...",
+    "preview": "Vorschau",
+    "showInFinder": "Im Finder anzeigen",
+    "openInApp": "In {{appName}} öffnen",
+    "openWith": "Öffnen mit...",
+    "showInHistory": "Im Verlauf anzeigen",
+    "deleteItem": "Löschen"
+  },
+  "app": {
+    "sidebar": {
+      "all": "Alle",
+      "favorites": "Favoriten",
+      "text": "Text",
+      "image": "Bilder",
+      "link": "Links",
+      "file": "Dateien",
+      "color": "Farben",
+      "email": "E-Mails",
+      "newtag": "Neuer Tag",
+      "showapps": "Apps anzeigen",
+      "hideapps": "Apps ausblenden",
+      "tag": {
+        "contextMenu": {
+          "edit": "Bearbeiten...",
+          "delete": "Löschen"
+        }
+      }
+    },
+    "history": {
+      "renamePlaceholder": "Geben Sie einen Namen für dieses Element ein",
+      "noItems": "Keine Elemente",
+      "noResults": "Keine Ergebnisse"
+    },
+    "itemInfoPane": {
+      "link": "Link",
+      "color": "Farbe",
+      "email": "E-Mail",
+      "image": "Bild",
+      "file": "Datei",
+      "folder": "Ordner",
+      "text": "Text",
+      "html": "HTML",
+      "rtf": "RTF",
+      "unknown": "Unbekannt",
+      "application": "Anwendung",
+      "types": "Typen",
+      "type": "Typ",
+      "tags": "Tags",
+      "url": "URL",
+      "path": "Pfad",
+      "fileSize": "Dateigröße",
+      "imageDimensions": "Bildabmessungen",
+      "imageSize": "Bildgröße",
+      "numberOfCopies": "Anzahl der Kopien",
+      "firstCopyTime": "Erste Kopierzeit",
+      "lastCopyTime": "Letzte Kopierzeit",
+      "copyTime": "Kopierzeit",
+      "bytes": "Bytes",
+      "kb": " KB",
+      "mb": " MB"
+    },
+    "itemsInfoPane": {
+      "text": "Text",
+      "texts": "Texte",
+      "image": "Bild",
+      "images": "Bilder",
+      "link": "Link",
+      "links": "Links",
+      "color": "Farbe",
+      "colors": "Farben",
+      "email": "E-Mail",
+      "emails": "E-Mails",
+      "file": "Datei",
+      "files": "Dateien",
+      "items": "Elemente",
+      "copyTime": "Kopierzeit"
+    },
+    "openWithCommands": {
+      "searchPlaceholder": "Suchen...",
+      "default": "Standard",
+      "recommended": "Empfohlen",
+      "other": "Andere",
+      "noResults": "Keine Ergebnisse gefunden."
+    },
+    "pasteTransformationCommands": {
+      "searchPlaceholder": "Befehl eingeben oder suchen...",
+      "formatTextWhenPasting": "Text beim Einfügen formatieren",
+      "makeLowerCase": "Kleinbuchstaben",
+      "makeUpperCase": "Großbuchstaben",
+      "capitalizeWords": "Wörter großschreiben",
+      "sentenceCase": "Satzschreibung",
+      "removeEmptyLines": "Leere Zeilen entfernen",
+      "stripAllWhitespaces": "Alle Leerzeichen entfernen",
+      "trimSurroundingWhitespaces": "Umgebende Leerzeichen entfernen",
+      "noResults": "Keine Ergebnisse gefunden."
+    },
+    "previewLinkCard": {
+      "loadingPreview": "Lade Vorschau...",
+      "noTitle": "Kein Titel",
+      "noDescription": "Keine Beschreibung"
+    }
+  }
 }

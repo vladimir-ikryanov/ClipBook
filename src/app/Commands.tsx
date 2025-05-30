@@ -486,7 +486,7 @@ export default function Commands(props: CommandsProps) {
   function getMultipleItemsIndicator(): string {
     let indices = getSelectedHistoryItemIndices().length
     if (indices > 1) {
-      return indices + " Items"
+      return indices + t('commands.items')
     }
     return ""
   }

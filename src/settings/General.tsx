@@ -38,6 +38,7 @@ import {getLanguageByCode, LanguageCode} from "@/data";
 import { useTranslation } from 'react-i18next';
 import i18n from "i18next";
 import { Trans } from 'react-i18next';
+import {emitter} from "@/actions";
 
 declare const closeSettingsWindow: () => void;
 declare const checkForUpdates: () => void;

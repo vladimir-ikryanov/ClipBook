@@ -39,7 +39,7 @@ import {
   setFilterVisibleState,
   getDetailsVisibleState,
   setDetailsVisibleState,
-  getFilterQuery, isFilterActive, resetFilter, setShouldUpdateHistory, fileExists
+  getFilterQuery, isFilterActive, resetFilter, setShouldUpdateHistory, fileExists, LanguageCode
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {

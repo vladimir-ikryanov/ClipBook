@@ -319,6 +319,7 @@
     }
   },
   "commands": {
+    "items": " Items",
     "showMoreActions": "Show more actions",
     "noResultsFound": "No results found.",
     "typeCommandOrSearch": "Type a command or search...",
