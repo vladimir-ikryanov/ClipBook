@@ -1,486 +1,486 @@
 {
   "welcome": {
-    "title": "Welcome to ClipBook",
-    "description": "ClipBook stores everything you copy and lets you quickly access your clipboard history whenever you need it.",
-    "getStarted": "Get Started"
+    "title": "Bem-vindo ao ClipBook",
+    "description": "O ClipBook armazena tudo o que você copia e permite acessar rapidamente o histórico da área de transferência sempre que precisar.",
+    "getStarted": "Começar"
   },
   "accessibility": {
-    "title": "Enable Accessibility Access",
-    "description": "To paste directly to other applications, allow ClipBook to access the accessibility features of your Mac in System Settings.",
-    "readMore": "accessibility features",
-    "doLater": "I'll Do It Later",
-    "allowAccess": "Allow Access"
+    "title": "Ativar Acesso à Acessibilidade",
+    "description": "Para colar diretamente em outros aplicativos, permita que o ClipBook acesse os recursos de acessibilidade do seu Mac nas Configurações do Sistema.",
+    "readMore": "recursos de acessibilidade",
+    "doLater": "Farei Isso Depois",
+    "allowAccess": "Permitir Acesso"
   },
   "enjoy": {
-    "ready": "ClipBook is Ready",
-    "description": "ClipBook is running in the background. You can access your clipboard history using the <strong>⇧Shift + ⌘Cmd + V</strong> global shortcut, or by clicking the ClipBook icon in the menu bar and selecting <strong>Open ClipBook</strong>.",
-    "openClipBook": "Open ClipBook"
+    "ready": "ClipBook Pronto",
+    "description": "O ClipBook está rodando em segundo plano. Você pode acessar o histórico da área de transferência usando o atalho global <strong>⇧Shift + ⌘Cmd + V</strong>, ou clicando no ícone do ClipBook na barra de menu e selecionando <strong>Abrir ClipBook</strong>.",
+    "openClipBook": "Abrir ClipBook"
   },
   "settings": {
     "sidebar": {
-      "general": "General",
-      "history": "History",
-      "shortcuts": "Shortcuts",
-      "privacy": "Privacy",
-      "license": "License",
-      "about": "About",
-      "managedByOrganization": "Some settings are managed by your organization."
+      "general": "Geral",
+      "history": "Histórico",
+      "shortcuts": "Atalhos",
+      "privacy": "Privacidade",
+      "license": "Licença",
+      "about": "Sobre",
+      "managedByOrganization": "Algumas configurações são gerenciadas pela sua organização."
     },
     "general": {
-      "title": "General",
+      "title": "Geral",
       "launchAtLogin": {
-        "title": "Launch at login",
-        "description": "Launch ClipBook automatically at login."
+        "title": "Iniciar ao fazer login",
+        "description": "Iniciar o ClipBook automaticamente ao fazer login."
       },
       "automaticUpdates": {
-        "title": "Automatic updates",
-        "description": "Download and install new updates when available.",
-        "checkForUpdates": "Check for Updates...",
-        "checkingForUpdates": "Checking for updates..."
+        "title": "Atualizações automáticas",
+        "description": "Baixe e instale novas atualizações quando disponíveis.",
+        "checkForUpdates": "Procurar Atualizações...",
+        "checkingForUpdates": "Procurando atualizações..."
       },
       "appearance": {
-        "title": "Appearance",
-        "description": "Change how ClipBook looks on your device.",
+        "title": "Aparência",
+        "description": "Altere como o ClipBook aparece no seu dispositivo.",
         "themes": {
-          "light": "Light",
-          "dark": "Dark",
-          "system": "System"
+          "light": "Claro",
+          "dark": "Escuro",
+          "system": "Sistema"
         }
       },
       "language": {
-        "title": "Language",
-        "description": "Change the language used in the user interface."
+        "title": "Idioma",
+        "description": "Altere o idioma usado na interface do usuário."
       },
       "openWindow": {
-        "title": "Open window at",
-        "description": "Select where the ClipBook window should be opened if it's possible.",
+        "title": "Abrir janela em",
+        "description": "Selecione onde a janela do ClipBook deve ser aberta, se possível.",
         "strategies": {
-          "lastLocation": "Last location on active screen",
-          "activeScreenCenter": "Center of the active screen",
-          "activeWindowCenter": "Center of the active window",
-          "screenWithCursor": "Screen with mouse pointer",
-          "mouseCursor": "Mouse pointer location",
-          "inputCursor": "Text caret location"
+          "lastLocation": "Última localização na tela ativa",
+          "activeScreenCenter": "Centro da tela ativa",
+          "activeWindowCenter": "Centro da janela ativa",
+          "screenWithCursor": "Tela com ponteiro do mouse",
+          "mouseCursor": "Localização do ponteiro do mouse",
+          "inputCursor": "Localização do cursor de texto"
         },
         "descriptions": {
-          "lastLocation": "ClipBook window remembers its position on each screen and opens at<br/>the last position on the active screen.",
-          "activeScreenCenter": "Open at the center of the active screen.",
-          "activeWindowCenter": "Open at the center of the active window. If there is no active window,<br/>then open at the center of the active screen.",
-          "screenWithCursor": "Open at the center of the screen where the mouse pointer is located.",
-          "mouseCursor": "Open near the mouse pointer location.",
-          "inputCursor": "Open near the current text caret location. If the caret location cannot<br/>be determined, then open at the center of the active window."
+          "lastLocation": "A janela do ClipBook lembra sua posição em cada tela e abre na<br/>última posição da tela ativa.",
+          "activeScreenCenter": "Abrir no centro da tela ativa.",
+          "activeWindowCenter": "Abrir no centro da janela ativa. Se não houver janela ativa,<br/>abrir no centro da tela ativa.",
+          "screenWithCursor": "Abrir no centro da tela onde o ponteiro do mouse está localizado.",
+          "mouseCursor": "Abrir próximo à localização do ponteiro do mouse.",
+          "inputCursor": "Abrir próximo à localização atual do cursor de texto. Se a localização do cursor não puder<br/>ser determinada, abrir no centro da janela ativa."
         }
       },
       "playSound": {
-        "title": "Play sound",
-        "description": "Play a sound when an item is added to the history."
+        "title": "Reproduzir som",
+        "description": "Reproduzir um som quando um item for adicionado ao histórico."
       },
       "showIcon": {
-        "title": "Show icon in menu bar",
-        "description": "Display the ClipBook app icon in the menu bar.",
-        "hint": "You can always open <strong>Settings</strong> by pressing <kbd>⌘</kbd><kbd>,</kbd> inside the ClipBook window."
+        "title": "Mostrar ícone na barra de menu",
+        "description": "Exibir o ícone do aplicativo ClipBook na barra de menu.",
+        "hint": "Você sempre pode abrir as <strong>Configurações</strong> pressionando <kbd>⌘</kbd><kbd>,</kbd> dentro da janela do ClipBook."
       }
     },
     "history": {
-      "title": "History",
+      "title": "Histórico",
       "updateHistoryAfterAction": {
-        "title": "Update history after paste/copy",
-        "description": "Move the item to the top of the history list after paste or copy action."
+        "title": "Atualizar histórico após colar/copiar",
+        "description": "Mover o item para o topo da lista de histórico após a ação de colar ou copiar."
       },
       "pasteOnClick": {
-        "title": "Paste on click",
-        "description": "Select history item on mouse over and paste on click."
+        "title": "Colar ao clicar",
+        "description": "Selecionar item do histórico ao passar o mouse e colar ao clicar."
       },
       "doubleClick": {
-        "title": "On double click",
-        "description": "Select action for double click on history item.",
-        "copy": "Copy to clipboard",
-        "paste": "Paste to active app"
+        "title": "Ao duplo clique",
+        "description": "Selecione a ação para duplo clique no item do histórico.",
+        "copy": "Copiar para a área de transferência",
+        "paste": "Colar no app ativo"
       },
       "numberAction": {
-        "title": "On command number shortcut ⌘1-9",
-        "description": "Select action for the command number shortcut ⌘1-9.",
-        "copy": "Copy to clipboard",
-        "paste": "Paste to active app"
+        "title": "No atalho numérico ⌘1-9",
+        "description": "Selecione a ação para o atalho numérico ⌘1-9.",
+        "copy": "Copiar para a área de transferência",
+        "paste": "Colar no app ativo"
       },
       "copyAndMerge": {
-        "title": "Copy and merge",
-        "description": "Press <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd> to append the currently selected text to the previously copied text in the clipboard history."
+        "title": "Copiar e mesclar",
+        "description": "Pressione <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd> para adicionar o texto atualmente selecionado ao texto previamente copiado no histórico da área de transferência."
       },
       "copyAndMergeSeparator": {
-        "title": "Copy and merge separator",
-        "description": "Select how the appended text should be separated from the previously copied text.",
-        "line": "New line",
-        "space": "Space"
+        "title": "Separador de copiar e mesclar",
+        "description": "Selecione como o texto adicionado deve ser separado do texto previamente copiado.",
+        "line": "Nova linha",
+        "space": "Espaço"
       },
       "copyToClipboardAfterMerge": {
-        "title": "Paste back to system clipboard",
-        "description": "Automatically copy the merged text to the system clipboard after merging."
+        "title": "Colar novamente na área de transferência do sistema",
+        "description": "Copiar automaticamente o texto mesclado para a área de transferência do sistema após a mesclagem."
       },
       "treatDigitNumbersAsColor": {
-        "title": "Treat 8-digit number as a color",
-        "description": "Treat 8-digit, 6-digit, 4-digit, and 3-digit numbers as a hex color code."
+        "title": "Tratar número de 8 dígitos como cor",
+        "description": "Tratar números de 8, 6, 4 e 3 dígitos como código de cor hexadecimal."
       },
       "showPreviewForLinks": {
-        "title": "Show preview for links",
-        "description": "Fetch and display a favicon, title, description, and social card image for links."
+        "title": "Mostrar prévia para links",
+        "description": "Buscar e exibir favicon, título, descrição e imagem social para links."
       },
       "warnOnClearAll": {
-        "title": "Warn when clearing entire history",
-        "description": "Display a confirmation dialog when clearing entire clipboard history."
+        "title": "Avisar ao limpar todo o histórico",
+        "description": "Exibir uma caixa de confirmação ao limpar todo o histórico da área de transferência."
       },
       "keepFavoritesOnClearAll": {
-        "title": "Keep favorites when clearing entire history",
-        "description": "Do not remove items market as favorite when clearing entire clipboard history."
+        "title": "Manter favoritos ao limpar todo o histórico",
+        "description": "Não remover itens marcados como favoritos ao limpar todo o histórico da área de transferência."
       },
       "clearHistoryOnQuit": {
-        "title": "Clear entire history on quit",
-        "description": "Clear the entire clipboard history when ClipBook is terminated."
+        "title": "Limpar todo o histórico ao sair",
+        "description": "Limpar todo o histórico da área de transferência ao encerrar o ClipBook."
       },
       "clearHistoryOnMacReboot": {
-        "title": "Clear entire history on Mac shutdown/restart",
-        "description": "Clear the entire clipboard history on Mac shutdown/restart."
+        "title": "Limpar todo o histórico ao desligar/reiniciar o Mac",
+        "description": "Limpar todo o histórico da área de transferência ao desligar/reiniciar o Mac."
       }
     },
     "shortcuts": {
-      "title": "Shortcuts",
-      "clickToEditShortcut": "Click to edit shortcut",
-      "openApp": "Open ClipBook",
-      "closeApp": "Close ClipBook",
-      "selectNextItem": "Select next item",
-      "selectPreviousItem": "Select previous item",
-      "pasteSelectedItemToActiveApp": "Paste to active app",
-      "alternatePasteSelectedItemToActiveApp": "Alternate paste to active app",
-      "copyToClipboard": "Copy to Clipboard",
-      "alternateCopyToClipboard": "Alternative copy to Clipboard",
-      "openInBrowser": "Open in Browser",
-      "showInFinder": "Show in Finder",
-      "openInDefaultApp": "Open in default app",
-      "addToFavorites": "Add to favorites",
-      "saveAsFile": "Save as file",
-      "editHistoryItem": "Edit history item",
-      "renameHistoryItem": "Rename history item",
-      "deleteHistoryItem": "Delete history item",
-      "deleteAllHistoryItems": "Delete all history items",
-      "showHidePreview": "Show/hide preview",
-      "showHideFilter": "Show/hide filter",
-      "showCommandMenu": "Show Command Menu",
-      "zoomIn": "Zoom In",
-      "zoomOut": "Zoom Out",
-      "zoomReset": "Reset Zoom",
-      "pauseResumeClipBook": "Pause/resume ClipBook",
-      "openSettings": "Open Settings",
-      "makeLowerCase": "Make lower case",
-      "makeUpperCase": "Make upper case",
-      "capitalizeWords": "Capitalize words",
-      "sentenceCase": "Sentence case",
-      "removeEmptyLines": "Remove empty lines",
-      "stripAllWhitespaces": "Strip all whitespaces",
-      "trimSurroundingWhitespaces": "Trim surrounding whitespaces"
+      "title": "Atalhos",
+      "clickToEditShortcut": "Clique para editar o atalho",
+      "openApp": "Abrir ClipBook",
+      "closeApp": "Fechar ClipBook",
+      "selectNextItem": "Selecionar próximo item",
+      "selectPreviousItem": "Selecionar item anterior",
+      "pasteSelectedItemToActiveApp": "Colar no app ativo",
+      "alternatePasteSelectedItemToActiveApp": "Colar alternadamente no app ativo",
+      "copyToClipboard": "Copiar para a Área de Transferência",
+      "alternateCopyToClipboard": "Copiar alternadamente para a Área de Transferência",
+      "openInBrowser": "Abrir no Navegador",
+      "showInFinder": "Mostrar no Finder",
+      "openInDefaultApp": "Abrir no app padrão",
+      "addToFavorites": "Adicionar aos favoritos",
+      "saveAsFile": "Salvar como arquivo",
+      "editHistoryItem": "Editar item do histórico",
+      "renameHistoryItem": "Renomear item do histórico",
+      "deleteHistoryItem": "Excluir item do histórico",
+      "deleteAllHistoryItems": "Excluir todos os itens do histórico",
+      "showHidePreview": "Mostrar/ocultar prévia",
+      "showHideFilter": "Mostrar/ocultar filtro",
+      "showCommandMenu": "Mostrar Menu de Comandos",
+      "zoomIn": "Aumentar Zoom",
+      "zoomOut": "Diminuir Zoom",
+      "zoomReset": "Redefinir Zoom",
+      "pauseResumeClipBook": "Pausar/retomar ClipBook",
+      "openSettings": "Abrir Configurações",
+      "makeLowerCase": "Converter para minúsculas",
+      "makeUpperCase": "Converter para maiúsculas",
+      "capitalizeWords": "Capitalizar palavras",
+      "sentenceCase": "Primeira letra maiúscula",
+      "removeEmptyLines": "Remover linhas vazias",
+      "stripAllWhitespaces": "Remover todos os espaços",
+      "trimSurroundingWhitespaces": "Remover espaços ao redor"
     },
     "privacy": {
-      "title": "Privacy",
+      "title": "Privacidade",
       "ignoreConfidentialContent": {
-        "title": "Ignore confidential content",
-        "description": "Do not save passwords and other sensitive data copied to the clipboard."
+        "title": "Ignorar conteúdo confidencial",
+        "description": "Não salvar senhas e outros dados sensíveis copiados para a área de transferência."
       },
       "ignoreTransientContent": {
-        "title": "Ignore transient content",
-        "description": "Do not save data temporarily placed to the clipboard."
+        "title": "Ignorar conteúdo temporário",
+        "description": "Não salvar dados temporários colocados na área de transferência."
       },
       "ignoreApps": {
-        "title": "Ignore applications",
-        "description": "Do not save content copied from the following applications."
+        "title": "Ignorar aplicativos",
+        "description": "Não salvar conteúdo copiado dos seguintes aplicativos."
       }
     },
     "license": {
-      "title": "ClipBook License",
-      "activated": "Activated",
-      "trial": "Trial",
-      "trialDescription": "You are currently using a <span>trial version</span> of ClipBook. To continue using ClipBook, please purchase a license key from online store and activate it.",
-      "licenseKey": "License key",
-      "licenseKeyDescription": "You can find your license key in the email you received after purchasing ClipBook.",
-      "activate": "Activate",
-      "buyLicense": "Buy License",
-      "deactivate": "Deactivate",
+      "title": "Licença do ClipBook",
+      "activated": "Ativada",
+      "trial": "Versão de avaliação",
+      "trialDescription": "Você está usando uma <span>versão de avaliação</span> do ClipBook. Para continuar usando o ClipBook, compre uma chave de licença na loja online e ative-a.",
+      "licenseKey": "Chave de licença",
+      "licenseKeyDescription": "Você pode encontrar sua chave de licença no e-mail recebido após a compra do ClipBook.",
+      "activate": "Ativar",
+      "buyLicense": "Comprar Licença",
+      "deactivate": "Desativar",
       "activationErrorMessage": {
-        "title": "The license key cannot be activated :(",
-        "help": "Help me",
-        "close": "Close"
+        "title": "A chave de licença não pode ser ativada :(",
+        "help": "Ajude-me",
+        "close": "Fechar"
       }
     },
     "about": {
-      "version": "Version {{version}} ({{arch}})",
-      "checkForUpdates": "Check for Updates...",
-      "checkingForUpdates": "Checking for updates...",
+      "version": "Versão {{version}} ({{arch}})",
+      "checkForUpdates": "Procurar Atualizações...",
+      "checkingForUpdates": "Procurando atualizações...",
       "checkForUpdatesResult": {
-        "newVersionAvailable": "New version available!",
-        "restartClipBookToInstallUpdate": "Restart ClipBook to install the update."
+        "newVersionAvailable": "Nova versão disponível!",
+        "restartClipBookToInstallUpdate": "Reinicie o ClipBook para instalar a atualização."
       },
       "links": {
-        "website": "Website",
-        "support": "Support",
-        "changelog": "Changelog",
+        "website": "Site",
+        "support": "Suporte",
+        "changelog": "Registro de alterações",
         "feedback": "Feedback"
       },
-      "copyright": "© 2025 ClipBook. All rights reserved."
+      "copyright": "© 2025 ClipBook. Todos os direitos reservados."
     }
   },
   "preview": {
     "toolbar": {
-      "openInBrowser": "Open in Browser",
-      "copyTextFromImage": "Copy Text from Image",
-      "selectedItems": "{{count}} items",
-      "items": "{{count}} Items",
-      "pasteTo": "Paste {{indicator}} to {{appName}}",
-      "pasteToWithReturn": "Paste {{indicator}} to {{appName}} with Return",
-      "pasteToWithTab": "Paste {{indicator}} to {{appName}} with Tab",
-      "mergeItems": "Merge {{count}} items",
-      "copyToClipboard": "Copy to Clipboard",
-      "removeFromFavorites": "Remove from favorites",
-      "addToFavorites": "Add to favorites",
-      "hideDetails": "Hide details",
-      "showDetails": "Show details",
-      "hidePreviewPanel": "Hide preview panel"
+      "openInBrowser": "Abrir no Navegador",
+      "copyTextFromImage": "Copiar Texto da Imagem",
+      "selectedItems": "{{count}} itens",
+      "items": "{{count}} Itens",
+      "pasteTo": "Colar {{indicator}} em {{appName}}",
+      "pasteToWithReturn": "Colar {{indicator}} em {{appName}} com Enter",
+      "pasteToWithTab": "Colar {{indicator}} em {{appName}} com Tab",
+      "mergeItems": "Mesclar {{count}} itens",
+      "copyToClipboard": "Copiar para a Área de Transferência",
+      "removeFromFavorites": "Remover dos favoritos",
+      "addToFavorites": "Adicionar aos favoritos",
+      "hideDetails": "Ocultar detalhes",
+      "showDetails": "Mostrar detalhes",
+      "hidePreviewPanel": "Ocultar painel de prévia"
     },
     "toolbarMenu": {
-      "formatText": "Format Text",
-      "makeLowerCase": "make lower case",
-      "makeUpperCase": "MAKE UPPER CASE",
-      "capitalizeWords": "Capitalize Words",
-      "sentenceCase": "Sentence case",
-      "removeEmptyLines": "Remove empty lines",
-      "stripAllWhitespaces": "Strip all whitespaces",
-      "trimSurroundingWhitespaces": "Trim surrounding whitespaces",
-      "editContent": "Edit Content...",
-      "rename": "Rename...",
-      "preview": "Preview",
-      "update": "Update",
-      "saveAsFile": "Save as File...",
-      "delete": "Delete {{indicator}}"
+      "formatText": "Formatar Texto",
+      "makeLowerCase": "converter para minúsculas",
+      "makeUpperCase": "CONVERTER PARA MAIÚSCULAS",
+      "capitalizeWords": "Capitalizar Palavras",
+      "sentenceCase": "Primeira letra maiúscula",
+      "removeEmptyLines": "Remover linhas vazias",
+      "stripAllWhitespaces": "RemoverTodosOsEspaços",
+      "trimSurroundingWhitespaces": "Remover Espaços ao Redor",
+      "editContent": "Editar Conteúdo...",
+      "rename": "Renomear...",
+      "preview": "Prévia",
+      "update": "Atualizar",
+      "saveAsFile": "Salvar como Arquivo...",
+      "delete": "Excluir {{indicator}}"
     }
   },
   "searchBar": {
-    "trial": "Trial ",
-    "expired": " expired",
-    "trialEnded": "Trial ended",
-    "trialEndsTomorrow": "Trial ends tomorrow",
-    "trialDaysLeft": "{{count}} days left",
-    "trialDayLeft": "{{count}} day left",
-    "trialExpired": "Trial expired",
-    "hideFilterOptions": "Hide filter options",
-    "showFilterOptions": "Show filter options",
-    "trialWillExpireIn": "Trial will expire in {{count}} days",
-    "typeToSearch": "Type to search...",
-    "clearSearch": "Clear search",
-    "hideWhenNotFocused": "Hide when not focused",
-    "alwaysDisplay": "Always display",
-    "showPreview": "Show preview"
+    "trial": "Versão de avaliação ",
+    "expired": " expirada",
+    "trialEnded": "Versão de avaliação encerrada",
+    "trialEndsTomorrow": "A versão de avaliação termina amanhã",
+    "trialDaysLeft": "{{count}} dias restantes",
+    "trialDayLeft": "{{count}} dia restante",
+    "trialExpired": "Versão de avaliação expirada",
+    "hideFilterOptions": "Ocultar opções de filtro",
+    "showFilterOptions": "Mostrar opções de filtro",
+    "trialWillExpireIn": "A versão de avaliação expirará em {{count}} dias",
+    "typeToSearch": "Digite para pesquisar...",
+    "clearSearch": "Limpar pesquisa",
+    "hideWhenNotFocused": "Ocultar quando não estiver em foco",
+    "alwaysDisplay": "Sempre exibir",
+    "showPreview": "Mostrar prévia"
   },
   "sortMenu": {
-    "lastCopyTime": "Last Copy Time",
-    "firstCopyTime": "First Copy Time",
-    "numberOfCopies": "Number of Copies",
-    "size": "Size",
-    "reverseOrder": "Reverse Order"
+    "lastCopyTime": "Última Cópia",
+    "firstCopyTime": "Primeira Cópia",
+    "numberOfCopies": "Número de Cópias",
+    "size": "Tamanho",
+    "reverseOrder": "Ordem Reversa"
   },
   "statusBar": {
-    "hideNotification": "Hide notification",
-    "updateClipBook": "Update ClipBook",
-    "newVersionAvailable": "New version available",
-    "clickToInstallUpdate": "Click to install the update",
-    "navigate": "Navigate",
-    "pasteTo": "Paste to {{appName}}"
+    "hideNotification": "Ocultar notificação",
+    "updateClipBook": "Atualizar ClipBook",
+    "newVersionAvailable": "Nova versão disponível",
+    "clickToInstallUpdate": "Clique para instalar a atualização",
+    "navigate": "Navegar",
+    "pasteTo": "Colar em {{appName}}"
   },
   "tagDialog": {
-    "editTag": "Edit tag",
-    "newTag": "New tag",
-    "tagName": "Tag name",
-    "save": "Save",
-    "create": "Create",
-    "cancel": "Cancel"
+    "editTag": "Editar tag",
+    "newTag": "Nova tag",
+    "tagName": "Nome da tag",
+    "save": "Salvar",
+    "create": "Criar",
+    "cancel": "Cancelar"
   },
   "trial": {
     "expiredDialog": {
-      "showDialog": "Show Dialog",
-      "title": "Your trial has ended :(",
-      "description": "I hope you enjoyed using ClipBook. If you like it, please consider supporting the development by purchasing a license.",
-      "feedback": "If you don't like it, please let me know why.",
-      "missingFeatures": "Missing features",
-      "dontNeedItRightNow": "Don't need it right now",
-      "wasntUsefulForMe": "Wasn't useful for me",
-      "other": "Other (please specify)",
-      "emailForResponse": "Email for response (optional)",
-      "yourFeedback": "Your feedback",
-      "founder": "Founder of ClipBook",
-      "sendFeedback": "Send Feedback",
-      "activateLicense": "Activate License",
-      "buyLicense": "Buy License"
+      "showDialog": "Mostrar Diálogo",
+      "title": "Sua versão de avaliação terminou :(",
+      "description": "Espero que você tenha gostado de usar o ClipBook. Se gostou, considere apoiar o desenvolvimento adquirindo uma licença.",
+      "feedback": "Se não gostou, por favor me diga o motivo.",
+      "missingFeatures": "Recursos ausentes",
+      "dontNeedItRightNow": "Não preciso agora",
+      "wasntUsefulForMe": "Não foi útil para mim",
+      "other": "Outro (especifique)",
+      "emailForResponse": "E-mail para resposta (opcional)",
+      "yourFeedback": "Seu feedback",
+      "founder": "Fundador do ClipBook",
+      "sendFeedback": "Enviar Feedback",
+      "activateLicense": "Ativar Licença",
+      "buyLicense": "Comprar Licença"
     }
   },
   "commands": {
-    "items": " Items",
-    "showMoreActions": "Show more actions",
-    "noResultsFound": "No results found.",
-    "typeCommandOrSearch": "Type a command or search...",
-    "pasteItemToApp": "Paste {{itemLabel}} {{itemsLabel}} to {{appName}}",
-    "pasteItemToAppWithFormatting": "Paste {{itemLabel}} {{itemsLabel}} to {{appName}} with Formatting...",
-    "pasteObjectToApp": "Paste to {{appName}}",
-    "pasteObjectsToApp": "Paste {{itemsLabel}} to {{appName}}",
-    "pasteItemsToAppWithReturn": "Paste {{itemsLabel}} to {{appName}} with Return",
-    "pasteItemsToAppWithTab": "Paste {{itemsLabel}} to {{appName}} with Tab",
-    "pastePathToApp": "Paste Path to {{appName}}",
-    "mergeItems": "Merge {{itemsLabel}}",
-    "copyItemToClipboard": "Copy {{itemLabel}} to Clipboard",
-    "copyObjectToClipboard": "Copy to Clipboard",
-    "copyPathToClipboard": "Copy Path to Clipboard",
-    "showInHistory": "Show in History",
-    "copyTextFromImage": "Copy Text from Image",
-    "saveImageAsFile": "Save as File...",
-    "editContent": "Edit Content...",
-    "addToFavorites": "Add {{itemsLabel}} to Favorites",
-    "removeFromFavorites": "Remove {{itemsLabel}} from Favorites",
-    "previewLink": "Preview Link",
-    "renameItem": "Rename...",
-    "formatText": "Format Text...",
-    "split": "Split",
-    "quickLook": "Quick Look",
-    "showInFinder": "Show in Finder",
-    "openInApp": "Open in {{appName}}",
-    "openWith": "Open With...",
-    "hidePreview": "Hide Preview",
-    "showPreview": "Show Preview",
-    "zoomIn": "Zoom In",
-    "zoomOut": "Zoom Out",
-    "resetZoom": "Reset Zoom",
-    "settings": "Settings...",
-    "deleteItem": "Delete",
-    "deleteItems": "Delete {{itemsLabel}}",
-    "deleteAllItems": "Delete All"
+    "items": " Itens",
+    "showMoreActions": "Mostrar mais ações",
+    "noResultsFound": "Nenhum resultado encontrado.",
+    "typeCommandOrSearch": "Digite um comando ou pesquise...",
+    "pasteItemToApp": "Colar {{itemLabel}} {{itemsLabel}} em {{appName}}",
+    "pasteItemToAppWithFormatting": "Colar {{itemLabel}} {{itemsLabel}} em {{appName}} com Formatação...",
+    "pasteObjectToApp": "Colar em {{appName}}",
+    "pasteObjectsToApp": "Colar {{itemsLabel}} em {{appName}}",
+    "pasteItemsToAppWithReturn": "Colar {{itemsLabel}} em {{appName}} com Enter",
+    "pasteItemsToAppWithTab": "Colar {{itemsLabel}} em {{appName}} com Tab",
+    "pastePathToApp": "Colar Caminho em {{appName}}",
+    "mergeItems": "Mesclar {{itemsLabel}}",
+    "copyItemToClipboard": "Copiar {{itemLabel}} para a Área de Transferência",
+    "copyObjectToClipboard": "Copiar para a Área de Transferência",
+    "copyPathToClipboard": "Copiar Caminho para a Área de Transferência",
+    "showInHistory": "Mostrar no Histórico",
+    "copyTextFromImage": "Copiar Texto da Imagem",
+    "saveImageAsFile": "Salvar como Arquivo...",
+    "editContent": "Editar Conteúdo...",
+    "addToFavorites": "Adicionar {{itemsLabel}} aos Favoritos",
+    "removeFromFavorites": "Remover {{itemsLabel}} dos Favoritos",
+    "previewLink": "Prévia do Link",
+    "renameItem": "Renomear...",
+    "formatText": "Formatar Texto...",
+    "split": "Dividir",
+    "quickLook": "Visualização Rápida",
+    "showInFinder": "Mostrar no Finder",
+    "openInApp": "Abrir em {{appName}}",
+    "openWith": "Abrir Com...",
+    "hidePreview": "Ocultar Prévia",
+    "showPreview": "Mostrar Prévia",
+    "zoomIn": "Aumentar Zoom",
+    "zoomOut": "Diminuir Zoom",
+    "resetZoom": "Redefinir Zoom",
+    "settings": "Configurações...",
+    "deleteItem": "Excluir",
+    "deleteItems": "Excluir {{itemsLabel}}",
+    "deleteAllItems": "Excluir Tudo"
   },
   "formatText": {
-    "makeLowerCase": "make lower case",
-    "makeUpperCase": "MAKE UPPER CASE",
-    "capitalizeWords": "Capitalize Words",
-    "sentenceCase": "Sentence case",
-    "removeEmptyLines": "Remove empty lines",
-    "stripAllWhitespaces": "StripAllWhitespaces",
-    "trimSurroundingWhitespaces": "Trim Surrounding Whitespaces"
+    "makeLowerCase": "converter para minúsculas",
+    "makeUpperCase": "CONVERTER PARA MAIÚSCULAS",
+    "capitalizeWords": "Capitalizar Palavras",
+    "sentenceCase": "Primeira letra maiúscula",
+    "removeEmptyLines": "Remover linhas vazias",
+    "stripAllWhitespaces": "RemoverTodosOsEspaços",
+    "trimSurroundingWhitespaces": "Remover Espaços ao Redor"
   },
   "historyItemContextMenu": {
-    "pasteItemToApp": "Paste {{itemLabel}} to {{appName}}",
-    "pastePathToApp": "Paste Path to {{appName}}",
-    "copyItemToClipboard": "Copy {{itemLabel}} to Clipboard",
-    "copyPathToClipboard": "Copy Path to Clipboard",
-    "openInBrowser": "Open in Browser",
-    "editContent": "Edit Content...",
-    "copyTextFromImage": "Copy Text from Image",
-    "addToFavorites": "Add to Favorites",
-    "removeFromFavorites": "Remove from Favorites",
-    "renameItem": "Rename...",
-    "quickLook": "Quick Look",
-    "formatText": "Format Text...",
+    "pasteItemToApp": "Colar {{itemLabel}} em {{appName}}",
+    "pastePathToApp": "Colar Caminho em {{appName}}",
+    "copyItemToClipboard": "Copiar {{itemLabel}} para a Área de Transferência",
+    "copyPathToClipboard": "Copiar Caminho para a Área de Transferência",
+    "openInBrowser": "Abrir no Navegador",
+    "editContent": "Editar Conteúdo...",
+    "copyTextFromImage": "Copiar Texto da Imagem",
+    "addToFavorites": "Adicionar aos Favoritos",
+    "removeFromFavorites": "Remover dos Favoritos",
+    "renameItem": "Renomear...",
+    "quickLook": "Visualização Rápida",
+    "formatText": "Formatar Texto...",
     "tags": "Tags...",
-    "newTag": "New Tag...",
-    "preview": "Preview",
-    "showInFinder": "Show in Finder",
-    "openInApp": "Open in {{appName}}",
-    "openWith": "Open With...",
-    "showInHistory": "Show in History",
-    "deleteItem": "Delete"
+    "newTag": "Nova Tag...",
+    "preview": "Prévia",
+    "showInFinder": "Mostrar no Finder",
+    "openInApp": "Abrir em {{appName}}",
+    "openWith": "Abrir Com...",
+    "showInHistory": "Mostrar no Histórico",
+    "deleteItem": "Excluir"
   },
   "app": {
     "sidebar": {
-      "all": "All",
-      "favorites": "Favorites",
-      "text": "Text",
-      "image": "Images",
+      "all": "Todos",
+      "favorites": "Favoritos",
+      "text": "Texto",
+      "image": "Imagens",
       "link": "Links",
-      "file": "Files",
-      "color": "Colors",
-      "email": "Emails",
-      "newtag": "New Tag",
-      "showapps": "Show Apps",
-      "hideapps": "Hide Apps",
+      "file": "Arquivos",
+      "color": "Cores",
+      "email": "E-mails",
+      "newtag": "Nova Tag",
+      "showapps": "Mostrar Apps",
+      "hideapps": "Ocultar Apps",
       "tag": {
         "contextMenu": {
-          "edit": "Edit...",
-          "delete": "Delete"
+          "edit": "Editar...",
+          "delete": "Excluir"
         }
       }
     },
     "history": {
-      "renamePlaceholder": "Enter a name for this item",
-      "noItems": "No items",
-      "noResults": "No results"
+      "renamePlaceholder": "Digite um nome para este item",
+      "noItems": "Nenhum item",
+      "noResults": "Nenhum resultado"
     },
     "itemInfoPane": {
       "link": "Link",
-      "color": "Color",
-      "email": "Email",
-      "image": "Image",
-      "file": "File",
-      "folder": "Folder",
-      "text": "Text",
+      "color": "Cor",
+      "email": "E-mail",
+      "image": "Imagem",
+      "file": "Arquivo",
+      "folder": "Pasta",
+      "text": "Texto",
       "html": "HTML",
       "rtf": "RTF",
-      "unknown": "Unknown",
-      "application": "Application",
-      "types": "Types",
-      "type": "Type",
+      "unknown": "Desconhecido",
+      "application": "Aplicativo",
+      "types": "Tipos",
+      "type": "Tipo",
       "tags": "Tags",
       "url": "URL",
-      "path": "Path",
-      "fileSize": "File size",
-      "imageDimensions": "Image dimensions",
-      "imageSize": "Image size",
-      "numberOfCopies": "Number of copies",
-      "firstCopyTime": "First copy time",
-      "lastCopyTime": "Last copy time",
-      "copyTime": "Copy time",
+      "path": "Caminho",
+      "fileSize": "Tamanho do arquivo",
+      "imageDimensions": "Dimensões da imagem",
+      "imageSize": "Tamanho da imagem",
+      "numberOfCopies": "Número de cópias",
+      "firstCopyTime": "Primeira cópia",
+      "lastCopyTime": "Última cópia",
+      "copyTime": "Hora da cópia",
       "bytes": "bytes",
       "kb": " KB",
       "mb": " MB"
     },
     "itemsInfoPane": {
-      "text": "text",
-      "texts": "texts",
-      "image": "image",
-      "images": "images",
+      "text": "texto",
+      "texts": "textos",
+      "image": "imagem",
+      "images": "imagens",
       "link": "link",
       "links": "links",
-      "color": "color",
-      "colors": "colors",
-      "email": "email",
-      "emails": "emails",
-      "file": "file",
-      "files": "files",
-      "items": "items",
-      "copyTime": "Copy time"
+      "color": "cor",
+      "colors": "cores",
+      "email": "e-mail",
+      "emails": "e-mails",
+      "file": "arquivo",
+      "files": "arquivos",
+      "items": "itens",
+      "copyTime": "Hora da cópia"
     },
     "openWithCommands": {
-      "searchPlaceholder": "Search...",
-      "default": "Default",
-      "recommended": "Recommended",
-      "other": "Other",
-      "noResults": "No results found."
+      "searchPlaceholder": "Pesquisar...",
+      "default": "Padrão",
+      "recommended": "Recomendado",
+      "other": "Outro",
+      "noResults": "Nenhum resultado encontrado."
     },
     "pasteTransformationCommands": {
-      "searchPlaceholder": "Type a command or search...",
-      "formatTextWhenPasting": "Format text when pasting",
-      "makeLowerCase": "make lower case",
-      "makeUpperCase": "MAKE UPPER CASE",
-      "capitalizeWords": "Capitalize Words",
-      "sentenceCase": "Sentence case",
-      "removeEmptyLines": "Remove empty lines",
-      "stripAllWhitespaces": "StripAllWhitespaces",
-      "trimSurroundingWhitespaces": "Trim Surrounding Whitespaces",
-      "noResults": "No results found."
+      "searchPlaceholder": "Digite um comando ou pesquise...",
+      "formatTextWhenPasting": "Formatar texto ao colar",
+      "makeLowerCase": "converter para minúsculas",
+      "makeUpperCase": "CONVERTER PARA MAIÚSCULAS",
+      "capitalizeWords": "Capitalizar Palavras",
+      "sentenceCase": "Primeira letra maiúscula",
+      "removeEmptyLines": "Remover linhas vazias",
+      "stripAllWhitespaces": "RemoverTodosOsEspaços",
+      "trimSurroundingWhitespaces": "Remover Espaços ao Redor",
+      "noResults": "Nenhum resultado encontrado."
     },
     "previewLinkCard": {
-      "loadingPreview": "Loading preview...",
-      "noTitle": "No title",
-      "noDescription": "No description"
+      "loadingPreview": "Carregando prévia...",
+      "noTitle": "Sem título",
+      "noDescription": "Sem descrição"
     }
   }
 }
