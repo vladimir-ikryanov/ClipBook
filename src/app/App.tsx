@@ -2,7 +2,6 @@ import HistoryPane from "@/app/HistoryPane";
 import {ThemeProvider} from "@/app/ThemeProvider"
 
 import {useEffect, useState} from "react";
-import * as React from "react";
 import {
   prefGetCloseAppShortcut,
   prefGetCloseAppShortcut2,
@@ -13,7 +12,6 @@ import {
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {TooltipProvider} from "@/components/ui/tooltip";
 import {emitter} from "@/actions";
-import i18n from "i18next";
 
 declare const hideAppWindow: () => void;
 declare const zoomIn: () => void;
@@ -93,14 +91,9 @@ export default function App() {
     emitter.emit("FocusSearchInput")
   }
 
-  function updateLanguage() {
-    i18n.changeLanguage(prefGetLanguage())
-  }
-
   // Attach the function to the window object
   (window as any).setActiveAppInfo = setActiveAppInfo;
   (window as any).onDidAppWindowHide = onDidAppWindowHide;
-  (window as any).updateLanguage = updateLanguage;
 
   return (
       <ThemeProvider defaultTheme="system">

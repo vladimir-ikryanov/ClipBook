@@ -118,7 +118,6 @@ export default function General() {
   function handleLanguageCodeChange(languageCode: string) {
     setLanguageCode(languageCode as LanguageCode)
     prefSetLanguage(languageCode as LanguageCode)
-    i18n.changeLanguage(languageCode)
   }
 
   (window as any).setUpdateCheckInProgress = setUpdateCheckInProgress

@@ -45,8 +45,7 @@ bool MainApp::init() {
     request_interceptor_->intercept(args, std::move(action));
   };
 
-  const auto label = "Open " + app_->name();
-  open_app_item_ = menu::Item(label, [this](const CustomMenuItemActionArgs &args) {
+  open_app_item_ = menu::Item("Open ClipBook", [this](const CustomMenuItemActionArgs &args) {
     show();
   });
 
@@ -54,8 +53,7 @@ bool MainApp::init() {
     showSettingsWindow();
   });
 
-  auto pause_label = "Pause " + app_->name();
-  pause_resume_item_ = menu::Item(pause_label, [this](const CustomMenuItemActionArgs &args) {
+  pause_resume_item_ = menu::Item("Pause ClipBook", [this](const CustomMenuItemActionArgs &args) {
     if (isPaused()) {
       resume();
     } else {
@@ -68,6 +66,41 @@ bool MainApp::init() {
         checkForUpdates(true);
       });
   check_for_updates_item_->setEnabled(settings_->isAllowCheckForUpdates());
+
+  about_item_ = menu::Item("About ClipBook", [this](const CustomMenuItemActionArgs &args) {
+    showAboutDialog();
+  });
+
+  quit_item_ = menu::Item("Quit", [this](const CustomMenuItemActionArgs &args) {
+    std::thread([this]() {
+      quit();
+    }).detach();
+  });
+
+  shortcuts_item_ = menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
+    app_->desktop()->openUrl(kKeyboardShortcutsUrl);
+  });
+
+  changelog_item_ = menu::Item("Changelog", [this](const CustomMenuItemActionArgs &args) {
+    app_->desktop()->openUrl(kChangelogUrl);
+  });
+
+  feedback_item_ = menu::Item("Feedback", [this](const CustomMenuItemActionArgs &args) {
+    app_->desktop()->openUrl(kFeedbackUrl);
+  });
+
+  support_item_ = menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
+    app_->desktop()->openUrl(kContactSupportUrl);
+  });
+
+  help_menu_ = menu::Menu("Help", {
+      shortcuts_item_,
+      menu::Separator(),
+      changelog_item_,
+      feedback_item_,
+      menu::Separator(),
+      support_item_,
+  });
 
   // Restore the application theme.
   setTheme(settings_->getTheme());
@@ -102,10 +135,6 @@ bool MainApp::init() {
 }
 
 void MainApp::launch() {
-  if (settings_->shouldShowIconInMenuBar()) {
-    createTray();
-  }
-
   app_window_ = Browser::create(app_);
   app_window_->settings()->disableOverscrollHistoryNavigation();
   app_window_->setVibrancy(VibrancyEffect::kSidebar);
@@ -160,6 +189,10 @@ void MainApp::launch() {
 
   app_window_->navigation()->loadUrlAndWait(app_->baseUrl());
 
+  if (settings_->shouldShowIconInMenuBar()) {
+    createTray();
+  }
+
 #ifdef OFFICIAL_BUILD
   activateLicense([this](const std::string &licenseKey) {
     settings_->saveLicenseKey(licenseKey);
@@ -168,6 +201,8 @@ void MainApp::launch() {
     LOG(ERROR) << "Failed to activate a license key: " << error;
   });
 #endif
+
+  onLanguageChanged();
 }
 
 void MainApp::show() {
@@ -237,11 +272,11 @@ void MainApp::clearHistory() {
     auto_hide_disabled_ = true;
     activate();
     MessageDialogOptions options;
-    options.message = "Are you sure you want to clear entire history?";
-    options.informative_text = "This action cannot be undone.";
+    options.message = i18n("app.dialogs.clearHistory.message");
+    options.informative_text = i18n("app.dialogs.clearHistory.informativeText");
     options.buttons = {
-        MessageDialogButton("Clear", MessageDialogButtonType::kDefault),
-        MessageDialogButton("Cancel", MessageDialogButtonType::kCancel),
+        MessageDialogButton(i18n("app.dialogs.clearHistory.clear"), MessageDialogButtonType::kDefault),
+        MessageDialogButton(i18n("app.dialogs.clearHistory.cancel"), MessageDialogButtonType::kCancel),
     };
     MessageDialog::show(app_window_, options, [this](const MessageDialogResult &result) {
       if (result.button.type == MessageDialogButtonType::kDefault) {
@@ -346,12 +381,12 @@ void MainApp::checkForUpdates(const std::function<void()> &complete, bool user_i
 void MainApp::showUpdateAvailableDialog(const std::shared_ptr<molybden::AppUpdate> &app_update,
                                         const std::function<void()> &complete) {
   MessageDialogOptions options;
-  options.title = "Update Available";
-  options.message = "A new version of " + app_->name() + " is available.";
-  options.informative_text = "Would you like to update?";
+  options.title = i18n("app.dialogs.updateAvailable.title");
+  options.message = i18n("app.dialogs.updateAvailable.message");
+  options.informative_text = i18n("app.dialogs.updateAvailable.informativeText");
   options.buttons = {
-      MessageDialogButton("Update", MessageDialogButtonType::kDefault),
-      MessageDialogButton("Later", MessageDialogButtonType::kCancel),
+      MessageDialogButton(i18n("app.dialogs.updateAvailable.update"), MessageDialogButtonType::kDefault),
+      MessageDialogButton(i18n("app.dialogs.updateAvailable.later"), MessageDialogButtonType::kCancel),
   };
   auto callback = [this, complete, app_update](const MessageDialogResult &result) {
     if (result.button.type == MessageDialogButtonType::kDefault) {
@@ -384,12 +419,12 @@ void MainApp::showUpdateAvailableDialog(const std::shared_ptr<molybden::AppUpdat
 void MainApp::showRestartRequiredDialog(const std::string &app_version,
                                         const std::function<void()> &complete) {
   MessageDialogOptions options;
-  options.title = "Restart Required";
-  options.message = app_->name() + " has been updated to version " + app_version + ".";
-  options.informative_text = "Please restart the application to apply the update.";
+  options.title = i18n("app.dialogs.restartRequired.title");
+  options.message = i18n("app.dialogs.restartRequired.message") + app_version + ".";
+  options.informative_text = i18n("app.dialogs.restartRequired.informativeText");
   options.buttons = {
-      MessageDialogButton("Restart", MessageDialogButtonType::kDefault),
-      MessageDialogButton("Later", MessageDialogButtonType::kCancel),
+      MessageDialogButton(i18n("app.dialogs.restartRequired.restart"), MessageDialogButtonType::kDefault),
+      MessageDialogButton(i18n("app.dialogs.restartRequired.later"), MessageDialogButtonType::kCancel),
   };
   auto callback = [this, complete](const MessageDialogResult &result) {
     complete();
@@ -414,11 +449,11 @@ void MainApp::showRestartRequiredDialog(const std::string &app_version,
 void MainApp::showUpdateFailedDialog(const std::string &text,
                                      const std::function<void()> &complete) {
   MessageDialogOptions options;
-  options.title = "Update Failed";
+  options.title = i18n("app.dialogs.updateFailed.title");
   options.type = MessageDialogType::kError;
-  options.message = "An error occurred while installing the update :(";
+  options.message = i18n("app.dialogs.updateFailed.message");
   options.informative_text = text;
-  options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
+  options.buttons.emplace_back(i18n("app.dialogs.updateFailed.close"), MessageDialogButtonType::kDefault);
   if (app_window_visible_) {
     auto_hide_disabled_ = true;
     MessageDialog::show(app_window_, options, [this](const MessageDialogResult &) {
@@ -434,11 +469,11 @@ void MainApp::showUpdateFailedDialog(const std::string &text,
 void MainApp::showUpdateCheckFailedDialog(const std::string &error_msg,
                                           const std::function<void()> &complete) {
   MessageDialogOptions options;
-  options.title = "Update Check Failed";
+  options.title = i18n("app.dialogs.updateCheckFailed.title");
   options.type = MessageDialogType::kError;
-  options.message = "Oops! An error occurred while checking for updates :(";
+  options.message = i18n("app.dialogs.updateCheckFailed.message");
   options.informative_text = error_msg;
-  options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
+  options.buttons.emplace_back(i18n("app.dialogs.updateCheckFailed.close"), MessageDialogButtonType::kDefault);
   if (app_window_visible_) {
     auto_hide_disabled_ = true;
     MessageDialog::show(app_window_, options, [this](const MessageDialogResult &) {
@@ -453,10 +488,10 @@ void MainApp::showUpdateCheckFailedDialog(const std::string &error_msg,
 
 void MainApp::showUpToDateDialog(const std::function<void()> &complete) {
   MessageDialogOptions options;
-  options.title = "Up to Date";
-  options.message = app_->name() + " is up to date!";
-  options.informative_text = "You are using the latest version of " + app_->name() + ".";
-  options.buttons.emplace_back("Close", MessageDialogButtonType::kDefault);
+  options.title = i18n("app.dialogs.upToDate.title");
+  options.message = i18n("app.dialogs.upToDate.message");
+  options.informative_text = i18n("app.dialogs.upToDate.informativeText");
+  options.buttons.emplace_back(i18n("app.dialogs.upToDate.close"), MessageDialogButtonType::kDefault);
   if (app_window_visible_) {
     auto_hide_disabled_ = true;
     MessageDialog::show(app_window_, options, [this](const MessageDialogResult &) {
@@ -763,19 +798,20 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("saveLanguage", [this](std::string language) -> void {
     settings_->saveLanguage(std::move(language));
     std::thread([this]() {
-      auto settings_main_frame = settings_window_->mainFrame();
-      if (settings_main_frame) {
-        settings_main_frame->executeJavaScript("updateLanguage()");
-      }
-      auto app_main_frame = app_window_->mainFrame();
-      if (app_main_frame) {
-        app_main_frame->executeJavaScript("updateLanguage()");
-      }
+      updateLanguage(app_window_);
+      updateLanguage(welcome_window_);
+      updateLanguage(settings_window_);
     }).detach();
   });
   window->putProperty("getLanguage", [this]() -> std::string {
     return settings_->getLanguage();
   });
+  window->putProperty("onLanguageChanged", [this]() {
+    std::thread([this]() {
+      onLanguageChanged();
+    }).detach();
+  });
+
   window->putProperty("saveTheme", [this](std::string theme) -> void {
     setTheme(theme);
     settings_->saveTheme(theme);
@@ -1328,13 +1364,13 @@ bool MainApp::isPaused() const {
 
 void MainApp::pause() {
   tray_->setImage(app_->getPath(PathKey::kAppResources) + "/pausedTemplate.png");
-  pause_resume_item_->setTitle("Resume " + app_->name());
+  pause_resume_item_->setTitle(i18n("app.menu.resume"));
   app_paused_ = true;
 }
 
 void MainApp::resume() {
   tray_->setImage(app_->getPath(PathKey::kAppResources) + "/imageTemplate.png");
-  pause_resume_item_->setTitle("Pause " + app_->name());
+  pause_resume_item_->setTitle(i18n("app.menu.pause"));
   app_paused_ = false;
 }
 
@@ -1367,35 +1403,14 @@ void MainApp::createTray() {
           {
               open_app_item_,
               menu::Separator(),
-              menu::Menu("Help", {
-                  menu::Item("Keyboard Shortcuts", [this](const CustomMenuItemActionArgs &args) {
-                    app_->desktop()->openUrl(kKeyboardShortcutsUrl);
-                  }),
-                  menu::Separator(),
-                  menu::Item("Changelog", [this](const CustomMenuItemActionArgs &args) {
-                    app_->desktop()->openUrl(kChangelogUrl);
-                  }),
-                  menu::Item("Feedback", [this](const CustomMenuItemActionArgs &args) {
-                    app_->desktop()->openUrl(kFeedbackUrl);
-                  }),
-                  menu::Separator(),
-                  menu::Item("Contact Support", [this](const CustomMenuItemActionArgs &args) {
-                    app_->desktop()->openUrl(kContactSupportUrl);
-                  }),
-              }),
+              help_menu_,
               menu::Separator(),
-              menu::Item("About " + app_->name(), [this](const CustomMenuItemActionArgs &args) {
-                showAboutDialog();
-              }),
+              about_item_,
               check_for_updates_item_,
               open_settings_item_,
               menu::Separator(),
               pause_resume_item_,
-              menu::Item("Quit", [this](const CustomMenuItemActionArgs &) {
-                std::thread([this]() {
-                  quit();
-                }).detach();
-              })
+              quit_item_
           }));
     }
   };
@@ -1417,9 +1432,9 @@ void MainApp::destroyTray() {
 void MainApp::selectAppsToIgnore() {
   molybden::OpenDialogOptions options;
   options.default_path = "/Applications";
-  options.button_label = "Choose";
+  options.button_label = i18n("app.dialogs.selectAppsToIgnore.choose");
   options.features.allow_multiple_selections = true;
-  options.filters = {{"Applications", {"app"}}};
+  options.filters = {{i18n("app.dialogs.selectAppsToIgnore.applications"), {"app"}}};
   molybden::OpenDialog::show(settings_window_, options, [this](molybden::OpenDialogResult result) {
     if (result.canceled) {
       return;
@@ -1476,10 +1491,10 @@ void MainApp::saveImageAsFile(const std::string &imageFileName, int imageWidth, 
   auto destImageFilePath = save_images_dir_ + "/" + destImageFileName;
 
   SaveDialogOptions options;
-  options.title = "Save Image As";
+  options.title = i18n("app.dialogs.saveImageAs.title");
   options.default_path = destImageFilePath;
-  options.filters = {{"Images", {"PNG"}}};
-  options.button_label = "Save";
+  options.filters = {{i18n("app.dialogs.saveImageAs.images"), {"PNG"}}};
+  options.button_label = i18n("app.dialogs.saveImageAs.save");
   SaveDialog::show(browser(), options, [this, imageFileName](SaveDialogResult result) {
     auto_hide_disabled_ = false;
     if (!result.canceled) {
@@ -1490,4 +1505,40 @@ void MainApp::saveImageAsFile(const std::string &imageFileName, int imageWidth, 
       app_->desktop()->showPath(result.path);
     }
   });
+}
+
+void MainApp::onLanguageChanged() {
+  open_app_item_->setTitle(i18n("app.menu.open"));
+  check_for_updates_item_->setTitle(i18n("app.menu.checkForUpdates"));
+  open_settings_item_->setTitle(i18n("app.menu.settings"));
+  if (isPaused()) {
+    pause_resume_item_->setTitle(i18n("app.menu.resume"));
+  } else {
+    pause_resume_item_->setTitle(i18n("app.menu.pause"));
+  }
+  about_item_->setTitle(i18n("app.menu.about"));
+  quit_item_->setTitle(i18n("app.menu.quit"));
+
+  shortcuts_item_->setTitle(i18n("app.menu.helpMenu.shortcuts"));
+  changelog_item_->setTitle(i18n("app.menu.helpMenu.changelog"));
+  feedback_item_->setTitle(i18n("app.menu.helpMenu.feedback"));
+  support_item_->setTitle(i18n("app.menu.helpMenu.contactSupport"));
+}
+
+void MainApp::updateLanguage(std::shared_ptr<molybden::Browser> window) {
+  if (window) {
+    auto frame = window->mainFrame();
+    if (frame) {
+      frame->executeJavaScript("updateLanguage()");
+    }
+  }
+}
+
+std::string MainApp::i18n(const std::string &key) {
+  auto frame = app_window_->mainFrame();
+  if (frame) {
+    auto js_value = frame->executeJavaScript("translate(\"" + key + "\")");
+    return js_value.asString();
+  }
+  return key;
 }

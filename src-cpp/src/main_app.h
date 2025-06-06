@@ -20,6 +20,8 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   explicit MainApp(const std::shared_ptr<molybden::App> &app,
                    const std::shared_ptr<AppSettings> &settings);
 
+  static void updateLanguage(std::shared_ptr<molybden::Browser> window);
+
   [[nodiscard]] std::shared_ptr<molybden::App> app() const;
   [[nodiscard]] std::shared_ptr<molybden::Browser> browser() const;
   [[nodiscard]] std::shared_ptr<AppSettings> settings() const;
@@ -92,6 +94,9 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void previewLink(const std::string &url);
   void saveImageAsFile(const std::string &imageFileName, int imageWidth, int imageHeight);
 
+  void onLanguageChanged();
+  std::string i18n(const std::string &key);
+
   void quit();
 
   // Returns the boot time of the system in seconds since Unix epoch or -1 if failed.
@@ -129,6 +134,13 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   std::shared_ptr<molybden::CustomMenuItem> open_settings_item_;
   std::shared_ptr<molybden::CustomMenuItem> pause_resume_item_;
   std::shared_ptr<molybden::CustomMenuItem> check_for_updates_item_;
+  std::shared_ptr<molybden::CustomMenuItem> about_item_;
+  std::shared_ptr<molybden::CustomMenuItem> quit_item_;
+  std::shared_ptr<molybden::CustomMenu> help_menu_;
+  std::shared_ptr<molybden::CustomMenuItem> shortcuts_item_;
+  std::shared_ptr<molybden::CustomMenuItem> changelog_item_;
+  std::shared_ptr<molybden::CustomMenuItem> feedback_item_;
+  std::shared_ptr<molybden::CustomMenuItem> support_item_;
   std::shared_ptr<AppSettings> settings_;
 
   std::list<std::string> fetch_url_requests_;

@@ -2,6 +2,7 @@
   "welcome": {
     "title": "Welcome to ClipBook",
     "description": "ClipBook stores everything you copy and lets you quickly access your clipboard history whenever you need it.",
+    "selectLanguage": "Please select your language",
     "getStarted": "Get Started"
   },
   "accessibility": {
@@ -390,6 +391,76 @@
     "deleteItem": "Delete"
   },
   "app": {
+    "menu": {
+      "open": "Open ClipBook",
+      "pause": "Pause ClipBook",
+      "resume": "Resume ClipBook",
+      "about": "About ClipBook",
+      "checkForUpdates": "Check for Updates...",
+      "settings": "Settings...",
+      "quit": "Quit",
+      "help": "Help",
+      "helpMenu": {
+        "shortcuts": "Keyboard Shortcuts",
+        "changelog": "Changelog",
+        "feedback": "Feedback",
+        "contactSupport": "Contact Support"
+      }
+    },
+    "dialogs": {
+      "clearHistory": {
+        "message": "Are you sure you want to clear entire history?",
+        "informativeText": "This action cannot be undone.",
+        "clear": "Clear",
+        "cancel": "Cancel"
+      },
+      "updateAvailable": {
+        "title": "Update Available",
+        "message": "A new version of ClipBook is available.",
+        "informativeText": "Would you like to update?",
+        "update": "Update",
+        "later": "Later"
+      },
+      "restartRequired": {
+        "title": "Restart Required",
+        "message": "ClipBook has been updated to version ",
+        "informativeText": "Please restart the application to apply the update.",
+        "restart": "Restart",
+        "later": "Later"
+      },
+      "updateFailed": {
+        "title": "Update Failed",
+        "message": "An error occurred while installing the update :(",
+        "close": "Close"
+      },
+      "updateCheckFailed": {
+        "title": "Update Check Failed",
+        "message": "Oops! An error occurred while checking for updates :(",
+        "close": "Close"
+      },
+      "upToDate": {
+        "title": "Up to Date",
+        "message": "ClipBook is up to date!",
+        "informativeText": "You are using the latest version of ClipBook.",
+        "close": "Close"
+      },
+      "selectAppsToIgnore": {
+        "choose": "Choose",
+        "applications": "Applications"
+      },
+      "saveImageAs": {
+        "title": "Save Image As",
+        "images": "Images",
+        "save": "Save"
+      },
+      "accessibilityAccessRequired": {
+        "message": "Accessibility access required",
+        "informativeText": "ClipBook needs accessibility access to paste directly into other apps.",
+        "enableAccessibility": "Enable Accessibility Access",
+        "copyToClipboard": "Copy to Clipboard",
+        "cancel": "Cancel"
+      }
+    },
     "sidebar": {
       "all": "All",
       "favorites": "Favourites",

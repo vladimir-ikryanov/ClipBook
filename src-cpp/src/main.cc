@@ -36,9 +36,9 @@ void launch() {
     main_app = std::make_shared<MainAppWin>(app);
 #endif
     bool first_run = main_app->init();
-    if (first_run) {
-      main_app->showWelcomeWindow();
-    }
     main_app->launch();
+//    if (first_run) {
+      main_app->showWelcomeWindow();
+//    }
   });
 }

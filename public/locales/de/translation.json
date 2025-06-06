@@ -2,6 +2,7 @@
   "welcome": {
     "title": "Willkommen bei ClipBook",
     "description": "ClipBook speichert alles, was Sie kopieren, und ermöglicht Ihnen den schnellen Zugriff auf Ihren Zwischenablageverlauf, wann immer Sie ihn benötigen.",
+    "selectLanguage": "Please select your language",
     "getStarted": "Loslegen"
   },
   "accessibility": {
@@ -390,6 +391,76 @@
     "deleteItem": "Löschen"
   },
   "app": {
+    "menu": {
+      "open": "ClipBook öffnen",
+      "pause": "ClipBook pausieren",
+      "resume": "ClipBook fortsetzen",
+      "about": "Über ClipBook",
+      "checkForUpdates": "Nach Updates suchen...",
+      "settings": "Einstellungen...",
+      "quit": "Beenden",
+      "help": "Hilfe",
+      "helpMenu": {
+        "shortcuts": "Tastenkombinationen",
+        "changelog": "Änderungsprotokoll",
+        "feedback": "Feedback",
+        "contactSupport": "Kontakt"
+      }
+    },
+    "dialogs": {
+      "clearHistory": {
+        "message": "Sind Sie sicher, dass Sie den gesamten Verlauf löschen möchten?",
+        "informativeText": "Diese Aktion kann nicht rückgängig gemacht werden.",
+        "clear": "Löschen",
+        "cancel": "Abbrechen"
+      },
+      "updateAvailable": {
+        "title": "Update verfügbar",
+        "message": "Eine neue Version von ClipBook ist verfügbar.",
+        "informativeText": "Möchten Sie das Update installieren?",
+        "update": "Installieren",
+        "later": "Später"
+      },
+      "restartRequired": {
+        "title": "Neustart erforderlich",
+        "message": "ClipBook wurde auf Version ",
+        "informativeText": "Bitte starten Sie die Anwendung neu, um das Update zu installieren.",
+        "restart": "Neustart",
+        "later": "Später"
+      },
+      "updateFailed": {
+        "title": "Update fehlgeschlagen",
+        "message": "Ein Fehler ist während der Installation des Updates aufgetreten :(",
+        "close": "Schließen"
+      },
+      "updateCheckFailed": {
+        "title": "Update-Prüfung fehlgeschlagen",
+        "message": "Hoppla! Ein Fehler ist während der Prüfung auf Updates aufgetreten :(",
+        "close": "Schließen"
+      },
+      "upToDate": {
+        "title": "Aktuell",
+        "message": "ClipBook ist aktuell!",
+        "informativeText": "Sie verwenden die neueste Version von ClipBook.",
+        "close": "Schließen"
+      },
+      "selectAppsToIgnore": {
+        "choose": "Auswählen",
+        "applications": "Anwendungen"
+      },
+      "saveImageAs": {
+        "title": "Bild als Datei speichern",
+        "images": "Bilder",
+        "save": "Speichern"
+      },
+      "accessibilityAccessRequired": {
+        "message": "Zugriff auf Barrierefreiheit erforderlich",
+        "informativeText": "ClipBook benötigt Zugriff auf Barrierefreiheit, um direkt in andere Apps einzufügen.",
+        "enableAccessibility": "Zugriff auf Barrierefreiheit aktivieren",
+        "copyToClipboard": "In Zwischenablage kopieren",
+        "cancel": "Abbrechen"
+      }
+    },
     "sidebar": {
       "all": "Alle",
       "favorites": "Favoriten",

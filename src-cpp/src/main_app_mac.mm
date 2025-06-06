@@ -844,12 +844,12 @@ bool MainAppMac::isAccessibilityAccessGranted() {
 
 void MainAppMac::showAccessibilityAccessDialog(const std::string &filePaths) {
   MessageDialogOptions options;
-  options.message = "Accessibility access required";
-  options.informative_text = "ClipBook needs accessibility access to paste directly into other apps.";
+  options.message = i18n("app.dialogs.accessibilityAccessRequired.message");
+  options.informative_text = i18n("app.dialogs.accessibilityAccessRequired.informativeText");
   options.buttons = {
-      MessageDialogButton("Enable Accessibility Access", MessageDialogButtonType::kDefault),
-      MessageDialogButton("Copy to Clipboard"),
-      MessageDialogButton("Cancel", MessageDialogButtonType::kCancel)
+      MessageDialogButton(i18n("app.dialogs.accessibilityAccessRequired.enableAccessibility"), MessageDialogButtonType::kDefault),
+      MessageDialogButton(i18n("app.dialogs.accessibilityAccessRequired.copyToClipboard")),
+      MessageDialogButton(i18n("app.dialogs.accessibilityAccessRequired.cancel"), MessageDialogButtonType::kCancel)
   };
   auto_hide_disabled_ = true;
   MessageDialog::show(app_window_, options, [this, filePaths](const MessageDialogResult &result) {
@@ -869,12 +869,14 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text,
                                                const std::string &imageFileName,
                                                const std::string &filePath) {
   MessageDialogOptions options;
-  options.message = "Accessibility access required";
-  options.informative_text = "ClipBook needs accessibility access to paste directly into other apps.";
+  options.message = i18n("app.dialogs.accessibilityAccessRequired.message");
+  options.informative_text = i18n("app.dialogs.accessibilityAccessRequired.informativeText");
   options.buttons = {
-      MessageDialogButton("Enable Accessibility Access", MessageDialogButtonType::kDefault),
-      MessageDialogButton("Copy to Clipboard"),
-      MessageDialogButton("Cancel", MessageDialogButtonType::kCancel)
+      MessageDialogButton(i18n("app.dialogs.accessibilityAccessRequired.enableAccessibility"),
+                          MessageDialogButtonType::kDefault),
+      MessageDialogButton(i18n("app.dialogs.accessibilityAccessRequired.copyToClipboard")),
+      MessageDialogButton(i18n("app.dialogs.accessibilityAccessRequired.cancel"),
+                          MessageDialogButtonType::kCancel)
   };
   auto_hide_disabled_ = true;
   MessageDialog::show(app_window_, options, [this, text, imageFileName, filePath](const MessageDialogResult &result) {

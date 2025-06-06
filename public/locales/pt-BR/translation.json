@@ -2,6 +2,7 @@
   "welcome": {
     "title": "Bem-vindo ao ClipBook",
     "description": "O ClipBook armazena tudo o que você copia e permite acessar rapidamente o histórico da área de transferência sempre que precisar.",
+    "selectLanguage": "Please select your language",
     "getStarted": "Começar"
   },
   "accessibility": {
@@ -390,6 +391,77 @@
     "deleteItem": "Excluir"
   },
   "app": {
+    "menu": {
+      "open": "Abrir ClipBook",
+      "pause": "Pausar ClipBook",
+      "resume": "Retomar ClipBook",
+      "about": "Sobre ClipBook",
+      "checkForUpdates": "Procurar Atualizações...",
+      "settings": "Configurações...",
+      "quit": "Sair",
+      "help": "Ajuda",
+      "helpMenu": {
+        "shortcuts": "Atalhos de teclado",
+        "changelog": "Registro de alterações",
+        "feedback": "Feedback",
+        "contactSupport": "Suporte"
+      }
+    },
+    "dialogs": {
+      "clearHistory": {
+        "message": "Tem certeza que deseja limpar todo o histórico?",
+        "informativeText": "Esta ação não pode ser desfeita.",
+        "clear": "Limpar",
+        "cancel": "Cancelar"
+      },
+      "updateAvailable": {
+        "title": "Atualização disponível",
+        "message": "Uma nova versão do ClipBook está disponível.",
+        "informativeText": "Você gostaria de atualizar?",
+        "update": "Atualizar",
+        "later": "Mais tarde"
+      },
+      "restartRequired": {
+        "title": "Reinício necessário",
+        "message": "O ClipBook foi atualizado para a versão ",
+        "informativeText": "Reinicie o aplicativo para aplicar a atualização.",
+        "restart": "Reiniciar",
+        "later": "Mais tarde"
+      },
+      "updateFailed": {
+        "title": "Atualização falhou",
+        "message": "Ocorreu um erro ao instalar a atualização :(",
+        "close": "Fechar"
+      },
+      "updateCheckFailed": {
+        "title": "Verificação de atualização falhou",
+        "message": "Oops! Ocorreu um erro ao verificar as atualizações :(",
+        "close": "Fechar"
+      },
+      "upToDate": {
+        "title": "Atualizado",
+        "message": "O ClipBook está atualizado!",
+        "informativeText": "Você está usando a versão mais recente do ClipBook.",
+        "close": "Fechar"
+      },
+      "selectAppsToIgnore": {
+        "choose": "Escolher",
+        "applications": "Aplicativos"
+      },
+      "saveImageAs": {
+        "title": "Salvar imagem como",
+        "images": "Imagens",
+        "save": "Salvar"
+      },
+      "accessibilityAccessRequired": {
+        "title": "Acessibilidade necessária",
+        "message": "O ClipBook precisa de acessibilidade para colar diretamente em outros aplicativos.",
+        "informativeText": "Por favor, habilite a acessibilidade no sistema para continuar.",
+        "enableAccessibility": "Habilitar Acessibilidade",
+        "copyToClipboard": "Copiar para a Área de Transferência",
+        "cancel": "Cancelar"
+      }
+    },
     "sidebar": {
       "all": "Todos",
       "favorites": "Favoritos",
