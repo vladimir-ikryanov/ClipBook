@@ -37,8 +37,8 @@ void launch() {
 #endif
     bool first_run = main_app->init();
     main_app->launch();
-//    if (first_run) {
+    if (first_run) {
       main_app->showWelcomeWindow();
-//    }
+    }
   });
 }
