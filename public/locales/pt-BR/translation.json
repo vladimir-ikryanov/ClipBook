@@ -2,7 +2,7 @@
   "welcome": {
     "title": "Bem-vindo ao ClipBook",
     "description": "O ClipBook armazena tudo o que você copia e permite acessar rapidamente o histórico da área de transferência sempre que precisar.",
-    "selectLanguage": "Please select your language",
+    "selectLanguage": "Selecione o idioma",
     "getStarted": "Começar"
   },
   "accessibility": {

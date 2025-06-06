@@ -2,7 +2,7 @@
   "welcome": {
     "title": "Willkommen bei ClipBook",
     "description": "ClipBook speichert alles, was Sie kopieren, und ermöglicht Ihnen den schnellen Zugriff auf Ihren Zwischenablageverlauf, wann immer Sie ihn benötigen.",
-    "selectLanguage": "Please select your language",
+    "selectLanguage": "Bitte wählen Sie Ihre Sprache",
     "getStarted": "Loslegen"
   },
   "accessibility": {
