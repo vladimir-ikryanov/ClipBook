@@ -454,9 +454,8 @@
         "save": "Salvar"
       },
       "accessibilityAccessRequired": {
-        "title": "Acessibilidade necessária",
-        "message": "O ClipBook precisa de acessibilidade para colar diretamente em outros aplicativos.",
-        "informativeText": "Por favor, habilite a acessibilidade no sistema para continuar.",
+        "message": "Acesso à acessibilidade necessário",
+        "informativeText": "O ClipBook precisa de acesso à acessibilidade para colar diretamente em outros aplicativos.",
         "enableAccessibility": "Habilitar Acessibilidade",
         "copyToClipboard": "Copiar para a Área de Transferência",
         "cancel": "Cancelar"
