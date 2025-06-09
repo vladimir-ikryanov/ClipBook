@@ -202,7 +202,7 @@ void MainApp::launch() {
   });
 #endif
 
-  onLanguageChanged();
+  updateLanguage(app_window_);
 }
 
 void MainApp::show() {
