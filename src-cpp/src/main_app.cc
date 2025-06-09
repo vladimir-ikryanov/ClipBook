@@ -24,6 +24,43 @@ std::string kContactSupportUrl =
 std::string kFeedbackUrl = "https://feedback.clipbook.app/?utm_source=clipbook";
 int32_t kUpdateCheckIntervalInHours = 24;
 
+std::string appDialogsUpdateAvailableTitle;
+std::string appDialogsUpdateAvailableMessage;
+std::string appDialogsUpdateAvailableInformativeText;
+std::string appDialogsUpdateAvailableUpdate;
+std::string appDialogsUpdateAvailableLater;
+
+std::string appDialogsRestartRequiredTitle;
+std::string appDialogsRestartRequiredMessage;
+std::string appDialogsRestartRequiredInformativeText;
+std::string appDialogsRestartRequiredRestart;
+std::string appDialogsRestartRequiredLater;
+
+std::string appDialogsUpdateFailedTitle;
+std::string appDialogsUpdateFailedMessage;
+std::string appDialogsUpdateFailedClose;
+
+std::string appDialogsUpdateCheckFailedTitle;
+std::string appDialogsUpdateCheckFailedMessage;
+std::string appDialogsUpdateCheckFailedClose;
+
+std::string appDialogsUpToDateTitle;
+std::string appDialogsUpToDateMessage;
+std::string appDialogsUpToDateInformativeText;
+std::string appDialogsUpToDateClose;
+
+std::string appDialogsClearHistoryMessage;
+std::string appDialogsClearHistoryInformativeText;
+std::string appDialogsClearHistoryClear;
+std::string appDialogsClearHistoryCancel;
+
+std::string appDialogsSelectAppsToIgnoreChoose;
+std::string appDialogsSelectAppsToIgnoreApplications;
+
+std::string appDialogsSaveImageAsTitle;
+std::string appDialogsSaveImageAsImages;
+std::string appDialogsSaveImageAsSave;
+
 MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSettings> &settings)
     : app_(app),
       first_run_(false),
@@ -272,11 +309,11 @@ void MainApp::clearHistory() {
     auto_hide_disabled_ = true;
     activate();
     MessageDialogOptions options;
-    options.message = i18n("app.dialogs.clearHistory.message");
-    options.informative_text = i18n("app.dialogs.clearHistory.informativeText");
+    options.message = appDialogsClearHistoryMessage;
+    options.informative_text = appDialogsClearHistoryInformativeText;
     options.buttons = {
-        MessageDialogButton(i18n("app.dialogs.clearHistory.clear"), MessageDialogButtonType::kDefault),
-        MessageDialogButton(i18n("app.dialogs.clearHistory.cancel"), MessageDialogButtonType::kCancel),
+        MessageDialogButton(appDialogsClearHistoryClear, MessageDialogButtonType::kDefault),
+        MessageDialogButton(appDialogsClearHistoryCancel, MessageDialogButtonType::kCancel),
     };
     MessageDialog::show(app_window_, options, [this](const MessageDialogResult &result) {
       if (result.button.type == MessageDialogButtonType::kDefault) {
@@ -381,12 +418,12 @@ void MainApp::checkForUpdates(const std::function<void()> &complete, bool user_i
 void MainApp::showUpdateAvailableDialog(const std::shared_ptr<molybden::AppUpdate> &app_update,
                                         const std::function<void()> &complete) {
   MessageDialogOptions options;
-  options.title = i18n("app.dialogs.updateAvailable.title");
-  options.message = i18n("app.dialogs.updateAvailable.message");
-  options.informative_text = i18n("app.dialogs.updateAvailable.informativeText");
+  options.title = appDialogsUpdateAvailableTitle;
+  options.message = appDialogsUpdateAvailableMessage;
+  options.informative_text = appDialogsUpdateAvailableInformativeText;
   options.buttons = {
-      MessageDialogButton(i18n("app.dialogs.updateAvailable.update"), MessageDialogButtonType::kDefault),
-      MessageDialogButton(i18n("app.dialogs.updateAvailable.later"), MessageDialogButtonType::kCancel),
+      MessageDialogButton(appDialogsUpdateAvailableUpdate, MessageDialogButtonType::kDefault),
+      MessageDialogButton(appDialogsUpdateAvailableLater, MessageDialogButtonType::kCancel),
   };
   auto callback = [this, complete, app_update](const MessageDialogResult &result) {
     if (result.button.type == MessageDialogButtonType::kDefault) {
@@ -419,12 +456,12 @@ void MainApp::showUpdateAvailableDialog(const std::shared_ptr<molybden::AppUpdat
 void MainApp::showRestartRequiredDialog(const std::string &app_version,
                                         const std::function<void()> &complete) {
   MessageDialogOptions options;
-  options.title = i18n("app.dialogs.restartRequired.title");
-  options.message = i18n("app.dialogs.restartRequired.message") + app_version + ".";
-  options.informative_text = i18n("app.dialogs.restartRequired.informativeText");
+  options.title = appDialogsRestartRequiredTitle;
+  options.message = appDialogsRestartRequiredMessage + app_version + ".";
+  options.informative_text = appDialogsRestartRequiredInformativeText;
   options.buttons = {
-      MessageDialogButton(i18n("app.dialogs.restartRequired.restart"), MessageDialogButtonType::kDefault),
-      MessageDialogButton(i18n("app.dialogs.restartRequired.later"), MessageDialogButtonType::kCancel),
+      MessageDialogButton(appDialogsRestartRequiredRestart, MessageDialogButtonType::kDefault),
+      MessageDialogButton(appDialogsRestartRequiredLater, MessageDialogButtonType::kCancel),
   };
   auto callback = [this, complete](const MessageDialogResult &result) {
     complete();
@@ -449,11 +486,11 @@ void MainApp::showRestartRequiredDialog(const std::string &app_version,
 void MainApp::showUpdateFailedDialog(const std::string &text,
                                      const std::function<void()> &complete) {
   MessageDialogOptions options;
-  options.title = i18n("app.dialogs.updateFailed.title");
+  options.title = appDialogsUpdateFailedTitle;
   options.type = MessageDialogType::kError;
-  options.message = i18n("app.dialogs.updateFailed.message");
+  options.message = appDialogsUpdateFailedMessage;
   options.informative_text = text;
-  options.buttons.emplace_back(i18n("app.dialogs.updateFailed.close"), MessageDialogButtonType::kDefault);
+  options.buttons.emplace_back(appDialogsUpdateFailedClose, MessageDialogButtonType::kDefault);
   if (app_window_visible_) {
     auto_hide_disabled_ = true;
     MessageDialog::show(app_window_, options, [this](const MessageDialogResult &) {
@@ -469,11 +506,11 @@ void MainApp::showUpdateFailedDialog(const std::string &text,
 void MainApp::showUpdateCheckFailedDialog(const std::string &error_msg,
                                           const std::function<void()> &complete) {
   MessageDialogOptions options;
-  options.title = i18n("app.dialogs.updateCheckFailed.title");
+  options.title = appDialogsUpdateCheckFailedTitle;
   options.type = MessageDialogType::kError;
-  options.message = i18n("app.dialogs.updateCheckFailed.message");
+  options.message = appDialogsUpdateCheckFailedMessage;
   options.informative_text = error_msg;
-  options.buttons.emplace_back(i18n("app.dialogs.updateCheckFailed.close"), MessageDialogButtonType::kDefault);
+  options.buttons.emplace_back(appDialogsUpdateCheckFailedClose, MessageDialogButtonType::kDefault);
   if (app_window_visible_) {
     auto_hide_disabled_ = true;
     MessageDialog::show(app_window_, options, [this](const MessageDialogResult &) {
@@ -488,10 +525,10 @@ void MainApp::showUpdateCheckFailedDialog(const std::string &error_msg,
 
 void MainApp::showUpToDateDialog(const std::function<void()> &complete) {
   MessageDialogOptions options;
-  options.title = i18n("app.dialogs.upToDate.title");
-  options.message = i18n("app.dialogs.upToDate.message");
-  options.informative_text = i18n("app.dialogs.upToDate.informativeText");
-  options.buttons.emplace_back(i18n("app.dialogs.upToDate.close"), MessageDialogButtonType::kDefault);
+  options.title = appDialogsUpToDateTitle;
+  options.message = appDialogsUpToDateMessage;
+  options.informative_text = appDialogsUpToDateInformativeText;
+  options.buttons.emplace_back(appDialogsUpToDateClose, MessageDialogButtonType::kDefault);
   if (app_window_visible_) {
     auto_hide_disabled_ = true;
     MessageDialog::show(app_window_, options, [this](const MessageDialogResult &) {
@@ -1432,9 +1469,9 @@ void MainApp::destroyTray() {
 void MainApp::selectAppsToIgnore() {
   molybden::OpenDialogOptions options;
   options.default_path = "/Applications";
-  options.button_label = i18n("app.dialogs.selectAppsToIgnore.choose");
+  options.button_label = appDialogsSelectAppsToIgnoreChoose;
   options.features.allow_multiple_selections = true;
-  options.filters = {{i18n("app.dialogs.selectAppsToIgnore.applications"), {"app"}}};
+  options.filters = {{appDialogsSelectAppsToIgnoreApplications, {"app"}}};
   molybden::OpenDialog::show(settings_window_, options, [this](molybden::OpenDialogResult result) {
     if (result.canceled) {
       return;
@@ -1491,10 +1528,10 @@ void MainApp::saveImageAsFile(const std::string &imageFileName, int imageWidth, 
   auto destImageFilePath = save_images_dir_ + "/" + destImageFileName;
 
   SaveDialogOptions options;
-  options.title = i18n("app.dialogs.saveImageAs.title");
+  options.title = appDialogsSaveImageAsTitle;
   options.default_path = destImageFilePath;
-  options.filters = {{i18n("app.dialogs.saveImageAs.images"), {"PNG"}}};
-  options.button_label = i18n("app.dialogs.saveImageAs.save");
+  options.filters = {{appDialogsSaveImageAsImages, {"PNG"}}};
+  options.button_label = appDialogsSaveImageAsSave;
   SaveDialog::show(browser(), options, [this, imageFileName](SaveDialogResult result) {
     auto_hide_disabled_ = false;
     if (!result.canceled) {
@@ -1523,6 +1560,43 @@ void MainApp::onLanguageChanged() {
   changelog_item_->setTitle(i18n("app.menu.helpMenu.changelog"));
   feedback_item_->setTitle(i18n("app.menu.helpMenu.feedback"));
   support_item_->setTitle(i18n("app.menu.helpMenu.contactSupport"));
+
+  appDialogsUpdateAvailableTitle = i18n("app.dialogs.updateAvailable.title");
+  appDialogsUpdateAvailableMessage = i18n("app.dialogs.updateAvailable.message");
+  appDialogsUpdateAvailableInformativeText = i18n("app.dialogs.updateAvailable.informativeText");
+  appDialogsUpdateAvailableUpdate = i18n("app.dialogs.updateAvailable.update");
+  appDialogsUpdateAvailableLater = i18n("app.dialogs.updateAvailable.later");
+
+  appDialogsRestartRequiredTitle = i18n("app.dialogs.restartRequired.title");
+  appDialogsRestartRequiredMessage = i18n("app.dialogs.restartRequired.message");
+  appDialogsRestartRequiredInformativeText = i18n("app.dialogs.restartRequired.informativeText");
+  appDialogsRestartRequiredRestart = i18n("app.dialogs.restartRequired.restart");
+  appDialogsRestartRequiredLater = i18n("app.dialogs.restartRequired.later");
+
+  appDialogsUpdateFailedTitle = i18n("app.dialogs.updateFailed.title");
+  appDialogsUpdateFailedMessage = i18n("app.dialogs.updateFailed.message");
+  appDialogsUpdateFailedClose = i18n("app.dialogs.updateFailed.close");
+
+  appDialogsUpdateCheckFailedTitle = i18n("app.dialogs.updateCheckFailed.title");
+  appDialogsUpdateCheckFailedMessage = i18n("app.dialogs.updateCheckFailed.message");
+  appDialogsUpdateCheckFailedClose = i18n("app.dialogs.updateCheckFailed.close");
+
+  appDialogsUpToDateTitle = i18n("app.dialogs.upToDate.title");
+  appDialogsUpToDateMessage = i18n("app.dialogs.upToDate.message");
+  appDialogsUpToDateInformativeText = i18n("app.dialogs.upToDate.informativeText");
+  appDialogsUpToDateClose = i18n("app.dialogs.upToDate.close");
+
+  appDialogsClearHistoryMessage = i18n("app.dialogs.clearHistory.message");
+  appDialogsClearHistoryInformativeText = i18n("app.dialogs.clearHistory.informativeText");
+  appDialogsClearHistoryClear = i18n("app.dialogs.clearHistory.clear");
+  appDialogsClearHistoryCancel = i18n("app.dialogs.clearHistory.cancel");
+
+  appDialogsSelectAppsToIgnoreChoose = i18n("app.dialogs.selectAppsToIgnore.choose");
+  appDialogsSelectAppsToIgnoreApplications = i18n("app.dialogs.selectAppsToIgnore.applications");
+
+  appDialogsSaveImageAsTitle = i18n("app.dialogs.saveImageAs.title");
+  appDialogsSaveImageAsImages = i18n("app.dialogs.saveImageAs.images");
+  appDialogsSaveImageAsSave = i18n("app.dialogs.saveImageAs.save");
 }
 
 void MainApp::updateLanguage(std::shared_ptr<molybden::Browser> window) {
