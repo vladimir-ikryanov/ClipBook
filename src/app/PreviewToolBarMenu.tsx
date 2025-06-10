@@ -1,21 +1,21 @@
 import '../app.css';
-import React, {KeyboardEvent, MouseEvent, useState} from "react";
+import React, {KeyboardEvent, MouseEvent, useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {
   DownloadIcon,
   Edit3Icon,
   EllipsisVerticalIcon,
   EyeIcon,
-  PenIcon,
-  RefreshCwIcon,
+  PenIcon, PlusIcon,
+  RefreshCwIcon, TagsIcon,
   TrashIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
+  DropdownMenuLabel, DropdownMenuPortal,
+  DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -36,12 +36,16 @@ import ShortcutLabel from "@/app/ShortcutLabel";
 import {
   getFirstSelectedHistoryItem,
   getSelectedHistoryItemIndices, isImageItem, isLinkItem,
-  isTextItem,
+  isTextItem, TagCheckedState,
   TextFormatOperation
 } from "@/data";
 import {CommandShortcut} from "@/components/ui/command";
 import {emitter} from "@/actions";
 import {useTranslation} from "react-i18next";
+import TagIcon, {allTags, Tag} from "@/tags";
+import {Checkbox} from "@/components/ui/checkbox";
+import {CheckedState} from "@radix-ui/react-checkbox";
+import {updateClip} from "@/db";
 
 type PreviewToolBarMenuProps = {
   selectedItemIndices: number[]
@@ -53,8 +57,28 @@ type PreviewToolBarMenuProps = {
 
 export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
   const {t} = useTranslation()
-  
+
+  const [itemTags, setItemTags] = useState<TagCheckedState[]>([])
   const [openDropdown, setOpenDropdown] = useState(false)
+
+  function selectedItem() {
+    if (props.selectedItemIndices.length === 1) {
+      return getFirstSelectedHistoryItem()
+    }
+    return undefined
+  }
+
+  useEffect(() => {
+    let tags: TagCheckedState[] = []
+    allTags().forEach(tag => {
+      let item = selectedItem()
+      if (item) {
+        const checked = !!item.tags?.includes(tag.id)
+        tags.push({tag, checked})
+      }
+    })
+    setItemTags(tags)
+  }, [])
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
@@ -126,6 +150,10 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
     return props.selectedItemIndices.length === 1 && isTextItem(getFirstSelectedHistoryItem())
   }
 
+  function canShowTags() {
+    return props.selectedItemIndices.length === 1
+  }
+
   function handleOpenDropdownChange(open: boolean) {
     setOpenDropdown(open)
   }
@@ -138,56 +166,79 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
     return ""
   }
 
+  function handleAssignTag() {
+    let item = selectedItem()
+    if (item) {
+      emitter.emit("AddTagToItemWithId", item.id)
+    }
+  }
+
+  async function handleTagChecked(tag: Tag, checked: CheckedState) {
+    let item = selectedItem()
+    if (!item) {
+      return
+    }
+    if (checked) {
+      item.tags = [...item.tags || [], tag.id]
+    } else {
+      item.tags = item.tags?.filter((t) => t !== tag.id)
+    }
+    await updateClip(item.id!, item)
+    let tags = itemTags.map(tagState => {
+      if (tagState.tag.id === tag.id) {
+        tagState.checked = !!checked
+      }
+      return tagState
+    })
+    setItemTags([...tags])
+    emitter.emit("UpdateItemById", item.id)
+  }
+
   function renderFormatOptions() {
     return (
         <>
           <DropdownMenuSeparator/>
           <DropdownMenuLabel>{t('preview.toolbarMenu.formatText')}</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.ToLowerCase)}>
-            <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">{t('preview.toolbarMenu.makeLowerCase')}</span>
+            <span className="ml-0.5 mr-12">{t('preview.toolbarMenu.makeLowerCase')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetMakeLowerCaseShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.ToUpperCase)}>
-            <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">{t('preview.toolbarMenu.makeUpperCase')}</span>
+            <span className="ml-0.5 mr-12">{t('preview.toolbarMenu.makeUpperCase')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetMakeUpperCaseShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.CapitalizeWords)}>
-            <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">{t('preview.toolbarMenu.capitalizeWords')}</span>
+            <span className="ml-0.5 mr-12">{t('preview.toolbarMenu.capitalizeWords')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetCapitalizeShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.ToSentenceCase)}>
-            <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">{t('preview.toolbarMenu.sentenceCase')}</span>
+            <span className="ml-0.5 mr-12">{t('preview.toolbarMenu.sentenceCase')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetSentenceCaseShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.RemoveEmptyLines)}>
-            <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">{t('preview.toolbarMenu.removeEmptyLines')}</span>
+            <span className="ml-0.5 mr-12">{t('preview.toolbarMenu.removeEmptyLines')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetRemoveEmptyLinesShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.StripAllWhitespaces)}>
-            <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">{t('preview.toolbarMenu.stripAllWhitespaces')}</span>
+          <DropdownMenuItem
+              onClick={() => handleFormatText(TextFormatOperation.StripAllWhitespaces)}>
+            <span className="ml-0.5 mr-12">{t('preview.toolbarMenu.stripAllWhitespaces')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetStripAllWhitespacesShortcut()}/>
             </CommandShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleFormatText(TextFormatOperation.TrimSurroundingWhitespaces)}>
-            <div className="mr-2 h-4 w-4"></div>
-            <span className="mr-12">{t('preview.toolbarMenu.trimSurroundingWhitespaces')}</span>
+          <DropdownMenuItem
+              onClick={() => handleFormatText(TextFormatOperation.TrimSurroundingWhitespaces)}>
+            <span className="ml-0.5 mr-12">{t('preview.toolbarMenu.trimSurroundingWhitespaces')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetTrimSurroundingWhitespacesShortcut()}/>
             </CommandShortcut>
@@ -260,10 +311,48 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
           {
               canSaveImageAsFile() && <DropdownMenuSeparator/>
           }
+          {
+              canShowTags() &&
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <TagsIcon className="mr-2 h-4 w-4"/>
+                  <span>{t('historyItemContextMenu.tags')}</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent className="p-1.5 bg-actions-background">
+                    {
+                      itemTags.map((tagState: TagCheckedState) => {
+                        return (
+                            <DropdownMenuItem key={tagState.tag.id}>
+                              <Checkbox className="mr-2 border-checkbox"
+                                        checked={tagState.checked}
+                                        onCheckedChange={(checked) => handleTagChecked(tagState.tag, checked)}
+                                        onClick={(e) => {
+                                          e.stopPropagation(); // Prevent closing the menu
+                                        }}/>
+                              <TagIcon className="mr-2 h-4 w-4"
+                                       style={{color: tagState.tag.color}}/>
+                              <span className="mr-12">{tagState.tag.name}</span>
+                            </DropdownMenuItem>
+                        )
+                      })
+                    }
+                    <DropdownMenuSeparator/>
+                    <DropdownMenuItem onClick={handleAssignTag}>
+                      <PlusIcon className="mr-2 h-4 w-4"/>
+                      <span className="mr-12">{t('historyItemContextMenu.newTag')}</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+          }
+          {
+              canShowTags() && <DropdownMenuSeparator/>
+          }
           <DropdownMenuItem onClick={handleDeleteItem}>
             <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
             <span className="mr-12 text-actions-danger">
-              {t('preview.toolbarMenu.delete', { indicator: getMultipleItemsIndicator() })}
+              {t('preview.toolbarMenu.delete', {indicator: getMultipleItemsIndicator()})}
             </span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>

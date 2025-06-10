@@ -96,6 +96,11 @@ export const supportedLanguages: Language[] = [
   new Language(LanguageCode.PT_BR, "Portuguese (Brazil)", "Português (Brasil)"),
 ];
 
+export type TagCheckedState = {
+  tag: Tag
+  checked: boolean
+}
+
 let history: Clip[] = [];
 let filteredHistory: Clip[] = [];
 let filterQuery = "";

@@ -28,7 +28,7 @@ import {
   AppInfo,
   fileExists, FinderIcon, getDefaultApp, getFileOrImagePath,
   getFilterQuery, getHistoryItem, getSelectedHistoryItemIndices, isFilterActive,
-  isTextItem,
+  isTextItem, TagCheckedState,
   toBase64Icon
 } from "@/data";
 import TagIcon, {allTags, Tag} from "@/tags";
@@ -54,11 +54,6 @@ type HistoryItemContextMenuProps = {
   appName: string
   appIcon: string
   children: React.ReactNode
-}
-
-type TagCheckedState = {
-  tag: Tag
-  checked: boolean
 }
 
 const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
