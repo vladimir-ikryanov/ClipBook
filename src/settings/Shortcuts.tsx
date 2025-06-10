@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
 import ShortcutInput from "@/settings/ShortcutInput";
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import {
   prefGetCapitalizeShortcut,
   prefGetClearHistoryShortcut,
@@ -15,7 +15,7 @@ import {
   prefGetOpenInBrowserShortcut, prefGetOpenInDefaultAppShortcut,
   prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut, prefGetPasteSelectedObjectToActiveAppShortcut,
-  prefGetPauseResumeShortcut, prefGetRemoveEmptyLinesShortcut,
+  prefGetPauseResumeShortcut, prefGetQuickLookShortcut, prefGetRemoveEmptyLinesShortcut,
   prefGetRenameItemShortcut,
   prefGetSaveImageAsFileShortcut,
   prefGetSelectNextItemShortcut,
@@ -37,7 +37,7 @@ import {
   prefSetOpenInBrowserShortcut, prefSetOpenInDefaultAppShortcut,
   prefSetOpenSettingsShortcut,
   prefSetPasteSelectedItemToActiveAppShortcut, prefSetPasteSelectedObjectToActiveAppShortcut,
-  prefSetPauseResumeShortcut, prefSetRemoveEmptyLinesShortcut,
+  prefSetPauseResumeShortcut, prefSetQuickLookShortcut, prefSetRemoveEmptyLinesShortcut,
   prefSetRenameItemShortcut,
   prefSetSaveImageAsFileShortcut,
   prefSetSelectNextItemShortcut,
@@ -91,6 +91,7 @@ export default function Shortcuts() {
   const [stripAllWhitespacesShortcut, setStripAllWhitespacesShortcut] = useState(prefGetStripAllWhitespacesShortcut());
   const [trimSurroundingWhitespacesShortcut, setTrimSurroundingWhitespacesShortcut] = useState(prefGetTrimSurroundingWhitespacesShortcut());
   const [toggleFilterShortcut, setToggleFilterShortcut] = useState(prefGetToggleFilterShortcut());
+  const [quickLookShortcut, setQuickLookShortcut] = useState(prefGetQuickLookShortcut());
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -231,6 +232,11 @@ export default function Shortcuts() {
     prefSetToggleFavoriteShortcut(shortcut)
   }
 
+  function handleQuickLookShortcutChange(shortcut: string) {
+    setQuickLookShortcut(shortcut)
+    prefSetQuickLookShortcut(shortcut)
+  }
+
   function handleSaveImageAsFileShortcutChange(shortcut: string) {
     setSaveImageAsFileShortcut(shortcut)
     prefSetSaveImageAsFileShortcut(shortcut)
@@ -368,6 +374,12 @@ export default function Shortcuts() {
               <ShortcutInput shortcut={toggleFavoriteShortcut}
                              defaultShortcut="MetaLeft + KeyS"
                              onSave={handleToggleFavoriteShortcutChange}/>
+            </div>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">{t('settings.shortcuts.quickLook')}</span>
+              <ShortcutInput shortcut={quickLookShortcut}
+                             defaultShortcut="MetaLeft + KeyL"
+                             onSave={handleQuickLookShortcutChange}/>
             </div>
             <div className="flex items-center justify-between space-x-20">
               <span className="">{t('settings.shortcuts.saveAsFile')}</span>

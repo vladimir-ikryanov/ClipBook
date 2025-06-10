@@ -177,7 +177,8 @@
       "sentenceCase": "Primeira letra maiúscula",
       "removeEmptyLines": "Remover linhas vazias",
       "stripAllWhitespaces": "Remover todos os espaços",
-      "trimSurroundingWhitespaces": "Remover espaços ao redor"
+      "trimSurroundingWhitespaces": "Remover espaços ao redor",
+      "quickLook": "Visualização Rápida"
     },
     "privacy": {
       "title": "Privacidade",

@@ -177,7 +177,8 @@
       "sentenceCase": "Sentence case",
       "removeEmptyLines": "Remove empty lines",
       "stripAllWhitespaces": "Strip all whitespaces",
-      "trimSurroundingWhitespaces": "Trim surrounding whitespaces"
+      "trimSurroundingWhitespaces": "Trim surrounding whitespaces",
+      "quickLook": "Quick look"
     },
     "privacy": {
       "title": "Privacy",
