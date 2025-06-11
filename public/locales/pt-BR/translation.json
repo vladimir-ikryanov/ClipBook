@@ -178,7 +178,8 @@
       "removeEmptyLines": "Remover linhas vazias",
       "stripAllWhitespaces": "Remover todos os espaços",
       "trimSurroundingWhitespaces": "Remover espaços ao redor",
-      "quickLook": "Visualização Rápida"
+      "quickLook": "Visualização Rápida",
+      "pasteNextItemToActiveApp": "Colar o próximo item do histórico"
     },
     "privacy": {
       "title": "Privacidade",

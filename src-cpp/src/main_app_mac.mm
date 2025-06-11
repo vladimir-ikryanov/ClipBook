@@ -297,6 +297,25 @@ void MainAppMac::updatePauseResumeShortcut() {
   });
 }
 
+void MainAppMac::enablePasteNextItemToActiveAppShortcut() {
+  disablePasteNextItemToActiveAppShortcut();
+  auto shortcut_str = settings_->getPasteNextItemToActiveAppShortcut();
+  paste_next_item_to_active_app_shortcut_ = createShortcut(shortcut_str);
+  if (paste_next_item_to_active_app_shortcut_.key == KeyCode::UNKNOWN) {
+    return;
+  }
+  app()->globalShortcuts()->registerShortcut(paste_next_item_to_active_app_shortcut_, [this](const Shortcut &) {
+    pasteNextItemToActiveApp();
+  });
+}
+
+void MainAppMac::disablePasteNextItemToActiveAppShortcut() {
+  if (paste_next_item_to_active_app_shortcut_.key != KeyCode::UNKNOWN) {
+    app()->globalShortcuts()->unregisterShortcut(paste_next_item_to_active_app_shortcut_);
+    paste_next_item_to_active_app_shortcut_.key = KeyCode::UNKNOWN;
+  }
+}
+
 void MainAppMac::updateOpenSettingsShortcut() {
   auto shortcut_str = settings_->getOpenSettingsShortcut();
   open_settings_shortcut_ = createShortcut(shortcut_str);
@@ -1097,4 +1116,8 @@ void MainAppMac::preview(const std::string &file_path) {
     }];
     [[QuickLookPreviewer shared] previewFileAtPath:filePath];
   });
+}
+
+void MainAppMac::playBeepSound() {
+//  [[NSSound soundNamed: @"Tink"] play];
 }

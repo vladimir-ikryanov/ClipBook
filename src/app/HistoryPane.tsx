@@ -39,7 +39,12 @@ import {
   setFilterVisibleState,
   getDetailsVisibleState,
   setDetailsVisibleState,
-  getFilterQuery, isFilterActive, resetFilter, setShouldUpdateHistory, fileExists, LanguageCode
+  getFilterQuery,
+  isFilterActive,
+  resetFilter,
+  setShouldUpdateHistory,
+  fileExists,
+  getNextItemIndexForPaste, resetPasteNextItemIndex
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
@@ -119,6 +124,7 @@ declare const openSettingsWindow: () => void;
 declare const saveImageAsFile: (imageFilePath: string, imageWidth: number, imageHeight: number) => void;
 declare const hideAppWindow: () => void;
 declare const openInApp: (filePath: string, appPath: string) => void;
+declare const playBeep: () => void;
 
 type HistoryPaneProps = {
   appName: string
@@ -195,6 +201,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
     setHistory([...getHistoryItems()])
 
+    // When the history is changed, we need to reset the next item index for paste.
+    resetPasteNextItemIndex()
+
     // The added item might not be in the visible history list if it doesn't match the search query.
     let index = getHistoryItemIndex(item)
     if (index >= 0) {
@@ -242,6 +251,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
           await updateHistoryItem(targetItem.id!, targetItem)
           let items = getHistoryItems()
           setHistory([...items])
+          resetPasteNextItemIndex()
           let index = items.findIndex(i => i.id === targetItem.id)
           setSelectedHistoryItemIndex(index)
           setSelectedItemIndices(getSelectedHistoryItemIndices())
@@ -271,6 +281,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     let keepFavorites = prefGetKeepFavoritesOnClearHistory()
     let items = await clear(keepFavorites)
     setHistory(items)
+    resetPasteNextItemIndex()
     // If the history is not empty, update the preview text to the new active item.
     if (items.length > 0) {
       let activeHistoryItemIndex = getFirstSelectedHistoryItemIndex()
@@ -306,6 +317,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       handleSearchQueryChange("")
     }
     await updateHistoryItemsIfNecessary()
+    resetPasteNextItemIndex()
     focusSearchField()
     if (getVisibleHistoryLength() > 0) {
       setSelectedHistoryItemIndex(0)
@@ -318,6 +330,19 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setIsTrialExpired(isTrialLicenseExpired())
   }
 
+  async function pasteNextItemToActiveApp() {
+    let index = getNextItemIndexForPaste()
+    if (index >= 0) {
+      let item = getHistoryItem(index)
+      if (item) {
+        await pasteItem(item, true)
+      }
+    } else {
+      // Play a sound to indicate that there are no more items to paste.
+      playBeep()
+    }
+  }
+  
   function scrollToLastSelectedItem() {
     let selectedItemIndices = getSelectedHistoryItemIndices()
     if (selectedItemIndices.length === 0) {
@@ -1496,6 +1521,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   (window as any).copyToClipboardAfterMerge = copyToClipboardAfterMerge;
   (window as any).clearHistory = clearHistory;
   (window as any).activateApp = activateApp;
+  (window as any).pasteNextItemToActiveApp = pasteNextItemToActiveApp;
 
   if (isHistoryEmpty()) {
     return (

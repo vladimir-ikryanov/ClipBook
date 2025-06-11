@@ -53,6 +53,7 @@ NSString *prefSelectNextItemShortcut = @"app.select_next_item_shortcut2";
 NSString *prefSelectPreviousItemShortcut = @"app.select_previous_item_shortcut2";
 NSString *prefPasteSelectedItemToActiveAppShortcut = @"app.paste_selected_item_to_active_app_shortcut2";
 NSString *prefPasteSelectedObjectToActiveAppShortcut = @"app.paste_selected_object_to_active_app_shortcut2";
+NSString *prefPasteNextItemToActiveAppShortcut = @"app.paste_next_item_to_active_app_shortcut2";
 NSString *prefEditHistoryItemShortcut = @"app.edit_history_item_shortcut2";
 NSString *prefOpenInBrowserShortcut = @"app.open_in_browser_shortcut2";
 NSString *prefShowInFinderShortcut = @"app.show_in_finder_shortcut";
@@ -612,6 +613,21 @@ std::string AppSettingsMac::getPasteSelectedObjectToActiveAppShortcut() {
     return {[shortcut UTF8String]};
   }
   return "ShiftLeft + Enter";
+}
+
+void AppSettingsMac::savePasteNextItemToActiveAppShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefPasteNextItemToActiveAppShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getPasteNextItemToActiveAppShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefPasteNextItemToActiveAppShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ControlLeft + KeyV";
 }
 
 void AppSettingsMac::saveEditHistoryItemShortcut(std::string shortcut) {

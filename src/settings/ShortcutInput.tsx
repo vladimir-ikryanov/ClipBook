@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 
 declare const enableOpenAppShortcut: () => void;
 declare const disableOpenAppShortcut: () => void;
+declare const enablePasteNextItemToActiveAppShortcut: () => void;
+declare const disablePasteNextItemToActiveAppShortcut: () => void;
 
 type ShortcutProps = {
   shortcut: string
@@ -25,11 +27,13 @@ export default function ShortcutInput(props: ShortcutProps) {
   function startEditing() {
     setIsEditing(true)
     disableOpenAppShortcut()
+    disablePasteNextItemToActiveAppShortcut()
   }
 
   function stopEditing() {
     setIsEditing(false)
     enableOpenAppShortcut()
+    enablePasteNextItemToActiveAppShortcut()
   }
 
   function handleClick() {

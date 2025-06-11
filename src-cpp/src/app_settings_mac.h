@@ -150,6 +150,9 @@ class AppSettingsMac : public AppSettings {
   void savePasteSelectedObjectToActiveAppShortcut(std::string shortcut) override;
   std::string getPasteSelectedObjectToActiveAppShortcut() override;
 
+  void savePasteNextItemToActiveAppShortcut(std::string shortcut) override;
+  std::string getPasteNextItemToActiveAppShortcut() override;
+
   void saveEditHistoryItemShortcut(std::string shortcut) override;
   std::string getEditHistoryItemShortcut() override;
 

@@ -1,1 +1,1 @@
-npm run molybden callstack -- --dump /Users/vladimir/Downloads/*.dmp --symbols /Applications
+npm run molybden callstack -- --dump "/Users/vladimir/Library/Application Support/ClipBook/Crashpad/pending/8a17edfc-65e3-4da9-a20b-c8d912893db9.dmp" --symbols /Users/vladimir/Projects/ClipBook/build-dist/bin

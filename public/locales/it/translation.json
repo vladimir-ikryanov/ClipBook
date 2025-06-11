@@ -178,7 +178,8 @@
       "removeEmptyLines": "Rimuovi righe vuote",
       "stripAllWhitespaces": "Rimuovi tutti gli spazi",
       "trimSurroundingWhitespaces": "Rimuovi spazi circostanti",
-      "quickLook": "Anteprima rapida"
+      "quickLook": "Anteprima rapida",
+      "pasteNextItemToActiveApp": "Incolla l'elemento successivo della cronologia"
     },
     "privacy": {
       "title": "Privacy",

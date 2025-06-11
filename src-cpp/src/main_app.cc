@@ -144,6 +144,8 @@ bool MainApp::init() {
 
   // Register a global shortcut to show the app.
   enableOpenAppShortcut();
+  // Register a global shortcut to paste the next item to the active app.
+  enablePasteNextItemToActiveAppShortcut();
   // Update the pause/resume shortcut.
   updatePauseResumeShortcut();
   // Update the open settings shortcut.
@@ -293,6 +295,15 @@ std::shared_ptr<molybden::Browser> MainApp::browser() const {
 
 std::shared_ptr<AppSettings> MainApp::settings() const {
   return settings_;
+}
+
+void MainApp::pasteNextItemToActiveApp() {
+  std::thread([this]() {
+    auto frame = app_window_->mainFrame();
+    if (frame) {
+      frame->executeJavaScript("pasteNextItemToActiveApp()");
+    }
+  }).detach();
 }
 
 void MainApp::setActiveAppInfo(const std::string &app_name, const std::string& app_icon) {
@@ -628,6 +639,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
 
   // App window.
+  window->putProperty("playBeep", [this]() {
+    playBeepSound();
+  });
   window->putProperty("pasteItemInFrontApp",
                       [this](std::string text,
                              std::string rtf,
@@ -726,6 +740,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("disableOpenAppShortcut", [this]() {
     disableOpenAppShortcut();
+  });
+  window->putProperty("enablePasteNextItemToActiveAppShortcut", [this]() {
+    enablePasteNextItemToActiveAppShortcut();
+  });
+  window->putProperty("disablePasteNextItemToActiveAppShortcut", [this]() {
+    disablePasteNextItemToActiveAppShortcut();
   });
   window->putProperty("updateOpenSettingsShortcut", [this]() {
     updateOpenSettingsShortcut();
@@ -1099,6 +1119,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
                       });
   window->putProperty("getPasteSelectedObjectToActiveAppShortcut", [this]() -> std::string {
     return settings_->getPasteSelectedObjectToActiveAppShortcut();
+  });
+  window->putProperty("savePasteNextItemToActiveAppShortcut", [this](std::string shortcut) -> void {
+    settings_->savePasteNextItemToActiveAppShortcut(shortcut);
+  });
+  window->putProperty("getPasteNextItemToActiveAppShortcut", [this]() -> std::string {
+    return settings_->getPasteNextItemToActiveAppShortcut();
   });
   window->putProperty("saveEditHistoryItemShortcut", [this](std::string shortcut) -> void {
     settings_->saveEditHistoryItemShortcut(shortcut);

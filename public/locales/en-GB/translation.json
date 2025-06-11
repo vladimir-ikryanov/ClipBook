@@ -178,7 +178,8 @@
       "removeEmptyLines": "Remove empty lines",
       "stripAllWhitespaces": "Strip all whitespaces",
       "trimSurroundingWhitespaces": "Trim surrounding whitespaces",
-      "quickLook": "Quick look"
+      "quickLook": "Quick look",
+      "pasteNextItemToActiveApp": "Paste next history item"
     },
     "privacy": {
       "title": "Privacy",

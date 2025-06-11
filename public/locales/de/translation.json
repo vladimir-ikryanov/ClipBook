@@ -178,7 +178,8 @@
       "removeEmptyLines": "Leere Zeilen entfernen",
       "stripAllWhitespaces": "Alle Leerzeichen entfernen",
       "trimSurroundingWhitespaces": "Umgebende Leerzeichen entfernen",
-      "quickLook": "Schnellvorschau"
+      "quickLook": "Schnellvorschau",
+      "pasteNextItemToActiveApp": "Nächstes Verlaufselement einfügen"
     },
     "privacy": {
       "title": "Datenschutz",

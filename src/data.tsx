@@ -122,6 +122,7 @@ let infoVisible = true;
 let sortType = SortHistoryType.TimeOfLastCopy;
 let sortOrderReverse = false;
 let sourceApps: AppInfo[] = [];
+let pasteNextItemIndex = -1;
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -826,4 +827,16 @@ export function formatNumber(value: number): string {
     maximumFractionDigits: 2,
     minimumFractionDigits: 2,
   }).format(value);
+}
+
+export function getNextItemIndexForPaste(): number {
+  pasteNextItemIndex++
+  if (pasteNextItemIndex >= history.length) {
+    pasteNextItemIndex = -1
+  }
+  return pasteNextItemIndex
+}
+
+export function resetPasteNextItemIndex() {
+  pasteNextItemIndex = -1
 }

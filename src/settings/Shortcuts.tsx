@@ -14,6 +14,7 @@ import {
   prefGetOpenAppShortcut,
   prefGetOpenInBrowserShortcut, prefGetOpenInDefaultAppShortcut,
   prefGetOpenSettingsShortcut,
+  prefGetPasteNextItemToActiveAppShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut, prefGetPasteSelectedObjectToActiveAppShortcut,
   prefGetPauseResumeShortcut, prefGetQuickLookShortcut, prefGetRemoveEmptyLinesShortcut,
   prefGetRenameItemShortcut,
@@ -36,6 +37,7 @@ import {
   prefSetOpenAppShortcut,
   prefSetOpenInBrowserShortcut, prefSetOpenInDefaultAppShortcut,
   prefSetOpenSettingsShortcut,
+  prefSetPasteNextItemToActiveAppShortcut,
   prefSetPasteSelectedItemToActiveAppShortcut, prefSetPasteSelectedObjectToActiveAppShortcut,
   prefSetPauseResumeShortcut, prefSetQuickLookShortcut, prefSetRemoveEmptyLinesShortcut,
   prefSetRenameItemShortcut,
@@ -53,6 +55,7 @@ import {
 declare const enableOpenAppShortcut: () => void;
 declare const closeSettingsWindow: () => void;
 declare const updateOpenSettingsShortcut: () => void;
+declare const enablePasteNextItemToActiveAppShortcut: () => void;
 
 export default function Shortcuts() {
   const { t } = useTranslation();
@@ -65,6 +68,7 @@ export default function Shortcuts() {
   const [selectPreviousItemShortcut, setSelectPreviousItemShortcut] = useState(prefGetSelectPreviousItemShortcut());
   const [pasteSelectedItemToActiveAppShortcut, setPasteSelectedItemToActiveAppShortcut] = useState(prefGetPasteSelectedItemToActiveAppShortcut());
   const [pasteSelectedObjectToActiveAppShortcut, setPasteSelectedObjectToActiveAppShortcut] = useState(prefGetPasteSelectedObjectToActiveAppShortcut());
+  const [pasteNextItemToActiveAppShortcut, setPasteNextItemToActiveAppShortcut] = useState(prefGetPasteNextItemToActiveAppShortcut());
   const [editHistoryItemShortcut, setEditHistoryItemShortcut] = useState(prefGetEditHistoryItemShortcut());
   const [openInBrowserShortcut, setOpenInBrowserShortcut] = useState(prefGetOpenInBrowserShortcut());
   const [showInFinderShortcut, setShowInFinderShortcut] = useState(prefGetShowInFinderShortcut());
@@ -144,6 +148,12 @@ export default function Shortcuts() {
   function handlePasteSelectedObjectToActiveAppShortcutChange(shortcut: string) {
     setPasteSelectedObjectToActiveAppShortcut(shortcut)
     prefSetPasteSelectedObjectToActiveAppShortcut(shortcut)
+  }
+
+  function handlePasteNextItemToActiveAppShortcutChange(shortcut: string) {
+    setPasteNextItemToActiveAppShortcut(shortcut)
+    prefSetPasteNextItemToActiveAppShortcut(shortcut)
+    enablePasteNextItemToActiveAppShortcut()
   }
 
   function handleEditHistoryItemShortcutChange(shortcut: string) {
@@ -460,6 +470,13 @@ export default function Shortcuts() {
               <ShortcutInput shortcut={openSettingsShortcut}
                              defaultShortcut="MetaLeft + Comma"
                              onSave={handleOpenSettingsShortcutChange}/>
+            </div>
+            <hr/>
+            <div className="flex items-center justify-between space-x-20">
+              <span className="">{t('settings.shortcuts.pasteNextItemToActiveApp')}</span>
+              <ShortcutInput shortcut={pasteNextItemToActiveAppShortcut}
+                             defaultShortcut="ControlLeft + KeyV"
+                             onSave={handlePasteNextItemToActiveAppShortcutChange}/>
             </div>
             <hr/>
             <div className="flex items-center justify-between space-x-20">

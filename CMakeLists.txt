@@ -30,13 +30,6 @@ set(APP_SOURCES
         src-cpp/src/webview.cc
 )
 
-if (OS_WIN)
-    set(APP_SOURCES_WIN
-            src-cpp/src/main_app_win.h
-            src-cpp/src/main_app_win.cc
-    )
-endif ()
-
 if (OS_MAC)
     set(APP_SOURCES_MAC
             src-cpp/src/active_app_observer.h
