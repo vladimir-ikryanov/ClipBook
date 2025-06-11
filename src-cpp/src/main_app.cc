@@ -184,7 +184,7 @@ void MainApp::launch() {
 
   app_window_->onCanExecuteCommand =
       [this](const CanExecuteCommandArgs &args, CanExecuteCommandAction action) {
-        if (app_->isProduction()) {
+        if (app_->isProduction() && !app_->options().logging.enabled) {
           action.cannot();
         } else {
           if (args.command_id == BrowserCommandId::kDevTools) {

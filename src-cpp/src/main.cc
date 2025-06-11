@@ -21,13 +21,12 @@ void launch() {
       options.logging.log_file = getAppDataDir() + "/clipbook.log";
     }
   }
-
   // Register the custom URL scheme.
   options.schemes.emplace_back(kClipBookScheme);
   // Disable internal Chromium traffic.
   options.switches.emplace("--disable-background-networking");
   options.switches.emplace("--disable-component-update");
-  options.switches.emplace("--disable-features=OptimizationHintsFetching,NativeNotifications");
+  options.switches.emplace("--disable-features=OptimizationHintsFetching,NativeNotifications,GatherProcessRequirementMetrics");
   options.switches.emplace("--disable-sync");
 
   App::init(options, [](std::shared_ptr<App> app) {
