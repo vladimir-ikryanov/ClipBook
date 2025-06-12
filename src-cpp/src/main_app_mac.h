@@ -56,7 +56,8 @@ class MainAppMac : public MainApp {
   void disableOpenAppShortcut() override;
   void enablePasteNextItemToActiveAppShortcut() override;
   void disablePasteNextItemToActiveAppShortcut() override;
-  void updatePauseResumeShortcut() override;
+  void enablePauseResumeShortcut() override;
+  void disablePauseResumeShortcut() override;
   void updateOpenSettingsShortcut() override;
   std::string getUserDataDir() override;
   std::string getUpdateServerUrl() override;
@@ -95,7 +96,7 @@ class MainAppMac : public MainApp {
   molybden::Shortcut open_app_shortcut_;
   molybden::Shortcut pause_resume_shortcut_;
   molybden::Shortcut open_settings_shortcut_;
-  molybden::Shortcut paste_next_item_to_active_app_shortcut_;
+  molybden::Shortcut paste_next_item_shortcut_;
   std::shared_ptr<ClipboardReaderMac> clipboard_reader_;
   bool should_activate_app_ = false;
 #ifdef __OBJC__

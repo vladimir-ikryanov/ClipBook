@@ -38,7 +38,7 @@ type SearchBarProps = {
 
 export default function SearchBar(props: SearchBarProps) {
   const {t} = useTranslation()
-  
+
   const [alwaysDisplay, setAlwaysDisplay] = useState(prefShouldAlwaysDisplay())
   const [filterActive, setFilterActive] = useState(isFilterActive())
 
@@ -128,7 +128,7 @@ export default function SearchBar(props: SearchBarProps) {
   function renderTrialBadge() {
     return (
         <Button variant="toolbar"
-                size="toolbar"
+                size="trial"
                 onClick={handleClickTrial}
                 className={getTrialBadgeAnimation()}>
           <span className={`rounded-sm ${getTrialBadgeBgColor()} py-1 px-2.5`}>
@@ -169,7 +169,7 @@ export default function SearchBar(props: SearchBarProps) {
           </div>
           <div
               className={props.searchQuery.length == 0 ? "flex-grow draggable" : "flex-none"}></div>
-          <div className={props.isTrial ? "" : "hidden"}>
+          <div className={props.isTrial ? "flex items-center" : "hidden"}>
             <Tooltip>
               <TooltipTrigger asChild>{renderTrialBadge()}
               </TooltipTrigger>

@@ -52,8 +52,9 @@ import {
   prefSetZoomUIResetShortcut
 } from "@/pref";
 
-declare const enableOpenAppShortcut: () => void;
 declare const closeSettingsWindow: () => void;
+declare const enableOpenAppShortcut: () => void;
+declare const enablePauseResumeShortcut: () => void;
 declare const updateOpenSettingsShortcut: () => void;
 declare const enablePasteNextItemToActiveAppShortcut: () => void;
 
@@ -255,6 +256,7 @@ export default function Shortcuts() {
   function handlePauseResumeShortcutChange(shortcut: string) {
     setPauseResumeShortcut(shortcut)
     prefSetPauseResumeShortcut(shortcut)
+    enablePauseResumeShortcut()
   }
 
   function handleMakeLowerCaseShortcutChange(shortcut: string) {

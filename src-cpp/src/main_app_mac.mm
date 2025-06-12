@@ -210,7 +210,11 @@ bool isAppleSilicon() {
 
 MainAppMac::MainAppMac(const std::shared_ptr<App> &app,
                        const std::shared_ptr<AppSettings> &settings)
-    : MainApp(app, settings) {
+    : MainApp(app, settings),
+      open_app_shortcut_(KeyCode::UNKNOWN),
+      pause_resume_shortcut_(KeyCode::UNKNOWN),
+      open_settings_shortcut_(KeyCode::UNKNOWN),
+      paste_next_item_shortcut_(KeyCode::UNKNOWN) {
   clipboard_reader_ = std::make_shared<ClipboardReaderMac>();
 }
 
@@ -248,7 +252,8 @@ void MainAppMac::enableOpenAppShortcut() {
   if (open_app_shortcut_.key == KeyCode::UNKNOWN) {
     return;
   }
-  app()->globalShortcuts()->registerShortcut(open_app_shortcut_, [this](const Shortcut &) {
+  auto shortcuts = app()->globalShortcuts();
+  bool success = shortcuts->registerShortcut(open_app_shortcut_, [this](const Shortcut &) {
     // Users can set the same shortcut for opening and closing the app.
     auto openAppShortcut = settings_->getOpenAppShortcut();
     auto closeAppShortcut = settings_->getCloseAppShortcut();
@@ -266,6 +271,9 @@ void MainAppMac::enableOpenAppShortcut() {
       show();
     }
   });
+  if (!success) {
+    LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
+  }
 }
 
 void MainAppMac::disableOpenAppShortcut() {
@@ -276,43 +284,55 @@ void MainAppMac::disableOpenAppShortcut() {
   }
 }
 
-void MainAppMac::updatePauseResumeShortcut() {
-  if (pause_resume_shortcut_.key != KeyCode::UNKNOWN) {
-    app()->globalShortcuts()->unregisterShortcut(pause_resume_shortcut_);
-    pause_resume_shortcut_.key = KeyCode::UNKNOWN;
-    pause_resume_item_->setShortcut(pause_resume_shortcut_);
-  }
+void MainAppMac::enablePauseResumeShortcut() {
+  disablePauseResumeShortcut();
   auto shortcut_str = settings_->getPauseResumeShortcut();
   pause_resume_shortcut_ = createShortcut(shortcut_str);
   pause_resume_item_->setShortcut(pause_resume_shortcut_);
   if (pause_resume_shortcut_.key == KeyCode::UNKNOWN) {
     return;
   }
-  app()->globalShortcuts()->registerShortcut(pause_resume_shortcut_, [this](const Shortcut &) {
+  auto shortcuts = app()->globalShortcuts();
+  bool success = shortcuts->registerShortcut(pause_resume_shortcut_, [this](const Shortcut &) {
     if (isPaused()) {
       resume();
     } else {
       pause();
     }
   });
+  if (!success) {
+    LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
+  }
+}
+
+void MainAppMac::disablePauseResumeShortcut() {
+  if (pause_resume_shortcut_.key != KeyCode::UNKNOWN) {
+    app()->globalShortcuts()->unregisterShortcut(pause_resume_shortcut_);
+    pause_resume_shortcut_.key = KeyCode::UNKNOWN;
+    pause_resume_item_->setShortcut(pause_resume_shortcut_);
+  }
 }
 
 void MainAppMac::enablePasteNextItemToActiveAppShortcut() {
   disablePasteNextItemToActiveAppShortcut();
   auto shortcut_str = settings_->getPasteNextItemToActiveAppShortcut();
-  paste_next_item_to_active_app_shortcut_ = createShortcut(shortcut_str);
-  if (paste_next_item_to_active_app_shortcut_.key == KeyCode::UNKNOWN) {
+  paste_next_item_shortcut_ = createShortcut(shortcut_str);
+  if (paste_next_item_shortcut_.key == KeyCode::UNKNOWN) {
     return;
   }
-  app()->globalShortcuts()->registerShortcut(paste_next_item_to_active_app_shortcut_, [this](const Shortcut &) {
+  auto shortcuts = app()->globalShortcuts();
+  bool success = shortcuts->registerShortcut(paste_next_item_shortcut_, [this](const Shortcut &) {
     pasteNextItemToActiveApp();
   });
+  if (!success) {
+    LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
+  }
 }
 
 void MainAppMac::disablePasteNextItemToActiveAppShortcut() {
-  if (paste_next_item_to_active_app_shortcut_.key != KeyCode::UNKNOWN) {
-    app()->globalShortcuts()->unregisterShortcut(paste_next_item_to_active_app_shortcut_);
-    paste_next_item_to_active_app_shortcut_.key = KeyCode::UNKNOWN;
+  if (paste_next_item_shortcut_.key != KeyCode::UNKNOWN) {
+    app()->globalShortcuts()->unregisterShortcut(paste_next_item_shortcut_);
+    paste_next_item_shortcut_.key = KeyCode::UNKNOWN;
   }
 }
 

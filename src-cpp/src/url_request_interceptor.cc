@@ -1076,7 +1076,6 @@ void UrlRequestInterceptor::intercept(const molybden::InterceptUrlRequestArgs &a
   headers.emplace_back("content-length", std::to_string(file_size));
 
   auto job = args.job_factory->createJob(molybden::kOk, headers);
-
   std::ifstream file(file_path, std::ios::binary);
   if (file.is_open()) {
     char* buffer = new char[file_size];
@@ -1085,11 +1084,10 @@ void UrlRequestInterceptor::intercept(const molybden::InterceptUrlRequestArgs &a
     job->write(buffer, buffer_size);
     delete[] buffer;
     file.close();
+    job->complete();
   } else {
     LOG(ERROR) << "Failed to read file " << file_path;
     job->fail();
   }
-  job->complete();
-
   action.intercept(job);
 }

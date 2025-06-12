@@ -144,10 +144,10 @@ bool MainApp::init() {
 
   // Register a global shortcut to show the app.
   enableOpenAppShortcut();
+  //Register a global shortcut to pause/resume the app.
+  enablePauseResumeShortcut();
   // Register a global shortcut to paste the next item to the active app.
   enablePasteNextItemToActiveAppShortcut();
-  // Update the pause/resume shortcut.
-  updatePauseResumeShortcut();
   // Update the open settings shortcut.
   updateOpenSettingsShortcut();
 
@@ -741,6 +741,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("disableOpenAppShortcut", [this]() {
     disableOpenAppShortcut();
   });
+  window->putProperty("enablePauseResumeShortcut", [this]() {
+    enablePauseResumeShortcut();
+  });
+  window->putProperty("disablePauseResumeShortcut", [this]() {
+    disablePauseResumeShortcut();
+  });
   window->putProperty("enablePasteNextItemToActiveAppShortcut", [this]() {
     enablePasteNextItemToActiveAppShortcut();
   });
@@ -1268,7 +1274,6 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("savePauseResumeShortcut", [this](std::string shortcut) -> void {
     settings_->savePauseResumeShortcut(shortcut);
-    updatePauseResumeShortcut();
   });
   window->putProperty("getPauseResumeShortcut", [this]() -> std::string {
     return settings_->getPauseResumeShortcut();
@@ -1481,8 +1486,27 @@ void MainApp::createTray() {
 
 void MainApp::quit() {
   if (settings_->shouldClearHistoryOnQuit()) {
-    app_window_->mainFrame()->executeJavaScript("clearHistory()");
+    auto frame = app_window_->mainFrame();
+    if (frame) {
+      frame->executeJavaScript("clearHistory()");
+    }
   }
+  disableOpenAppShortcut();
+  disablePauseResumeShortcut();
+  disablePasteNextItemToActiveAppShortcut();
+
+  if (welcome_window_) {
+    welcome_window_->close();
+  }
+  if (settings_window_) {
+    settings_window_->close();
+  }
+
+  hide(true);
+  app_window_->close();
+
+  destroyTray();
+
   app_->quit();
 }
 

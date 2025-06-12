@@ -35,6 +35,7 @@ const buttonVariants = cva(
           toolbar: "h-10 px-2",
           dropdown: "h-10 px-1",
           badge: "h-6",
+          trial: "h-6 mx-1.5",
           menu: "h-6 w-6 p-0 m-0",
         },
       },

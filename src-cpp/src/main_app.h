@@ -108,7 +108,8 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   virtual void disableOpenAppShortcut() = 0;
   virtual void enablePasteNextItemToActiveAppShortcut() = 0;
   virtual void disablePasteNextItemToActiveAppShortcut() = 0;
-  virtual void updatePauseResumeShortcut() = 0;
+  virtual void enablePauseResumeShortcut() = 0;
+  virtual void disablePauseResumeShortcut() = 0;
   virtual void updateOpenSettingsShortcut() = 0;
   virtual std::string getUserDataDir() = 0;
   virtual std::string getUpdateServerUrl() = 0;

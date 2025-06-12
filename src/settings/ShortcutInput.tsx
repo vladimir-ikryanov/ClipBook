@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 
 declare const enableOpenAppShortcut: () => void;
 declare const disableOpenAppShortcut: () => void;
+declare const enablePauseResumeShortcut: () => void;
+declare const disablePauseResumeShortcut: () => void;
 declare const enablePasteNextItemToActiveAppShortcut: () => void;
 declare const disablePasteNextItemToActiveAppShortcut: () => void;
 
@@ -19,7 +21,7 @@ type ShortcutProps = {
 
 export default function ShortcutInput(props: ShortcutProps) {
   const { t } = useTranslation();
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [currentKeys, setCurrentKeys] = useState<string[]>([]);
   const [shortcut, setShortcut] = useState(props.shortcut);
@@ -27,12 +29,14 @@ export default function ShortcutInput(props: ShortcutProps) {
   function startEditing() {
     setIsEditing(true)
     disableOpenAppShortcut()
+    disablePauseResumeShortcut()
     disablePasteNextItemToActiveAppShortcut()
   }
 
   function stopEditing() {
     setIsEditing(false)
     enableOpenAppShortcut()
+    enablePauseResumeShortcut()
     enablePasteNextItemToActiveAppShortcut()
   }
 
