@@ -53,7 +53,6 @@ NSString *prefSelectNextItemShortcut = @"app.select_next_item_shortcut2";
 NSString *prefSelectPreviousItemShortcut = @"app.select_previous_item_shortcut2";
 NSString *prefPasteSelectedItemToActiveAppShortcut = @"app.paste_selected_item_to_active_app_shortcut2";
 NSString *prefPasteSelectedObjectToActiveAppShortcut = @"app.paste_selected_object_to_active_app_shortcut2";
-NSString *prefPasteNextItemToActiveAppShortcut = @"app.paste_next_item_to_active_app_shortcut2";
 NSString *prefEditHistoryItemShortcut = @"app.edit_history_item_shortcut2";
 NSString *prefOpenInBrowserShortcut = @"app.open_in_browser_shortcut2";
 NSString *prefShowInFinderShortcut = @"app.show_in_finder_shortcut";
@@ -87,6 +86,7 @@ NSString *prefRemoveEmptyLinesShortcut = @"app.remove_empty_lines_shortcut";
 NSString *prefStripAllWhitespacesShortcut = @"app.strip_all_whitespaces_shortcut";
 NSString *prefTrimSurroundingWhitespacesShortcut = @"app.trim_surrounding_whitespaces_shortcut";
 NSString *prefToggleFilterShortcut = @"app.toggle_filter_shortcut";
+NSString *prefPasteNextItemShortcut = @"app.paste_next_item_shortcut";
 
 /**
  * Checks if the device is managed by MDM.
@@ -617,13 +617,13 @@ std::string AppSettingsMac::getPasteSelectedObjectToActiveAppShortcut() {
 
 void AppSettingsMac::savePasteNextItemToActiveAppShortcut(std::string shortcut) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefPasteNextItemToActiveAppShortcut];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefPasteNextItemShortcut];
   [defaults synchronize];
 }
 
 std::string AppSettingsMac::getPasteNextItemToActiveAppShortcut() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  NSString *shortcut = [defaults objectForKey:prefPasteNextItemToActiveAppShortcut];
+  NSString *shortcut = [defaults objectForKey:prefPasteNextItemShortcut];
   if (shortcut != nil) {
     return {[shortcut UTF8String]};
   }

@@ -103,11 +103,10 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   // Returns the boot time of the system in seconds since Unix epoch or -1 if failed.
   virtual long getSystemBootTime();
 
-  virtual void playBeepSound() = 0;
   virtual void enableOpenAppShortcut() = 0;
   virtual void disableOpenAppShortcut() = 0;
-  virtual void enablePasteNextItemToActiveAppShortcut() = 0;
-  virtual void disablePasteNextItemToActiveAppShortcut() = 0;
+  virtual void enablePasteNextItemShortcut() = 0;
+  virtual void disablePasteNextItemShortcut() = 0;
   virtual void enablePauseResumeShortcut() = 0;
   virtual void disablePauseResumeShortcut() = 0;
   virtual void updateOpenSettingsShortcut() = 0;

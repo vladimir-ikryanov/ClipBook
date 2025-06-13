@@ -1,5 +1,6 @@
 #include "main_app_mac.h"
 
+#include "active_app_observer.h"
 #include "quick_look_previewer_mac.h"
 
 #import <ApplicationServices/ApplicationServices.h>
@@ -209,12 +210,7 @@ bool isAppleSilicon() {
 }
 
 MainAppMac::MainAppMac(const std::shared_ptr<App> &app,
-                       const std::shared_ptr<AppSettings> &settings)
-    : MainApp(app, settings),
-      open_app_shortcut_(KeyCode::UNKNOWN),
-      pause_resume_shortcut_(KeyCode::UNKNOWN),
-      open_settings_shortcut_(KeyCode::UNKNOWN),
-      paste_next_item_shortcut_(KeyCode::UNKNOWN) {
+                       const std::shared_ptr<AppSettings> &settings) : MainApp(app, settings) {
   clipboard_reader_ = std::make_shared<ClipboardReaderMac>();
 }
 
@@ -231,11 +227,6 @@ void MainAppMac::setActiveAppInfo(NSRunningApplication* activeApp) {
     std::string app_icon = getFileIconAsBase64(app_path, false);
     MainApp::setActiveAppInfo(app_name, app_icon);
   }
-}
-
-void MainAppMac::onActiveAppChanged(NSNotification *notification) {
-  NSDictionary *userInfo = notification.userInfo;
-  setActiveAppInfo(userInfo[NSWorkspaceApplicationKey]);
 }
 
 molybden::Shortcut MainAppMac::createShortcut(const std::string &shortcut) {
@@ -313,8 +304,8 @@ void MainAppMac::disablePauseResumeShortcut() {
   }
 }
 
-void MainAppMac::enablePasteNextItemToActiveAppShortcut() {
-  disablePasteNextItemToActiveAppShortcut();
+void MainAppMac::enablePasteNextItemShortcut() {
+  disablePasteNextItemShortcut();
   auto shortcut_str = settings_->getPasteNextItemToActiveAppShortcut();
   paste_next_item_shortcut_ = createShortcut(shortcut_str);
   if (paste_next_item_shortcut_.key == KeyCode::UNKNOWN) {
@@ -329,7 +320,7 @@ void MainAppMac::enablePasteNextItemToActiveAppShortcut() {
   }
 }
 
-void MainAppMac::disablePasteNextItemToActiveAppShortcut() {
+void MainAppMac::disablePasteNextItemShortcut() {
   if (paste_next_item_shortcut_.key != KeyCode::UNKNOWN) {
     app()->globalShortcuts()->unregisterShortcut(paste_next_item_shortcut_);
     paste_next_item_shortcut_.key = KeyCode::UNKNOWN;
@@ -831,7 +822,12 @@ bool MainAppMac::init() {
 void MainAppMac::launch() {
   MainApp::launch();
   clipboard_reader_->start(shared_from_this());
-  observer_ = [[ActiveAppObserver alloc] initWithOwner:this];
+  ActiveAppObserver* active_app_watcher = nullptr;
+  active_app_watcher = [[ActiveAppObserver alloc] initWithCallback:[this](void* app) {
+    NSRunningApplication* activeApp = (__bridge NSRunningApplication *)app;
+    this->setActiveAppInfo(activeApp);
+  }];
+  [active_app_watcher startObserving];
 }
 
 bool MainAppMac::isAppInLoginItems() {
@@ -1136,8 +1132,4 @@ void MainAppMac::preview(const std::string &file_path) {
     }];
     [[QuickLookPreviewer shared] previewFileAtPath:filePath];
   });
-}
-
-void MainAppMac::playBeepSound() {
-//  [[NSSound soundNamed: @"Tink"] play];
 }

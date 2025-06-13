@@ -124,7 +124,6 @@ declare const openSettingsWindow: () => void;
 declare const saveImageAsFile: (imageFilePath: string, imageWidth: number, imageHeight: number) => void;
 declare const hideAppWindow: () => void;
 declare const openInApp: (filePath: string, appPath: string) => void;
-declare const playBeep: () => void;
 
 type HistoryPaneProps = {
   appName: string
@@ -338,11 +337,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
         await pasteItem(item, true)
       }
     } else {
-      // Play a sound to indicate that there are no more items to paste.
-      playBeep()
+      console.log("No next item to paste")
     }
   }
-  
+
   function scrollToLastSelectedItem() {
     let selectedItemIndices = getSelectedHistoryItemIndices()
     if (selectedItemIndices.length === 0) {

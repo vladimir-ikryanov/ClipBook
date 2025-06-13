@@ -147,7 +147,7 @@ bool MainApp::init() {
   //Register a global shortcut to pause/resume the app.
   enablePauseResumeShortcut();
   // Register a global shortcut to paste the next item to the active app.
-  enablePasteNextItemToActiveAppShortcut();
+  enablePasteNextItemShortcut();
   // Update the open settings shortcut.
   updateOpenSettingsShortcut();
 
@@ -639,9 +639,6 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
 
   // App window.
-  window->putProperty("playBeep", [this]() {
-    playBeepSound();
-  });
   window->putProperty("pasteItemInFrontApp",
                       [this](std::string text,
                              std::string rtf,
@@ -747,11 +744,11 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("disablePauseResumeShortcut", [this]() {
     disablePauseResumeShortcut();
   });
-  window->putProperty("enablePasteNextItemToActiveAppShortcut", [this]() {
-    enablePasteNextItemToActiveAppShortcut();
+  window->putProperty("enablePasteNextItemShortcut", [this]() {
+    enablePasteNextItemShortcut();
   });
-  window->putProperty("disablePasteNextItemToActiveAppShortcut", [this]() {
-    disablePasteNextItemToActiveAppShortcut();
+  window->putProperty("disablePasteNextItemShortcut", [this]() {
+    disablePasteNextItemShortcut();
   });
   window->putProperty("updateOpenSettingsShortcut", [this]() {
     updateOpenSettingsShortcut();
@@ -1493,7 +1490,7 @@ void MainApp::quit() {
   }
   disableOpenAppShortcut();
   disablePauseResumeShortcut();
-  disablePasteNextItemToActiveAppShortcut();
+  disablePasteNextItemShortcut();
 
   if (welcome_window_) {
     welcome_window_->close();

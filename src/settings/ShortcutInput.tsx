@@ -10,8 +10,8 @@ declare const enableOpenAppShortcut: () => void;
 declare const disableOpenAppShortcut: () => void;
 declare const enablePauseResumeShortcut: () => void;
 declare const disablePauseResumeShortcut: () => void;
-declare const enablePasteNextItemToActiveAppShortcut: () => void;
-declare const disablePasteNextItemToActiveAppShortcut: () => void;
+declare const enablePasteNextItemShortcut: () => void;
+declare const disablePasteNextItemShortcut: () => void;
 
 type ShortcutProps = {
   shortcut: string
@@ -30,14 +30,14 @@ export default function ShortcutInput(props: ShortcutProps) {
     setIsEditing(true)
     disableOpenAppShortcut()
     disablePauseResumeShortcut()
-    disablePasteNextItemToActiveAppShortcut()
+    disablePasteNextItemShortcut()
   }
 
   function stopEditing() {
     setIsEditing(false)
     enableOpenAppShortcut()
     enablePauseResumeShortcut()
-    enablePasteNextItemToActiveAppShortcut()
+    enablePasteNextItemShortcut()
   }
 
   function handleClick() {

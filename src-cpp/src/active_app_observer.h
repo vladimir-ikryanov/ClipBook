@@ -4,15 +4,17 @@
 #import <Cocoa/Cocoa.h>
 
 #include <memory>
+#include <functional>
 
 class MainAppMac;
 
 @interface ActiveAppObserver : NSObject {
  @private
-  MainAppMac* owner_;
+  std::function<void(void*)> callback_;
 }
 
-- (instancetype)initWithOwner:(MainAppMac*)owner;
+- (instancetype)initWithCallback:(std::function<void(void*)>)callback;
+- (void)startObserving;
 - (void)activeAppChanged:(NSNotification *)notification;
 
 @end

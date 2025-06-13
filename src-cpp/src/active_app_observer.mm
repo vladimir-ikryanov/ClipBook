@@ -4,22 +4,28 @@
 
 @implementation ActiveAppObserver
 
-- (instancetype)initWithOwner:(MainAppMac*)owner {
+- (instancetype)initWithCallback:(std::function<void(void*)>)callback {
   self = [super init];
   if (self) {
-    owner_ = owner;
-    [[[NSWorkspace sharedWorkspace] notificationCenter]
-        addObserver:self
-           selector:@selector(activeAppChanged:)
-               name:NSWorkspaceDidActivateApplicationNotification
-             object:nil];
+    callback_ = callback;
   }
   return self;
 }
 
+- (void)startObserving {
+  [[[NSWorkspace sharedWorkspace] notificationCenter]
+      addObserver:self
+         selector:@selector(activeAppChanged:)
+             name:NSWorkspaceDidActivateApplicationNotification
+           object:nil];
+}
+
 - (void)activeAppChanged:(NSNotification*)notification {
-  if (owner_) {
-    owner_->onActiveAppChanged(notification);
+  if (callback_) {
+    NSDictionary *userInfo = notification.userInfo;
+    if (userInfo) {
+      callback_(userInfo[NSWorkspaceApplicationKey]);
+    }
   }
 }
 

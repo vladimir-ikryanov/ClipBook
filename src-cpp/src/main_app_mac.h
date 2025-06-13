@@ -5,7 +5,6 @@
 
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
-#include "active_app_observer.h"
 #endif
 
 #include "clipboard_reader_mac.h"
@@ -17,7 +16,6 @@ class MainAppMac : public MainApp {
 
 #ifdef __OBJC__
   void setActiveAppInfo(NSRunningApplication* activeApp);
-  void onActiveAppChanged(NSNotification* notification);
 #endif
 
   bool init() override;
@@ -51,11 +49,10 @@ class MainAppMac : public MainApp {
   void preview(const std::string &file_path) override;
 
  protected:
-  void playBeepSound() override;
   void enableOpenAppShortcut() override;
   void disableOpenAppShortcut() override;
-  void enablePasteNextItemToActiveAppShortcut() override;
-  void disablePasteNextItemToActiveAppShortcut() override;
+  void enablePasteNextItemShortcut() override;
+  void disablePasteNextItemShortcut() override;
   void enablePauseResumeShortcut() override;
   void disablePauseResumeShortcut() override;
   void updateOpenSettingsShortcut() override;
@@ -100,7 +97,6 @@ class MainAppMac : public MainApp {
   std::shared_ptr<ClipboardReaderMac> clipboard_reader_;
   bool should_activate_app_ = false;
 #ifdef __OBJC__
-  ActiveAppObserver* observer_ = nullptr;
   pid_t active_app_pid_ = 0;
   NSPoint getInputCursorLocationOnScreen();
   void moveToScreen(NSScreen *screen);
