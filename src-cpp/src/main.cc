@@ -12,15 +12,15 @@ using namespace molybden;
 void launch() {
   AppOptions options;
   // Configure logging.
-//  auto args = CommandLineArgs::get().list();
-//  for (const auto& arg : args) {
-//    if (arg == "--debug") {
-//      options.logging.enabled = true;
-//      options.logging.log_level = LogLevel::kInfo;
-//      options.logging.destination = Destination::kFile;
-//      options.logging.log_file = getAppDataDir() + "/clipbook.log";
-//    }
-//  }
+  auto args = CommandLineArgs::get().list();
+  for (const auto& arg : args) {
+    if (arg == "--debug") {
+      options.logging.enabled = true;
+      options.logging.log_level = LogLevel::kInfo;
+      options.logging.destination = Destination::kFile;
+      options.logging.log_file = getAppDataDir() + "/clipbook.log";
+    }
+  }
   // Register the custom URL scheme.
   options.schemes.emplace_back(kClipBookScheme);
   // Disable internal Chromium traffic.
