@@ -340,6 +340,13 @@ export default function Shortcuts() {
             </div>
             <hr/>
             <div className="flex items-center justify-between space-x-20">
+              <span className="">{t('settings.shortcuts.pasteNextItemToActiveApp')}</span>
+              <ShortcutInput shortcut={pasteNextItemShortcut}
+                             defaultShortcut="ControlLeft + KeyV"
+                             onSave={handlePasteNextItemToActiveAppShortcutChange}/>
+            </div>
+            <hr/>
+            <div className="flex items-center justify-between space-x-20">
               <span className="">{t('settings.shortcuts.pasteSelectedItemToActiveApp')}</span>
               <ShortcutInput shortcut={pasteSelectedItemToActiveAppShortcut}
                              defaultShortcut="Enter"
@@ -472,13 +479,6 @@ export default function Shortcuts() {
               <ShortcutInput shortcut={openSettingsShortcut}
                              defaultShortcut="MetaLeft + Comma"
                              onSave={handleOpenSettingsShortcutChange}/>
-            </div>
-            <hr/>
-            <div className="flex items-center justify-between space-x-20">
-              <span className="">{t('settings.shortcuts.pasteNextItemToActiveApp')}</span>
-              <ShortcutInput shortcut={pasteNextItemShortcut}
-                             defaultShortcut="ControlLeft + KeyV"
-                             onSave={handlePasteNextItemToActiveAppShortcutChange}/>
             </div>
             <hr/>
             <div className="flex items-center justify-between space-x-20">

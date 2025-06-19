@@ -615,13 +615,13 @@ std::string AppSettingsMac::getPasteSelectedObjectToActiveAppShortcut() {
   return "ShiftLeft + Enter";
 }
 
-void AppSettingsMac::savePasteNextItemToActiveAppShortcut(std::string shortcut) {
+void AppSettingsMac::savePasteNextItemShortcut(std::string shortcut) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefPasteNextItemShortcut];
   [defaults synchronize];
 }
 
-std::string AppSettingsMac::getPasteNextItemToActiveAppShortcut() {
+std::string AppSettingsMac::getPasteNextItemShortcut() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   NSString *shortcut = [defaults objectForKey:prefPasteNextItemShortcut];
   if (shortcut != nil) {

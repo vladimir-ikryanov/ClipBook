@@ -1123,11 +1123,11 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   window->putProperty("getPasteSelectedObjectToActiveAppShortcut", [this]() -> std::string {
     return settings_->getPasteSelectedObjectToActiveAppShortcut();
   });
-  window->putProperty("savePasteNextItemToActiveAppShortcut", [this](std::string shortcut) -> void {
-    settings_->savePasteNextItemToActiveAppShortcut(shortcut);
+  window->putProperty("savePasteNextItemShortcut", [this](std::string shortcut) -> void {
+    settings_->savePasteNextItemShortcut(shortcut);
   });
-  window->putProperty("getPasteNextItemToActiveAppShortcut", [this]() -> std::string {
-    return settings_->getPasteNextItemToActiveAppShortcut();
+  window->putProperty("getPasteNextItemShortcut", [this]() -> std::string {
+    return settings_->getPasteNextItemShortcut();
   });
   window->putProperty("saveEditHistoryItemShortcut", [this](std::string shortcut) -> void {
     settings_->saveEditHistoryItemShortcut(shortcut);

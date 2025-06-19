@@ -306,7 +306,7 @@ void MainAppMac::disablePauseResumeShortcut() {
 
 void MainAppMac::enablePasteNextItemShortcut() {
   disablePasteNextItemShortcut();
-  auto shortcut_str = settings_->getPasteNextItemToActiveAppShortcut();
+  auto shortcut_str = settings_->getPasteNextItemShortcut();
   paste_next_item_shortcut_ = createShortcut(shortcut_str);
   if (paste_next_item_shortcut_.key == KeyCode::UNKNOWN) {
     return;
