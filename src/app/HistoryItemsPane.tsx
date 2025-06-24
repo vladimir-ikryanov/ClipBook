@@ -35,7 +35,7 @@ type HistoryItemsPaneProps = {
 
 const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
   const {t} = useTranslation()
-  
+
   function handleItemSelected(index: number, metaKeyDown: boolean, shiftKeyDown: boolean) {
     // Handle click without modifier keys: select a single item.
     if (!metaKeyDown && !shiftKeyDown) {
@@ -82,7 +82,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
 
   function renderItems() {
     if (props.history.length === 0) {
-      return <div className="flex h-screen draggable">
+      return <div className="flex h-screen">
           <div className="flex flex-col text-center m-auto">
             <p className="text-center text-xl font-semibold text-foreground">
               {t("app.history.noItems")}
