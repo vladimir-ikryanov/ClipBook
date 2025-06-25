@@ -570,31 +570,25 @@ bool ClipboardReaderMac::readFilesData(const std::shared_ptr<ClipboardData> &dat
           NSString *preview_file_name = [NSString stringWithFormat:@"file_preview_%@.png", file_path_hash];
           NSString *preview_file_path = [images_dir stringByAppendingPathComponent:preview_file_name];
           file_path_info.file_preview_name = [preview_file_name UTF8String];
-          // If the file preview does not exist, get the preview image and save it.
-          if (!fs::exists(preview_file_path.UTF8String)) {
-            NSImage *preview = getThumbnailForFile(filePath, CGSizeMake(1024, 1024));
-            if (preview) {
-              NSData *tiff_data = [preview TIFFRepresentation];
-              NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithData:tiff_data];
-              NSData *png_data = [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
-              [png_data writeToFile:preview_file_path atomically:YES];
-              file_path_info.file_preview_name = [preview_file_name UTF8String];
-            }
+          NSImage *preview = getThumbnailForFile(filePath, CGSizeMake(1024, 1024));
+          if (preview) {
+            NSData *tiff_data = [preview TIFFRepresentation];
+            NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithData:tiff_data];
+            NSData *png_data = [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+            [png_data writeToFile:preview_file_path atomically:YES];
+            file_path_info.file_preview_name = [preview_file_name UTF8String];
           }
 
           NSString *file_thumb_name = [NSString stringWithFormat:@"file_thumb_%@.png", file_path_hash];
           NSString *file_thumb_path = [images_dir stringByAppendingPathComponent:file_thumb_name];
           file_path_info.file_thumb_name = [file_thumb_name UTF8String];
-          // If the file thumbnail does not exist, get the thumbnail and save it.
-          if (!fs::exists(file_thumb_path.UTF8String)) {
-            NSImage *thumb = getThumbnailForFile(filePath, CGSizeMake(48, 48));
-            if (thumb) {
-              NSData *tiff_data = [thumb TIFFRepresentation];
-              NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithData:tiff_data];
-              NSData *png_data = [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
-              [png_data writeToFile:file_thumb_path atomically:YES];
-              file_path_info.file_thumb_name = [file_thumb_name UTF8String];
-            }
+          NSImage *thumb = getThumbnailForFile(filePath, CGSizeMake(48, 48));
+          if (thumb) {
+            NSData *tiff_data = [thumb TIFFRepresentation];
+            NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithData:tiff_data];
+            NSData *png_data = [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+            [png_data writeToFile:file_thumb_path atomically:YES];
+            file_path_info.file_thumb_name = [file_thumb_name UTF8String];
           }
 
           // Read file size in bytes.
