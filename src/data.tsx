@@ -272,6 +272,10 @@ export function isLinkItem(item: Clip): boolean {
   return item && item.type === ClipType.Link
 }
 
+export function isFileItem(item: Clip): boolean {
+  return item && item.type === ClipType.File
+}
+
 export function findItem(content: string, imageFileName: string, fileName: string): Clip | undefined {
   if (fileName.length > 0) {
     // Content is a file path in this case.

@@ -23,7 +23,7 @@ import {
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetMakeLowerCaseShortcut,
-  prefGetMakeUpperCaseShortcut,
+  prefGetMakeUpperCaseShortcut, prefGetQuickLookShortcut,
   prefGetRemoveEmptyLinesShortcut,
   prefGetRenameItemShortcut,
   prefGetSaveImageAsFileShortcut,
@@ -35,17 +35,17 @@ import {
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {
   getFirstSelectedHistoryItem,
-  getSelectedHistoryItemIndices, isImageItem, isLinkItem,
+  getSelectedHistoryItemIndices, isFileItem, isImageItem, isLinkItem,
   isTextItem, TagCheckedState,
   TextFormatOperation
 } from "@/data";
-import {CommandShortcut} from "@/components/ui/command";
+import {CommandItem, CommandShortcut} from "@/components/ui/command";
 import {emitter} from "@/actions";
 import {useTranslation} from "react-i18next";
 import TagIcon, {allTags, Tag} from "@/tags";
 import {Checkbox} from "@/components/ui/checkbox";
 import {CheckedState} from "@radix-ui/react-checkbox";
-import {updateClip} from "@/db";
+import {ClipType, updateClip} from "@/db";
 
 type PreviewToolBarMenuProps = {
   selectedItemIndices: number[]
@@ -107,6 +107,11 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
     emitter.emit("SaveImageAsFile")
   }
 
+  function handleQuickLook() {
+    handleOpenDropdownChange(false)
+    emitter.emit("QuickLookItem")
+  }
+
   function handleDeleteItem() {
     handleOpenDropdownChange(false)
     emitter.emit("DeleteItem")
@@ -131,7 +136,7 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
   }
 
   function canShowEditContent() {
-    return props.selectedItemIndices.length === 1 && isTextItem(getFirstSelectedHistoryItem())
+    return isText()
   }
 
   function canShowRenameItem() {
@@ -139,19 +144,51 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
   }
 
   function canShowPreviewLink() {
-    return props.selectedItemIndices.length === 1 && isLinkItem(getFirstSelectedHistoryItem())
+    return isLink()
   }
 
   function canSaveImageAsFile() {
-    return props.selectedItemIndices.length === 1 && isImageItem(getFirstSelectedHistoryItem())
+    return isImage()
   }
 
   function canFormatText() {
-    return props.selectedItemIndices.length === 1 && isTextItem(getFirstSelectedHistoryItem())
+    return isText()
   }
 
   function canShowTags() {
     return props.selectedItemIndices.length === 1
+  }
+
+  function canShowQuickLook() {
+    return isFile() || isImage()
+  }
+
+  function isText() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      return isTextItem(getFirstSelectedHistoryItem())
+    }
+    return false
+  }
+
+  function isLink() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      return isLinkItem(getFirstSelectedHistoryItem())
+    }
+    return false
+  }
+
+  function isFile() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      return isFileItem(getFirstSelectedHistoryItem())
+    }
+    return false
+  }
+
+  function isImage() {
+    if (getSelectedHistoryItemIndices().length === 1) {
+      return isImageItem(getFirstSelectedHistoryItem())
+    }
+    return false
   }
 
   function handleOpenDropdownChange(open: boolean) {
@@ -279,7 +316,17 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
               </DropdownMenuItem>
           }
           {
-              canShowEditContent() && <DropdownMenuSeparator/>
+              canShowQuickLook() &&
+              <DropdownMenuItem onClick={handleQuickLook}>
+                <EyeIcon className="mr-2 h-4 w-4"/>
+                <span className="mr-12">{t('commands.quickLook')}</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetQuickLookShortcut()}/>
+                </CommandShortcut>
+              </DropdownMenuItem>
+          }
+          {
+              canShowPreviewLink() && <DropdownMenuSeparator/>
           }
           {
               canShowPreviewLink() &&
@@ -296,7 +343,7 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
               </DropdownMenuItem>
           }
           {
-              canShowPreviewLink() && <DropdownMenuSeparator/>
+              canSaveImageAsFile() && <DropdownMenuSeparator/>
           }
           {
               canSaveImageAsFile() &&
@@ -309,7 +356,7 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
               </DropdownMenuItem>
           }
           {
-              canSaveImageAsFile() && <DropdownMenuSeparator/>
+              canShowTags() && <DropdownMenuSeparator/>
           }
           {
               canShowTags() &&
