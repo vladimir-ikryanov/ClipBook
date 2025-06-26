@@ -244,7 +244,8 @@
       "addToFavorites": "Aggiungi ai preferiti",
       "hideDetails": "Nascondi dettagli",
       "showDetails": "Mostra dettagli",
-      "hidePreviewPanel": "Nascondi pannello anteprima"
+      "hidePreviewPanel": "Nascondi pannello anteprima",
+      "more": "Altre azioni"
     },
     "toolbarMenu": {
       "formatText": "Formatta Testo",
@@ -278,7 +279,8 @@
     "clearSearch": "Cancella ricerca",
     "hideWhenNotFocused": "Nascondi quando non in focus",
     "alwaysDisplay": "Mostra sempre",
-    "showPreview": "Mostra anteprima"
+    "showPreview": "Mostra anteprima",
+    "sort": "Ordina cronologia"
   },
   "sortMenu": {
     "lastCopyTime": "Ultima Copia",

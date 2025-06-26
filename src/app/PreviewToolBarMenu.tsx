@@ -2,6 +2,7 @@ import '../app.css';
 import React, {KeyboardEvent, MouseEvent, useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {
+  ClipboardIcon,
   DownloadIcon,
   Edit3Icon,
   EllipsisVerticalIcon,
@@ -23,7 +24,9 @@ import {
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
   prefGetMakeLowerCaseShortcut,
-  prefGetMakeUpperCaseShortcut, prefGetQuickLookShortcut,
+  prefGetMakeUpperCaseShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetQuickLookShortcut,
   prefGetRemoveEmptyLinesShortcut,
   prefGetRenameItemShortcut,
   prefGetSaveImageAsFileShortcut,
@@ -46,6 +49,7 @@ import TagIcon, {allTags, Tag} from "@/tags";
 import {Checkbox} from "@/components/ui/checkbox";
 import {CheckedState} from "@radix-ui/react-checkbox";
 import {ClipType, updateClip} from "@/db";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 type PreviewToolBarMenuProps = {
   selectedItemIndices: number[]
@@ -275,7 +279,8 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
           </DropdownMenuItem>
           <DropdownMenuItem
               onClick={() => handleFormatText(TextFormatOperation.TrimSurroundingWhitespaces)}>
-            <span className="ml-0.5 mr-12">{t('preview.toolbarMenu.trimSurroundingWhitespaces')}</span>
+            <span
+                className="ml-0.5 mr-12">{t('preview.toolbarMenu.trimSurroundingWhitespaces')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetTrimSurroundingWhitespacesShortcut()}/>
             </CommandShortcut>
@@ -285,130 +290,139 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
   }
 
   return (
-      <DropdownMenu open={openDropdown} onOpenChange={handleOpenDropdownChange}>
-        <DropdownMenuTrigger className="text-primary-foreground hover:text-accent-foreground"
-                             asChild>
-          <Button variant="dropdown" size="toolbar"
-                  className={openDropdown ? "bg-accent text-accent-foreground" : ""}>
-            <EllipsisVerticalIcon className="h-5 w-5" strokeWidth={2}/>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="p-1.5 bg-actions-background" align="center"
-                             onKeyDown={handleKeyDown} onMouseDown={handleMouseDown}>
-          {
-              canShowEditContent() &&
-              <DropdownMenuItem onClick={handleRequestEditItem}>
-                <Edit3Icon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">{t('preview.toolbarMenu.editContent')}</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
-                </CommandShortcut>
-              </DropdownMenuItem>
-          }
-          {
-              canShowRenameItem() &&
-              <DropdownMenuItem onClick={handleRenameItem}>
-                <PenIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">{t('preview.toolbarMenu.rename')}</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
-                </CommandShortcut>
-              </DropdownMenuItem>
-          }
-          {
-              canShowQuickLook() &&
-              <DropdownMenuItem onClick={handleQuickLook}>
-                <EyeIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">{t('commands.quickLook')}</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetQuickLookShortcut()}/>
-                </CommandShortcut>
-              </DropdownMenuItem>
-          }
-          {
-              canShowPreviewLink() && <DropdownMenuSeparator/>
-          }
-          {
-              canShowPreviewLink() &&
-              <DropdownMenuItem onClick={handlePreviewLink}>
-                <EyeIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">{t('preview.toolbarMenu.preview')}</span>
-              </DropdownMenuItem>
-          }
-          {
-              canShowPreviewLink() && prefShouldShowPreviewForLinks() &&
-              <DropdownMenuItem onClick={handleUpdateLinkPreview}>
-                <RefreshCwIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">{t('preview.toolbarMenu.update')}</span>
-              </DropdownMenuItem>
-          }
-          {
-              canSaveImageAsFile() && <DropdownMenuSeparator/>
-          }
-          {
-              canSaveImageAsFile() &&
-              <DropdownMenuItem onClick={handleSaveImageAsFile}>
-                <DownloadIcon className="mr-2 h-4 w-4"/>
-                <span className="mr-12">{t('preview.toolbarMenu.saveAsFile')}</span>
-                <CommandShortcut className="flex flex-row">
-                  <ShortcutLabel shortcut={prefGetSaveImageAsFileShortcut()}/>
-                </CommandShortcut>
-              </DropdownMenuItem>
-          }
-          {
-              canShowTags() && <DropdownMenuSeparator/>
-          }
-          {
-              canShowTags() &&
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <TagsIcon className="mr-2 h-4 w-4"/>
-                  <span>{t('historyItemContextMenu.tags')}</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="p-1.5 bg-actions-background">
-                    {
-                      itemTags.map((tagState: TagCheckedState) => {
-                        return (
-                            <DropdownMenuItem key={tagState.tag.id}>
-                              <Checkbox className="mr-2 border-checkbox"
-                                        checked={tagState.checked}
-                                        onCheckedChange={(checked) => handleTagChecked(tagState.tag, checked)}
-                                        onClick={(e) => {
-                                          e.stopPropagation(); // Prevent closing the menu
-                                        }}/>
-                              <TagIcon className="mr-2 h-4 w-4"
-                                       style={{color: tagState.tag.color}}/>
-                              <span className="mr-12">{tagState.tag.name}</span>
-                            </DropdownMenuItem>
-                        )
-                      })
-                    }
-                    <DropdownMenuSeparator/>
-                    <DropdownMenuItem onClick={handleAssignTag}>
-                      <PlusIcon className="mr-2 h-4 w-4"/>
-                      <span className="mr-12">{t('historyItemContextMenu.newTag')}</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-          }
-          {
-              canShowTags() && <DropdownMenuSeparator/>
-          }
-          <DropdownMenuItem onClick={handleDeleteItem}>
-            <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
-            <span className="mr-12 text-actions-danger">
+      <Tooltip>
+        <DropdownMenu open={openDropdown} onOpenChange={handleOpenDropdownChange}>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger className="text-primary-foreground hover:text-accent-foreground"
+                                 asChild>
+              <Button variant="dropdown" size="toolbar"
+                      className={openDropdown ? "bg-accent text-accent-foreground" : ""}>
+                <EllipsisVerticalIcon className="h-5 w-5" strokeWidth={2}/>
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent className="flex items-center">
+            <div className="select-none mx-1">
+              {t('preview.toolbar.more')}
+            </div>
+          </TooltipContent>
+          <DropdownMenuContent className="p-1.5 bg-actions-background" align="center"
+                               onKeyDown={handleKeyDown} onMouseDown={handleMouseDown}>
+            {
+                canShowEditContent() &&
+                <DropdownMenuItem onClick={handleRequestEditItem}>
+                  <Edit3Icon className="mr-2 h-4 w-4"/>
+                  <span className="mr-12">{t('preview.toolbarMenu.editContent')}</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetEditHistoryItemShortcut()}/>
+                  </CommandShortcut>
+                </DropdownMenuItem>
+            }
+            {
+                canShowRenameItem() &&
+                <DropdownMenuItem onClick={handleRenameItem}>
+                  <PenIcon className="mr-2 h-4 w-4"/>
+                  <span className="mr-12">{t('preview.toolbarMenu.rename')}</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
+                  </CommandShortcut>
+                </DropdownMenuItem>
+            }
+            {
+                canShowQuickLook() &&
+                <DropdownMenuItem onClick={handleQuickLook}>
+                  <EyeIcon className="mr-2 h-4 w-4"/>
+                  <span className="mr-12">{t('commands.quickLook')}</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetQuickLookShortcut()}/>
+                  </CommandShortcut>
+                </DropdownMenuItem>
+            }
+            {
+                canShowPreviewLink() && <DropdownMenuSeparator/>
+            }
+            {
+                canShowPreviewLink() &&
+                <DropdownMenuItem onClick={handlePreviewLink}>
+                  <EyeIcon className="mr-2 h-4 w-4"/>
+                  <span className="mr-12">{t('preview.toolbarMenu.preview')}</span>
+                </DropdownMenuItem>
+            }
+            {
+                canShowPreviewLink() && prefShouldShowPreviewForLinks() &&
+                <DropdownMenuItem onClick={handleUpdateLinkPreview}>
+                  <RefreshCwIcon className="mr-2 h-4 w-4"/>
+                  <span className="mr-12">{t('preview.toolbarMenu.update')}</span>
+                </DropdownMenuItem>
+            }
+            {
+                canSaveImageAsFile() && <DropdownMenuSeparator/>
+            }
+            {
+                canSaveImageAsFile() &&
+                <DropdownMenuItem onClick={handleSaveImageAsFile}>
+                  <DownloadIcon className="mr-2 h-4 w-4"/>
+                  <span className="mr-12">{t('preview.toolbarMenu.saveAsFile')}</span>
+                  <CommandShortcut className="flex flex-row">
+                    <ShortcutLabel shortcut={prefGetSaveImageAsFileShortcut()}/>
+                  </CommandShortcut>
+                </DropdownMenuItem>
+            }
+            {
+                canShowTags() && <DropdownMenuSeparator/>
+            }
+            {
+                canShowTags() &&
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <TagsIcon className="mr-2 h-4 w-4"/>
+                    <span>{t('historyItemContextMenu.tags')}</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent className="p-1.5 bg-actions-background">
+                      {
+                        itemTags.map((tagState: TagCheckedState) => {
+                          return (
+                              <DropdownMenuItem key={tagState.tag.id}>
+                                <Checkbox className="mr-2 border-checkbox"
+                                          checked={tagState.checked}
+                                          onCheckedChange={(checked) => handleTagChecked(tagState.tag, checked)}
+                                          onClick={(e) => {
+                                            e.stopPropagation(); // Prevent closing the menu
+                                          }}/>
+                                <TagIcon className="mr-2 h-4 w-4"
+                                         style={{color: tagState.tag.color}}/>
+                                <span className="mr-12">{tagState.tag.name}</span>
+                              </DropdownMenuItem>
+                          )
+                        })
+                      }
+                      <DropdownMenuSeparator/>
+                      <DropdownMenuItem onClick={handleAssignTag}>
+                        <PlusIcon className="mr-2 h-4 w-4"/>
+                        <span className="mr-12">{t('historyItemContextMenu.newTag')}</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+            }
+            {
+                canShowTags() && <DropdownMenuSeparator/>
+            }
+            <DropdownMenuItem onClick={handleDeleteItem}>
+              <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
+              <span className="mr-12 text-actions-danger">
               {t('preview.toolbarMenu.delete', {indicator: getMultipleItemsIndicator()})}
             </span>
-            <CommandShortcut className="flex flex-row">
-              <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
-            </CommandShortcut>
-          </DropdownMenuItem>
-          {
-              canFormatText() && renderFormatOptions()
-          }
-        </DropdownMenuContent>
-      </DropdownMenu>
+              <CommandShortcut className="flex flex-row">
+                <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
+              </CommandShortcut>
+            </DropdownMenuItem>
+            {
+                canFormatText() && renderFormatOptions()
+            }
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </Tooltip>
   )
 }

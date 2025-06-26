@@ -244,7 +244,8 @@
       "addToFavorites": "Add to favourites",
       "hideDetails": "Hide details",
       "showDetails": "Show details",
-      "hidePreviewPanel": "Hide preview panel"
+      "hidePreviewPanel": "Hide preview panel",
+      "more": "More actions"
     },
     "toolbarMenu": {
       "formatText": "Format Text",
@@ -278,7 +279,8 @@
     "clearSearch": "Clear search",
     "hideWhenNotFocused": "Hide when not focused",
     "alwaysDisplay": "Always display",
-    "showPreview": "Show preview"
+    "showPreview": "Show preview",
+    "sort": "Sort history"
   },
   "sortMenu": {
     "lastCopyTime": "Last Copy Time",

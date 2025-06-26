@@ -244,7 +244,8 @@
       "addToFavorites": "Zu Favoriten hinzufügen",
       "hideDetails": "Details ausblenden",
       "showDetails": "Details anzeigen",
-      "hidePreviewPanel": "Vorschaubereich ausblenden"
+      "hidePreviewPanel": "Vorschaubereich ausblenden",
+      "more": "Weitere Aktionen"
     },
     "toolbarMenu": {
       "formatText": "Text formatieren",
@@ -278,7 +279,8 @@
     "clearSearch": "Suche löschen",
     "hideWhenNotFocused": "Ausblenden, wenn nicht fokussiert",
     "alwaysDisplay": "Immer anzeigen",
-    "showPreview": "Vorschau anzeigen"
+    "showPreview": "Vorschau anzeigen",
+    "sort": "Verlauf sortieren"
   },
   "sortMenu": {
     "lastCopyTime": "Letzte Kopierzeit",

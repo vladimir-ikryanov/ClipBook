@@ -1,7 +1,7 @@
 import '../app.css';
 import React, {KeyboardEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
-import {ArrowDownUpIcon, ArrowUpDownIcon,} from "lucide-react";
+import {ArrowDownUpIcon, ArrowUpDownIcon, XIcon,} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -18,10 +18,12 @@ import {
 } from "@/data";
 import {emitter} from "@/actions";
 import {useTranslation} from "react-i18next";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import ShortcutLabel from "@/app/ShortcutLabel";
 
 export default function SortMenu() {
   const {t} = useTranslation()
-  
+
   const [menuOpen, setMenuOpen] = useState(false)
   const [sortType, setSortType] = useState(getSortType())
   const [sortOrderReverse, setSortOrderReverse] = useState(isSortOrderReverse())
@@ -52,33 +54,46 @@ export default function SortMenu() {
   }
 
   return (
-      <DropdownMenu open={menuOpen} onOpenChange={handleMenuOpenChange}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="dropdown" size="toolbar" className={menuOpen ? "bg-accent" : ""}>
-            {
-              sortOrderReverse ? <ArrowUpDownIcon className="h-5 w-5"/> : <ArrowDownUpIcon className="h-5 w-5"/>
-            }
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="p-1.5 bg-actions-background" align="start"
-                             onKeyDown={handleKeyDown}>
-          <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.TimeOfLastCopy} onCheckedChange={() => handleSortTypeChange(SortHistoryType.TimeOfLastCopy)}>
-            {t('sortMenu.lastCopyTime')}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.TimeOfFirstCopy} onCheckedChange={() => handleSortTypeChange(SortHistoryType.TimeOfFirstCopy)}>
-            {t('sortMenu.firstCopyTime')}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.NumberOfCopies} onCheckedChange={() => handleSortTypeChange(SortHistoryType.NumberOfCopies)}>
-            {t('sortMenu.numberOfCopies')}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.Size} onCheckedChange={() => handleSortTypeChange(SortHistoryType.Size)}>
-            {t('sortMenu.size')}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuSeparator/>
-          <DropdownMenuCheckboxItem checked={sortOrderReverse} onCheckedChange={handleSortOrderReverseChange}>
-            {t('sortMenu.reverseOrder')}
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Tooltip>
+        <DropdownMenu open={menuOpen} onOpenChange={handleMenuOpenChange}>
+          <DropdownMenuTrigger asChild>
+            <TooltipTrigger asChild>
+              <Button variant="dropdown" size="toolbar" className={menuOpen ? "bg-accent" : ""}>
+                {
+                  sortOrderReverse ? <ArrowUpDownIcon className="h-5 w-5"/> :
+                      <ArrowDownUpIcon className="h-5 w-5"/>
+                }
+              </Button>
+            </TooltipTrigger>
+          </DropdownMenuTrigger>
+          <TooltipContent className="flex items-center">
+            <div className="select-none mx-1">{t('searchBar.sort')}</div>
+          </TooltipContent>
+          <DropdownMenuContent className="p-1.5 bg-actions-background" align="start"
+                               onKeyDown={handleKeyDown}>
+            <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.TimeOfLastCopy}
+                                      onCheckedChange={() => handleSortTypeChange(SortHistoryType.TimeOfLastCopy)}>
+              {t('sortMenu.lastCopyTime')}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.TimeOfFirstCopy}
+                                      onCheckedChange={() => handleSortTypeChange(SortHistoryType.TimeOfFirstCopy)}>
+              {t('sortMenu.firstCopyTime')}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.NumberOfCopies}
+                                      onCheckedChange={() => handleSortTypeChange(SortHistoryType.NumberOfCopies)}>
+              {t('sortMenu.numberOfCopies')}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.Size}
+                                      onCheckedChange={() => handleSortTypeChange(SortHistoryType.Size)}>
+              {t('sortMenu.size')}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuSeparator/>
+            <DropdownMenuCheckboxItem checked={sortOrderReverse}
+                                      onCheckedChange={handleSortOrderReverseChange}>
+              {t('sortMenu.reverseOrder')}
+            </DropdownMenuCheckboxItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </Tooltip>
   )
 }
