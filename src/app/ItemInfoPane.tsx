@@ -1,12 +1,11 @@
 import '../app.css';
 import React, {useEffect, useState} from "react";
 import {Clip, ClipType, getFilePath, getHTML, getRTF} from "@/db";
-import {fileExists, formatDateTime, formatNumber, getHistoryItemById, toBase64Icon} from "@/data";
+import {fileExists, formatDateTime, getHistoryItemById, toBase64Icon} from "@/data";
 import ItemTags from "@/app/ItemTags";
 import {getTags, Tag} from "@/tags";
 import {emitter} from "@/actions";
 import {useTranslation} from "react-i18next";
-import {prefGetLanguage} from "@/pref";
 
 declare const getAppNameFromPath: (appPath: string) => string;
 declare const getFileIconAsBase64: (appPath: string, large: boolean) => string;
@@ -17,12 +16,10 @@ type ItemInfoPaneProps = {
 }
 
 export default function ItemInfoPane(props: ItemInfoPaneProps) {
-  const {t} = useTranslation()
-  
   if (!props.visible || !props.item) {
     return null
   }
-
+  const {t} = useTranslation()
   const [type, setType] = useState<ClipType>(props.item.type)
   const [content, setContent] = useState<string>(props.item.content)
   const [rtf, setRtf] = useState<string>(getRTF(props.item))

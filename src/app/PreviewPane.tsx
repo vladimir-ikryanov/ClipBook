@@ -31,6 +31,11 @@ type PreviewPaneProps = {
 }
 
 export default function PreviewPane(props: PreviewPaneProps) {
+  if (props.selectedItemIndices.length === 0) {
+    return <div
+        className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]"></div>
+  }
+
   const [updateLinkPreview, setUpdateLinkPreview] = useState(false)
 
   useEffect(() => {
@@ -39,11 +44,6 @@ export default function PreviewPane(props: PreviewPaneProps) {
       emitter.off("UpdateLinkPreview", handleUpdateLinkPreview)
     };
   }, []);
-
-  if (props.selectedItemIndices.length === 0) {
-    return <div
-        className="flex flex-col h-screen p-0 m-0 border-l border-l-border min-w-[300px]"></div>
-  }
 
   function handleUpdateLinkPreview() {
     setUpdateLinkPreview(true)

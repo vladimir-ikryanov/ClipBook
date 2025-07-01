@@ -9,11 +9,11 @@ type ItemsInfoPaneProps = {
 }
 
 export default function ItemsInfoPane(props: ItemsInfoPaneProps) {
-  const {t} = useTranslation()
-  
-  if (!props.display || props.items.length === 0) {
+  if (!props.display || (props.items && props.items.length === 0)) {
     return <div></div>
   }
+
+  const {t} = useTranslation()
 
   function getCopyTimeRange(): string {
     let earliestCopyTime = new Date();
