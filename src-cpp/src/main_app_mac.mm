@@ -264,6 +264,7 @@ void MainAppMac::enableOpenAppShortcut() {
   });
   if (!success) {
     LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
+    open_app_shortcut_ = molybden::Shortcut();
   }
 }
 
@@ -293,6 +294,7 @@ void MainAppMac::enablePauseResumeShortcut() {
   });
   if (!success) {
     LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
+    pause_resume_shortcut_ = molybden::Shortcut();
   }
 }
 
@@ -317,6 +319,9 @@ void MainAppMac::enablePasteNextItemShortcut() {
   });
   if (!success) {
     LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
+    // Reset the shortcut to an empty one if registration fails to avoid crash when we try to
+    // unregister it later.
+    paste_next_item_shortcut_ = molybden::Shortcut();
   }
 }
 
