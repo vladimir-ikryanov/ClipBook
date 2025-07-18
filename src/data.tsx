@@ -826,19 +826,16 @@ export function formatDateTime(date: Date): string {
   }).format(date);
 }
 
-export function formatNumber(value: number): string {
-  return new Intl.NumberFormat(toLocale(prefGetLanguage()), {
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2,
-  }).format(value);
+function getFavoriteItemsCount(): number {
+  return history.filter(item => item.favorite).length;
 }
 
 export function getNextItemIndexForPaste(): number {
   pasteNextItemIndex++
   if (pasteNextItemIndex >= history.length) {
-    pasteNextItemIndex = -1
+    resetPasteNextItemIndex()
   }
-  return pasteNextItemIndex
+  return getFavoriteItemsCount() + pasteNextItemIndex
 }
 
 export function resetPasteNextItemIndex() {
