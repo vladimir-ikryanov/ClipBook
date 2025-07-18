@@ -658,6 +658,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     emitter.on("PasteByIndex", handlePasteByIndex)
     emitter.on("PastePathByIndex", handlePastePathByIndex)
     emitter.on("PasteObject", handlePasteObject)
+    emitter.on("PasteObjectByIndex", handlePasteObjectByIndex)
     emitter.on("EditContent", handleEditContent)
     emitter.on("EditContentByIndex", handleEditContentByIndex)
     emitter.on("EditItem", handleEditHistoryItem)
@@ -710,6 +711,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       emitter.off("PasteByIndex", handlePasteByIndex)
       emitter.off("PastePathByIndex", handlePastePathByIndex)
       emitter.off("PasteObject", handlePasteObject)
+      emitter.off("PasteObjectByIndex", handlePasteObjectByIndex)
       emitter.off("EditContent", handleEditContent)
       emitter.off("EditContentByIndex", handleEditContentByIndex)
       emitter.off("EditItem", handleEditHistoryItem)
@@ -893,6 +895,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
       if (item.type === ClipType.Text) {
         await pasteItem(item, false, true)
       }
+    }
+    handleSearchQueryChange("")
+  }
+
+  async function handlePasteObjectByIndex(index: number) {
+    let item = getHistoryItem(index)
+    if (item.type === ClipType.Text) {
+      await pasteItem(item, false, true)
     }
     handleSearchQueryChange("")
   }

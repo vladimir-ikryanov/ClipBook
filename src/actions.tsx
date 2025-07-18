@@ -73,6 +73,7 @@ export type Events = {
   PastePath: void;
   PastePathByIndex: number;
   PasteObject: void;
+  PasteObjectByIndex: number;
   EditContent: void;
   EditContentByIndex: number;
   EditItem: Clip;

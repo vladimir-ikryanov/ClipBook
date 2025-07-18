@@ -16,19 +16,30 @@ import {
   prefGetCopyToClipboardShortcut,
   prefGetDeleteHistoryItemShortcut,
   prefGetEditHistoryItemShortcut,
-  prefGetOpenInBrowserShortcut, prefGetOpenInDefaultAppShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut, prefGetQuickLookShortcut,
+  prefGetOpenInBrowserShortcut,
+  prefGetOpenInDefaultAppShortcut,
+  prefGetPasteSelectedItemToActiveAppShortcut,
+  prefGetPasteSelectedObjectToActiveAppShortcut,
+  prefGetQuickLookShortcut,
   prefGetRenameItemShortcut,
   prefGetShowInFinderShortcut,
   prefGetToggleFavoriteShortcut,
 } from "@/pref";
 import {CommandShortcut} from "@/components/ui/command";
-import {Clip, ClipType, getImageText, updateClip} from "@/db";
+import {Clip, ClipType, getHTML, getImageText, getRTF, updateClip} from "@/db";
 import {
   AppInfo,
-  fileExists, FinderIcon, getDefaultApp, getFileOrImagePath,
-  getFilterQuery, getHistoryItem, getSelectedHistoryItemIndices, isFilterActive,
-  isTextItem, TagCheckedState,
+  fileExists,
+  FinderIcon,
+  getDefaultApp,
+  getFileOrImagePath,
+  getFilterQuery,
+  getFirstSelectedHistoryItem,
+  getHistoryItem,
+  getSelectedHistoryItemIndices,
+  isFilterActive,
+  isTextItem,
+  TagCheckedState,
   toBase64Icon
 } from "@/data";
 import TagIcon, {allTags, Tag} from "@/tags";
@@ -139,6 +150,10 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
 
   function handlePaste() {
     emitter.emit("PasteByIndex", props.index)
+  }
+
+  function handlePasteObject() {
+    emitter.emit("PasteObjectByIndex", props.index)
   }
 
   function handlePastePath() {
@@ -261,6 +276,13 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
     emitter.emit("ShowOpenWithCommandsByIndex", props.index)
   }
 
+  function canPasteObject() {
+    if (props.item.type === ClipType.Text) {
+      return getRTF(props.item).length > 0 || getHTML(props.item).length > 0
+    }
+    return false
+  }
+
   return (
       <ContextMenu onOpenChange={handleOpenChange}>
         <ContextMenuTrigger asChild>
@@ -276,6 +298,17 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
             </CommandShortcut>
           </ContextMenuItem>
+          {
+              canPasteObject() &&
+              <ContextMenuItem onClick={handlePasteObject}>
+                <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
+                     alt="Application icon"/>
+                <span>{t('commands.pasteObjectToApp', {appName: props.appName})}</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetPasteSelectedObjectToActiveAppShortcut()}/>
+                </CommandShortcut>
+              </ContextMenuItem>
+          }
           {
               props.item.type === ClipType.File &&
               <ContextMenuItem onClick={handlePastePath}>
