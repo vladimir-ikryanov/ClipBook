@@ -132,7 +132,7 @@
       },
       "keepFavoritesOnClearAll": {
         "title": "Keep favorites when clearing entire history",
-        "description": "Do not remove items market as favorite when clearing entire clipboard history."
+        "description": "Do not remove favorite and tagged items when clearing entire clipboard history."
       },
       "clearHistoryOnQuit": {
         "title": "Clear entire history on quit",

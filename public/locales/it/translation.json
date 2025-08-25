@@ -132,7 +132,7 @@
       },
       "keepFavoritesOnClearAll": {
         "title": "Mantieni i preferiti quando si cancella l'intera cronologia",
-        "description": "Non rimuovere gli elementi contrassegnati come preferiti quando si cancella l'intera cronologia degli appunti."
+        "description": "Non rimuovere gli elementi contrassegnati come preferiti e taggati quando si cancella l'intera cronologia degli appunti."
       },
       "clearHistoryOnQuit": {
         "title": "Cancella l'intera cronologia all'uscita",

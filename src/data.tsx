@@ -432,13 +432,13 @@ export async function updateHistoryItem(id: number, item: Clip) {
   requestHistoryUpdate()
 }
 
-function getFavorites(): Clip[] {
-  return history.filter(item => item.favorite)
+function getFavoriteItems(): Clip[] {
+  return history.filter(item => item.favorite || (item.tags && item.tags.length > 0))
 }
 
 export async function clear(keepFavorites: boolean): Promise<Clip[]> {
   if (keepFavorites) {
-    let favorites = getFavorites()
+    let favorites = getFavoriteItems()
     if (favorites.length > 0) {
       for (const clip of history) {
         if (!clip.favorite) {

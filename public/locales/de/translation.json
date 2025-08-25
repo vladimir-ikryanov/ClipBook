@@ -132,7 +132,7 @@
       },
       "keepFavoritesOnClearAll": {
         "title": "Favoriten beim Löschen des gesamten Verlaufs behalten",
-        "description": "Als Favoriten markierte Elemente beim Löschen des gesamten Zwischenablageverlaufs nicht entfernen."
+        "description": "Favoriten und getaggte Elemente beim Löschen des gesamten Verlaufs nicht entfernen."
       },
       "clearHistoryOnQuit": {
         "title": "Gesamten Verlauf beim Beenden löschen",
