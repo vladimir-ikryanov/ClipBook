@@ -214,11 +214,6 @@ MainAppMac::MainAppMac(const std::shared_ptr<App> &app,
   clipboard_reader_ = std::make_shared<ClipboardReaderMac>();
 }
 
-MainAppMac::~MainAppMac() {
-  // Remove observer for application activation events.
-  removeApplicationObservers();
-}
-
 void MainAppMac::setActiveAppInfo(NSRunningApplication* activeApp) {
   if (activeApp) {
     auto app_path = [[activeApp bundleURL] fileSystemRepresentation];
@@ -826,8 +821,6 @@ bool MainAppMac::init() {
   if (!open_at_login && app_in_login_items) {
     setOpenAtLogin(false);
   }
-  // Set up observer for application activation events.
-  setupApplicationObservers();
   return MainApp::init();
 }
 
@@ -840,6 +833,9 @@ void MainAppMac::launch() {
     this->setActiveAppInfo(activeApp);
   }];
   [active_app_watcher startObserving];
+
+  // Set up observer for application activation events.
+  setupApplicationObservers();
 }
 
 bool MainAppMac::isAppInLoginItems() {
@@ -1148,7 +1144,7 @@ void MainAppMac::preview(const std::string &file_path) {
 
 void MainAppMac::setupApplicationObservers() {
   // Set up observer for application activation events.
-  activation_observer_ = [[NSNotificationCenter defaultCenter]
+  [[NSNotificationCenter defaultCenter]
       addObserverForName:NSApplicationDidBecomeActiveNotification
                   object:[NSApplication sharedApplication]
                    queue:[NSOperationQueue mainQueue]
@@ -1161,11 +1157,4 @@ void MainAppMac::setupApplicationObservers() {
                       app()->dock()->hide();
                     });
               }];
-}
-
-void MainAppMac::removeApplicationObservers() {
-  if (activation_observer_) {
-    [[NSNotificationCenter defaultCenter] removeObserver:activation_observer_];
-    activation_observer_ = nil;
-  }
 }
