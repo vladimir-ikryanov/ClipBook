@@ -185,7 +185,6 @@ export async function loadHistory() {
 
   history = await getAllClips()
   sortHistory(sortType, history)
-  loadSourceApps(history)
   requestHistoryUpdate()
 }
 
@@ -213,6 +212,7 @@ function loadSettings() {
 }
 
 function loadSourceApps(history: Clip[]) {
+  sourceApps = []
   for (let i = 0; i < history.length; i++) {
     let appPath = history[i].sourceApp
     if (appPath && appPath.length > 0) {
@@ -424,7 +424,6 @@ export async function addHistoryItem(content: string,
 
 export async function deleteHistoryItem(item: Clip) {
   await deleteItem(item)
-  requestHistoryUpdate()
 }
 
 export async function updateHistoryItem(id: number, item: Clip) {
