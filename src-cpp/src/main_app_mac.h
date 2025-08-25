@@ -13,6 +13,7 @@ class MainAppMac : public MainApp {
  public:
   explicit MainAppMac(const std::shared_ptr<molybden::App> &app,
                       const std::shared_ptr<AppSettings> &settings);
+  ~MainAppMac();
 
 #ifdef __OBJC__
   void setActiveAppInfo(NSRunningApplication* activeApp);
@@ -97,9 +98,13 @@ class MainAppMac : public MainApp {
   std::shared_ptr<ClipboardReaderMac> clipboard_reader_;
   bool should_activate_app_ = false;
 #ifdef __OBJC__
+  // Observer for application activation events.
+  id activation_observer_;
   pid_t active_app_pid_ = 0;
   NSPoint getInputCursorLocationOnScreen();
   void moveToScreen(NSScreen *screen);
+  void setupApplicationObservers();
+  void removeApplicationObservers();
   static NSRect getActiveWindowBounds(NSRunningApplication *app);
 #endif
 };
