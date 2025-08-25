@@ -431,8 +431,12 @@ export async function updateHistoryItem(id: number, item: Clip) {
   requestHistoryUpdate()
 }
 
+function isFavoriteOrTagged(item: Clip) {
+  return item.favorite || (item.tags && item.tags.length > 0);
+}
+
 function getFavoriteItems(): Clip[] {
-  return history.filter(item => item.favorite || (item.tags && item.tags.length > 0))
+  return history.filter(item => isFavoriteOrTagged(item))
 }
 
 export async function clear(keepFavorites: boolean): Promise<Clip[]> {
@@ -440,7 +444,7 @@ export async function clear(keepFavorites: boolean): Promise<Clip[]> {
     let favorites = getFavoriteItems()
     if (favorites.length > 0) {
       for (const clip of history) {
-        if (!clip.favorite) {
+        if (!isFavoriteOrTagged(clip)) {
           await deleteClip(clip.id!)
         }
       }
