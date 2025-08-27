@@ -20,6 +20,11 @@ void launch() {
       options.logging.destination = Destination::kFile;
       options.logging.log_file = getAppDataDir() + "/clipbook.log";
     }
+    if (arg == "--dev") {
+      options.logging.enabled = true;
+      options.logging.log_level = LogLevel::kWarning;
+      options.logging.destination = Destination::kStandardOutput;
+    }
   }
   // Register the custom URL scheme.
   options.schemes.emplace_back(kClipBookScheme);

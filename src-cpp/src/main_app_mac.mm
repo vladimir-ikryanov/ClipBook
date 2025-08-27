@@ -9,6 +9,7 @@
 
 #include <filesystem>
 #include <sys/sysctl.h>
+#include <thread>
 
 #define KEY_CODE_V ((CGKeyCode)9)
 #define KEY_CODE_RETURN ((CGKeyCode)36)
@@ -1154,7 +1155,11 @@ void MainAppMac::setupApplicationObservers() {
                 // Use a small delay to ensure the activation process is complete.
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 50 * NSEC_PER_MSEC),
                                dispatch_get_main_queue(), ^{
-                      app()->dock()->hide();
+                      std::thread([this]() {
+                        if (app()->dock()->isVisible()) {
+                          app()->dock()->hide();
+                        }
+                      }).detach();
                     });
               }];
 }
