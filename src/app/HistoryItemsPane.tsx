@@ -91,7 +91,7 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
         </div>
     }
 
-    return <div className="flex h-full p-2">
+    return <div className="flex h-full py-2">
       <div className="grid h-full w-full">
         <AutoSizer style={{}}>
           {(sizeProps: Size) => {

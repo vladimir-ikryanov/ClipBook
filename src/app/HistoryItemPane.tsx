@@ -1,6 +1,12 @@
 import '../app.css';
 import React, {CSSProperties, KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
-import {fileExists, getFilterQuery, updateHistoryItem} from "@/data";
+import {
+  fileExists,
+  getFilterQuery,
+  getFilterVisibleState,
+  getPasteNextItemIndex,
+  updateHistoryItem
+} from "@/data";
 import {Clip, ClipType, getFilePath} from "@/db";
 import {getFileNameFromPath, hasModifiers, toCSSColor} from "@/lib/utils";
 import {
@@ -32,7 +38,7 @@ type HistoryItemPaneProps = {
 
 const HistoryItemPane = (props: HistoryItemPaneProps) => {
   const {t} = useTranslation()
-  
+
   const [renameItemMode, setRenameItemMode] = useState(false)
   const [itemName, setItemName] = useState(props.item.name ? props.item.name : "")
   const [itemTags, setItemTags] = useState(getTags(props.item.tags))
@@ -62,6 +68,14 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
 
   function isItemSelected() {
     return props.selectedItemIndices.includes(props.index)
+  }
+
+  function isPointer() {
+    return props.index == getPasteNextItemIndex() + 1
+  }
+
+  function isFilterPaneVisible() {
+    return getFilterVisibleState()
   }
 
   function isMultipleItemsSelected() {
@@ -319,25 +333,30 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
 
   function renderItemPane() {
     return (
-        <div
-            id={`tab-${props.index}`}
-            style={props.style}
-            className={`flex flex-row cursor-default select-none items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-accent-hover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
-            onKeyDown={handleKeyDown}
-            onMouseUp={handleMouseUp}
-            onMouseDown={handleMouseDown}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}>
-          <div className="flex flex-none mr-1">{renderClipIcon()}</div>
+        <div id={`tab-${props.index}`}
+             style={props.style}
+             className={`flex flex-row pr-2 ${isPointer() ? '' : 'pl-2'}`}>
+          {
+            isPointer() && <div className={`flex flex-none w-[3px] h-8 ${isFilterPaneVisible() ? 'mr-1' : 'ml-[1px] mr-[4px]'} rounded my-auto bg-switch-checked`}></div>
+          }
           <div
-              className={`flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis ${isDisabled() ? "" : "text-primary-foreground"}`}>
-            {
-              renameItemMode ? renderInputField() : renderItemLabel(getItemLabel(), getFilterQuery())
-            }
+              className={`flex flex-grow cursor-default select-none items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-accent-hover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
+              onKeyDown={handleKeyDown}
+              onMouseUp={handleMouseUp}
+              onMouseDown={handleMouseDown}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}>
+            <div className="flex flex-none mr-1">{renderClipIcon()}</div>
+            <div
+                className={`flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis ${isDisabled() ? "" : "text-primary-foreground"}`}>
+              {
+                renameItemMode ? renderInputField() : renderItemLabel(getItemLabel(), getFilterQuery())
+              }
+            </div>
+            {renderTags()}
+            {renderFavoriteIcon()}
+            {renderQuickPasteAlias()}
           </div>
-          {renderTags()}
-          {renderFavoriteIcon()}
-          {renderQuickPasteAlias()}
         </div>
     )
   }

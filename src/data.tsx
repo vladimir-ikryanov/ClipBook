@@ -833,6 +833,10 @@ function getFavoriteItemsCount(): number {
   return history.filter(item => item.favorite).length;
 }
 
+export function getPasteNextItemIndex(): number {
+  return pasteNextItemIndex
+}
+
 export function getNextItemIndexForPaste(): number {
   pasteNextItemIndex++
   if (pasteNextItemIndex >= history.length) {
