@@ -11,9 +11,12 @@ declare const checkForUpdates: () => void;
 declare const openUrl: (url: string) => void;
 declare const getArch: () => string;
 declare const getVersion: () => string;
+declare const isUpdateAvailable: () => boolean;
+declare const restartApp: () => void;
 
 export default function About() {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
+  const [updateAvailable, setUpdateAvailable] = useState(isUpdateAvailable)
   const [checkingForUpdates, setCheckingForUpdates] = useState(false)
 
   useEffect(() => {
@@ -51,8 +54,34 @@ export default function About() {
     openUrl("https://feedback.clipbook.app/board/all")
   }
 
+  function handleUpdateAvailable() {
+    setUpdateAvailable(true)
+  }
+
   // Attach the function to the window object
+  (window as any).updateAvailable = handleUpdateAvailable;
   (window as any).setUpdateCheckInProgress = setUpdateCheckInProgress
+
+  function renderActionButton() {
+    if (updateAvailable) {
+      return (
+          <Button variant="secondary" size="sm" className="px-4 mt-4" onClick={() => {restartApp()}}>
+            {t('statusBar.updateClipBook')}
+          </Button>
+      )
+    }
+    return (
+        <Button variant="secondary" size="sm" className="px-4 mt-4"
+                onClick={handleCheckForUpdates} disabled={checkingForUpdates || !prefAllowCheckForUpdates()}>
+          {
+            checkingForUpdates ? <RefreshCcwIcon className="animate-spin h-4 w-4 mr-2"/> : null
+          }
+          {
+            checkingForUpdates ? t('settings.about.checkingForUpdates') : t('settings.about.checkForUpdates')
+          }
+        </Button>
+    )
+  }
 
   return (
       <div className="flex flex-col min-h-screen relative overflow-hidden">
@@ -63,15 +92,7 @@ export default function About() {
           <img src="/assets/logo_256x256@2x.png" className="w-28 h-28"/>
           <h1 className="text-3xl font-semibold mb-3 mt-1">ClipBook</h1>
           <p className="text-secondary-foreground">{t('settings.about.version', { version: getVersion(), arch: getArch() })}</p>
-          <Button variant="secondary" size="sm" className="px-4 mt-4"
-                  onClick={handleCheckForUpdates} disabled={checkingForUpdates || !prefAllowCheckForUpdates()}>
-            {
-              checkingForUpdates ? <RefreshCcwIcon className="animate-spin h-4 w-4 mr-2"/> : null
-            }
-            {
-              checkingForUpdates ? t('settings.about.checkingForUpdates') : t('settings.about.checkForUpdates')
-            }
-          </Button>
+          {renderActionButton()}
           <div className="justify-center text-center mt-4">
             <CheckForUpdatesResult/>
           </div>

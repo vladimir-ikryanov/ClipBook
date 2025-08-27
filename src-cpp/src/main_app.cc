@@ -386,6 +386,12 @@ void MainApp::notifyUpdateAvailable() {
     if (frame) {
       frame->executeJavaScript("updateAvailable()");
     }
+    if (settings_window_) {
+      auto settings_frame = settings_window_->mainFrame();
+      if (settings_frame) {
+        settings_frame->executeJavaScript("updateAvailable()");
+      }
+    }
   }).detach();
 }
 
