@@ -1607,6 +1607,7 @@ void MainApp::onLanguageChanged() {
     pause_resume_item_->setTitle(i18n("app.menu.pause"));
   }
   about_item_->setTitle(i18n("app.menu.about"));
+  help_menu_->setTitle(i18n("app.menu.help"));
   quit_item_->setTitle(i18n("app.menu.quit"));
 
   shortcuts_item_->setTitle(i18n("app.menu.helpMenu.shortcuts"));
