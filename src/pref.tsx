@@ -837,3 +837,7 @@ export function prefSetCopyOnNumberAction(copy: boolean) {
 export function prefShouldCopyOnNumberAction() {
   return shouldCopyOnNumberAction()
 }
+
+export function prefGetSelectAllShortcut() {
+  return "MetaLeft + KeyA"
+}

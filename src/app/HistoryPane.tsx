@@ -74,7 +74,7 @@ import {
   prefGetQuickPasteShortcuts,
   prefGetRemoveEmptyLinesShortcut,
   prefGetRenameItemShortcut,
-  prefGetSaveImageAsFileShortcut,
+  prefGetSaveImageAsFileShortcut, prefGetSelectAllShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
   prefGetSentenceCaseShortcut,
@@ -131,6 +131,7 @@ type HistoryPaneProps = {
 }
 
 let treatDigitNumbersAsColor = prefShouldTreatDigitNumbersAsColor()
+let renameItemMode = false
 
 export default function HistoryPane(props: HistoryPaneProps) {
   const [history, setHistory] = useState<Clip[]>([])
@@ -555,6 +556,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
         handleQuickLook()
         e.preventDefault()
       }
+
+      // Handle select all (Cmd+A) shortcut.
+      if (isShortcutMatch(prefGetSelectAllShortcut(), e)) {
+        if (handleSelectAll()) {
+          e.preventDefault()
+        }
+      }
     }
 
     document.addEventListener("keydown", down)
@@ -671,6 +679,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     emitter.on("ShowInHistory", handleShowInHistory)
     emitter.on("Split", handleSplit)
     emitter.on("Merge", handleMerge)
+    emitter.on("RenameItemModeEnabled", handleRenameItemModeEnabled)
     return () => {
       emitter.off("ToggleFilter", handleToggleFilter)
       emitter.off("ToggleFavorite", handleToggleFavorite)
@@ -724,6 +733,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       emitter.off("ShowInHistory", handleShowInHistory)
       emitter.off("Split", handleSplit)
       emitter.off("Merge", handleMerge)
+      emitter.off("RenameItemModeEnabled", handleRenameItemModeEnabled)
     };
   }, []);
 
@@ -1511,6 +1521,22 @@ export default function HistoryPane(props: HistoryPaneProps) {
     let visible = !getFilterVisibleState()
     setFilterVisibleState(visible)
     setFilterVisible(visible)
+  }
+
+  function handleSelectAll(): boolean {
+    if (editMode || searchQuery !== "" || renameItemMode) {
+      return false
+    }
+    clearSelection()
+    for (let i = 0; i < getVisibleHistoryLength(); i++) {
+      addSelectedHistoryItemIndex(i)
+    }
+    setSelectedItemIndices(getSelectedHistoryItemIndices())
+    return true
+  }
+
+  function handleRenameItemModeEnabled(enabled: boolean) {
+    renameItemMode = enabled
   }
 
   function updateHistory() {

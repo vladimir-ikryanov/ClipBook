@@ -55,6 +55,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     function handleRenameSelectedItemEvent() {
       if (!isMultipleItemsSelected() && isItemSelected()) {
         setRenameItemMode(true)
+        emitter.emit("RenameItemModeEnabled", true)
       }
     }
 
@@ -96,12 +97,14 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
     setRenameItemMode(false)
     setOriginalItemName(itemName)
     emitter.emit("FocusSearchInput")
+    emitter.emit("RenameItemModeEnabled", false)
   }
 
   async function handleCancelRename() {
     setRenameItemMode(false)
     await saveItemName(originalItemName)
     emitter.emit("FocusSearchInput")
+    emitter.emit("RenameItemModeEnabled", false)
   }
 
   function handleFocus(event: React.FocusEvent<HTMLInputElement>) {
