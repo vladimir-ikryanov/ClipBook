@@ -5,7 +5,7 @@
 #include <string>
 #include <list>
 
-#include "molybden.hpp"
+#include "mobrowser.hpp"
 #include "app_settings.h"
 #include "url_request_interceptor.h"
 #include "webview.h"
@@ -17,13 +17,13 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
     kReturn,
     kTab
   };
-  explicit MainApp(const std::shared_ptr<molybden::App> &app,
+  explicit MainApp(const std::shared_ptr<mobrowser::App> &app,
                    const std::shared_ptr<AppSettings> &settings);
 
-  static void updateLanguage(std::shared_ptr<molybden::Browser> window);
+  static void updateLanguage(std::shared_ptr<mobrowser::Browser> window);
 
-  [[nodiscard]] std::shared_ptr<molybden::App> app() const;
-  [[nodiscard]] std::shared_ptr<molybden::Browser> browser() const;
+  [[nodiscard]] std::shared_ptr<mobrowser::App> app() const;
+  [[nodiscard]] std::shared_ptr<mobrowser::Browser> browser() const;
   [[nodiscard]] std::shared_ptr<AppSettings> settings() const;
 
   void pause();
@@ -78,7 +78,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void showUpdateFailedDialog(const std::string &text, const std::function<void()> &complete);
   void showUpdateCheckFailedDialog(const std::string &error_msg,
                                    const std::function<void()> &complete);
-  void showUpdateAvailableDialog(const std::shared_ptr<molybden::AppUpdate> &app_update,
+  void showUpdateAvailableDialog(const std::shared_ptr<mobrowser::AppUpdate> &app_update,
                                  const std::function<void()> &complete);
   void notifyUpdateAvailable();
   void showSettingsWindow();
@@ -89,9 +89,9 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void setShowIconInMenuBar(bool show);
   void createTray();
   void destroyTray();
-  void initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &window);
+  void initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &window);
   void deleteImage(const std::string &imageFileName);
-  void fetchLinkPreviewDetails(const std::string &url, const std::shared_ptr<molybden::JsObject> &callback);
+  void fetchLinkPreviewDetails(const std::string &url, const std::shared_ptr<mobrowser::JsObject> &callback);
   void previewLink(const std::string &url);
   void saveImageAsFile(const std::string &imageFileName, int imageWidth, int imageHeight);
 
@@ -128,23 +128,23 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   bool update_available_;
   long long app_hide_time_;
   std::string save_images_dir_;
-  std::shared_ptr<molybden::App> app_;
-  std::shared_ptr<molybden::Tray> tray_;
-  std::shared_ptr<molybden::Browser> app_window_;
-  std::shared_ptr<molybden::Browser> preview_window_;
-  std::shared_ptr<molybden::Browser> welcome_window_;
-  std::shared_ptr<molybden::Browser> settings_window_;
-  std::shared_ptr<molybden::CustomMenuItem> open_app_item_;
-  std::shared_ptr<molybden::CustomMenuItem> open_settings_item_;
-  std::shared_ptr<molybden::CustomMenuItem> pause_resume_item_;
-  std::shared_ptr<molybden::CustomMenuItem> check_for_updates_item_;
-  std::shared_ptr<molybden::CustomMenuItem> about_item_;
-  std::shared_ptr<molybden::CustomMenuItem> quit_item_;
-  std::shared_ptr<molybden::CustomMenu> help_menu_;
-  std::shared_ptr<molybden::CustomMenuItem> shortcuts_item_;
-  std::shared_ptr<molybden::CustomMenuItem> changelog_item_;
-  std::shared_ptr<molybden::CustomMenuItem> feedback_item_;
-  std::shared_ptr<molybden::CustomMenuItem> support_item_;
+  std::shared_ptr<mobrowser::App> app_;
+  std::shared_ptr<mobrowser::Tray> tray_;
+  std::shared_ptr<mobrowser::Browser> app_window_;
+  std::shared_ptr<mobrowser::Browser> preview_window_;
+  std::shared_ptr<mobrowser::Browser> welcome_window_;
+  std::shared_ptr<mobrowser::Browser> settings_window_;
+  std::shared_ptr<mobrowser::CustomMenuItem> open_app_item_;
+  std::shared_ptr<mobrowser::CustomMenuItem> open_settings_item_;
+  std::shared_ptr<mobrowser::CustomMenuItem> pause_resume_item_;
+  std::shared_ptr<mobrowser::CustomMenuItem> check_for_updates_item_;
+  std::shared_ptr<mobrowser::CustomMenuItem> about_item_;
+  std::shared_ptr<mobrowser::CustomMenuItem> quit_item_;
+  std::shared_ptr<mobrowser::CustomMenu> help_menu_;
+  std::shared_ptr<mobrowser::CustomMenuItem> shortcuts_item_;
+  std::shared_ptr<mobrowser::CustomMenuItem> changelog_item_;
+  std::shared_ptr<mobrowser::CustomMenuItem> feedback_item_;
+  std::shared_ptr<mobrowser::CustomMenuItem> support_item_;
   std::shared_ptr<AppSettings> settings_;
 
   std::list<std::string> fetch_url_requests_;

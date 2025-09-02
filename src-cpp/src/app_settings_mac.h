@@ -23,11 +23,11 @@ class AppSettingsMac : public AppSettings {
   void saveLanguage(std::string code) override;
   std::string getLanguage() override;
 
-  void saveWindowBounds(molybden::Rect window_bounds) override;
-  molybden::Rect getWindowBounds() override;
+  void saveWindowBounds(mobrowser::Rect window_bounds) override;
+  mobrowser::Rect getWindowBounds() override;
 
-  void saveWindowBoundsForScreen(int screen_id, molybden::Rect screen_bounds, molybden::Rect window_bounds) override;
-  molybden::Rect getWindowBoundsForScreen(int screen_id, molybden::Rect screen_bounds) override;
+  void saveWindowBoundsForScreen(int screen_id, mobrowser::Rect screen_bounds, mobrowser::Rect window_bounds) override;
+  mobrowser::Rect getWindowBoundsForScreen(int screen_id, mobrowser::Rect screen_bounds) override;
 
   void saveIgnoreConfidentialContent(bool ignore) override;
   bool shouldIgnoreConfidentialContent() override;
@@ -253,7 +253,7 @@ class AppSettingsMac : public AppSettings {
   std::string getToggleFilterShortcut() override;
 
  private:
-  static molybden::Rect getWindowBoundsForScreen(int screen_id);
+  static mobrowser::Rect getWindowBoundsForScreen(int screen_id);
 };
 
 

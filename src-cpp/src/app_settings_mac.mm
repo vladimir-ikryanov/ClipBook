@@ -164,7 +164,7 @@ std::string AppSettingsMac::getLicenseKey() {
   return "";
 }
 
-void AppSettingsMac::saveWindowBounds(molybden::Rect window_bounds) {
+void AppSettingsMac::saveWindowBounds(mobrowser::Rect window_bounds) {
   NSMutableDictionary *prefValue = [[NSMutableDictionary alloc] init];
   prefValue[prefWindowBoundsX] = [NSNumber numberWithInt:window_bounds.origin.x];
   prefValue[prefWindowBoundsY] = [NSNumber numberWithInt:window_bounds.origin.y];
@@ -176,7 +176,7 @@ void AppSettingsMac::saveWindowBounds(molybden::Rect window_bounds) {
   [defaults synchronize];
 }
 
-molybden::Rect AppSettingsMac::getWindowBounds() {
+mobrowser::Rect AppSettingsMac::getWindowBounds() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   NSDictionary *value = [defaults objectForKey:prefWindowBounds];
   if (value == nil) {
@@ -186,10 +186,10 @@ molybden::Rect AppSettingsMac::getWindowBounds() {
   auto y = [[value objectForKey:prefWindowBoundsY] intValue];
   auto width = [[value objectForKey:prefWindowBoundsWidth] unsignedIntValue];
   auto height = [[value objectForKey:prefWindowBoundsHeight] unsignedIntValue];
-  return {molybden::Point(x, y), molybden::Size(width, height)};
+  return {mobrowser::Point(x, y), mobrowser::Size(width, height)};
 }
 
-molybden::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id) {
+mobrowser::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id) {
   NSString *key = [NSString stringWithFormat:prefScreenNumber, [NSNumber numberWithInt:screen_id]];
   NSDictionary *value = [[NSUserDefaults standardUserDefaults] objectForKey:key];
   if (value == nil) {
@@ -199,12 +199,12 @@ molybden::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id) {
   auto y = [[value objectForKey:prefWindowBoundsY] intValue];
   auto width = [[value objectForKey:prefWindowBoundsWidth] unsignedIntValue];
   auto height = [[value objectForKey:prefWindowBoundsHeight] unsignedIntValue];
-  return {molybden::Point(x, y), molybden::Size(width, height)};
+  return {mobrowser::Point(x, y), mobrowser::Size(width, height)};
 }
 
 void AppSettingsMac::saveWindowBoundsForScreen(int screen_id,
-                                               molybden::Rect screen_bounds,
-                                               molybden::Rect window_bounds) {
+                                               mobrowser::Rect screen_bounds,
+                                               mobrowser::Rect window_bounds) {
   if (window_bounds.size.isEmpty()) {
     return;
   }
@@ -225,8 +225,8 @@ void AppSettingsMac::saveWindowBoundsForScreen(int screen_id,
   [defaults synchronize];
 }
 
-molybden::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id,
-                                                        molybden::Rect screen_bounds) {
+mobrowser::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id,
+                                                        mobrowser::Rect screen_bounds) {
   NSString *key = [NSString stringWithFormat:prefScreenInfo,
                                              [NSNumber numberWithInt:screen_id],
                                              [NSNumber numberWithInt:screen_bounds.origin.x],
@@ -241,7 +241,7 @@ molybden::Rect AppSettingsMac::getWindowBoundsForScreen(int screen_id,
   auto y = [[value objectForKey:prefWindowBoundsY] intValue];
   auto width = [[value objectForKey:prefWindowBoundsWidth] unsignedIntValue];
   auto height = [[value objectForKey:prefWindowBoundsHeight] unsignedIntValue];
-  return {molybden::Point(x, y), molybden::Size(width, height)};
+  return {mobrowser::Point(x, y), mobrowser::Size(width, height)};
 }
 
 void AppSettingsMac::saveLanguage(std::string code) {

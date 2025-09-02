@@ -1,7 +1,7 @@
 #ifndef WEBVIEW_H_
 #define WEBVIEW_H_
 
-#include "molybden.hpp"
+#include "mobrowser.hpp"
 
 struct LinkPreviewDetails {
   std::string title;
@@ -12,7 +12,7 @@ struct LinkPreviewDetails {
 
 class HeadlessWebView {
  public:
-  explicit HeadlessWebView(std::shared_ptr<molybden::App> app, std::string images_dir);
+  explicit HeadlessWebView(std::shared_ptr<mobrowser::App> app, std::string images_dir);
   ~HeadlessWebView();
 
   std::string download(const std::string &url, const std::string& file_name_prefix);
@@ -20,7 +20,7 @@ class HeadlessWebView {
 
  private:
   std::string images_dir_;
-  std::shared_ptr<molybden::Browser> browser_;
+  std::shared_ptr<mobrowser::Browser> browser_;
 };
 
 #endif  // WEBVIEW_H_

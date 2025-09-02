@@ -11,7 +11,7 @@
 
 class MainAppMac : public MainApp {
  public:
-  explicit MainAppMac(const std::shared_ptr<molybden::App> &app,
+  explicit MainAppMac(const std::shared_ptr<mobrowser::App> &app,
                       const std::shared_ptr<AppSettings> &settings);
 
 #ifdef __OBJC__
@@ -73,7 +73,7 @@ class MainAppMac : public MainApp {
 
  private:
   void restoreWindowBounds();
-  molybden::Size restoreWindowSize();
+  mobrowser::Size restoreWindowSize();
   void saveWindowBounds();
   void moveToLastPositionOnActiveScreen();
   void moveToActiveScreenCenter();
@@ -81,7 +81,7 @@ class MainAppMac : public MainApp {
   bool moveToActiveWindowCenter();
   bool moveToScreenWithMousePointer();
   void moveToMousePointerLocation();
-  static molybden::Shortcut createShortcut(const std::string &shortcut);
+  static mobrowser::Shortcut createShortcut(const std::string &shortcut);
 
   static void addAppToLoginItems();
   static void removeAppFromLoginItems();
@@ -90,10 +90,10 @@ class MainAppMac : public MainApp {
   long getSystemBootTime() override;
 
  private:
-  molybden::Shortcut open_app_shortcut_;
-  molybden::Shortcut pause_resume_shortcut_;
-  molybden::Shortcut open_settings_shortcut_;
-  molybden::Shortcut paste_next_item_shortcut_;
+  mobrowser::Shortcut open_app_shortcut_;
+  mobrowser::Shortcut pause_resume_shortcut_;
+  mobrowser::Shortcut open_settings_shortcut_;
+  mobrowser::Shortcut paste_next_item_shortcut_;
   std::shared_ptr<ClipboardReaderMac> clipboard_reader_;
   bool should_activate_app_ = false;
 #ifdef __OBJC__

@@ -4,14 +4,14 @@ cmake_minimum_required(VERSION 3.21)
 set(OFFICIAL_BUILD FALSE)
 
 # Set deployment target for macOS
-set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS deployment version" FORCE)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS deployment version" FORCE)
 
 # Configures your project.
 project(ClipBook LANGUAGES CXX)
 
-# Imports the Molybden app configuration and setups the auxiliary targets, resources, etc.
+# Imports the MoBrowser app configuration and setups the auxiliary targets, resources, etc.
 # Important: Do not move this include above the project declaration.
-include(node_modules/@molybden-apps/molybden/Molybden.cmake)
+include(node_modules/@mobrowser-apps/mobrowser/MoBrowser.cmake)
 
 # The source files of your app.
 set(APP_SOURCES
@@ -57,15 +57,15 @@ if (OFFICIAL_BUILD)
 endif ()
 
 # Defines the main target of the application.
-add_library(molybden_lib STATIC ${APP_SOURCES} ${APP_SOURCES_WIN} ${APP_SOURCES_MAC} ${LICENSING_SOURCES_MAC})
+add_library(mobrowser_lib STATIC ${APP_SOURCES} ${APP_SOURCES_WIN} ${APP_SOURCES_MAC} ${LICENSING_SOURCES_MAC})
 
-# The Molybden API requires C++20.
-set_property(TARGET molybden_lib PROPERTY CXX_STANDARD 20)
+# The MoBrowser API requires C++20.
+set_property(TARGET mobrowser_lib PROPERTY CXX_STANDARD 20)
 
-# Adds the Molybden API to the include path.
+# Adds the MoBrowser API to the include path.
 # Provide the additional include directories if needed.
-target_include_directories(molybden_lib PRIVATE ${MOLYBDEN_SDK_DIR}/include)
+target_include_directories(mobrowser_lib PRIVATE ${MOBROWSER_SDK_DIR}/include)
 
 if (OS_MAC)
-    target_link_libraries(molybden_lib PRIVATE "-framework Cocoa -framework Vision -framework IOKit -framework QuickLookThumbnailing -framework QuickLook -framework Quartz")
+    target_link_libraries(mobrowser_lib PRIVATE "-framework Cocoa -framework Vision -framework IOKit -framework QuickLookThumbnailing -framework QuickLook -framework Quartz")
 endif ()

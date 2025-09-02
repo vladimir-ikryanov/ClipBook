@@ -1,4 +1,4 @@
-#include "molybden.hpp"
+#include "mobrowser.hpp"
 
 #if OS_MAC
 #include "main_app_mac.h"
@@ -7,7 +7,7 @@
 #include "url_request_interceptor.h"
 #include "utils.h"
 
-using namespace molybden;
+using namespace mobrowser;
 
 void launch() {
   AppOptions options;

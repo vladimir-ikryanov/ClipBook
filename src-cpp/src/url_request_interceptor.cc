@@ -1032,8 +1032,8 @@ bool isRoutingPage(const std::string& url) {
 UrlRequestInterceptor::UrlRequestInterceptor(std::string profile_path, std::string resources_dir) :
     profile_path_(std::move(profile_path)), resources_dir_(std::move(resources_dir)) {}
 
-void UrlRequestInterceptor::intercept(const molybden::InterceptUrlRequestArgs &args,
-                                      molybden::InterceptUrlRequestAction action) {
+void UrlRequestInterceptor::intercept(const mobrowser::InterceptUrlRequestArgs &args,
+                                      mobrowser::InterceptUrlRequestAction action) {
   URL url(args.request.url);
 
   fs::path file_path;
@@ -1070,12 +1070,12 @@ void UrlRequestInterceptor::intercept(const molybden::InterceptUrlRequestArgs &a
   auto file_extension = getFileExtension(file_path);
   const auto mime_type = kMimeTypes[file_extension];
 
-  std::vector<molybden::HttpHeader> headers;
+  std::vector<mobrowser::HttpHeader> headers;
   headers.emplace_back("content-type", mime_type);
   headers.emplace_back("cache-control", "no-cache");
   headers.emplace_back("content-length", std::to_string(file_size));
 
-  auto job = args.job_factory->createJob(molybden::kOk, headers);
+  auto job = args.job_factory->createJob(mobrowser::kOk, headers);
   std::ifstream file(file_path, std::ios::binary);
   if (file.is_open()) {
     char* buffer = new char[file_size];

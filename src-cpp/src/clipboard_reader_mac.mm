@@ -280,7 +280,7 @@ ClipboardReaderMac::~ClipboardReaderMac() {
 void ClipboardReaderMac::start(const std::shared_ptr<MainApp> &app) {
   app_ = app;
 
-  auto resources = app_->app()->getPath(molybden::PathKey::kAppResources) + "/sound.aiff";
+  auto resources = app_->app()->getPath(mobrowser::PathKey::kAppResources) + "/sound.aiff";
   auto *sound_file_path = [NSString stringWithUTF8String:resources.c_str()];
   sound_ = [[NSSound alloc] initWithContentsOfFile:sound_file_path byReference:YES];
 

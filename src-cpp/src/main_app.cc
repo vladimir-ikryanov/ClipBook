@@ -12,7 +12,7 @@
 #include "licensing/licensing.h"
 #endif
 
-using namespace molybden;
+using namespace mobrowser;
 
 namespace fs = std::filesystem;
 
@@ -73,7 +73,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSetti
       app_hide_time_(0),
       settings_(settings) {
   request_interceptor_ = std::make_shared<UrlRequestInterceptor>(
-      app_->profile()->path(), app_->getPath(molybden::PathKey::kAppResources));
+      app_->profile()->path(), app_->getPath(mobrowser::PathKey::kAppResources));
 }
 
 bool MainApp::init() {
@@ -285,11 +285,11 @@ void MainApp::hide(bool force) {
   }
 }
 
-std::shared_ptr<molybden::App> MainApp::app() const {
+std::shared_ptr<mobrowser::App> MainApp::app() const {
   return app_;
 }
 
-std::shared_ptr<molybden::Browser> MainApp::browser() const {
+std::shared_ptr<mobrowser::Browser> MainApp::browser() const {
   return app_window_;
 }
 
@@ -432,7 +432,7 @@ void MainApp::checkForUpdates(const std::function<void()> &complete, bool user_i
   });
 }
 
-void MainApp::showUpdateAvailableDialog(const std::shared_ptr<molybden::AppUpdate> &app_update,
+void MainApp::showUpdateAvailableDialog(const std::shared_ptr<mobrowser::AppUpdate> &app_update,
                                         const std::function<void()> &complete) {
   MessageDialogOptions options;
   options.title = appDialogsUpdateAvailableTitle;
@@ -630,7 +630,7 @@ void MainApp::showWelcomeWindow() {
   welcome_window_->show();
 }
 
-void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &window) {
+void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &window) {
   // Welcome window.
   window->putProperty("enableAccessibilityAccess", [this]() {
     paste();
@@ -713,30 +713,30 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
   window->putProperty("zoomIn", [window]() {
     auto zoom = window->frame()->browser()->zoom();
-    if (zoom->level() < molybden::k200) {
+    if (zoom->level() < mobrowser::k200) {
       zoom->in();
     }
   });
   window->putProperty("zoomOut", [window]() {
     auto zoom = window->frame()->browser()->zoom();
-    if (zoom->level() > molybden::k50) {
+    if (zoom->level() > mobrowser::k50) {
       zoom->out();
     }
   });
   window->putProperty("canZoomIn", [window]() -> bool {
     auto zoom = window->frame()->browser()->zoom();
-    return zoom->level() < molybden::k200;
+    return zoom->level() < mobrowser::k200;
   });
   window->putProperty("canZoomOut", [window]() -> bool {
     auto zoom = window->frame()->browser()->zoom();
-    return zoom->level() > molybden::k50;
+    return zoom->level() > mobrowser::k50;
   });
   window->putProperty("resetZoom", [window]() {
     window->frame()->browser()->zoom()->reset();
   });
   window->putProperty("canResetZoom", [window]() -> bool {
     auto zoom = window->frame()->browser()->zoom();
-    return zoom->level() != molybden::k100;
+    return zoom->level() != mobrowser::k100;
   });
   window->putProperty("enableOpenAppShortcut", [this]() {
     enableOpenAppShortcut();
@@ -1410,7 +1410,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<molybden::JsObject> &windo
   });
 }
 
-void MainApp::fetchLinkPreviewDetails(const std::string &url, const std::shared_ptr<molybden::JsObject> &callback) {
+void MainApp::fetchLinkPreviewDetails(const std::string &url, const std::shared_ptr<mobrowser::JsObject> &callback) {
   // If the given URL is already being fetched, ignore the request.
   if (std::find(fetch_url_requests_.begin(), fetch_url_requests_.end(), url) != fetch_url_requests_.end()) {
     LOG(INFO) << "Skip fetching link preview: " << url;
@@ -1520,12 +1520,12 @@ void MainApp::destroyTray() {
 }
 
 void MainApp::selectAppsToIgnore() {
-  molybden::OpenDialogOptions options;
+  mobrowser::OpenDialogOptions options;
   options.default_path = "/Applications";
   options.button_label = appDialogsSelectAppsToIgnoreChoose;
   options.features.allow_multiple_selections = true;
   options.filters = {{appDialogsSelectAppsToIgnoreApplications, {"app"}}};
-  molybden::OpenDialog::show(settings_window_, options, [this](molybden::OpenDialogResult result) {
+  mobrowser::OpenDialog::show(settings_window_, options, [this](mobrowser::OpenDialogResult result) {
     if (result.canceled) {
       return;
     }
@@ -1652,7 +1652,7 @@ void MainApp::onLanguageChanged() {
   appDialogsSaveImageAsSave = i18n("app.dialogs.saveImageAs.save");
 }
 
-void MainApp::updateLanguage(std::shared_ptr<molybden::Browser> window) {
+void MainApp::updateLanguage(std::shared_ptr<mobrowser::Browser> window) {
   if (window) {
     auto frame = window->mainFrame();
     if (frame) {

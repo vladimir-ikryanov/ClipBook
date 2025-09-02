@@ -15,7 +15,7 @@
 #define KEY_CODE_RETURN ((CGKeyCode)36)
 #define KEY_CODE_TAB ((CGKeyCode)48)
 
-using namespace molybden;
+using namespace mobrowser;
 
 namespace fs = std::filesystem;
 
@@ -230,10 +230,10 @@ void MainAppMac::setActiveAppInfo(NSRunningApplication* activeApp) {
   }
 }
 
-molybden::Shortcut MainAppMac::createShortcut(const std::string &shortcut) {
+mobrowser::Shortcut MainAppMac::createShortcut(const std::string &shortcut) {
   int32_t key_modifiers = extractKeyModifiers(shortcut);
   KeyCode key_code = extractKeyCode(shortcut);
-  return molybden::Shortcut(key_code, key_modifiers);
+  return mobrowser::Shortcut(key_code, key_modifiers);
 }
 
 void MainAppMac::enableOpenAppShortcut() {
@@ -265,7 +265,7 @@ void MainAppMac::enableOpenAppShortcut() {
   });
   if (!success) {
     LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
-    open_app_shortcut_ = molybden::Shortcut();
+    open_app_shortcut_ = mobrowser::Shortcut();
   }
 }
 
@@ -295,7 +295,7 @@ void MainAppMac::enablePauseResumeShortcut() {
   });
   if (!success) {
     LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
-    pause_resume_shortcut_ = molybden::Shortcut();
+    pause_resume_shortcut_ = mobrowser::Shortcut();
   }
 }
 
@@ -322,7 +322,7 @@ void MainAppMac::enablePasteNextItemShortcut() {
     LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
     // Reset the shortcut to an empty one if registration fails to avoid crash when we try to
     // unregister it later.
-    paste_next_item_shortcut_ = molybden::Shortcut();
+    paste_next_item_shortcut_ = mobrowser::Shortcut();
   }
 }
 
@@ -630,7 +630,7 @@ bool MainAppMac::moveToInputCursorLocation() {
   return true;
 }
 
-molybden::Size MainAppMac::restoreWindowSize() {
+mobrowser::Size MainAppMac::restoreWindowSize() {
   auto window_bounds = settings_->getWindowBounds();
   if (!window_bounds.size.isEmpty()) {
     app_window_->setSize(window_bounds.size);
@@ -699,11 +699,11 @@ void MainAppMac::moveToLastPositionOnActiveScreen() {
   NSNumber *screen_number = [[main_screen deviceDescription] objectForKey:@"NSScreenNumber"];
   int screen_id = [screen_number intValue];
   auto screen_frame = [main_screen frame];
-  auto screen_origin = molybden::Point(static_cast<int32_t>(screen_frame.origin.x),
+  auto screen_origin = mobrowser::Point(static_cast<int32_t>(screen_frame.origin.x),
                                        static_cast<int32_t>(screen_frame.origin.y));
-  auto screen_size = molybden::Size(static_cast<int32_t>(screen_frame.size.width),
+  auto screen_size = mobrowser::Size(static_cast<int32_t>(screen_frame.size.width),
                                     static_cast<int32_t>(screen_frame.size.height));
-  auto screen_bounds = molybden::Rect(screen_origin, screen_size);
+  auto screen_bounds = mobrowser::Rect(screen_origin, screen_size);
   auto window_bounds = settings_->getWindowBoundsForScreen(screen_id, screen_bounds);
   if (!window_bounds.size.isEmpty()) {
     app_window_->setBounds(window_bounds);
@@ -717,11 +717,11 @@ void MainAppMac::saveWindowBounds() {
   NSNumber *screen_number = [[main_screen deviceDescription] objectForKey:@"NSScreenNumber"];
   int screen_id = [screen_number intValue];
   auto screen_frame = [main_screen frame];
-  auto screen_origin = molybden::Point(static_cast<int32_t>(screen_frame.origin.x),
+  auto screen_origin = mobrowser::Point(static_cast<int32_t>(screen_frame.origin.x),
                                        static_cast<int32_t>(screen_frame.origin.y));
-  auto screen_size = molybden::Size(static_cast<int32_t>(screen_frame.size.width),
+  auto screen_size = mobrowser::Size(static_cast<int32_t>(screen_frame.size.width),
                                     static_cast<int32_t>(screen_frame.size.height));
-  auto screen_bounds = molybden::Rect(screen_origin, screen_size);
+  auto screen_bounds = mobrowser::Rect(screen_origin, screen_size);
   auto window_bounds = app_window_->bounds();
   settings_->saveWindowBoundsForScreen(screen_id, screen_bounds, window_bounds);
   settings_->saveWindowBounds(window_bounds);

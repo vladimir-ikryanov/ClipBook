@@ -6,8 +6,8 @@
 #include "url.h"
 #include "utils.h"
 
-HeadlessWebView::HeadlessWebView(std::shared_ptr<molybden::App> app, std::string images_dir) : images_dir_(std::move(images_dir)) {
-  browser_ = molybden::Browser::create(std::move(app));
+HeadlessWebView::HeadlessWebView(std::shared_ptr<mobrowser::App> app, std::string images_dir) : images_dir_(std::move(images_dir)) {
+  browser_ = mobrowser::Browser::create(std::move(app));
   // Mute audio to avoid playing sounds on the web page while fetching link preview details.
   browser_->media()->muteAudio();
 }
@@ -64,17 +64,17 @@ std::string HeadlessWebView::download(const std::string &url, const std::string&
   std::promise<std::string> promise;
   std::future<std::string> future = promise.get_future();
   browser_->onStartDownload = [this, &promise, &file_name_prefix]
-      (const molybden::StartDownloadArgs &args, molybden::StartDownloadAction action) {
+      (const mobrowser::StartDownloadArgs &args, mobrowser::StartDownloadAction action) {
     // Get current time in milliseconds to generate a unique file name.
     std::string file = file_name_prefix + std::to_string(getCurrentTimeMillis()) + ".png";
     auto path = images_dir_ + "/" + file;
-    args.download->onDownloadFinished += [file, &promise](const molybden::DownloadFinished &event) {
+    args.download->onDownloadFinished += [file, &promise](const mobrowser::DownloadFinished &event) {
       promise.set_value(file);
     };
-    args.download->onDownloadCanceled += [&promise](const molybden::DownloadCanceled &event) {
+    args.download->onDownloadCanceled += [&promise](const mobrowser::DownloadCanceled &event) {
       promise.set_value("");
     };
-    args.download->onDownloadInterrupted += [&promise](const molybden::DownloadInterrupted &event) {
+    args.download->onDownloadInterrupted += [&promise](const mobrowser::DownloadInterrupted &event) {
       promise.set_value("");
     };
     action.download(path);
