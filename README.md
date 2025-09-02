@@ -20,7 +20,7 @@ You can build your own copy of ClipBook from the source code by following these 
 - Install [Node.js](https://nodejs.org/en/download) version 20.11.0 or higher.
 - Install [Command Line Tools](http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/).
 
-**Note**: ClipBook is built using [Molybden](https://teamdev.com/molybden/docs/quick-start/), a commercial SDK for building cross-platform desktop applications using C++ and web technologies. You can use a [free 3-week trial](https://teamdev.com/molybden/#pricing) to build ClipBook.
+**Note**: ClipBook is built using [MōBrowser](https://teamdev.com/mobrowser/docs/quick-start/), a commercial SDK for building cross-platform desktop applications using C++ and web technologies. You can use a [free 3-week trial](https://teamdev.com/mobrowser/#pricing) to build ClipBook.
 
 ### Getting the source code
 
@@ -38,12 +38,12 @@ npm install
 ### Building ClipBook
 
 ```sh
-npm run molybden build
+npm run mobrowser build
 ```
 
 This command will build and pack ClipBook into a native executable and place it in the project's `build-dist/bin` directory. It will also create a DMG installer in `build-dist/pack`.
 
-**Note**: The application will not be signed and notarized. You can sign and notarize it using your own Apple developer certificate by following the instructions in the [Molybden documentation](https://teamdev.com/molybden/docs/distribution/signing.html#macos). 
+**Note**: The application will not be signed and notarized. You can sign and notarize it using your own Apple developer certificate by following the instructions in the [MōBrowser SDK documentation](https://teamdev.com/mobrowser/docs/distribution/signing.html#macos). 
 
 ## License
 
