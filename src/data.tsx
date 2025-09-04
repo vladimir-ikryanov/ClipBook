@@ -320,12 +320,14 @@ export function findItemByImageFileName(imageFileName: string): Clip | undefined
   return undefined
 }
 
-async function deleteItem(item: Clip) {
+async function deleteItem(item: Clip, skipUpdate: boolean = false) {
   let index = hasItem(item);
   if (index !== -1) {
     history.splice(index, 1)
     await deleteClip(item.id!)
-    requestHistoryUpdate()
+    if (!skipUpdate) {
+      requestHistoryUpdate()
+    }
   }
 }
 
@@ -422,8 +424,8 @@ export async function addHistoryItem(content: string,
   return item
 }
 
-export async function deleteHistoryItem(item: Clip) {
-  await deleteItem(item)
+export async function deleteHistoryItem(item: Clip, skipUpdate: boolean = false) {
+  await deleteItem(item, skipUpdate)
 }
 
 export async function updateHistoryItem(id: number, item: Clip) {

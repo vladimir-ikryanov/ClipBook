@@ -44,7 +44,9 @@ import {
   resetFilter,
   setShouldUpdateHistory,
   fileExists,
-  getNextItemIndexForPaste, resetPasteNextItemIndex
+  getNextItemIndexForPaste, 
+  resetPasteNextItemIndex, 
+  requestHistoryUpdate
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
@@ -1356,8 +1358,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
     focusSearchField()
   }
 
-  async function deleteItem(item: Clip) {
-    await deleteHistoryItem(item)
+  async function deleteItem(item: Clip, skipUpdate: boolean = false) {
+    await deleteHistoryItem(item, skipUpdate)
     if (item.type === ClipType.Image) {
       deleteImage(item.imageFileName)
       deleteImage(item.imageThumbFileName)
@@ -1366,6 +1368,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
       deleteImage(item.filePathFileName)
       deleteImage(item.filePathThumbFileName)
     }
+    
+    if (skipUpdate) {
+      return
+    }
 
     // If the history is not empty, update the preview text to the new active item.
     let items = getHistoryItems()
@@ -1373,6 +1379,14 @@ export default function HistoryPane(props: HistoryPaneProps) {
       setSelectedItemIndices(getSelectedHistoryItemIndices())
     }
     setHistory(items)
+  }
+
+  async function deleteItems(items: Clip[]) {
+    for (let item of items) {
+      await deleteItem(item, true)
+    }
+    requestHistoryUpdate()
+    setHistory(getHistoryItems())
   }
 
   async function handleDeleteItem() {
@@ -1411,12 +1425,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
     let items = getSelectedHistoryItems()
     if (items.length > 0) {
       let nextSelectedItemIndex = getVisibleHistoryLength() - 1
-      clearSelection()
       for (let item of items) {
         let index = getHistoryItemIndex(item)
         nextSelectedItemIndex = Math.min(index, nextSelectedItemIndex)
-        await deleteItem(item)
       }
+      clearSelection()
+      await deleteItems(items)
 
       let lastIndex = getVisibleHistoryLength() - 1
       if (nextSelectedItemIndex >= lastIndex) {
