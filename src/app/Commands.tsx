@@ -84,6 +84,9 @@ export default function Commands(props: CommandsProps) {
 
   const [open, setOpen] = useState(false)
   const [defaultApp, setDefaultApp] = useState<AppInfo | undefined>(undefined)
+  const [canZoomInState, setCanZoomInState] = useState(false)
+  const [canZoomOutState, setCanZoomOutState] = useState(false)
+  const [canResetZoomState, setCanResetZoomState] = useState(false)
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -130,6 +133,9 @@ export default function Commands(props: CommandsProps) {
           }
         }
       }
+      setCanZoomInState(canZoomIn())
+      setCanZoomOutState(canZoomOut())
+      setCanResetZoomState(canResetZoom())
     } else {
       if (focusSearch) {
         emitter.emit("FocusSearchInput")
@@ -781,21 +787,21 @@ export default function Commands(props: CommandsProps) {
                     <ShortcutLabel shortcut={prefGetTogglePreviewShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
-                <CommandItem onSelect={handleZoomIn} disabled={!canZoomIn()}>
+                <CommandItem onSelect={handleZoomIn} disabled={!canZoomInState}>
                   <ZoomIn className="mr-2 h-5 w-5"/>
                   <span>{t('commands.zoomIn')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetZoomUIInShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
-                <CommandItem onSelect={handleZoomOut} disabled={!canZoomOut()}>
+                <CommandItem onSelect={handleZoomOut} disabled={!canZoomOutState}>
                   <ZoomOut className="mr-2 h-5 w-5"/>
                   <span>{t('commands.zoomOut')}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetZoomUIOutShortcut()}/>
                   </CommandShortcut>
                 </CommandItem>
-                <CommandItem onSelect={handleResetZoom} disabled={!canResetZoom()}>
+                <CommandItem onSelect={handleResetZoom} disabled={!canResetZoomState}>
                   <Undo2Icon className="mr-2 h-5 w-5"/>
                   <span>{t('commands.resetZoom')}</span>
                   <CommandShortcut className="flex flex-row">
@@ -847,7 +853,4 @@ export default function Commands(props: CommandsProps) {
         </div>
       </>
   )
-}
-
-export class HideActionsReason {
 }

@@ -727,16 +727,14 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
     auto zoom = window->frame()->browser()->zoom();
     return zoom->level() < mobrowser::k200;
   });
-  window->putProperty("canZoomOut", [window]() -> bool {
-    auto zoom = window->frame()->browser()->zoom();
-    return zoom->level() > mobrowser::k50;
+  window->putProperty("canZoomOut", [this]() -> bool {
+    return app_window_->zoom()->level() > mobrowser::k50;
   });
-  window->putProperty("resetZoom", [window]() {
-    window->frame()->browser()->zoom()->reset();
+  window->putProperty("resetZoom", [this]() {
+    app_window_->zoom()->reset();
   });
-  window->putProperty("canResetZoom", [window]() -> bool {
-    auto zoom = window->frame()->browser()->zoom();
-    return zoom->level() != mobrowser::k100;
+  window->putProperty("canResetZoom", [this]() -> bool {
+    return app_window_->zoom()->level() != mobrowser::k100;
   });
   window->putProperty("enableOpenAppShortcut", [this]() {
     enableOpenAppShortcut();
