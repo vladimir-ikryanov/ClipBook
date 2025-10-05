@@ -82,7 +82,7 @@ export async function addClip(clip: Clip) {
 }
 
 export async function updateClip(id: number, clip: Clip) {
-  await db.history.update(id, clip)
+  await db.history.update(id, clip as any)
 }
 
 export async function deleteClip(id: number) {

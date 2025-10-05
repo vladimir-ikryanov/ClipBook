@@ -5,6 +5,7 @@ import Privacy from "@/settings/Privacy";
 import Shortcuts from "@/settings/Shortcuts";
 import License from "@/settings/License";
 import General from "@/settings/General";
+import AISettings from "@/settings/AISettings";
 import SettingsSidebar from "@/settings/SettingsSidebar";
 import {SettingsSidebarItemType} from "@/settings/SettingsSidebarItem";
 import {useState} from "react";
@@ -36,6 +37,9 @@ export default function Settings(props: SettingsProps) {
           }
           {
               selectedItemType === "Privacy" && <Privacy/>
+          }
+          {
+              selectedItemType === "AI" && <AISettings/>
           }
           {
               selectedItemType === "License" && <License/>

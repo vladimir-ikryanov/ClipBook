@@ -12,6 +12,11 @@ import {
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {TooltipProvider} from "@/components/ui/tooltip";
 import {emitter} from "@/actions";
+import {getAIService, AIProviderType} from "@/ai/ai-service";
+import {OllamaProvider} from "@/ai/ollama-provider";
+import {OpenAIProvider} from "@/ai/openai-provider";
+import {PerplexityProvider} from "@/ai/perplexity-provider";
+import {prefGetAIProvider, prefGetAIAPIKey, prefGetAIModel} from "@/pref";
 
 declare const hideAppWindow: () => void;
 declare const zoomIn: () => void;
@@ -90,6 +95,28 @@ export default function App() {
     resetZoom()
     emitter.emit("FocusSearchInput")
   }
+
+  // Initialize AI service
+  useEffect(() => {
+    const aiService = getAIService();
+    const provider = (prefGetAIProvider() as AIProviderType) || AIProviderType.Ollama;
+    const apiKey = prefGetAIAPIKey() || "";
+    const model = prefGetAIModel() || (
+      provider === AIProviderType.Ollama ? "llama3.2" : 
+      provider === AIProviderType.Perplexity ? "sonar" : 
+      "gpt-3.5-turbo"
+    );
+
+    if (provider === AIProviderType.Ollama) {
+      aiService.setProvider(AIProviderType.Ollama, new OllamaProvider(model));
+    } else if (provider === AIProviderType.OpenAI && apiKey) {
+      aiService.setProvider(AIProviderType.OpenAI, new OpenAIProvider(apiKey, model));
+    } else if (provider === AIProviderType.Perplexity && apiKey) {
+      aiService.setProvider(AIProviderType.Perplexity, new PerplexityProvider(apiKey, model));
+    }
+
+    aiService.updateConfig({ provider, apiKey, model });
+  }, []);
 
   // Attach the function to the window object
   (window as any).setActiveAppInfo = setActiveAppInfo;

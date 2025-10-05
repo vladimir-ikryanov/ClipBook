@@ -9,6 +9,7 @@ import {
   GlobeIcon,
   ScanTextIcon,
   StarIcon,
+  WandIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -55,6 +56,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   const [pasteOptionsMenuOpen, setPasteOptionsMenuOpen] = useState(false)
   const [isCopying, setIsCopying] = useState(false)
   const [showCheckIcon, setShowCheckIcon] = useState(false)
+  const [aiDialogOpen, setAIDialogOpen] = useState(false)
 
   useEffect(() => {
     if (props.selectedItemIndices.length === 1) {
@@ -125,6 +127,21 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
   function handleToggleFavorite() {
     emitter.emit("ToggleFavorite")
+  }
+
+  function handleAIRewrite() {
+    setAIDialogOpen(true)
+  }
+
+  function handleAIDialogClose() {
+    setAIDialogOpen(false)
+  }
+
+  function handleAIReplace(newText: string) {
+    if (selectedItem) {
+      selectedItem.content = newText
+      emitter.emit("EditItem", selectedItem)
+    }
   }
 
   function selectedItemsAreMarkedAsFavorite() {
@@ -333,6 +350,19 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                   </TooltipContent>
                 </Tooltip>
             }
+            {
+                canShowCopyToClipboard() && selectedItem && isTextItem(selectedItem) &&
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="toolbar" size="toolbar" onClick={handleAIRewrite}>
+                      <WandIcon className="h-5 w-5" strokeWidth={2}/>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex items-center">
+                    <div className="select-none mr-2 ml-1">AI Rewrite</div>
+                  </TooltipContent>
+                </Tooltip>
+            }
           </div>
           <div className="flex-grow draggable"></div>
           {
@@ -405,6 +435,14 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
             </Tooltip>
           </div>
         </div>
+        <AIRewriteDialog
+          open={aiDialogOpen}
+          onClose={handleAIDialogClose}
+          originalText={selectedItem?.content || ""}
+          onReplace={handleAIReplace}
+        />
       </div>
   )
 }
+
+import AIRewriteDialog from "./AIRewriteDialog";
