@@ -9,6 +9,12 @@ declare const getTheme: () => string;
 declare const saveLicenseKey: (licenseKey: string) => void;
 declare const getLicenseKey: () => string;
 
+// AI settings are stored in localStorage since they don't need native persistence
+const AI_ENABLED_KEY = "ai_enabled";
+const AI_PROVIDER_KEY = "ai_provider";
+const AI_API_KEY = "ai_api_key";
+const AI_MODEL_KEY = "ai_model";
+
 declare const saveOpenAtLogin: (openAtLogin: boolean) => void;
 declare const shouldOpenAtLogin: () => boolean;
 declare const isOpenAtLoginManaged: () => boolean;
@@ -840,4 +846,36 @@ export function prefShouldCopyOnNumberAction() {
 
 export function prefGetSelectAllShortcut() {
   return "MetaLeft + KeyA"
+}
+
+export function prefIsAIEnabled() {
+  return localStorage.getItem(AI_ENABLED_KEY) === "true"
+}
+
+export function prefSetAIEnabled(enabled: boolean) {
+  localStorage.setItem(AI_ENABLED_KEY, enabled.toString())
+}
+
+export function prefGetAIProvider() {
+  return localStorage.getItem(AI_PROVIDER_KEY) || "ollama"
+}
+
+export function prefSetAIProvider(provider: string) {
+  localStorage.setItem(AI_PROVIDER_KEY, provider)
+}
+
+export function prefGetAIAPIKey() {
+  return localStorage.getItem(AI_API_KEY) || ""
+}
+
+export function prefSetAIAPIKey(apiKey: string) {
+  localStorage.setItem(AI_API_KEY, apiKey)
+}
+
+export function prefGetAIModel() {
+  return localStorage.getItem(AI_MODEL_KEY) || "llama3.2"
+}
+
+export function prefSetAIModel(model: string) {
+  localStorage.setItem(AI_MODEL_KEY, model)
 }

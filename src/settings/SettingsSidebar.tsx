@@ -14,7 +14,8 @@ import {
   KeyRoundIcon,
   ListIcon,
   SettingsIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  WandIcon
 } from "lucide-react";
 import {prefIsDeviceManaged} from "@/pref";
 import { useTranslation } from 'react-i18next';
@@ -61,6 +62,11 @@ export default function SettingsSidebar(props: SettingsSidebarProps) {
                                      icon={ShieldCheckIcon}
                                      isSelected={selectedItemType === "Privacy"}
                                      onSelect={() => handleSelect("Privacy")}/>
+                <SettingsSidebarItem type={"AI"}
+                                     url={"/"}
+                                     icon={WandIcon}
+                                     isSelected={selectedItemType === "AI"}
+                                     onSelect={() => handleSelect("AI")}/>
                 <SettingsSidebarItem type={"License"}
                                      url={"/"}
                                      icon={KeyRoundIcon}

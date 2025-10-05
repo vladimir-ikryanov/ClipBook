@@ -88,6 +88,7 @@ export type Events = {
   UpdateLinkPreview: void;
   UpdateLanguage: void;
   RenameItemModeEnabled: boolean;
+  AIRewrite: void;
 };
 
 export const emitter: Emitter<Events> = mitt<Events>();

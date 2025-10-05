@@ -5,15 +5,27 @@ import * as React from "react"
 import {useEffect, useState} from "react"
 import {
   ArrowUpLeftIcon,
+  ClipboardCheck,
+  ClipboardPen,
+  ClipboardPaste,
   CommandIcon,
-  CopyIcon, DownloadIcon,
-  Edit3Icon, EyeIcon,
-  GlobeIcon, PenIcon,
+  CopyIcon,
+  DownloadIcon,
+  Edit3Icon,
+  EyeIcon,
+  GlobeIcon,
+  PenIcon,
   ScanTextIcon,
   SettingsIcon,
   StarIcon,
   StarOffIcon,
-  TrashIcon, TypeIcon, Undo2Icon, UnfoldVerticalIcon, UploadIcon, ZoomIn, ZoomOut
+  TrashIcon,
+  TypeIcon,
+  Undo2Icon,
+  UnfoldVerticalIcon,
+  UploadIcon,
+  ZoomIn,
+  ZoomOut
 } from "lucide-react"
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -529,8 +541,7 @@ export default function Commands(props: CommandsProps) {
             <div className="max-h-[70vh] overflow-y-auto mb-1.5 scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent">
               <CommandList>
                 <CommandItem onSelect={handlePaste}>
-                  <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                       alt="Application icon"/>
+                  <ClipboardPaste className="mr-2 h-5 w-5" aria-hidden="true" />
                   <span>{t('commands.pasteItemToApp', {itemLabel: getItemLabel(), itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
@@ -539,8 +550,7 @@ export default function Commands(props: CommandsProps) {
                 {
                     canPasteObject() &&
                     <CommandItem onSelect={handlePasteObject}>
-                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                           alt="Application icon"/>
+                      <ClipboardCheck className="mr-2 h-5 w-5" aria-hidden="true" />
                       <span>
                         {
                           getMultipleItemsIndicator().length > 0 ?
@@ -556,8 +566,7 @@ export default function Commands(props: CommandsProps) {
                 {
                     canPasteWithTransformation() &&
                     <CommandItem onSelect={handlePasteWithTransformation}>
-                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                           alt="Application icon"/>
+                      <ClipboardCheck className="mr-2 h-5 w-5" aria-hidden="true" />
                       <span>
                         {t('commands.pasteItemToAppWithFormatting', {itemLabel: getItemLabel(), itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}
                       </span>
@@ -566,24 +575,21 @@ export default function Commands(props: CommandsProps) {
                 {
                     canShowMultiplePaste() &&
                     <CommandItem onSelect={handlePasteWithReturn}>
-                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                           alt="Application icon"/>
+                      <ClipboardPaste className="mr-2 h-5 w-5" aria-hidden="true" />
                       <span>{t('commands.pasteItemsToAppWithReturn', {itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}</span>
                     </CommandItem>
                 }
                 {
                     canShowMultiplePaste() &&
                     <CommandItem onSelect={handlePasteWithTab}>
-                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                           alt="Application icon"/>
+                      <ClipboardPaste className="mr-2 h-5 w-5" aria-hidden="true" />
                       <span>{t('commands.pasteItemsToAppWithTab', {itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}</span>
                     </CommandItem>
                 }
                 {
                     canShowPastePath() &&
                     <CommandItem onSelect={handlePastePath}>
-                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                           alt="Application icon"/>
+                      <ClipboardCheck className="mr-2 h-5 w-5" aria-hidden="true" />
                       <span>{t('commands.pastePathToApp', {appName: props.appName})}</span>
                     </CommandItem>
                 }
