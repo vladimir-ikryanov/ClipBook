@@ -1,0 +1,55 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v1.0.0
+
+jobs:
+  build-macos:
+    # Use an older macOS runner - macos-12 has macOS Monterey + Xcode 14.x
+    # macos-13 has macOS Ventura + Xcode 14.x/15.x
+    runs-on: macos-12
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Restore licensing files
+        run: |
+          mkdir -p src-cpp/src/licensing
+          echo "${{ secrets.LICENSING_H }}" | base64 -d > src-cpp/src/licensing/licensing.h
+          echo "${{ secrets.LICENSING_MM }}" | base64 -d > src-cpp/src/licensing/licensing.mm
+
+      - name: Build ClipBook for arm64
+        run: npm run mobrowser build -- --arm64
+      
+      # - name: Upload DMG as artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ClipBook-macOS
+      #     path: |
+      #       build-dist/pack/*.dmg
+      #       dist/*.dmg
+      #     retention-days: 30
+      
+      # - name: Create GitHub Release
+      #   uses: softprops/action-gh-release@v1
+      #   if: startsWith(github.ref, 'refs/tags/')
+      #   with:
+      #     files: |
+      #       build-dist/pack/*.dmg
+      #       dist/*.dmg
+      #     draft: false
+      #     prerelease: false
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
