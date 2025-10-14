@@ -77,7 +77,8 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/app-signing.keychain-db"
 
           # Run the build
-          npm run mobrowser build -- --arm64 --verbose
+          codesign --force --options runtime --timestamp --entitlements src-cpp/assets/entitlements.plist --verbose --sign "Developer ID Application: Vladimir Ikryanov (96B3X7S47C)" /Users/runner/work/ClipBook/ClipBook/build-dist/bin/ClipBook.app/Contents/Frameworks/Chromium Framework.framework/Versions/Current/Libraries/libmobrowser_client.dylib
+          # npm run mobrowser build -- --arm64 --verbose
       
       # - name: Upload DMG as artifact
       #   uses: actions/upload-artifact@v4
