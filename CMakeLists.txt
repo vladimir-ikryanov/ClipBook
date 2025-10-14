@@ -1,10 +1,24 @@
 cmake_minimum_required(VERSION 3.21)
 
 # The official build flag is used to enable/disable certain features.
-set(OFFICIAL_BUILD FALSE)
+if(DEFINED ENV{CLIPBOOK_CODESIGN_IDENTITY})
+  set(OFFICIAL_BUILD TRUE)
+else()
+  set(OFFICIAL_BUILD FALSE)
+endif()
 
 # Set deployment target for macOS
 set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS deployment version" FORCE)
+
+# Force use of older C++ standard library symbols compatible with macOS 12
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=12.0")
+
+# Use libc++ but with backward compatibility
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -D_LIBCPP_DISABLE_AVAILABILITY")
+
+# Additional flags for backward compatibility
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-aligned-allocation")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unguarded-availability-new")
 
 # Configures your project.
 project(ClipBook LANGUAGES CXX)
