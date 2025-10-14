@@ -73,8 +73,8 @@ jobs:
       - name: Build ClipBook for arm64
         run: |
           # Re-list keychain in subprocess just in case
-          security list-keychains -d user -s "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$RUNNER_TEMP/app-signing.keychain-db"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/app-signing.keychain-db"
 
           # Run the build
           npm run mobrowser build -- --arm64 --verbose
