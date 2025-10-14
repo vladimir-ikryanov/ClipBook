@@ -8,6 +8,16 @@ jobs:
     # macos-13 has macOS Ventura + Xcode 14.x/15.x
     runs-on: macos-latest
     
+    env:
+      MOBROWSER_KEY: ${{ vars.MOBROWSER_KEY }}
+      CLIPBOOK_TEAM_ID: ${{ vars.CLIPBOOK_TEAM_ID }}
+      CLIPBOOK_APPLE_ID: ${{ vars.CLIPBOOK_APPLE_ID }}
+      CLIPBOOK_PASSWORD: ${{ vars.CLIPBOOK_PASSWORD }}
+      CLIPBOOK_CODESIGN_IDENTITY: ${{ vars.CLIPBOOK_CODESIGN_IDENTITY }}
+      BUILD_CERT_BASE64: ${{ secrets.DEVELOPER_ID_APPLICATION_CERT }}
+      P12_PASSWORD: ${{ secrets.DEVELOPER_ID_APPLICATION_CERT_PASSWORD }}
+      KEYCHAIN_PASSWORD: ${{ secrets.MAC_KEYCHAIN_PASSWORD }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,54 +31,30 @@ jobs:
       - name: Install dependencies
         run: npm install
       
-      - name: Import Code Signing Certificate
-        uses: apple-actions/import-codesign-certs@v3
-        with:
-          p12-file-base64: ${{ secrets.DEVELOPER_ID_APPLICATION_CERT }}
-          p12-password: ${{ secrets.DEVELOPER_ID_APPLICATION_CERT_PASSWORD }}
-          keychain-password: temp_keychain_password
-      
-      - name: Configure Keychain for Subprocesses
+      - name: Set up keychain
         run: |
-          # The apple-actions creates signing_temp.keychain, we need to ensure it's unlocked and in search path
-          KEYCHAIN_PATH=~/Library/Keychains/signing_temp.keychain-db
-          
-          # Unlock the keychain (it might lock between steps)
-          security unlock-keychain -p temp_keychain_password "$KEYCHAIN_PATH"
-          
-          # Make it the default keychain (this ensures subprocesses use it)
-          security default-keychain -s "$KEYCHAIN_PATH"
-          
-          # Create a codesign wrapper in PATH that will be found before /usr/bin/codesign
-          mkdir -p ~/bin
-          cat > ~/bin/codesign << 'EOF'
-          #!/bin/bash
-          # Wrapper script to ensure codesign uses the correct keychain
-          KEYCHAIN_PATH="$HOME/Library/Keychains/signing_temp.keychain-db"
-          security unlock-keychain -p temp_keychain_password "$KEYCHAIN_PATH" 2>/dev/null || true
-          exec /usr/bin/codesign --keychain "$KEYCHAIN_PATH" "$@"
-          EOF
-          
-          chmod +x ~/bin/codesign
-          
-          # Add ~/bin to PATH at the beginning so our wrapper is found first
-          echo "$HOME/bin" >> $GITHUB_PATH
-          export PATH="$HOME/bin:$PATH"
-          
-          # Verify the setup
-          echo "Default keychain:"
-          security default-keychain
-          echo ""
-          echo "Keychain list:"
-          security list-keychains -d user
-          echo ""
-          echo "Available identities in keychain:"
-          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
-          echo ""
-          echo "Codesign wrapper installed at:"
-          which codesign
-          cat ~/bin/codesign
-      
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          echo -n "$BUILD_CERT_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Import necessary public certificates to keychain
+          curl https://www.apple.com/certificateauthority/AppleRootCA-G3.cer -o AppleRootCA-G3.cer
+          curl https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer -o AppleWWDRCAG6.cer
+          curl https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer -o DeveloperIDG2CA.cer
+
+          security import ./AppleRootCA-G3.cer -k $KEYCHAIN_PATH
+          security import ./AppleWWDRCAG6.cer -k $KEYCHAIN_PATH
+          security import ./DeveloperIDG2CA.cer -k $KEYCHAIN_PATH
+
+          # Import private certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
       - name: Restore licensing files
         run: |
           mkdir -p src-cpp/src/licensing
@@ -83,12 +69,6 @@ jobs:
           
           # Run the build
           npm run mobrowser build -- --arm64 --verbose
-        env:
-          MOBROWSER_KEY: ${{ vars.MOBROWSER_KEY }}
-          CLIPBOOK_TEAM_ID: ${{ vars.CLIPBOOK_TEAM_ID }}
-          CLIPBOOK_APPLE_ID: ${{ vars.CLIPBOOK_APPLE_ID }}
-          CLIPBOOK_PASSWORD: ${{ vars.CLIPBOOK_PASSWORD }}
-          CLIPBOOK_CODESIGN_IDENTITY: ${{ vars.CLIPBOOK_CODESIGN_IDENTITY }}
       
       # - name: Upload DMG as artifact
       #   uses: actions/upload-artifact@v4
