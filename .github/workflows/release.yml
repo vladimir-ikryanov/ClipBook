@@ -22,32 +22,18 @@ jobs:
         run: npm install
       
       - name: Import Code Signing Certificate
+        uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.DEVELOPER_ID_APPLICATION_CERT }}
+          p12-password: ${{ secrets.DEVELOPER_ID_APPLICATION_CERT_PASSWORD }}
+      
+      - name: Verify Certificate
         run: |
-          # Use the default login keychain instead of creating a new one
-          # This ensures codesign can find the certificate in subprocesses
-          KEYCHAIN_PATH=~/Library/Keychains/login.keychain-db
-          
-          # Decode and import certificate to login keychain
-          echo "${{ secrets.DEVELOPER_ID_APPLICATION_CERT }}" | base64 -d > certificate.p12
-          security import certificate.p12 -k "$KEYCHAIN_PATH" -P "${{ secrets.DEVELOPER_ID_APPLICATION_CERT_PASSWORD }}" -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
-          rm certificate.p12
-          
-          # Set key partition list to allow codesign to use the certificate without prompting
-          # The partition list must be set to allow access without user interaction
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -k "" "$KEYCHAIN_PATH"
-          
-          # Unlock the login keychain (it should already be unlocked, but make sure)
-          security unlock-keychain "$KEYCHAIN_PATH" || true
-          
-          # Verify certificate is available
-          echo "Certificates in login keychain:"
+          echo "Verifying certificate is available:"
           security find-identity -v -p codesigning
           echo ""
           echo "Default keychain:"
-          security default-keychain
-          echo ""
-          echo "Keychain search list:"
-          security list-keychains -d user
+          security default-keychain -d user
       
       - name: Restore licensing files
         run: |
@@ -69,14 +55,6 @@ jobs:
           CLIPBOOK_APPLE_ID: ${{ vars.CLIPBOOK_APPLE_ID }}
           CLIPBOOK_PASSWORD: ${{ vars.CLIPBOOK_PASSWORD }}
           CLIPBOOK_CODESIGN_IDENTITY: ${{ vars.CLIPBOOK_CODESIGN_IDENTITY }}
-      
-      - name: Cleanup Certificate
-        if: always()
-        run: |
-          # Remove the imported certificate from the login keychain
-          # Find and delete the certificate by its common name
-          security delete-identity -c "Developer ID Application: Vladimir Ikryanov (96B3X7S47C)" ~/Library/Keychains/login.keychain-db || true
-          echo "Certificate cleanup completed"
       
       # - name: Upload DMG as artifact
       #   uses: actions/upload-artifact@v4
