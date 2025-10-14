@@ -3,8 +3,10 @@ cmake_minimum_required(VERSION 3.21)
 # The official build flag is used to enable/disable certain features.
 if(DEFINED ENV{CLIPBOOK_CODESIGN_IDENTITY})
   set(OFFICIAL_BUILD TRUE)
+  message(STATUS "Official build enabled")
 else()
   set(OFFICIAL_BUILD FALSE)
+  message(STATUS "Official build disabled")
 endif()
 
 # Set deployment target for macOS

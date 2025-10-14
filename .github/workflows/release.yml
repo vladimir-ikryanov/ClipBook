@@ -28,7 +28,7 @@ jobs:
           echo "${{ secrets.LICENSING_MM }}" | base64 -d > src-cpp/src/licensing/licensing.mm
 
       - name: Build ClipBook for arm64
-        run: npm run mobrowser build -- --arm64
+        run: npm run mobrowser build -- --arm64 --verbose
       
       # - name: Upload DMG as artifact
       #   uses: actions/upload-artifact@v4
