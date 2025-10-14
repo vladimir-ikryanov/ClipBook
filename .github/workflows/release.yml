@@ -26,14 +26,28 @@ jobs:
         with:
           p12-file-base64: ${{ secrets.DEVELOPER_ID_APPLICATION_CERT }}
           p12-password: ${{ secrets.DEVELOPER_ID_APPLICATION_CERT_PASSWORD }}
+          keychain-password: temp_keychain_password
       
-      - name: Verify Certificate
+      - name: Configure Keychain for Subprocesses
         run: |
-          echo "Verifying certificate is available:"
-          security find-identity -v -p codesigning
-          echo ""
+          # The apple-actions creates signing_temp.keychain, we need to ensure it's unlocked and in search path
+          KEYCHAIN_PATH=~/Library/Keychains/signing_temp.keychain-db
+          
+          # Unlock the keychain (it might lock between steps)
+          security unlock-keychain -p temp_keychain_password "$KEYCHAIN_PATH"
+          
+          # Make it the default keychain (this ensures subprocesses use it)
+          security default-keychain -s "$KEYCHAIN_PATH"
+          
+          # Verify the setup
           echo "Default keychain:"
-          security default-keychain -d user
+          security default-keychain
+          echo ""
+          echo "Keychain list:"
+          security list-keychains -d user
+          echo ""
+          echo "Available identities:"
+          security find-identity -v -p codesigning
       
       - name: Restore licensing files
         run: |
