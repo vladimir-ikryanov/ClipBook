@@ -29,6 +29,12 @@ jobs:
 
       - name: Build ClipBook for arm64
         run: npm run mobrowser build -- --arm64 --verbose
+        env:
+          MOBROWSER_KEY: ${{ vars.MOBROWSER_KEY }}
+          CLIPBOOK_TEAM_ID: ${{ vars.CLIPBOOK_TEAM_ID }}
+          CLIPBOOK_APPLE_ID: ${{ vars.CLIPBOOK_APPLE_ID }}
+          CLIPBOOK_PASSWORD: ${{ vars.CLIPBOOK_PASSWORD }}
+          CLIPBOOK_CODESIGN_IDENTITY: ${{ vars.CLIPBOOK_CODESIGN_IDENTITY }}
       
       # - name: Upload DMG as artifact
       #   uses: actions/upload-artifact@v4
