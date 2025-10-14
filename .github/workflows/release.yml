@@ -1,6 +1,9 @@
 name: Build and Release
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-macos:
@@ -42,40 +45,39 @@ jobs:
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-          echo -n "$BUILD_CERT_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          # Decode and create keychain
+          echo -n "$BUILD_CERT_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-          # Import necessary public certificates to keychain
-          curl https://www.apple.com/certificateauthority/AppleRootCA-G3.cer -o AppleRootCA-G3.cer
-          curl https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer -o AppleWWDRCAG6.cer
-          curl https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer -o DeveloperIDG2CA.cer
+          # Import Apple root certs
+          curl -O https://www.apple.com/certificateauthority/AppleRootCA-G3.cer
+          curl -O https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer
+          curl -O https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
+          security import AppleRootCA-G3.cer -k "$KEYCHAIN_PATH" -A
+          security import AppleWWDRCAG6.cer -k "$KEYCHAIN_PATH" -A
+          security import DeveloperIDG2CA.cer -k "$KEYCHAIN_PATH" -A
 
-          security import ./AppleRootCA-G3.cer -k $KEYCHAIN_PATH
-          security import ./AppleWWDRCAG6.cer -k $KEYCHAIN_PATH
-          security import ./DeveloperIDG2CA.cer -k $KEYCHAIN_PATH
+          # Import Developer ID certificate
+          security import "$CERTIFICATE_PATH" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-          # Import private certificate to keychain
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
+          # 🔑 Ensure this keychain is used by all subprocesses
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
 
-          # Verify certificate is available before build
-          echo "Verifying certificate before build:"
-          security find-identity -v -p codesigning
-          
+          # Optionally verify identity exists
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+
+      - name: Build ClipBook for arm64
+        run: |
+          # Re-list keychain in subprocess just in case
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
           # Run the build
           npm run mobrowser build -- --arm64 --verbose
-
-      # - name: Build ClipBook for arm64
-      #   run: |
-      #     # Verify certificate is available before build
-      #     echo "Verifying certificate before build:"
-      #     security find-identity -v -p codesigning
-          
-      #     # Run the build
-      #     npm run mobrowser build -- --arm64 --verbose
       
       # - name: Upload DMG as artifact
       #   uses: actions/upload-artifact@v4
