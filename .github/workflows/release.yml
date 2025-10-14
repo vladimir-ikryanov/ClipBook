@@ -27,6 +27,9 @@ jobs:
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
           KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
           
+          # Store keychain info for later steps
+          echo "$KEYCHAIN_PASSWORD" > $RUNNER_TEMP/keychain_password
+          
           # Create keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
@@ -34,17 +37,28 @@ jobs:
           
           # Import certificate
           echo "${{ secrets.DEVELOPER_ID_APPLICATION_CERT }}" | base64 -d > certificate.p12
-          security import certificate.p12 -k "$KEYCHAIN_PATH" -P "${{ secrets.DEVELOPER_ID_APPLICATION_CERT_PASSWORD }}" -T /usr/bin/codesign
+          security import certificate.p12 -k "$KEYCHAIN_PATH" -P "${{ secrets.DEVELOPER_ID_APPLICATION_CERT_PASSWORD }}" -T /usr/bin/codesign -T /usr/bin/security
           rm certificate.p12
           
-          # Set key partition list to allow codesign to use the certificate
+          # Set key partition list to allow codesign to use the certificate without prompting
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           
-          # Add keychain to search list
-          security list-keychain -d user -s "$KEYCHAIN_PATH" $(security list-keychain -d user | sed s/\"//g)
+          # Make this keychain the default and add to search list
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | sed s/\"//g)
+          security default-keychain -s "$KEYCHAIN_PATH"
+          
+          # Unlock again to be sure
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           
           # Verify certificate is available
+          echo "Certificates in keychain:"
           security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+          echo ""
+          echo "Default keychain:"
+          security default-keychain
+          echo ""
+          echo "Keychain search list:"
+          security list-keychains -d user
       
       - name: Restore licensing files
         run: |
@@ -53,7 +67,18 @@ jobs:
           echo "${{ secrets.LICENSING_MM }}" | base64 -d > src-cpp/src/licensing/licensing.mm
 
       - name: Build ClipBook for arm64
-        run: npm run mobrowser build -- --arm64 --verbose
+        run: |
+          # Ensure keychain is unlocked before build
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(cat $RUNNER_TEMP/keychain_password)
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          
+          # Verify certificate is still available
+          echo "Verifying certificate before build:"
+          security find-identity -v -p codesigning
+          
+          # Run the build
+          npm run mobrowser build -- --arm64 --verbose
         env:
           MOBROWSER_KEY: ${{ vars.MOBROWSER_KEY }}
           CLIPBOOK_TEAM_ID: ${{ vars.CLIPBOOK_TEAM_ID }}
@@ -68,6 +93,7 @@ jobs:
           if [ -f "$KEYCHAIN_PATH" ]; then
             security delete-keychain "$KEYCHAIN_PATH"
           fi
+          rm -f $RUNNER_TEMP/keychain_password
       
       # - name: Upload DMG as artifact
       #   uses: actions/upload-artifact@v4
