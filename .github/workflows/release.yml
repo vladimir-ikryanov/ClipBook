@@ -31,6 +31,12 @@ jobs:
       - name: Install dependencies
         run: npm install
       
+      - name: Restore licensing files
+        run: |
+          mkdir -p src-cpp/src/licensing
+          echo "${{ secrets.LICENSING_H }}" | base64 -d > src-cpp/src/licensing/licensing.h
+          echo "${{ secrets.LICENSING_MM }}" | base64 -d > src-cpp/src/licensing/licensing.mm
+
       - name: Set up keychain
         run: |
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
@@ -55,20 +61,21 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-      - name: Restore licensing files
-        run: |
-          mkdir -p src-cpp/src/licensing
-          echo "${{ secrets.LICENSING_H }}" | base64 -d > src-cpp/src/licensing/licensing.h
-          echo "${{ secrets.LICENSING_MM }}" | base64 -d > src-cpp/src/licensing/licensing.mm
-
-      - name: Build ClipBook for arm64
-        run: |
           # Verify certificate is available before build
           echo "Verifying certificate before build:"
           security find-identity -v -p codesigning
           
           # Run the build
           npm run mobrowser build -- --arm64 --verbose
+
+      # - name: Build ClipBook for arm64
+      #   run: |
+      #     # Verify certificate is available before build
+      #     echo "Verifying certificate before build:"
+      #     security find-identity -v -p codesigning
+          
+      #     # Run the build
+      #     npm run mobrowser build -- --arm64 --verbose
       
       # - name: Upload DMG as artifact
       #   uses: actions/upload-artifact@v4
