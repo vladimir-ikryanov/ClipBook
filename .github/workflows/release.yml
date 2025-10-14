@@ -39,6 +39,22 @@ jobs:
           # Make it the default keychain (this ensures subprocesses use it)
           security default-keychain -s "$KEYCHAIN_PATH"
           
+          # Create a codesign wrapper in PATH that will be found before /usr/bin/codesign
+          mkdir -p ~/bin
+          cat > ~/bin/codesign << 'EOF'
+          #!/bin/bash
+          # Wrapper script to ensure codesign uses the correct keychain
+          KEYCHAIN_PATH="$HOME/Library/Keychains/signing_temp.keychain-db"
+          security unlock-keychain -p temp_keychain_password "$KEYCHAIN_PATH" 2>/dev/null || true
+          exec /usr/bin/codesign --keychain "$KEYCHAIN_PATH" "$@"
+          EOF
+          
+          chmod +x ~/bin/codesign
+          
+          # Add ~/bin to PATH at the beginning so our wrapper is found first
+          echo "$HOME/bin" >> $GITHUB_PATH
+          export PATH="$HOME/bin:$PATH"
+          
           # Verify the setup
           echo "Default keychain:"
           security default-keychain
@@ -46,8 +62,14 @@ jobs:
           echo "Keychain list:"
           security list-keychains -d user
           echo ""
-          echo "Available identities:"
-          security find-identity -v -p codesigning
+          echo "Available identities in keychain:"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+          echo ""
+          echo "Codesign wrapper installed at:"
+          which codesign
+          echo ""
+          echo "Testing codesign wrapper:"
+          codesign --version
       
       - name: Restore licensing files
         run: |
