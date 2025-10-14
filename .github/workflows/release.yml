@@ -23,36 +23,25 @@ jobs:
       
       - name: Import Code Signing Certificate
         run: |
-          # Create a temporary keychain
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+          # Use the default login keychain instead of creating a new one
+          # This ensures codesign can find the certificate in subprocesses
+          KEYCHAIN_PATH=~/Library/Keychains/login.keychain-db
           
-          # Store keychain info for later steps
-          echo "$KEYCHAIN_PASSWORD" > $RUNNER_TEMP/keychain_password
-          
-          # Create keychain
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          
-          # Import certificate
+          # Decode and import certificate to login keychain
           echo "${{ secrets.DEVELOPER_ID_APPLICATION_CERT }}" | base64 -d > certificate.p12
-          security import certificate.p12 -k "$KEYCHAIN_PATH" -P "${{ secrets.DEVELOPER_ID_APPLICATION_CERT_PASSWORD }}" -T /usr/bin/codesign -T /usr/bin/security
+          security import certificate.p12 -k "$KEYCHAIN_PATH" -P "${{ secrets.DEVELOPER_ID_APPLICATION_CERT_PASSWORD }}" -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
           rm certificate.p12
           
           # Set key partition list to allow codesign to use the certificate without prompting
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          # The partition list must be set to allow access without user interaction
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -k "" "$KEYCHAIN_PATH"
           
-          # Make this keychain the default and add to search list
-          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | sed s/\"//g)
-          security default-keychain -s "$KEYCHAIN_PATH"
-          
-          # Unlock again to be sure
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          # Unlock the login keychain (it should already be unlocked, but make sure)
+          security unlock-keychain "$KEYCHAIN_PATH" || true
           
           # Verify certificate is available
-          echo "Certificates in keychain:"
-          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+          echo "Certificates in login keychain:"
+          security find-identity -v -p codesigning
           echo ""
           echo "Default keychain:"
           security default-keychain
@@ -68,12 +57,7 @@ jobs:
 
       - name: Build ClipBook for arm64
         run: |
-          # Ensure keychain is unlocked before build
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          KEYCHAIN_PASSWORD=$(cat $RUNNER_TEMP/keychain_password)
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          
-          # Verify certificate is still available
+          # Verify certificate is available before build
           echo "Verifying certificate before build:"
           security find-identity -v -p codesigning
           
@@ -86,14 +70,13 @@ jobs:
           CLIPBOOK_PASSWORD: ${{ vars.CLIPBOOK_PASSWORD }}
           CLIPBOOK_CODESIGN_IDENTITY: ${{ vars.CLIPBOOK_CODESIGN_IDENTITY }}
       
-      - name: Cleanup Keychain
+      - name: Cleanup Certificate
         if: always()
         run: |
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          if [ -f "$KEYCHAIN_PATH" ]; then
-            security delete-keychain "$KEYCHAIN_PATH"
-          fi
-          rm -f $RUNNER_TEMP/keychain_password
+          # Remove the imported certificate from the login keychain
+          # Find and delete the certificate by its common name
+          security delete-identity -c "Developer ID Application: Vladimir Ikryanov (96B3X7S47C)" ~/Library/Keychains/login.keychain-db || true
+          echo "Certificate cleanup completed"
       
       # - name: Upload DMG as artifact
       #   uses: actions/upload-artifact@v4
