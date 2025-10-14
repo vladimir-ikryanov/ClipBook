@@ -67,9 +67,7 @@ jobs:
           echo ""
           echo "Codesign wrapper installed at:"
           which codesign
-          echo ""
-          echo "Testing codesign wrapper:"
-          codesign --version
+          cat ~/bin/codesign
       
       - name: Restore licensing files
         run: |
