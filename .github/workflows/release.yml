@@ -21,6 +21,31 @@ jobs:
       - name: Install dependencies
         run: npm install
       
+      - name: Import Code Signing Certificate
+        run: |
+          # Create a temporary keychain
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+          
+          # Create keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          
+          # Import certificate
+          echo "${{ secrets.DEVELOPER_ID_APPLICATION_CERT }}" | base64 -d > certificate.p12
+          security import certificate.p12 -k "$KEYCHAIN_PATH" -P "${{ secrets.DEVELOPER_ID_APPLICATION_CERT_PASSWORD }}" -T /usr/bin/codesign
+          rm certificate.p12
+          
+          # Set key partition list to allow codesign to use the certificate
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          
+          # Add keychain to search list
+          security list-keychain -d user -s "$KEYCHAIN_PATH" $(security list-keychain -d user | sed s/\"//g)
+          
+          # Verify certificate is available
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+      
       - name: Restore licensing files
         run: |
           mkdir -p src-cpp/src/licensing
@@ -35,6 +60,14 @@ jobs:
           CLIPBOOK_APPLE_ID: ${{ vars.CLIPBOOK_APPLE_ID }}
           CLIPBOOK_PASSWORD: ${{ vars.CLIPBOOK_PASSWORD }}
           CLIPBOOK_CODESIGN_IDENTITY: ${{ vars.CLIPBOOK_CODESIGN_IDENTITY }}
+      
+      - name: Cleanup Keychain
+        if: always()
+        run: |
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          if [ -f "$KEYCHAIN_PATH" ]; then
+            security delete-keychain "$KEYCHAIN_PATH"
+          fi
       
       # - name: Upload DMG as artifact
       #   uses: actions/upload-artifact@v4
