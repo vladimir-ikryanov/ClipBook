@@ -89,7 +89,6 @@ jobs:
           
           # Test if codesign can access the identity
           echo "=== Testing codesign access to identity ==="
-          codesign --version
           # Create a simple test file to sign
           echo "test" > /tmp/test.txt
           
