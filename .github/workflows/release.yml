@@ -40,7 +40,7 @@ jobs:
           echo "${{ secrets.LICENSING_H }}" | base64 -d > src-cpp/src/licensing/licensing.h
           echo "${{ secrets.LICENSING_MM }}" | base64 -d > src-cpp/src/licensing/licensing.mm
 
-      - name: Build ClipBook for Apple Silicon
+      - name: Build ClipBook (ARM64)
         run: |
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
@@ -55,6 +55,7 @@ jobs:
           curl -O https://www.apple.com/certificateauthority/AppleRootCA-G3.cer
           curl -O https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer
           curl -O https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
+          
           security import AppleRootCA-G3.cer -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/productsign
           security import AppleWWDRCAG6.cer -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/productsign
           security import DeveloperIDG2CA.cer -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/productsign
@@ -75,20 +76,15 @@ jobs:
           
           # Keep the keychain unlocked for the entire build process
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-          # Verify identity exists and is valid
-          echo "=== Verifying codesigning identity ==="
-          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
-          echo "=== All identities in keychain ==="
-          security find-identity -v "$KEYCHAIN_PATH"
           
           # Run the build
           npm run mobrowser build -- --arm64 --verbose
       
-      - name: Upload DMG for Apple Silicon
+      - name: Upload DMG (ARM64)
         uses: actions/upload-artifact@v4
         with:
-          name: ClipBook-1.29.5-arm64
+          name: clipBook-arm64
           path: |
             build-dist/pack/*.dmg
+            build-dist/pack/*.xml
           retention-days: 60
