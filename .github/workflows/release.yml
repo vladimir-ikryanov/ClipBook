@@ -40,7 +40,7 @@ jobs:
           echo "${{ secrets.LICENSING_H }}" | base64 -d > src-cpp/src/licensing/licensing.h
           echo "${{ secrets.LICENSING_MM }}" | base64 -d > src-cpp/src/licensing/licensing.mm
 
-      - name: Set up keychain & build ClipBook for arm64
+      - name: Build ClipBook for Apple Silicon
         run: |
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
@@ -85,23 +85,10 @@ jobs:
           # Run the build
           npm run mobrowser build -- --arm64 --verbose
       
-      # - name: Upload DMG as artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: ClipBook-macOS
-      #     path: |
-      #       build-dist/pack/*.dmg
-      #       dist/*.dmg
-      #     retention-days: 30
-      
-      # - name: Create GitHub Release
-      #   uses: softprops/action-gh-release@v1
-      #   if: startsWith(github.ref, 'refs/tags/')
-      #   with:
-      #     files: |
-      #       build-dist/pack/*.dmg
-      #       dist/*.dmg
-      #     draft: false
-      #     prerelease: false
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload DMG for Apple Silicon
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClipBook-1.29.5-arm64
+          path: |
+            build-dist/pack/*.dmg
+          retention-days: 60
