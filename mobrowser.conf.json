@@ -14,6 +14,7 @@
         "icon": "src-cpp/assets/app.icns",
         "bundleID": "com.ikryanov.clipbook",
         "codesignIdentity": "${CLIPBOOK_CODESIGN_IDENTITY}",
+        "codesignKeychain": "${CLIPBOOK_CODESIGN_KEYCHAIN}",
         "codesignEntitlements": "src-cpp/assets/entitlements.plist",
         "teamID": "${CLIPBOOK_TEAM_ID}",
         "appleID": "${CLIPBOOK_APPLE_ID}",

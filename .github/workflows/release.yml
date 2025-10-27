@@ -70,15 +70,20 @@ jobs:
           # Optionally verify identity exists
           security find-identity -v -p codesigning "$KEYCHAIN_PATH"
 
+          # Init the environment variable with the keychain path
+          echo "export CLIPBOOK_CODESIGN_KEYCHAIN=$KEYCHAIN_PATH" >> $GITHUB_ENV
+
       - name: Build ClipBook for arm64
         run: |
           # Re-list keychain in subprocess just in case
           security list-keychains -d user -s "$RUNNER_TEMP/app-signing.keychain-db"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/app-signing.keychain-db"
 
+          # Print the environment variable
+          echo "CLIPBOOK_CODESIGN_KEYCHAIN=$CLIPBOOK_CODESIGN_KEYCHAIN"
+
           # Run the build
-          codesign --force --options runtime --timestamp --entitlements src-cpp/assets/entitlements.plist --verbose --sign "Developer ID Application: Vladimir Ikryanov (96B3X7S47C)" /Users/runner/work/ClipBook/ClipBook/build-dist/bin/ClipBook.app/Contents/Frameworks/Chromium Framework.framework/Versions/Current/Libraries/libmobrowser_client.dylib
-          # npm run mobrowser build -- --arm64 --verbose
+          npm run mobrowser build -- --arm64 --verbose
       
       # - name: Upload DMG as artifact
       #   uses: actions/upload-artifact@v4
