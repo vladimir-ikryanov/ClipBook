@@ -9,7 +9,7 @@ jobs:
   build-macos:
     # Use an older macOS runner - macos-12 has macOS Monterey + Xcode 14.x
     # macos-13 has macOS Ventura + Xcode 14.x/15.x
-    runs-on: macos-13
+    runs-on: macos-14
     
     env:
       MOBROWSER_KEY: ${{ vars.MOBROWSER_KEY }}
