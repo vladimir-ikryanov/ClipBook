@@ -82,47 +82,6 @@ jobs:
           echo "=== All identities in keychain ==="
           security find-identity -v "$KEYCHAIN_PATH"
           
-          # Extract the certificate hash (SHA-1) to use instead of the name
-          # This is more reliable when specifying --keychain in codesign
-          CERT_HASH=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep "Developer ID Application" | awk '{print $2}')
-          echo "Certificate hash: $CERT_HASH"
-          
-          # Test if codesign can access the identity
-          echo "=== Testing codesign access to identity ==="
-          # Create a simple test file to sign
-          echo "test" > /tmp/test.txt
-          
-          echo "Test 1: WITH --keychain flag using hash:"
-          codesign --keychain "$KEYCHAIN_PATH" -s "$CERT_HASH" /tmp/test.txt && echo "✓ Success with hash" || echo "✗ Failed with hash"
-          rm -f /tmp/test.txt
-          
-          echo "test" > /tmp/test.txt
-          echo "Test 2: WITH --keychain flag using name:"
-          codesign --keychain "$KEYCHAIN_PATH" -s "$CLIPBOOK_CODESIGN_IDENTITY" /tmp/test.txt && echo "✓ Success with name" || echo "✗ Failed with name"
-          rm -f /tmp/test.txt
-          
-          echo "test" > /tmp/test.txt
-          echo "Test 3: WITHOUT --keychain flag using hash (default search path):"
-          codesign -s "$CERT_HASH" /tmp/test.txt && echo "✓ Success - will use this approach!" || echo "✗ Failed"
-          rm -f /tmp/test.txt
-          
-          echo "test" > /tmp/test.txt
-          echo "Test 4: WITHOUT --keychain flag using name (default search path):"
-          codesign -s "$CLIPBOOK_CODESIGN_IDENTITY" /tmp/test.txt && echo "✓ Success - will use this approach!" || echo "✗ Failed"
-          rm -f /tmp/test.txt
-
-          # Override CLIPBOOK_CODESIGN_IDENTITY with the certificate hash
-          # The tests showed that codesign can find the identity by hash but not by name
-          export CLIPBOOK_CODESIGN_IDENTITY=$CERT_HASH
-          echo "CLIPBOOK_CODESIGN_IDENTITY=$CLIPBOOK_CODESIGN_IDENTITY (using hash instead of name)"
-          
-          # DO NOT set CLIPBOOK_CODESIGN_KEYCHAIN - let codesign use the default keychain search path
-          # This avoids the "no identity found" error when codesign looks only in the specified keychain
-          echo "Note: NOT setting CLIPBOOK_CODESIGN_KEYCHAIN to allow codesign to use default search path"
-
-          # Export the environment variable
-          echo "CLIPBOOK_CODESIGN_IDENTITY=$CERT_HASH" >> $GITHUB_ENV
-
           # Run the build
           npm run mobrowser build -- --arm64 --verbose
       
