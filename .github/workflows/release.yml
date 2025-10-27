@@ -74,6 +74,9 @@ jobs:
           export CLIPBOOK_CODESIGN_KEYCHAIN=$KEYCHAIN_PATH
           echo $CLIPBOOK_CODESIGN_KEYCHAIN
 
+          # Export the environment variable
+          echo "CLIPBOOK_CODESIGN_KEYCHAIN=$KEYCHAIN_PATH" >> $GITHUB_ENV
+
           # Run the build
           npm run mobrowser build -- --arm64 --verbose
       
