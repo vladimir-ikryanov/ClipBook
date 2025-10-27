@@ -40,7 +40,7 @@ jobs:
           echo "${{ secrets.LICENSING_H }}" | base64 -d > src-cpp/src/licensing/licensing.h
           echo "${{ secrets.LICENSING_MM }}" | base64 -d > src-cpp/src/licensing/licensing.mm
 
-      - name: Set up keychain
+      - name: Set up keychain & build ClipBook for arm64
         run: |
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
@@ -71,19 +71,8 @@ jobs:
           security find-identity -v -p codesigning "$KEYCHAIN_PATH"
 
           # Init the environment variable with the keychain path
-          echo "export CLIPBOOK_CODESIGN_KEYCHAIN=$KEYCHAIN_PATH" >> $GITHUB_ENV
-
-          # Print the environment variable
-          echo "CLIPBOOK_CODESIGN_KEYCHAIN=$CLIPBOOK_CODESIGN_KEYCHAIN"
-
-      - name: Build ClipBook for arm64
-        run: |
-          # Re-list keychain in subprocess just in case
-          security list-keychains -d user -s "$RUNNER_TEMP/app-signing.keychain-db"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/app-signing.keychain-db"
-
-          # Print the environment variable
-          echo "CLIPBOOK_CODESIGN_KEYCHAIN=$CLIPBOOK_CODESIGN_KEYCHAIN"
+          export CLIPBOOK_CODESIGN_KEYCHAIN=$KEYCHAIN_PATH
+          echo $CLIPBOOK_CODESIGN_KEYCHAIN
 
           # Run the build
           npm run mobrowser build -- --arm64 --verbose
