@@ -9,7 +9,7 @@ jobs:
   build-macos:
     # Use an older macOS runner - macos-12 has macOS Monterey + Xcode 14.x
     # macos-13 has macOS Ventura + Xcode 14.x/15.x
-    runs-on: macos-latest
+    runs-on: macos-12
     
     env:
       MOBROWSER_KEY: ${{ vars.MOBROWSER_KEY }}
@@ -55,7 +55,7 @@ jobs:
           curl -O https://www.apple.com/certificateauthority/AppleRootCA-G3.cer
           curl -O https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer
           curl -O https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
-          
+
           security import AppleRootCA-G3.cer -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/productsign
           security import AppleWWDRCAG6.cer -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/productsign
           security import DeveloperIDG2CA.cer -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/productsign
@@ -83,7 +83,56 @@ jobs:
       - name: Upload DMG (ARM64)
         uses: actions/upload-artifact@v4
         with:
-          name: clipBook-arm64
+          name: ClipBook-arm64
+          path: |
+            build-dist/pack/*.dmg
+            build-dist/pack/*.xml
+          retention-days: 60
+
+      - name: Build ClipBook (x64)
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Decode and create keychain
+          echo -n "$BUILD_CERT_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          # Import Apple root certs (must be done BEFORE importing the certificate)
+          curl -O https://www.apple.com/certificateauthority/AppleRootCA-G3.cer
+          curl -O https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer
+          curl -O https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
+
+          security import AppleRootCA-G3.cer -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/productsign
+          security import AppleWWDRCAG6.cer -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/productsign
+          security import DeveloperIDG2CA.cer -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/productsign
+
+          # Import Developer ID certificate with private key
+          # Using -T flags to explicitly allow codesign and productsign access
+          security import "$CERTIFICATE_PATH" -P "$P12_PASSWORD" -k "$KEYCHAIN_PATH" -T /usr/bin/codesign
+          
+          # Set partition list to allow access without password prompts
+          # This MUST be done immediately after import for it to work properly
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          # 🔑 Ensure this keychain is used by all subprocesses
+          # Add both our custom keychain AND the login keychain to the search list
+          # This ensures system processes can find certificates in both locations
+          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain
+          security default-keychain -s "$KEYCHAIN_PATH"
+          
+          # Keep the keychain unlocked for the entire build process
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          
+          # Run the build
+          npm run mobrowser build -- --x64 --verbose
+      
+      - name: Upload DMG (x64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClipBook-x64
           path: |
             build-dist/pack/*.dmg
             build-dist/pack/*.xml
