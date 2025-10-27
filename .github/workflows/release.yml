@@ -111,16 +111,17 @@ jobs:
           codesign -s "$CLIPBOOK_CODESIGN_IDENTITY" /tmp/test.txt && echo "✓ Success - will use this approach!" || echo "✗ Failed"
           rm -f /tmp/test.txt
 
-          # Init the environment variables
-          export CLIPBOOK_CODESIGN_HASH=$CERT_HASH
-          echo "CLIPBOOK_CODESIGN_HASH=$CLIPBOOK_CODESIGN_HASH"
+          # Override CLIPBOOK_CODESIGN_IDENTITY with the certificate hash
+          # The tests showed that codesign can find the identity by hash but not by name
+          export CLIPBOOK_CODESIGN_IDENTITY=$CERT_HASH
+          echo "CLIPBOOK_CODESIGN_IDENTITY=$CLIPBOOK_CODESIGN_IDENTITY (using hash instead of name)"
           
           # DO NOT set CLIPBOOK_CODESIGN_KEYCHAIN - let codesign use the default keychain search path
           # This avoids the "no identity found" error when codesign looks only in the specified keychain
           echo "Note: NOT setting CLIPBOOK_CODESIGN_KEYCHAIN to allow codesign to use default search path"
 
           # Export the environment variable
-          echo "CLIPBOOK_CODESIGN_HASH=$CERT_HASH" >> $GITHUB_ENV
+          echo "CLIPBOOK_CODESIGN_IDENTITY=$CERT_HASH" >> $GITHUB_ENV
 
           # Run the build
           npm run mobrowser build -- --arm64 --verbose
