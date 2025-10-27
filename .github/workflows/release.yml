@@ -73,6 +73,9 @@ jobs:
           # Init the environment variable with the keychain path
           echo "export CLIPBOOK_CODESIGN_KEYCHAIN=$KEYCHAIN_PATH" >> $GITHUB_ENV
 
+          # Print the environment variable
+          echo "CLIPBOOK_CODESIGN_KEYCHAIN=$CLIPBOOK_CODESIGN_KEYCHAIN"
+
       - name: Build ClipBook for arm64
         run: |
           # Re-list keychain in subprocess just in case
