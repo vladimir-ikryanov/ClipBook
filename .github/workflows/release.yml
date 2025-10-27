@@ -59,28 +59,69 @@ jobs:
           security import AppleWWDRCAG6.cer -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/productsign
           security import DeveloperIDG2CA.cer -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/productsign
 
-          # Import Developer ID certificate with private key (remove -t cert, let it auto-detect)
-          security import "$CERTIFICATE_PATH" -P "$P12_PASSWORD" -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/productsign
+          # Import Developer ID certificate with private key
+          # Using -T flags to explicitly allow codesign and productsign access
+          security import "$CERTIFICATE_PATH" -P "$P12_PASSWORD" -k "$KEYCHAIN_PATH" -T /usr/bin/codesign
           
-          # Allow codesign to access the keychain without prompting
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          # Set partition list to allow access without password prompts
+          # This MUST be done immediately after import for it to work properly
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
           # 🔑 Ensure this keychain is used by all subprocesses
-          security list-keychains -d user -s "$KEYCHAIN_PATH"
+          # Add both our custom keychain AND the login keychain to the search list
+          # This ensures system processes can find certificates in both locations
+          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain
           security default-keychain -s "$KEYCHAIN_PATH"
+          
+          # Keep the keychain unlocked for the entire build process
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
           # Verify identity exists and is valid
           echo "=== Verifying codesigning identity ==="
           security find-identity -v -p codesigning "$KEYCHAIN_PATH"
           echo "=== All identities in keychain ==="
           security find-identity -v "$KEYCHAIN_PATH"
+          
+          # Extract the certificate hash (SHA-1) to use instead of the name
+          # This is more reliable when specifying --keychain in codesign
+          CERT_HASH=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep "Developer ID Application" | awk '{print $2}')
+          echo "Certificate hash: $CERT_HASH"
+          
+          # Test if codesign can access the identity
+          echo "=== Testing codesign access to identity ==="
+          codesign --version
+          # Create a simple test file to sign
+          echo "test" > /tmp/test.txt
+          
+          echo "Test 1: WITH --keychain flag using hash:"
+          codesign --keychain "$KEYCHAIN_PATH" -s "$CERT_HASH" /tmp/test.txt && echo "✓ Success with hash" || echo "✗ Failed with hash"
+          rm -f /tmp/test.txt
+          
+          echo "test" > /tmp/test.txt
+          echo "Test 2: WITH --keychain flag using name:"
+          codesign --keychain "$KEYCHAIN_PATH" -s "$CLIPBOOK_CODESIGN_IDENTITY" /tmp/test.txt && echo "✓ Success with name" || echo "✗ Failed with name"
+          rm -f /tmp/test.txt
+          
+          echo "test" > /tmp/test.txt
+          echo "Test 3: WITHOUT --keychain flag using hash (default search path):"
+          codesign -s "$CERT_HASH" /tmp/test.txt && echo "✓ Success - will use this approach!" || echo "✗ Failed"
+          rm -f /tmp/test.txt
+          
+          echo "test" > /tmp/test.txt
+          echo "Test 4: WITHOUT --keychain flag using name (default search path):"
+          codesign -s "$CLIPBOOK_CODESIGN_IDENTITY" /tmp/test.txt && echo "✓ Success - will use this approach!" || echo "✗ Failed"
+          rm -f /tmp/test.txt
 
-          # Init the environment variable with the keychain path
-          export CLIPBOOK_CODESIGN_KEYCHAIN=$KEYCHAIN_PATH
-          echo $CLIPBOOK_CODESIGN_KEYCHAIN
+          # Init the environment variables
+          export CLIPBOOK_CODESIGN_HASH=$CERT_HASH
+          echo "CLIPBOOK_CODESIGN_HASH=$CLIPBOOK_CODESIGN_HASH"
+          
+          # DO NOT set CLIPBOOK_CODESIGN_KEYCHAIN - let codesign use the default keychain search path
+          # This avoids the "no identity found" error when codesign looks only in the specified keychain
+          echo "Note: NOT setting CLIPBOOK_CODESIGN_KEYCHAIN to allow codesign to use default search path"
 
           # Export the environment variable
-          echo "CLIPBOOK_CODESIGN_KEYCHAIN=$KEYCHAIN_PATH" >> $GITHUB_ENV
+          echo "CLIPBOOK_CODESIGN_HASH=$CERT_HASH" >> $GITHUB_ENV
 
           # Run the build
           npm run mobrowser build -- --arm64 --verbose
