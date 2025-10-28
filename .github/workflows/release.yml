@@ -7,9 +7,12 @@ on:
 
 jobs:
   build-macos:
-    # Use an older macOS runner - macos-12 has macOS Monterey + Xcode 14.x
-    # macos-13 has macOS Ventura + Xcode 14.x/15.x
-    runs-on: macos-15
+    # Use an older macOS runner for better compatibility with older macOS versions
+    # macos-12 has macOS Monterey + Xcode 14.x (SDK 12.x)
+    # macos-13 has macOS Ventura + Xcode 14.x/15.x (SDK 13.x)
+    # macos-14 has macOS Sonoma + Xcode 15.x (SDK 14.x)
+    # Using macos-13 to avoid C++ standard library ABI compatibility issues with macOS 14.x systems
+    runs-on: macos-13
     
     env:
       MOBROWSER_KEY: ${{ vars.MOBROWSER_KEY }}

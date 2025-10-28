@@ -1,7 +1,8 @@
 #include "webview.h"
 
-#include <future>
 #include <utility>
+#include <thread>
+#include <chrono>
 
 #include "url.h"
 #include "utils.h"
@@ -61,29 +62,35 @@ std::string HeadlessWebView::download(const std::string &url, const std::string&
     return "";
   }
 
-  std::promise<std::string> promise;
-  std::future<std::string> future = promise.get_future();
-  browser_->onStartDownload = [this, &promise, &file_name_prefix]
+  std::string result;
+  bool completed = false;
+  
+  browser_->onStartDownload = [this, &result, &completed, &file_name_prefix]
       (const mobrowser::StartDownloadArgs &args, mobrowser::StartDownloadAction action) {
     // Get current time in milliseconds to generate a unique file name.
     std::string file = file_name_prefix + std::to_string(getCurrentTimeMillis()) + ".png";
     auto path = images_dir_ + "/" + file;
-    args.download->onDownloadFinished += [file, &promise](const mobrowser::DownloadFinished &event) {
-      promise.set_value(file);
+    args.download->onDownloadFinished += [file, &result, &completed](const mobrowser::DownloadFinished &event) {
+      result = file;
+      completed = true;
     };
-    args.download->onDownloadCanceled += [&promise](const mobrowser::DownloadCanceled &event) {
-      promise.set_value("");
+    args.download->onDownloadCanceled += [&result, &completed](const mobrowser::DownloadCanceled &event) {
+      result = "";
+      completed = true;
     };
-    args.download->onDownloadInterrupted += [&promise](const mobrowser::DownloadInterrupted &event) {
-      promise.set_value("");
+    args.download->onDownloadInterrupted += [&result, &completed](const mobrowser::DownloadInterrupted &event) {
+      result = "";
+      completed = true;
     };
     action.download(path);
   };
   browser_->download(url);
 
-  if (future.wait_for(std::chrono::seconds(3)) == std::future_status::ready) {
-    return future.get();
-  } else {
-    return "";
+  // Wait for the download to complete or timeout after 10 seconds.
+  auto start = std::chrono::steady_clock::now();
+  while (!completed && (std::chrono::steady_clock::now() - start) < std::chrono::seconds(10)) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
+  
+  return completed ? result : "";
 }
