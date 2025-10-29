@@ -9,40 +9,8 @@ else()
   message(STATUS "Official build disabled")
 endif()
 
-# Set deployment target for macOS
+# Set deployment target for macOS to 12.0.
 set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS deployment version" FORCE)
-
-# Try to use an older SDK if building on macOS 15+ to avoid ABI incompatibility issues
-# This checks for older SDKs and uses them if available
-if(APPLE)
-  # Check for macOS 14.x SDK
-  if(EXISTS "/Library/Developer/CommandLineTools/SDKs/MacOSX14.sdk")
-    set(CMAKE_OSX_SYSROOT "/Library/Developer/CommandLineTools/SDKs/MacOSX14.sdk" CACHE PATH "macOS SDK path" FORCE)
-    message(STATUS "Using macOS 14 SDK for better compatibility")
-  elseif(EXISTS "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.sdk")
-    set(CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.sdk" CACHE PATH "macOS SDK path" FORCE)
-    message(STATUS "Using macOS 14 SDK for better compatibility")
-  # Check for macOS 13.x SDK
-  elseif(EXISTS "/Library/Developer/CommandLineTools/SDKs/MacOSX13.sdk")
-    set(CMAKE_OSX_SYSROOT "/Library/Developer/CommandLineTools/SDKs/MacOSX13.sdk" CACHE PATH "macOS SDK path" FORCE)
-    message(STATUS "Using macOS 13 SDK for better compatibility")
-  elseif(EXISTS "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.sdk")
-    set(CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.sdk" CACHE PATH "macOS SDK path" FORCE)
-    message(STATUS "Using macOS 13 SDK for better compatibility")
-  else()
-    message(WARNING "Building with the default SDK. This may cause ABI compatibility issues on older macOS versions. Consider installing an older SDK.")
-  endif()
-endif()
-
-# Force use of older C++ standard library symbols compatible with macOS 12
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=12.0")
-
-# Use libc++ but with backward compatibility
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -D_LIBCPP_DISABLE_AVAILABILITY")
-
-# Additional flags for backward compatibility
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-aligned-allocation")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unguarded-availability-new")
 
 # Configures your project.
 project(ClipBook LANGUAGES CXX)
