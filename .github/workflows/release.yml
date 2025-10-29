@@ -12,7 +12,7 @@ jobs:
     # macos-13 has macOS Ventura + Xcode 14.x/15.x (SDK 13.x)
     # macos-14 has macOS Sonoma + Xcode 15.x (SDK 14.x)
     # Using macos-13 to avoid C++ standard library ABI compatibility issues with macOS 14.x systems
-    runs-on: macos-13
+    runs-on: macos-14
     
     env:
       MOBROWSER_KEY: ${{ vars.MOBROWSER_KEY }}
