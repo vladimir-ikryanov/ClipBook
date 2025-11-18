@@ -146,6 +146,8 @@
     "shortcuts": {
       "title": "Scorciatoie",
       "clickToEditShortcut": "Clicca per modificare la scorciatoia",
+      "resetToDefault": "Reimposta a default",
+      "clearShortcut": "Cancella scorciatoia",
       "openApp": "Apri ClipBook",
       "closeApp": "Chiudi ClipBook",
       "selectNextItem": "Seleziona elemento successivo",

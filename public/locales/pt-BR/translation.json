@@ -146,6 +146,8 @@
     "shortcuts": {
       "title": "Atalhos",
       "clickToEditShortcut": "Clique para editar o atalho",
+      "resetToDefault": "Redefinir para o padrão",
+      "clearShortcut": "Limpar atalho",
       "openApp": "Abrir ClipBook",
       "closeApp": "Fechar ClipBook",
       "selectNextItem": "Selecionar próximo item",

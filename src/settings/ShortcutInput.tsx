@@ -1,10 +1,11 @@
 import '../app.css';
-import React, {useState} from "react";
-import {Input} from "@/components/ui/input";
-import {isModifierKey, keysToDisplayShortcut, shortcutToDisplayShortcut} from "@/lib/shortcuts";
-import {Button} from "@/components/ui/button";
-import {Undo2Icon} from "lucide-react";
+import React, { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { isModifierKey, keysToDisplayShortcut, shortcutToDisplayShortcut } from "@/lib/shortcuts";
+import { Button } from "@/components/ui/button";
+import { Undo2Icon, CircleXIcon } from "lucide-react";
 import { useTranslation } from 'react-i18next';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 declare const enableOpenAppShortcut: () => void;
 declare const disableOpenAppShortcut: () => void;
@@ -25,6 +26,7 @@ export default function ShortcutInput(props: ShortcutProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [currentKeys, setCurrentKeys] = useState<string[]>([]);
   const [shortcut, setShortcut] = useState(props.shortcut);
+  const [isHovered, setIsHovered] = useState(false);
 
   function startEditing() {
     setIsEditing(true)
@@ -95,6 +97,11 @@ export default function ShortcutInput(props: ShortcutProps) {
     }
   }
 
+  function handleClear() {
+    setShortcut('')
+    props.onSave('')
+  }
+
   function getInputValue() {
     if (isEditing) {
       if (currentKeys.length === 0) {
@@ -105,23 +112,59 @@ export default function ShortcutInput(props: ShortcutProps) {
     return shortcutToDisplayShortcut(shortcut)
   }
 
+  const showRevertButton = props.shortcut !== props.defaultShortcut;
+  const showClearButton = !showRevertButton && shortcut !== '' && isHovered;
+
   return (
-      <div className="flex flex-row bg-shortcut shadow hover:shadow-md rounded-md">
-        <Input
+    <div
+      className="flex flex-row bg-shortcut shadow hover:shadow-md rounded-md"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Input
             className={`w-40 h-8 pl-10 text-base text-center caret-transparent border-none bg-shortcut ${isEditing ? "text-neutral-400" : ""}`}
-            title={t('settings.shortcuts.clickToEditShortcut')}
             readOnly={true}
             value={getInputValue()}
             onBlur={handleBlur}
             onClick={handleClick}
             onKeyDown={handleKeyDown}
-            onKeyUp={handleKeyUp}/>
-        <Button variant="ghost" onClick={handleReset}
-                className="text-xs my-auto h-5 w-5 p-0 mr-2 text-neutral-400"
-                title="Reset to default" disabled={props.shortcut === props.defaultShortcut}>
-          <Undo2Icon
-              className={props.shortcut !== props.defaultShortcut ? "w-4 h-4" : "invisible"}/>
-        </Button>
-      </div>
+            onKeyUp={handleKeyUp} />
+        </TooltipTrigger>
+        <TooltipContent className="flex items-center">
+          <div className="select-none mr-2 ml-1">{t('settings.shortcuts.clickToEditShortcut')}</div>
+        </TooltipContent>
+      </Tooltip>
+      {showRevertButton ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" onClick={handleReset}
+              className="text-xs my-auto h-5 w-5 p-0 mr-2 text-neutral-400">
+              <Undo2Icon className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="flex items-center">
+            <div
+              className="select-none mr-2 ml-1">{t('settings.shortcuts.resetToDefault')}</div>
+          </TooltipContent>
+        </Tooltip>
+
+      ) : showClearButton ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" onClick={handleClear}
+              className="text-xs my-auto h-5 w-5 p-0 mr-2 text-neutral-400">
+              <CircleXIcon className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="flex items-center">
+            <div
+              className="select-none mr-2 ml-1">{t('settings.shortcuts.clearShortcut')}</div>
+          </TooltipContent>
+        </Tooltip>
+      ) : (
+        <div className="h-5 w-5 mr-2 my-auto" />
+      )}
+    </div>
   )
 }
