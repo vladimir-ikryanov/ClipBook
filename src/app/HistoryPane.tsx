@@ -159,7 +159,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   useEffect(() => {
     loadHistory().then(() => {
+      resetFilter()
       setHistory(getHistoryItems())
+      activateApp(true)
     })
   }, []);
 

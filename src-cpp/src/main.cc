@@ -47,6 +47,9 @@ void launch() {
     main_app->launch();
     if (first_run) {
       main_app->showWelcomeWindow();
+    } else {
+      // Show the history window at the startup.
+      main_app->show();
     }
   });
 }
