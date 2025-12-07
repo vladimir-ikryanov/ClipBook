@@ -1,5 +1,4 @@
 import HistoryPane from "@/app/HistoryPane";
-import {ThemeProvider} from "@/app/ThemeProvider"
 
 import {useEffect, useState} from "react";
 import {
@@ -123,10 +122,8 @@ export default function App() {
   (window as any).onDidAppWindowHide = onDidAppWindowHide;
 
   return (
-      <ThemeProvider defaultTheme="system">
-        <TooltipProvider delayDuration={250}>
-          <HistoryPane appName={appName} appIcon={appIcon}/>
-        </TooltipProvider>
-      </ThemeProvider>
+      <TooltipProvider delayDuration={250}>
+        <HistoryPane appName={appName} appIcon={appIcon}/>
+      </TooltipProvider>
   )
 }

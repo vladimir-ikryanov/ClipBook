@@ -2,7 +2,6 @@ import * as React from "react";
 import {useEffect, useState} from "react";
 import {Label} from "@/components/ui/label";
 import {Switch} from "@/components/ui/switch";
-import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {
   OpenWindowStrategy,
   prefAllowCheckForUpdates,
@@ -11,7 +10,6 @@ import {
   prefGetOpenAtLogin,
   prefGetOpenWindowStrategy,
   prefGetShowIconInMenuBar,
-  prefGetTheme,
   prefIsCheckForUpdatesAutomaticallyManaged,
   prefIsOpenAtLoginManaged,
   prefIsPlaySoundOnCopyManaged,
@@ -21,7 +19,6 @@ import {
   prefSetOpenWindowStrategy,
   prefSetPlaySoundOnCopy,
   prefSetShowIconInMenuBar,
-  prefSetTheme,
   prefShouldPlaySoundOnCopy,
 } from "@/pref";
 import {ChevronsUpDown, RefreshCcwIcon,} from "lucide-react";
@@ -47,7 +44,6 @@ export default function General() {
   const { t } = useTranslation()
 
   const [languageCode, setLanguageCode] = useState(prefGetLanguage())
-  const [theme, setTheme] = useState(prefGetTheme())
   const [openAtLogin, setOpenAtLogin] = useState(prefGetOpenAtLogin())
   const [checkForUpdatesAutomatically, setCheckForUpdatesAutomatically] = useState(prefGetCheckForUpdatesAutomatically())
   const [showIconInMenuBar, setShowIconInMenuBar] = useState(prefGetShowIconInMenuBar())
@@ -76,11 +72,6 @@ export default function General() {
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
   }, [])
-
-  function handleThemeChange(theme: string) {
-    setTheme(theme)
-    prefSetTheme(theme)
-  }
 
   function handleOpenAtLoginChange(openAtLogin: boolean) {
     setOpenAtLogin(openAtLogin)
@@ -168,59 +159,6 @@ export default function General() {
             </div>
 
             <hr/>
-
-            <div className="flex justify-between space-x-10 py-1">
-              <Label className="flex flex-col text-base">
-                <span className="">{t('settings.general.appearance.title')}</span>
-                <span className="text-neutral-500 font-normal text-sm">
-                  {t('settings.general.appearance.description')}
-                </span>
-              </Label>
-
-              <RadioGroup value={theme} onValueChange={handleThemeChange}>
-                <div className="flex flex-row gap-x-6">
-                  <div className="">
-                    <Label htmlFor="r1" className="[&:has([data-state=checked])>div>img]:outline">
-                      <RadioGroupItem value="light" id="r1" className="sr-only"/>
-                      <div className="items-center content-center">
-                        <img src="/assets/theme-light.svg"
-                             className="mx-auto rounded-sm outline-neutral-400 outline-4"
-                             alt=""/>
-                        <span className="block w-full pt-4 text-center">
-                          {t('settings.general.appearance.themes.light')}
-                        </span>
-                      </div>
-                    </Label>
-                  </div>
-                  <div className="">
-                    <Label htmlFor="r2" className="[&:has([data-state=checked])>div>img]:outline">
-                      <RadioGroupItem value="dark" id="r2" className="sr-only"/>
-                      <div className="items-center content-center">
-                        <img src="/assets/theme-dark.svg"
-                             className="mx-auto rounded-sm outline-neutral-400 outline-4"
-                             alt=""/>
-                        <span className="block w-full pt-4 text-center">
-                          {t('settings.general.appearance.themes.dark')}
-                        </span>
-                      </div>
-                    </Label>
-                  </div>
-                  <div className="">
-                    <Label htmlFor="r3" className="[&:has([data-state=checked])>div>img]:outline">
-                      <RadioGroupItem value="system" id="r3" className="sr-only"/>
-                      <div className="items-center content-center">
-                        <img src="/assets/theme-system.svg"
-                             className="mx-auto rounded-sm outline-neutral-400 outline-4"
-                             alt=""/>
-                        <span className="block w-full pt-4 text-center">
-                          {t('settings.general.appearance.themes.system')}
-                        </span>
-                      </div>
-                    </Label>
-                  </div>
-                </div>
-              </RadioGroup>
-            </div>
 
             <div className="flex items-center justify-between space-x-10 py-1">
               <Label htmlFor="openWindowStrategy" className="flex flex-col text-base">

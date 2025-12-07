@@ -20,13 +20,29 @@
   "settings": {
     "sidebar": {
       "general": "General",
+      "appearance": "Appearance",
       "history": "History",
       "shortcuts": "Shortcuts",
       "privacy": "Privacy",
       "ai": "AI Rewrite",
+      "tools": "Tools",
+      "calculator": "Calculator",
+      "calendar": "Calendar",
       "license": "License",
       "about": "About",
       "managedByOrganization": "Some settings are managed by your organization."
+    },
+    "tools": {
+      "title": "Developer Tools",
+      "description": "Quick utilities for developers - all run locally and instantly"
+    },
+    "calculator": {
+      "title": "Calculator",
+      "description": "Quick calculations - use keyboard or click buttons"
+    },
+    "calendar": {
+      "title": "Events Calendar",
+      "description": "View holidays, events, and observances worldwide"
     },
     "general": {
       "title": "General",
@@ -147,6 +163,8 @@
     "shortcuts": {
       "title": "Shortcuts",
       "clickToEditShortcut": "Click to edit shortcut",
+      "resetToDefault": "Reset to default",
+      "clearShortcut": "Clear shortcut",
       "openApp": "Open ClipBook",
       "closeApp": "Close ClipBook",
       "selectNextItem": "Select next item",
@@ -246,7 +264,29 @@
       "hideDetails": "Hide details",
       "showDetails": "Show details",
       "hidePreviewPanel": "Hide preview panel",
-      "more": "More actions"
+      "more": "More actions",
+      "aiRewrite": "AI Rewrite",
+      "developerTools": "Developer Tools",
+      "quickImprove": {
+        "tooltip": "Quick Improve",
+        "processing": "Improving...",
+        "success": "Text improved!",
+        "notConfigured": "AI not configured. Go to Settings → AI",
+        "ollamaNotRunning": "Ollama not running. Start with: ollama serve",
+        "apiKeyMissing": "API key missing. Check Settings → AI"
+      }
+    },
+    "citations": {
+      "title": "Sources"
+    },
+    "context": {
+      "exchanges": "{{count}} exchanges",
+      "exchange": "{{count}} exchange",
+      "newConversation": "New"
+    },
+    "imageAnalysis": {
+      "title": "Image Analysis",
+      "toolbar": "AI Image Analysis"
     },
     "toolbarMenu": {
       "formatText": "Format Text",

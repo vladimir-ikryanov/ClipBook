@@ -15,7 +15,11 @@ import {
   ListIcon,
   SettingsIcon,
   ShieldCheckIcon,
-  WandIcon
+  WandIcon,
+  WrenchIcon,
+  CalculatorIcon,
+  CalendarIcon,
+  PaletteIcon,
 } from "lucide-react";
 import {prefIsDeviceManaged} from "@/pref";
 import { useTranslation } from 'react-i18next';
@@ -47,6 +51,11 @@ export default function SettingsSidebar(props: SettingsSidebarProps) {
                                      icon={SettingsIcon}
                                      isSelected={selectedItemType === "General"}
                                      onSelect={() => handleSelect("General")}/>
+                <SettingsSidebarItem type={"Appearance"}
+                                     url={"/"}
+                                     icon={PaletteIcon}
+                                     isSelected={selectedItemType === "Appearance"}
+                                     onSelect={() => handleSelect("Appearance")}/>
                 <SettingsSidebarItem type={"History"}
                                      url={"/"}
                                      icon={ListIcon}
@@ -67,6 +76,21 @@ export default function SettingsSidebar(props: SettingsSidebarProps) {
                                      icon={WandIcon}
                                      isSelected={selectedItemType === "AI"}
                                      onSelect={() => handleSelect("AI")}/>
+                <SettingsSidebarItem type={"Tools"}
+                                     url={"/"}
+                                     icon={WrenchIcon}
+                                     isSelected={selectedItemType === "Tools"}
+                                     onSelect={() => handleSelect("Tools")}/>
+                <SettingsSidebarItem type={"Calculator"}
+                                     url={"/"}
+                                     icon={CalculatorIcon}
+                                     isSelected={selectedItemType === "Calculator"}
+                                     onSelect={() => handleSelect("Calculator")}/>
+                <SettingsSidebarItem type={"Calendar"}
+                                     url={"/"}
+                                     icon={CalendarIcon}
+                                     isSelected={selectedItemType === "Calendar"}
+                                     onSelect={() => handleSelect("Calendar")}/>
                 <SettingsSidebarItem type={"License"}
                                      url={"/"}
                                      icon={KeyRoundIcon}

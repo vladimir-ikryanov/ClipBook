@@ -146,6 +146,8 @@
     "shortcuts": {
       "title": "Tastenkombinationen",
       "clickToEditShortcut": "Klicken Sie, um die Tastenkombination zu bearbeiten",
+      "resetToDefault": "Auf Standard zurücksetzen",
+      "clearShortcut": "Tastenkombination löschen",
       "openApp": "ClipBook öffnen",
       "closeApp": "ClipBook schließen",
       "selectNextItem": "Nächstes Element auswählen",

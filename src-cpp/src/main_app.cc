@@ -563,13 +563,13 @@ void MainApp::showAboutDialog() {
 }
 
 void MainApp::setTheme(const std::string &theme) {
-  if (theme == "dark") {
+  if (theme == "dark" || theme == "amoled" || theme == "glass-dark") {
+    // amoled and glass-dark use dark native appearance
     app_->setTheme(AppTheme::kDark);
-  }
-  if (theme == "light") {
+  } else if (theme == "light" || theme == "glass-light") {
+    // glass-light uses light native appearance
     app_->setTheme(AppTheme::kLight);
-  }
-  if (theme == "system") {
+  } else if (theme == "system") {
     app_->setTheme(AppTheme::kSystem);
   }
 }

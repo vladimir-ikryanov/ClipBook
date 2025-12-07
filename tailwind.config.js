@@ -64,6 +64,11 @@ module.exports = {
           foreground: "var(--accent-foreground)",
           hover: "var(--accent-hover)",
         },
+        selection: {
+          DEFAULT: "var(--selection)",
+          foreground: "var(--selection-foreground)",
+          hover: "var(--selection-hover)",
+        },
         popover: {
           DEFAULT: "var(--popover)",
           foreground: "var(--popover-foreground)",

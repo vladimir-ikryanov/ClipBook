@@ -1,26 +1,31 @@
 import '../app.css';
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { getAIService } from "@/ai/ai-service";
-import { getPrompt, AIAction } from "@/ai/prompts";
+import { 
+  AIAction, 
+  ACTION_CATEGORIES, 
+  ACTION_METADATA,
+  getOptimizedPrompt,
+  getActionSettings,
+} from "@/ai/prompts";
 import {
   WandIcon,
   CopyIcon,
@@ -34,8 +39,27 @@ import {
   BugIcon,
   BookOpen,
   PencilIcon,
+  Languages,
+  Code,
+  FileText,
+  Search,
+  Zap,
+  CheckCircle,
+  AlertCircle,
+  ArrowRight,
+  Clock,
+  Globe,
+  CheckIcon,
+  Square,
+  MessageSquare,
+  RotateCcw,
 } from "lucide-react";
 import { useTranslation } from 'react-i18next';
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import CitationsPanel, { Citation } from "./CitationsPanel";
+import { PerplexityProvider } from "@/ai/perplexity-provider";
+import { AIConversationContext } from "@/ai/ai-context";
+import ModelSwitcher from "./ModelSwitcher";
 
 interface AIRewriteDialogProps {
   open: boolean;
@@ -44,285 +68,537 @@ interface AIRewriteDialogProps {
   onReplace: (newText: string) => void;
 }
 
+// Icon mapping with better sizes
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  'Writing': <PencilIcon className="h-4 w-4" />,
+  'Summary': <NotebookText className="h-4 w-4" />,
+  'Tone': <Smile className="h-4 w-4" />,
+  'Code': <Code className="h-4 w-4" />,
+  'Format': <FileText className="h-4 w-4" />,
+  'Extract': <Search className="h-4 w-4" />,
+  'Language': <Languages className="h-4 w-4" />,
+  'Fix': <CheckCircle className="h-4 w-4" />,
+  'Research 🌐': <Globe className="h-4 w-4 text-blue-500" />,
+  'Advanced': <Zap className="h-4 w-4" />,
+};
+
+const ACTION_ICONS: Record<string, React.ReactNode> = {
+  improveWriting: <Sparkles className="h-4 w-4" />,
+  rewrite: <RefreshCw className="h-4 w-4" />,
+  summarize: <NotebookText className="h-4 w-4" />,
+  makeProfessional: <Briefcase className="h-4 w-4" />,
+  makeCasual: <Smile className="h-4 w-4" />,
+  fixCode: <BugIcon className="h-4 w-4" />,
+  explainCode: <BookOpen className="h-4 w-4" />,
+  custom: <PencilIcon className="h-4 w-4" />,
+  generatePrompt: <Zap className="h-4 w-4" />,
+  translate: <Languages className="h-4 w-4" />,
+  research: <Globe className="h-4 w-4 text-blue-500" />,
+  factCheck: <Globe className="h-4 w-4 text-blue-500" />,
+};
+
+const LANGUAGES = [
+  'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese',
+  'Chinese', 'Japanese', 'Korean', 'Russian', 'Arabic', 'Hindi'
+];
+
 export default function AIRewriteDialog(props: AIRewriteDialogProps) {
   const { t } = useTranslation();
 
   const [action, setAction] = useState<AIAction>("improveWriting");
   const [customPrompt, setCustomPrompt] = useState("");
+  const [targetLanguage, setTargetLanguage] = useState("Spanish");
+  const [promptTopic, setPromptTopic] = useState("");
   const [result, setResult] = useState("");
+  const [streamingText, setStreamingText] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const actionOptions = React.useMemo(
-    () => [
-      { value: "improveWriting" as AIAction, icon: Sparkles, label: t("aiRewrite.actions.improveWriting", { defaultValue: "Improve Writing" }) },
-      { value: "rewrite" as AIAction, icon: RefreshCw, label: t("aiRewrite.actions.rewrite", { defaultValue: "Rewrite" }) },
-      { value: "summarize" as AIAction, icon: NotebookText, label: t("aiRewrite.actions.summarize", { defaultValue: "Summarize" }) },
-      { value: "makeProfessional" as AIAction, icon: Briefcase, label: t("aiRewrite.actions.makeProfessional", { defaultValue: "Professional" }) },
-      { value: "makeCasual" as AIAction, icon: Smile, label: t("aiRewrite.actions.makeCasual", { defaultValue: "Casual" }) },
-      { value: "fixCode" as AIAction, icon: BugIcon, label: t("aiRewrite.actions.fixCode", { defaultValue: "Fix Code" }) },
-      { value: "explainCode" as AIAction, icon: BookOpen, label: t("aiRewrite.actions.explainCode", { defaultValue: "Explain Code" }) },
-      { value: "custom" as AIAction, icon: PencilIcon, label: t("aiRewrite.actions.custom", { defaultValue: "Custom Prompt" }) },
-    ],
-    [t]
-  );
+  const [executionTime, setExecutionTime] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [citations, setCitations] = useState<Citation[]>([]);
+  
+  // Conversation context - persists for follow-up questions
+  const [context] = useState(() => new AIConversationContext(10));
+  const [contextCount, setContextCount] = useState(0);
+  
+  const resultRef = useRef<HTMLTextAreaElement>(null);
+  const startTimeRef = useRef<number>(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const chunkBufferRef = useRef<string>('');
+  const renderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (props.open) {
       setAction("improveWriting");
       setCustomPrompt("");
+      setPromptTopic("");
       setResult("");
+      setStreamingText("");
       setError("");
+      setIsStreaming(false);
+      setExecutionTime(null);
+      setCopied(false);
+      setCitations([]);
+      // Clean up any previous abort controller
+      abortControllerRef.current = null;
     }
+    
+    // Cleanup on unmount or close
+    return () => {
+      if (renderTimeoutRef.current) {
+        clearTimeout(renderTimeoutRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [props.open]);
 
+  useEffect(() => {
+    if (isStreaming && resultRef.current) {
+      resultRef.current.scrollTop = resultRef.current.scrollHeight;
+    }
+  }, [streamingText, isStreaming]);
+
+  const getInstruction = useCallback(() => {
+    if (action === "custom") return customPrompt;
+    if (action === "translate") return getOptimizedPrompt(action, targetLanguage);
+    if (action === "generatePrompt") return getOptimizedPrompt(action, promptTopic || props.originalText);
+    return getOptimizedPrompt(action);
+  }, [action, customPrompt, targetLanguage, promptTopic, props.originalText]);
+
+  // Helper to get citations from Perplexity provider
+  const getCitationsFromProvider = (provider: any): Citation[] => {
+    if (provider instanceof PerplexityProvider) {
+      return provider.getLastCitations();
+    }
+    return [];
+  };
+
   const handleGenerate = async () => {
+    startTimeRef.current = performance.now();
     setLoading(true);
+    setIsStreaming(false);
     setError("");
     setResult("");
+    setStreamingText("");
+    setExecutionTime(null);
+    setCitations([]);
+    
+    // Create new abort controller for this generation
+    abortControllerRef.current = new AbortController();
+    chunkBufferRef.current = '';
 
     try {
       const aiService = getAIService();
-      
-      // Check if AI provider is available
       const config = aiService.getConfig();
-      const providerInstance = (aiService as any).getProvider();
+      const providerInstance = aiService.getProvider();
       
       if (!providerInstance) {
-        throw new Error(`AI provider not configured. Please go to Settings → AI to configure ${config.provider}`);
+        throw new Error(`AI provider not configured. Go to Settings → AI to configure ${config.provider}`);
       }
       
       const isAvailable = await providerInstance.isAvailable();
       if (!isAvailable) {
-        if (config.provider === "ollama") {
-          throw new Error("Ollama is not running. Please start it with: ollama serve");
-        } else if (config.provider === "openai" || config.provider === "perplexity") {
-          throw new Error(`${config.provider === "openai" ? "OpenAI" : "Perplexity"} API key is missing or invalid. Please check Settings → AI`);
-        }
+        throw new Error(config.provider === "ollama" 
+          ? "Ollama not running. Start with: ollama serve"
+          : "API key missing. Check Settings → AI");
       }
 
-      const instruction = action === "custom" 
-        ? customPrompt 
-        : getPrompt(action);
+      const instruction = getInstruction();
+      
+      // Build user message content for context
+      const userMessage = `${instruction}\n\n---\nText: ${props.originalText.substring(0, 200)}${props.originalText.length > 200 ? '...' : ''}`;
 
-      const rewritten = await aiService.rewrite(props.originalText, instruction);
-      setResult(rewritten);
+      if (aiService.supportsStreaming()) {
+        setIsStreaming(true);
+        let fullText = '';
+        
+        // Smooth text batching - buffer chunks and render at intervals
+        const flushBuffer = () => {
+          if (chunkBufferRef.current && !abortControllerRef.current?.signal.aborted) {
+            fullText += chunkBufferRef.current;
+            setStreamingText(fullText);
+            chunkBufferRef.current = '';
+          }
+        };
+        
+        await aiService.rewriteStream(props.originalText, instruction, {
+          onChunk: (chunk) => {
+            // Check if aborted
+            if (abortControllerRef.current?.signal.aborted) return;
+            
+            chunkBufferRef.current += chunk;
+            
+            // Render at most every 30ms for smooth appearance
+            if (!renderTimeoutRef.current) {
+              renderTimeoutRef.current = setTimeout(() => {
+                flushBuffer();
+                renderTimeoutRef.current = null;
+              }, 30);
+            }
+          },
+          onComplete: (finalText) => {
+            // Final flush of any remaining buffer
+            if (renderTimeoutRef.current) {
+              clearTimeout(renderTimeoutRef.current);
+              renderTimeoutRef.current = null;
+            }
+            
+            if (!abortControllerRef.current?.signal.aborted) {
+              setResult(finalText);
+              setStreamingText("");
+              setIsStreaming(false);
+              setLoading(false);
+              setExecutionTime(performance.now() - startTimeRef.current);
+              
+              // Add to conversation context for follow-ups
+              context.addUserMessage(userMessage);
+              context.addAssistantMessage(finalText.substring(0, 500));
+              setContextCount(context.getCount());
+              
+              // Capture citations from Perplexity
+              const newCitations = getCitationsFromProvider(providerInstance);
+              setCitations(newCitations);
+            }
+          },
+          onError: (err) => {
+            if (!abortControllerRef.current?.signal.aborted) {
+              setError(err.message);
+              setIsStreaming(false);
+              setLoading(false);
+            }
+          }
+        }, context);
+      } else {
+        const rewritten = await aiService.rewrite(props.originalText, instruction, context);
+        if (!abortControllerRef.current?.signal.aborted) {
+          setResult(rewritten);
+          setLoading(false);
+          setExecutionTime(performance.now() - startTimeRef.current);
+          
+          // Add to conversation context for follow-ups
+          context.addUserMessage(userMessage);
+          context.addAssistantMessage(rewritten.substring(0, 500));
+          setContextCount(context.getCount());
+          
+          // Capture citations from Perplexity
+          const newCitations = getCitationsFromProvider(providerInstance);
+          setCitations(newCitations);
+        }
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setLoading(false);
+      if (!abortControllerRef.current?.signal.aborted) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+        setLoading(false);
+        setIsStreaming(false);
+      }
     }
+  };
+
+  const handleStop = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Clear any pending render timeout
+    if (renderTimeoutRef.current) {
+      clearTimeout(renderTimeoutRef.current);
+      renderTimeoutRef.current = null;
+    }
+    
+    // Keep whatever text we have so far as the result
+    if (streamingText) {
+      setResult(streamingText);
+      setStreamingText("");
+    }
+    
+    setIsStreaming(false);
+    setLoading(false);
+    setExecutionTime(performance.now() - startTimeRef.current);
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(result);
+    const text = result || streamingText;
+    if (text) {
+      navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
+
+  const handleClearContext = () => {
+    context.clear();
+    setContextCount(0);
   };
 
   const handleReplace = () => {
-    props.onReplace(result);
-    props.onClose();
-  };
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    e.stopPropagation();
-    if (e.key === "Escape") {
+    const text = result || streamingText;
+    if (text) {
+      props.onReplace(text);
       props.onClose();
     }
-  }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    e.stopPropagation();
+    if (e.key === "Escape") props.onClose();
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !loading && !isStreaming) handleGenerate();
+  };
+
+  const displayText = result || streamingText;
+  const formatTime = (ms: number) => ms < 1000 ? `${Math.round(ms)}ms` : `${(ms / 1000).toFixed(1)}s`;
+
+  const renderActionOptions = () => {
+    return Object.entries(ACTION_CATEGORIES).map(([category, actions]) => (
+      <SelectGroup key={category}>
+        <SelectLabel className="flex items-center gap-2 text-xs text-muted-foreground px-2 py-1.5">
+          {CATEGORY_ICONS[category]}
+          {category}
+        </SelectLabel>
+        {actions.map((actionKey) => {
+          const meta = ACTION_METADATA[actionKey];
+          if (!meta) return null;
+          return (
+            <SelectItem key={actionKey} value={actionKey} className="text-sm py-2">
+              <div className="flex items-center gap-2">
+                {ACTION_ICONS[actionKey] || <ArrowRight className="h-4 w-4" />}
+                <span>{meta.label}</span>
+              </div>
+            </SelectItem>
+          );
+        })}
+      </SelectGroup>
+    ));
+  };
 
   return (
-    <Dialog
-      open={props.open}
-      onOpenChange={(open) => {
-        if (!open) {
-          props.onClose();
-        }
-      }}
-    >
-      <DialogContent onKeyDown={handleKeyDown} className="max-w-[70vw] w-[70vw] h-[70vh] max-h-[70vh] bg-background-solid border-dialog-border shadow-lg p-0 gap-0 flex flex-col">
-        <DialogHeader className="px-6 pt-2 pb-2 border-b border-border flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+    <Dialog open={props.open} onOpenChange={(open) => !open && props.onClose()}>
+      <DialogContent 
+        onKeyDown={handleKeyDown} 
+        className="max-w-5xl w-[min(1000px,calc(100vw-2rem))] p-0 gap-0 overflow-hidden rounded-2xl"
+      >
+        <VisuallyHidden>
+          <DialogTitle>AI Rewrite</DialogTitle>
+          <DialogDescription>Transform text with AI</DialogDescription>
+        </VisuallyHidden>
+        
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-secondary/30 rounded-t-2xl">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-xl">
               <WandIcon className="h-5 w-5 text-primary" />
-              <DialogTitle className="text-lg font-semibold">{t("aiRewrite.title", { defaultValue: "AI Rewrite" })}</DialogTitle>
             </div>
-            <div className="flex items-center gap-2">
-              <Select value={action} onValueChange={(v) => setAction(v as AIAction)}>
-                <SelectTrigger className="w-64 h-10 px-3 rounded-lg border border-border bg-background-solid hover:bg-secondary-solid transition-all text-sm font-medium shadow-sm [&_[data-option-icon]]:hidden">
-                  <div className="flex w-full items-center justify-center gap-1.5">
-                    {(() => {
-                      const Icon = actionOptions.find((option) => option.value === action)?.icon;
-                      return Icon ? <Icon className="h-4 w-4" aria-hidden="true" /> : null;
-                    })()}
-                    <SelectValue className="flex-1 text-center font-medium" />
+            <div>
+              <span className="text-base font-semibold">AI Rewrite</span>
+              <div className="mt-0.5">
+                <ModelSwitcher compact />
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <Select value={action} onValueChange={(v) => setAction(v as AIAction)}>
+              <SelectTrigger className="w-52 h-9 text-sm rounded-xl">
+                <SelectValue>
+                  <div className="flex items-center gap-2">
+                    {ACTION_ICONS[action]}
+                    <span>{ACTION_METADATA[action]?.label || action}</span>
                   </div>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="max-h-80 rounded-xl">
+                {renderActionOptions()}
+              </SelectContent>
+            </Select>
+            
+            {action === "translate" && (
+              <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+                <SelectTrigger className="w-32 h-9 text-sm rounded-xl">
+                  <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="w-64 bg-popover border border-border shadow-xl rounded-lg p-1">
-                  {actionOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value} className="rounded-md">
-                      <div className="flex w-full items-center justify-start gap-2">
-                        <option.icon className="h-4 w-4" aria-hidden="true" data-option-icon />
-                        <span className="font-medium flex-1 text-left">{option.label}</span>
-                      </div>
-                    </SelectItem>
+                <SelectContent className="rounded-xl">
+                  {LANGUAGES.map(lang => (
+                    <SelectItem key={lang} value={lang} className="text-sm">{lang}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            )}
+            
+            <kbd className="px-2.5 py-1.5 bg-secondary rounded-lg text-xs font-medium text-muted-foreground">⌘↵</kbd>
           </div>
-        </DialogHeader>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 overflow-hidden px-6 py-3 min-h-0">
-          <div className="space-y-3 flex flex-col min-h-0">
-            <Label className="text-sm font-medium text-foreground">{t("aiRewrite.originalText", { defaultValue: "Original Text" })}</Label>
-            <div className="relative flex-1 min-h-0">
-              <Textarea
-                value={props.originalText}
-                readOnly
-                className="h-full w-full font-mono text-base resize-none bg-secondary-solid border-border rounded-md"
-              />
-              <div className="absolute bottom-3 right-3 text-xs text-muted-foreground bg-background-solid px-2.5 py-1.5 rounded border border-border shadow-sm">
-                {t("aiRewrite.charCount", {
-                  count: props.originalText.length,
-                  defaultValue: "{{count}} chars",
-                })}
+        {/* Main content - side by side */}
+        <div className="flex min-h-[380px] max-h-[500px] h-[55vh]">
+          {/* Original text */}
+          <div className="flex-1 flex flex-col border-r border-border">
+            <div className="px-4 py-2.5 border-b border-border bg-secondary/20 flex items-center justify-between">
+              <span className="text-sm font-medium text-muted-foreground">Original</span>
+              <span className="text-xs text-muted-foreground">{props.originalText.length} chars</span>
+            </div>
+            <Textarea
+              value={props.originalText}
+              readOnly
+              className="flex-1 border-0 rounded-none resize-none text-[15px] leading-relaxed font-mono focus-visible:ring-0 bg-transparent p-4"
+            />
+          </div>
+
+          {/* Result */}
+          <div className="flex-1 flex flex-col">
+            <div className="px-4 py-2.5 border-b border-border bg-secondary/20 flex items-center justify-between">
+              <span className="text-sm font-medium text-muted-foreground">
+                {isStreaming ? "Generating..." : "Result"}
+              </span>
+              <div className="flex items-center gap-3">
+                {executionTime !== null && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5" />
+                    {formatTime(executionTime)}
+                  </span>
+                )}
+                {displayText && (
+                  <button 
+                    onClick={handleCopy}
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                  >
+                    {copied ? <CheckIcon className="h-3.5 w-3.5 text-green-500" /> : <CopyIcon className="h-3.5 w-3.5" />}
+                    {copied ? 'Copied' : 'Copy'}
+                  </button>
+                )}
+                <span className="text-xs text-muted-foreground">{displayText.length} chars</span>
               </div>
             </div>
-          </div>
-
-          <div className="space-y-3 flex flex-col min-h-0">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium text-foreground">{t("aiRewrite.aiGenerated", { defaultValue: "AI Generated" })}</Label>
-              {result && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCopy}
-                  className="h-8 px-3 text-sm"
-                >
-                  <CopyIcon className="mr-1.5 h-4 w-4" />
-                  {t("aiRewrite.copy", { defaultValue: "Copy" })}
-                </Button>
-              )}
-            </div>
-            {loading ? (
-              <div className="flex-1 min-h-0 flex items-center justify-center border border-border rounded-md bg-secondary-solid">
-                <div className="text-center space-y-4">
-                  <Loader2Icon className="h-12 w-12 animate-spin text-primary mx-auto" />
-                  <div>
-                    <p className="text-base font-medium text-foreground">{t("aiRewrite.status.generating", { defaultValue: "Generating with AI..." })}</p>
-                    <p className="text-sm text-muted-foreground mt-1.5">{t("aiRewrite.status.generatingHint", { defaultValue: "This may take a moment" })}</p>
-                  </div>
-                </div>
-              </div>
-            ) : result ? (
-              <div className="relative flex-1 min-h-0">
-                <Textarea
-                  value={result}
-                  onChange={(e) => setResult(e.target.value)}
-                  className="h-full w-full font-mono text-base resize-none bg-secondary-solid border-primary rounded-md"
-                />
-                <div className="absolute bottom-3 right-3 text-xs text-muted-foreground bg-background-solid px-2.5 py-1.5 rounded border border-border shadow-sm">
-                  {t("aiRewrite.charCount", {
-                    count: result.length,
-                    defaultValue: "{{count}} chars",
-                  })}
+            
+            {loading && !isStreaming ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <Loader2Icon className="h-10 w-10 animate-spin text-primary mx-auto" />
+                  <p className="text-sm text-muted-foreground mt-3">Generating...</p>
                 </div>
               </div>
             ) : error ? (
-              <div className="flex-1 min-h-0 flex items-center justify-center border border-destructive rounded-md bg-secondary-solid p-8">
-                <div className="text-center space-y-4 max-w-lg">
-                  <div className="p-4 rounded-full bg-destructive/10 w-fit mx-auto">
-                    <p className="text-4xl">⚠️</p>
-                  </div>
-                  <div>
-                    <p className="text-base font-semibold text-destructive">{t("aiRewrite.error.title", { defaultValue: "Error" })}</p>
-                    <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{error}</p>
-                  </div>
+              <div className="flex-1 flex items-center justify-center p-6">
+                <div className="text-center max-w-sm">
+                  <AlertCircle className="h-10 w-10 text-destructive mx-auto" />
+                  <p className="text-sm text-destructive mt-3">{error}</p>
                 </div>
               </div>
+            ) : isStreaming ? (
+              /* Streaming text with cursor */
+              <div 
+                ref={resultRef as any}
+                className="flex-1 overflow-y-auto p-4 text-[15px] leading-relaxed font-mono bg-transparent border-l-2 border-l-primary"
+              >
+                <span className="whitespace-pre-wrap break-words">{streamingText}</span>
+                <span className="inline-block w-0.5 h-5 bg-primary animate-pulse ml-0.5 align-middle" />
+              </div>
+            ) : displayText ? (
+              <Textarea
+                ref={resultRef}
+                value={displayText}
+                onChange={(e) => setResult(e.target.value)}
+                readOnly={false}
+                className="flex-1 border-0 rounded-none resize-none text-[15px] leading-relaxed font-mono focus-visible:ring-0 bg-transparent p-4"
+              />
             ) : (
-              <div className="flex-1 min-h-0 flex items-center justify-center border border-border border-dashed rounded-md bg-secondary-solid/50 text-muted-foreground">
-                <div className="text-center space-y-4 px-12">
-                  <div className="p-5 rounded-full bg-primary/5 w-fit mx-auto">
-                    <WandIcon className="h-16 w-16 text-primary/40" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-medium text-foreground">{t("aiRewrite.state.readyTitle", { defaultValue: "Ready to Transform" })}</p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {t("aiRewrite.state.readyDescription", { defaultValue: "Select an action above and click Generate" })}
-                    </p>
-                  </div>
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <WandIcon className="h-12 w-12 text-muted-foreground/30 mx-auto" />
+                  <p className="text-sm text-muted-foreground mt-3">Select action & Generate</p>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {action === "custom" && (
-          <div className="space-y-2.5 px-6 py-3 border-t border-border bg-secondary-solid/30 flex-shrink-0">
-            <Label className="text-sm font-medium text-foreground">{t("aiRewrite.customInstructions", { defaultValue: "Custom Instructions" })}</Label>
+        {/* Citations panel - only shown when citations exist */}
+        {citations.length > 0 && (
+          <CitationsPanel citations={citations} expanded={false} />
+        )}
+
+        {/* Custom prompt area - only when needed */}
+        {(action === "custom" || action === "generatePrompt") && (
+          <div className="px-5 py-3 border-t border-border bg-secondary/20">
             <Textarea
-              value={customPrompt}
-              onChange={(e) => setCustomPrompt(e.target.value)}
-              placeholder={t("aiRewrite.customPlaceholder", { defaultValue: "Describe what you want the AI to do with your text..." })}
-              className="h-20 resize-none bg-background-solid border-border text-base rounded-md"
+              value={action === "custom" ? customPrompt : promptTopic}
+              onChange={(e) => action === "custom" ? setCustomPrompt(e.target.value) : setPromptTopic(e.target.value)}
+              placeholder={action === "custom" ? "Custom instructions..." : "Topic for prompt..."}
+              className="h-20 resize-none text-sm rounded-xl"
             />
           </div>
         )}
 
-        <DialogFooter className="gap-3 px-6 py-2 border-t border-border flex-shrink-0">
-          <Button 
-            variant="secondary" 
-            onClick={props.onClose}
-            size="lg"
-          >
-            {t("aiRewrite.actions.cancel", { defaultValue: "Cancel" })}
-          </Button>
+        {/* Footer */}
+        <div className="px-5 py-4 border-t border-border flex items-center justify-between bg-secondary/30 rounded-b-2xl">
+          <div className="text-xs text-muted-foreground flex items-center gap-3">
+            {isStreaming ? (
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                Streaming...
+              </span>
+            ) : contextCount > 0 ? (
+              <span className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5 text-primary">
+                  <MessageSquare className="h-4 w-4" />
+                  {Math.floor(contextCount / 2)} {Math.floor(contextCount / 2) === 1 ? 'exchange' : 'exchanges'}
+                </span>
+                <button
+                  onClick={handleClearContext}
+                  className="flex items-center gap-1 hover:text-foreground transition-colors"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  New
+                </button>
+              </span>
+            ) : null}
+          </div>
           
-          {result && (
-            <>
-              <Button 
-                variant="secondary" 
-                onClick={handleGenerate}
-                size="lg"
-              >
-                <RefreshCwIcon className="mr-2 h-4 w-4" />
-                {t("aiRewrite.actions.regenerate", { defaultValue: "Regenerate" })}
-              </Button>
-              <Button 
-                variant="primary" 
-                onClick={handleReplace}
-                size="lg"
-              >
-                {t("aiRewrite.actions.replace", { defaultValue: "Replace Original" })}
-              </Button>
-            </>
-          )}
-
-          {!result && (
-            <Button 
-              variant="primary" 
-              onClick={handleGenerate} 
-              disabled={loading || (action === "custom" && !customPrompt)}
-              size="lg"
-            >
-              {loading ? (
-                <>
-                  <Loader2Icon className="mr-2 h-5 w-5 animate-spin" />
-                  {t("aiRewrite.status.generatingShort", { defaultValue: "Generating..." })}
-                </>
-              ) : (
-                <>
-                  <WandIcon className="mr-2 h-5 w-5" />
-                  {t("aiRewrite.actions.generate", { defaultValue: "Generate with AI" })}
-                </>
-              )}
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={props.onClose} className="h-9 px-4 text-sm rounded-xl">
+              Cancel
             </Button>
-          )}
-        </DialogFooter>
+            
+            {isStreaming ? (
+              /* Stop button during streaming */
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={handleStop} 
+                className="h-9 px-4 text-sm rounded-xl"
+              >
+                <Square className="h-4 w-4 mr-1.5 fill-current" />
+                Stop
+              </Button>
+            ) : displayText ? (
+              <>
+                <Button variant="secondary" size="sm" onClick={handleGenerate} disabled={loading} className="h-9 px-4 text-sm rounded-xl">
+                  <RefreshCwIcon className="h-4 w-4 mr-1.5" />
+                  Redo
+                </Button>
+                <Button size="sm" onClick={handleReplace} className="h-9 px-5 text-sm rounded-xl">
+                  Replace
+                </Button>
+              </>
+            ) : (
+              <Button 
+                size="sm"
+                onClick={handleGenerate} 
+                disabled={loading || (action === "custom" && !customPrompt)}
+                className="h-9 px-5 text-sm rounded-xl"
+              >
+                {loading ? (
+                  <Loader2Icon className="h-4 w-4 mr-1.5 animate-spin" />
+                ) : (
+                  <WandIcon className="h-4 w-4 mr-1.5" />
+                )}
+                Generate
+              </Button>
+            )}
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
-

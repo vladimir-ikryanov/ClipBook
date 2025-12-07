@@ -10,7 +10,16 @@ import {
   ScanTextIcon,
   StarIcon,
   WandIcon,
+  Wrench,
+  ImageIcon,
+  Sparkles,
+  Square,
+  X,
 } from "lucide-react";
+import QuickRewriteButton from "./QuickRewriteButton";
+import ImageAnalysisDialog from "./ImageAnalysisDialog";
+import AIRewriteDialog from "./AIRewriteDialog";
+import ToolsDialog from "./ToolsDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,6 +66,12 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   const [isCopying, setIsCopying] = useState(false)
   const [showCheckIcon, setShowCheckIcon] = useState(false)
   const [aiDialogOpen, setAIDialogOpen] = useState(false)
+  const [toolsDialogOpen, setToolsDialogOpen] = useState(false)
+  const [imageAnalysisOpen, setImageAnalysisOpen] = useState(false)
+  
+  // Streaming state for quick rewrite
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [streamingText, setStreamingText] = useState("")
 
   useEffect(() => {
     if (props.selectedItemIndices.length === 1) {
@@ -142,6 +157,88 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
       selectedItem.content = newText
       emitter.emit("EditItem", selectedItem)
     }
+  }
+
+  // Streaming handlers for quick rewrite
+  function handleStreamingStart() {
+    setIsStreaming(true)
+    setStreamingText("")
+  }
+
+  function handleStreamingChunk(text: string) {
+    setStreamingText(text)
+  }
+
+  function handleStreamingEnd() {
+    setIsStreaming(false)
+    setStreamingText("")
+  }
+
+  function handleCancelStreaming() {
+    setIsStreaming(false)
+    setStreamingText("")
+  }
+
+  function handleApplyStreamingResult() {
+    if (selectedItem && streamingText) {
+      selectedItem.content = streamingText
+      emitter.emit("EditItem", selectedItem)
+    }
+    setIsStreaming(false)
+    setStreamingText("")
+  }
+
+  function handleOpenTools() {
+    setToolsDialogOpen(true)
+  }
+
+  function handleToolsDialogClose() {
+    setToolsDialogOpen(false)
+  }
+
+  function handleToolsInsertResult(result: string) {
+    if (selectedItem) {
+      selectedItem.content = result
+      emitter.emit("EditItem", selectedItem)
+    }
+  }
+
+  function handleOpenImageAnalysis() {
+    setImageAnalysisOpen(true)
+  }
+
+  function handleImageAnalysisClose() {
+    setImageAnalysisOpen(false)
+  }
+
+  function handleImageAnalysisInsert(result: string) {
+    // Create a new text item with the result
+    // The result will be inserted as text content
+    if (result) {
+      navigator.clipboard.writeText(result)
+    }
+  }
+
+  function canShowImageAnalysis() {
+    if (props.selectedItemIndices.length === 1) {
+      let item = getFirstSelectedHistoryItem()
+      if (item && item.type === ClipType.Image) {
+        return true
+      }
+    }
+    return false
+  }
+
+  function getImageDataUrl(): string {
+    if (selectedItem && selectedItem.type === ClipType.Image) {
+      // Assuming content is already a data URL or base64
+      if (selectedItem.content.startsWith('data:')) {
+        return selectedItem.content
+      }
+      // If it's raw base64, add the data URL prefix
+      return `data:image/png;base64,${selectedItem.content}`
+    }
+    return ''
   }
 
   function selectedItemsAreMarkedAsFavorite() {
@@ -351,6 +448,29 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 </Tooltip>
             }
             {
+                canShowImageAnalysis() &&
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="toolbar" size="toolbar" onClick={handleOpenImageAnalysis}>
+                      <ImageIcon className="h-5 w-5" strokeWidth={2}/>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex items-center">
+                    <div className="select-none mr-2 ml-1">{t('preview.toolbar.imageAnalysis', { defaultValue: 'AI Image Analysis' })}</div>
+                  </TooltipContent>
+                </Tooltip>
+            }
+            {
+                canShowCopyToClipboard() && selectedItem && isTextItem(selectedItem) &&
+                <QuickRewriteButton
+                  selectedItem={selectedItem}
+                  onComplete={handleAIReplace}
+                  onStreamingStart={handleStreamingStart}
+                  onStreamingChunk={handleStreamingChunk}
+                  onStreamingEnd={handleStreamingEnd}
+                />
+            }
+            {
                 canShowCopyToClipboard() && selectedItem && isTextItem(selectedItem) &&
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -359,7 +479,20 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
-                    <div className="select-none mr-2 ml-1">AI Rewrite</div>
+                    <div className="select-none mr-2 ml-1">{t('preview.toolbar.aiRewrite', { defaultValue: 'AI Rewrite' })}</div>
+                  </TooltipContent>
+                </Tooltip>
+            }
+            {
+                canShowCopyToClipboard() &&
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="toolbar" size="toolbar" onClick={handleOpenTools}>
+                      <Wrench className="h-5 w-5" strokeWidth={2}/>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex items-center">
+                    <div className="select-none mr-2 ml-1">{t('preview.toolbar.developerTools', { defaultValue: 'Developer Tools' })}</div>
                   </TooltipContent>
                 </Tooltip>
             }
@@ -435,14 +568,84 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
             </Tooltip>
           </div>
         </div>
+        {/* Streaming Overlay - shows when quick rewrite is streaming */}
+        {isStreaming && streamingText && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+            <div className="w-[min(700px,calc(100vw-3rem))] max-h-[80vh] bg-background-solid rounded-2xl border border-border shadow-2xl overflow-hidden">
+              {/* Header */}
+              <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-secondary/30">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-xl">
+                    <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+                  </div>
+                  <div>
+                    <span className="text-base font-semibold">Quick Improve</span>
+                    <p className="text-xs text-muted-foreground mt-0.5">Generating improved text...</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={handleCancelStreaming}
+                  className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                >
+                  <X className="h-5 w-5 text-muted-foreground" />
+                </button>
+              </div>
+              
+              {/* Streaming Content */}
+              <div className="p-5 max-h-[50vh] overflow-y-auto">
+                <div className="text-[15px] leading-relaxed font-mono whitespace-pre-wrap break-words">
+                  {streamingText}
+                  <span className="inline-block w-0.5 h-5 bg-primary animate-pulse ml-0.5 align-middle" />
+                </div>
+              </div>
+              
+              {/* Footer */}
+              <div className="px-5 py-4 border-t border-border flex items-center justify-between bg-secondary/30">
+                <span className="text-xs text-muted-foreground">
+                  {streamingText.length} characters
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleCancelStreaming}
+                    className="h-9 px-4 text-sm rounded-xl"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={handleCancelStreaming}
+                    className="h-9 px-4 text-sm rounded-xl"
+                  >
+                    <Square className="h-4 w-4 mr-1.5 fill-current" />
+                    Stop
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <AIRewriteDialog
           open={aiDialogOpen}
           onClose={handleAIDialogClose}
           originalText={selectedItem?.content || ""}
           onReplace={handleAIReplace}
         />
+        <ToolsDialog
+          open={toolsDialogOpen}
+          onClose={handleToolsDialogClose}
+          initialText={selectedItem?.content || ""}
+          onInsertResult={handleToolsInsertResult}
+        />
+        <ImageAnalysisDialog
+          open={imageAnalysisOpen}
+          onClose={handleImageAnalysisClose}
+          imageBase64={getImageDataUrl()}
+          onInsertResult={handleImageAnalysisInsert}
+        />
       </div>
   )
 }
-
-import AIRewriteDialog from "./AIRewriteDialog";

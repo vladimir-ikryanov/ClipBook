@@ -159,7 +159,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   useEffect(() => {
     loadHistory().then(() => {
+      resetFilter()
       setHistory(getHistoryItems())
+      activateApp(true)
     })
   }, []);
 
@@ -339,9 +341,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
       if (item) {
         await pasteItem(item, true)
       }
-    } else {
-      console.log("No next item to paste")
     }
+    // No next item to paste - silent fail is expected behavior
   }
 
   function scrollToLastSelectedItem() {
@@ -1514,6 +1515,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   async function handleEditHistoryItem(item: Clip) {
     await updateHistoryItem(item.id!, item)
+    emitter.emit("UpdateItemById", item.id)
     setHistory([...getHistoryItems()])
   }
 
@@ -1573,13 +1575,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   if (isHistoryEmpty()) {
     return (
-        <div className="flex h-screen draggable">
+        <div className="flex h-screen draggable bg-background text-foreground">
           <div className="flex flex-col text-center m-auto">
             <ClipboardIcon className="h-24 w-24 m-auto text-secondary-foreground"/>
             <p className="text-center pt-8 text-2xl font-semibold text-foreground">
               Your clipboard is empty
             </p>
-            <p className="text-center pt-2">
+            <p className="text-center pt-2 text-muted-foreground">
               Start copying text or links to build your history.
             </p>
           </div>
@@ -1606,7 +1608,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   return (
-      <div className="w-full p-0 m-0">
+      <div className="w-full h-screen p-0 m-0 bg-background text-foreground">
         <TrialExpiredDialog visible={isTrialExpired}/>
         <SidebarProvider className="">
           <AppSidebar visible={filterVisible}

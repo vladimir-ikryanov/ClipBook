@@ -5,6 +5,9 @@
 NSString *appThemeLight = @"light";
 NSString *appThemeDark = @"dark";
 NSString *appThemeSystem = @"system";
+NSString *appThemeAmoled = @"amoled";
+NSString *appThemeGlassLight = @"glass-light";
+NSString *appThemeGlassDark = @"glass-dark";
 
 NSString *prefWindowBounds = @"window_bounds";
 NSString *prefWindowBoundsX = @"window.bounds.x";
@@ -263,12 +266,16 @@ void AppSettingsMac::saveTheme(std::string theme) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   if (theme == "light") {
     [defaults setObject:appThemeLight forKey:prefAppTheme];
-  }
-  if (theme == "dark") {
+  } else if (theme == "dark") {
     [defaults setObject:appThemeDark forKey:prefAppTheme];
-  }
-  if (theme == "system") {
+  } else if (theme == "system") {
     [defaults setObject:appThemeSystem forKey:prefAppTheme];
+  } else if (theme == "amoled") {
+    [defaults setObject:appThemeAmoled forKey:prefAppTheme];
+  } else if (theme == "glass-light") {
+    [defaults setObject:appThemeGlassLight forKey:prefAppTheme];
+  } else if (theme == "glass-dark") {
+    [defaults setObject:appThemeGlassDark forKey:prefAppTheme];
   }
   [defaults synchronize];
 }
@@ -282,6 +289,15 @@ std::string AppSettingsMac::getTheme() {
     }
     if ([theme isEqualToString:appThemeDark]) {
       return "dark";
+    }
+    if ([theme isEqualToString:appThemeAmoled]) {
+      return "amoled";
+    }
+    if ([theme isEqualToString:appThemeGlassLight]) {
+      return "glass-light";
+    }
+    if ([theme isEqualToString:appThemeGlassDark]) {
+      return "glass-dark";
     }
   }
   return "system";

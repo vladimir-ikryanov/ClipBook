@@ -5,7 +5,11 @@ import Privacy from "@/settings/Privacy";
 import Shortcuts from "@/settings/Shortcuts";
 import License from "@/settings/License";
 import General from "@/settings/General";
+import Appearance from "@/settings/Appearance";
 import AISettings from "@/settings/AISettings";
+import Tools from "@/settings/Tools";
+import Calculator from "@/settings/Calculator";
+import Calendar from "@/settings/Calendar";
 import SettingsSidebar from "@/settings/SettingsSidebar";
 import {SettingsSidebarItemType} from "@/settings/SettingsSidebarItem";
 import {useState} from "react";
@@ -30,6 +34,9 @@ export default function Settings(props: SettingsProps) {
               selectedItemType === "General" && <General/>
           }
           {
+              selectedItemType === "Appearance" && <Appearance/>
+          }
+          {
               selectedItemType === "History" && <History/>
           }
           {
@@ -40,6 +47,15 @@ export default function Settings(props: SettingsProps) {
           }
           {
               selectedItemType === "AI" && <AISettings/>
+          }
+          {
+              selectedItemType === "Tools" && <Tools/>
+          }
+          {
+              selectedItemType === "Calculator" && <Calculator/>
+          }
+          {
+              selectedItemType === "Calendar" && <Calendar/>
           }
           {
               selectedItemType === "License" && <License/>

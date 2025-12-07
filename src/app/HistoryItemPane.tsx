@@ -343,7 +343,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
             isPointer() && <div className={`flex flex-none w-[3px] h-8 ${isFilterPaneVisible() ? 'mr-1' : 'ml-[1px] mr-[4px]'} rounded my-auto bg-switch-checked`}></div>
           }
           <div
-              className={`flex flex-grow cursor-default select-none items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-accent-hover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
+              className={`flex flex-grow cursor-default select-none items-center ${isItemSelected() ? 'bg-selection text-selection-foreground shadow-sm' : 'hover:bg-accent-hover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis transition-colors duration-100 ${getRoundedStyle()}`}
               onKeyDown={handleKeyDown}
               onMouseUp={handleMouseUp}
               onMouseDown={handleMouseDown}
@@ -351,7 +351,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
               onMouseLeave={handleMouseLeave}>
             <div className="flex flex-none mr-1">{renderClipIcon()}</div>
             <div
-                className={`flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis ${isDisabled() ? "" : "text-primary-foreground"}`}>
+                className={`flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis ${isDisabled() ? "" : (isItemSelected() ? "" : "text-primary-foreground")}`}>
               {
                 renameItemMode ? renderInputField() : renderItemLabel(getItemLabel(), getFilterQuery())
               }

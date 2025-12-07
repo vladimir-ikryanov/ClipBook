@@ -5,25 +5,25 @@ import {cva, type VariantProps} from "class-variance-authority"
 import {cn} from "@/lib/utils"
 
 const buttonVariants = cva(
-    "cursor-default inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
+    "cursor-default inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all duration-150 disabled:pointer-events-none disabled:opacity-50",
     {
       variants: {
         variant: {
-          default: "bg-primary text-primary-foreground hover:bg-primary/90",
-          destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-          outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-          ghost: "hover:bg-accent-hover hover:text-accent-foreground",
+          default: "bg-settings-primary-button text-settings-primary-button-text hover:bg-settings-primary-button-hover active:scale-[0.98] active:brightness-90",
+          destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:scale-[0.98] active:bg-destructive/80",
+          outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground active:scale-[0.98] active:bg-accent/80",
+          ghost: "hover:bg-accent-hover hover:text-accent-foreground active:bg-accent/60",
           badge: "rounded-sm content-center items-center justify-center text-xs",
-          plus: "rounded-full border border-border hover:bg-accent hover:text-accent-foreground content-center items-center justify-center text-xs",
+          plus: "rounded-full border border-border hover:bg-accent hover:text-accent-foreground active:bg-accent/60 content-center items-center justify-center text-xs",
           info: "",
-          tool: "focus:outline-none",
+          tool: "focus:outline-none active:scale-[0.95]",
           link: "text-primary underline-offset-4 hover:underline",
-          toolbar: "rounded-sm text-toolbar-button hover:bg-accent-hover hover:text-accent-foreground outline-none select-none",
-          copy: "rounded-sm text-toolbar-button hover:bg-accent-hover hover:text-accent-foreground disabled:opacity-100",
-          dropdown: "rounded-sm text-toolbar-button hover:bg-accent-hover hover:text-accent-foreground outline-none select-none",
-          menu: "rounded-sm hover:text-accent-foreground",
-          primary: "bg-settings-primary-button text-settings-primary-button-text hover:bg-settings-primary-button-hover outline-none",
-          secondary: "bg-settings-secondary-button text-settings-secondary-button-text hover:bg-settings-secondary-button-hover border border-settings-secondary-button-border hover:border-settings-secondary-button-border-hover outline-none",
+          toolbar: "rounded-sm text-toolbar-button hover:bg-accent-hover hover:text-accent-foreground active:bg-accent/60 outline-none select-none",
+          copy: "rounded-sm text-toolbar-button hover:bg-accent-hover hover:text-accent-foreground disabled:opacity-100 active:bg-accent/60",
+          dropdown: "rounded-sm text-toolbar-button hover:bg-accent-hover hover:text-accent-foreground active:bg-accent/60 outline-none select-none",
+          menu: "rounded-sm hover:text-accent-foreground active:bg-accent/60",
+          primary: "bg-settings-primary-button text-settings-primary-button-text hover:bg-settings-primary-button-hover active:scale-[0.98] active:brightness-90 outline-none",
+          secondary: "bg-settings-secondary-button text-settings-secondary-button-text hover:bg-settings-secondary-button-hover border border-settings-secondary-button-border hover:border-settings-secondary-button-border-hover active:scale-[0.98] active:bg-settings-secondary-button-hover/80 outline-none",
         },
         size: {
           default: "h-10 px-4 py-2",

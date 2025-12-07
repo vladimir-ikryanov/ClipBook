@@ -2,216 +2,826 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   TYPOGRAPHY SCALE
+   ============================================ */
 @layer base {
   :root {
+    /* Font sizes */
+    --font-size-2xs: 0.625rem;   /* 10px */
+    --font-size-xs: 0.75rem;     /* 12px */
+    --font-size-sm: 0.8125rem;   /* 13px */
+    --font-size-base: 0.875rem;  /* 14px */
+    --font-size-md: 1rem;        /* 16px */
+    --font-size-lg: 1.125rem;    /* 18px */
+    --font-size-xl: 1.25rem;     /* 20px */
+    --font-size-2xl: 1.5rem;     /* 24px */
+    
+    /* Line heights */
+    --line-height-tight: 1.25;
+    --line-height-snug: 1.375;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.625;
+    
+    /* Font weights */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    /* Letter spacing */
+    --letter-spacing-tight: -0.025em;
+    --letter-spacing-normal: 0;
+    --letter-spacing-wide: 0.025em;
+  }
+}
+
+/* ============================================
+   LIGHT THEME (Default)
+   ============================================ */
+@layer base {
+  :root, .light {
+    /* Default accent color - can be overridden by ThemeProvider */
+    --accent-color: #006fff;
+    
     --background: rgba(255, 255, 255, 0.25);
     --background-solid: #fafafa;
-    --foreground: #252525;
-    --card: #d0d0d0;
-    --card-foreground: #616161;
+    --foreground: #1a1a1a;
+    --card: #e5e5e5;
+    --card-foreground: #525252;
     --tag: #e3e3e3;
-    --shortcut-label: rgba(175, 175, 175, 0.3);
-    --shortcut-label-text: #858585;
-    --shortcut-label-hover: rgba(208, 208, 208, 0.9);
-    --shortcut-label-hover-text: #616161;
-    --popover: #eeeeee;
-    --popover-foreground: #252525;
-    --scrollbar: #979797;
-    --switch-checked: #006FFF;
-    --switch-unchecked: #616161;
-    --primary: #252525;
-    --primary-foreground: rgba(60, 60, 60, 0.8);
-    --secondary: rgba(255, 255, 255, 0.5);
-    --secondary-solid: #F2F2F2;
-    --secondary-foreground: #888888;
-    --muted: #fafafa;
-    --muted-foreground: #252525;
-    --accent: rgba(145, 145, 145, 0.3);
-    --accent-foreground: #252525;
-    --accent-hover: rgba(156, 156, 156, 0.15);
-    --destructive: #fafafa;
-    --destructive-foreground: #fafafa;
-    --border: rgba(193, 193, 193, 0.5);
-    --input: #d0d0d0;
-    --ring: #fafafa;
-    --radius: 0.75rem;
+    --shortcut-label: rgba(175, 175, 175, 0.35);
+    --shortcut-label-text: #6b6b6b;
+    --shortcut-label-hover: rgba(180, 180, 180, 0.9);
+    --shortcut-label-hover-text: #525252;
+    --popover: #ffffff;
+    --popover-foreground: #1a1a1a;
+    --scrollbar: #c4c4c4;
+    --switch-checked: var(--accent-color);
+    --switch-unchecked: #d4d4d4;
+    --primary: #1a1a1a;
+    --primary-foreground: #ffffff;
+    --secondary: rgba(245, 245, 245, 0.8);
+    --secondary-solid: #f5f5f5;
+    --secondary-foreground: #525252;
+    --muted: #f5f5f5;
+    --muted-foreground: #737373;
+    --accent: rgba(0, 0, 0, 0.06);
+    --accent-foreground: #1a1a1a;
+    --accent-hover: rgba(0, 0, 0, 0.04);
+    
+    /* Selection - DISTINCT visible colors for selected items */
+    --selection: #dbeafe;
+    --selection-foreground: #1e3a5f;
+    --selection-hover: #bfdbfe;
+    --destructive: #dc2626;
+    --destructive-foreground: #ffffff;
+    --border: rgba(0, 0, 0, 0.1);
+    --input: #e5e5e5;
+    --ring: var(--accent-color);
+    --radius: 0.625rem;
     --search-highlight: #3b82f6;
-    --checked: #1ba123;
-    --checkbox: #bfbfbf;
+    --checked: #16a34a;
+    --checkbox: #d4d4d4;
+    
     /* Status bar */
-    --status-bar-green: rgba(27, 161, 35);
-    --status-bar-green-button: rgb(105, 193, 120, 0.25);
-    --status-bar-highlight-green-start: rgba(27, 161, 35, 0.1);
-    --status-bar-highlight-green-middle: rgba(27, 161, 35, 0.25);
+    --status-bar-green: #16a34a;
+    --status-bar-green-button: rgba(22, 163, 74, 0.15);
+    --status-bar-highlight-green-start: rgba(22, 163, 74, 0.05);
+    --status-bar-highlight-green-middle: rgba(22, 163, 74, 0.15);
+    
     /* Preview */
-    --preview-background: #eeeeee;
-    --preview-border: rgb(204, 204, 204, 0.5);
-    --preview-info-border: rgba(218, 218, 218, 0.5);
+    --preview-background: #fafafa;
+    --preview-border: rgba(0, 0, 0, 0.08);
+    --preview-info-border: rgba(0, 0, 0, 0.06);
     --preview-info-label: #737373;
+    
     /* Toolbar */
-    --toolbar-background: #eeeeee;
+    --toolbar-background: #fafafa;
     --toolbar-button: #737373;
-    --toolbar-button-active: #252525;
-    --toolbar-button-selected: #006fff;
+    --toolbar-button-active: #1a1a1a;
+    --toolbar-button-selected: var(--accent-color);
+    
     /* Actions */
-    --actions-background: #fafafa;
-    --actions-selection: #e2e2e2;
+    --actions-background: #ffffff;
+    --actions-selection: rgba(0, 0, 0, 0.06);
     --actions-danger: #dc2626;
-    /* Settings dialog colors */
-    --settings: #fafafa;
+    
+    /* Settings */
+    --settings: #ffffff;
     --settings-border: #e5e5e5;
-    --settings-selection: #0064e1;
-    --settings-sidebar-selection: #fafafa;
-    --settings-sidebar-label: #e3e3e3;
-    --settings-title-license-trial-label: #8a8a8a;
-    --settings-title-license-activated-label: #1ba123;
-    --settings-table-row: #eeeeee;
+    --settings-selection: var(--accent-color);
+    --settings-sidebar-selection: #f5f5f5;
+    --settings-sidebar-label: #e5e5e5;
+    --settings-title-license-trial-label: #737373;
+    --settings-title-license-activated-label: #16a34a;
+    --settings-table-row: #fafafa;
     --settings-table-row2: #f5f5f5;
-    --settings-input-placeholder: #8a8a8a;
-    --primary-button-background: #006fff;
-    --primary-button-background-hover: #0064e1;
-    --primary-button-text: white;
-    --shortcut-input: #F2F2F2;
-    --secondary-button-background: #e8e8e8;
-    --secondary-button-background-hover: #d8d8d8;
-    --secondary-button-border: #e8e8e8;
-    --secondary-button-border-hover: #d8d8d8;
-    --secondary-button-text: #252525;
+    --settings-input-placeholder: #a3a3a3;
+    --primary-button-background: var(--accent-color);
+    --primary-button-background-hover: color-mix(in srgb, var(--accent-color) 85%, black);
+    --primary-button-text: #ffffff;
+    --shortcut-input: #f5f5f5;
+    --secondary-button-background: #f5f5f5;
+    --secondary-button-background-hover: #e5e5e5;
+    --secondary-button-border: #e5e5e5;
+    --secondary-button-border-hover: #d4d4d4;
+    --secondary-button-text: #1a1a1a;
+    
     /* Skeleton */
-    --skeleton-background: #ffffff;
-    --skeleton-foreground: #dadada;
-    --skeleton-text: #5a5a5a;
+    --skeleton-background: #fafafa;
+    --skeleton-foreground: #e5e5e5;
+    --skeleton-text: #525252;
+    
     /* Dialog */
-    --dialog-shadow: #414141;
-    --dialog-border: #ffffff;
-    --dialog-overlay: rgba(0, 0, 0, 0.3);
-    --dialog-text: #414141;
+    --dialog-shadow: rgba(0, 0, 0, 0.15);
+    --dialog-border: rgba(0, 0, 0, 0.1);
+    --dialog-overlay: rgba(0, 0, 0, 0.4);
+    --dialog-text: #525252;
+    
     /* Sidebar */
-    --sidebar-background: #F2F2F2;
-    --sidebar-background-secondary: rgba(236, 236, 236, 0.25);
-    --sidebar-foreground: #000000;
-    --sidebar-foreground-secondary: #6e6e6e;
-    --sidebar-primary: #000000;
-    --sidebar-primary-foreground: #414141;
-    --sidebar-accent: #006fff;
+    --sidebar-background: #f5f5f5;
+    --sidebar-background-secondary: rgba(245, 245, 245, 0.5);
+    --sidebar-foreground: #1a1a1a;
+    --sidebar-foreground-secondary: #525252;
+    --sidebar-primary: #1a1a1a;
+    --sidebar-primary-foreground: #525252;
+    --sidebar-accent: var(--accent-color);
     --sidebar-accent-foreground: #ffffff;
     --sidebar-border: #e5e5e5;
-    --sidebar-ring: #d0d0d0;
+    --sidebar-ring: #d4d4d4;
 
     font-size: 14px;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: rgba(40, 40, 40, 0.5);
-    --background-solid: rgba(40, 40, 40);
-    --foreground: #E8E8E8;
-    --card: #3E4144;
-    --card-foreground: #e3e3e3;
-    --tag: #373737;
-    --shortcut-label: rgba(90, 94, 97, 0.5);
-    --shortcut-label-text: #e3e3e3;
-    --shortcut-label-hover: rgba(79, 81, 83, 0.9);
-    --shortcut-label-hover-text: #e3e3e3;
-    --scrollbar: #121212;
-    --switch-checked: #006FFF;
-    --switch-unchecked: #3e4144;
-    /* History item hover background */
-    --popover: #2e2e2e;
-    --popover-foreground: #DADADA;
-    --primary: #f6f6f6;
-    /* History item icon */
-    --primary-foreground: rgba(215, 215, 215, 0.5);
-    /* Preview pane background */
-    --secondary: rgba(33, 33, 33, 0.7);
-    --secondary-solid: rgba(33, 33, 33);
-    /* Search field placeholder text */
-    --secondary-foreground: #8a8a8a;
-    /* History item background */
-    --muted: #282828;
-    /* History item text */
-    --muted-foreground: #DADADA;
-    /* History item selected background */
-    --accent: rgba(83, 83, 83, 0.6);
-    --accent-foreground: #f5f5f5;
-    --accent-hover: rgba(83, 83, 83, 0.3);
-    --destructive: #282828;
-    --destructive-foreground: #2b2d30;
-    --border: rgba(97, 99, 101, 0.4);
-    --input: #707070;
-    --ring: #282828;
-    --search-highlight: #06b6d4;
-    --checked: #15cf20;
-    --checkbox: #676767;
-    /* Status bar */
-    --status-bar-green: rgb(0, 191, 11);
-    --status-bar-green-button: rgba(0, 193, 33, 0.2);
-    --status-bar-highlight-green-start: rgba(27, 161, 35, 0.05);
-    --status-bar-highlight-green-middle: rgba(27, 161, 35, 0.25);
-    /* Preview */
-    --preview-background: #212121;
-    --preview-border: rgba(69, 69, 69, 0.5);
-    --preview-info-border: rgba(69, 69, 69, 0.1);
-    --preview-info-label: #808081;
-    /* Toolbar */
-    --toolbar-background: #212121;
-    --toolbar-button: #808081;
-    --toolbar-button-active: #f6f6f6;
-    --toolbar-button-selected: #006fff;
-    /* Actions */
-    --actions-background: #212121;
-    --actions-selection: #333333;
-    --actions-danger: #ff5b5b;
-    /* Settings dialog colors */
-    --settings: #282828;
-    --settings-border: #3e4144;
-    --settings-selection: #0064e1;
-    --settings-sidebar-selection: #3e4144;
-    --settings-sidebar-label: #333333;
-    --settings-title-license-trial-label: #acacac;
-    --settings-title-license-activated-label: #15cf20;
-    --settings-table-row: #212121;
-    --settings-table-row2: #272727;
-    --settings-input-placeholder: #686868;
-    --primary-button-background: #006fff;
-    --primary-button-background-hover: #0064e1;
-    --primary-button-text: white;
-    --shortcut-input: #3e3e3e;
-    --secondary-button-background: #3e4144;
-    --secondary-button-background-hover: #3a3c40;
-    --secondary-button-text: white;
-    --secondary-button-border: #3e4144;
-    --secondary-button-border-hover: #3a3c40;
-    /* Skeleton */
-    --skeleton-background: #282828;
-    --skeleton-foreground: #3c3c3c;
-    --skeleton-text: #939393;
-    /* Dialog */
-    --dialog-shadow: black;
-    --dialog-border: #3e4144;
-    --dialog-overlay: rgba(0, 0, 0, 0.3);
-    --dialog-text: #b8b8b8;
-    /* Sidebar */
-    --sidebar-background: #212121;
-    --sidebar-background-secondary: rgba(58, 58, 58, 0.5);
-    --sidebar-foreground: #DADADA;
-    --sidebar-foreground-secondary: #cccccc;
-    --sidebar-primary: #f6f6f6;
-    --sidebar-primary-foreground: #808081;
-    --sidebar-accent: #006fff;
-    --sidebar-accent-foreground: #ffffff;
-    --sidebar-border: #171717;
-    --sidebar-ring: #3e4144;
+/* ============================================
+   DARK THEME
+   ============================================ */
+.dark {
+  /* Default accent color - can be overridden by ThemeProvider */
+  --accent-color: #006fff;
+  
+  --background: rgba(26, 26, 26, 0.8);
+  --background-solid: #1a1a1a;
+  --foreground: #f5f5f5;
+  --card: #262626;
+  --card-foreground: #e5e5e5;
+  --tag: #2a2a2a;
+  --shortcut-label: rgba(80, 80, 80, 0.6);
+  --shortcut-label-text: #a3a3a3;
+  --shortcut-label-hover: rgba(100, 100, 100, 0.8);
+  --shortcut-label-hover-text: #e5e5e5;
+  --scrollbar: #404040;
+  --switch-checked: var(--accent-color);
+  --switch-unchecked: #404040;
+  --popover: #262626;
+  --popover-foreground: #f5f5f5;
+  --primary: #f5f5f5;
+  --primary-foreground: #1a1a1a;
+  --secondary: rgba(38, 38, 38, 0.8);
+  --secondary-solid: #262626;
+  --secondary-foreground: #a3a3a3;
+  --muted: #262626;
+  --muted-foreground: #a3a3a3;
+  --accent: rgba(255, 255, 255, 0.08);
+  --accent-foreground: #f5f5f5;
+  --accent-hover: rgba(255, 255, 255, 0.05);
+  
+  /* Selection - DISTINCT visible colors for selected items */
+  --selection: #374151;
+  --selection-foreground: #f9fafb;
+  --selection-hover: #4b5563;
+  
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: #404040;
+  --ring: var(--accent-color);
+  --search-highlight: #22d3ee;
+  --checked: #22c55e;
+  --checkbox: #525252;
+  
+  /* Status bar */
+  --status-bar-green: #22c55e;
+  --status-bar-green-button: rgba(34, 197, 94, 0.2);
+  --status-bar-highlight-green-start: rgba(34, 197, 94, 0.05);
+  --status-bar-highlight-green-middle: rgba(34, 197, 94, 0.2);
+  
+  /* Preview */
+  --preview-background: #1a1a1a;
+  --preview-border: rgba(255, 255, 255, 0.08);
+  --preview-info-border: rgba(255, 255, 255, 0.05);
+  --preview-info-label: #737373;
+  
+  /* Toolbar */
+  --toolbar-background: #1a1a1a;
+  --toolbar-button: #737373;
+  --toolbar-button-active: #f5f5f5;
+  --toolbar-button-selected: var(--accent-color);
+  
+  /* Actions */
+  --actions-background: #1a1a1a;
+  --actions-selection: rgba(255, 255, 255, 0.08);
+  --actions-danger: #ef4444;
+  
+  /* Settings */
+  --settings: #1a1a1a;
+  --settings-border: #2a2a2a;
+  --settings-selection: var(--accent-color);
+  --settings-sidebar-selection: #262626;
+  --settings-sidebar-label: #262626;
+  --settings-title-license-trial-label: #a3a3a3;
+  --settings-title-license-activated-label: #22c55e;
+  --settings-table-row: #1f1f1f;
+  --settings-table-row2: #262626;
+  --settings-input-placeholder: #525252;
+  --primary-button-background: var(--accent-color);
+  --primary-button-background-hover: color-mix(in srgb, var(--accent-color) 85%, black);
+  --primary-button-text: #ffffff;
+  --shortcut-input: #2a2a2a;
+  --secondary-button-background: #2a2a2a;
+  --secondary-button-background-hover: #333333;
+  --secondary-button-text: #f5f5f5;
+  --secondary-button-border: #333333;
+  --secondary-button-border-hover: #404040;
+  
+  /* Skeleton */
+  --skeleton-background: #1a1a1a;
+  --skeleton-foreground: #2a2a2a;
+  --skeleton-text: #a3a3a3;
+  
+  /* Dialog */
+  --dialog-shadow: rgba(0, 0, 0, 0.5);
+  --dialog-border: #2a2a2a;
+  --dialog-overlay: rgba(0, 0, 0, 0.6);
+  --dialog-text: #a3a3a3;
+  
+  /* Sidebar */
+  --sidebar-background: #1a1a1a;
+  --sidebar-background-secondary: rgba(38, 38, 38, 0.5);
+  --sidebar-foreground: #f5f5f5;
+  --sidebar-foreground-secondary: #a3a3a3;
+  --sidebar-primary: #f5f5f5;
+  --sidebar-primary-foreground: #737373;
+  --sidebar-accent: var(--accent-color);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #262626;
+  --sidebar-ring: #333333;
+}
+
+/* ============================================
+   AMOLED THEME (True Black)
+   ============================================ */
+.amoled {
+  /* Default accent color - can be overridden by ThemeProvider */
+  --accent-color: #006fff;
+  
+  --background: #000000;
+  --background-solid: #000000;
+  --foreground: #ffffff;
+  --card: #0a0a0a;
+  --card-foreground: #f5f5f5;
+  --tag: #0f0f0f;
+  --shortcut-label: rgba(60, 60, 60, 0.8);
+  --shortcut-label-text: #b3b3b3;
+  --shortcut-label-hover: rgba(80, 80, 80, 0.9);
+  --shortcut-label-hover-text: #f5f5f5;
+  --scrollbar: #262626;
+  --switch-checked: var(--accent-color);
+  --switch-unchecked: #262626;
+  --popover: #0a0a0a;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  --secondary: #0a0a0a;
+  --secondary-solid: #0a0a0a;
+  --secondary-foreground: #b3b3b3;
+  --muted: #0a0a0a;
+  --muted-foreground: #b3b3b3;
+  --accent: rgba(255, 255, 255, 0.06);
+  --accent-foreground: #ffffff;
+  --accent-hover: rgba(255, 255, 255, 0.03);
+  
+  /* Selection - DISTINCT visible colors for selected items */
+  --selection: #1f2937;
+  --selection-foreground: #ffffff;
+  --selection-hover: #374151;
+  
+  --destructive: #ff4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: #1a1a1a;
+  --ring: var(--accent-color);
+  --search-highlight: #00d4ff;
+  --checked: #00ff88;
+  --checkbox: #404040;
+  
+  /* Status bar */
+  --status-bar-green: #00ff88;
+  --status-bar-green-button: rgba(0, 255, 136, 0.15);
+  --status-bar-highlight-green-start: rgba(0, 255, 136, 0.03);
+  --status-bar-highlight-green-middle: rgba(0, 255, 136, 0.12);
+  
+  /* Preview */
+  --preview-background: #000000;
+  --preview-border: rgba(255, 255, 255, 0.06);
+  --preview-info-border: rgba(255, 255, 255, 0.04);
+  --preview-info-label: #808080;
+  
+  /* Toolbar */
+  --toolbar-background: #000000;
+  --toolbar-button: #808080;
+  --toolbar-button-active: #ffffff;
+  --toolbar-button-selected: var(--accent-color);
+  
+  /* Actions */
+  --actions-background: #000000;
+  --actions-selection: rgba(255, 255, 255, 0.06);
+  --actions-danger: #ff4444;
+  
+  /* Settings */
+  --settings: #000000;
+  --settings-border: #1a1a1a;
+  --settings-selection: var(--accent-color);
+  --settings-sidebar-selection: #0a0a0a;
+  --settings-sidebar-label: #0f0f0f;
+  --settings-title-license-trial-label: #b3b3b3;
+  --settings-title-license-activated-label: #00ff88;
+  --settings-table-row: #050505;
+  --settings-table-row2: #0a0a0a;
+  --settings-input-placeholder: #404040;
+  --primary-button-background: var(--accent-color);
+  --primary-button-background-hover: color-mix(in srgb, var(--accent-color) 85%, black);
+  --primary-button-text: #ffffff;
+  --shortcut-input: #0f0f0f;
+  --secondary-button-background: #1a1a1a;
+  --secondary-button-background-hover: #262626;
+  --secondary-button-text: #ffffff;
+  --secondary-button-border: #262626;
+  --secondary-button-border-hover: #333333;
+  
+  /* Skeleton */
+  --skeleton-background: #000000;
+  --skeleton-foreground: #1a1a1a;
+  --skeleton-text: #b3b3b3;
+  
+  /* Dialog */
+  --dialog-shadow: rgba(0, 136, 255, 0.1);
+  --dialog-border: #1a1a1a;
+  --dialog-overlay: rgba(0, 0, 0, 0.8);
+  --dialog-text: #b3b3b3;
+  
+  /* Sidebar */
+  --sidebar-background: #000000;
+  --sidebar-background-secondary: rgba(10, 10, 10, 0.8);
+  --sidebar-foreground: #ffffff;
+  --sidebar-foreground-secondary: #b3b3b3;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #808080;
+  --sidebar-accent: var(--accent-color);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1a1a1a;
+  --sidebar-ring: #262626;
+}
+
+/* ============================================
+   GLASS LIGHT THEME (Glassmorphism)
+   ============================================ */
+.glass-light {
+  /* Default accent color - can be overridden by ThemeProvider */
+  --accent-color: #006fff;
+  
+  --background: rgba(255, 255, 255, 0.6);
+  --background-solid: rgba(255, 255, 255, 0.95);
+  --foreground: #1a1a1a;
+  --card: rgba(255, 255, 255, 0.5);
+  --card-foreground: #404040;
+  --tag: rgba(255, 255, 255, 0.6);
+  --shortcut-label: rgba(200, 200, 200, 0.5);
+  --shortcut-label-text: #525252;
+  --shortcut-label-hover: rgba(220, 220, 220, 0.8);
+  --shortcut-label-hover-text: #1a1a1a;
+  --scrollbar: rgba(0, 0, 0, 0.2);
+  --switch-checked: var(--accent-color);
+  --switch-unchecked: rgba(0, 0, 0, 0.15);
+  --popover: rgba(255, 255, 255, 0.9);
+  --popover-foreground: #1a1a1a;
+  --primary: #1a1a1a;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(255, 255, 255, 0.4);
+  --secondary-solid: rgba(255, 255, 255, 0.85);
+  --secondary-foreground: #525252;
+  --muted: rgba(255, 255, 255, 0.5);
+  --muted-foreground: #737373;
+  --accent: rgba(0, 0, 0, 0.05);
+  --accent-foreground: #1a1a1a;
+  --accent-hover: rgba(0, 0, 0, 0.03);
+  
+  /* Selection - DISTINCT visible colors for selected items */
+  --selection: rgba(99, 102, 241, 0.2);
+  --selection-foreground: #312e81;
+  --selection-hover: rgba(99, 102, 241, 0.12);
+  
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.4);
+  --input: rgba(255, 255, 255, 0.6);
+  --ring: var(--accent-color);
+  --search-highlight: #3b82f6;
+  --checked: #16a34a;
+  --checkbox: rgba(0, 0, 0, 0.15);
+  
+  /* Glass-specific */
+  --glass-blur: 20px;
+  --glass-saturation: 180%;
+  
+  /* Status bar */
+  --status-bar-green: #16a34a;
+  --status-bar-green-button: rgba(22, 163, 74, 0.2);
+  --status-bar-highlight-green-start: rgba(22, 163, 74, 0.1);
+  --status-bar-highlight-green-middle: rgba(22, 163, 74, 0.2);
+  
+  /* Preview */
+  --preview-background: rgba(255, 255, 255, 0.7);
+  --preview-border: rgba(255, 255, 255, 0.5);
+  --preview-info-border: rgba(255, 255, 255, 0.3);
+  --preview-info-label: #737373;
+  
+  /* Toolbar */
+  --toolbar-background: rgba(255, 255, 255, 0.6);
+  --toolbar-button: #737373;
+  --toolbar-button-active: #1a1a1a;
+  --toolbar-button-selected: var(--accent-color);
+  
+  /* Actions */
+  --actions-background: rgba(255, 255, 255, 0.85);
+  --actions-selection: rgba(0, 0, 0, 0.06);
+  --actions-danger: #dc2626;
+  
+  /* Settings */
+  --settings: rgba(255, 255, 255, 0.85);
+  --settings-border: rgba(255, 255, 255, 0.5);
+  --settings-selection: var(--accent-color);
+  --settings-sidebar-selection: rgba(255, 255, 255, 0.6);
+  --settings-sidebar-label: rgba(255, 255, 255, 0.4);
+  --settings-title-license-trial-label: #737373;
+  --settings-title-license-activated-label: #16a34a;
+  --settings-table-row: rgba(255, 255, 255, 0.5);
+  --settings-table-row2: rgba(255, 255, 255, 0.3);
+  --settings-input-placeholder: #a3a3a3;
+  --primary-button-background: var(--accent-color);
+  --primary-button-background-hover: color-mix(in srgb, var(--accent-color) 85%, black);
+  --primary-button-text: #ffffff;
+  --shortcut-input: rgba(255, 255, 255, 0.6);
+  --secondary-button-background: rgba(255, 255, 255, 0.5);
+  --secondary-button-background-hover: rgba(255, 255, 255, 0.7);
+  --secondary-button-text: #1a1a1a;
+  --secondary-button-border: rgba(255, 255, 255, 0.5);
+  --secondary-button-border-hover: rgba(255, 255, 255, 0.7);
+  
+  /* Skeleton */
+  --skeleton-background: rgba(255, 255, 255, 0.5);
+  --skeleton-foreground: rgba(255, 255, 255, 0.7);
+  --skeleton-text: #525252;
+  
+  /* Dialog */
+  --dialog-shadow: rgba(0, 0, 0, 0.1);
+  --dialog-border: rgba(255, 255, 255, 0.5);
+  --dialog-overlay: rgba(0, 0, 0, 0.3);
+  --dialog-text: #525252;
+  
+  /* Sidebar */
+  --sidebar-background: rgba(255, 255, 255, 0.5);
+  --sidebar-background-secondary: rgba(255, 255, 255, 0.3);
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-foreground-secondary: #525252;
+  --sidebar-primary: #1a1a1a;
+  --sidebar-primary-foreground: #525252;
+  --sidebar-accent: var(--accent-color);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.4);
+  --sidebar-ring: rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================
+   GLASS DARK THEME
+   ============================================ */
+.glass-dark {
+  /* Default accent color - can be overridden by ThemeProvider */
+  --accent-color: #006fff;
+  
+  --background: rgba(0, 0, 0, 0.5);
+  --background-solid: rgba(20, 20, 20, 0.95);
+  --foreground: #f5f5f5;
+  --card: rgba(40, 40, 40, 0.5);
+  --card-foreground: #e5e5e5;
+  --tag: rgba(50, 50, 50, 0.6);
+  --shortcut-label: rgba(80, 80, 80, 0.6);
+  --shortcut-label-text: #a3a3a3;
+  --shortcut-label-hover: rgba(100, 100, 100, 0.8);
+  --shortcut-label-hover-text: #f5f5f5;
+  --scrollbar: rgba(255, 255, 255, 0.15);
+  --switch-checked: var(--accent-color);
+  --switch-unchecked: rgba(255, 255, 255, 0.15);
+  --popover: rgba(30, 30, 30, 0.95);
+  --popover-foreground: #f5f5f5;
+  --primary: #f5f5f5;
+  --primary-foreground: #1a1a1a;
+  --secondary: rgba(50, 50, 50, 0.5);
+  --secondary-solid: rgba(40, 40, 40, 0.9);
+  --secondary-foreground: #a3a3a3;
+  --muted: rgba(50, 50, 50, 0.5);
+  --muted-foreground: #a3a3a3;
+  --accent: rgba(255, 255, 255, 0.08);
+  --accent-foreground: #f5f5f5;
+  --accent-hover: rgba(255, 255, 255, 0.05);
+  
+  /* Selection - DISTINCT visible colors for selected items */
+  --selection: rgba(99, 102, 241, 0.3);
+  --selection-foreground: #e0e7ff;
+  --selection-hover: rgba(99, 102, 241, 0.2);
+  
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(60, 60, 60, 0.6);
+  --ring: var(--accent-color);
+  --search-highlight: #22d3ee;
+  --checked: #22c55e;
+  --checkbox: rgba(255, 255, 255, 0.2);
+  
+  /* Glass-specific */
+  --glass-blur: 20px;
+  --glass-saturation: 150%;
+  
+  /* Status bar */
+  --status-bar-green: #22c55e;
+  --status-bar-green-button: rgba(34, 197, 94, 0.2);
+  --status-bar-highlight-green-start: rgba(34, 197, 94, 0.05);
+  --status-bar-highlight-green-middle: rgba(34, 197, 94, 0.15);
+  
+  /* Preview */
+  --preview-background: rgba(20, 20, 20, 0.8);
+  --preview-border: rgba(255, 255, 255, 0.08);
+  --preview-info-border: rgba(255, 255, 255, 0.05);
+  --preview-info-label: #737373;
+  
+  /* Toolbar */
+  --toolbar-background: rgba(20, 20, 20, 0.8);
+  --toolbar-button: #737373;
+  --toolbar-button-active: #f5f5f5;
+  --toolbar-button-selected: var(--accent-color);
+  
+  /* Actions */
+  --actions-background: rgba(20, 20, 20, 0.9);
+  --actions-selection: rgba(255, 255, 255, 0.08);
+  --actions-danger: #ef4444;
+  
+  /* Settings */
+  --settings: rgba(20, 20, 20, 0.9);
+  --settings-border: rgba(255, 255, 255, 0.1);
+  --settings-selection: var(--accent-color);
+  --settings-sidebar-selection: rgba(60, 60, 60, 0.6);
+  --settings-sidebar-label: rgba(50, 50, 50, 0.5);
+  --settings-title-license-trial-label: #a3a3a3;
+  --settings-title-license-activated-label: #22c55e;
+  --settings-table-row: rgba(30, 30, 30, 0.6);
+  --settings-table-row2: rgba(40, 40, 40, 0.5);
+  --settings-input-placeholder: #525252;
+  --primary-button-background: var(--accent-color);
+  --primary-button-background-hover: color-mix(in srgb, var(--accent-color) 85%, black);
+  --primary-button-text: #ffffff;
+  --shortcut-input: rgba(50, 50, 50, 0.6);
+  --secondary-button-background: rgba(60, 60, 60, 0.6);
+  --secondary-button-background-hover: rgba(80, 80, 80, 0.6);
+  --secondary-button-text: #f5f5f5;
+  --secondary-button-border: rgba(255, 255, 255, 0.1);
+  --secondary-button-border-hover: rgba(255, 255, 255, 0.15);
+  
+  /* Skeleton */
+  --skeleton-background: rgba(30, 30, 30, 0.6);
+  --skeleton-foreground: rgba(50, 50, 50, 0.6);
+  --skeleton-text: #a3a3a3;
+  
+  /* Dialog */
+  --dialog-shadow: rgba(0, 0, 0, 0.4);
+  --dialog-border: rgba(255, 255, 255, 0.1);
+  --dialog-overlay: rgba(0, 0, 0, 0.5);
+  --dialog-text: #a3a3a3;
+  
+  /* Sidebar */
+  --sidebar-background: rgba(20, 20, 20, 0.8);
+  --sidebar-background-secondary: rgba(40, 40, 40, 0.5);
+  --sidebar-foreground: #f5f5f5;
+  --sidebar-foreground-secondary: #a3a3a3;
+  --sidebar-primary: #f5f5f5;
+  --sidebar-primary-foreground: #737373;
+  --sidebar-accent: var(--accent-color);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   GLASS EFFECT UTILITIES
+   ============================================ */
+.glass-panel {
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+}
+
+.glass-panel-subtle {
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+}
+
+/* Reduce transparency support */
+[data-reduce-transparency="true"] .glass-panel,
+[data-reduce-transparency="true"] .glass-panel-subtle {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-panel,
+  .glass-panel-subtle {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
+/* ============================================
+   BASE STYLES
+   ============================================ */
 @layer base {
   * {
     @apply border-border;
   }
 
   body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* Ensure portals (dialogs, dropdowns) inherit theme */
+  [data-radix-popper-content-wrapper],
+  [data-radix-portal] {
     @apply text-foreground;
+  }
+}
+
+/* ============================================
+   MACOS-STYLE SCROLLBARS
+   ============================================ */
+/* Custom scrollbar styling for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Thin scrollbar variant */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  border: 1px solid transparent;
+}
+
+/* Auto-hide scrollbar on hover */
+.scrollbar-auto-hide {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.scrollbar-auto-hide:hover {
+  scrollbar-color: var(--scrollbar) transparent;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+}
+
+/* ============================================
+   DARK MODE MEDIA QUERY FALLBACK
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.amoled):not(.glass-light):not(.glass-dark) {
+    /* Default accent color - can be overridden by ThemeProvider */
+    --accent-color: #006fff;
+    
+    --background: rgba(26, 26, 26, 0.8);
+    --background-solid: #1a1a1a;
+    --foreground: #f5f5f5;
+    --card: #262626;
+    --card-foreground: #e5e5e5;
+    --tag: #2a2a2a;
+    --shortcut-label: rgba(80, 80, 80, 0.6);
+    --shortcut-label-text: #a3a3a3;
+    --shortcut-label-hover: rgba(100, 100, 100, 0.8);
+    --shortcut-label-hover-text: #e5e5e5;
+    --scrollbar: #404040;
+    --switch-checked: var(--accent-color);
+    --switch-unchecked: #404040;
+    --popover: #262626;
+    --popover-foreground: #f5f5f5;
+    --primary: #f5f5f5;
+    --primary-foreground: #1a1a1a;
+    --secondary: rgba(38, 38, 38, 0.8);
+    --secondary-solid: #262626;
+    --secondary-foreground: #a3a3a3;
+    --muted: #262626;
+    --muted-foreground: #a3a3a3;
+    --accent: rgba(255, 255, 255, 0.08);
+    --accent-foreground: #f5f5f5;
+    --accent-hover: rgba(255, 255, 255, 0.05);
+    
+    /* Selection - DISTINCT visible colors for selected items */
+    --selection: #374151;
+    --selection-foreground: #f9fafb;
+    --selection-hover: #4b5563;
+    
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: rgba(255, 255, 255, 0.1);
+    --input: #404040;
+    --ring: var(--accent-color);
+    --search-highlight: #22d3ee;
+    --checked: #22c55e;
+    --checkbox: #525252;
+    --status-bar-green: #22c55e;
+    --status-bar-green-button: rgba(34, 197, 94, 0.2);
+    --status-bar-highlight-green-start: rgba(34, 197, 94, 0.05);
+    --status-bar-highlight-green-middle: rgba(34, 197, 94, 0.2);
+    --preview-background: #1a1a1a;
+    --preview-border: rgba(255, 255, 255, 0.08);
+    --preview-info-border: rgba(255, 255, 255, 0.05);
+    --preview-info-label: #737373;
+    --toolbar-background: #1a1a1a;
+    --toolbar-button: #737373;
+    --toolbar-button-active: #f5f5f5;
+    --toolbar-button-selected: var(--accent-color);
+    --actions-background: #1a1a1a;
+    --actions-selection: rgba(255, 255, 255, 0.08);
+    --actions-danger: #ef4444;
+    --settings: #1a1a1a;
+    --settings-border: #2a2a2a;
+    --settings-selection: var(--accent-color);
+    --settings-sidebar-selection: #262626;
+    --settings-sidebar-label: #262626;
+    --settings-title-license-trial-label: #a3a3a3;
+    --settings-title-license-activated-label: #22c55e;
+    --settings-table-row: #1f1f1f;
+    --settings-table-row2: #262626;
+    --settings-input-placeholder: #525252;
+    --primary-button-background: var(--accent-color);
+    --primary-button-background-hover: color-mix(in srgb, var(--accent-color) 85%, black);
+    --primary-button-text: #ffffff;
+    --shortcut-input: #2a2a2a;
+    --secondary-button-background: #2a2a2a;
+    --secondary-button-background-hover: #333333;
+    --secondary-button-text: #f5f5f5;
+    --secondary-button-border: #333333;
+    --secondary-button-border-hover: #404040;
+    --skeleton-background: #1a1a1a;
+    --skeleton-foreground: #2a2a2a;
+    --skeleton-text: #a3a3a3;
+    --dialog-shadow: rgba(0, 0, 0, 0.5);
+    --dialog-border: #2a2a2a;
+    --dialog-overlay: rgba(0, 0, 0, 0.6);
+    --dialog-text: #a3a3a3;
+    --sidebar-background: #1a1a1a;
+    --sidebar-background-secondary: rgba(38, 38, 38, 0.5);
+    --sidebar-foreground: #f5f5f5;
+    --sidebar-foreground-secondary: #a3a3a3;
+    --sidebar-primary: #f5f5f5;
+    --sidebar-primary-foreground: #737373;
+    --sidebar-accent: var(--accent-color);
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #262626;
+    --sidebar-ring: #333333;
   }
 }
