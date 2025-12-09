@@ -104,6 +104,10 @@
         "copy": "Copiar para a área de transferência",
         "paste": "Colar no app ativo"
       },
+      "itemsToDelete": {
+        "all": "Todos os itens",
+        "images": "Apenas imagens"
+      },
       "copyAndMerge": {
         "title": "Copiar e mesclar",
         "description": "Pressione <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd> para adicionar o texto atualmente selecionado ao texto previamente copiado no histórico da área de transferência."

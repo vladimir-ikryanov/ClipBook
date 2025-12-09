@@ -104,6 +104,10 @@
         "copy": "Copy to clipboard",
         "paste": "Paste to active app"
       },
+      "itemsToDelete": {
+        "all": "All items",
+        "images": "Images only"
+      },
       "copyAndMerge": {
         "title": "Copy and merge",
         "description": "Press <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd> to append the currently selected text to the previously copied text in the clipboard history."

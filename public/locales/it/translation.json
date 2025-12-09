@@ -104,6 +104,10 @@
         "copy": "Copia negli appunti",
         "paste": "Incolla nell'app attiva"
       },
+      "itemsToDelete": {
+        "all": "Tutti gli elementi",
+        "images": "Solo immagini"
+      },
       "copyAndMerge": {
         "title": "Copia e unisci",
         "description": "Premi <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd> per aggiungere il testo attualmente selezionato al testo precedentemente copiato nella cronologia degli appunti."

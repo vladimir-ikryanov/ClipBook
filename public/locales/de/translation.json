@@ -104,6 +104,10 @@
         "copy": "In Zwischenablage kopieren",
         "paste": "In aktive App einfügen"
       },
+      "itemsToDelete": {
+        "all": "Alle Elemente",
+        "images": "Nur Bilder"
+      },
       "copyAndMerge": {
         "title": "Kopieren und zusammenführen",
         "description": "Drücken Sie <kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd>, um den aktuell ausgewählten Text an den zuvor kopierten Text im Zwischenablageverlauf anzuhängen."
