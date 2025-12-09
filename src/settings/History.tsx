@@ -12,8 +12,13 @@ import {
   prefGetCopyAndMergeSeparator,
   prefGetCopyToClipboardAfterMerge,
   prefGetKeepFavoritesOnClearHistory,
-  prefGetWarnOnClearHistory, prefIsClearHistoryOnMacRebootManaged, prefIsClearHistoryOnQuitManaged,
-  prefIsKeepFavoritesOnClearHistoryManaged, prefIsShowPreviewForLinksManaged,
+  prefShouldPinFavoritesOnTop,
+  prefGetWarnOnClearHistory, 
+  prefIsClearHistoryOnMacRebootManaged, 
+  prefIsClearHistoryOnQuitManaged,
+  prefIsKeepFavoritesOnClearHistoryManaged, 
+  prefIsPinFavoritesOnTopManaged, 
+  prefIsShowPreviewForLinksManaged,
   prefIsWarnOnClearHistoryManaged,
   prefSetClearHistoryOnMacReboot,
   prefSetClearHistoryOnQuit,
@@ -24,6 +29,7 @@ import {
   prefSetCopyToClipboardAfterMerge,
   prefSetKeepFavoritesOnClearHistory,
   prefSetPasteOnClick,
+  prefSetPinFavoritesOnTop,
   prefSetShowPreviewForLinks,
   prefSetTreatDigitNumbersAsColor,
   prefSetUpdateHistoryAfterAction,
@@ -69,6 +75,7 @@ export default function History() {
 
   const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory())
   const [keepFavoritesOnClearHistory, setKeepFavoritesOnClearHistory] = useState(prefGetKeepFavoritesOnClearHistory())
+  const [pinFavoritesOnTop, setPinFavoritesOnTop] = useState(prefShouldPinFavoritesOnTop())
   const [copyAndMergeEnabled, setCopyAndMergeEnabled] = useState(prefGetCopyAndMergeEnabled())
   const [copyToClipboardAfterMerge, setCopyToClipboardAfterMerge] = useState(prefGetCopyToClipboardAfterMerge())
   const [copyAndMergeSeparator, setCopyAndMergeSeparator] = useState(prefGetCopyAndMergeSeparator())
@@ -101,6 +108,11 @@ export default function History() {
   function handleKeepFavoritesOnClearHistoryChange(keepFavoritesOnClearHistory: boolean) {
     setKeepFavoritesOnClearHistory(keepFavoritesOnClearHistory)
     prefSetKeepFavoritesOnClearHistory(keepFavoritesOnClearHistory)
+  }
+
+  function handlePinFavoritesOnTopChange(pinFavoritesOnTop: boolean) {
+    setPinFavoritesOnTop(pinFavoritesOnTop)
+    prefSetPinFavoritesOnTop(pinFavoritesOnTop)
   }
 
   function handleCopyAndMergeChange(copyAndMerge: boolean) {
@@ -175,6 +187,18 @@ export default function History() {
               </Label>
               <Switch id="updateHistoryAfterAction" checked={updateHistoryAfterAction}
                       onCheckedChange={handleUpdateHistoryAfterActionChange}/>
+            </div>
+
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label htmlFor="pinFavoritesOnTop" className="flex flex-col text-base">
+                <span className="">{t('settings.history.pinFavoritesOnTop.title')}</span>
+                <span className="text-neutral-500 font-normal text-sm">
+                  {t('settings.history.pinFavoritesOnTop.description')}
+                </span>
+              </Label>
+              <Switch id="pinFavoritesOnTop" checked={pinFavoritesOnTop}
+                      onCheckedChange={handlePinFavoritesOnTopChange}
+                      disabled={prefIsPinFavoritesOnTopManaged()}/>
             </div>
 
             <hr/>

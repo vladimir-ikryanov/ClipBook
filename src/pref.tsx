@@ -27,6 +27,10 @@ declare const saveKeepFavoritesOnClearHistory: (keep: boolean) => void;
 declare const shouldKeepFavoritesOnClearHistory: () => boolean;
 declare const isKeepFavoritesOnClearHistoryManaged: () => boolean;
 
+declare const savePinFavoritesOnTop: (pin: boolean) => void;
+declare const shouldPinFavoritesOnTop: () => boolean;
+declare const isPinFavoritesOnTopManaged: () => boolean;
+
 declare const saveIgnoreTransientContent: (ignore: boolean) => void;
 declare const saveIgnoreConfidentialContent: (ignore: boolean) => void;
 declare const isIgnoreTransientContentManaged: () => boolean;
@@ -281,6 +285,18 @@ export function prefSetKeepFavoritesOnClearHistory(keep: boolean) {
 
 export function prefIsKeepFavoritesOnClearHistoryManaged() {
   return isKeepFavoritesOnClearHistoryManaged()
+}
+
+export function prefShouldPinFavoritesOnTop() {
+  return shouldPinFavoritesOnTop()
+}
+
+export function prefSetPinFavoritesOnTop(pin: boolean) {
+  savePinFavoritesOnTop(pin)
+}
+
+export function prefIsPinFavoritesOnTopManaged() {
+  return isPinFavoritesOnTopManaged()
 }
 
 export function prefGetIgnoreTransientContent() {

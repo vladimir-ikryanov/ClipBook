@@ -124,6 +124,10 @@ class AppSettingsMac : public AppSettings {
 
   bool allowCheckForUpdates() override;
 
+  void savePinFavoritesOnTop(bool pin) override;
+  bool shouldPinFavoritesOnTop() override;
+  bool isPinFavoritesOnTopManaged() override;
+
   // Shortcuts.
 
   void saveOpenAppShortcut(std::string shortcut) override;

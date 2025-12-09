@@ -1076,6 +1076,16 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
     return app_->version();
   });
 
+  window->putProperty("savePinFavoritesOnTop", [this](bool pin) -> void {
+    settings_->savePinFavoritesOnTop(pin);
+  });
+  window->putProperty("shouldPinFavoritesOnTop", [this]() -> bool {
+    return settings_->shouldPinFavoritesOnTop();
+  });
+  window->putProperty("isPinFavoritesOnTopManaged", [this]() -> bool {
+    return settings_->isPinFavoritesOnTopManaged();
+  });
+
   // Application shortcuts.
   window->putProperty("saveOpenAppShortcut", [this](std::string shortcut) -> void {
     settings_->saveOpenAppShortcut(shortcut);

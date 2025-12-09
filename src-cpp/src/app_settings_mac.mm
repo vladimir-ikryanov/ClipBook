@@ -40,6 +40,7 @@ NSString *prefPlaySoundOnCopy = @"play_sound_on_copy";
 NSString *prefAlwaysDisplay = @"always_display";
 NSString *prefCopyOnDoubleClick = @"copy_on_double_click";
 NSString *prefCopyOnNumberAction = @"copy_on_number_action";
+NSString *prefPinFavoritesOnTop = @"pin_favorites_on_top";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
@@ -1294,4 +1295,22 @@ bool AppSettingsMac::allowCheckForUpdates() {
 
 bool AppSettingsMac::isDeviceManaged() {
   return ::isDeviceManaged();
+}
+
+void AppSettingsMac::savePinFavoritesOnTop(bool pin) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:pin forKey:prefPinFavoritesOnTop];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldPinFavoritesOnTop() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefPinFavoritesOnTop] != nil) {
+    return [defaults boolForKey:prefPinFavoritesOnTop];
+  }
+  return true;
+}
+
+bool AppSettingsMac::isPinFavoritesOnTopManaged() {
+  return isManaged(prefPinFavoritesOnTop);
 }

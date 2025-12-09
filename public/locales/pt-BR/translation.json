@@ -134,6 +134,10 @@
         "title": "Manter favoritos ao limpar todo o histórico",
         "description": "Não remover itens marcados como favoritos e taggados ao limpar todo o histórico da área de transferência."
       },
+      "pinFavoritesOnTop": {
+        "title": "Fixar favoritos no topo",
+        "description": "Mostrar sempre itens favoritos no topo da lista do histórico."
+      },
       "clearHistoryOnQuit": {
         "title": "Limpar todo o histórico ao sair",
         "description": "Limpar todo o histórico da área de transferência ao encerrar o ClipBook."

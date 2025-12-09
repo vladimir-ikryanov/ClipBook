@@ -10,7 +10,7 @@ import {
   getImageText, getRTF,
   updateClip
 } from "@/db";
-import {prefGetClearHistoryOnMacReboot, prefGetLanguage} from "@/pref";
+import {prefGetClearHistoryOnMacReboot, prefGetLanguage, prefShouldPinFavoritesOnTop} from "@/pref";
 import {getClipType} from "@/lib/utils";
 import {loadTags, Tag} from "@/tags";
 import {emitter} from "@/actions";
@@ -123,6 +123,7 @@ let sortType = SortHistoryType.TimeOfLastCopy;
 let sortOrderReverse = false;
 let sourceApps: AppInfo[] = [];
 let pasteNextItemIndex = -1;
+let pinFavoritesOnTop = true;
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -209,6 +210,7 @@ function loadSettings() {
   if (localStorage.getItem("sortOrderReverse")) {
     sortOrderReverse = localStorage.getItem("sortOrderReverse") === "true"
   }
+  pinFavoritesOnTop = prefShouldPinFavoritesOnTop()
 }
 
 function loadSourceApps(history: Clip[]) {
@@ -476,16 +478,18 @@ export function sortHistory(type: SortHistoryType, history: Clip[]) {
       history.sort((a, b) => compareItemsSize(a, b))
       break
   }
-  // Move pinned items to the top.
-  history.sort((a, b) => {
-    if (a.favorite && !b.favorite) {
-      return -1
-    }
-    if (!a.favorite && b.favorite) {
-      return 1
-    }
-    return 0
-  })
+  // Move pinned items to the top if needed.
+  if (pinFavoritesOnTop) {
+    history.sort((a, b) => {
+      if (a.favorite && !b.favorite) {
+        return -1
+      }
+      if (!a.favorite && b.favorite) {
+        return 1
+      }
+      return 0
+    })
+  }
   // Reverse order if needed.
   if (sortOrderReverse) {
     history.reverse()
@@ -849,4 +853,10 @@ export function getNextItemIndexForPaste(): number {
 
 export function resetPasteNextItemIndex() {
   pasteNextItemIndex = -1
+}
+
+export function setPinFavoritesOnTop(pin: boolean): boolean {
+  let oldValue = pinFavoritesOnTop
+  pinFavoritesOnTop = pin
+  return oldValue !== pin
 }

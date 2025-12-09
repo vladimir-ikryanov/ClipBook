@@ -134,6 +134,10 @@
         "title": "Keep favorites when clearing entire history",
         "description": "Do not remove favorite and tagged items when clearing entire clipboard history."
       },
+      "pinFavoritesOnTop": {
+        "title": "Pin favorites on top",
+        "description": "Always show favorite items at the top of the history list."
+      },
       "clearHistoryOnQuit": {
         "title": "Clear entire history on quit",
         "description": "Clear the entire clipboard history when ClipBook is terminated."

@@ -46,7 +46,8 @@ import {
   fileExists,
   getNextItemIndexForPaste, 
   resetPasteNextItemIndex, 
-  requestHistoryUpdate
+  requestHistoryUpdate,
+  setPinFavoritesOnTop
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
@@ -71,12 +72,14 @@ import {
   prefGetOpenSettingsShortcut,
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetPasteSelectedObjectToActiveAppShortcut,
+  prefShouldPinFavoritesOnTop,
   prefGetQuickLookShortcut,
   prefGetQuickPasteModifier,
   prefGetQuickPasteShortcuts,
   prefGetRemoveEmptyLinesShortcut,
   prefGetRenameItemShortcut,
-  prefGetSaveImageAsFileShortcut, prefGetSelectAllShortcut,
+  prefGetSaveImageAsFileShortcut,
+  prefGetSelectAllShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
   prefGetSentenceCaseShortcut,
@@ -307,12 +310,23 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function updateHistoryItemsIfNecessary() {
-    let newValue = prefShouldTreatDigitNumbersAsColor()
-    if (treatDigitNumbersAsColor !== newValue) {
+    let updateHistory = false;
+    // Check if the treat digit numbers as color option has changed.
+    let shouldTreatDigitNumbersAsColor = prefShouldTreatDigitNumbersAsColor()
+    if (treatDigitNumbersAsColor !== shouldTreatDigitNumbersAsColor) {
       if (await updateHistoryItemTypes()) {
-        setHistory([...getHistoryItems()])
+        updateHistory = true;
       }
-      treatDigitNumbersAsColor = newValue
+      treatDigitNumbersAsColor = shouldTreatDigitNumbersAsColor
+    }
+    // Check if the pin favorites on top option has changed.
+    if (setPinFavoritesOnTop(prefShouldPinFavoritesOnTop())) {
+      requestHistoryUpdate()
+      updateHistory = true;
+    }
+    // Update the history if necessary.
+    if (updateHistory) {
+      setHistory([...getHistoryItems()])
     }
   }
 

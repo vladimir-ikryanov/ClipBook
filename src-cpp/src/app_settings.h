@@ -134,6 +134,10 @@ class AppSettings {
 
   virtual bool allowCheckForUpdates() = 0;
 
+  virtual void savePinFavoritesOnTop(bool pin) = 0;
+  virtual bool shouldPinFavoritesOnTop() = 0;
+  virtual bool isPinFavoritesOnTopManaged() = 0;
+
   // Shortcuts.
 
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;
