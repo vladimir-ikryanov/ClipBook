@@ -149,6 +149,9 @@ public:
   virtual void saveRetentionPeriod(int period) = 0;
   virtual int getRetentionPeriod() = 0;
 
+  virtual void saveItemsToDeleteStrategy(std::string strategy) = 0;
+  virtual std::string getItemsToDeleteStrategy() = 0;
+
   // Shortcuts.
 
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;

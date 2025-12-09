@@ -10,7 +10,7 @@ import {
   getImageText, getRTF,
   updateClip
 } from "@/db";
-import {prefGetClearHistoryOnMacReboot, prefGetLanguage, prefShouldPinFavoritesOnTop} from "@/pref";
+import {ItemsToDeleteStrategy, prefGetClearHistoryOnMacReboot, prefGetItemsToDeleteStrategy, prefGetLanguage, prefShouldPinFavoritesOnTop} from "@/pref";
 import {getClipType} from "@/lib/utils";
 import {loadTags, Tag} from "@/tags";
 import {emitter} from "@/actions";
@@ -464,10 +464,15 @@ export async function clear(keepFavorites: boolean): Promise<Clip[]> {
 }
 
 export async function clearOlderThan(days: number): Promise<Clip[]> {
+  let deleteOnlyImages = prefGetItemsToDeleteStrategy() === ItemsToDeleteStrategy.IMAGES
   const itemIdsToDelete: number[] = []
   for (const clip of history) {
     // Skip favorite and tagged items.
     if (clip.favorite || (clip.tags && clip.tags.length > 0)) {
+      continue
+    }
+    // Skip items that are not images if we are deleting only images.
+    if (deleteOnlyImages && clip.type !== ClipType.Image) {
       continue
     }
     // Delete the item if it hasn't been touched in the last N days.

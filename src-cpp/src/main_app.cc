@@ -1039,6 +1039,13 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
     return settings_->isOpenWindowStrategyManaged();
   });
 
+  window->putProperty("saveItemsToDeleteStrategy", [this](std::string strategy) -> void {
+    settings_->saveItemsToDeleteStrategy(std::move(strategy));
+  });
+  window->putProperty("getItemsToDeleteStrategy", [this]() -> std::string {
+    return settings_->getItemsToDeleteStrategy();
+  });
+
   window->putProperty("setPlaySoundOnCopy", [this](bool play) -> void {
     settings_->savePlaySoundOnCopy(play);
   });

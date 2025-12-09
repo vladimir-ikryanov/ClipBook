@@ -131,6 +131,9 @@ class AppSettingsMac : public AppSettings {
   void saveRetentionPeriod(int period) override;
   int getRetentionPeriod() override;
 
+  void saveItemsToDeleteStrategy(std::string strategy) override;
+  std::string getItemsToDeleteStrategy() override;
+
   // Shortcuts.
 
   void saveOpenAppShortcut(std::string shortcut) override;

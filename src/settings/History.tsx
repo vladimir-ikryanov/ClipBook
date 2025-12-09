@@ -42,6 +42,9 @@ import {
   prefShouldUpdateHistoryAfterAction,
   prefGetRetentionPeriod,
   prefSetRetentionPeriod,
+  ItemsToDeleteStrategy,
+  prefGetItemsToDeleteStrategy,
+  prefSetItemsToDeleteStrategy,
 } from "@/pref";
 import {
   Select,
@@ -76,6 +79,11 @@ export default function History() {
     [NumberActionStrategy.PASTE]: t('settings.history.numberAction.paste'),
   }
 
+  const itemsToDeleteStrategyLabels = {
+    [ItemsToDeleteStrategy.ALL]: t('settings.history.itemsToDelete.all'),
+    [ItemsToDeleteStrategy.IMAGES]: t('settings.history.itemsToDelete.images'),
+  }
+
   const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory())
   const [keepFavoritesOnClearHistory, setKeepFavoritesOnClearHistory] = useState(prefGetKeepFavoritesOnClearHistory())
   const [pinFavoritesOnTop, setPinFavoritesOnTop] = useState(prefShouldPinFavoritesOnTop())
@@ -90,6 +98,7 @@ export default function History() {
   const [pasteOnClick, setPasteOnClick] = useState(prefShouldPasteOnClick())
   const [doubleClickStrategy, setDoubleClickStrategy] = useState(prefShouldCopyOnDoubleClick() ? DoubleClickStrategy.COPY : DoubleClickStrategy.PASTE)
   const [numberActionStrategy, setNumberActionStrategy] = useState(prefShouldCopyOnNumberAction() ? NumberActionStrategy.COPY : NumberActionStrategy.PASTE)
+  const [itemsToDeleteStrategy, setItemsToDeleteStrategy] = useState(prefGetItemsToDeleteStrategy())
   const [retentionPeriod, setRetentionPeriod] = useState(prefGetRetentionPeriod())
 
   useEffect(() => {
@@ -172,6 +181,11 @@ export default function History() {
   function handleNumberActionStrategyChange(numberActionStrategy: string) {
     setNumberActionStrategy(numberActionStrategy as NumberActionStrategy)
     prefSetCopyOnNumberAction(numberActionStrategy === NumberActionStrategy.COPY)
+  }
+
+  function handleItemsToDeleteStrategyChange(itemsToDeleteStrategy: string) {
+    setItemsToDeleteStrategy(itemsToDeleteStrategy as ItemsToDeleteStrategy)
+    prefSetItemsToDeleteStrategy(itemsToDeleteStrategy as ItemsToDeleteStrategy)
   }
 
   function handleRetentionPeriodChange(retentionPeriod: number) {
@@ -402,6 +416,46 @@ export default function History() {
 
             <hr/>
 
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between space-x-10 pb-1">
+                <Label className="flex flex-col text-base">
+                  <span className="">{t('settings.history.retentionPeriod.title')}</span>
+                  <span className="text-neutral-500 font-normal text-sm">
+                    {t('settings.history.retentionPeriod.description')}
+                  </span>
+                </Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="dropdown" className="px-4 outline-none">
+                      {itemsToDeleteStrategyLabels[itemsToDeleteStrategy]}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="p-1.5 bg-actions-background" align="end">
+                    <DropdownMenuRadioGroup value={itemsToDeleteStrategy}
+                      onValueChange={handleItemsToDeleteStrategyChange}>
+                      <DropdownMenuRadioItem value={ItemsToDeleteStrategy.ALL}
+                        className="py-2 pr-4 pl-10">
+                        <div className="flex flex-col">
+                          <span>{itemsToDeleteStrategyLabels[ItemsToDeleteStrategy.ALL]}</span>
+                        </div>
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value={ItemsToDeleteStrategy.IMAGES}
+                        className="py-2 pr-4 pl-10">
+                        <div className="flex flex-col">
+                          <span>{itemsToDeleteStrategyLabels[ItemsToDeleteStrategy.IMAGES]}</span>
+                        </div>
+                      </DropdownMenuRadioItem>
+
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <div className="bg-settings-tableRow rounded-lg p-4 mt-4">
+                <RetentionPeriodSlider value={retentionPeriod} onValueChange={handleRetentionPeriodChange} />
+              </div>
+            </div>
+
             <div className="flex items-center justify-between space-x-20 py-1">
               <Label htmlFor="clearHistoryOnQuit" className="flex flex-col text-base">
                 <span className="">{t('settings.history.clearHistoryOnQuit.title')}</span>
@@ -423,20 +477,6 @@ export default function History() {
               <Switch id="clearHistoryOnMacReboot" checked={clearHistoryOnMacReboot}
                       onCheckedChange={handleClearHistoryOnMacRebootChange}
                       disabled={prefIsClearHistoryOnMacRebootManaged()}/>
-            </div>
-
-            <hr/>
-
-            <div className="flex flex-col">
-              <Label className="flex flex-col text-base">
-                <span className="">{t('settings.history.retentionPeriod.title')}</span>
-                <span className="text-neutral-500 font-normal text-sm">
-                  {t('settings.history.retentionPeriod.description')}
-                </span>
-              </Label>
-              <div className="bg-settings-tableRow rounded-lg p-4 mt-4">
-                <RetentionPeriodSlider value={retentionPeriod} onValueChange={handleRetentionPeriodChange} />
-              </div>
             </div>
           </div>
         </div>

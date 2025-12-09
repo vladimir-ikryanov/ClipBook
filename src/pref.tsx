@@ -106,6 +106,9 @@ declare const isCopyOnNumberActionManaged: () => boolean;
 declare const saveRetentionPeriod: (period: number) => void;
 declare const getRetentionPeriod: () => number;
 
+declare const saveItemsToDeleteStrategy: (strategy: string) => void;
+declare const getItemsToDeleteStrategy: () => string;
+
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
 declare const saveCloseAppShortcut: (shortcut: string) => void;
@@ -203,6 +206,11 @@ export enum OpenWindowStrategy {
 export enum DoubleClickStrategy {
   COPY = "copy",
   PASTE = "paste",
+}
+
+export enum ItemsToDeleteStrategy {
+  ALL = "all",
+  IMAGES = "images",
 }
 
 export enum NumberActionStrategy {
@@ -867,4 +875,21 @@ export function prefGetRetentionPeriod() {
 
 export function prefSetRetentionPeriod(period: number) {
   saveRetentionPeriod(period)
+}
+
+export function prefGetItemsToDeleteStrategy(): ItemsToDeleteStrategy {
+  let strategy = getItemsToDeleteStrategy()
+  if (strategy === null || strategy == "") {
+    return ItemsToDeleteStrategy.ALL
+  }
+  if (strategy === ItemsToDeleteStrategy.ALL) {
+    return ItemsToDeleteStrategy.ALL
+  } else if (strategy === ItemsToDeleteStrategy.IMAGES) {
+    return ItemsToDeleteStrategy.IMAGES
+  }
+  return ItemsToDeleteStrategy.ALL
+}
+
+export function prefSetItemsToDeleteStrategy(strategy: ItemsToDeleteStrategy) {
+  saveItemsToDeleteStrategy(strategy.toString())
 }

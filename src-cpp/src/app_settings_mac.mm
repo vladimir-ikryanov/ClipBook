@@ -44,6 +44,7 @@ NSString *prefCopyOnDoubleClick = @"copy_on_double_click";
 NSString *prefCopyOnNumberAction = @"copy_on_number_action";
 NSString *prefPinFavoritesOnTop = @"pin_favorites_on_top";
 NSString *prefRetentionPeriod = @"retention_period_index";
+NSString *prefItemsToDeleteStrategy = @"items_to_delete_strategy";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
@@ -139,6 +140,7 @@ bool prefReadBoolValue(NSString *key, bool defaultValue) {
 AppSettingsMac::AppSettingsMac() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults registerDefaults:@{prefRetentionPeriod: [NSNumber numberWithInt:kRetentionPeriods.size() - 1]}];
+  [defaults registerDefaults:@{prefItemsToDeleteStrategy: @"all"}];
 }
 
 void AppSettingsMac::saveLastSystemBootTime(long time) {
@@ -1333,4 +1335,19 @@ int AppSettingsMac::getRetentionPeriod() {
     return [defaults integerForKey:prefRetentionPeriod];
   }
   return kRetentionPeriods.size() - 1;
+}
+
+void AppSettingsMac::saveItemsToDeleteStrategy(std::string strategy) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:strategy.c_str()] forKey:prefItemsToDeleteStrategy];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getItemsToDeleteStrategy() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *strategy = [defaults objectForKey:prefItemsToDeleteStrategy];
+  if (strategy != nil) {
+    return {[strategy UTF8String]};
+  }
+  return "all";
 }
