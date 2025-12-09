@@ -40,6 +40,8 @@ import {
   prefShouldShowPreviewForLinks,
   prefShouldTreatDigitNumbersAsColor,
   prefShouldUpdateHistoryAfterAction,
+  prefGetRetentionPeriod,
+  prefSetRetentionPeriod,
 } from "@/pref";
 import {
   Select,
@@ -57,6 +59,7 @@ import {
 import {ChevronsUpDown} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import { Trans, useTranslation } from 'react-i18next';
+import { RETENTION_STEPS, RetentionPeriodSlider } from "./RetentionPeriodSlider";
 
 declare const closeSettingsWindow: () => void;
 
@@ -87,6 +90,7 @@ export default function History() {
   const [pasteOnClick, setPasteOnClick] = useState(prefShouldPasteOnClick())
   const [doubleClickStrategy, setDoubleClickStrategy] = useState(prefShouldCopyOnDoubleClick() ? DoubleClickStrategy.COPY : DoubleClickStrategy.PASTE)
   const [numberActionStrategy, setNumberActionStrategy] = useState(prefShouldCopyOnNumberAction() ? NumberActionStrategy.COPY : NumberActionStrategy.PASTE)
+  const [retentionPeriod, setRetentionPeriod] = useState(prefGetRetentionPeriod())
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -168,6 +172,11 @@ export default function History() {
   function handleNumberActionStrategyChange(numberActionStrategy: string) {
     setNumberActionStrategy(numberActionStrategy as NumberActionStrategy)
     prefSetCopyOnNumberAction(numberActionStrategy === NumberActionStrategy.COPY)
+  }
+
+  function handleRetentionPeriodChange(retentionPeriod: number) {
+    setRetentionPeriod(retentionPeriod)
+    prefSetRetentionPeriod(retentionPeriod)
   }
 
   return (
@@ -414,6 +423,20 @@ export default function History() {
               <Switch id="clearHistoryOnMacReboot" checked={clearHistoryOnMacReboot}
                       onCheckedChange={handleClearHistoryOnMacRebootChange}
                       disabled={prefIsClearHistoryOnMacRebootManaged()}/>
+            </div>
+
+            <hr/>
+
+            <div className="flex flex-col">
+              <Label className="flex flex-col text-base">
+                <span className="">{t('settings.history.retentionPeriod.title')}</span>
+                <span className="text-neutral-500 font-normal text-sm">
+                  {t('settings.history.retentionPeriod.description')}
+                </span>
+              </Label>
+              <div className="bg-settings-tableRow rounded-lg p-4 mt-4">
+                <RetentionPeriodSlider value={retentionPeriod} onValueChange={handleRetentionPeriodChange} />
+              </div>
             </div>
           </div>
         </div>

@@ -94,6 +94,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void fetchLinkPreviewDetails(const std::string &url, const std::shared_ptr<mobrowser::JsObject> &callback);
   void previewLink(const std::string &url);
   void saveImageAsFile(const std::string &imageFileName, int imageWidth, int imageHeight);
+  void checkRetentionPeriod();
 
   void onLanguageChanged();
   std::string i18n(const std::string &key);

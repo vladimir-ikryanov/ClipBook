@@ -463,6 +463,26 @@ export async function clear(keepFavorites: boolean): Promise<Clip[]> {
   return getHistoryItems()
 }
 
+export async function clearOlderThan(days: number): Promise<Clip[]> {
+  const itemIdsToDelete: number[] = []
+  for (const clip of history) {
+    // Skip favorite and tagged items.
+    if (clip.favorite || (clip.tags && clip.tags.length > 0)) {
+      continue
+    }
+    // Delete the item if it hasn't been touched in the last N days.
+    if (clip.lastTimeCopy.getTime() < Date.now() - (days * 24 * 60 * 60 * 1000)) {
+      itemIdsToDelete.push(clip.id!)
+    }
+  }
+  for (const clipId of itemIdsToDelete) {
+    await deleteClip(clipId)
+  }
+  history = history.filter(clip => !itemIdsToDelete.includes(clip.id!))
+  requestHistoryUpdate()
+  return getHistoryItems()
+}
+
 export function sortHistory(type: SortHistoryType, history: Clip[]) {
   switch (type) {
     case SortHistoryType.TimeOfFirstCopy:

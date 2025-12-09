@@ -47,7 +47,8 @@ import {
   getNextItemIndexForPaste, 
   resetPasteNextItemIndex, 
   requestHistoryUpdate,
-  setPinFavoritesOnTop
+  setPinFavoritesOnTop,
+  clearOlderThan
 } from "@/data";
 import {isQuickPasteShortcut, isShortcutMatch} from "@/lib/shortcuts";
 import {
@@ -287,6 +288,22 @@ export default function HistoryPane(props: HistoryPaneProps) {
   async function clearHistory() {
     let keepFavorites = prefGetKeepFavoritesOnClearHistory()
     let items = await clear(keepFavorites)
+    setHistory(items)
+    resetPasteNextItemIndex()
+    // If the history is not empty, update the preview text to the new active item.
+    if (items.length > 0) {
+      let activeHistoryItemIndex = getFirstSelectedHistoryItemIndex()
+      if (activeHistoryItemIndex >= items.length) {
+        activeHistoryItemIndex = 0
+        setSelectedHistoryItemIndex(activeHistoryItemIndex)
+        setSelectedItemIndices(getSelectedHistoryItemIndices())
+        scrollToLastSelectedItem()
+      }
+    }
+  }
+
+  async function clearHistoryOlderThan(days: number) {
+    let items = await clearOlderThan(days)
     setHistory(items)
     resetPasteNextItemIndex()
     // If the history is not empty, update the preview text to the new active item.
@@ -1584,6 +1601,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   (window as any).mergeClipboardData = mergeClipboardData;
   (window as any).copyToClipboardAfterMerge = copyToClipboardAfterMerge;
   (window as any).clearHistory = clearHistory;
+  (window as any).clearHistoryOlderThan = clearHistoryOlderThan;
   (window as any).activateApp = activateApp;
   (window as any).pasteNextItemToActiveApp = pasteNextItemToActiveApp;
 

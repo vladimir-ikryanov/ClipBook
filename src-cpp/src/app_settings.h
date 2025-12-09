@@ -2,12 +2,17 @@
 #define CLIPBOOK_APP_SETTINGS_H_
 
 #include <memory>
+#include <vector>
 
 #include "mobrowser.hpp"
 
 struct AppInfo {
   std::string path;
 };
+
+static const std::vector<int> kRetentionPeriods = {
+    1,  2,   3,   4,   5,   6,   7,   14,  21,  30,  60,
+    90, 120, 150, 180, 210, 240, 270, 300, 330, 365, -1};
 
 static const std::string kEnglishUS = "en";
 static const std::string kEnglishGB = "en-GB";
@@ -16,7 +21,7 @@ static const std::string kItalian = "it";
 static const std::string kPortugueseBR = "pt-BR";
 
 class AppSettings {
- public:
+public:
   static std::shared_ptr<AppSettings> create();
 
   virtual bool isDeviceManaged() = 0;
@@ -36,8 +41,11 @@ class AppSettings {
   virtual void saveWindowBounds(mobrowser::Rect window_bounds) = 0;
   virtual mobrowser::Rect getWindowBounds() = 0;
 
-  virtual void saveWindowBoundsForScreen(int screen_id, mobrowser::Rect screen_bounds, mobrowser::Rect window_bounds) = 0;
-  virtual mobrowser::Rect getWindowBoundsForScreen(int screen_id, mobrowser::Rect screen_bounds) = 0;
+  virtual void saveWindowBoundsForScreen(int screen_id,
+                                         mobrowser::Rect screen_bounds,
+                                         mobrowser::Rect window_bounds) = 0;
+  virtual mobrowser::Rect
+  getWindowBoundsForScreen(int screen_id, mobrowser::Rect screen_bounds) = 0;
 
   virtual void saveIgnoreConfidentialContent(bool ignore) = 0;
   virtual bool shouldIgnoreConfidentialContent() = 0;
@@ -138,6 +146,9 @@ class AppSettings {
   virtual bool shouldPinFavoritesOnTop() = 0;
   virtual bool isPinFavoritesOnTopManaged() = 0;
 
+  virtual void saveRetentionPeriod(int period) = 0;
+  virtual int getRetentionPeriod() = 0;
+
   // Shortcuts.
 
   virtual void saveOpenAppShortcut(std::string shortcut) = 0;
@@ -158,10 +169,12 @@ class AppSettings {
   virtual void saveSelectPreviousItemShortcut(std::string shortcut) = 0;
   virtual std::string getSelectPreviousItemShortcut() = 0;
 
-  virtual void savePasteSelectedItemToActiveAppShortcut(std::string shortcut) = 0;
+  virtual void
+  savePasteSelectedItemToActiveAppShortcut(std::string shortcut) = 0;
   virtual std::string getPasteSelectedItemToActiveAppShortcut() = 0;
 
-  virtual void savePasteSelectedObjectToActiveAppShortcut(std::string shortcut) = 0;
+  virtual void
+  savePasteSelectedObjectToActiveAppShortcut(std::string shortcut) = 0;
   virtual std::string getPasteSelectedObjectToActiveAppShortcut() = 0;
 
   virtual void savePasteNextItemShortcut(std::string shortcut) = 0;

@@ -242,6 +242,14 @@ void MainApp::launch() {
 #endif
 
   updateLanguage(app_window_);
+
+  // Every hour check if the retention period is changed and if so, clear the history.
+  std::thread([this]() {
+    while (true) {
+      std::this_thread::sleep_for(std::chrono::hours(1));
+      checkRetentionPeriod();
+    }
+  }).detach();
 }
 
 void MainApp::show() {
@@ -874,6 +882,13 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
     std::thread([this]() {
       onLanguageChanged();
     }).detach();
+  });
+
+  window->putProperty("saveRetentionPeriod", [this](int period) -> void {
+    settings_->saveRetentionPeriod(period);
+  });
+  window->putProperty("getRetentionPeriod", [this]() -> int {
+    return settings_->getRetentionPeriod();
   });
 
   window->putProperty("saveTheme", [this](std::string theme) -> void {
@@ -1677,4 +1692,19 @@ std::string MainApp::i18n(const std::string &key) {
     return js_value.asString();
   }
   return key;
+}
+
+void MainApp::checkRetentionPeriod() {
+  auto retention_period_index = settings_->getRetentionPeriod();
+  if (retention_period_index >= 0 &&
+      retention_period_index < kRetentionPeriods.size()) {
+    auto days = kRetentionPeriods[retention_period_index];
+    if (days > 0) {
+      auto frame = app_window_->mainFrame();
+      if (frame) {
+        frame->executeJavaScript("clearHistoryOlderThan(" +
+                                 std::to_string(days) + ")");
+      }
+    }
+  }
 }

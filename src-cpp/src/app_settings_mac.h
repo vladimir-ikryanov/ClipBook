@@ -128,6 +128,9 @@ class AppSettingsMac : public AppSettings {
   bool shouldPinFavoritesOnTop() override;
   bool isPinFavoritesOnTopManaged() override;
 
+  void saveRetentionPeriod(int period) override;
+  int getRetentionPeriod() override;
+
   // Shortcuts.
 
   void saveOpenAppShortcut(std::string shortcut) override;

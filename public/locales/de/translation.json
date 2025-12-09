@@ -145,6 +145,10 @@
       "clearHistoryOnMacReboot": {
         "title": "Gesamten Verlauf beim Mac-Neustart löschen",
         "description": "Den gesamten Zwischenablageverlauf beim Herunterfahren/Neustarten des Mac löschen."
+      },
+      "retentionPeriod": {
+        "title": "Verlauf behalten",
+        "description": "Wählen Sie aus, wie lange Ihr Zwischenablageverlauf gespeichert werden soll. Elemente, die älter als dieser Zeitraum sind, werden entfernt, mit Ausnahme von Favoriten und getaggten Elementen."
       }
     },
     "shortcuts": {

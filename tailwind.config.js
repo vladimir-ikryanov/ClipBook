@@ -142,7 +142,15 @@ module.exports = {
 					"accent-foreground": "var(--sidebar-accent-foreground)",
 					border: "var(--sidebar-border)",
 					ring: "var(--sidebar-ring)"
-				}
+				},
+        slider: {
+          "track-background": "var(--slider-track-background)",
+          "track-filled": "var(--slider-track-filled)",
+          "thumb-background": "var(--slider-thumb-background)",
+          "thumb-border": "var(--slider-thumb-border)",
+          "dot-background": "var(--slider-dot-background)",
+          "dot-background-filled": "var(--slider-dot-background-filled)",
+        }
       },
       borderRadius: {
         lg: "var(--radius)",

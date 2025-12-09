@@ -103,6 +103,9 @@ declare const setCopyOnNumberAction: (copy: boolean) => void;
 declare const shouldCopyOnNumberAction: () => boolean;
 declare const isCopyOnNumberActionManaged: () => boolean;
 
+declare const saveRetentionPeriod: (period: number) => void;
+declare const getRetentionPeriod: () => number;
+
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
 declare const saveCloseAppShortcut: (shortcut: string) => void;
@@ -856,4 +859,12 @@ export function prefShouldCopyOnNumberAction() {
 
 export function prefGetSelectAllShortcut() {
   return "MetaLeft + KeyA"
+}
+
+export function prefGetRetentionPeriod() {
+  return getRetentionPeriod()
+}
+
+export function prefSetRetentionPeriod(period: number) {
+  saveRetentionPeriod(period)
 }

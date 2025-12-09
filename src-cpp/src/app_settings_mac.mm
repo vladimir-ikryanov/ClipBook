@@ -1,5 +1,7 @@
 #include "app_settings_mac.h"
 
+#include "mobrowser.hpp"
+
 #include <Foundation/Foundation.h>
 
 NSString *appThemeLight = @"light";
@@ -41,6 +43,7 @@ NSString *prefAlwaysDisplay = @"always_display";
 NSString *prefCopyOnDoubleClick = @"copy_on_double_click";
 NSString *prefCopyOnNumberAction = @"copy_on_number_action";
 NSString *prefPinFavoritesOnTop = @"pin_favorites_on_top";
+NSString *prefRetentionPeriod = @"retention_period_index";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
@@ -133,7 +136,10 @@ bool prefReadBoolValue(NSString *key, bool defaultValue) {
   return defaultValue;
 }
 
-AppSettingsMac::AppSettingsMac() = default;
+AppSettingsMac::AppSettingsMac() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults registerDefaults:@{prefRetentionPeriod: [NSNumber numberWithInt:kRetentionPeriods.size() - 1]}];
+}
 
 void AppSettingsMac::saveLastSystemBootTime(long time) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -1313,4 +1319,18 @@ bool AppSettingsMac::shouldPinFavoritesOnTop() {
 
 bool AppSettingsMac::isPinFavoritesOnTopManaged() {
   return isManaged(prefPinFavoritesOnTop);
+}
+
+void AppSettingsMac::saveRetentionPeriod(int period) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setInteger:period forKey:prefRetentionPeriod];
+  [defaults synchronize];
+}
+
+int AppSettingsMac::getRetentionPeriod() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefRetentionPeriod] != nil) {
+    return [defaults integerForKey:prefRetentionPeriod];
+  }
+  return kRetentionPeriods.size() - 1;
 }

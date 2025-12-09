@@ -145,6 +145,10 @@
       "clearHistoryOnMacReboot": {
         "title": "Clear entire history on Mac shutdown/restart",
         "description": "Clear the entire clipboard history on Mac shutdown/restart."
+      },
+      "retentionPeriod": {
+        "title": "Keep history",
+        "description": "Select how long to keep your clipboard history. Items older than this period will be removed, except favorites and tagged items."
       }
     },
     "shortcuts": {

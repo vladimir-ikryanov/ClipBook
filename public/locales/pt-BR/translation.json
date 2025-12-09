@@ -145,6 +145,10 @@
       "clearHistoryOnMacReboot": {
         "title": "Limpar todo o histórico ao desligar/reiniciar o Mac",
         "description": "Limpar todo o histórico da área de transferência ao desligar/reiniciar o Mac."
+      },
+      "retentionPeriod": {
+        "title": "Manter histórico",
+        "description": "Selecione por quanto tempo manter o histórico da área de transferência. Itens mais antigos que este período serão removidos, exceto favoritos e itens marcados."
       }
     },
     "shortcuts": {

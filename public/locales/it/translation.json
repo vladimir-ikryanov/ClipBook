@@ -145,6 +145,10 @@
       "clearHistoryOnMacReboot": {
         "title": "Cancella l'intera cronologia allo spegnimento/riavvio del Mac",
         "description": "Cancella l'intera cronologia degli appunti allo spegnimento/riavvio del Mac."
+      },
+      "retentionPeriod": {
+        "title": "Mantieni cronologia",
+        "description": "Seleziona per quanto tempo mantenere la cronologia degli appunti. Gli elementi più vecchi di questo periodo verranno rimossi, ad eccezione dei preferiti e degli elementi taggati."
       }
     },
     "shortcuts": {
