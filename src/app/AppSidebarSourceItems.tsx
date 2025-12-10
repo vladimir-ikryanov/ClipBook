@@ -3,7 +3,7 @@ import {
   SidebarGroupContent,
   SidebarMenu,
 } from "@/components/ui/sidebar";
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {AppInfo, getSourceApps} from "@/data";
 import {AppSidebarSourceItem} from "@/app/AppSidebarSourceItem";
 import {AppSidebarItem, AppSidebarItemType} from "@/app/AppSidebarItem";

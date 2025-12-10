@@ -1,5 +1,4 @@
 import '../app.css';
-import React from "react";
 
 type PreviewFilePaneProps = {
   filePath: string

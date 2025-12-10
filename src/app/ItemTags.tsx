@@ -1,5 +1,4 @@
 import '../app.css';
-import React from "react";
 import TagIcon, {Tag} from "@/tags";
 import {Button} from "@/components/ui/button";
 

@@ -8,10 +8,12 @@ import HistoryItemPane from "@/app/HistoryItemPane";
 import {Clip} from "@/db";
 import {SearchIcon} from "lucide-react";
 import {
-  addSelectedHistoryItemIndex,
+  addHistoryItemToSelection,
+  clearSelection,
+  getActiveHistoryItemIndex,
   getSelectedHistoryItemIndices,
-  removeSelectedHistoryItemIndex,
-  setSelectedHistoryItemIndex,
+  removeHistoryItemFromSelection,
+  setActiveHistoryItemIndex,
 } from "@/data";
 import {useTranslation} from "react-i18next";
 
@@ -39,37 +41,33 @@ const HistoryItemsPane = (props: HistoryItemsPaneProps) => {
   function handleItemSelected(index: number, metaKeyDown: boolean, shiftKeyDown: boolean) {
     // Handle click without modifier keys: select a single item.
     if (!metaKeyDown && !shiftKeyDown) {
-      setSelectedHistoryItemIndex(index)
+      clearSelection()
+      setActiveHistoryItemIndex(index)
     }
     // Handle click with meta key: toggle selection of an item.
     if (metaKeyDown) {
       let selectedIndices = getSelectedHistoryItemIndices()
       if (selectedIndices.includes(index)) {
         if (selectedIndices.length > 1) {
-          removeSelectedHistoryItemIndex(index)
+          removeHistoryItemFromSelection(index)
         }
       } else {
-        addSelectedHistoryItemIndex(index)
+        addHistoryItemToSelection(index)
+        addHistoryItemToSelection(getActiveHistoryItemIndex())
       }
+      setActiveHistoryItemIndex(index)
     }
     // Handle click with shift key: select a range of items.
     if (shiftKeyDown) {
-      let selectedIndices = getSelectedHistoryItemIndices()
-      if (selectedIndices.length === 0) {
-        setSelectedHistoryItemIndex(index)
-      } else {
-        // Sort selected indices.
-        selectedIndices.sort((a, b) => a - b)
-        let firstIndex = selectedIndices[0]
-        let lastIndex = selectedIndices[selectedIndices.length - 1]
-        if (index < firstIndex) {
-          for (let i = index; i <= firstIndex; i++) {
-            addSelectedHistoryItemIndex(i)
-          }
-        } else if (index > lastIndex) {
-          for (let i = lastIndex; i <= index; i++) {
-            addSelectedHistoryItemIndex(i)
-          }
+      let currentIndex = getActiveHistoryItemIndex()
+      setActiveHistoryItemIndex(index)
+      if (index < currentIndex) {
+        for (let i = index; i <= currentIndex; i++) {
+          addHistoryItemToSelection(i)
+        }
+      } else if (index > currentIndex) {
+        for (let i = currentIndex; i <= index; i++) {
+          addHistoryItemToSelection(i)
         }
       }
     }

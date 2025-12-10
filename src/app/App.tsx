@@ -12,6 +12,7 @@ import {
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {TooltipProvider} from "@/components/ui/tooltip";
 import {emitter} from "@/actions";
+import { isSelectionModeEnabled, setSelectionMode } from "@/data";
 
 declare const hideAppWindow: () => void;
 declare const zoomIn: () => void;
@@ -27,6 +28,12 @@ export default function App() {
       // Prevent leaving the history items with the tab key.
       if (e.code === "Tab") {
         e.preventDefault()
+      }
+      if (e.code === "Escape") {
+        if (isSelectionModeEnabled()) {
+          e.preventDefault()
+          return
+        }
       }
       // Close the app window with the close app shortcut.
       if (isShortcutMatch(prefGetCloseAppShortcut(), e)

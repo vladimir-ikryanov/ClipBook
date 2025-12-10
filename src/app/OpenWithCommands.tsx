@@ -15,8 +15,10 @@ import {
 import {
   AppInfo,
   getAllApps,
-  getDefaultApp, getFileOrImagePath,
-  getFirstSelectedHistoryItem, getHistoryItem,
+  getDefaultApp, 
+  getFileOrImagePath,
+  getActiveHistoryItemIndex, 
+  getHistoryItem,
   getRecommendedApps,
   toBase64Icon
 } from "@/data";
@@ -77,7 +79,8 @@ export default function OpenWithCommands() {
       if (index >= 0) {
         item = getHistoryItem(index)
       } else {
-        item = getFirstSelectedHistoryItem()
+        let index = getActiveHistoryItemIndex()
+        item = getHistoryItem(index)
       }
       if ((item.type === ClipType.File || item.type === ClipType.Image) && !item.fileFolder) {
         let filePath = getFileOrImagePath(item)

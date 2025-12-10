@@ -1,5 +1,5 @@
 import '../app.css';
-import React, {useEffect} from "react";
+import {useEffect} from "react";
 import {Clip, ClipType} from "@/db";
 
 type PreviewItemsPaneProps = {

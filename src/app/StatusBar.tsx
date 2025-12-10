@@ -1,6 +1,6 @@
 import '../app.css';
 import {Button} from "@/components/ui/button";
-import React, {useState} from "react";
+import {useState} from "react";
 import {
   prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetSelectNextItemShortcut,

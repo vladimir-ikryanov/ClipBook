@@ -2,6 +2,7 @@ import '../app.css';
 import React, {CSSProperties, KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
 import {
   fileExists,
+  getActiveHistoryItemIndex,
   getFilterQuery,
   getFilterVisibleState,
   getPasteNextItemIndex,
@@ -52,23 +53,30 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
       }
     }
 
-    function handleRenameSelectedItemEvent() {
-      if (!isMultipleItemsSelected() && isItemSelected()) {
+    function handleRenameActiveItemEvent() {
+      if (isMultipleItemsSelected()) {
+        return
+      }
+      if (isActiveItem()) {
         setRenameItemMode(true)
         emitter.emit("RenameItemModeEnabled", true)
       }
     }
 
     emitter.on("UpdateItemById", handleUpdateItemByIdEvent)
-    emitter.on("RenameSelectedItem", handleRenameSelectedItemEvent)
+    emitter.on("RenameSelectedItem", handleRenameActiveItemEvent)
     return () => {
       emitter.off("UpdateItemById", handleUpdateItemByIdEvent)
-      emitter.off("RenameSelectedItem", handleRenameSelectedItemEvent)
+      emitter.off("RenameSelectedItem", handleRenameActiveItemEvent)
     };
   }, [])
 
   function isItemSelected() {
     return props.selectedItemIndices.includes(props.index)
+  }
+
+  function isActiveItem() {
+    return props.index == getActiveHistoryItemIndex()
   }
 
   function isPointer() {
@@ -117,7 +125,9 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   }
 
   const handleKeyDown = async (e: KeyboardEvent) => {
-    if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
+    if (e.key === "ArrowUp" || e.key === "ArrowDown" ||
+      e.key === "ArrowLeft" || e.key === "ArrowRight" ||
+      e.key === "Enter" || e.key === "Escape") {
       e.stopPropagation()
     }
     if (renameItemMode) {
@@ -342,23 +352,25 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
           {
             isPointer() && <div className={`flex flex-none w-[3px] h-8 ${isFilterPaneVisible() ? 'mr-1' : 'ml-[1px] mr-[4px]'} rounded my-auto bg-switch-checked`}></div>
           }
-          <div
-              className={`flex flex-grow cursor-default select-none items-center ${isItemSelected() ? 'bg-accent' : 'hover:bg-accent-hover'} py-2 px-2 whitespace-nowrap overflow-hidden overflow-ellipsis ${getRoundedStyle()}`}
-              onKeyDown={handleKeyDown}
-              onMouseUp={handleMouseUp}
-              onMouseDown={handleMouseDown}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}>
-            <div className="flex flex-none mr-1">{renderClipIcon()}</div>
+          <div className={`flex flex-grow whitespace-nowrap overflow-hidden overflow-ellipsis cursor-default select-none items-center ${isItemSelected() ? getRoundedStyle() : ''} ${isItemSelected() ? 'bg-accent-hover' : ''}`}>
             <div
-                className={`flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis ${isDisabled() ? "" : "text-primary-foreground"}`}>
-              {
-                renameItemMode ? renderInputField() : renderItemLabel(getItemLabel(), getFilterQuery())
-              }
+                className={`flex flex-grow items-center py-2 px-2 ${isActiveItem() ? 'bg-accent' : 'hover:bg-accent-hover'} rounded-md overflow-hidden overflow-ellipsis`}
+                onKeyDown={handleKeyDown}
+                onMouseUp={handleMouseUp}
+                onMouseDown={handleMouseDown}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}>
+              <div className="flex flex-none mr-1">{renderClipIcon()}</div>
+              <div
+                  className={`flex-grow text-base text-justify font-normal overflow-hidden overflow-ellipsis ${isDisabled() ? "" : "text-primary-foreground"}`}>
+                {
+                  renameItemMode ? renderInputField() : renderItemLabel(getItemLabel(), getFilterQuery())
+                }
+              </div>
+              {renderTags()}
+              {renderFavoriteIcon()}
+              {renderQuickPasteAlias()}
             </div>
-            {renderTags()}
-            {renderFavoriteIcon()}
-            {renderQuickPasteAlias()}
           </div>
         </div>
     )

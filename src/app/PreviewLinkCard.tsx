@@ -1,5 +1,4 @@
 import '../app.css';
-import React from "react";
 import { Skeleton } from "@/components/ui/skeleton"
 import {useTranslation} from "react-i18next";
 

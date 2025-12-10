@@ -258,6 +258,7 @@
       "openInBrowser": "Open in Browser",
       "copyTextFromImage": "Copy Text from Image",
       "selectedItems": "{{count}} items",
+      "item": "{{count}} Item",
       "items": "{{count}} Items",
       "pasteTo": "Paste {{indicator}} to {{appName}}",
       "pasteToWithReturn": "Paste {{indicator}} to {{appName}} with Return",

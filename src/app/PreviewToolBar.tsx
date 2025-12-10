@@ -29,7 +29,7 @@ import {HideInfoPaneIcon, HidePreviewPaneIcon, ShowInfoPaneIcon} from "@/app/Ico
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {
-  getFirstSelectedHistoryItem,
+  getActiveHistoryItemIndex,
   getHistoryItem,
   getSelectedHistoryItemIndices,
   getSelectedHistoryItems, getSelectedItemTextTypes, isTextItem, toBase64Icon
@@ -57,8 +57,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   const [showCheckIcon, setShowCheckIcon] = useState(false)
 
   useEffect(() => {
-    if (props.selectedItemIndices.length === 1) {
-      setSelectedItem(getFirstSelectedHistoryItem())
+    if (props.selectedItemIndices.length <= 1) {
+      let index = getActiveHistoryItemIndex()
+      setSelectedItem(getHistoryItem(index))
     } else {
       setSelectedItem(undefined)
     }
@@ -128,19 +129,24 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   }
 
   function selectedItemsAreMarkedAsFavorite() {
-    return props.selectedItemIndices.every(index => {
-      let item = getHistoryItem(index)
-      return item && item.favorite
-    })
+    if (props.selectedItemIndices.length > 1) {
+      return props.selectedItemIndices.every(index => {
+        let item = getHistoryItem(index)
+        return item && item.favorite
+      })
+    }
+    return selectedItem?.favorite ?? false
+    
   }
 
   function canShowCopyToClipboard() {
-    return props.selectedItemIndices.length === 1
+    return props.selectedItemIndices.length === 0
   }
 
   function canShowOpenInBrowser() {
-    if (getSelectedHistoryItems().length === 1) {
-      let item = getFirstSelectedHistoryItem()
+    if (getSelectedHistoryItems().length === 0) {
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
       if (item) {
         return item.type === ClipType.Link
       }
@@ -149,8 +155,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   }
 
   function canShowCopyTextFromImage() {
-    if (props.selectedItemIndices.length === 1) {
-      let item = getFirstSelectedHistoryItem()
+    if (props.selectedItemIndices.length === 0) {
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
       if (item) {
         if (getImageText(item).length > 0) {
           return true
@@ -162,15 +169,15 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   }
 
   function canShowNumberOfSelectedItems() {
-    return props.selectedItemIndices.length > 1
+    return props.selectedItemIndices.length !== 0
   }
 
   function canShowPasteOptions() {
-    return props.selectedItemIndices.length > 1
+    return props.selectedItemIndices.length !== 0
   }
 
   function canShowMergeItems() {
-    if (props.selectedItemIndices.length > 1) {
+    if (props.selectedItemIndices.length !== 0) {
       return getSelectedHistoryItems().every(item => {
         return item && (isTextItem(item) || item.type === ClipType.File)
       })
@@ -183,9 +190,12 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   }
 
   function getMultipleItemsIndicator(): string {
-    let indices = getSelectedHistoryItemIndices().length
-    if (indices > 1) {
-      return t('preview.toolbar.items', { count: indices })
+    let numberOfItems = getSelectedHistoryItemIndices().length
+    if (numberOfItems > 1) {
+      return t('preview.toolbar.items', { count: numberOfItems })
+    }
+    if (numberOfItems === 1) {
+      return t('preview.toolbar.item', { count: numberOfItems })
     }
     return ""
   }
@@ -344,7 +354,7 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 canShowNumberOfSelectedItems() &&
                 <div
                     className="text-sm pt-2.5 items-center justify-center text-center text-toolbar-button">
-                  {t('preview.toolbar.selectedItems', { count: props.selectedItemIndices.length })}
+                  {getMultipleItemsIndicator()}
                 </div>
             }
           </div>

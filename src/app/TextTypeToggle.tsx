@@ -1,5 +1,5 @@
 import '../app.css';
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {Clip} from "@/db";
 import {ToggleGroup, ToggleGroupItem} from "@/components/ui/toggle-group";
 import {emitter} from "@/actions";

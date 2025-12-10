@@ -1,5 +1,5 @@
 import '../app.css';
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {Clip, ClipType, getFilePath, getHTML, getRTF} from "@/db";
 import {fileExists, formatDateTime, getHistoryItemById, toBase64Icon} from "@/data";
 import ItemTags from "@/app/ItemTags";

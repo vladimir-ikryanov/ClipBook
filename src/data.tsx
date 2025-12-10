@@ -113,7 +113,7 @@ let filterOptions: FilterOptions = {
   apps: []
 };
 let shouldUpdateHistory = false;
-let lastSelectedItemIndex = -1;
+let activeItemIndex = -1;
 let selectedItemIndices: number[] = [];
 let visibleHistoryLength = 0;
 let previewVisible = true;
@@ -124,6 +124,7 @@ let sortOrderReverse = false;
 let sourceApps: AppInfo[] = [];
 let pasteNextItemIndex = -1;
 let pinFavoritesOnTop = true;
+let selectionMode = false;
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -565,46 +566,33 @@ function filter(item: Clip) {
   return true
 }
 
-export function getLastSelectedItemIndex(): number {
-  return lastSelectedItemIndex
+export function getActiveHistoryItemIndex(): number {
+  return activeItemIndex
 }
 
-export function setSelectedHistoryItemIndex(index: number) {
-  clearSelection()
-  addSelectedHistoryItemIndex(index)
-}
-
-export function getFirstSelectedHistoryItemIndex(): number {
-  return selectedItemIndices.length > 0 ? selectedItemIndices[0] : 0
+export function setActiveHistoryItemIndex(index: number) {
+  activeItemIndex = index
 }
 
 export function clearSelection() {
   selectedItemIndices = []
-  lastSelectedItemIndex = -1
 }
 
-export function addSelectedHistoryItemIndex(index: number) {
+export function addHistoryItemToSelection(index: number) {
   if (!selectedItemIndices.includes(index)) {
     selectedItemIndices.push(index)
   }
-  lastSelectedItemIndex = index
 }
 
-export function removeSelectedHistoryItemIndex(index: number) {
+export function removeHistoryItemFromSelection(index: number) {
   let i = selectedItemIndices.indexOf(index)
   if (i !== -1) {
     selectedItemIndices.splice(i, 1)
-    // Make the last selected item from the list the last selected item.
-    lastSelectedItemIndex = selectedItemIndices.length > 0 ? selectedItemIndices[selectedItemIndices.length - 1] : -1
   }
 }
 
 export function getSelectedHistoryItemIndices(): number[] {
   return [...selectedItemIndices]
-}
-
-export function getFirstSelectedHistoryItem(): Clip {
-  return getHistoryItems()[getFirstSelectedHistoryItemIndex()]
 }
 
 export function isHistoryItemSelected(index: number): boolean {
@@ -883,4 +871,12 @@ export function setPinFavoritesOnTop(pin: boolean): boolean {
   let oldValue = pinFavoritesOnTop
   pinFavoritesOnTop = pin
   return oldValue !== pin
+}
+
+export function setSelectionMode(mode: boolean) {
+  selectionMode = mode
+}
+
+export function isSelectionModeEnabled(): boolean {
+  return selectionMode
 }

@@ -6,14 +6,23 @@ import {useEffect, useState} from "react"
 import {
   ArrowUpLeftIcon,
   CommandIcon,
-  CopyIcon, DownloadIcon,
-  Edit3Icon, EyeIcon,
-  GlobeIcon, PenIcon,
+  CopyIcon,
+  DownloadIcon,
+  Edit3Icon,
+  EyeIcon,
+  GlobeIcon,
+  PenIcon,
   ScanTextIcon,
   SettingsIcon,
   StarIcon,
   StarOffIcon,
-  TrashIcon, TypeIcon, Undo2Icon, UnfoldVerticalIcon, UploadIcon, ZoomIn, ZoomOut
+  TrashIcon,
+  TypeIcon,
+  Undo2Icon,
+  UnfoldVerticalIcon,
+  UploadIcon,
+  ZoomIn,
+  ZoomOut
 } from "lucide-react"
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -53,7 +62,6 @@ import {
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {isShortcutMatch} from "@/lib/shortcuts";
 import {
-  getFirstSelectedHistoryItem,
   getPreviewVisibleState,
   toBase64Icon,
   getSelectedHistoryItemIndices,
@@ -61,7 +69,13 @@ import {
   isTextItem,
   AppInfo,
   getDefaultApp,
-  getFileOrImagePath, fileExists, getFilterQuery, isFilterActive, FinderIcon
+  getFileOrImagePath, 
+  fileExists, 
+  getFilterQuery, 
+  isFilterActive, 
+  FinderIcon,
+  getActiveHistoryItemIndex,
+  getHistoryItem
 } from "@/data";
 import {ClipType, getHTML, getImageText, getRTF} from "@/db";
 import {HidePreviewPaneIcon, ShowPreviewPaneIcon} from "@/app/Icons";
@@ -124,7 +138,8 @@ export default function Commands(props: CommandsProps) {
   function handleOpenChange(open: boolean, focusSearch: boolean = false) {
     setDefaultApp(undefined)
     if (open) {
-      let item = getFirstSelectedHistoryItem()
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
       if (item.type === ClipType.File || item.type === ClipType.Image) {
         if (!item.fileFolder) {
           let filePath = getFileOrImagePath(item);
@@ -251,7 +266,8 @@ export default function Commands(props: CommandsProps) {
 
   function handleShowInHistory() {
     handleOpenChange(false)
-    let item = getFirstSelectedHistoryItem()
+    let index = getActiveHistoryItemIndex()
+    let item = getHistoryItem(index)
     emitter.emit("ShowInHistory", item)
   }
 
@@ -319,7 +335,8 @@ export default function Commands(props: CommandsProps) {
 
   function isFile() {
     if (getSelectedHistoryItemIndices().length === 1) {
-      let item = getFirstSelectedHistoryItem()
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
       return item && item.type === ClipType.File
     }
     return false
@@ -327,7 +344,8 @@ export default function Commands(props: CommandsProps) {
 
   function isImage() {
     if (getSelectedHistoryItemIndices().length === 1) {
-      let item = getFirstSelectedHistoryItem()
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
       return item && item.type === ClipType.Image
     }
     return false
@@ -355,7 +373,8 @@ export default function Commands(props: CommandsProps) {
 
   function isFileExists() {
     if (isFile()) {
-      let item = getFirstSelectedHistoryItem()
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
       if (item) {
         return fileExists(item.filePath)
       }
@@ -365,7 +384,8 @@ export default function Commands(props: CommandsProps) {
 
   function canPasteWithTransformation() {
     if (getSelectedHistoryItemIndices().length === 1) {
-      let item = getFirstSelectedHistoryItem()
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
       if (item) {
         return isTextItem(item)
       }
@@ -379,7 +399,8 @@ export default function Commands(props: CommandsProps) {
 
   function isObjectSelected() {
     if (getSelectedHistoryItemIndices().length === 1) {
-      let item = getFirstSelectedHistoryItem()
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
       if (item && item.type === ClipType.Text) {
         return getRTF(item).length > 0 || getHTML(item).length > 0
       }
@@ -396,7 +417,9 @@ export default function Commands(props: CommandsProps) {
 
   function canShowOpenInBrowser() {
     if (getSelectedHistoryItemIndices().length === 1) {
-      return getFirstSelectedHistoryItem()?.type === ClipType.Link
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
+      return item?.type === ClipType.Link
     }
     return false
   }
@@ -422,14 +445,17 @@ export default function Commands(props: CommandsProps) {
 
   function canShowFormatText() {
     if (getSelectedHistoryItemIndices().length === 1) {
-      return isTextItem(getFirstSelectedHistoryItem())
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
+      return isTextItem(item)
     }
     return false
   }
 
   function canShowSplit() {
     if (getSelectedHistoryItemIndices().length === 1) {
-      let item = getFirstSelectedHistoryItem()
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
       if (isTextItem(item)) {
         // Check if the item content has text with line breaks and has at least two lines.
         let text = item.content
@@ -442,7 +468,8 @@ export default function Commands(props: CommandsProps) {
 
   function canShowCopyTextFromImage() {
     if (getSelectedHistoryItemIndices().length === 1) {
-      let item = getFirstSelectedHistoryItem()
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
       if (item) {
         if (item.type === ClipType.Image && item.content.length > 0) {
           return true
@@ -456,23 +483,19 @@ export default function Commands(props: CommandsProps) {
   }
 
   function canShowSaveImageAsFile() {
-    if (getSelectedHistoryItemIndices().length === 1) {
-      let item = getFirstSelectedHistoryItem();
-      return item?.type === ClipType.Image
-    }
-    return false
+    let index = getActiveHistoryItemIndex()
+    let item = getHistoryItem(index);
+    return item?.type === ClipType.Image
   }
 
   function canShowEditContent() {
-    if (getSelectedHistoryItemIndices().length === 1) {
-      let item = getFirstSelectedHistoryItem();
-      let type = item?.type;
-      return item && (type === ClipType.Text ||
-          type === ClipType.Link ||
-          type === ClipType.Email ||
-          type === ClipType.Color)
-    }
-    return false
+    let index = getActiveHistoryItemIndex()
+    let item = getHistoryItem(index);
+    let type = item?.type;
+    return item && (type === ClipType.Text ||
+      type === ClipType.Link ||
+      type === ClipType.Email ||
+      type === ClipType.Color)
   }
 
   function canAddToFavorites() {
@@ -498,11 +521,10 @@ export default function Commands(props: CommandsProps) {
   }
 
   function getItemLabel(): string {
-    if (getSelectedHistoryItemIndices().length === 1) {
-      let item = getFirstSelectedHistoryItem()
-      if (item) {
-        return ClipType[item.type]
-      }
+    let index = getActiveHistoryItemIndex()
+    let item = getHistoryItem(index);
+    if (item) {
+      return ClipType[item.type]
     }
     return ""
   }

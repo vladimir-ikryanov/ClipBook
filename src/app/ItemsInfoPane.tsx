@@ -1,5 +1,4 @@
 import '../app.css';
-import React from "react";
 import {Clip, ClipType} from "@/db";
 import {useTranslation} from "react-i18next";
 

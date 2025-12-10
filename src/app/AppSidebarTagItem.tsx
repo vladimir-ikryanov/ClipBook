@@ -1,6 +1,5 @@
 import {Edit3Icon, TrashIcon} from "lucide-react";
 import {SidebarMenuButton, SidebarMenuItem} from "@/components/ui/sidebar";
-import React from "react";
 import {
   ContextMenu,
   ContextMenuContent,

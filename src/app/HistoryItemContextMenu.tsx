@@ -1,14 +1,20 @@
 import '../app.css';
-import React, {KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
+import {KeyboardEvent, MouseEvent, useEffect, useState} from 'react';
 import {
   ArrowUpLeftIcon,
   CopyIcon,
   Edit3Icon,
   EyeIcon,
-  GlobeIcon, PenIcon, PlusIcon, ScanTextIcon,
+  GlobeIcon, 
+  PenIcon, 
+  PlusIcon, 
+  ScanTextIcon,
   StarIcon,
-  StarOffIcon, TagsIcon,
-  TrashIcon, TypeIcon, UploadIcon
+  StarOffIcon, 
+  TagsIcon,
+  TrashIcon, 
+  TypeIcon, 
+  UploadIcon
 } from "lucide-react";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {
@@ -34,7 +40,6 @@ import {
   getDefaultApp,
   getFileOrImagePath,
   getFilterQuery,
-  getFirstSelectedHistoryItem,
   getHistoryItem,
   getSelectedHistoryItemIndices,
   isFilterActive,

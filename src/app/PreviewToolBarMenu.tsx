@@ -1,22 +1,27 @@
 import '../app.css';
-import React, {KeyboardEvent, MouseEvent, useEffect, useState} from "react";
+import {KeyboardEvent, MouseEvent, useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {
-  ClipboardIcon,
   DownloadIcon,
   Edit3Icon,
   EllipsisVerticalIcon,
   EyeIcon,
-  PenIcon, PlusIcon,
-  RefreshCwIcon, TagsIcon,
+  PenIcon, 
+  PlusIcon,
+  RefreshCwIcon, 
+  TagsIcon,
   TrashIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuPortal,
-  DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger,
+  DropdownMenuLabel, 
+  DropdownMenuPortal,
+  DropdownMenuSeparator, 
+  DropdownMenuSub, 
+  DropdownMenuSubContent, 
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -25,7 +30,6 @@ import {
   prefGetEditHistoryItemShortcut,
   prefGetMakeLowerCaseShortcut,
   prefGetMakeUpperCaseShortcut,
-  prefGetPasteSelectedItemToActiveAppShortcut,
   prefGetQuickLookShortcut,
   prefGetRemoveEmptyLinesShortcut,
   prefGetRenameItemShortcut,
@@ -37,18 +41,23 @@ import {
 } from "@/pref";
 import ShortcutLabel from "@/app/ShortcutLabel";
 import {
-  getFirstSelectedHistoryItem,
-  getSelectedHistoryItemIndices, isFileItem, isImageItem, isLinkItem,
-  isTextItem, TagCheckedState,
+  getActiveHistoryItemIndex,
+  getHistoryItem,
+  getSelectedHistoryItemIndices, 
+  isFileItem, 
+  isImageItem, 
+  isLinkItem,
+  isTextItem,
+  TagCheckedState,
   TextFormatOperation
 } from "@/data";
-import {CommandItem, CommandShortcut} from "@/components/ui/command";
+import {CommandShortcut} from "@/components/ui/command";
 import {emitter} from "@/actions";
 import {useTranslation} from "react-i18next";
 import TagIcon, {allTags, Tag} from "@/tags";
 import {Checkbox} from "@/components/ui/checkbox";
 import {CheckedState} from "@radix-ui/react-checkbox";
-import {ClipType, updateClip} from "@/db";
+import {updateClip} from "@/db";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 type PreviewToolBarMenuProps = {
@@ -66,10 +75,8 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
   const [openDropdown, setOpenDropdown] = useState(false)
 
   function selectedItem() {
-    if (props.selectedItemIndices.length === 1) {
-      return getFirstSelectedHistoryItem()
-    }
-    return undefined
+    let index = getActiveHistoryItemIndex()
+    return getHistoryItem(index)
   }
 
   useEffect(() => {
@@ -160,7 +167,7 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
   }
 
   function canShowTags() {
-    return props.selectedItemIndices.length === 1
+    return props.selectedItemIndices.length === 0
   }
 
   function canShowQuickLook() {
@@ -168,29 +175,37 @@ export default function PreviewToolBarMenu(props: PreviewToolBarMenuProps) {
   }
 
   function isText() {
-    if (getSelectedHistoryItemIndices().length === 1) {
-      return isTextItem(getFirstSelectedHistoryItem())
+    if (getSelectedHistoryItemIndices().length === 0) {
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
+      return item && isTextItem(item)
     }
     return false
   }
 
   function isLink() {
-    if (getSelectedHistoryItemIndices().length === 1) {
-      return isLinkItem(getFirstSelectedHistoryItem())
+    if (getSelectedHistoryItemIndices().length === 0) {
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
+      return item && isLinkItem(item)
     }
     return false
   }
 
   function isFile() {
-    if (getSelectedHistoryItemIndices().length === 1) {
-      return isFileItem(getFirstSelectedHistoryItem())
+    if (getSelectedHistoryItemIndices().length === 0) {
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
+      return item && isFileItem(item)
     }
     return false
   }
 
   function isImage() {
-    if (getSelectedHistoryItemIndices().length === 1) {
-      return isImageItem(getFirstSelectedHistoryItem())
+    if (getSelectedHistoryItemIndices().length === 0) {
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
+      return item && isImageItem(item)
     }
     return false
   }

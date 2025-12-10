@@ -1,5 +1,4 @@
 import {SidebarMenuButton, SidebarMenuItem} from "@/components/ui/sidebar";
-import React from "react";
 import {AppInfo, toBase64Icon} from "@/data";
 
 interface AppSidebarSourceItemProps {

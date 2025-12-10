@@ -1,5 +1,5 @@
 import '../app.css';
-import React, {KeyboardEvent, useState} from "react";
+import {KeyboardEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {ArrowDownUpIcon, ArrowUpDownIcon, XIcon,} from "lucide-react";
 import {
