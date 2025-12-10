@@ -70,6 +70,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSetti
       app_paused_(false),
       after_system_reboot_(false),
       update_available_(false),
+      app_ready_to_quit_(true),
       app_hide_time_(0),
       settings_(settings) {
   request_interceptor_ = std::make_shared<UrlRequestInterceptor>(
@@ -653,6 +654,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
   });
 
   // App window.
+  window->putProperty("notifyAppReadyToQuit", [this]() {
+    app_ready_to_quit_ = true;
+  });
   window->putProperty("pasteItemInFrontApp",
                       [this](std::string text,
                              std::string rtf,
@@ -1542,9 +1546,15 @@ void MainApp::createTray() {
 
 void MainApp::quit() {
   if (settings_->shouldClearHistoryOnQuit()) {
-    auto frame = app_window_->mainFrame();
-    if (frame) {
+    if (const auto frame = app_window_->mainFrame()) {
+      // Set the flag to false to indicate that the app is not ready to quit.
+      // When the history is cleared, it will notify the app that it's ready to quit.
+      app_ready_to_quit_ = false;
       frame->executeJavaScript("clearHistory()");
+      // Wait until the app is ready to quit.
+      while (!app_ready_to_quit_) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      }
     }
   }
   disableOpenAppShortcut();

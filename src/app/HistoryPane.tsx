@@ -130,6 +130,7 @@ declare const openSettingsWindow: () => void;
 declare const saveImageAsFile: (imageFilePath: string, imageWidth: number, imageHeight: number) => void;
 declare const hideAppWindow: () => void;
 declare const openInApp: (filePath: string, appPath: string) => void;
+declare const notifyAppReadyToQuit: () => void;
 
 type HistoryPaneProps = {
   appName: string
@@ -300,6 +301,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
         scrollToLastSelectedItem()
       }
     }
+    // The history can be cleared on app quit. Since it's asynchronous, 
+    // we need to notify the app that it's ready to quit when the history is cleared.
+    notifyAppReadyToQuit()
   }
 
   async function clearTextOlderThan(days: number) {

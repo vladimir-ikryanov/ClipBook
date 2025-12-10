@@ -128,6 +128,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   bool app_paused_;
   bool after_system_reboot_;
   bool update_available_;
+  bool app_ready_to_quit_;
   long long app_hide_time_;
   std::string save_images_dir_;
   std::shared_ptr<mobrowser::App> app_;
