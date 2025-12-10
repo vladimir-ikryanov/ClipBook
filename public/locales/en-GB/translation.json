@@ -21,6 +21,7 @@
     "sidebar": {
       "general": "General",
       "history": "History",
+      "storage": "Storage",
       "shortcuts": "Shortcuts",
       "privacy": "Privacy",
       "license": "Licence",
@@ -141,7 +142,10 @@
       "pinFavoritesOnTop": {
         "title": "Pin favourites on top",
         "description": "Always show favourite items at the top of the history list."
-      },
+      }
+    },
+    "storage": {
+      "title": "Storage",
       "clearHistoryOnQuit": {
         "title": "Clear entire history on quit",
         "description": "Clear the entire clipboard history when ClipBook is terminated."
@@ -152,7 +156,13 @@
       },
       "retentionPeriod": {
         "title": "Keep history",
-        "description": "Select how long to keep your clipboard history. Items older than this period will be removed, except favourites and tagged items."
+        "description": "Select how long to keep individual history items. Items older than this period will be removed, except favourites and tagged items.",
+        "text": "Texts",
+        "image": "Images",
+        "file": "Files & Folders",
+        "link": "Links",
+        "email": "Emails",
+        "color": "Colours"
       }
     },
     "shortcuts": {
@@ -248,6 +258,7 @@
       "openInBrowser": "Open in Browser",
       "copyTextFromImage": "Copy Text from Image",
       "selectedItems": "{{count}} items",
+      "item": "{{count}} Item",
       "items": "{{count}} Items",
       "pasteTo": "Paste {{indicator}} to {{appName}}",
       "pasteToWithReturn": "Paste {{indicator}} to {{appName}} with Return",
@@ -338,6 +349,7 @@
     }
   },
   "commands": {
+    "item": " Item",
     "items": " Items",
     "showMoreActions": "Show more actions",
     "noResultsFound": "No results found.",

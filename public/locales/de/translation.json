@@ -21,6 +21,7 @@
     "sidebar": {
       "general": "Allgemein",
       "history": "Verlauf",
+      "storage": "Speicher",
       "shortcuts": "Tastenkombinationen",
       "privacy": "Datenschutz",
       "license": "Lizenz",
@@ -141,7 +142,10 @@
       "pinFavoritesOnTop": {
         "title": "Favoriten oben anheften",
         "description": "Favoriten immer oben in der Verlaufsliste anzeigen."
-      },
+      }
+    },
+    "storage": {
+      "title": "Speicher",
       "clearHistoryOnQuit": {
         "title": "Gesamten Verlauf beim Beenden löschen",
         "description": "Den gesamten Zwischenablageverlauf beim Beenden von ClipBook löschen."
@@ -152,7 +156,13 @@
       },
       "retentionPeriod": {
         "title": "Verlauf behalten",
-        "description": "Wählen Sie aus, wie lange Ihr Zwischenablageverlauf gespeichert werden soll. Elemente, die älter als dieser Zeitraum sind, werden entfernt, mit Ausnahme von Favoriten und getaggten Elementen."
+        "description": "Wählen Sie aus, wie lange einzelne Verlaufselemente aufbewahrt werden sollen. Elemente, die älter als dieser Zeitraum sind, werden entfernt, mit Ausnahme von Favoriten und getaggten Elementen.",
+        "text": "Texte",
+        "image": "Bilder",
+        "file": "Dateien & Ordner",
+        "link": "Links",
+        "email": "E-Mails",
+        "color": "Farben"
       }
     },
     "shortcuts": {
@@ -248,6 +258,7 @@
       "openInBrowser": "Im Browser öffnen",
       "copyTextFromImage": "Text aus Bild kopieren",
       "selectedItems": "{{count}} Elemente",
+      "item": "{{count}} Element",
       "items": "{{count}} Elemente",
       "pasteTo": "{{indicator}} in {{appName}} einfügen",
       "pasteToWithReturn": "{{indicator}} mit Return in {{appName}} einfügen",
@@ -338,6 +349,7 @@
     }
   },
   "commands": {
+    "item": " Element",
     "items": " Elemente",
     "showMoreActions": "Weitere Aktionen anzeigen",
     "noResultsFound": "Keine Ergebnisse gefunden.",

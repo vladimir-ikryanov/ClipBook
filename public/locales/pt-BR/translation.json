@@ -21,6 +21,7 @@
     "sidebar": {
       "general": "Geral",
       "history": "Histórico",
+      "storage": "Armazenamento",
       "shortcuts": "Atalhos",
       "privacy": "Privacidade",
       "license": "Licença",
@@ -141,7 +142,10 @@
       "pinFavoritesOnTop": {
         "title": "Fixar favoritos no topo",
         "description": "Mostrar sempre itens favoritos no topo da lista do histórico."
-      },
+      }
+    },
+    "storage": {
+      "title": "Armazenamento",
       "clearHistoryOnQuit": {
         "title": "Limpar todo o histórico ao sair",
         "description": "Limpar todo o histórico da área de transferência ao encerrar o ClipBook."
@@ -152,7 +156,13 @@
       },
       "retentionPeriod": {
         "title": "Manter histórico",
-        "description": "Selecione por quanto tempo manter o histórico da área de transferência. Itens mais antigos que este período serão removidos, exceto favoritos e itens marcados."
+        "description": "Selecione por quanto tempo manter itens individuais do histórico. Itens mais antigos que este período serão removidos, exceto favoritos e itens marcados.",
+        "text": "Textos",
+        "image": "Imagens",
+        "file": "Arquivos e Pastas",
+        "link": "Links",
+        "email": "E-mails",
+        "color": "Cores"
       }
     },
     "shortcuts": {
@@ -248,6 +258,7 @@
       "openInBrowser": "Abrir no Navegador",
       "copyTextFromImage": "Copiar Texto da Imagem",
       "selectedItems": "{{count}} itens",
+      "item": "{{count}} Item",
       "items": "{{count}} Itens",
       "pasteTo": "Colar {{indicator}} em {{appName}}",
       "pasteToWithReturn": "Colar {{indicator}} em {{appName}} com Enter",
@@ -338,6 +349,7 @@
     }
   },
   "commands": {
+    "item": " Item",
     "items": " Itens",
     "showMoreActions": "Mostrar mais ações",
     "noResultsFound": "Nenhum resultado encontrado.",

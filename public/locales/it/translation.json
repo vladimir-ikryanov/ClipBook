@@ -21,6 +21,7 @@
     "sidebar": {
       "general": "Generale",
       "history": "Cronologia",
+      "storage": "Archiviazione",
       "shortcuts": "Scorciatoie",
       "privacy": "Privacy",
       "license": "Licenza",
@@ -141,7 +142,10 @@
       "pinFavoritesOnTop": {
         "title": "Fissa i preferiti in alto",
         "description": "Mostra sempre gli elementi preferiti in cima alla lista della cronologia."
-      },
+      }
+    },
+    "storage": {
+      "title": "Archiviazione",
       "clearHistoryOnQuit": {
         "title": "Cancella l'intera cronologia all'uscita",
         "description": "Cancella l'intera cronologia degli appunti quando ClipBook viene terminato."
@@ -152,7 +156,13 @@
       },
       "retentionPeriod": {
         "title": "Mantieni cronologia",
-        "description": "Seleziona per quanto tempo mantenere la cronologia degli appunti. Gli elementi più vecchi di questo periodo verranno rimossi, ad eccezione dei preferiti e degli elementi taggati."
+        "description": "Seleziona per quanto tempo mantenere i singoli elementi della cronologia. Gli elementi più vecchi di questo periodo verranno rimossi, ad eccezione dei preferiti e degli elementi taggati.",
+        "text": "Testi",
+        "image": "Immagini",
+        "file": "File e Cartelle",
+        "link": "Link",
+        "email": "Email",
+        "color": "Colori"
       }
     },
     "shortcuts": {
@@ -248,6 +258,7 @@
       "openInBrowser": "Apri nel Browser",
       "copyTextFromImage": "Copia Testo dall'Immagine",
       "selectedItems": "{{count}} elementi",
+      "item": "{{count}} Elemento",
       "items": "{{count}} Elementi",
       "pasteTo": "Incolla {{indicator}} in {{appName}}",
       "pasteToWithReturn": "Incolla {{indicator}} in {{appName}} con Invio",
@@ -338,6 +349,7 @@
     }
   },
   "commands": {
+    "item": " elemento",
     "items": " elementi",
     "showMoreActions": "Mostra altre azioni",
     "noResultsFound": "Nessun risultato trovato.",
