@@ -499,21 +499,29 @@ export default function Commands(props: CommandsProps) {
   }
 
   function canAddToFavorites() {
-    return getSelectedHistoryItems().some(item => {
+    let items = getSelectedHistoryItems()
+    if (items.length === 0) {
+      items.push(getHistoryItem(getActiveHistoryItemIndex()))
+    }
+    return items.some(item => {
       return item && !item.favorite
     })
   }
 
   function canShowDeleteItem() {
-    return getSelectedHistoryItemIndices().length === 1
+    return getSelectedHistoryItemIndices().length === 0
   }
 
   function canShowDeleteItems() {
-    return getSelectedHistoryItemIndices().length > 1
+    return getSelectedHistoryItemIndices().length !== 0
   }
 
   function getMultipleItemsIndicator(): string {
-    let indices = getSelectedHistoryItemIndices().length
+    let items = getSelectedHistoryItems()
+    if (items.length === 0) {
+      items.push(getHistoryItem(getActiveHistoryItemIndex()))
+    }
+    let indices = items.length
     if (indices > 1) {
       return indices + t('commands.items')
     }
@@ -521,6 +529,10 @@ export default function Commands(props: CommandsProps) {
   }
 
   function getItemLabel(): string {
+    let items = getSelectedHistoryItems()
+    if (items.length !== 0) {
+      return ""
+    }
     let index = getActiveHistoryItemIndex()
     let item = getHistoryItem(index);
     if (item) {

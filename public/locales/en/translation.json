@@ -349,6 +349,7 @@
     }
   },
   "commands": {
+    "item": " Item",
     "items": " Items",
     "showMoreActions": "Show more actions",
     "noResultsFound": "No results found.",
