@@ -21,6 +21,7 @@
     "sidebar": {
       "general": "General",
       "history": "History",
+      "storage": "Storage",
       "shortcuts": "Shortcuts",
       "privacy": "Privacy",
       "license": "License",
@@ -141,18 +142,6 @@
       "pinFavoritesOnTop": {
         "title": "Pin favorites on top",
         "description": "Always show favorite items at the top of the history list."
-      },
-      "clearHistoryOnQuit": {
-        "title": "Clear entire history on quit",
-        "description": "Clear the entire clipboard history when ClipBook is terminated."
-      },
-      "clearHistoryOnMacReboot": {
-        "title": "Clear entire history on Mac shutdown/restart",
-        "description": "Clear the entire clipboard history on Mac shutdown/restart."
-      },
-      "retentionPeriod": {
-        "title": "Clear old history items",
-        "description": "Select how long to keep your clipboard history. Items older than this period will be removed, except favorites and tagged items."
       }
     },
     "shortcuts": {
@@ -208,6 +197,27 @@
       "ignoreApps": {
         "title": "Ignore applications",
         "description": "Do not save content copied from the following applications."
+      }
+    },
+    "storage": {
+      "title": "Storage",
+      "clearHistoryOnQuit": {
+        "title": "Clear entire history on quit",
+        "description": "Clear the entire clipboard history when ClipBook is terminated."
+      },
+      "clearHistoryOnMacReboot": {
+        "title": "Clear entire history on Mac shutdown/restart",
+        "description": "Clear the entire clipboard history on Mac shutdown/restart."
+      },
+      "retentionPeriod": {
+        "title": "Keep history",
+        "description": "Select how long to keep individual history items. Items older than this period will be removed, except favorites and tagged items.",
+        "text": "Texts",
+        "image": "Images",
+        "file": "Files & Folders",
+        "link": "Links",
+        "email": "Emails",
+        "color": "Colors"
       }
     },
     "license": {

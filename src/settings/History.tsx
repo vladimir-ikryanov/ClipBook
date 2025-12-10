@@ -6,22 +6,16 @@ import {
   CopyAndMergeSeparator,
   DoubleClickStrategy,
   NumberActionStrategy,
-  prefGetClearHistoryOnMacReboot,
-  prefGetClearHistoryOnQuit,
   prefGetCopyAndMergeEnabled,
   prefGetCopyAndMergeSeparator,
   prefGetCopyToClipboardAfterMerge,
   prefGetKeepFavoritesOnClearHistory,
   prefShouldPinFavoritesOnTop,
   prefGetWarnOnClearHistory, 
-  prefIsClearHistoryOnMacRebootManaged, 
-  prefIsClearHistoryOnQuitManaged,
   prefIsKeepFavoritesOnClearHistoryManaged, 
   prefIsPinFavoritesOnTopManaged, 
   prefIsShowPreviewForLinksManaged,
   prefIsWarnOnClearHistoryManaged,
-  prefSetClearHistoryOnMacReboot,
-  prefSetClearHistoryOnQuit,
   prefSetCopyAndMergeEnabled,
   prefSetCopyAndMergeSeparator,
   prefSetCopyOnDoubleClick,
@@ -40,11 +34,6 @@ import {
   prefShouldShowPreviewForLinks,
   prefShouldTreatDigitNumbersAsColor,
   prefShouldUpdateHistoryAfterAction,
-  prefGetRetentionPeriod,
-  prefSetRetentionPeriod,
-  ItemsToDeleteStrategy,
-  prefGetItemsToDeleteStrategy,
-  prefSetItemsToDeleteStrategy,
 } from "@/pref";
 import {
   Select,
@@ -62,7 +51,6 @@ import {
 import {ChevronsUpDown} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import { Trans, useTranslation } from 'react-i18next';
-import { RETENTION_STEPS, RetentionPeriodSlider } from "./RetentionPeriodSlider";
 
 declare const closeSettingsWindow: () => void;
 
@@ -79,27 +67,18 @@ export default function History() {
     [NumberActionStrategy.PASTE]: t('settings.history.numberAction.paste'),
   }
 
-  const itemsToDeleteStrategyLabels = {
-    [ItemsToDeleteStrategy.ALL]: t('settings.history.itemsToDelete.all'),
-    [ItemsToDeleteStrategy.IMAGES]: t('settings.history.itemsToDelete.images'),
-  }
-
   const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory())
   const [keepFavoritesOnClearHistory, setKeepFavoritesOnClearHistory] = useState(prefGetKeepFavoritesOnClearHistory())
   const [pinFavoritesOnTop, setPinFavoritesOnTop] = useState(prefShouldPinFavoritesOnTop())
   const [copyAndMergeEnabled, setCopyAndMergeEnabled] = useState(prefGetCopyAndMergeEnabled())
   const [copyToClipboardAfterMerge, setCopyToClipboardAfterMerge] = useState(prefGetCopyToClipboardAfterMerge())
   const [copyAndMergeSeparator, setCopyAndMergeSeparator] = useState(prefGetCopyAndMergeSeparator())
-  const [clearHistoryOnQuit, setClearHistoryOnQuit] = useState(prefGetClearHistoryOnQuit())
-  const [clearHistoryOnMacReboot, setClearHistoryOnMacReboot] = useState(prefGetClearHistoryOnMacReboot())
   const [treatDigitNumbersAsColor, setTreatDigitNumbersAsColor] = useState(prefShouldTreatDigitNumbersAsColor())
   const [showPreviewForLinks, setShowPreviewForLinks] = useState(prefShouldShowPreviewForLinks())
   const [updateHistoryAfterAction, setUpdateHistoryAfterAction] = useState(prefShouldUpdateHistoryAfterAction())
   const [pasteOnClick, setPasteOnClick] = useState(prefShouldPasteOnClick())
   const [doubleClickStrategy, setDoubleClickStrategy] = useState(prefShouldCopyOnDoubleClick() ? DoubleClickStrategy.COPY : DoubleClickStrategy.PASTE)
   const [numberActionStrategy, setNumberActionStrategy] = useState(prefShouldCopyOnNumberAction() ? NumberActionStrategy.COPY : NumberActionStrategy.PASTE)
-  const [itemsToDeleteStrategy, setItemsToDeleteStrategy] = useState(prefGetItemsToDeleteStrategy())
-  const [retentionPeriod, setRetentionPeriod] = useState(prefGetRetentionPeriod())
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -143,16 +122,6 @@ export default function History() {
     prefSetCopyAndMergeSeparator(separator)
   }
 
-  function handleClearHistoryOnQuitChange(clearHistoryOnQuit: boolean) {
-    setClearHistoryOnQuit(clearHistoryOnQuit)
-    prefSetClearHistoryOnQuit(clearHistoryOnQuit)
-  }
-
-  function handleClearHistoryOnMacRebootChange(clearHistoryOnMacReboot: boolean) {
-    setClearHistoryOnMacReboot(clearHistoryOnMacReboot)
-    prefSetClearHistoryOnMacReboot(clearHistoryOnMacReboot)
-  }
-
   function handleTreatDigitNumbersAsColorChange(treatDigitNumbersAsColor: boolean) {
     setTreatDigitNumbersAsColor(treatDigitNumbersAsColor)
     prefSetTreatDigitNumbersAsColor(treatDigitNumbersAsColor)
@@ -181,16 +150,6 @@ export default function History() {
   function handleNumberActionStrategyChange(numberActionStrategy: string) {
     setNumberActionStrategy(numberActionStrategy as NumberActionStrategy)
     prefSetCopyOnNumberAction(numberActionStrategy === NumberActionStrategy.COPY)
-  }
-
-  function handleItemsToDeleteStrategyChange(itemsToDeleteStrategy: string) {
-    setItemsToDeleteStrategy(itemsToDeleteStrategy as ItemsToDeleteStrategy)
-    prefSetItemsToDeleteStrategy(itemsToDeleteStrategy as ItemsToDeleteStrategy)
-  }
-
-  function handleRetentionPeriodChange(retentionPeriod: number) {
-    setRetentionPeriod(retentionPeriod)
-    prefSetRetentionPeriod(retentionPeriod)
   }
 
   return (
@@ -412,71 +371,6 @@ export default function History() {
               <Switch id="keepFavoritesOnClearAll" checked={keepFavoritesOnClearHistory}
                       onCheckedChange={handleKeepFavoritesOnClearHistoryChange}
                       disabled={prefIsKeepFavoritesOnClearHistoryManaged()}/>
-            </div>
-
-            <hr/>
-
-            <div className="flex flex-col">
-              <div className="flex items-center justify-between space-x-10 pb-1">
-                <Label className="flex flex-col text-base">
-                  <span className="">{t('settings.history.retentionPeriod.title')}</span>
-                  <span className="text-neutral-500 font-normal text-sm">
-                    {t('settings.history.retentionPeriod.description')}
-                  </span>
-                </Label>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="dropdown" className="px-4 outline-none">
-                      {itemsToDeleteStrategyLabels[itemsToDeleteStrategy]}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="p-1.5 bg-actions-background" align="end">
-                    <DropdownMenuRadioGroup value={itemsToDeleteStrategy}
-                      onValueChange={handleItemsToDeleteStrategyChange}>
-                      <DropdownMenuRadioItem value={ItemsToDeleteStrategy.ALL}
-                        className="py-2 pr-4 pl-10">
-                        <div className="flex flex-col">
-                          <span>{itemsToDeleteStrategyLabels[ItemsToDeleteStrategy.ALL]}</span>
-                        </div>
-                      </DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value={ItemsToDeleteStrategy.IMAGES}
-                        className="py-2 pr-4 pl-10">
-                        <div className="flex flex-col">
-                          <span>{itemsToDeleteStrategyLabels[ItemsToDeleteStrategy.IMAGES]}</span>
-                        </div>
-                      </DropdownMenuRadioItem>
-
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="bg-settings-tableRow rounded-lg p-4 mt-4">
-                <RetentionPeriodSlider value={retentionPeriod} onValueChange={handleRetentionPeriodChange} />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between space-x-20 py-1">
-              <Label htmlFor="clearHistoryOnQuit" className="flex flex-col text-base">
-                <span className="">{t('settings.history.clearHistoryOnQuit.title')}</span>
-                <span className="text-neutral-500 font-normal text-sm">
-                  {t('settings.history.clearHistoryOnQuit.description')}
-                </span>
-              </Label>
-              <Switch id="clearHistoryOnQuit" checked={clearHistoryOnQuit}
-                      onCheckedChange={handleClearHistoryOnQuitChange}
-                      disabled={prefIsClearHistoryOnQuitManaged()}/>
-            </div>
-            <div className="flex items-center justify-between space-x-20 py-1">
-              <Label htmlFor="clearHistoryOnMacReboot" className="flex flex-col text-base">
-                <span className="">{t('settings.history.clearHistoryOnMacReboot.title')}</span>
-                <span className="text-neutral-500 font-normal text-sm">
-                  {t('settings.history.clearHistoryOnMacReboot.description')}
-                </span>
-              </Label>
-              <Switch id="clearHistoryOnMacReboot" checked={clearHistoryOnMacReboot}
-                      onCheckedChange={handleClearHistoryOnMacRebootChange}
-                      disabled={prefIsClearHistoryOnMacRebootManaged()}/>
             </div>
           </div>
         </div>

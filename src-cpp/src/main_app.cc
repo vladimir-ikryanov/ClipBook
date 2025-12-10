@@ -884,11 +884,41 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
     }).detach();
   });
 
-  window->putProperty("saveRetentionPeriod", [this](int period) -> void {
-    settings_->saveRetentionPeriod(period);
+  window->putProperty("saveRetentionPeriodText", [this](int period) -> void {
+    settings_->saveRetentionPeriodText(period);
   });
-  window->putProperty("getRetentionPeriod", [this]() -> int {
-    return settings_->getRetentionPeriod();
+  window->putProperty("getRetentionPeriodText", [this]() -> int {
+    return settings_->getRetentionPeriodText();
+  });
+  window->putProperty("saveRetentionPeriodImage", [this](int period) -> void {
+    settings_->saveRetentionPeriodImage(period);
+  });
+  window->putProperty("getRetentionPeriodImage", [this]() -> int {
+    return settings_->getRetentionPeriodImage();
+  });
+  window->putProperty("saveRetentionPeriodFile", [this](int period) -> void {
+    settings_->saveRetentionPeriodFile(period);
+  });
+  window->putProperty("getRetentionPeriodFile", [this]() -> int {
+    return settings_->getRetentionPeriodFile();
+  });
+  window->putProperty("saveRetentionPeriodLink", [this](int period) -> void {
+    settings_->saveRetentionPeriodLink(period);
+  });
+  window->putProperty("getRetentionPeriodLink", [this]() -> int {
+    return settings_->getRetentionPeriodLink();
+  });
+  window->putProperty("saveRetentionPeriodEmail", [this](int period) -> void {
+    settings_->saveRetentionPeriodEmail(period);
+  });
+  window->putProperty("getRetentionPeriodEmail", [this]() -> int {
+    return settings_->getRetentionPeriodEmail();
+  });
+  window->putProperty("saveRetentionPeriodColor", [this](int period) -> void {
+    settings_->saveRetentionPeriodColor(period);
+  });
+  window->putProperty("getRetentionPeriodColor", [this]() -> int {
+    return settings_->getRetentionPeriodColor();
   });
 
   window->putProperty("saveTheme", [this](std::string theme) -> void {
@@ -1037,13 +1067,6 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
   });
   window->putProperty("isOpenWindowStrategyManaged", [this]() -> bool {
     return settings_->isOpenWindowStrategyManaged();
-  });
-
-  window->putProperty("saveItemsToDeleteStrategy", [this](std::string strategy) -> void {
-    settings_->saveItemsToDeleteStrategy(std::move(strategy));
-  });
-  window->putProperty("getItemsToDeleteStrategy", [this]() -> std::string {
-    return settings_->getItemsToDeleteStrategy();
   });
 
   window->putProperty("setPlaySoundOnCopy", [this](bool play) -> void {
@@ -1702,14 +1725,21 @@ std::string MainApp::i18n(const std::string &key) {
 }
 
 void MainApp::checkRetentionPeriod() {
-  auto retention_period_index = settings_->getRetentionPeriod();
-  if (retention_period_index >= 0 &&
-      retention_period_index < kRetentionPeriods.size()) {
-    auto days = kRetentionPeriods[retention_period_index];
+  checkRetentionPeriod(settings_->getRetentionPeriodText(), "Text");
+  checkRetentionPeriod(settings_->getRetentionPeriodImage(), "Image");
+  checkRetentionPeriod(settings_->getRetentionPeriodFile(), "File");
+  checkRetentionPeriod(settings_->getRetentionPeriodLink(), "Link");
+  checkRetentionPeriod(settings_->getRetentionPeriodEmail(), "Email");
+  checkRetentionPeriod(settings_->getRetentionPeriodColor(), "Color");
+}
+
+void MainApp::checkRetentionPeriod(int index, const std::string &clipType) {
+  if (index >= 0 && index < kRetentionPeriods.size()) {
+    auto days = kRetentionPeriods[index];
     if (days > 0) {
       auto frame = app_window_->mainFrame();
       if (frame) {
-        frame->executeJavaScript("clearHistoryOlderThan(" +
+        frame->executeJavaScript("clear" + clipType + "OlderThan(" +
                                  std::to_string(days) + ")");
       }
     }

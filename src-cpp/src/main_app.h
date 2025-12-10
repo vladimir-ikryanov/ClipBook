@@ -95,6 +95,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void previewLink(const std::string &url);
   void saveImageAsFile(const std::string &imageFileName, int imageWidth, int imageHeight);
   void checkRetentionPeriod();
+  void checkRetentionPeriod(int index, const std::string &clipType);
 
   void onLanguageChanged();
   std::string i18n(const std::string &key);

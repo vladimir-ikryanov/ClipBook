@@ -9,6 +9,7 @@ import {SettingsSidebarItem, SettingsSidebarItemType} from "@/settings/SettingsS
 import {useState} from "react";
 import {
   CogIcon,
+  HardDriveIcon,
   InfoIcon,
   KeyboardIcon,
   KeyRoundIcon,
@@ -61,6 +62,11 @@ export default function SettingsSidebar(props: SettingsSidebarProps) {
                                      icon={ShieldCheckIcon}
                                      isSelected={selectedItemType === "Privacy"}
                                      onSelect={() => handleSelect("Privacy")}/>
+                <SettingsSidebarItem type={"Storage"}
+                                     url={"/"}
+                                     icon={HardDriveIcon}
+                                     isSelected={selectedItemType === "Storage"}
+                                     onSelect={() => handleSelect("Storage")}/>
                 <SettingsSidebarItem type={"License"}
                                      url={"/"}
                                      icon={KeyRoundIcon}

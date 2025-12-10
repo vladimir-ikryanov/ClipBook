@@ -302,8 +302,32 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
-  async function clearHistoryOlderThan(days: number) {
-    let items = await clearOlderThan(days)
+  async function clearTextOlderThan(days: number) {
+    clearClipOlderThan(ClipType.Text, days)
+  }
+
+  async function clearImageOlderThan(days: number) {
+    clearClipOlderThan(ClipType.Image, days)
+  }
+
+  async function clearFileOlderThan(days: number) {
+    clearClipOlderThan(ClipType.File, days)
+  }
+
+  async function clearLinkOlderThan(days: number) {
+    clearClipOlderThan(ClipType.Link, days)
+  }
+
+  async function clearEmailOlderThan(days: number) {
+    clearClipOlderThan(ClipType.Email, days)
+  }
+
+  async function clearColorOlderThan(days: number) {
+    clearClipOlderThan(ClipType.Color, days)
+  }
+
+  async function clearClipOlderThan(clipType: ClipType, days: number) {
+    let items = await clearOlderThan(clipType, days)
     setHistory(items)
     resetPasteNextItemIndex()
     // If the history is not empty, update the preview text to the new active item.
@@ -1601,7 +1625,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
   (window as any).mergeClipboardData = mergeClipboardData;
   (window as any).copyToClipboardAfterMerge = copyToClipboardAfterMerge;
   (window as any).clearHistory = clearHistory;
-  (window as any).clearHistoryOlderThan = clearHistoryOlderThan;
+  (window as any).clearTextOlderThan = clearTextOlderThan;
+  (window as any).clearImageOlderThan = clearImageOlderThan;
+  (window as any).clearFileOlderThan = clearFileOlderThan;
+  (window as any).clearLinkOlderThan = clearLinkOlderThan;
+  (window as any).clearEmailOlderThan = clearEmailOlderThan;
+  (window as any).clearColorOlderThan = clearColorOlderThan;
   (window as any).activateApp = activateApp;
   (window as any).pasteNextItemToActiveApp = pasteNextItemToActiveApp;
 

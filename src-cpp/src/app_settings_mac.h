@@ -128,11 +128,23 @@ class AppSettingsMac : public AppSettings {
   bool shouldPinFavoritesOnTop() override;
   bool isPinFavoritesOnTopManaged() override;
 
-  void saveRetentionPeriod(int period) override;
-  int getRetentionPeriod() override;
+  void saveRetentionPeriodText(int period) override;
+  int getRetentionPeriodText() override;
 
-  void saveItemsToDeleteStrategy(std::string strategy) override;
-  std::string getItemsToDeleteStrategy() override;
+  void saveRetentionPeriodImage(int period) override;
+  int getRetentionPeriodImage() override;
+
+  void saveRetentionPeriodFile(int period) override;
+  int getRetentionPeriodFile() override;
+
+  void saveRetentionPeriodLink(int period) override;
+  int getRetentionPeriodLink() override;
+
+  void saveRetentionPeriodEmail(int period) override;
+  int getRetentionPeriodEmail() override;
+
+  void saveRetentionPeriodColor(int period) override;
+  int getRetentionPeriodColor() override;
 
   // Shortcuts.
 

@@ -43,8 +43,12 @@ NSString *prefAlwaysDisplay = @"always_display";
 NSString *prefCopyOnDoubleClick = @"copy_on_double_click";
 NSString *prefCopyOnNumberAction = @"copy_on_number_action";
 NSString *prefPinFavoritesOnTop = @"pin_favorites_on_top";
-NSString *prefRetentionPeriod = @"retention_period_index";
-NSString *prefItemsToDeleteStrategy = @"items_to_delete_strategy";
+NSString *prefRetentionPeriodText = @"retention_period_text";
+NSString *prefRetentionPeriodImage = @"retention_period_image";
+NSString *prefRetentionPeriodFile = @"retention_period_file";
+NSString *prefRetentionPeriodLink = @"retention_period_link";
+NSString *prefRetentionPeriodEmail = @"retention_period_email";
+NSString *prefRetentionPeriodColor = @"retention_period_color";
 
 NSString *prefLastSystemBootTime = @"last_system_boot_time";
 NSString *prefLicenseKey = @"license_key";
@@ -139,8 +143,15 @@ bool prefReadBoolValue(NSString *key, bool defaultValue) {
 
 AppSettingsMac::AppSettingsMac() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults registerDefaults:@{prefRetentionPeriod: [NSNumber numberWithInt:kRetentionPeriods.size() - 1]}];
-  [defaults registerDefaults:@{prefItemsToDeleteStrategy: @"all"}];
+  [defaults registerDefaults:@{
+    prefRetentionPeriodText : [NSNumber numberWithInt:kRetentionPeriods.size() - 1],
+    prefRetentionPeriodImage : [NSNumber numberWithInt:kRetentionPeriods.size() - 1],
+    prefRetentionPeriodFile : [NSNumber numberWithInt:kRetentionPeriods.size() - 1],
+    prefRetentionPeriodLink : [NSNumber numberWithInt:kRetentionPeriods.size() - 1],
+    prefRetentionPeriodEmail : [NSNumber numberWithInt:kRetentionPeriods.size() - 1],
+    prefRetentionPeriodColor : [NSNumber numberWithInt:kRetentionPeriods.size() - 1],
+  }];
+  [defaults synchronize];
 }
 
 void AppSettingsMac::saveLastSystemBootTime(long time) {
@@ -1323,31 +1334,86 @@ bool AppSettingsMac::isPinFavoritesOnTopManaged() {
   return isManaged(prefPinFavoritesOnTop);
 }
 
-void AppSettingsMac::saveRetentionPeriod(int period) {
+void AppSettingsMac::saveRetentionPeriodText(int period) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setInteger:period forKey:prefRetentionPeriod];
+  [defaults setInteger:period forKey:prefRetentionPeriodText];
   [defaults synchronize];
 }
 
-int AppSettingsMac::getRetentionPeriod() {
+int AppSettingsMac::getRetentionPeriodText() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:prefRetentionPeriod] != nil) {
-    return [defaults integerForKey:prefRetentionPeriod];
+  if ([defaults objectForKey:prefRetentionPeriodText] != nil) {
+    return [defaults integerForKey:prefRetentionPeriodText];
   }
   return kRetentionPeriods.size() - 1;
 }
 
-void AppSettingsMac::saveItemsToDeleteStrategy(std::string strategy) {
+void AppSettingsMac::saveRetentionPeriodImage(int period) {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setObject:[NSString stringWithUTF8String:strategy.c_str()] forKey:prefItemsToDeleteStrategy];
+  [defaults setInteger:period forKey:prefRetentionPeriodImage];
   [defaults synchronize];
 }
 
-std::string AppSettingsMac::getItemsToDeleteStrategy() {
+int AppSettingsMac::getRetentionPeriodImage() {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  NSString *strategy = [defaults objectForKey:prefItemsToDeleteStrategy];
-  if (strategy != nil) {
-    return {[strategy UTF8String]};
+  if ([defaults objectForKey:prefRetentionPeriodImage] != nil) {
+    return [defaults integerForKey:prefRetentionPeriodImage];
   }
-  return "all";
+  return kRetentionPeriods.size() - 1;
+}
+
+void AppSettingsMac::saveRetentionPeriodFile(int period) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setInteger:period forKey:prefRetentionPeriodFile];
+  [defaults synchronize];
+}
+
+int AppSettingsMac::getRetentionPeriodFile() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefRetentionPeriodFile] != nil) {
+    return [defaults integerForKey:prefRetentionPeriodFile];
+  }
+  return kRetentionPeriods.size() - 1;
+}
+
+void AppSettingsMac::saveRetentionPeriodLink(int period) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setInteger:period forKey:prefRetentionPeriodLink];
+  [defaults synchronize];
+}
+
+int AppSettingsMac::getRetentionPeriodLink() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefRetentionPeriodLink] != nil) {
+    return [defaults integerForKey:prefRetentionPeriodLink];
+  }
+  return kRetentionPeriods.size() - 1;
+}
+
+void AppSettingsMac::saveRetentionPeriodEmail(int period) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setInteger:period forKey:prefRetentionPeriodEmail];
+  [defaults synchronize];
+}
+
+int AppSettingsMac::getRetentionPeriodEmail() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefRetentionPeriodEmail] != nil) {
+    return [defaults integerForKey:prefRetentionPeriodEmail];
+  }
+  return kRetentionPeriods.size() - 1;
+}
+
+void AppSettingsMac::saveRetentionPeriodColor(int period) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setInteger:period forKey:prefRetentionPeriodColor];
+  [defaults synchronize];
+}
+
+int AppSettingsMac::getRetentionPeriodColor() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefRetentionPeriodColor] != nil) {
+    return [defaults integerForKey:prefRetentionPeriodColor];
+  }
+  return kRetentionPeriods.size() - 1;
 }

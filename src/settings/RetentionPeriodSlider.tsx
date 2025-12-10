@@ -1,5 +1,8 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { ClipType } from "@/db"
+import { useTranslation } from 'react-i18next';
+import { FileIcon, ImageIcon, LinkIcon, MailIcon, PaletteIcon, TextIcon } from "lucide-react";
 
 // Define all the steps in order
 const RETENTION_STEPS = [
@@ -82,16 +85,20 @@ function getValueFromPosition(position: number): number {
 }
 
 interface RetentionPeriodSliderProps {
+  clipType: ClipType
   value?: number
   onValueChange?: (value: number) => void
   className?: string
 }
 
 export function RetentionPeriodSlider({
+  clipType,
   value = 0,
   onValueChange,
   className,
 }: RetentionPeriodSliderProps) {
+  const { t } = useTranslation();
+
   const trackRef = React.useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = React.useState(false)
 
@@ -199,32 +206,68 @@ export function RetentionPeriodSlider({
     [value, onValueChange]
   )
 
+  function renderClipType() {
+    if (clipType === ClipType.Text) {
+      return <div className="flex gap-2">
+        <TextIcon className="h-6 w-6 text-primary-foreground"/>
+        <span className="text-base text-foreground">
+          {t('settings.storage.retentionPeriod.text')}
+        </span>
+      </div>
+    }
+    if (clipType === ClipType.Image) {
+      return <div className="flex gap-2">
+        <ImageIcon className="h-6 w-6 text-primary-foreground"/>
+        <span className="text-base text-foreground">
+          {t('settings.storage.retentionPeriod.image')}
+        </span>
+      </div>
+    }
+    if (clipType === ClipType.File) {
+      return <div className="flex gap-2">
+        <FileIcon className="h-6 w-6 text-primary-foreground"/>
+        <span className="text-base text-foreground">
+          {t('settings.storage.retentionPeriod.file')}
+        </span>
+      </div>
+    }
+    if (clipType === ClipType.Link) {
+      return <div className="flex gap-2">
+        <LinkIcon className="h-6 w-6 text-primary-foreground"/>
+        <span className="text-base text-foreground">
+          {t('settings.storage.retentionPeriod.link')}
+        </span>
+      </div>
+    }
+    if (clipType === ClipType.Email) {
+      return <div className="flex gap-2">
+        <MailIcon className="h-6 w-6 text-primary-foreground"/>
+        <span className="text-base text-foreground">
+          {t('settings.storage.retentionPeriod.email')}
+        </span>
+      </div>
+    }
+    if (clipType === ClipType.Color) {
+      return <div className="flex gap-2">
+        <PaletteIcon className="h-6 w-6 text-primary-foreground"/>
+        <span className="text-sm font-medium text-foreground">
+          {t('settings.storage.retentionPeriod.color')}
+        </span>
+      </div>
+    }
+    return ""
+  }
+
   return (
-    <div className={cn("w-full space-y-4", className)}>
-      {/* Labels above the slider */}
-      <div className="relative h-5 px-2.5">
-        {KEY_POINTS.map((point) => {
-          // First label (Day) aligns left, last label (Forever) aligns right, others center
-          let transform = "translateX(-50%)"
-          if (point.position === 0) {
-            transform = "translateX(0%)"
-          } else if (point.position === 100) {
-            transform = "translateX(-100%)"
-          }
-          
-          return (
-            <div
-              key={point.value}
-              className="absolute text-sm font-medium text-foreground"
-              style={{
-                left: `${point.position}%`,
-                transform,
-              }}
-            >
-              {point.label}
-            </div>
-          )
-        })}
+    <div className={cn("w-full space-y-3.5", className)}>
+      {/* Label and current selection display above slider */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-medium text-foreground">
+          {renderClipType()}
+        </div>
+        <div className="text-sm text-neutral-500">
+          {currentStep?.label}
+        </div>
       </div>
 
       {/* Custom slider */}
@@ -285,7 +328,7 @@ export function RetentionPeriodSlider({
         <div
           className={cn(
             "absolute top-1/2 -translate-y-1/2",
-            "h-4 w-4 rounded-full border-2 border-slider-thumb-border bg-slider-thumb-background",
+            "h-4 w-5 rounded-md border-1.5 shadow border-slider-thumb-border bg-slider-thumb-background",
             "ring-offset-background",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             isDragging && "scale-110"
@@ -297,9 +340,30 @@ export function RetentionPeriodSlider({
         />
       </div>
 
-      {/* Current selection display */}
-      <div className="text-center text-sm text-neutral-500">
-        {currentStep?.label}
+      {/* Labels below the slider */}
+      <div className="relative h-4 px-2.5">
+        {KEY_POINTS.map((point) => {
+          // First label (Day) aligns left, last label (Forever) aligns right, others center
+          let transform = "translateX(-50%)"
+          if (point.position === 0) {
+            transform = "translateX(0%)"
+          } else if (point.position === 100) {
+            transform = "translateX(-100%)"
+          }
+          
+          return (
+            <div
+              key={point.value}
+              className="absolute text-sm font-medium text-neutral-500"
+              style={{
+                left: `${point.position}%`,
+                transform,
+              }}
+            >
+              {point.label}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

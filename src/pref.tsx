@@ -103,11 +103,18 @@ declare const setCopyOnNumberAction: (copy: boolean) => void;
 declare const shouldCopyOnNumberAction: () => boolean;
 declare const isCopyOnNumberActionManaged: () => boolean;
 
-declare const saveRetentionPeriod: (period: number) => void;
-declare const getRetentionPeriod: () => number;
-
-declare const saveItemsToDeleteStrategy: (strategy: string) => void;
-declare const getItemsToDeleteStrategy: () => string;
+declare const saveRetentionPeriodText: (period: number) => void;
+declare const getRetentionPeriodText: () => number;
+declare const saveRetentionPeriodImage: (period: number) => void;
+declare const getRetentionPeriodImage: () => number;
+declare const saveRetentionPeriodFile: (period: number) => void;
+declare const getRetentionPeriodFile: () => number;
+declare const saveRetentionPeriodLink: (period: number) => void;
+declare const getRetentionPeriodLink: () => number;
+declare const saveRetentionPeriodEmail: (period: number) => void;
+declare const getRetentionPeriodEmail: () => number;
+declare const saveRetentionPeriodColor: (period: number) => void;
+declare const getRetentionPeriodColor: () => number;
 
 declare const saveOpenAppShortcut: (shortcut: string) => void;
 declare const getOpenAppShortcut: () => string;
@@ -206,11 +213,6 @@ export enum OpenWindowStrategy {
 export enum DoubleClickStrategy {
   COPY = "copy",
   PASTE = "paste",
-}
-
-export enum ItemsToDeleteStrategy {
-  ALL = "all",
-  IMAGES = "images",
 }
 
 export enum NumberActionStrategy {
@@ -869,27 +871,50 @@ export function prefGetSelectAllShortcut() {
   return "MetaLeft + KeyA"
 }
 
-export function prefGetRetentionPeriod() {
-  return getRetentionPeriod()
+export function prefGetRetentionPeriodText() {
+  return getRetentionPeriodText()
 }
 
-export function prefSetRetentionPeriod(period: number) {
-  saveRetentionPeriod(period)
+export function prefSetRetentionPeriodText(period: number) {
+  saveRetentionPeriodText(period)
 }
 
-export function prefGetItemsToDeleteStrategy(): ItemsToDeleteStrategy {
-  let strategy = getItemsToDeleteStrategy()
-  if (strategy === null || strategy == "") {
-    return ItemsToDeleteStrategy.ALL
-  }
-  if (strategy === ItemsToDeleteStrategy.ALL) {
-    return ItemsToDeleteStrategy.ALL
-  } else if (strategy === ItemsToDeleteStrategy.IMAGES) {
-    return ItemsToDeleteStrategy.IMAGES
-  }
-  return ItemsToDeleteStrategy.ALL
+export function prefGetRetentionPeriodImage() {
+  return getRetentionPeriodImage()
 }
 
-export function prefSetItemsToDeleteStrategy(strategy: ItemsToDeleteStrategy) {
-  saveItemsToDeleteStrategy(strategy.toString())
+export function prefSetRetentionPeriodImage(period: number) {
+  saveRetentionPeriodImage(period)
+}
+
+export function prefGetRetentionPeriodFile() {
+  return getRetentionPeriodFile()
+}
+
+export function prefSetRetentionPeriodFile(period: number) {
+  saveRetentionPeriodFile(period)
+}
+
+export function prefGetRetentionPeriodLink() {
+  return getRetentionPeriodLink()
+}
+
+export function prefSetRetentionPeriodLink(period: number) {
+  saveRetentionPeriodLink(period)
+}
+
+export function prefGetRetentionPeriodEmail() {
+  return getRetentionPeriodEmail()
+}
+
+export function prefSetRetentionPeriodEmail(period: number) {
+  saveRetentionPeriodEmail(period)
+}
+
+export function prefGetRetentionPeriodColor() {
+  return getRetentionPeriodColor()
+}
+
+export function prefSetRetentionPeriodColor(period: number) {
+  saveRetentionPeriodColor(period)
 }

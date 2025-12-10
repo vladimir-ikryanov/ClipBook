@@ -146,11 +146,23 @@ public:
   virtual bool shouldPinFavoritesOnTop() = 0;
   virtual bool isPinFavoritesOnTopManaged() = 0;
 
-  virtual void saveRetentionPeriod(int period) = 0;
-  virtual int getRetentionPeriod() = 0;
+  virtual void saveRetentionPeriodText(int period) = 0;
+  virtual int getRetentionPeriodText() = 0;
 
-  virtual void saveItemsToDeleteStrategy(std::string strategy) = 0;
-  virtual std::string getItemsToDeleteStrategy() = 0;
+  virtual void saveRetentionPeriodImage(int period) = 0;
+  virtual int getRetentionPeriodImage() = 0;
+
+  virtual void saveRetentionPeriodFile(int period) = 0;
+  virtual int getRetentionPeriodFile() = 0;
+
+  virtual void saveRetentionPeriodLink(int period) = 0;
+  virtual int getRetentionPeriodLink() = 0;
+
+  virtual void saveRetentionPeriodEmail(int period) = 0;
+  virtual int getRetentionPeriodEmail() = 0;
+
+  virtual void saveRetentionPeriodColor(int period) = 0;
+  virtual int getRetentionPeriodColor() = 0;
 
   // Shortcuts.
 

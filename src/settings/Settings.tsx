@@ -9,6 +9,7 @@ import SettingsSidebar from "@/settings/SettingsSidebar";
 import {SettingsSidebarItemType} from "@/settings/SettingsSidebarItem";
 import {useState} from "react";
 import About from "@/settings/About";
+import Storage from "@/settings/Storage";
 
 interface SettingsProps {
   selectedItemType: SettingsSidebarItemType
@@ -30,6 +31,9 @@ export default function Settings(props: SettingsProps) {
           }
           {
               selectedItemType === "History" && <History/>
+          }
+          {
+              selectedItemType === "Storage" && <Storage/>
           }
           {
               selectedItemType === "Shortcuts" && <Shortcuts/>
