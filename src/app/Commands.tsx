@@ -70,10 +70,10 @@ import {
   isTextItem,
   AppInfo,
   getDefaultApp,
-  getFileOrImagePath, 
-  fileExists, 
-  getFilterQuery, 
-  isFilterActive, 
+  getFileOrImagePath,
+  fileExists,
+  getFilterQuery,
+  isFilterActive,
   FinderIcon,
   getActiveHistoryItemIndex,
   getHistoryItem
@@ -323,7 +323,7 @@ export default function Commands(props: CommandsProps) {
   }
 
   function canShowCopyToClipboard() {
-    return getSelectedHistoryItemIndices().length === 1
+    return getSelectedHistoryItemIndices().length === 0
   }
 
   function canShowCopyObjectToClipboard() {
@@ -335,7 +335,7 @@ export default function Commands(props: CommandsProps) {
   }
 
   function isFile() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       return item && item.type === ClipType.File
@@ -344,7 +344,7 @@ export default function Commands(props: CommandsProps) {
   }
 
   function isImage() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       return item && item.type === ClipType.Image
@@ -384,7 +384,7 @@ export default function Commands(props: CommandsProps) {
   }
 
   function canPasteWithTransformation() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       if (item) {
@@ -399,7 +399,7 @@ export default function Commands(props: CommandsProps) {
   }
 
   function isObjectSelected() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       if (item && item.type === ClipType.Text) {
@@ -417,7 +417,7 @@ export default function Commands(props: CommandsProps) {
   }
 
   function canShowOpenInBrowser() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       return item?.type === ClipType.Link
@@ -441,11 +441,11 @@ export default function Commands(props: CommandsProps) {
   }
 
   function canShowRenameItem() {
-    return getSelectedHistoryItemIndices().length === 1
+    return getSelectedHistoryItemIndices().length === 0
   }
 
   function canShowFormatText() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       return isTextItem(item)
@@ -454,7 +454,7 @@ export default function Commands(props: CommandsProps) {
   }
 
   function canShowSplit() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       if (isTextItem(item)) {
@@ -468,7 +468,7 @@ export default function Commands(props: CommandsProps) {
   }
 
   function canShowCopyTextFromImage() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       if (item) {

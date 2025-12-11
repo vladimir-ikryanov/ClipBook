@@ -40,8 +40,8 @@ import {
   resetFilter,
   setShouldUpdateHistory,
   fileExists,
-  getNextItemIndexForPaste, 
-  resetPasteNextItemIndex, 
+  getNextItemIndexForPaste,
+  resetPasteNextItemIndex,
   requestHistoryUpdate,
   setPinFavoritesOnTop,
   clearOlderThan,
@@ -306,7 +306,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
         scrollToActiveItem()
       }
     }
-    // The history can be cleared on app quit. Since it's asynchronous, 
+    // The history can be cleared on app quit. Since it's asynchronous,
     // we need to notify the app that it's ready to quit when the history is cleared.
     notifyAppReadyToQuit()
   }
@@ -1116,7 +1116,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       let item = getHistoryItem(index)
       if (item && item.type === ClipType.File) {
         copyToClipboard(item.filePath, "", "", "", "", false)
-      } 
+      }
     }
     focusSearchField()
   }
@@ -1312,7 +1312,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function handleCopyToClipboard() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       if (item) {
@@ -1323,7 +1323,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function handleCopyObjectToClipboard() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       if (item) {
@@ -1345,7 +1345,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleCopyTextFromImage() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       if (item) {
@@ -1366,7 +1366,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleOpenInBrowser() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       if (item) {
@@ -1377,7 +1377,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleShowInFinder() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       if (item) {
@@ -1443,7 +1443,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleQuickLook() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       if (item) {
@@ -1453,7 +1453,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleOpenInDefaultApp() {
-    if (getSelectedHistoryItemIndices().length === 1) {
+    if (getSelectedHistoryItemIndices().length === 0) {
       let index = getActiveHistoryItemIndex()
       let item = getHistoryItem(index)
       if (item) {
@@ -1549,7 +1549,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
       deleteImage(item.filePathFileName)
       deleteImage(item.filePathThumbFileName)
     }
-    
+
     if (skipUpdate) {
       return
     }
