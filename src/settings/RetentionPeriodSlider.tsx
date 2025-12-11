@@ -208,48 +208,48 @@ export function RetentionPeriodSlider({
 
   function renderClipType() {
     if (clipType === ClipType.Text) {
-      return <div className="flex gap-2">
-        <TextIcon className="h-6 w-6 text-primary-foreground"/>
-        <span className="text-base text-foreground">
+      return <div className="flex gap-1">
+        <TextIcon className="h-5 w-5 text-primary-foreground"/>
+        <span className="text-sm font-medium text-foreground">
           {t('settings.storage.retentionPeriod.text')}
         </span>
       </div>
     }
     if (clipType === ClipType.Image) {
-      return <div className="flex gap-2">
-        <ImageIcon className="h-6 w-6 text-primary-foreground"/>
-        <span className="text-base text-foreground">
+      return <div className="flex gap-1">
+        <ImageIcon className="h-5 w-5 text-primary-foreground"/>
+        <span className="text-sm font-medium text-foreground">
           {t('settings.storage.retentionPeriod.image')}
         </span>
       </div>
     }
     if (clipType === ClipType.File) {
-      return <div className="flex gap-2">
-        <FileIcon className="h-6 w-6 text-primary-foreground"/>
-        <span className="text-base text-foreground">
+      return <div className="flex gap-1">
+        <FileIcon className="h-5 w-5 text-primary-foreground"/>
+        <span className="text-sm font-medium text-foreground">
           {t('settings.storage.retentionPeriod.file')}
         </span>
       </div>
     }
     if (clipType === ClipType.Link) {
-      return <div className="flex gap-2">
-        <LinkIcon className="h-6 w-6 text-primary-foreground"/>
-        <span className="text-base text-foreground">
+      return <div className="flex gap-1">
+        <LinkIcon className="h-5 w-5 text-primary-foreground"/>
+        <span className="text-sm font-medium text-foreground">
           {t('settings.storage.retentionPeriod.link')}
         </span>
       </div>
     }
     if (clipType === ClipType.Email) {
-      return <div className="flex gap-2">
-        <MailIcon className="h-6 w-6 text-primary-foreground"/>
-        <span className="text-base text-foreground">
+      return <div className="flex gap-1">
+        <MailIcon className="h-5 w-5 text-primary-foreground"/>
+        <span className="text-sm font-medium text-foreground">
           {t('settings.storage.retentionPeriod.email')}
         </span>
       </div>
     }
     if (clipType === ClipType.Color) {
-      return <div className="flex gap-2">
-        <PaletteIcon className="h-6 w-6 text-primary-foreground"/>
+      return <div className="flex gap-1">
+        <PaletteIcon className="h-5 w-5 text-primary-foreground"/>
         <span className="text-sm font-medium text-foreground">
           {t('settings.storage.retentionPeriod.color')}
         </span>
