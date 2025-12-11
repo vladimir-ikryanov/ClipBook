@@ -351,6 +351,7 @@
   "commands": {
     "item": " Item",
     "items": " Items",
+    "activeApp": "Active App",
     "showMoreActions": "Show more actions",
     "noResultsFound": "No results found.",
     "typeCommandOrSearch": "Type a command or search...",

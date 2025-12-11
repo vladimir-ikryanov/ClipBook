@@ -860,7 +860,10 @@ export function getNextItemIndexForPaste(): number {
   if (pasteNextItemIndex >= history.length) {
     resetPasteNextItemIndex()
   }
-  return getFavoriteItemsCount() + pasteNextItemIndex
+  if (prefShouldPinFavoritesOnTop()) {
+    return getFavoriteItemsCount() + pasteNextItemIndex
+  }
+  return pasteNextItemIndex
 }
 
 export function resetPasteNextItemIndex() {

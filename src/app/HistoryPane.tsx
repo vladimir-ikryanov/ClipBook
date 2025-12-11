@@ -408,8 +408,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
       if (item) {
         await pasteItem(item, true)
       }
-    } else {
-      console.log("No next item to paste")
     }
   }
 
@@ -1502,15 +1500,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   function handleOpenWithApp(appPath: string) {
-    if (getSelectedHistoryItemIndices().length === 1) {
-      let index = getActiveHistoryItemIndex()
-      let item = getHistoryItem(index)
-      if (item) {
-        if (item.type === ClipType.File || item.type === ClipType.Image) {
-          let filePath = getFileOrImagePath(item);
-          if (filePath) {
-            openInApp(filePath, appPath)
-          }
+    let index = getActiveHistoryItemIndex()
+    let item = getHistoryItem(index)
+    if (item) {
+      if (item.type === ClipType.File || item.type === ClipType.Image) {
+        let filePath = getFileOrImagePath(item);
+        if (filePath) {
+          openInApp(filePath, appPath)
         }
       }
     }

@@ -351,6 +351,7 @@
   "commands": {
     "item": " elemento",
     "items": " elementi",
+    "activeApp": "App attiva",
     "showMoreActions": "Mostra altre azioni",
     "noResultsFound": "Nessun risultato trovato.",
     "typeCommandOrSearch": "Digita un comando o cerca...",

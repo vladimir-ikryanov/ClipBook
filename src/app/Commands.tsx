@@ -5,6 +5,7 @@ import * as React from "react"
 import {useEffect, useState} from "react"
 import {
   ArrowUpLeftIcon,
+  ClipboardIcon,
   CommandIcon,
   CopyIcon,
   DownloadIcon,
@@ -541,6 +542,18 @@ export default function Commands(props: CommandsProps) {
     return ""
   }
 
+  function activeAppIcon() {
+    if (props.appIcon === "") {
+      return <ClipboardIcon className="mr-2 h-5 w-5"/>
+    }
+    return <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
+                       alt="Application icon"/>
+  }
+
+  function getActiveAppName(): string {
+    return props.appName === "" ? t('commands.activeApp') : props.appName
+  }
+
   return (
       <>
         <Tooltip>
@@ -563,9 +576,8 @@ export default function Commands(props: CommandsProps) {
             <div className="max-h-[70vh] overflow-y-auto mb-1.5 scrollbar-thin scrollbar-thumb-scrollbar scrollbar-track-transparent">
               <CommandList>
                 <CommandItem onSelect={handlePaste}>
-                  <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                       alt="Application icon"/>
-                  <span>{t('commands.pasteItemToApp', {itemLabel: getItemLabel(), itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}</span>
+                  {activeAppIcon()}
+                  <span>{t('commands.pasteItemToApp', {itemLabel: getItemLabel(), itemsLabel: getMultipleItemsIndicator(), appName: getActiveAppName()})}</span>
                   <CommandShortcut className="flex flex-row">
                     <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
                   </CommandShortcut>
@@ -573,13 +585,12 @@ export default function Commands(props: CommandsProps) {
                 {
                     canPasteObject() &&
                     <CommandItem onSelect={handlePasteObject}>
-                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                           alt="Application icon"/>
+                      {activeAppIcon()}
                       <span>
                         {
                           getMultipleItemsIndicator().length > 0 ?
-                              t('commands.pasteObjectsToApp', {itemsLabel: getMultipleItemsIndicator(), appName: props.appName}) :
-                              t('commands.pasteObjectToApp', {appName: props.appName})
+                              t('commands.pasteObjectsToApp', {itemsLabel: getMultipleItemsIndicator(), appName: getActiveAppName()}) :
+                              t('commands.pasteObjectToApp', {appName: getActiveAppName()})
                         }
                       </span>
                       <CommandShortcut className="flex flex-row">
@@ -590,35 +601,31 @@ export default function Commands(props: CommandsProps) {
                 {
                     canPasteWithTransformation() &&
                     <CommandItem onSelect={handlePasteWithTransformation}>
-                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                           alt="Application icon"/>
+                      {activeAppIcon()}
                       <span>
-                        {t('commands.pasteItemToAppWithFormatting', {itemLabel: getItemLabel(), itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}
+                        {t('commands.pasteItemToAppWithFormatting', {itemLabel: getItemLabel(), itemsLabel: getMultipleItemsIndicator(), appName: getActiveAppName()})}
                       </span>
                     </CommandItem>
                 }
                 {
                     canShowMultiplePaste() &&
                     <CommandItem onSelect={handlePasteWithReturn}>
-                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                           alt="Application icon"/>
-                      <span>{t('commands.pasteItemsToAppWithReturn', {itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}</span>
+                      {activeAppIcon()}
+                      <span>{t('commands.pasteItemsToAppWithReturn', {itemsLabel: getMultipleItemsIndicator(), appName: getActiveAppName()})}</span>
                     </CommandItem>
                 }
                 {
                     canShowMultiplePaste() &&
                     <CommandItem onSelect={handlePasteWithTab}>
-                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                           alt="Application icon"/>
-                      <span>{t('commands.pasteItemsToAppWithTab', {itemsLabel: getMultipleItemsIndicator(), appName: props.appName})}</span>
+                      {activeAppIcon()}
+                      <span>{t('commands.pasteItemsToAppWithTab', {itemsLabel: getMultipleItemsIndicator(), appName: getActiveAppName()})}</span>
                     </CommandItem>
                 }
                 {
                     canShowPastePath() &&
                     <CommandItem onSelect={handlePastePath}>
-                      <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
-                           alt="Application icon"/>
-                      <span>{t('commands.pastePathToApp', {appName: props.appName})}</span>
+                      {activeAppIcon()}
+                      <span>{t('commands.pastePathToApp', {appName: getActiveAppName()})}</span>
                     </CommandItem>
                 }
                 {
