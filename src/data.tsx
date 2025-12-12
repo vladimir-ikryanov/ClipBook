@@ -173,18 +173,13 @@ export async function loadHistory() {
   // Load all tags.
   loadTags()
 
+  history = await getAllClips()
+
   // Clear history on Mac reboot and keep favorites.
   if (prefGetClearHistoryOnMacReboot() && isAfterSystemReboot()) {
     await clear(prefGetKeepFavoritesOnClearHistory())
-    return
   }
 
-  // Fill the history with 10000 items.
-  // for (let i = 0; i < 10000; i++) {
-  //   history[i] = new Clip(ClipType.Text, "Standard clipboard stores only one entry and overwrites the previous one. It is easy to accidentally overwrite. It is inconvenient and wastes a lot of time because of such a limitation. If you copy a lot, if you are annoyed by wasting time searching for information that was copied just a couple of minutes or hours ago, if you are tired of constantly switching applications for copying and pasting, then the clipboard history app is for you. Once you try it, you will no longer be able to imagine working on a Mac without this application.", "/Applications/Safari.app")
-  // }
-
-  history = await getAllClips()
   sortHistory(sortType, history)
   requestHistoryUpdate()
 }
