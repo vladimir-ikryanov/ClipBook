@@ -132,12 +132,12 @@
         "description": "Favicon, Titel, Beschreibung und Social-Card-Bild für Links abrufen und anzeigen."
       },
       "warnOnClearAll": {
-        "title": "Bei Löschen des gesamten Verlaufs warnen",
-        "description": "Bestätigungsdialog anzeigen, wenn der gesamte Zwischenablageverlauf gelöscht wird."
+        "title": "Bei manuellem Löschen des gesamten Verlaufs warnen",
+        "description": "Bestätigungsdialog anzeigen, wenn der gesamte Verlauf manuell mit dem Befehl \"Alle löschen\" gelöscht wird."
       },
       "keepFavoritesOnClearAll": {
-        "title": "Favoriten beim Löschen des gesamten Verlaufs behalten",
-        "description": "Favoriten und getaggte Elemente beim Löschen des gesamten Verlaufs nicht entfernen."
+        "title": "Favoriten und getaggte Elemente immer behalten",
+        "description": "Favoriten und getaggte Elemente beim manuellen oder automatischen Löschen des gesamten Verlaufs nicht entfernen."
       },
       "pinFavoritesOnTop": {
         "title": "Favoriten oben anheften",
@@ -156,7 +156,7 @@
       },
       "retentionPeriod": {
         "title": "Verlauf behalten",
-        "description": "Wählen Sie aus, wie lange einzelne Verlaufselemente aufbewahrt werden sollen. Elemente, die älter als dieser Zeitraum sind, werden entfernt, mit Ausnahme von Favoriten und getaggten Elementen.",
+        "description": "Wählen Sie aus, wie lange einzelne Verlaufselemente aufbewahrt werden sollen. Elemente, die älter als dieser Zeitraum sind, werden automatisch aus dem Verlauf entfernt, mit Ausnahme von Favoriten und getaggten Elementen.",
         "text": "Texte",
         "image": "Bilder",
         "file": "Dateien & Ordner",

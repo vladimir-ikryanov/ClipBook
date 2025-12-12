@@ -132,12 +132,12 @@
         "description": "Recupera e visualizza un'icona, un titolo, una descrizione e un'immagine della card social per i link."
       },
       "warnOnClearAll": {
-        "title": "Avvisa quando si cancella l'intera cronologia",
-        "description": "Visualizza una finestra di dialogo di conferma quando si cancella l'intera cronologia degli appunti."
+        "title": "Avvisa quando si cancella manualmente l'intera cronologia",
+        "description": "Visualizza una finestra di dialogo di conferma quando si cancella l'intera cronologia manualmente utilizzando il comando \"Elimina Tutto\"."
       },
       "keepFavoritesOnClearAll": {
-        "title": "Mantieni i preferiti quando si cancella l'intera cronologia",
-        "description": "Non rimuovere gli elementi contrassegnati come preferiti e taggati quando si cancella l'intera cronologia degli appunti."
+        "title": "Mantieni sempre i preferiti e gli elementi taggati",
+        "description": "Non rimuovere i preferiti e gli elementi taggati quando si cancella l'intera cronologia manualmente o automaticamente."
       },
       "pinFavoritesOnTop": {
         "title": "Fissa i preferiti in alto",
@@ -156,7 +156,7 @@
       },
       "retentionPeriod": {
         "title": "Mantieni cronologia",
-        "description": "Seleziona per quanto tempo mantenere i singoli elementi della cronologia. Gli elementi più vecchi di questo periodo verranno rimossi, ad eccezione dei preferiti e degli elementi taggati.",
+        "description": "Seleziona per quanto tempo mantenere i singoli elementi della cronologia. Gli elementi più vecchi di questo periodo verranno automaticamente rimossi dalla cronologia, ad eccezione dei preferiti e degli elementi taggati.",
         "text": "Testi",
         "image": "Immagini",
         "file": "File e Cartelle",

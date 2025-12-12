@@ -10,7 +10,7 @@ import {
   getImageText, getRTF,
   updateClip
 } from "@/db";
-import {prefGetClearHistoryOnMacReboot, prefGetLanguage, prefShouldPinFavoritesOnTop} from "@/pref";
+import {prefGetClearHistoryOnMacReboot, prefGetKeepFavoritesOnClearHistory, prefGetLanguage, prefShouldPinFavoritesOnTop} from "@/pref";
 import {getClipType} from "@/lib/utils";
 import {loadTags, Tag} from "@/tags";
 import {emitter} from "@/actions";
@@ -173,10 +173,9 @@ export async function loadHistory() {
   // Load all tags.
   loadTags()
 
-  // Clear history on Mac reboot.
+  // Clear history on Mac reboot and keep favorites.
   if (prefGetClearHistoryOnMacReboot() && isAfterSystemReboot()) {
-    await deleteAllClips()
-    history = []
+    await clear(prefGetKeepFavoritesOnClearHistory())
     return
   }
 

@@ -9,25 +9,19 @@ import {
   prefGetCopyAndMergeEnabled,
   prefGetCopyAndMergeSeparator,
   prefGetCopyToClipboardAfterMerge,
-  prefGetKeepFavoritesOnClearHistory,
   prefShouldPinFavoritesOnTop,
-  prefGetWarnOnClearHistory, 
-  prefIsKeepFavoritesOnClearHistoryManaged, 
   prefIsPinFavoritesOnTopManaged, 
   prefIsShowPreviewForLinksManaged,
-  prefIsWarnOnClearHistoryManaged,
   prefSetCopyAndMergeEnabled,
   prefSetCopyAndMergeSeparator,
   prefSetCopyOnDoubleClick,
   prefSetCopyOnNumberAction,
   prefSetCopyToClipboardAfterMerge,
-  prefSetKeepFavoritesOnClearHistory,
   prefSetPasteOnClick,
   prefSetPinFavoritesOnTop,
   prefSetShowPreviewForLinks,
   prefSetTreatDigitNumbersAsColor,
   prefSetUpdateHistoryAfterAction,
-  prefSetWarnOnClearHistory,
   prefShouldCopyOnDoubleClick,
   prefShouldCopyOnNumberAction,
   prefShouldPasteOnClick,
@@ -67,8 +61,6 @@ export default function History() {
     [NumberActionStrategy.PASTE]: t('settings.history.numberAction.paste'),
   }
 
-  const [warnOnClearHistory, setWarnOnClearHistory] = useState(prefGetWarnOnClearHistory())
-  const [keepFavoritesOnClearHistory, setKeepFavoritesOnClearHistory] = useState(prefGetKeepFavoritesOnClearHistory())
   const [pinFavoritesOnTop, setPinFavoritesOnTop] = useState(prefShouldPinFavoritesOnTop())
   const [copyAndMergeEnabled, setCopyAndMergeEnabled] = useState(prefGetCopyAndMergeEnabled())
   const [copyToClipboardAfterMerge, setCopyToClipboardAfterMerge] = useState(prefGetCopyToClipboardAfterMerge())
@@ -91,16 +83,6 @@ export default function History() {
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
   }, [])
-
-  function handleWarnOnClearHistoryChange(warnOnClearHistory: boolean) {
-    setWarnOnClearHistory(warnOnClearHistory)
-    prefSetWarnOnClearHistory(warnOnClearHistory)
-  }
-
-  function handleKeepFavoritesOnClearHistoryChange(keepFavoritesOnClearHistory: boolean) {
-    setKeepFavoritesOnClearHistory(keepFavoritesOnClearHistory)
-    prefSetKeepFavoritesOnClearHistory(keepFavoritesOnClearHistory)
-  }
 
   function handlePinFavoritesOnTopChange(pinFavoritesOnTop: boolean) {
     setPinFavoritesOnTop(pinFavoritesOnTop)
@@ -345,32 +327,6 @@ export default function History() {
               <Switch id="showPreviewForLinks" checked={showPreviewForLinks}
                       onCheckedChange={handleShowPreviewForLinksChange}
                       disabled={prefIsShowPreviewForLinksManaged()}/>
-            </div>
-
-            <hr/>
-
-            <div className="flex items-center justify-between space-x-20 py-1">
-              <Label htmlFor="warnOnClearAll" className="flex flex-col text-base">
-                <span className="">{t('settings.history.warnOnClearAll.title')}</span>
-                <span className="text-neutral-500 font-normal text-sm">
-                  {t('settings.history.warnOnClearAll.description')}
-                </span>
-              </Label>
-              <Switch id="warnOnClearAll" checked={warnOnClearHistory}
-                      onCheckedChange={handleWarnOnClearHistoryChange}
-                      disabled={prefIsWarnOnClearHistoryManaged()}/>
-            </div>
-
-            <div className="flex items-center justify-between space-x-20 py-1">
-              <Label htmlFor="keepFavoritesOnClearAll" className="flex flex-col text-base">
-                <span className="">{t('settings.history.keepFavoritesOnClearAll.title')}</span>
-                <span className="text-neutral-500 font-normal text-sm">
-                  {t('settings.history.keepFavoritesOnClearAll.description')}
-                </span>
-              </Label>
-              <Switch id="keepFavoritesOnClearAll" checked={keepFavoritesOnClearHistory}
-                      onCheckedChange={handleKeepFavoritesOnClearHistoryChange}
-                      disabled={prefIsKeepFavoritesOnClearHistoryManaged()}/>
             </div>
           </div>
         </div>

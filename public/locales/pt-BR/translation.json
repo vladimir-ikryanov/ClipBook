@@ -132,12 +132,12 @@
         "description": "Buscar e exibir favicon, título, descrição e imagem social para links."
       },
       "warnOnClearAll": {
-        "title": "Avisar ao limpar todo o histórico",
-        "description": "Exibir uma caixa de confirmação ao limpar todo o histórico da área de transferência."
+        "title": "Avisar ao limpar manualmente todo o histórico",
+        "description": "Exibir uma caixa de confirmação ao limpar todo o histórico manualmente usando o comando \"Excluir Tudo\"."
       },
       "keepFavoritesOnClearAll": {
-        "title": "Manter favoritos ao limpar todo o histórico",
-        "description": "Não remover itens marcados como favoritos e taggados ao limpar todo o histórico da área de transferência."
+        "title": "Sempre manter favoritos e itens marcados",
+        "description": "Não remover favoritos e itens marcados ao limpar todo o histórico manualmente ou automaticamente."
       },
       "pinFavoritesOnTop": {
         "title": "Fixar favoritos no topo",
@@ -156,7 +156,7 @@
       },
       "retentionPeriod": {
         "title": "Manter histórico",
-        "description": "Selecione por quanto tempo manter itens individuais do histórico. Itens mais antigos que este período serão removidos, exceto favoritos e itens marcados.",
+        "description": "Selecione por quanto tempo manter itens individuais do histórico. Itens mais antigos que este período serão automaticamente removidos do histórico, exceto favoritos e itens marcados.",
         "text": "Textos",
         "image": "Imagens",
         "file": "Arquivos e Pastas",

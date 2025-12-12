@@ -132,12 +132,12 @@
         "description": "Fetch and display a favicon, title, description, and social card image for links."
       },
       "warnOnClearAll": {
-        "title": "Warn when clearing entire history",
-        "description": "Display a confirmation dialog when clearing entire clipboard history."
+        "title": "Warn when manually clearing entire history",
+        "description": "Display a confirmation dialog when clearing entire history manually using the \"Delete All\" command."
       },
       "keepFavoritesOnClearAll": {
-        "title": "Keep favorites when clearing entire history",
-        "description": "Do not remove favorite and tagged items when clearing entire clipboard history."
+        "title": "Always keep favorites and tagged items",
+        "description": "Do not remove favorites and tagged items when clearing entire history manually or automatically."
       },
       "pinFavoritesOnTop": {
         "title": "Pin favorites on top",
@@ -211,7 +211,7 @@
       },
       "retentionPeriod": {
         "title": "Keep history",
-        "description": "Select how long to keep individual history items. Items older than this period will be removed, except favorites and tagged items.",
+        "description": "Select how long to keep individual history items. Items older than this period will be automatically removed from the history, except favorites and tagged items.",
         "text": "Texts",
         "image": "Images",
         "file": "Files & Folders",
