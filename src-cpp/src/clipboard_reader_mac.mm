@@ -452,7 +452,12 @@ bool ClipboardReaderMac::readImageData(const std::shared_ptr<ClipboardData> &dat
       NSData *png_data = nil;
       if ([types containsObject:NSPasteboardTypePNG]) {
         png_data = [pasteboard dataForType:NSPasteboardTypePNG];
-      } else {
+      }
+      // Check if the PNG data is not available, then try to get the TIFF data
+      // and convert it to PNG. In some applications (e.g., Lightshot), the PNG data
+      // might be empty for NSPasteboardTypePNG, so we need to handle this case
+      // using the TIFF data.
+      if (!png_data && [types containsObject:NSPasteboardTypeTIFF]) {
         NSData *tiff_data = [pasteboard dataForType:NSPasteboardTypeTIFF];
         NSBitmapImageRep *image_rep = [NSBitmapImageRep imageRepWithData:tiff_data];
         if (image_rep) {
