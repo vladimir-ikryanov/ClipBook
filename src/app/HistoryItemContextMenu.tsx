@@ -42,6 +42,7 @@ import {
   getFilterQuery,
   getHistoryItem,
   getSelectedHistoryItemIndices,
+  getSelectedHistoryItems,
   isFilterActive,
   isTextItem,
   TagCheckedState,
@@ -83,8 +84,16 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   useEffect(() => {
     let tags: TagCheckedState[] = []
     allTags().forEach(tag => {
-      const checked = !!props.item.tags?.includes(tag.id)
-      tags.push({tag, checked})
+      if (isMultipleItemsSelected()) {
+        let checked: boolean[] = []
+        getSelectedHistoryItems().forEach(item => {
+          checked.push(!!item.tags?.includes(tag.id))
+        })
+        tags.push({tag, checked: checked.every(c => c)})
+      } else { 
+        const checked = !!props.item.tags?.includes(tag.id)
+        tags.push({tag, checked})
+      }
     })
     setItemTags(tags)
   }, [props.item.tags])
@@ -99,8 +108,12 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
     e.stopPropagation()
   }
 
+  function isMultipleItemsSelected() {
+    return getSelectedHistoryItemIndices().length > 1
+  }
+
   function canShowInHistory() {
-    if (getSelectedHistoryItemIndices().length > 1) {
+    if (isMultipleItemsSelected()) {
       return false
     }
     let filterQuery = getFilterQuery()
@@ -118,6 +131,10 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
     return props.item && props.item.type === ClipType.Image
   }
 
+  function isLink() {
+    return props.item && props.item.type === ClipType.Link
+  }
+
   function isFileExists() {
     if (isFile()) {
       return fileExists(props.item.filePath)
@@ -126,14 +143,17 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   }
 
   function canShowInFinder() {
-    return isFile()
+    return !isMultipleItemsSelected() && isFile()
   }
 
   function canOpenInDefaultApp() {
-    return defaultApp !== undefined
+    return !isMultipleItemsSelected() && defaultApp !== undefined
   }
 
   function canShowCopyTextFromImage() {
+    if (isMultipleItemsSelected()) {
+      return false
+    }
     if (props.item) {
       if (props.item.type === ClipType.Image && props.item.content.length > 0) {
         return true
@@ -146,11 +166,11 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   }
 
   function canShowFormatText() {
-    return isTextItem(props.item)
+    return !isMultipleItemsSelected() && isTextItem(props.item)
   }
 
   function canShowQuickLook() {
-    return isFile() || isImage()
+    return !isMultipleItemsSelected() && (isFile() || isImage())
   }
 
   function handlePaste() {
@@ -178,8 +198,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   }
 
   function handleToggleFavorite() {
-    props.item.favorite = !props.item.favorite
-    emitter.emit("EditItem", props.item)
+    emitter.emit("ToggleFavorite")
   }
 
   function handleEditContent() {
@@ -223,12 +242,22 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
   }
 
   async function handleTagChecked(tag: Tag, checked: CheckedState) {
-    if (checked) {
-      props.item.tags = [...props.item.tags || [], tag.id]
+    if (isMultipleItemsSelected()) {
+      getSelectedHistoryItems().forEach(item => {
+        updateItemTags(item, tag, checked)
+      })
     } else {
-      props.item.tags = props.item.tags?.filter((t) => t !== tag.id)
+      updateItemTags(props.item, tag, checked)
     }
-    await updateClip(props.item.id!, props.item)
+  }
+
+  async function updateItemTags(item: Clip, tag: Tag, checked: CheckedState) {
+    if (checked) {
+      item.tags = [...item.tags || [], tag.id]
+    } else {
+      item.tags = item.tags?.filter((t) => t !== tag.id)
+    }
+    await updateClip(item.id!, item)
     let tags = itemTags.map(tagState => {
       if (tagState.tag.id === tag.id) {
         tagState.checked = !!checked
@@ -236,7 +265,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
       return tagState
     })
     setItemTags([...tags])
-    emitter.emit("UpdateItemById", props.item.id)
+    emitter.emit("UpdateItemById", item.id)
   }
 
   function getItemLabel(): string {
@@ -281,11 +310,53 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
     emitter.emit("ShowOpenWithCommandsByIndex", props.index)
   }
 
-  function canPasteObject() {
+  function canShowCopyToClipboard() {
+    return !isMultipleItemsSelected()
+  }
+
+  function canShowPaste() {
+    return !isMultipleItemsSelected()
+  }
+
+  function canShowPasteObject() {
+    if (isMultipleItemsSelected()) {
+      return false
+    }
     if (props.item.type === ClipType.Text) {
       return getRTF(props.item).length > 0 || getHTML(props.item).length > 0
     }
     return false
+  }
+
+  function canShowPastePath() {
+    return !isMultipleItemsSelected() && isFile()
+  }
+
+  function canShowCopyPathToClipboard() {
+    return !isMultipleItemsSelected() && isFile()
+  }
+
+  function canShowOpenInBrowser() {
+    return !isMultipleItemsSelected() && isLink()
+  }
+
+  function canShowEditContent() {
+    return !isMultipleItemsSelected() && isTextItem(props.item)
+  }
+
+  function canShowRename() {
+    return !isMultipleItemsSelected()
+  }
+
+  function canShowPreviewLink() {
+    return !isMultipleItemsSelected() && isLink()
+  }
+
+  function deleteItemLabel() {
+    if (isMultipleItemsSelected()) {
+      return t('historyItemContextMenu.deleteItems', {count: getSelectedHistoryItemIndices().length})
+    }
+    return t('historyItemContextMenu.deleteItem')
   }
 
   return (
@@ -295,16 +366,19 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
         </ContextMenuTrigger>
         <ContextMenuContent className="p-1.5 bg-actions-background"
                             onKeyDown={handleKeyDown} onMouseDown={handleMouseDown}>
-          <ContextMenuItem onClick={handlePaste}>
-            <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
-                 alt="Application icon"/>
-            <span className="mr-12">{t('historyItemContextMenu.pasteItemToApp', {itemLabel: getItemLabel(), appName: props.appName})}</span>
-            <CommandShortcut className="flex flex-row">
-              <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()}/>
-            </CommandShortcut>
-          </ContextMenuItem>
           {
-              canPasteObject() &&
+              canShowPaste() &&
+              <ContextMenuItem onClick={handlePaste}>
+                <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
+                  alt="Application icon" />
+                <span className="mr-12">{t('historyItemContextMenu.pasteItemToApp', { itemLabel: getItemLabel(), appName: props.appName })}</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetPasteSelectedItemToActiveAppShortcut()} />
+                </CommandShortcut>
+              </ContextMenuItem>
+          }
+          {
+              canShowPasteObject() &&
               <ContextMenuItem onClick={handlePasteObject}>
                 <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                      alt="Application icon"/>
@@ -315,30 +389,35 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               </ContextMenuItem>
           }
           {
-              props.item.type === ClipType.File &&
+              canShowPastePath() &&
               <ContextMenuItem onClick={handlePastePath}>
                 <img src={toBase64Icon(props.appIcon)} className="mr-2 h-4 w-4"
                      alt="Application icon"/>
                 <span className="mr-12">{t('historyItemContextMenu.pastePathToApp', {appName: props.appName})}</span>
               </ContextMenuItem>
           }
-          <ContextMenuItem onClick={handleCopyToClipboard}>
-            <CopyIcon className="mr-2 h-4 w-4"/>
-            <span className="mr-12">{t('historyItemContextMenu.copyItemToClipboard', {itemLabel: getItemLabel()})}</span>
-            <CommandShortcut className="flex flex-row">
-              <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
-            </CommandShortcut>
-          </ContextMenuItem>
           {
-              props.item.type === ClipType.File &&
+              canShowCopyToClipboard() &&
+              <ContextMenuItem onClick={handleCopyToClipboard}>
+                <CopyIcon className="mr-2 h-4 w-4"/>
+                <span className="mr-12">{t('historyItemContextMenu.copyItemToClipboard', {itemLabel: getItemLabel()})}</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetCopyToClipboardShortcut()}/>
+                </CommandShortcut>
+              </ContextMenuItem>
+          }
+          {
+              canShowCopyPathToClipboard() &&
               <ContextMenuItem onClick={handleCopyPathToClipboard}>
                 <CopyIcon className="mr-2 h-4 w-4"/>
                 <span className="mr-12">{t('historyItemContextMenu.copyPathToClipboard')}</span>
               </ContextMenuItem>
           }
-          <ContextMenuSeparator/>
           {
-              props.item.type === ClipType.Link &&
+            (canShowPaste() || canShowPasteObject() || canShowPastePath() || canShowCopyToClipboard() || canShowCopyPathToClipboard()) && <ContextMenuSeparator/>
+          }
+          {
+              canShowOpenInBrowser() &&
               <ContextMenuItem onClick={handleOpenInBrowser}>
                 <GlobeIcon className="mr-2 h-4 w-4"/>
                 <span className="mr-12">{t('historyItemContextMenu.openInBrowser')}</span>
@@ -348,7 +427,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               </ContextMenuItem>
           }
           {
-              isTextItem(props.item) &&
+              canShowEditContent() &&
               <ContextMenuItem onClick={handleEditContent}>
                 <Edit3Icon className="mr-2 h-4 w-4"/>
                 <span className="mr-12">{t('historyItemContextMenu.editContent')}</span>
@@ -372,18 +451,21 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               props.item.favorite ? <StarOffIcon className="mr-2 h-4 w-4"/> :
                   <StarIcon className="mr-2 h-4 w-4"/>
             }
-            <span>{props.item.favorite ? t('historyItemContextMenu.removeFromFavorites') : t('historyItemContextMenu.addToFavorites')}</span>
+            <span className="mr-12">{props.item.favorite ? t('historyItemContextMenu.removeFromFavorites') : t('historyItemContextMenu.addToFavorites')}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetToggleFavoriteShortcut()}/>
             </CommandShortcut>
           </ContextMenuItem>
-          <ContextMenuItem onClick={handleRename}>
-            <PenIcon className="mr-2 h-4 w-4"/>
-            <span className="mr-12">{t('historyItemContextMenu.renameItem')}</span>
-            <CommandShortcut className="flex flex-row">
-              <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
-            </CommandShortcut>
-          </ContextMenuItem>
+          {
+              canShowRename() &&
+              <ContextMenuItem onClick={handleRename}>
+                <PenIcon className="mr-2 h-4 w-4"/>
+                <span className="mr-12">{t('historyItemContextMenu.renameItem')}</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetRenameItemShortcut()}/>
+                </CommandShortcut>
+              </ContextMenuItem>
+          }
           {
               canShowQuickLook() &&
               <ContextMenuItem onClick={handleQuickLook}>
@@ -398,14 +480,14 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               canShowFormatText() &&
               <ContextMenuItem onSelect={handleFormatText}>
                 <TypeIcon className="mr-2 h-4 w-4"/>
-                <span>{t('historyItemContextMenu.formatText')}</span>
+                <span className="mr-12">{t('historyItemContextMenu.formatText')}</span>
               </ContextMenuItem>
           }
           <ContextMenuSeparator/>
           <ContextMenuSub>
             <ContextMenuSubTrigger>
               <TagsIcon className="mr-2 h-4 w-4"/>
-              <span>{t('historyItemContextMenu.tags')}</span>
+              <span className="mr-12">{t('historyItemContextMenu.tags')}</span>
             </ContextMenuSubTrigger>
             <ContextMenuPortal>
               <ContextMenuSubContent className="p-1.5 bg-actions-background">
@@ -434,10 +516,10 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
             </ContextMenuPortal>
           </ContextMenuSub>
           {
-              props.item.type === ClipType.Link && <ContextMenuSeparator/>
+              canShowPreviewLink() && <ContextMenuSeparator/>
           }
           {
-              props.item.type === ClipType.Link &&
+              canShowPreviewLink() &&
               <ContextMenuItem onClick={handlePreviewLink}>
                 <EyeIcon className="mr-2 h-4 w-4"/>
                 <span className="mr-12">{t('historyItemContextMenu.preview')}</span>
@@ -459,16 +541,16 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
           }
           {
               canOpenInDefaultApp() &&
-                <ContextMenuItem onSelect={handleOpenInDefaultApp}>
-                  {
-                    defaultApp ? <img src={toBase64Icon(defaultApp.icon)} className="mr-2 h-5 w-5"
-                                      alt="App icon"/> : null
-                  }
-                  <span className="mr-12">{t('historyItemContextMenu.openInApp', {appName: defaultApp?.name})}</span>
-                  <CommandShortcut className="flex flex-row">
-                    <ShortcutLabel shortcut={prefGetOpenInDefaultAppShortcut()}/>
-                  </CommandShortcut>
-                </ContextMenuItem>
+              <ContextMenuItem onSelect={handleOpenInDefaultApp}>
+                {
+                  defaultApp ? <img src={toBase64Icon(defaultApp.icon)} className="mr-2 h-5 w-5"
+                                    alt="App icon"/> : null
+                }
+                <span className="mr-12">{t('historyItemContextMenu.openInApp', {appName: defaultApp?.name})}</span>
+                <CommandShortcut className="flex flex-row">
+                  <ShortcutLabel shortcut={prefGetOpenInDefaultAppShortcut()}/>
+                </CommandShortcut>
+              </ContextMenuItem>
           }
           {
               canOpenInDefaultApp() &&
@@ -490,7 +572,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
           }
           <ContextMenuItem onClick={handleDeleteItem}>
             <TrashIcon className="mr-2 h-4 w-4 text-actions-danger"/>
-            <span className="text-actions-danger mr-12">{t('historyItemContextMenu.deleteItem')}</span>
+            <span className="text-actions-danger mr-12">{deleteItemLabel()}</span>
             <CommandShortcut className="flex flex-row">
               <ShortcutLabel shortcut={prefGetDeleteHistoryItemShortcut()}/>
             </CommandShortcut>

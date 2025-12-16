@@ -419,7 +419,8 @@
     "openInApp": "In {{appName}} öffnen",
     "openWith": "Öffnen mit...",
     "showInHistory": "Im Verlauf anzeigen",
-    "deleteItem": "Löschen"
+    "deleteItem": "Löschen",
+    "deleteItems": "{{count}} Elemente löschen"
   },
   "app": {
     "menu": {

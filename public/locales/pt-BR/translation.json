@@ -419,7 +419,8 @@
     "openInApp": "Abrir em {{appName}}",
     "openWith": "Abrir Com...",
     "showInHistory": "Mostrar no Histórico",
-    "deleteItem": "Excluir"
+    "deleteItem": "Excluir",
+    "deleteItems": "Excluir {{count}} Itens"
   },
   "app": {
     "menu": {

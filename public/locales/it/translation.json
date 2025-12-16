@@ -419,7 +419,8 @@
     "openInApp": "Apri in {{appName}}",
     "openWith": "Apri Con...",
     "showInHistory": "Mostra in Cronologia",
-    "deleteItem": "Elimina"
+    "deleteItem": "Elimina",
+    "deleteItems": "Elimina {{count}} Elementi"
   },
   "app": {
     "menu": {
