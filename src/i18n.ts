@@ -10,7 +10,7 @@ i18n
   .use(initReactI18next) // connect with React
   .init({
     fallbackLng: prefGetLanguage(),
-    supportedLngs: ['en', 'en-GB', 'de', 'it', 'pt-BR', 'ja', 'zh-CN'],
+    supportedLngs: ['en', 'en-GB', 'de', 'it', 'pt-BR', 'ja', 'zh-CN', 'es'],
     debug: true,
     interpolation: {
       escapeValue: false, // react already escapes

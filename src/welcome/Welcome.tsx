@@ -50,52 +50,43 @@ export default function Welcome() {
                 <DropdownMenuRadioGroup value={languageCode}
                                         onValueChange={handleLanguageCodeChange}>
                   <DropdownMenuRadioItem value={LanguageCode.EN_US} className="py-2 pr-4 pl-10">
-                    <div className="flex flex-col">
+                    <div className="flex">
                       <span>{getLanguageByCode(LanguageCode.EN_US)?.nativeName}</span>
-                      <span
-                          className="text-secondary-foreground">{getLanguageByCode(LanguageCode.EN_US)?.name}</span>
                     </div>
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value={LanguageCode.EN_GB} className="py-2 pr-4 pl-10">
-                    <div className="flex flex-col">
+                    <div className="flex">
                       <span>{getLanguageByCode(LanguageCode.EN_GB)?.nativeName}</span>
-                      <span
-                          className="text-secondary-foreground">{getLanguageByCode(LanguageCode.EN_GB)?.name}</span>
                     </div>
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value={LanguageCode.DE} className="py-2 pr-4 pl-10">
-                    <div className="flex flex-col">
+                    <div className="flex">
                       <span>{getLanguageByCode(LanguageCode.DE)?.nativeName}</span>
-                      <span
-                          className="text-secondary-foreground">{getLanguageByCode(LanguageCode.DE)?.name}</span>
                     </div>
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value={LanguageCode.IT} className="py-2 pr-4 pl-10">
-                    <div className="flex flex-col">
+                    <div className="flex">
                       <span>{getLanguageByCode(LanguageCode.IT)?.nativeName}</span>
-                      <span
-                          className="text-secondary-foreground">{getLanguageByCode(LanguageCode.IT)?.name}</span>
+                    </div>
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value={LanguageCode.ES} className="py-2 pr-4 pl-10">
+                    <div className="flex">
+                      <span>{getLanguageByCode(LanguageCode.ES)?.nativeName}</span>
                     </div>
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value={LanguageCode.PT_BR} className="py-2 pr-4 pl-10">
-                    <div className="flex flex-col">
+                    <div className="flex">
                       <span>{getLanguageByCode(LanguageCode.PT_BR)?.nativeName}</span>
-                      <span
-                          className="text-secondary-foreground">{getLanguageByCode(LanguageCode.PT_BR)?.name}</span>
                     </div>
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value={LanguageCode.JA} className="py-2 pr-4 pl-10">
-                    <div className="flex flex-col">
+                    <div className="flex">
                       <span>{getLanguageByCode(LanguageCode.JA)?.nativeName}</span>
-                      <span
-                          className="text-secondary-foreground">{getLanguageByCode(LanguageCode.JA)?.name}</span>
                     </div>
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value={LanguageCode.ZH_CN} className="py-2 pr-4 pl-10">
-                    <div className="flex flex-col">
+                    <div className="flex">
                       <span>{getLanguageByCode(LanguageCode.ZH_CN)?.nativeName}</span>
-                      <span
-                          className="text-secondary-foreground">{getLanguageByCode(LanguageCode.ZH_CN)?.name}</span>
                     </div>
                   </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
