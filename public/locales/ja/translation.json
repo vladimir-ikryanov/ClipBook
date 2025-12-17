@@ -1,0 +1,590 @@
+{
+  "welcome": {
+    "title": "ClipBookへようこそ",
+    "description": "ClipBookはコピーしたすべてのものを保存し、必要な時にいつでもクリップボード履歴にすばやくアクセスできます。",
+    "selectLanguage": "言語を選択してください",
+    "getStarted": "始める"
+  },
+  "accessibility": {
+    "title": "アクセシビリティアクセスを有効にする",
+    "description": "他のアプリケーションに直接ペーストするには、システム設定でClipBookがMacのアクセシビリティ機能にアクセスできるようにしてください。",
+    "readMore": "アクセシビリティ機能",
+    "doLater": "後で行う",
+    "allowAccess": "アクセスを許可"
+  },
+  "enjoy": {
+    "ready": "ClipBookの準備が整いました",
+    "description": "ClipBookはバックグラウンドで実行されています。<strong>⇧Shift + ⌘Cmd + V</strong>のグローバルショートカット、またはメニューバーのClipBookアイコンをクリックして<strong>ClipBookを開く</strong>を選択すると、クリップボード履歴にアクセスできます。",
+    "openClipBook": "ClipBookを開く"
+  },
+  "settings": {
+    "sidebar": {
+      "general": "一般",
+      "history": "履歴",
+      "storage": "ストレージ",
+      "shortcuts": "ショートカット",
+      "privacy": "プライバシー",
+      "license": "ライセンス",
+      "about": "情報",
+      "managedByOrganization": "一部の設定は組織によって管理されています。"
+    },
+    "general": {
+      "title": "一般",
+      "launchAtLogin": {
+        "title": "ログイン時に起動",
+        "description": "ログイン時にClipBookを自動的に起動します。"
+      },
+      "automaticUpdates": {
+        "title": "自動アップデート",
+        "description": "利用可能な場合は新しいアップデートをダウンロードしてインストールします。",
+        "checkForUpdates": "アップデートを確認...",
+        "checkingForUpdates": "アップデートを確認中..."
+      },
+      "appearance": {
+        "title": "外観",
+        "description": "デバイス上でのClipBookの見た目を変更します。",
+        "themes": {
+          "light": "ライト",
+          "dark": "ダーク",
+          "system": "システム"
+        }
+      },
+      "language": {
+        "title": "言語",
+        "description": "ユーザーインターフェースで使用する言語を変更します。"
+      },
+      "openWindow": {
+        "title": "ウィンドウを開く位置",
+        "description": "可能な場合、ClipBookウィンドウを開く場所を選択します。",
+        "strategies": {
+          "lastLocation": "アクティブな画面の最後の位置",
+          "activeScreenCenter": "アクティブな画面の中央",
+          "activeWindowCenter": "アクティブなウィンドウの中央",
+          "screenWithCursor": "マウスポインターがある画面",
+          "mouseCursor": "マウスポインターの位置",
+          "inputCursor": "テキストキャレットの位置"
+        },
+        "descriptions": {
+          "lastLocation": "ClipBookウィンドウは各画面での位置を記憶し、アクティブな画面の<br/>最後の位置で開きます。",
+          "activeScreenCenter": "アクティブな画面の中央に開きます。",
+          "activeWindowCenter": "アクティブなウィンドウの中央に開きます。アクティブなウィンドウがない場合は、<br/>アクティブな画面の中央に開きます。",
+          "screenWithCursor": "マウスポインターがある画面の中央に開きます。",
+          "mouseCursor": "マウスポインターの位置の近くに開きます。",
+          "inputCursor": "現在のテキストキャレットの位置の近くに開きます。キャレットの位置を<br/>特定できない場合は、アクティブなウィンドウの中央に開きます。"
+        }
+      },
+      "playSound": {
+        "title": "サウンドを再生",
+        "description": "アイテムが履歴に追加されたときにサウンドを再生します。"
+      },
+      "showIcon": {
+        "title": "メニューバーにアイコンを表示",
+        "description": "メニューバーにClipBookアプリアイコンを表示します。",
+        "hint": "ClipBookウィンドウ内で<kbd>⌘</kbd><kbd>,</kbd>を押すことで、いつでも<strong>設定</strong>を開くことができます。"
+      }
+    },
+    "history": {
+      "title": "履歴",
+      "updateHistoryAfterAction": {
+        "title": "ペースト/コピー後に履歴を更新",
+        "description": "ペーストまたはコピーアクション後、アイテムを履歴リストの一番上に移動します。"
+      },
+      "pasteOnClick": {
+        "title": "クリックでペースト",
+        "description": "マウスオーバーで履歴アイテムを選択し、クリックでペーストします。"
+      },
+      "doubleClick": {
+        "title": "ダブルクリック時",
+        "description": "履歴アイテムのダブルクリックのアクションを選択します。",
+        "copy": "クリップボードにコピー",
+        "paste": "アクティブなアプリにペースト"
+      },
+      "numberAction": {
+        "title": "コマンド番号ショートカット⌘1-9時",
+        "description": "コマンド番号ショートカット⌘1-9のアクションを選択します。",
+        "copy": "クリップボードにコピー",
+        "paste": "アクティブなアプリにペースト"
+      },
+      "itemsToDelete": {
+        "all": "すべてのアイテム",
+        "images": "画像のみ"
+      },
+      "copyAndMerge": {
+        "title": "コピーとマージ",
+        "description": "<kbd>⌘</kbd><kbd>C</kbd><kbd>C</kbd>を押すと、現在選択されているテキストをクリップボード履歴の以前にコピーされたテキストに追加します。"
+      },
+      "copyAndMergeSeparator": {
+        "title": "コピーとマージの区切り文字",
+        "description": "追加されたテキストを以前にコピーされたテキストとどのように区切るかを選択します。",
+        "line": "改行",
+        "space": "スペース"
+      },
+      "copyToClipboardAfterMerge": {
+        "title": "システムクリップボードに貼り付け",
+        "description": "マージ後、マージされたテキストを自動的にシステムクリップボードにコピーします。"
+      },
+      "treatDigitNumbersAsColor": {
+        "title": "8桁の数字を色として扱う",
+        "description": "8桁、6桁、4桁、3桁の数字を16進数カラーコードとして扱います。"
+      },
+      "showPreviewForLinks": {
+        "title": "リンクのプレビューを表示",
+        "description": "リンクのファビコン、タイトル、説明、ソーシャルカード画像を取得して表示します。"
+      },
+      "warnOnClearAll": {
+        "title": "履歴全体を手動でクリアする際に警告",
+        "description": "「すべて削除」コマンドを使用して履歴全体を手動でクリアする際に確認ダイアログを表示します。"
+      },
+      "keepFavoritesOnClearAll": {
+        "title": "お気に入りとタグ付きアイテムを常に保持",
+        "description": "手動または自動で履歴全体をクリアする際に、お気に入りとタグ付きアイテムを削除しません。"
+      },
+      "pinFavoritesOnTop": {
+        "title": "お気に入りを上部に固定",
+        "description": "お気に入りアイテムを常に履歴リストの一番上に表示します。"
+      }
+    },
+    "shortcuts": {
+      "title": "ショートカット",
+      "clickToEditShortcut": "クリックしてショートカットを編集",
+      "resetToDefault": "デフォルトにリセット",
+      "clearShortcut": "ショートカットをクリア",
+      "openApp": "ClipBookを開く",
+      "closeApp": "ClipBookを閉じる",
+      "selectNextItem": "次のアイテムを選択",
+      "selectPreviousItem": "前のアイテムを選択",
+      "pasteSelectedItemToActiveApp": "アクティブなアプリにペースト",
+      "alternatePasteSelectedItemToActiveApp": "アクティブなアプリに代替ペースト",
+      "copyToClipboard": "クリップボードにコピー",
+      "alternateCopyToClipboard": "クリップボードに代替コピー",
+      "openInBrowser": "ブラウザで開く",
+      "showInFinder": "Finderで表示",
+      "openInDefaultApp": "デフォルトアプリで開く",
+      "addToFavorites": "お気に入りに追加",
+      "saveAsFile": "ファイルとして保存",
+      "editHistoryItem": "履歴アイテムを編集",
+      "renameHistoryItem": "履歴アイテムの名前を変更",
+      "deleteHistoryItem": "履歴アイテムを削除",
+      "deleteAllHistoryItems": "すべての履歴アイテムを削除",
+      "showHidePreview": "プレビューを表示/非表示",
+      "showHideFilter": "フィルターを表示/非表示",
+      "showCommandMenu": "コマンドメニューを表示",
+      "zoomIn": "拡大",
+      "zoomOut": "縮小",
+      "zoomReset": "ズームをリセット",
+      "pauseResumeClipBook": "ClipBookを一時停止/再開",
+      "openSettings": "設定を開く",
+      "makeLowerCase": "小文字にする",
+      "makeUpperCase": "大文字にする",
+      "capitalizeWords": "単語を大文字にする",
+      "sentenceCase": "文の先頭を大文字にする",
+      "removeEmptyLines": "空行を削除",
+      "stripAllWhitespaces": "すべての空白を削除",
+      "trimSurroundingWhitespaces": "前後の空白を削除",
+      "quickLook": "クイックルック",
+      "pasteNextItemToActiveApp": "次の履歴アイテムをペースト"
+    },
+    "privacy": {
+      "title": "プライバシー",
+      "ignoreConfidentialContent": {
+        "title": "機密コンテンツを無視",
+        "description": "クリップボードにコピーされたパスワードやその他の機密データを保存しません。"
+      },
+      "ignoreTransientContent": {
+        "title": "一時的なコンテンツを無視",
+        "description": "一時的にクリップボードに配置されたデータを保存しません。"
+      },
+      "ignoreApps": {
+        "title": "アプリケーションを無視",
+        "description": "以下のアプリケーションからコピーされたコンテンツを保存しません。"
+      }
+    },
+    "storage": {
+      "title": "ストレージ",
+      "clearHistoryOnQuit": {
+        "title": "終了時に履歴全体をクリア",
+        "description": "ClipBookが終了したときにクリップボード履歴全体をクリアします。"
+      },
+      "clearHistoryOnMacReboot": {
+        "title": "Macのシャットダウン/再起動時に履歴全体をクリア",
+        "description": "Macのシャットダウン/再起動時にクリップボード履歴全体をクリアします。"
+      },
+      "retentionPeriod": {
+        "title": "履歴を保持",
+        "description": "個々の履歴アイテムを保持する期間を選択します。この期間より古いアイテムは、お気に入りとタグ付きアイテムを除いて、履歴から自動的に削除されます。",
+        "text": "テキスト",
+        "image": "画像",
+        "file": "ファイルとフォルダ",
+        "link": "リンク",
+        "email": "メール",
+        "color": "カラー"
+      }
+    },
+    "license": {
+      "title": "ClipBookライセンス",
+      "activated": "アクティベート済み",
+      "trial": "トライアル",
+      "trialDescription": "現在、ClipBookの<span>トライアル版</span>を使用しています。ClipBookを引き続き使用するには、オンラインストアからライセンスキーを購入してアクティベートしてください。",
+      "licenseKey": "ライセンスキー",
+      "licenseKeyDescription": "ライセンスキーは、ClipBook購入後に受信したメールで確認できます。",
+      "activate": "アクティベート",
+      "buyLicense": "ライセンスを購入",
+      "deactivate": "アクティベート解除",
+      "activationErrorMessage": {
+        "title": "ライセンスキーをアクティベートできません :(",
+        "help": "ヘルプ",
+        "close": "閉じる"
+      }
+    },
+    "about": {
+      "version": "バージョン {{version}} ({{arch}})",
+      "checkForUpdates": "アップデートを確認...",
+      "checkingForUpdates": "アップデートを確認中...",
+      "checkForUpdatesResult": {
+        "newVersionAvailable": "新しいバージョンが利用可能です！",
+        "restartClipBookToInstallUpdate": "アップデートをインストールするにはClipBookを再起動してください。"
+      },
+      "links": {
+        "website": "ウェブサイト",
+        "support": "サポート",
+        "changelog": "変更履歴",
+        "feedback": "フィードバック"
+      },
+      "copyright": "© 2025 ClipBook。全著作権所有。"
+    }
+  },
+  "preview": {
+    "toolbar": {
+      "openInBrowser": "ブラウザで開く",
+      "copyTextFromImage": "画像からテキストをコピー",
+      "selectedItems": "{{count}}個のアイテム",
+      "item": "{{count}}個のアイテム",
+      "items": "{{count}}個のアイテム",
+      "pasteTo": "{{indicator}}を{{appName}}にペースト",
+      "pasteToWithReturn": "{{indicator}}を{{appName}}にReturnキーでペースト",
+      "pasteToWithTab": "{{indicator}}を{{appName}}にTabキーでペースト",
+      "mergeItems": "{{count}}個のアイテムをマージ",
+      "copyToClipboard": "クリップボードにコピー",
+      "removeFromFavorites": "お気に入りから削除",
+      "addToFavorites": "お気に入りに追加",
+      "hideDetails": "詳細を非表示",
+      "showDetails": "詳細を表示",
+      "hidePreviewPanel": "プレビューパネルを非表示",
+      "more": "その他のアクション"
+    },
+    "toolbarMenu": {
+      "formatText": "テキストをフォーマット",
+      "makeLowerCase": "小文字にする",
+      "makeUpperCase": "大文字にする",
+      "capitalizeWords": "単語を大文字にする",
+      "sentenceCase": "文の先頭を大文字にする",
+      "removeEmptyLines": "空行を削除",
+      "stripAllWhitespaces": "すべての空白を削除",
+      "trimSurroundingWhitespaces": "前後の空白を削除",
+      "editContent": "コンテンツを編集...",
+      "rename": "名前を変更...",
+      "preview": "プレビュー",
+      "update": "更新",
+      "saveAsFile": "ファイルとして保存...",
+      "delete": "{{indicator}}を削除"
+    }
+  },
+  "searchBar": {
+    "trial": "トライアル",
+    "expired": "期限切れ",
+    "trialEnded": "トライアル終了",
+    "trialEndsTomorrow": "トライアル明日終了",
+    "trialDaysLeft": "残り{{count}}日",
+    "trialDayLeft": "残り{{count}}日",
+    "trialExpired": "トライアル期限切れ",
+    "hideFilterOptions": "フィルターオプションを非表示",
+    "showFilterOptions": "フィルターオプションを表示",
+    "trialWillExpireIn": "トライアルは{{count}}日後に期限切れになります",
+    "typeToSearch": "検索するには入力してください...",
+    "clearSearch": "検索をクリア",
+    "hideWhenNotFocused": "フォーカスされていないときは非表示",
+    "alwaysDisplay": "常に表示",
+    "showPreview": "プレビューを表示",
+    "sort": "履歴をソート"
+  },
+  "sortMenu": {
+    "lastCopyTime": "最終コピー時刻",
+    "firstCopyTime": "最初のコピー時刻",
+    "numberOfCopies": "コピー回数",
+    "size": "サイズ",
+    "reverseOrder": "逆順"
+  },
+  "statusBar": {
+    "hideNotification": "通知を非表示",
+    "updateClipBook": "ClipBookを更新",
+    "newVersionAvailable": "新しいバージョンが利用可能",
+    "clickToInstallUpdate": "クリックしてアップデートをインストール",
+    "navigate": "ナビゲート",
+    "pasteTo": "{{appName}}にペースト"
+  },
+  "tagDialog": {
+    "editTag": "タグを編集",
+    "newTag": "新しいタグ",
+    "tagName": "タグ名",
+    "save": "保存",
+    "create": "作成",
+    "cancel": "キャンセル"
+  },
+  "trial": {
+    "expiredDialog": {
+      "showDialog": "ダイアログを表示",
+      "title": "トライアル期間が終了しました :(",
+      "description": "ClipBookをお楽しみいただけたことを願っています。気に入っていただけた場合は、ライセンスを購入して開発をサポートしていただけると幸いです。",
+      "feedback": "気に入らなかった場合は、その理由をお聞かせください。",
+      "missingFeatures": "機能が不足している",
+      "dontNeedItRightNow": "今は必要ない",
+      "wasntUsefulForMe": "役に立たなかった",
+      "other": "その他（具体的に記入してください）",
+      "emailForResponse": "返信用メールアドレス（任意）",
+      "yourFeedback": "フィードバック",
+      "founder": "ClipBook創設者",
+      "sendFeedback": "フィードバックを送信",
+      "activateLicense": "ライセンスをアクティベート",
+      "buyLicense": "ライセンスを購入"
+    }
+  },
+  "commands": {
+    "item": "アイテム",
+    "items": "アイテム",
+    "activeApp": "アクティブなアプリ",
+    "showMoreActions": "その他のアクションを表示",
+    "noResultsFound": "結果が見つかりません。",
+    "typeCommandOrSearch": "コマンドを入力するか検索...",
+    "pasteItemToApp": "{{itemLabel}}{{itemsLabel}}を{{appName}}にペースト",
+    "pasteItemToAppWithFormatting": "{{itemLabel}}{{itemsLabel}}を{{appName}}にフォーマット付きでペースト...",
+    "pasteObjectToApp": "{{appName}}にペースト",
+    "pasteObjectsToApp": "{{itemsLabel}}を{{appName}}にペースト",
+    "pasteItemsToAppWithReturn": "{{itemsLabel}}を{{appName}}にReturnキーでペースト",
+    "pasteItemsToAppWithTab": "{{itemsLabel}}を{{appName}}にTabキーでペースト",
+    "pastePathToApp": "パスを{{appName}}にペースト",
+    "mergeItems": "{{itemsLabel}}をマージ",
+    "copyItemToClipboard": "{{itemLabel}}をクリップボードにコピー",
+    "copyObjectToClipboard": "クリップボードにコピー",
+    "copyPathToClipboard": "パスをクリップボードにコピー",
+    "showInHistory": "履歴に表示",
+    "copyTextFromImage": "画像からテキストをコピー",
+    "saveImageAsFile": "ファイルとして保存...",
+    "editContent": "コンテンツを編集...",
+    "addToFavorites": "{{itemsLabel}}をお気に入りに追加",
+    "removeFromFavorites": "{{itemsLabel}}をお気に入りから削除",
+    "previewLink": "リンクをプレビュー",
+    "renameItem": "名前を変更...",
+    "formatText": "テキストをフォーマット...",
+    "split": "分割",
+    "quickLook": "クイックルック",
+    "showInFinder": "Finderで表示",
+    "openInApp": "{{appName}}で開く",
+    "openWith": "このアプリケーションで開く...",
+    "hidePreview": "プレビューを非表示",
+    "showPreview": "プレビューを表示",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "resetZoom": "ズームをリセット",
+    "settings": "設定...",
+    "deleteItem": "削除",
+    "deleteItems": "{{itemsLabel}}を削除",
+    "deleteAllItems": "すべて削除"
+  },
+  "formatText": {
+    "makeLowerCase": "小文字にする",
+    "makeUpperCase": "大文字にする",
+    "capitalizeWords": "単語を大文字にする",
+    "sentenceCase": "文の先頭を大文字にする",
+    "removeEmptyLines": "空行を削除",
+    "stripAllWhitespaces": "すべての空白を削除",
+    "trimSurroundingWhitespaces": "前後の空白を削除"
+  },
+  "historyItemContextMenu": {
+    "pasteItemToApp": "{{itemLabel}}を{{appName}}にペースト",
+    "pastePathToApp": "パスを{{appName}}にペースト",
+    "copyItemToClipboard": "{{itemLabel}}をクリップボードにコピー",
+    "copyPathToClipboard": "パスをクリップボードにコピー",
+    "openInBrowser": "ブラウザで開く",
+    "editContent": "コンテンツを編集...",
+    "copyTextFromImage": "画像からテキストをコピー",
+    "addToFavorites": "お気に入りに追加",
+    "removeFromFavorites": "お気に入りから削除",
+    "renameItem": "名前を変更...",
+    "quickLook": "クイックルック",
+    "formatText": "テキストをフォーマット...",
+    "tags": "タグ...",
+    "newTag": "新しいタグ...",
+    "preview": "プレビュー",
+    "showInFinder": "Finderで表示",
+    "openInApp": "{{appName}}で開く",
+    "openWith": "このアプリケーションで開く...",
+    "showInHistory": "履歴に表示",
+    "deleteItem": "削除",
+    "deleteItems": "{{count}}個のアイテムを削除"
+  },
+  "app": {
+    "menu": {
+      "open": "ClipBookを開く",
+      "pause": "ClipBookを一時停止",
+      "resume": "ClipBookを再開",
+      "about": "ClipBookについて",
+      "checkForUpdates": "アップデートを確認...",
+      "settings": "設定...",
+      "quit": "終了",
+      "help": "ヘルプ",
+      "helpMenu": {
+        "shortcuts": "キーボードショートカット",
+        "changelog": "変更履歴",
+        "feedback": "フィードバック",
+        "contactSupport": "サポートに連絡"
+      }
+    },
+    "dialogs": {
+      "clearHistory": {
+        "message": "履歴全体をクリアしてもよろしいですか？",
+        "informativeText": "この操作は元に戻せません。",
+        "clear": "クリア",
+        "cancel": "キャンセル"
+      },
+      "updateAvailable": {
+        "title": "アップデート利用可能",
+        "message": "ClipBookの新しいバージョンが利用可能です。",
+        "informativeText": "アップデートしますか？",
+        "update": "アップデート",
+        "later": "後で"
+      },
+      "restartRequired": {
+        "title": "再起動が必要",
+        "message": "ClipBookがバージョン",
+        "informativeText": "アップデートを適用するにはアプリケーションを再起動してください。",
+        "restart": "再起動",
+        "later": "後で"
+      },
+      "updateFailed": {
+        "title": "アップデート失敗",
+        "message": "アップデートのインストール中にエラーが発生しました :(",
+        "close": "閉じる"
+      },
+      "updateCheckFailed": {
+        "title": "アップデート確認失敗",
+        "message": "おっと！アップデートの確認中にエラーが発生しました :(",
+        "close": "閉じる"
+      },
+      "upToDate": {
+        "title": "最新です",
+        "message": "ClipBookは最新です！",
+        "informativeText": "ClipBookの最新バージョンを使用しています。",
+        "close": "閉じる"
+      },
+      "selectAppsToIgnore": {
+        "choose": "選択",
+        "applications": "アプリケーション"
+      },
+      "saveImageAs": {
+        "title": "画像を保存",
+        "images": "画像",
+        "save": "保存"
+      },
+      "accessibilityAccessRequired": {
+        "message": "アクセシビリティアクセスが必要です",
+        "informativeText": "他のアプリに直接ペーストするには、ClipBookにアクセシビリティアクセスが必要です。",
+        "enableAccessibility": "アクセシビリティアクセスを有効にする",
+        "copyToClipboard": "クリップボードにコピー",
+        "cancel": "キャンセル"
+      }
+    },
+    "sidebar": {
+      "all": "すべて",
+      "favorites": "お気に入り",
+      "text": "テキスト",
+      "image": "画像",
+      "link": "リンク",
+      "file": "ファイル",
+      "color": "カラー",
+      "email": "メール",
+      "newtag": "新しいタグ",
+      "showapps": "アプリを表示",
+      "hideapps": "アプリを非表示",
+      "tag": {
+        "contextMenu": {
+          "edit": "編集...",
+          "delete": "削除"
+        }
+      }
+    },
+    "history": {
+      "renamePlaceholder": "このアイテムの名前を入力",
+      "noItems": "アイテムなし",
+      "noResults": "結果なし"
+    },
+    "itemInfoPane": {
+      "link": "リンク",
+      "color": "カラー",
+      "email": "メール",
+      "image": "画像",
+      "file": "ファイル",
+      "folder": "フォルダ",
+      "text": "テキスト",
+      "html": "HTML",
+      "rtf": "RTF",
+      "unknown": "不明",
+      "application": "アプリケーション",
+      "types": "タイプ",
+      "type": "タイプ",
+      "tags": "タグ",
+      "url": "URL",
+      "path": "パス",
+      "fileSize": "ファイルサイズ",
+      "imageDimensions": "画像サイズ",
+      "imageSize": "画像サイズ",
+      "numberOfCopies": "コピー回数",
+      "firstCopyTime": "最初のコピー時刻",
+      "lastCopyTime": "最終コピー時刻",
+      "copyTime": "コピー時刻",
+      "bytes": "バイト",
+      "kb": " KB",
+      "mb": " MB"
+    },
+    "itemsInfoPane": {
+      "text": "テキスト",
+      "texts": "テキスト",
+      "image": "画像",
+      "images": "画像",
+      "link": "リンク",
+      "links": "リンク",
+      "color": "カラー",
+      "colors": "カラー",
+      "email": "メール",
+      "emails": "メール",
+      "file": "ファイル",
+      "files": "ファイル",
+      "items": "アイテム",
+      "copyTime": "コピー時刻"
+    },
+    "openWithCommands": {
+      "searchPlaceholder": "検索...",
+      "default": "デフォルト",
+      "recommended": "推奨",
+      "other": "その他",
+      "noResults": "結果が見つかりません。"
+    },
+    "pasteTransformationCommands": {
+      "searchPlaceholder": "コマンドを入力するか検索...",
+      "formatTextWhenPasting": "ペースト時にテキストをフォーマット",
+      "makeLowerCase": "小文字にする",
+      "makeUpperCase": "大文字にする",
+      "capitalizeWords": "単語を大文字にする",
+      "sentenceCase": "文の先頭を大文字にする",
+      "removeEmptyLines": "空行を削除",
+      "stripAllWhitespaces": "すべての空白を削除",
+      "trimSurroundingWhitespaces": "前後の空白を削除",
+      "noResults": "結果が見つかりません。"
+    },
+    "previewLinkCard": {
+      "loadingPreview": "プレビューを読み込み中...",
+      "noTitle": "タイトルなし",
+      "noDescription": "説明なし"
+    }
+  }
+}
+

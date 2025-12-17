@@ -269,6 +269,12 @@ export default function General() {
                         <span className="text-secondary-foreground">{getLanguageByCode(LanguageCode.PT_BR)?.name}</span>
                       </div>
                     </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={LanguageCode.JA} className="py-2 pr-4 pl-10">
+                      <div className="flex flex-col">
+                        <span>{getLanguageByCode(LanguageCode.JA)?.nativeName}</span>
+                        <span className="text-secondary-foreground">{getLanguageByCode(LanguageCode.JA)?.name}</span>
+                      </div>
+                    </DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
