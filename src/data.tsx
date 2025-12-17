@@ -75,6 +75,7 @@ export enum LanguageCode {
   IT = "it",
   PT_BR = "pt-BR",
   JA = "ja",
+  ZH_CN = "zh-CN",
 }
 
 export class Language {
@@ -96,6 +97,7 @@ export const supportedLanguages: Language[] = [
   new Language(LanguageCode.IT, "Italian", "Italiano"),
   new Language(LanguageCode.PT_BR, "Portuguese (Brazil)", "Português (Brasil)"),
   new Language(LanguageCode.JA, "Japanese", "日本語"),
+  new Language(LanguageCode.ZH_CN, "Chinese (Simplified)", "简体中文"),
 ];
 
 export type TagCheckedState = {
@@ -829,6 +831,8 @@ function toLocale(languageCode: LanguageCode): string {
       return "pt-BR";
     case LanguageCode.JA:
       return "ja-JP";
+    case LanguageCode.ZH_CN:
+      return "zh-CN";
     default:
       return "en-US"; // Default to English (US)
   }
