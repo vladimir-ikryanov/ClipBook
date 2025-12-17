@@ -108,8 +108,12 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
     e.stopPropagation()
   }
 
+  function isItemSelected() {
+    return getSelectedHistoryItemIndices().includes(props.index)
+  }
+
   function isMultipleItemsSelected() {
-    return getSelectedHistoryItemIndices().length > 1
+    return getSelectedHistoryItemIndices().length > 1 && isItemSelected()
   }
 
   function canShowInHistory() {
