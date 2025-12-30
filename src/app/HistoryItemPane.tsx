@@ -148,7 +148,7 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
       if (e.metaKey || e.shiftKey) {
         props.onItemSelected(props.index, e.metaKey, e.shiftKey)
       } else {
-        if (props.selectedItemIndices.length >= 1) {
+        if (props.selectedItemIndices.length > 0) {
           emitter.emit("Paste")
         } else {
           emitter.emit("PasteByIndex", props.index)

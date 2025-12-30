@@ -1141,19 +1141,17 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function handlePasteByIndex(index: number) {
-    if (index < history.length) {
-      let item = history[index]
-      if (prefShouldCopyOnDoubleClick()) {
-        await copyItemToClipboard(item)
-        if (!prefShouldAlwaysDisplay()) {
-          hideAppWindow()
-        }
-      } else {
-        await pasteItem(item)
+    let item = getHistoryItem(index)
+    if (prefShouldCopyOnDoubleClick()) {
+      await copyItemToClipboard(item)
+      if (!prefShouldAlwaysDisplay()) {
+        hideAppWindow()
       }
-      handleSearchQueryChange("")
-      setQuickPasteModifierPressed(false)
+    } else {
+      await pasteItem(item)
     }
+    handleSearchQueryChange("")
+    setQuickPasteModifierPressed(false)
   }
 
   async function handleToggleFavorite() {
