@@ -1238,7 +1238,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
         items.push(item)
       }
     } else {
-      items = getSelectedHistoryItems()
+      let index = getActiveHistoryItemIndex()
+      let item = getHistoryItem(index)
+      if (item) {
+        items.push(item)
+      }
     }
     items.forEach(item => {
       item.content = formatText(item.content, args.operation)
