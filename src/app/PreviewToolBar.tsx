@@ -102,12 +102,10 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
     setIsCopying(true)
 
-    // Step 1: Fade out the Copy icon
     setTimeout(() => {
-      setShowCheckIcon(true); // Step 2: Wait 200ms, then show Check icon
+      setShowCheckIcon(true);
     }, 150);
 
-    // Step 3: Reset after 1 seconds
     setTimeout(() => {
       setShowCheckIcon(false);
       setIsCopying(false);
