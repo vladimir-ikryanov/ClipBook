@@ -54,7 +54,9 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
   const [selectedItem, setSelectedItem] = useState<Clip>()
   const [pasteOptionsMenuOpen, setPasteOptionsMenuOpen] = useState(false)
   const [isCopying, setIsCopying] = useState(false)
+  const [isCopyingTextFromImage, setIsCopyingTextFromImage] = useState(false)
   const [showCheckIcon, setShowCheckIcon] = useState(false)
+  const [showCheckIconTextFromImage, setShowCheckIconTextFromImage] = useState(false)
 
   useEffect(() => {
     if (props.selectedItemIndices.length <= 1) {
@@ -122,6 +124,21 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
 
   function handleCopyTextFromImage() {
     emitter.emit("CopyTextFromImage")
+
+    if (isCopyingTextFromImage) {
+      return
+    }
+
+    setIsCopyingTextFromImage(true)
+
+    setTimeout(() => {
+      setShowCheckIconTextFromImage(true)
+    }, 150)
+
+    setTimeout(() => {
+      setIsCopyingTextFromImage(false)
+      setShowCheckIconTextFromImage(false)
+    }, 1000)
   }
 
   function handleToggleFavorite() {
@@ -333,8 +350,27 @@ export default function PreviewToolBar(props: PreviewToolBarProps) {
                 canShowCopyTextFromImage() &&
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="toolbar" size="toolbar" onClick={handleCopyTextFromImage}>
-                      <ScanTextIcon className="h-5 w-5" strokeWidth={2}/>
+                  <Button
+                        variant="copy"
+                        size="toolbar"
+                        onClick={handleCopyTextFromImage}
+                        disabled={isCopyingTextFromImage}
+                        className="relative"
+                    >
+                      <div className="relative w-5 h-5">
+                        <ScanTextIcon
+                            className={`absolute inset-0 h-5 w-5 transition-opacity duration-150 ${
+                                isCopyingTextFromImage ? "opacity-0" : "opacity-100"
+                            }`}
+                            strokeWidth={2}
+                        />
+                        <CheckIcon
+                            className={`absolute inset-0 h-5 w-5 !text-checked transition-opacity duration-150 ${
+                                showCheckIconTextFromImage ? "opacity-100" : "opacity-0"
+                            }`}
+                            strokeWidth={3}
+                        />
+                      </div>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center">
