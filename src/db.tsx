@@ -50,6 +50,8 @@ export class Clip {
   fileFolder: boolean = false;
   rtf: string = "";
   html: string = "";
+  sequenceId?: number;
+  sequenceOrder?: number;
 
   constructor(type: ClipType, content: string, sourceApp: string) {
     this.type = type;
@@ -66,6 +68,10 @@ class AppDatabase extends Dexie {
     super('ClipBookDB');
     this.version(1).stores({
       history: '++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder, rtf, html',
+      linkPreviews: '++id, url, title, description, imageFileName, faviconFileName'
+    });
+    this.version(2).stores({
+      history: '++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder, rtf, html, sequenceId, sequenceOrder',
       linkPreviews: '++id, url, title, description, imageFileName, faviconFileName'
     });
   }

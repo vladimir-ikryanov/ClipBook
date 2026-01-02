@@ -43,7 +43,8 @@ export enum SortHistoryType {
   TimeOfFirstCopy,
   TimeOfLastCopy,
   NumberOfCopies,
-  Size
+  Size,
+  CopySequence
 }
 
 export enum TextFormatOperation {
@@ -111,6 +112,7 @@ let history: Clip[] = [];
 let filteredHistory: Clip[] = [];
 let filterQuery = "";
 let filterHistory = false;
+let lastPasteTime: number = 0;
 let filterOptionsUpdated = false;
 let filterOptions: FilterOptions = {
   types: [],
@@ -390,6 +392,70 @@ export function isHistoryEmpty() {
   return history.length === 0
 }
 
+// Track when the last paste happened to break sequences
+export function markPasteAction(): void {
+  lastPasteTime = Date.now() + 1
+}
+
+// Helper function to track sequences for CopySequence sort
+export async function trackSequence(item: Clip, isNewItem: boolean = true): Promise<void> {
+  const sequenceThreshold = 10000 // 10 seconds in milliseconds
+  
+  if (history.length === 0) {
+    return
+  }
+  
+  // Find the clip with the most recent lastTimeCopy (excluding the current item if it's a duplicate)
+  let mostRecentClip: Clip | undefined
+  let mostRecentTime = 0
+  
+  for (const clip of history) {
+    // Skip the current item if it's a duplicate
+    if (!isNewItem && clip.id === item.id) {
+      continue
+    }
+    
+    const clipTime = clip.lastTimeCopy.getTime()
+    if (clipTime > mostRecentTime) {
+      mostRecentTime = clipTime
+      mostRecentClip = clip
+    }
+  }
+  
+  if (!mostRecentClip) {
+    return
+  }
+  
+  const timeDiff = item.lastTimeCopy.getTime() - mostRecentClip.lastTimeCopy.getTime()
+  
+  // Check if a paste happened after the most recent copy
+  // If so, start a new sequence regardless of time threshold (better UX)
+  const pasteHappenedAfterLastCopy = lastPasteTime > mostRecentTime
+  
+  if (pasteHappenedAfterLastCopy) {
+    // User pasted items, ready to start fresh sequence
+    item.sequenceId = undefined
+    item.sequenceOrder = undefined
+  } else if (timeDiff < sequenceThreshold && mostRecentClip.sequenceId !== undefined) {
+    // Continue existing sequence
+    item.sequenceId = mostRecentClip.sequenceId
+    item.sequenceOrder = (mostRecentClip.sequenceOrder || 0) + 1
+  } else if (timeDiff < sequenceThreshold) {
+    // Start new sequence with previous clip
+    const sequenceId = mostRecentClip.lastTimeCopy.getTime()
+    mostRecentClip.sequenceId = sequenceId
+    mostRecentClip.sequenceOrder = 0
+    await updateClip(mostRecentClip.id!, mostRecentClip)
+    
+    item.sequenceId = sequenceId
+    item.sequenceOrder = 1
+  } else {
+    // Time gap is too large, reset sequence info for this item
+    item.sequenceId = undefined
+    item.sequenceOrder = undefined
+  }
+}
+
 export async function addHistoryItem(content: string,
                                      sourceAppPath: string,
                                      imageFileName: string,
@@ -421,6 +487,10 @@ export async function addHistoryItem(content: string,
   item.imageThumbFileName = imageThumbFileName
   item.imageText = imageText
   item.fileFolder = isFolder
+  
+  // Add sequence tracking for CopySequence sort
+  await trackSequence(item, true)
+  
   await addClip(item)
   history.push(item)
   requestHistoryUpdate()
@@ -502,6 +572,24 @@ export function sortHistory(type: SortHistoryType, history: Clip[]) {
     case SortHistoryType.Size:
       history.sort((a, b) => compareItemsSize(a, b))
       break
+    case SortHistoryType.CopySequence:
+      // Copy sequence: Maintain copy order for sequential items, sort by recency
+      history.sort((a, b) => {
+        // Get effective timestamp for comparison
+        // For sequenced items: use sequenceId (when sequence started)
+        // For non-sequenced items: use lastTimeCopy
+        const aTime = a.sequenceId ?? a.lastTimeCopy.getTime()
+        const bTime = b.sequenceId ?? b.lastTimeCopy.getTime()
+        
+        // Sort by timestamp (newest first)
+        if (aTime !== bTime) {
+          return bTime - aTime
+        }
+        
+        // Same timestamp means same sequence - maintain copy order
+        return (a.sequenceOrder ?? 0) - (b.sequenceOrder ?? 0)
+      })
+      break
   }
   // Move pinned items to the top if needed.
   if (pinFavoritesOnTop) {
@@ -515,8 +603,8 @@ export function sortHistory(type: SortHistoryType, history: Clip[]) {
       return 0
     })
   }
-  // Reverse order if needed.
-  if (sortOrderReverse) {
+  // Reverse order if needed (ignore for CopySequence as it has specific order)
+  if (sortOrderReverse && type !== SortHistoryType.CopySequence) {
     history.reverse()
   }
 }

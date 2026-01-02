@@ -26,10 +26,12 @@ import {
   isHistoryItemSelected,
   isTextItem,
   loadHistory,
+  markPasteAction,
   removeHistoryItemFromSelection,
   setFilterQuery,
   setPreviewVisibleState,
   TextFormatOperation,
+  trackSequence,
   updateHistoryItem,
   updateHistoryItemTypes,
   setFilterVisibleState,
@@ -189,6 +191,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (item) {
       item.numberOfCopies++
       item.lastTimeCopy = new Date()
+      await trackSequence(item, false)
       await updateHistoryItem(item.id!, item)
     } else {
       item = await addHistoryItem(
@@ -939,8 +942,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
     item.numberOfCopies++
     if (prefShouldUpdateHistoryAfterAction() && !keepHistory) {
       item.lastTimeCopy = new Date()
+      await trackSequence(item, false)
     }
     await updateHistoryItem(item.id!, item)
+
+    // Mark that a paste happened (breaks copy sequences for better UX)
+    markPasteAction()
 
     let rtf = pasteObject ? getRTF(item) : ""
     let html = pasteObject ? getHTML(item) : ""
@@ -965,11 +972,15 @@ export default function HistoryPane(props: HistoryPaneProps) {
       item.numberOfCopies++
       if (prefShouldUpdateHistoryAfterAction() && !keepHistory) {
         item.lastTimeCopy = new Date()
+        await trackSequence(item, false)
       }
       await updateHistoryItem(item.id!, item)
       filePaths.push(getFilePath(item))
     }
     setHistory([...getHistoryItems()])
+
+    // Mark that a paste happened (breaks copy sequences for better UX)
+    markPasteAction()
 
     pasteFilesInFrontApp(filePaths.join(":"))
 
@@ -1293,6 +1304,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
     item.numberOfCopies++
     if (prefShouldUpdateHistoryAfterAction()) {
       item.lastTimeCopy = new Date()
+      // Break copy sequence for better UX
+      markPasteAction()
+      // Track the copy sequence
+      await trackSequence(item, false)
     }
     await updateHistoryItem(item.id!, item)
 

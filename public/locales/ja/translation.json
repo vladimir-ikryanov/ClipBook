@@ -312,6 +312,7 @@
     "firstCopyTime": "最初のコピー時刻",
     "numberOfCopies": "コピー回数",
     "size": "サイズ",
+    "smartGrouping": "スマートグルーピング",
     "reverseOrder": "逆順"
   },
   "statusBar": {

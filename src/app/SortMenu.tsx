@@ -87,8 +87,13 @@ export default function SortMenu() {
                                       onCheckedChange={() => handleSortTypeChange(SortHistoryType.Size)}>
               {t('sortMenu.size')}
             </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.CopySequence}
+                                      onCheckedChange={() => handleSortTypeChange(SortHistoryType.CopySequence)}>
+              {t('sortMenu.smartGrouping')}
+            </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator/>
             <DropdownMenuCheckboxItem checked={sortOrderReverse}
+                                      disabled={sortType === SortHistoryType.CopySequence}
                                       onCheckedChange={handleSortOrderReverseChange}>
               {t('sortMenu.reverseOrder')}
             </DropdownMenuCheckboxItem>
