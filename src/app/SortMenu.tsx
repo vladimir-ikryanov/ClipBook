@@ -1,7 +1,7 @@
 import '../app.css';
 import {KeyboardEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
-import {ArrowDownUpIcon, ArrowUpDownIcon, XIcon,} from "lucide-react";
+import {ArrowDownUpIcon, ArrowUpDownIcon, BrainIcon, XIcon,} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -71,6 +71,11 @@ export default function SortMenu() {
           </TooltipContent>
           <DropdownMenuContent className="p-1.5 bg-actions-background" align="start"
                                onKeyDown={handleKeyDown}>
+            <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.CopySequence}
+              onCheckedChange={() => handleSortTypeChange(SortHistoryType.CopySequence)}>
+              <span className="mr-2">{t('sortMenu.keepSequence')}</span>
+              <BrainIcon className="h-4 w-4 text-secondary-foreground"/>
+            </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.TimeOfLastCopy}
                                       onCheckedChange={() => handleSortTypeChange(SortHistoryType.TimeOfLastCopy)}>
               {t('sortMenu.lastCopyTime')}
@@ -86,10 +91,6 @@ export default function SortMenu() {
             <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.Size}
                                       onCheckedChange={() => handleSortTypeChange(SortHistoryType.Size)}>
               {t('sortMenu.size')}
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.CopySequence}
-                                      onCheckedChange={() => handleSortTypeChange(SortHistoryType.CopySequence)}>
-              {t('sortMenu.smartGrouping')}
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator/>
             <DropdownMenuCheckboxItem checked={sortOrderReverse}

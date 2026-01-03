@@ -196,13 +196,13 @@ export default function History() {
                   <DropdownMenuRadioGroup value={doubleClickStrategy}
                                           onValueChange={handleDoubleClickStrategyChange}>
                     <DropdownMenuRadioItem value={DoubleClickStrategy.PASTE}
-                                           className="py-2 pr-4 pl-10">
+                                           className="py-2 pr-4 pl-8">
                       <div className="flex flex-col">
                         <span>{doubleClickStrategyLabels[DoubleClickStrategy.PASTE]}</span>
                       </div>
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value={DoubleClickStrategy.COPY}
-                                           className="py-2 pr-4 pl-10">
+                                           className="py-2 pr-4 pl-8">
                       <div className="flex flex-col">
                         <span>{doubleClickStrategyLabels[DoubleClickStrategy.COPY]}</span>
                       </div>
@@ -231,13 +231,13 @@ export default function History() {
                   <DropdownMenuRadioGroup value={numberActionStrategy}
                                           onValueChange={handleNumberActionStrategyChange}>
                     <DropdownMenuRadioItem value={NumberActionStrategy.PASTE}
-                                           className="py-2 pr-4 pl-10">
+                                           className="py-2 pr-4 pl-8">
                       <div className="flex flex-col">
                         <span>{numberActionStrategyLabels[NumberActionStrategy.PASTE]}</span>
                       </div>
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value={NumberActionStrategy.COPY}
-                                           className="py-2 pr-4 pl-10">
+                                           className="py-2 pr-4 pl-8">
                       <div className="flex flex-col">
                         <span>{numberActionStrategyLabels[NumberActionStrategy.COPY]}</span>
                       </div>

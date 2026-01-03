@@ -239,42 +239,42 @@ export default function General() {
                 <DropdownMenuContent className="p-1.5 bg-actions-background" align="end">
                   <DropdownMenuRadioGroup value={languageCode}
                                           onValueChange={handleLanguageCodeChange}>
-                    <DropdownMenuRadioItem value={LanguageCode.EN_US} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={LanguageCode.EN_US} className="py-2 pr-4 pl-8">
                       <div className="flex">
                         <span>{getLanguageByCode(LanguageCode.EN_US)?.nativeName}</span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={LanguageCode.EN_GB} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={LanguageCode.EN_GB} className="py-2 pr-4 pl-8">
                       <div className="flex">
                         <span>{getLanguageByCode(LanguageCode.EN_GB)?.nativeName}</span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={LanguageCode.DE} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={LanguageCode.DE} className="py-2 pr-4 pl-8">
                       <div className="flex">
                         <span>{getLanguageByCode(LanguageCode.DE)?.nativeName}</span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={LanguageCode.IT} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={LanguageCode.IT} className="py-2 pr-4 pl-8">
                       <div className="flex">
                         <span>{getLanguageByCode(LanguageCode.IT)?.nativeName}</span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={LanguageCode.ES} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={LanguageCode.ES} className="py-2 pr-4 pl-8">
                       <div className="flex">
                         <span>{getLanguageByCode(LanguageCode.ES)?.nativeName}</span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={LanguageCode.PT_BR} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={LanguageCode.PT_BR} className="py-2 pr-4 pl-8">
                       <div className="flex">
                         <span>{getLanguageByCode(LanguageCode.PT_BR)?.nativeName}</span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={LanguageCode.JA} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={LanguageCode.JA} className="py-2 pr-4 pl-8">
                       <div className="flex">
                         <span>{getLanguageByCode(LanguageCode.JA)?.nativeName}</span>
                       </div>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={LanguageCode.ZH_CN} className="py-2 pr-4 pl-10">
+                    <DropdownMenuRadioItem value={LanguageCode.ZH_CN} className="py-2 pr-4 pl-8">
                       <div className="flex">
                         <span>{getLanguageByCode(LanguageCode.ZH_CN)?.nativeName}</span>
                       </div>
@@ -336,7 +336,7 @@ export default function General() {
                   <DropdownMenuRadioGroup value={openWindowStrategy}
                                           onValueChange={handleOpenWindowStrategyChange}>
                     <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION}
-                                           className="py-2 pr-4 pl-10">
+                                           className="py-2 pr-4 pl-8">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_SCREEN_LAST_POSITION]}</span>
                         <span className="text-secondary-foreground">
@@ -350,7 +350,7 @@ export default function General() {
                       </div>
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_SCREEN_CENTER}
-                                           className="py-2 pr-4 pl-10">
+                                           className="py-2 pr-4 pl-8">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_SCREEN_CENTER]}</span>
                         <span className="text-secondary-foreground">
@@ -359,7 +359,7 @@ export default function General() {
                       </div>
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value={OpenWindowStrategy.ACTIVE_WINDOW_CENTER}
-                                           className="py-2 pr-4 pl-10">
+                                           className="py-2 pr-4 pl-8">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.ACTIVE_WINDOW_CENTER]}</span>
                         <span className="text-secondary-foreground">
@@ -373,7 +373,7 @@ export default function General() {
                       </div>
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value={OpenWindowStrategy.SCREEN_WITH_CURSOR}
-                                           className="py-2 pr-4 pl-10">
+                                           className="py-2 pr-4 pl-8">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.SCREEN_WITH_CURSOR]}</span>
                         <span className="text-secondary-foreground">
@@ -382,7 +382,7 @@ export default function General() {
                       </div>
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value={OpenWindowStrategy.MOUSE_CURSOR}
-                                           className="py-2 pr-4 pl-10">
+                                           className="py-2 pr-4 pl-8">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.MOUSE_CURSOR]}</span>
                         <span className="text-secondary-foreground">
@@ -391,7 +391,7 @@ export default function General() {
                       </div>
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value={OpenWindowStrategy.INPUT_CURSOR}
-                                           className="py-2 pr-4 pl-10">
+                                           className="py-2 pr-4 pl-8">
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.INPUT_CURSOR]}</span>
                         <span className="text-secondary-foreground">

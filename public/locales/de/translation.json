@@ -312,7 +312,7 @@
     "firstCopyTime": "Erste Kopierzeit",
     "numberOfCopies": "Anzahl der Kopien",
     "size": "Größe",
-    "smartGrouping": "Intelligente Gruppierung",
+    "keepSequence": "Kopierreihenfolge beibehalten",
     "reverseOrder": "Reihenfolge umkehren"
   },
   "statusBar": {
