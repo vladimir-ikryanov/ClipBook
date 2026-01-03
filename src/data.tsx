@@ -757,6 +757,9 @@ export function saveSortType(type: SortHistoryType) {
 }
 
 export function getSortType(): SortHistoryType {
+  if (localStorage.getItem("sortType")) {
+    sortType = parseInt(localStorage.getItem("sortType")!)
+  }
   return sortType
 }
 

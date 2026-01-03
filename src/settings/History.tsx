@@ -45,6 +45,7 @@ import {
 import {ChevronsUpDown} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import { Trans, useTranslation } from 'react-i18next';
+import { getSortType, saveSortType, SortHistoryType } from "@/data";
 
 declare const closeSettingsWindow: () => void;
 
@@ -87,6 +88,11 @@ export default function History() {
   function handlePinFavoritesOnTopChange(pinFavoritesOnTop: boolean) {
     setPinFavoritesOnTop(pinFavoritesOnTop)
     prefSetPinFavoritesOnTop(pinFavoritesOnTop)
+    // If favorites are pinned on top and the sort type is CopySequence, 
+    // change the sort type to TimeOfLastCopy.
+    if (pinFavoritesOnTop && getSortType() === SortHistoryType.CopySequence) {
+      saveSortType(SortHistoryType.TimeOfLastCopy)
+    }
   }
 
   function handleCopyAndMergeChange(copyAndMerge: boolean) {
