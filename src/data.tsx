@@ -399,7 +399,7 @@ export function markPasteAction(): void {
 
 // Helper function to track sequences for CopySequence sort
 export async function trackSequence(item: Clip, isNewItem: boolean = true): Promise<void> {
-  const sequenceThreshold = 10000 // 10 seconds in milliseconds
+  const sequenceThreshold = 30000 // 30 seconds in milliseconds
   
   if (history.length === 0) {
     return
