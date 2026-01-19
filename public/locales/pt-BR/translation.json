@@ -312,7 +312,7 @@
     "firstCopyTime": "Primeira Cópia",
     "numberOfCopies": "Número de Cópias",
     "size": "Tamanho",
-    "keepSequence": "Manter sequência de cópia",
+    "copySequence": "Sequência de cópia",
     "reverseOrder": "Ordem Reversa"
   },
   "statusBar": {

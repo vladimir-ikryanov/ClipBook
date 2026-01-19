@@ -74,8 +74,7 @@ export default function SortMenu() {
           <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.CopySequence}
             onCheckedChange={() => handleSortTypeChange(SortHistoryType.CopySequence)}
             disabled={prefShouldPinFavoritesOnTop()}>
-            <span className="mr-2">{t('sortMenu.keepSequence')}</span>
-            <BrainIcon className="h-4 w-4 text-secondary-foreground" />
+            {t('sortMenu.copySequence')}
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem checked={sortType === SortHistoryType.TimeOfLastCopy}
             onCheckedChange={() => handleSortTypeChange(SortHistoryType.TimeOfLastCopy)}>

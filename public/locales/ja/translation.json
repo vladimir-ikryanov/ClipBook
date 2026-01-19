@@ -312,7 +312,7 @@
     "firstCopyTime": "最初のコピー時刻",
     "numberOfCopies": "コピー回数",
     "size": "サイズ",
-    "keepSequence": "コピー順序を保持",
+    "copySequence": "コピー順序",
     "reverseOrder": "逆順"
   },
   "statusBar": {

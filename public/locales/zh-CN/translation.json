@@ -312,7 +312,7 @@
     "firstCopyTime": "首次复制时间",
     "numberOfCopies": "复制次数",
     "size": "大小",
-    "keepSequence": "保持复制顺序",
+    "copySequence": "复制顺序",
     "reverseOrder": "反向排序"
   },
   "statusBar": {
