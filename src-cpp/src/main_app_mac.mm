@@ -1156,7 +1156,7 @@ void MainAppMac::setupApplicationObservers() {
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 50 * NSEC_PER_MSEC),
                                dispatch_get_main_queue(), ^{
                       std::thread([this]() {
-                        if (app()->dock()->isVisible()) {
+                        if (app()->dock()->isVisible() && open_windows_number_ == 0) {
                           app()->dock()->hide();
                         }
                       }).detach();

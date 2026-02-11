@@ -71,6 +71,7 @@ MainApp::MainApp(const std::shared_ptr<App> &app, const std::shared_ptr<AppSetti
       after_system_reboot_(false),
       update_available_(false),
       app_ready_to_quit_(true),
+      open_windows_number_(0),
       app_hide_time_(0),
       settings_(settings) {
   request_interceptor_ = std::make_shared<UrlRequestInterceptor>(
@@ -588,6 +589,8 @@ void MainApp::showSettingsWindow() {
 }
 
 void MainApp::showSettingsWindow(const std::string &section) {
+  notifyWindowOpened();
+
   if (settings_window_ && !settings_window_->isClosed()) {
     settings_window_->navigation()->loadUrl(app_->baseUrl() + section);
     settings_window_->show();
@@ -596,6 +599,9 @@ void MainApp::showSettingsWindow(const std::string &section) {
   }
 
   settings_window_ = Browser::create(app_);
+  settings_window_->onBrowserClosed += [this](const BrowserClosed&) {
+    notifyWindowClosed();
+  };
   settings_window_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
     initJavaScriptApi(args.window);
     action.proceed();
@@ -621,7 +627,16 @@ void MainApp::showSettingsWindow(const std::string &section) {
 }
 
 void MainApp::showWelcomeWindow() {
+  notifyWindowOpened();
+
   welcome_window_ = Browser::create(app_);
+  welcome_window_->onBrowserClosed += [this](const BrowserClosed&) {
+    notifyWindowClosed();
+    std::thread([this]() {
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+      show();
+    }).detach();
+  };
   welcome_window_->setVibrancy(VibrancyEffect::kSidebar);
   welcome_window_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
     initJavaScriptApi(args.window);
@@ -646,8 +661,7 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
     welcome_window_->loadUrl(app_->baseUrl() + "/enjoy");
   });
   window->putProperty("openHistory", [this]() {
-    welcome_window_->hide();
-    show();
+    welcome_window_->close();
   });
   window->putProperty("openUrl", [this](std::string url) {
     app_->desktop()->openUrl(url);
@@ -1753,5 +1767,19 @@ void MainApp::checkRetentionPeriod(int index, const std::string &clipType) {
                                  std::to_string(days) + ")");
       }
     }
+  }
+}
+
+void MainApp::notifyWindowOpened() {
+  open_windows_number_++;
+  if (open_windows_number_ > 0) {
+    app_->dock()->show();
+  }
+}
+
+void MainApp::notifyWindowClosed() {
+  open_windows_number_--;
+  if (open_windows_number_ == 0) {
+    app_->dock()->hide();
   }
 }

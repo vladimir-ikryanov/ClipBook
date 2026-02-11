@@ -38,16 +38,16 @@ void launch() {
     std::shared_ptr<MainApp> main_app;
 #if OS_MAC
     main_app = std::make_shared<MainAppMac>(app, AppSettings::create());
-    // Hide the dock icon and make the app a background app.
-    app->dock()->hide();
 #elif OS_WIN
     main_app = std::make_shared<MainAppWin>(app);
 #endif
-    bool first_run = main_app->init();
+    const bool first_run = main_app->init();
     main_app->launch();
     if (first_run) {
       main_app->showWelcomeWindow();
     } else {
+      // Hide the dock icon and make the app a background app.
+      app->dock()->hide();
       // Show the history window at the startup.
       main_app->show();
     }

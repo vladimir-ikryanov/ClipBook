@@ -96,6 +96,8 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void saveImageAsFile(const std::string &imageFileName, int imageWidth, int imageHeight);
   void checkRetentionPeriod();
   void checkRetentionPeriod(int index, const std::string &clipType);
+  void notifyWindowOpened();
+  void notifyWindowClosed();
 
   void onLanguageChanged();
   std::string i18n(const std::string &key);
@@ -129,6 +131,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   bool after_system_reboot_;
   bool update_available_;
   bool app_ready_to_quit_;
+  int open_windows_number_;
   long long app_hide_time_;
   std::string save_images_dir_;
   std::shared_ptr<mobrowser::App> app_;
