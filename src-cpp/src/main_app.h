@@ -30,6 +30,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void resume();
   bool isPaused() const;
 
+  void initMainMenu() const;
   void showWelcomeWindow();
 
   std::string getImagesDir();

@@ -153,6 +153,8 @@ bool MainApp::init() {
   // Update the open settings shortcut.
   updateOpenSettingsShortcut();
 
+  initMainMenu();
+
   // Check if the app is running after system reboot.
   auto system_boot_time = getSystemBootTime();
   auto last_system_boot_time = settings_->getLastSystemBootTime();
@@ -1502,6 +1504,21 @@ void MainApp::fetchLinkPreviewDetails(const std::string &url, const std::shared_
 
 bool MainApp::isPaused() const {
   return app_paused_;
+}
+
+void MainApp::initMainMenu() const {
+  app_->setMainMenu(CustomMenu::create({
+    menu::MacApp({
+      open_app_item_,
+      menu::Separator(),
+      about_item_,
+      check_for_updates_item_,
+      menu::Separator(),
+      open_settings_item_,
+      menu::Separator(),
+      menu::Quit()
+    })
+  }));
 }
 
 void MainApp::pause() {
