@@ -27,6 +27,9 @@ build-dist
 cmake-build-release
 cmake-build-debug
 
+# The cache directory
+.cache
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
