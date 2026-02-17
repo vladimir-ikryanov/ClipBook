@@ -196,7 +196,8 @@
       },
       "ignoreApps": {
         "title": "Ignorar aplicaciones",
-        "description": "No guardar contenido copiado de las siguientes aplicaciones."
+        "description": "No guardar contenido copiado de las siguientes aplicaciones.",
+        "noApplications": "No hay aplicaciones"
       }
     },
     "storage": {
@@ -217,7 +218,38 @@
         "file": "Archivos y carpetas",
         "link": "Enlaces",
         "email": "Correos electrónicos",
-        "color": "Colores"
+        "color": "Colores",
+        "steps": {
+          "1day": "1 día",
+          "2days": "2 días",
+          "3days": "3 días",
+          "4days": "4 días",
+          "5days": "5 días",
+          "6days": "6 días",
+          "1week": "1 semana",
+          "2weeks": "2 semanas",
+          "3weeks": "3 semanas",
+          "1month": "1 mes",
+          "2months": "2 meses",
+          "3months": "3 meses",
+          "4months": "4 meses",
+          "5months": "5 meses",
+          "6months": "6 meses",
+          "7months": "7 meses",
+          "8months": "8 meses",
+          "9months": "9 meses",
+          "10months": "10 meses",
+          "11months": "11 meses",
+          "1year": "1 año",
+          "unlimited": "Ilimitado"
+        },
+        "keyPoints": {
+          "day": "Día",
+          "week": "Semana",
+          "month": "Mes",
+          "year": "Año",
+          "forever": "Para siempre"
+        }
       }
     },
     "license": {
@@ -516,7 +548,11 @@
     "history": {
       "renamePlaceholder": "Introduce un nombre para este elemento",
       "noItems": "No hay elementos",
-      "noResults": "No hay resultados"
+      "noResults": "No hay resultados",
+      "emptyState": {
+        "title": "El portapapeles está vacío",
+        "description": "Comienza a copiar texto o enlaces para crear tu historial."
+      }
     },
     "itemInfoPane": {
       "link": "Enlace",

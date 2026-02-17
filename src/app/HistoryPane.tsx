@@ -1,5 +1,6 @@
 import '../app.css';
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/components/ui/resizable";
+import {useTranslation} from "react-i18next";
 import PreviewPane from "@/app/PreviewPane"
 import HistoryItemsPane from "@/app/HistoryItemsPane";
 import {useEffect, useRef, useState} from "react";
@@ -142,6 +143,7 @@ let treatDigitNumbersAsColor = prefShouldTreatDigitNumbersAsColor()
 let renameItemMode = false
 
 export default function HistoryPane(props: HistoryPaneProps) {
+  const { t } = useTranslation()
   const [history, setHistory] = useState<Clip[]>([])
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -1802,10 +1804,10 @@ export default function HistoryPane(props: HistoryPaneProps) {
           <div className="flex flex-col text-center m-auto">
             <ClipboardIcon className="h-24 w-24 m-auto text-secondary-foreground"/>
             <p className="text-center pt-8 text-2xl font-semibold text-foreground">
-              Your clipboard is empty
+              {t("app.history.emptyState.title")}
             </p>
             <p className="text-center pt-2">
-              Start copying text or links to build your history.
+              {t("app.history.emptyState.description")}
             </p>
           </div>
         </div>

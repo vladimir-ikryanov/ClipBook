@@ -162,7 +162,38 @@
         "file": "Arquivos e Pastas",
         "link": "Links",
         "email": "E-mails",
-        "color": "Cores"
+        "color": "Cores",
+        "steps": {
+          "1day": "1 dia",
+          "2days": "2 dias",
+          "3days": "3 dias",
+          "4days": "4 dias",
+          "5days": "5 dias",
+          "6days": "6 dias",
+          "1week": "1 semana",
+          "2weeks": "2 semanas",
+          "3weeks": "3 semanas",
+          "1month": "1 mês",
+          "2months": "2 meses",
+          "3months": "3 meses",
+          "4months": "4 meses",
+          "5months": "5 meses",
+          "6months": "6 meses",
+          "7months": "7 meses",
+          "8months": "8 meses",
+          "9months": "9 meses",
+          "10months": "10 meses",
+          "11months": "11 meses",
+          "1year": "1 ano",
+          "unlimited": "Ilimitado"
+        },
+        "keyPoints": {
+          "day": "Dia",
+          "week": "Semana",
+          "month": "Mês",
+          "year": "Ano",
+          "forever": "Para sempre"
+        }
       }
     },
     "shortcuts": {
@@ -217,7 +248,8 @@
       },
       "ignoreApps": {
         "title": "Ignorar aplicativos",
-        "description": "Não salvar conteúdo copiado dos seguintes aplicativos."
+        "description": "Não salvar conteúdo copiado dos seguintes aplicativos.",
+        "noApplications": "Nenhum aplicativo"
       }
     },
     "license": {
@@ -516,7 +548,11 @@
     "history": {
       "renamePlaceholder": "Digite um nome para este item",
       "noItems": "Nenhum item",
-      "noResults": "Nenhum resultado"
+      "noResults": "Nenhum resultado",
+      "emptyState": {
+        "title": "Sua área de transferência está vazia",
+        "description": "Comece a copiar texto ou links para criar seu histórico."
+      }
     },
     "itemInfoPane": {
       "link": "Link",

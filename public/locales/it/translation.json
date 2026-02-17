@@ -162,7 +162,38 @@
         "file": "File e Cartelle",
         "link": "Link",
         "email": "Email",
-        "color": "Colori"
+        "color": "Colori",
+        "steps": {
+          "1day": "1 giorno",
+          "2days": "2 giorni",
+          "3days": "3 giorni",
+          "4days": "4 giorni",
+          "5days": "5 giorni",
+          "6days": "6 giorni",
+          "1week": "1 settimana",
+          "2weeks": "2 settimane",
+          "3weeks": "3 settimane",
+          "1month": "1 mese",
+          "2months": "2 mesi",
+          "3months": "3 mesi",
+          "4months": "4 mesi",
+          "5months": "5 mesi",
+          "6months": "6 mesi",
+          "7months": "7 mesi",
+          "8months": "8 mesi",
+          "9months": "9 mesi",
+          "10months": "10 mesi",
+          "11months": "11 mesi",
+          "1year": "1 anno",
+          "unlimited": "Illimitato"
+        },
+        "keyPoints": {
+          "day": "Giorno",
+          "week": "Settimana",
+          "month": "Mese",
+          "year": "Anno",
+          "forever": "Per sempre"
+        }
       }
     },
     "shortcuts": {
@@ -217,7 +248,8 @@
       },
       "ignoreApps": {
         "title": "Ignora applicazioni",
-        "description": "Non salvare i contenuti copiati dalle seguenti applicazioni."
+        "description": "Non salvare i contenuti copiati dalle seguenti applicazioni.",
+        "noApplications": "Nessuna applicazione"
       }
     },
     "license": {
@@ -516,7 +548,11 @@
     "history": {
       "renamePlaceholder": "Inserisci un nome per questo elemento",
       "noItems": "Nessun elemento",
-      "noResults": "Nessun risultato"
+      "noResults": "Nessun risultato",
+      "emptyState": {
+        "title": "Gli appunti sono vuoti",
+        "description": "Inizia a copiare testo o link per creare la cronologia."
+      }
     },
     "itemInfoPane": {
       "link": "Link",

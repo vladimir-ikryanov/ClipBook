@@ -162,7 +162,38 @@
         "file": "Dateien & Ordner",
         "link": "Links",
         "email": "E-Mails",
-        "color": "Farben"
+        "color": "Farben",
+        "steps": {
+          "1day": "1 Tag",
+          "2days": "2 Tage",
+          "3days": "3 Tage",
+          "4days": "4 Tage",
+          "5days": "5 Tage",
+          "6days": "6 Tage",
+          "1week": "1 Woche",
+          "2weeks": "2 Wochen",
+          "3weeks": "3 Wochen",
+          "1month": "1 Monat",
+          "2months": "2 Monate",
+          "3months": "3 Monate",
+          "4months": "4 Monate",
+          "5months": "5 Monate",
+          "6months": "6 Monate",
+          "7months": "7 Monate",
+          "8months": "8 Monate",
+          "9months": "9 Monate",
+          "10months": "10 Monate",
+          "11months": "11 Monate",
+          "1year": "1 Jahr",
+          "unlimited": "Unbegrenzt"
+        },
+        "keyPoints": {
+          "day": "Tag",
+          "week": "Woche",
+          "month": "Monat",
+          "year": "Jahr",
+          "forever": "Dauerhaft"
+        }
       }
     },
     "shortcuts": {
@@ -217,7 +248,8 @@
       },
       "ignoreApps": {
         "title": "Anwendungen ignorieren",
-        "description": "Inhalte, die aus den folgenden Anwendungen kopiert wurden, nicht speichern."
+        "description": "Inhalte, die aus den folgenden Anwendungen kopiert wurden, nicht speichern.",
+        "noApplications": "Keine Anwendungen"
       }
     },
     "license": {
@@ -516,7 +548,11 @@
     "history": {
       "renamePlaceholder": "Geben Sie einen Namen für dieses Element ein",
       "noItems": "Keine Elemente",
-      "noResults": "Keine Ergebnisse"
+      "noResults": "Keine Ergebnisse",
+      "emptyState": {
+        "title": "Ihre Zwischenablage ist leer",
+        "description": "Kopieren Sie Text oder Links, um Ihren Verlauf zu erstellen."
+      }
     },
     "itemInfoPane": {
       "link": "Link",

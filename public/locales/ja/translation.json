@@ -196,7 +196,8 @@
       },
       "ignoreApps": {
         "title": "アプリケーションを無視",
-        "description": "以下のアプリケーションからコピーされたコンテンツを保存しません。"
+        "description": "以下のアプリケーションからコピーされたコンテンツを保存しません。",
+        "noApplications": "アプリケーションなし"
       }
     },
     "storage": {
@@ -217,7 +218,38 @@
         "file": "ファイルとフォルダ",
         "link": "リンク",
         "email": "メール",
-        "color": "カラー"
+        "color": "カラー",
+        "steps": {
+          "1day": "1日",
+          "2days": "2日",
+          "3days": "3日",
+          "4days": "4日",
+          "5days": "5日",
+          "6days": "6日",
+          "1week": "1週間",
+          "2weeks": "2週間",
+          "3weeks": "3週間",
+          "1month": "1ヶ月",
+          "2months": "2ヶ月",
+          "3months": "3ヶ月",
+          "4months": "4ヶ月",
+          "5months": "5ヶ月",
+          "6months": "6ヶ月",
+          "7months": "7ヶ月",
+          "8months": "8ヶ月",
+          "9months": "9ヶ月",
+          "10months": "10ヶ月",
+          "11months": "11ヶ月",
+          "1year": "1年",
+          "unlimited": "無制限"
+        },
+        "keyPoints": {
+          "day": "日",
+          "week": "週",
+          "month": "月",
+          "year": "年",
+          "forever": "永久"
+        }
       }
     },
     "license": {
@@ -516,7 +548,11 @@
     "history": {
       "renamePlaceholder": "このアイテムの名前を入力",
       "noItems": "アイテムなし",
-      "noResults": "結果なし"
+      "noResults": "結果なし",
+      "emptyState": {
+        "title": "クリップボードは空です",
+        "description": "テキストやリンクをコピーして履歴を作成してください。"
+      }
     },
     "itemInfoPane": {
       "link": "リンク",

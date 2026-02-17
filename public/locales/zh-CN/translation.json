@@ -196,7 +196,8 @@
       },
       "ignoreApps": {
         "title": "忽略应用程序",
-        "description": "不保存从以下应用程序复制的内容。"
+        "description": "不保存从以下应用程序复制的内容。",
+        "noApplications": "无应用程序"
       }
     },
     "storage": {
@@ -217,7 +218,38 @@
         "file": "文件和文件夹",
         "link": "链接",
         "email": "电子邮件",
-        "color": "颜色"
+        "color": "颜色",
+        "steps": {
+          "1day": "1天",
+          "2days": "2天",
+          "3days": "3天",
+          "4days": "4天",
+          "5days": "5天",
+          "6days": "6天",
+          "1week": "1周",
+          "2weeks": "2周",
+          "3weeks": "3周",
+          "1month": "1个月",
+          "2months": "2个月",
+          "3months": "3个月",
+          "4months": "4个月",
+          "5months": "5个月",
+          "6months": "6个月",
+          "7months": "7个月",
+          "8months": "8个月",
+          "9months": "9个月",
+          "10months": "10个月",
+          "11months": "11个月",
+          "1year": "1年",
+          "unlimited": "无限期"
+        },
+        "keyPoints": {
+          "day": "日",
+          "week": "周",
+          "month": "月",
+          "year": "年",
+          "forever": "永久"
+        }
       }
     },
     "license": {
@@ -516,7 +548,11 @@
     "history": {
       "renamePlaceholder": "输入此项目的名称",
       "noItems": "无项目",
-      "noResults": "无结果"
+      "noResults": "无结果",
+      "emptyState": {
+        "title": "您的剪贴板为空",
+        "description": "开始复制文本或链接以创建您的历史记录。"
+      }
     },
     "itemInfoPane": {
       "link": "链接",

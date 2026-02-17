@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
+import {useTranslation} from "react-i18next";
 import {Button} from "@/components/ui/button";
 import {MinusIcon, PlusIcon} from "lucide-react";
 import {toBase64Icon} from "@/data";
@@ -14,6 +15,7 @@ declare const getAppNameFromPath: (appPath: string) => string;
 declare const getFileIconAsBase64: (appPath: string, large: boolean) => string;
 
 export default function IgnoreAppsPane(props: IgnoreAppsPaneProps) {
+  const {t} = useTranslation();
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -117,7 +119,7 @@ export default function IgnoreAppsPane(props: IgnoreAppsPaneProps) {
             className="flex flex-col mt-2 border border-settings-border rounded-md overflow-auto focus:outline-none"
         >
           {props.apps.length === 0 && (
-              <div className="p-4 bg-secondary text-secondary-foreground text-center">No applications</div>
+              <div className="p-4 bg-secondary text-secondary-foreground text-center">{t("settings.privacy.ignoreApps.noApplications")}</div>
           )}
           {props.apps.map((item, index) => (
               <div

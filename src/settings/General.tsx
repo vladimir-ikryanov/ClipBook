@@ -377,7 +377,7 @@ export default function General() {
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.SCREEN_WITH_CURSOR]}</span>
                         <span className="text-secondary-foreground">
-                          Open at the center of the screen where the mouse pointer is located.
+                          {t('settings.general.openWindow.descriptions.screenWithCursor')}
                         </span>
                       </div>
                     </DropdownMenuRadioItem>
@@ -386,7 +386,7 @@ export default function General() {
                       <div className="flex flex-col">
                         <span>{openWindowStrategyLabels[OpenWindowStrategy.MOUSE_CURSOR]}</span>
                         <span className="text-secondary-foreground">
-                          Open near the mouse pointer location.
+                          {t('settings.general.openWindow.descriptions.mouseCursor')}
                         </span>
                       </div>
                     </DropdownMenuRadioItem>

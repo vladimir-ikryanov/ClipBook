@@ -4,39 +4,39 @@ import { ClipType } from "@/db"
 import { useTranslation } from 'react-i18next';
 import { FileIcon, ImageIcon, LinkIcon, MailIcon, PaletteIcon, TextIcon } from "lucide-react";
 
-// Define all the steps in order
+// Define all the steps in order. Labels are localized via settings.storage.retentionPeriod.steps.*
 const RETENTION_STEPS = [
-  { value: 0, label: "1 day", days: 1 },
-  { value: 1, label: "2 days", days: 2 },
-  { value: 2, label: "3 days", days: 3 },
-  { value: 3, label: "4 days", days: 4 },
-  { value: 4, label: "5 days", days: 5 },
-  { value: 5, label: "6 days", days: 6 },
-  { value: 6, label: "1 week", days: 7, isKeyPoint: true, keyLabel: "Week" },
-  { value: 7, label: "2 weeks", days: 14 },
-  { value: 8, label: "3 weeks", days: 21 },
-  { value: 9, label: "1 month", days: 30, isKeyPoint: true, keyLabel: "Month" },
-  { value: 10, label: "2 months", days: 60 },
-  { value: 11, label: "3 months", days: 90 },
-  { value: 12, label: "4 months", days: 120 },
-  { value: 13, label: "5 months", days: 150 },
-  { value: 14, label: "6 months", days: 180 },
-  { value: 15, label: "7 months", days: 210 },
-  { value: 16, label: "8 months", days: 240 },
-  { value: 17, label: "9 months", days: 270 },
-  { value: 18, label: "10 months", days: 300 },
-  { value: 19, label: "11 months", days: 330 },
-  { value: 20, label: "1 year", days: 365, isKeyPoint: true, keyLabel: "Year" },
-  { value: 21, label: "Unlimited", days: -1, isKeyPoint: true, keyLabel: "Forever" },
+  { value: 0, labelKey: "1day", days: 1 },
+  { value: 1, labelKey: "2days", days: 2 },
+  { value: 2, labelKey: "3days", days: 3 },
+  { value: 3, labelKey: "4days", days: 4 },
+  { value: 4, labelKey: "5days", days: 5 },
+  { value: 5, labelKey: "6days", days: 6 },
+  { value: 6, labelKey: "1week", days: 7, isKeyPoint: true },
+  { value: 7, labelKey: "2weeks", days: 14 },
+  { value: 8, labelKey: "3weeks", days: 21 },
+  { value: 9, labelKey: "1month", days: 30, isKeyPoint: true },
+  { value: 10, labelKey: "2months", days: 60 },
+  { value: 11, labelKey: "3months", days: 90 },
+  { value: 12, labelKey: "4months", days: 120 },
+  { value: 13, labelKey: "5months", days: 150 },
+  { value: 14, labelKey: "6months", days: 180 },
+  { value: 15, labelKey: "7months", days: 210 },
+  { value: 16, labelKey: "8months", days: 240 },
+  { value: 17, labelKey: "9months", days: 270 },
+  { value: 18, labelKey: "10months", days: 300 },
+  { value: 19, labelKey: "11months", days: 330 },
+  { value: 20, labelKey: "1year", days: 365, isKeyPoint: true },
+  { value: 21, labelKey: "unlimited", days: -1, isKeyPoint: true },
 ] as const
 
-// Key points for display (these are evenly spaced visually at 25% intervals)
+// Key points for display (these are evenly spaced visually at 25% intervals). Labels are localized via settings.storage.retentionPeriod.keyPoints.*
 const KEY_POINTS = [
-  { value: 0, label: "Day", position: 0 },
-  { value: 6, label: "Week", position: 25 },
-  { value: 9, label: "Month", position: 50 },
-  { value: 20, label: "Year", position: 75 },
-  { value: 21, label: "Forever", position: 100 },
+  { value: 0, labelKey: "day", position: 0 },
+  { value: 6, labelKey: "week", position: 25 },
+  { value: 9, labelKey: "month", position: 50 },
+  { value: 20, labelKey: "year", position: 75 },
+  { value: 21, labelKey: "forever", position: 100 },
 ]
 
 // Define the segments with their value ranges and position ranges
@@ -266,7 +266,7 @@ export function RetentionPeriodSlider({
           {renderClipType()}
         </div>
         <div className="text-sm text-neutral-500">
-          {currentStep?.label}
+          {currentStep ? t(`settings.storage.retentionPeriod.steps.${currentStep.labelKey}`) : ""}
         </div>
       </div>
 
@@ -280,7 +280,7 @@ export function RetentionPeriodSlider({
         aria-valuemin={0}
         aria-valuemax={21}
         aria-valuenow={value}
-        aria-valuetext={currentStep?.label}
+        aria-valuetext={currentStep ? t(`settings.storage.retentionPeriod.steps.${currentStep.labelKey}`) : ""}
         tabIndex={0}
         onKeyDown={handleKeyDown}
       >
@@ -360,7 +360,7 @@ export function RetentionPeriodSlider({
                 transform,
               }}
             >
-              {point.label}
+              {t(`settings.storage.retentionPeriod.keyPoints.${point.labelKey}`)}
             </div>
           )
         })}

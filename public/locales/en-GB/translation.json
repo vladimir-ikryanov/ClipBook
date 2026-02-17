@@ -162,7 +162,38 @@
         "file": "Files & Folders",
         "link": "Links",
         "email": "Emails",
-        "color": "Colours"
+        "color": "Colours",
+        "steps": {
+          "1day": "1 day",
+          "2days": "2 days",
+          "3days": "3 days",
+          "4days": "4 days",
+          "5days": "5 days",
+          "6days": "6 days",
+          "1week": "1 week",
+          "2weeks": "2 weeks",
+          "3weeks": "3 weeks",
+          "1month": "1 month",
+          "2months": "2 months",
+          "3months": "3 months",
+          "4months": "4 months",
+          "5months": "5 months",
+          "6months": "6 months",
+          "7months": "7 months",
+          "8months": "8 months",
+          "9months": "9 months",
+          "10months": "10 months",
+          "11months": "11 months",
+          "1year": "1 year",
+          "unlimited": "Unlimited"
+        },
+        "keyPoints": {
+          "day": "Day",
+          "week": "Week",
+          "month": "Month",
+          "year": "Year",
+          "forever": "Forever"
+        }
       }
     },
     "shortcuts": {
@@ -217,7 +248,8 @@
       },
       "ignoreApps": {
         "title": "Ignore applications",
-        "description": "Do not save content copied from the following applications."
+        "description": "Do not save content copied from the following applications.",
+        "noApplications": "No applications"
       }
     },
     "license": {
@@ -516,7 +548,11 @@
     "history": {
       "renamePlaceholder": "Enter a name for this item",
       "noItems": "No items",
-      "noResults": "No results"
+      "noResults": "No results",
+      "emptyState": {
+        "title": "Your clipboard is empty",
+        "description": "Start copying text or links to build your history."
+      }
     },
     "itemInfoPane": {
       "link": "Link",
