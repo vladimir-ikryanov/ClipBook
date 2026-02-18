@@ -135,41 +135,39 @@ let pasteNextItemIndex = -1;
 let pinFavoritesOnTop = true;
 let selectionMode = false;
 
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 loadSettings()
 
+function makeDemoClip(type: ClipType, content: string, sourceApp: string, offsetSeconds: number): Clip {
+  const clip = new Clip(type, content, sourceApp)
+  const timestamp = new Date(Date.now() - offsetSeconds * 1000)
+  clip.firstTimeCopy = timestamp
+  clip.lastTimeCopy = timestamp
+  return clip
+}
+
 async function initHistoryForDemo() {
-  await addClip(new Clip(ClipType.Text, "Get it. Try it. Use it if you like it.", "/Applications/Arc.app"))
-  await sleep(500)
-  await addClip(new Clip(ClipType.Email, "vladimir.ikryanov@clipbook.app", "/System/Applications/Mail.app"))
-  await sleep(500)
-  await addClip(new Clip(ClipType.Color, "rgb(255 100 3 / 80%)", "/Applications/Sketch.app"))
-  await sleep(500)
-  await addClip(new Clip(ClipType.Color, "#ea3380", "/Applications/Sketch.app"))
-  await sleep(500)
-  await addClip(new Clip(ClipType.Link, "https://openai.com/index/sora-is-here", "/Applications/Safari.app"))
-  await addClip(new Clip(ClipType.Link, "https://clipbook.app", "/Applications/Safari.app"))
-  await sleep(500)
-  await addClip(new Clip(ClipType.Text, "🔒 All data is securely stored on your Mac and never leave it", "/System/Applications/Notes.app"))
-  await sleep(500)
-  await addClip(new Clip(ClipType.Text, "✏️ Edit and preview history items", "/System/Applications/Notes.app"))
-  await sleep(500)
-  await addClip(new Clip(ClipType.Text, "⭐️ Add items to favorites", "/System/Applications/Notes.app"))
-  await sleep(500)
-  await addClip(new Clip(ClipType.Text, "🔎 Type to search", "/System/Applications/Notes.app"))
-  await sleep(500)
-  await addClip(new Clip(ClipType.Text, "⌛️ Unlimited clipboard history", "/System/Applications/Notes.app"))
-  await sleep(500)
-  await addClip(new Clip(ClipType.Text, "Keep everything you copy and quickly access your macOS clipboard history whenever you need it.\n" +
-      "\n" +
-      "ClipBook runs in the background and remembers everything you copy. You will never lose what you have already copied.\n" +
-      "\n" +
-      "Your clipboard history is always at your hands. To open your macOS clipboard history just press the following global keyboard shortcut.", "/System/Applications/Notes.app"))
-  await sleep(500)
-  await addClip(new Clip(ClipType.Text, "Clipboard history app for your Mac", "/System/Applications/Notes.app"))
+  const clips: Clip[] = [
+    makeDemoClip(ClipType.Text, "Clipboard history app for your Mac", "/System/Applications/Notes.app", 0),
+    makeDemoClip(ClipType.Text, "Keep everything you copy and quickly access your macOS clipboard history whenever you need it.\n" +
+        "\n" +
+        "ClipBook runs in the background and remembers everything you copy. You will never lose what you have already copied.\n" +
+        "\n" +
+        "Your clipboard history is always at your hands. To open your macOS clipboard history just press the following global keyboard shortcut.", "/System/Applications/Notes.app", 1),
+    makeDemoClip(ClipType.Text, "⌛️ Unlimited clipboard history", "/System/Applications/Notes.app", 2),
+    makeDemoClip(ClipType.Text, "🔎 Type to search", "/System/Applications/Notes.app", 3),
+    makeDemoClip(ClipType.Text, "⭐️ Add items to favorites", "/System/Applications/Notes.app", 4),
+    makeDemoClip(ClipType.Text, "✏️ Edit and preview history items", "/System/Applications/Notes.app", 5),
+    makeDemoClip(ClipType.Text, "🔒 All data is securely stored on your Mac and never leave it", "/System/Applications/Notes.app", 6),
+    makeDemoClip(ClipType.Link, "https://clipbook.app", "/Applications/Safari.app", 7),
+    makeDemoClip(ClipType.Link, "https://openai.com/index/sora-is-here", "/Applications/Safari.app", 8),
+    makeDemoClip(ClipType.Color, "#ea3380", "/Applications/Sketch.app", 9),
+    makeDemoClip(ClipType.Color, "rgb(255 100 3 / 80%)", "/Applications/Sketch.app", 10),
+    makeDemoClip(ClipType.Email, "vladimir.ikryanov@clipbook.app", "/System/Applications/Mail.app", 11),
+    makeDemoClip(ClipType.Text, "Get it. Try it. Use it if you like it.", "/Applications/Arc.app", 12),
+  ]
+  for (const clip of clips) {
+    await addClip(clip)
+  }
 }
 
 function initTagsForDemo() {
