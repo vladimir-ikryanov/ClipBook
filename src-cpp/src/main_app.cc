@@ -591,12 +591,11 @@ void MainApp::showSettingsWindow() {
 }
 
 void MainApp::showSettingsWindow(const std::string &section) {
-  notifyWindowOpened();
-
   if (settings_window_ && !settings_window_->isClosed()) {
     settings_window_->navigation()->loadUrl(app_->baseUrl() + section);
     settings_window_->show();
     settings_window_->activate();
+    settings_window_->focus();
     return;
   }
 
@@ -626,11 +625,14 @@ void MainApp::showSettingsWindow(const std::string &section) {
   settings_window_->setSize(700, 760);
   settings_window_->centerWindow();
   settings_window_->show();
+
+  notifyWindowOpened();
+
+  settings_window_->activate();
+  settings_window_->focus();
 }
 
 void MainApp::showWelcomeWindow() {
-  notifyWindowOpened();
-
   welcome_window_ = Browser::create(app_);
   welcome_window_->onBrowserClosed += [this](const BrowserClosed&) {
     notifyWindowClosed();
@@ -654,6 +656,8 @@ void MainApp::showWelcomeWindow() {
   welcome_window_->setSize(500, 700);
   welcome_window_->centerWindow();
   welcome_window_->show();
+
+  notifyWindowOpened();
 }
 
 void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &window) {
