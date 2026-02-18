@@ -661,6 +661,10 @@ void MainApp::showWelcomeWindow() {
 }
 
 void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &window) {
+  window->putProperty("isFirstRun", [this]() -> bool {
+    return first_run_;
+  });
+
   // Welcome window.
   window->putProperty("enableAccessibilityAccess", [this]() {
     paste();
@@ -1511,18 +1515,25 @@ bool MainApp::isPaused() const {
 }
 
 void MainApp::initMainMenu() const {
-  app_->setMainMenu(CustomMenu::create({
-    menu::MacApp({
-      open_app_item_,
-      menu::Separator(),
-      about_item_,
-      check_for_updates_item_,
-      menu::Separator(),
-      open_settings_item_,
-      menu::Separator(),
-      menu::Quit()
-    })
-  }));
+  auto app_menu = menu::MacApp({
+    open_app_item_,
+    menu::Separator(),
+    about_item_,
+    check_for_updates_item_,
+    menu::Separator(),
+    open_settings_item_,
+    menu::Separator(),
+    menu::Quit()
+  });
+
+  auto app_menu_items = MenuItems({app_menu});
+  if (!app_->isProduction()) {
+    app_menu_items.push_back(menu::View({
+      menu::DevTools()
+    }));
+  }
+
+  app_->setMainMenu(CustomMenu::create(app_menu_items));
 }
 
 void MainApp::pause() {

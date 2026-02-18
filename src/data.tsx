@@ -12,7 +12,7 @@ import {
 } from "@/db";
 import {prefGetClearHistoryOnMacReboot, prefGetKeepFavoritesOnClearHistory, prefGetLanguage, prefShouldPinFavoritesOnTop} from "@/pref";
 import {getClipType} from "@/lib/utils";
-import {loadTags, Tag} from "@/tags";
+import {addTag, loadTags, Tag, TagColor} from "@/tags";
 import {emitter} from "@/actions";
 
 declare const getImagesDir: () => string;
@@ -109,6 +109,7 @@ export type TagCheckedState = {
 }
 
 let history: Clip[] = [];
+let historyLoaded = false;
 let filteredHistory: Clip[] = [];
 let filterQuery = "";
 let filterHistory = false;
@@ -125,7 +126,7 @@ let activeItemIndex = -1;
 let selectedItemIndices: number[] = [];
 let visibleHistoryLength = 0;
 let previewVisible = true;
-let filterVisible = false;
+let filterVisible = true;
 let infoVisible = true;
 let sortType = SortHistoryType.TimeOfLastCopy;
 let sortOrderReverse = false;
@@ -139,12 +140,8 @@ function sleep(ms: number) {
 }
 
 loadSettings()
-// await loadHistory()
-// await loadHistoryForPromo()
 
-// noinspection JSUnusedLocalSymbols
-async function loadHistoryForPromo() {
-  await deleteAllClips()
+async function initHistoryForDemo() {
   await addClip(new Clip(ClipType.Text, "Get it. Try it. Use it if you like it.", "/Applications/Arc.app"))
   await sleep(500)
   await addClip(new Clip(ClipType.Email, "vladimir.ikryanov@clipbook.app", "/System/Applications/Mail.app"))
@@ -154,7 +151,7 @@ async function loadHistoryForPromo() {
   await addClip(new Clip(ClipType.Color, "#ea3380", "/Applications/Sketch.app"))
   await sleep(500)
   await addClip(new Clip(ClipType.Link, "https://openai.com/index/sora-is-here", "/Applications/Safari.app"))
-  await addClip(new Clip(ClipType.Link, "https://github.com/vladimir-ikryanov/ClipBook", "/Applications/Safari.app"))
+  await addClip(new Clip(ClipType.Link, "https://clipbook.app", "/Applications/Safari.app"))
   await sleep(500)
   await addClip(new Clip(ClipType.Text, "🔒 All data is securely stored on your Mac and never leave it", "/System/Applications/Notes.app"))
   await sleep(500)
@@ -172,16 +169,33 @@ async function loadHistoryForPromo() {
       "\n" +
       "Your clipboard history is always at your hands. To open your macOS clipboard history just press the following global keyboard shortcut.", "/System/Applications/Notes.app"))
   await sleep(500)
-  await addClip(new Clip(ClipType.Text, "Standard clipboard stores only one entry and overwrites the previous one. It is easy to accidentally overwrite. It is inconvenient and wastes a lot of time because of such a limitation. If you copy a lot, if you are annoyed by wasting time searching for information that was copied just a couple of minutes or hours ago, if you are tired of constantly switching applications for copying and pasting, then the clipboard history app is for you. Once you try it, you will no longer be able to imagine working on a Mac without this application.", "/System/Applications/Notes.app"))
   await addClip(new Clip(ClipType.Text, "Clipboard history app for your Mac", "/System/Applications/Notes.app"))
-  history = await getAllClips()
 }
 
-export async function loadHistory() {
-  // Load all tags.
-  loadTags()
+function initTagsForDemo() {
+  addTag(new Tag("Personal", TagColor.Blue))
+  addTag(new Tag("Work", TagColor.Pink))
+}
 
+export async function loadHistory(isFirstRun: boolean = false) {
+  if (historyLoaded) {
+    return
+  }
+  // Set the flag before any await to avoid double invoke
+  // due to the StrictMode behavior when HistoryPane is
+  // mounted twice.
+  historyLoaded = true
+
+  loadTags()
   history = await getAllClips()
+
+  // If it's the first run and the history is empty,
+  // then initialize the demo history.
+  if (isFirstRun && history.length === 0) {
+    initTagsForDemo()
+    await initHistoryForDemo()
+    history = await getAllClips()
+  }
 
   // Clear history on Mac reboot and keep favorites.
   if (prefGetClearHistoryOnMacReboot() && isAfterSystemReboot()) {

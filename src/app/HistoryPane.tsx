@@ -116,6 +116,7 @@ import {
   OpenInAppByIndexArgs
 } from "@/actions";
 
+declare const isFirstRun: () => boolean;
 declare const pasteItemInFrontApp: (text: string, rtf: string, html: string, imageFileName: string, filePath: string) => void;
 declare const pasteFilesInFrontApp: (filePaths: string) => void;
 declare const pressReturn: () => void;
@@ -167,7 +168,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [selectedApp, setSelectedApp] = useState<AppInfo | undefined>(undefined)
 
   useEffect(() => {
-    loadHistory().then(() => {
+    const firstRun = isFirstRun()
+    loadHistory(firstRun).then(() => {
       resetFilter()
       setHistory(getHistoryItems())
       activateApp(true)
