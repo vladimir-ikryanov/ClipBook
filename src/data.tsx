@@ -137,33 +137,32 @@ let selectionMode = false;
 
 loadSettings()
 
-function makeDemoClip(type: ClipType, content: string, sourceApp: string, offsetSeconds: number): Clip {
+function makeDemoClip(type: ClipType, name: string, content: string, sourceApp: string, offsetSeconds: number, favorite: boolean = false, tags: number[] = []): Clip {
   const clip = new Clip(type, content, sourceApp)
   const timestamp = new Date(Date.now() - offsetSeconds * 1000)
   clip.firstTimeCopy = timestamp
   clip.lastTimeCopy = timestamp
+  clip.name = name;
+  clip.favorite = favorite;
+  clip.tags = tags;
   return clip
 }
 
 async function initHistoryForDemo() {
+  initTagsForDemo()
+
   const clips: Clip[] = [
-    makeDemoClip(ClipType.Text, "Clipboard history app for your Mac", "/System/Applications/Notes.app", 0),
-    makeDemoClip(ClipType.Text, "Keep everything you copy and quickly access your macOS clipboard history whenever you need it.\n" +
-        "\n" +
-        "ClipBook runs in the background and remembers everything you copy. You will never lose what you have already copied.\n" +
-        "\n" +
-        "Your clipboard history is always at your hands. To open your macOS clipboard history just press the following global keyboard shortcut.", "/System/Applications/Notes.app", 1),
-    makeDemoClip(ClipType.Text, "⌛️ Unlimited clipboard history", "/System/Applications/Notes.app", 2),
-    makeDemoClip(ClipType.Text, "🔎 Type to search", "/System/Applications/Notes.app", 3),
-    makeDemoClip(ClipType.Text, "⭐️ Add items to favorites", "/System/Applications/Notes.app", 4),
-    makeDemoClip(ClipType.Text, "✏️ Edit and preview history items", "/System/Applications/Notes.app", 5),
-    makeDemoClip(ClipType.Text, "🔒 All data is securely stored on your Mac and never leave it", "/System/Applications/Notes.app", 6),
-    makeDemoClip(ClipType.Link, "https://clipbook.app", "/Applications/Safari.app", 7),
-    makeDemoClip(ClipType.Link, "https://openai.com/index/sora-is-here", "/Applications/Safari.app", 8),
-    makeDemoClip(ClipType.Color, "#ea3380", "/Applications/Sketch.app", 9),
-    makeDemoClip(ClipType.Color, "rgb(255 100 3 / 80%)", "/Applications/Sketch.app", 10),
-    makeDemoClip(ClipType.Email, "vladimir.ikryanov@clipbook.app", "/System/Applications/Mail.app", 11),
-    makeDemoClip(ClipType.Text, "Get it. Try it. Use it if you like it.", "/Applications/Arc.app", 12),
+    makeDemoClip(ClipType.Text, "👋 Welcome to ClipBook", "ClipBook keeps everything you copy.\n\nTry this:\n1. Select history item using ↑ or ↓.\n2. Press Return to paste it into an active app.\n3. Open ClipBook using Shift + Cmd + V.", "/System/Applications/Notes.app", 0, false, [0, 1]),
+    makeDemoClip(ClipType.Email, "", "john.doe@example.com", "/System/Applications/Mail.app", 1),
+    makeDemoClip(ClipType.Text, "", "John Doe", "/System/Applications/Contacts.app", 2),
+    makeDemoClip(ClipType.Text, "✉️ Quick reply", "Thanks for your message. I'll get back to you shortly.", "/System/Applications/Notes.app", 3, true, [2]),
+    makeDemoClip(ClipType.Link, "", "https://clipbook.app", "/Applications/Safari.app", 4, true),
+    makeDemoClip(ClipType.Color, "", "#3498db", "/Applications/Safari.app", 5, false, [1]),
+    makeDemoClip(ClipType.Color, "", "#FF5733", "/Applications/Safari.app", 6, false, [1]),
+    makeDemoClip(ClipType.Text, "✏️ Rename me", "You can give clipboard items custom names using Cmd + R.", "/Applications/Safari.app", 7),
+    makeDemoClip(ClipType.Text, "🔍 Type to search", "Just start typing to filter history items.\n✨ You can find text inside images too.", "/Applications/Safari.app", 8),
+    makeDemoClip(ClipType.Text, "", "Copy images, files, folders, links, emails, colors...", "/Applications/Safari.app", 9),
+    makeDemoClip(ClipType.Text, "", "const greet = (name: string) => `Hello, ${name}!`", "/System/Applications/Notes.app", 10, false, [2]),
   ]
   for (const clip of clips) {
     await addClip(clip)
@@ -173,6 +172,7 @@ async function initHistoryForDemo() {
 function initTagsForDemo() {
   addTag(new Tag("Personal", TagColor.Blue))
   addTag(new Tag("Work", TagColor.Pink))
+  addTag(new Tag("Snippets", TagColor.Green))
 }
 
 export async function loadHistory(isFirstRun: boolean = false) {
@@ -190,7 +190,6 @@ export async function loadHistory(isFirstRun: boolean = false) {
   // If it's the first run and the history is empty,
   // then initialize the demo history.
   if (isFirstRun && history.length === 0) {
-    initTagsForDemo()
     await initHistoryForDemo()
     history = await getAllClips()
   }
