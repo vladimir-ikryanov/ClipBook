@@ -100,10 +100,14 @@
         "paste": "Colar no app ativo"
       },
       "numberAction": {
-        "title": "No atalho numérico ⌘1-9",
-        "description": "Selecione a ação para o atalho numérico ⌘1-9.",
+        "title": "No atalho de colagem rápida ⌘1-9",
+        "description": "Selecione a ação para o atalho de colagem rápida ⌘1-9.",
         "copy": "Copiar para a área de transferência",
         "paste": "Colar no app ativo"
+      },
+      "showCommandNumberShortcut": {
+        "title": "Mostrar atalho de colagem rápida ⌘1-9",
+        "description": "Exibir o atalho de colagem rápida (⌘1-9) ao lado de cada item do histórico."
       },
       "itemsToDelete": {
         "all": "Todos os itens",

@@ -10,7 +10,8 @@ import {
   prefGetCopyAndMergeSeparator,
   prefGetCopyToClipboardAfterMerge,
   prefShouldPinFavoritesOnTop,
-  prefIsPinFavoritesOnTopManaged, 
+  prefIsPinFavoritesOnTopManaged,
+  prefIsShowCommandNumberShortcutManaged, 
   prefIsShowPreviewForLinksManaged,
   prefSetCopyAndMergeEnabled,
   prefSetCopyAndMergeSeparator,
@@ -19,12 +20,14 @@ import {
   prefSetCopyToClipboardAfterMerge,
   prefSetPasteOnClick,
   prefSetPinFavoritesOnTop,
+  prefSetShowCommandNumberShortcut,
   prefSetShowPreviewForLinks,
   prefSetTreatDigitNumbersAsColor,
   prefSetUpdateHistoryAfterAction,
   prefShouldCopyOnDoubleClick,
   prefShouldCopyOnNumberAction,
   prefShouldPasteOnClick,
+  prefShouldShowCommandNumberShortcut,
   prefShouldShowPreviewForLinks,
   prefShouldTreatDigitNumbersAsColor,
   prefShouldUpdateHistoryAfterAction,
@@ -72,6 +75,7 @@ export default function History() {
   const [pasteOnClick, setPasteOnClick] = useState(prefShouldPasteOnClick())
   const [doubleClickStrategy, setDoubleClickStrategy] = useState(prefShouldCopyOnDoubleClick() ? DoubleClickStrategy.COPY : DoubleClickStrategy.PASTE)
   const [numberActionStrategy, setNumberActionStrategy] = useState(prefShouldCopyOnNumberAction() ? NumberActionStrategy.COPY : NumberActionStrategy.PASTE)
+  const [showCommandNumberShortcut, setShowCommandNumberShortcut] = useState(prefShouldShowCommandNumberShortcut())
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -138,6 +142,11 @@ export default function History() {
   function handleNumberActionStrategyChange(numberActionStrategy: string) {
     setNumberActionStrategy(numberActionStrategy as NumberActionStrategy)
     prefSetCopyOnNumberAction(numberActionStrategy === NumberActionStrategy.COPY)
+  }
+
+  function handleShowCommandNumberShortcutChange(show: boolean) {
+    setShowCommandNumberShortcut(show)
+    prefSetShowCommandNumberShortcut(show)
   }
 
   return (
@@ -251,6 +260,18 @@ export default function History() {
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
+            </div>
+
+            <div className="flex items-center justify-between space-x-20 pb-1">
+              <Label htmlFor="showCommandNumberShortcut" className="flex flex-col text-base">
+                <span className="">{t('settings.history.showCommandNumberShortcut.title')}</span>
+                <span className="text-neutral-500 font-normal text-sm mt-1">
+                  {t('settings.history.showCommandNumberShortcut.description')}
+                </span>
+              </Label>
+              <Switch id="showCommandNumberShortcut" checked={showCommandNumberShortcut}
+                      onCheckedChange={handleShowCommandNumberShortcutChange}
+                      disabled={prefIsShowCommandNumberShortcutManaged()}/>
             </div>
 
             <hr/>

@@ -18,10 +18,11 @@ import {
 } from "lucide-react";
 import HistoryItemContextMenu from "@/app/HistoryItemContextMenu";
 import ShortcutLabel from "@/app/ShortcutLabel";
-import {prefShouldPasteOnClick} from "@/pref";
+import {prefShouldPasteOnClick, prefShouldShowCommandNumberShortcut} from "@/pref";
 import TagIcon, {getTags} from "@/tags";
 import {emitter} from "@/actions";
 import {useTranslation} from "react-i18next";
+import QuickPasteLabel from './QuickPasteLabel';
 
 type HistoryItemPaneProps = {
   item: Clip
@@ -222,14 +223,14 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
   }
 
   function renderQuickPasteAlias() {
-    if (!props.isQuickPasteModifierPressed) {
+    if (!prefShouldShowCommandNumberShortcut() && !props.isQuickPasteModifierPressed) {
       return null
     }
     if (props.index >= 9) {
       return null
     }
     return <div className="flex flex-none ml-4">
-      <ShortcutLabel shortcut={String(props.index + 1)}/>
+      <QuickPasteLabel index={props.index + 1}/>
     </div>
   }
 

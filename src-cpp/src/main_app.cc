@@ -1134,6 +1134,16 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
     return settings_->isCopyOnNumberActionManaged();
   });
 
+  window->putProperty("setShowCommandNumberShortcut", [this](bool show) -> void {
+    settings_->saveShowCommandNumberShortcut(show);
+  });
+  window->putProperty("shouldShowCommandNumberShortcut", [this]() -> bool {
+    return settings_->shouldShowCommandNumberShortcut();
+  });
+  window->putProperty("isShowCommandNumberShortcutManaged", [this]() -> bool {
+    return settings_->isShowCommandNumberShortcutManaged();
+  });
+
   window->putProperty("getArch", [this]() -> std::string {
 #ifdef ARCH_MAC_X64
     return "Intel";

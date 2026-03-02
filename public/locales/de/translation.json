@@ -100,10 +100,14 @@
         "paste": "In aktive App einfügen"
       },
       "numberAction": {
-        "title": "Bei Befehlstastenkombination ⌘1-9",
-        "description": "Aktion für die Befehlstastenkombination ⌘1-9 auswählen.",
+        "title": "Bei Schnell-Einfüge-Tastenkombination ⌘1-9",
+        "description": "Aktion für die Schnell-Einfüge-Tastenkombination ⌘1-9 auswählen.",
         "copy": "In Zwischenablage kopieren",
         "paste": "In aktive App einfügen"
+      },
+      "showCommandNumberShortcut": {
+        "title": "Schnell-Einfüge-Tastenkombination ⌘1-9 anzeigen",
+        "description": "Die Schnell-Einfüge-Tastenkombination (⌘1-9) neben jedem Verlaufselement anzeigen."
       },
       "itemsToDelete": {
         "all": "Alle Elemente",

@@ -100,10 +100,14 @@
         "paste": "Paste to active app"
       },
       "numberAction": {
-        "title": "On command number shortcut ⌘1-9",
-        "description": "Select action for the command number shortcut ⌘1-9.",
+        "title": "On quick paste shortcut ⌘1-9",
+        "description": "Select action for the quick paste shortcut ⌘1-9.",
         "copy": "Copy to clipboard",
         "paste": "Paste to active app"
+      },
+      "showCommandNumberShortcut": {
+        "title": "Show the quick paste shortcut ⌘1-9",
+        "description": "Display the quick paste shortcut (⌘1-9) next to each history item."
       },
       "itemsToDelete": {
         "all": "All items",

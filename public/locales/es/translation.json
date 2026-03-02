@@ -100,10 +100,14 @@
         "paste": "Pegar en la aplicación activa"
       },
       "numberAction": {
-        "title": "En atajo de número de comando ⌘1-9",
-        "description": "Seleccionar acción para el atajo de número de comando ⌘1-9.",
+        "title": "En atajo de pegado rápido ⌘1-9",
+        "description": "Seleccionar acción para el atajo de pegado rápido ⌘1-9.",
         "copy": "Copiar al portapapeles",
         "paste": "Pegar en la aplicación activa"
+      },
+      "showCommandNumberShortcut": {
+        "title": "Mostrar atajo de pegado rápido ⌘1-9",
+        "description": "Mostrar el atajo de pegado rápido (⌘1-9) junto a cada elemento del historial."
       },
       "itemsToDelete": {
         "all": "Todos los elementos",

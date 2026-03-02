@@ -100,10 +100,14 @@
         "paste": "粘贴到活动应用"
       },
       "numberAction": {
-        "title": "命令数字快捷键 ⌘1-9 时",
-        "description": "选择命令数字快捷键 ⌘1-9 的操作。",
+        "title": "快速粘贴快捷键 ⌘1-9 时",
+        "description": "选择快速粘贴快捷键 ⌘1-9 的操作。",
         "copy": "复制到剪贴板",
         "paste": "粘贴到活动应用"
+      },
+      "showCommandNumberShortcut": {
+        "title": "显示快速粘贴快捷键 ⌘1-9",
+        "description": "在每个历史记录项目旁边显示快速粘贴快捷键（⌘1-9）。"
       },
       "itemsToDelete": {
         "all": "所有项目",

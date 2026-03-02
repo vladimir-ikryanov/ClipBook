@@ -100,10 +100,14 @@
         "paste": "Incolla nell'app attiva"
       },
       "numberAction": {
-        "title": "Alla scorciatoia numerica ⌘1-9",
-        "description": "Seleziona l'azione per la scorciatoia numerica ⌘1-9.",
+        "title": "Alla scorciatoia incolla rapido ⌘1-9",
+        "description": "Seleziona l'azione per la scorciatoia incolla rapido ⌘1-9.",
         "copy": "Copia negli appunti",
         "paste": "Incolla nell'app attiva"
+      },
+      "showCommandNumberShortcut": {
+        "title": "Mostra scorciatoia incolla rapido ⌘1-9",
+        "description": "Mostra la scorciatoia incolla rapido (⌘1-9) accanto a ogni elemento della cronologia."
       },
       "itemsToDelete": {
         "all": "Tutti gli elementi",

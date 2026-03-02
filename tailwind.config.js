@@ -78,6 +78,9 @@ module.exports = {
           hover: "var(--shortcut-label-hover)",
           "hover-text": "var(--shortcut-label-hover-text)",
         },
+        "quick-paste-label": {
+          DEFAULT: "var(--quick-paste-label-text)",
+        },
         actions: {
           DEFAULT: "var(--actions-background)",
           background: "var(--actions-background)",

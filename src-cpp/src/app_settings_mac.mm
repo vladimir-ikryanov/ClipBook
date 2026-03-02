@@ -42,6 +42,7 @@ NSString *prefPlaySoundOnCopy = @"play_sound_on_copy";
 NSString *prefAlwaysDisplay = @"always_display";
 NSString *prefCopyOnDoubleClick = @"copy_on_double_click";
 NSString *prefCopyOnNumberAction = @"copy_on_number_action";
+NSString *prefShowCommandNumberShortcut = @"show_command_number_shortcut";
 NSString *prefPinFavoritesOnTop = @"pin_favorites_on_top";
 NSString *prefRetentionPeriodText = @"retention_period_text";
 NSString *prefRetentionPeriodImage = @"retention_period_image";
@@ -1290,6 +1291,24 @@ bool AppSettingsMac::shouldCopyOnNumberAction() {
 }
 
 bool AppSettingsMac::isCopyOnNumberActionManaged() {
+  return false;
+}
+
+void AppSettingsMac::saveShowCommandNumberShortcut(bool show) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:show forKey:prefShowCommandNumberShortcut];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldShowCommandNumberShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:prefShowCommandNumberShortcut] != nil) {
+    return [defaults boolForKey:prefShowCommandNumberShortcut];
+  }
+  return true;
+}
+
+bool AppSettingsMac::isShowCommandNumberShortcutManaged() {
   return false;
 }
 

@@ -122,6 +122,10 @@ class AppSettingsMac : public AppSettings {
   bool shouldCopyOnNumberAction() override;
   bool isCopyOnNumberActionManaged() override;
 
+  void saveShowCommandNumberShortcut(bool show) override;
+  bool shouldShowCommandNumberShortcut() override;
+  bool isShowCommandNumberShortcutManaged() override;
+
   bool allowCheckForUpdates() override;
 
   void savePinFavoritesOnTop(bool pin) override;

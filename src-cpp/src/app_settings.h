@@ -140,6 +140,10 @@ public:
   virtual bool shouldCopyOnNumberAction() = 0;
   virtual bool isCopyOnNumberActionManaged() = 0;
 
+  virtual void saveShowCommandNumberShortcut(bool show) = 0;
+  virtual bool shouldShowCommandNumberShortcut() = 0;
+  virtual bool isShowCommandNumberShortcutManaged() = 0;
+
   virtual bool allowCheckForUpdates() = 0;
 
   virtual void savePinFavoritesOnTop(bool pin) = 0;

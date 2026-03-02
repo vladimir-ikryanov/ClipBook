@@ -103,6 +103,10 @@ declare const setCopyOnNumberAction: (copy: boolean) => void;
 declare const shouldCopyOnNumberAction: () => boolean;
 declare const isCopyOnNumberActionManaged: () => boolean;
 
+declare const setShowCommandNumberShortcut: (show: boolean) => void;
+declare const shouldShowCommandNumberShortcut: () => boolean;
+declare const isShowCommandNumberShortcutManaged: () => boolean;
+
 declare const saveRetentionPeriodText: (period: number) => void;
 declare const getRetentionPeriodText: () => number;
 declare const saveRetentionPeriodImage: (period: number) => void;
@@ -865,6 +869,18 @@ export function prefSetCopyOnNumberAction(copy: boolean) {
 
 export function prefShouldCopyOnNumberAction() {
   return shouldCopyOnNumberAction()
+}
+
+export function prefSetShowCommandNumberShortcut(show: boolean) {
+  setShowCommandNumberShortcut(show)
+}
+
+export function prefShouldShowCommandNumberShortcut() {
+  return shouldShowCommandNumberShortcut()
+}
+
+export function prefIsShowCommandNumberShortcutManaged() {
+  return isShowCommandNumberShortcutManaged()
 }
 
 export function prefGetSelectAllShortcut() {
