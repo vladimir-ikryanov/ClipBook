@@ -41,6 +41,8 @@ static std::string kAppInfoSeparator = "|";
 static std::string kAppInfoListSeparator = "*";
 
 static std::string kShortcutSeparator = " + ";
+static std::string kLegacyMetaDoubleTapShortcut = "MetaDoubleTap";
+static std::string kDoubleTapShortcutPrefix = "DoubleTap + ";
 static std::string kMetaLeft = "MetaLeft";
 static std::string kMetaRight = "MetaRight";
 static std::string kControlLeft = "ControlLeft";
@@ -141,6 +143,16 @@ static std::map<std::string, KeyCode> kKeyCodes = {
     {"BracketRight", KeyCode::CLOSE_BRACE},
 };
 
+static const CGKeyCode kLeftCommandKeyCode = 55;
+static const CGKeyCode kRightCommandKeyCode = 54;
+static const CGKeyCode kLeftShiftKeyCode = 56;
+static const CGKeyCode kRightShiftKeyCode = 60;
+static const CGKeyCode kLeftControlKeyCode = 59;
+static const CGKeyCode kRightControlKeyCode = 62;
+static const CGKeyCode kLeftOptionKeyCode = 58;
+static const CGKeyCode kRightOptionKeyCode = 61;
+static const int64_t kOpenAppDoubleTapThresholdMs = 350;
+
 void copyCustomClip(NSPasteboard *pasteboard) {
   NSString *str = @"ClipBook";
   NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
@@ -157,6 +169,20 @@ std::vector<std::string> split(const std::string &str, const std::string &delimi
   }
   result.push_back(str.substr(start));
   return result;
+}
+
+bool startsWith(const std::string &value, const std::string &prefix) {
+  return value.rfind(prefix, 0) == 0;
+}
+
+std::string extractDoubleTapShortcut(const std::string &shortcut) {
+  if (shortcut == kLegacyMetaDoubleTapShortcut) {
+    return kMetaLeft;
+  }
+  if (startsWith(shortcut, kDoubleTapShortcutPrefix)) {
+    return shortcut.substr(kDoubleTapShortcutPrefix.length());
+  }
+  return "";
 }
 
 int32_t extractKeyModifiers(const std::string &shortcut) {
@@ -236,9 +262,172 @@ mobrowser::Shortcut MainAppMac::createShortcut(const std::string &shortcut) {
   return mobrowser::Shortcut(key_code, key_modifiers);
 }
 
+void MainAppMac::handleOpenAppShortcutTriggered() {
+  // Users can set the same shortcut for opening and closing the app.
+  auto openAppShortcut = settings_->getOpenAppShortcut();
+  auto closeAppShortcut = settings_->getCloseAppShortcut();
+  auto closeAppShortcut2 = settings_->getCloseAppShortcut2();
+  auto closeAppShortcut3 = settings_->getCloseAppShortcut3();
+  if (closeAppShortcut == openAppShortcut ||
+      closeAppShortcut2 == openAppShortcut ||
+      closeAppShortcut3 == openAppShortcut) {
+    if (app_window_visible_) {
+      hide(true);
+    } else {
+      show();
+    }
+  } else {
+    show();
+  }
+}
+
+bool MainAppMac::handleOpenAppDoubleTapTriggered() {
+  auto now = std::chrono::steady_clock::now();
+  if (waiting_for_second_open_app_tap_) {
+    waiting_for_second_open_app_tap_ = false;
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+        now - last_open_app_tap_time_).count();
+    if (elapsed <= kOpenAppDoubleTapThresholdMs) {
+      return true;
+    }
+  }
+  waiting_for_second_open_app_tap_ = true;
+  last_open_app_tap_time_ = now;
+  return false;
+}
+
+#ifdef __OBJC__
+void MainAppMac::registerOpenAppDoubleTapMonitor(const std::string &key) {
+  unregisterOpenAppDoubleTapMonitor();
+  open_app_double_tap_modifier_key_ = key;
+  open_app_double_tap_monitor_ =
+      [NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskFlagsChanged
+                                             handler:^(NSEvent *event) {
+                                               handleOpenAppDoubleTapMonitorEvent(event);
+                                             }];
+}
+
+void MainAppMac::unregisterOpenAppDoubleTapMonitor() {
+  if (open_app_double_tap_monitor_ != nil) {
+    [NSEvent removeMonitor:open_app_double_tap_monitor_];
+    open_app_double_tap_monitor_ = nil;
+  }
+  open_app_modifier_key_down_ = false;
+  open_app_double_tap_modifier_key_.clear();
+}
+
+void MainAppMac::handleOpenAppDoubleTapMonitorEvent(NSEvent *event) {
+  if (event == nil) {
+    return;
+  }
+
+  auto modifier_key = open_app_double_tap_modifier_key_;
+  if (modifier_key.empty()) {
+    return;
+  }
+
+  auto key_code = static_cast<CGKeyCode>(event.keyCode);
+
+  NSEventModifierFlags modifiers = event.modifierFlags & NSEventModifierFlagDeviceIndependentFlagsMask;
+  bool command_down = (modifiers & NSEventModifierFlagCommand) != 0;
+  bool shift_down = (modifiers & NSEventModifierFlagShift) != 0;
+  bool option_down = (modifiers & NSEventModifierFlagOption) != 0;
+  bool control_down = (modifiers & NSEventModifierFlagControl) != 0;
+  bool has_system_modifiers = (modifiers & NSEventModifierFlagCapsLock) != 0 ||
+                              (modifiers & NSEventModifierFlagFunction) != 0;
+
+  bool is_expected_key = false;
+  bool modifier_down = false;
+  bool has_other_modifiers = false;
+
+  if (modifier_key == kMetaLeft) {
+    is_expected_key = key_code == kLeftCommandKeyCode;
+    modifier_down = command_down;
+    has_other_modifiers = shift_down || option_down || control_down || has_system_modifiers;
+  } else if (modifier_key == kMetaRight) {
+    is_expected_key = key_code == kRightCommandKeyCode;
+    modifier_down = command_down;
+    has_other_modifiers = shift_down || option_down || control_down || has_system_modifiers;
+  } else if (modifier_key == kShiftLeft) {
+    is_expected_key = key_code == kLeftShiftKeyCode;
+    modifier_down = shift_down;
+    has_other_modifiers = command_down || option_down || control_down || has_system_modifiers;
+  } else if (modifier_key == kShiftRight) {
+    is_expected_key = key_code == kRightShiftKeyCode;
+    modifier_down = shift_down;
+    has_other_modifiers = command_down || option_down || control_down || has_system_modifiers;
+  } else if (modifier_key == kAltLeft) {
+    is_expected_key = key_code == kLeftOptionKeyCode;
+    modifier_down = option_down;
+    has_other_modifiers = command_down || shift_down || control_down || has_system_modifiers;
+  } else if (modifier_key == kAltRight) {
+    is_expected_key = key_code == kRightOptionKeyCode;
+    modifier_down = option_down;
+    has_other_modifiers = command_down || shift_down || control_down || has_system_modifiers;
+  } else if (modifier_key == kControlLeft) {
+    is_expected_key = key_code == kLeftControlKeyCode;
+    modifier_down = control_down;
+    has_other_modifiers = command_down || shift_down || option_down || has_system_modifiers;
+  } else if (modifier_key == kControlRight) {
+    is_expected_key = key_code == kRightControlKeyCode;
+    modifier_down = control_down;
+    has_other_modifiers = command_down || shift_down || option_down || has_system_modifiers;
+  }
+
+  if (!is_expected_key) {
+    return;
+  }
+
+  if (modifier_down) {
+    open_app_modifier_key_down_ = !has_other_modifiers;
+    return;
+  }
+
+  if (!open_app_modifier_key_down_ || has_other_modifiers) {
+    open_app_modifier_key_down_ = false;
+    waiting_for_second_open_app_tap_ = false;
+    return;
+  }
+
+  open_app_modifier_key_down_ = false;
+  if (handleOpenAppDoubleTapTriggered()) {
+    // Avoid waiting for frame id on the AppKit event callback thread.
+    std::thread([this]() {
+      handleOpenAppShortcutTriggered();
+    }).detach();
+  }
+}
+#endif
+
 void MainAppMac::enableOpenAppShortcut() {
   disableOpenAppShortcut();
   auto shortcut_str = settings_->getOpenAppShortcut();
+  auto double_tap_shortcut = extractDoubleTapShortcut(shortcut_str);
+  if (!double_tap_shortcut.empty()) {
+    waiting_for_second_open_app_tap_ = false;
+
+    open_app_shortcut_ = createShortcut(double_tap_shortcut);
+    open_app_item_->setShortcut(open_app_shortcut_);
+    if (open_app_shortcut_.key != KeyCode::UNKNOWN) {
+      auto shortcuts = app()->globalShortcuts();
+      bool success = shortcuts->registerShortcut(open_app_shortcut_, [this](const Shortcut &) {
+        if (handleOpenAppDoubleTapTriggered()) {
+          handleOpenAppShortcutTriggered();
+        }
+      });
+      if (!success) {
+        LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
+        open_app_shortcut_ = mobrowser::Shortcut();
+        open_app_item_->setShortcut(open_app_shortcut_);
+      }
+      return;
+    }
+#ifdef __OBJC__
+    registerOpenAppDoubleTapMonitor(double_tap_shortcut);
+#endif
+    return;
+  }
+
   open_app_shortcut_ = createShortcut(shortcut_str);
   open_app_item_->setShortcut(open_app_shortcut_);
   if (open_app_shortcut_.key == KeyCode::UNKNOWN) {
@@ -246,22 +435,7 @@ void MainAppMac::enableOpenAppShortcut() {
   }
   auto shortcuts = app()->globalShortcuts();
   bool success = shortcuts->registerShortcut(open_app_shortcut_, [this](const Shortcut &) {
-    // Users can set the same shortcut for opening and closing the app.
-    auto openAppShortcut = settings_->getOpenAppShortcut();
-    auto closeAppShortcut = settings_->getCloseAppShortcut();
-    auto closeAppShortcut2 = settings_->getCloseAppShortcut2();
-    auto closeAppShortcut3 = settings_->getCloseAppShortcut3();
-    if (closeAppShortcut == openAppShortcut ||
-        closeAppShortcut2 == openAppShortcut ||
-        closeAppShortcut3 == openAppShortcut) {
-      if (app_window_visible_) {
-        hide(true);
-      } else {
-        show();
-      }
-    } else {
-      show();
-    }
+    handleOpenAppShortcutTriggered();
   });
   if (!success) {
     LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
@@ -270,6 +444,10 @@ void MainAppMac::enableOpenAppShortcut() {
 }
 
 void MainAppMac::disableOpenAppShortcut() {
+#ifdef __OBJC__
+  unregisterOpenAppDoubleTapMonitor();
+#endif
+  waiting_for_second_open_app_tap_ = false;
   if (open_app_shortcut_.key != KeyCode::UNKNOWN) {
     app()->globalShortcuts()->unregisterShortcut(open_app_shortcut_);
     open_app_shortcut_.key = KeyCode::UNKNOWN;

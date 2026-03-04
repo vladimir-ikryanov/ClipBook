@@ -306,6 +306,7 @@ export default function Shortcuts() {
               <span className="">{t('settings.shortcuts.openApp')}</span>
               <ShortcutInput shortcut={openAppShortcut}
                              defaultShortcut="ShiftLeft + MetaLeft + KeyV"
+                             allowDoubleTap={true}
                              onSave={handleOpenAppShortcutChange}/>
             </div>
             <hr/>

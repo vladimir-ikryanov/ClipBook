@@ -2,6 +2,7 @@
 #define CLIPBOOK_MAIN_APP_MAC_H_
 
 #include "main_app.h"
+#include <chrono>
 
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
@@ -72,6 +73,8 @@ class MainAppMac : public MainApp {
   void showSystemAccessibilityPreferencesDialog();
 
  private:
+  void handleOpenAppShortcutTriggered();
+  bool handleOpenAppDoubleTapTriggered();
   void restoreWindowBounds();
   mobrowser::Size restoreWindowSize();
   void saveWindowBounds();
@@ -96,8 +99,16 @@ class MainAppMac : public MainApp {
   mobrowser::Shortcut paste_next_item_shortcut_;
   std::shared_ptr<ClipboardReaderMac> clipboard_reader_;
   bool should_activate_app_ = false;
+  bool waiting_for_second_open_app_tap_ = false;
+  std::chrono::steady_clock::time_point last_open_app_tap_time_{};
 #ifdef __OBJC__
   pid_t active_app_pid_ = 0;
+  id open_app_double_tap_monitor_ = nil;
+  std::string open_app_double_tap_modifier_key_;
+  bool open_app_modifier_key_down_ = false;
+  void registerOpenAppDoubleTapMonitor(const std::string &key);
+  void unregisterOpenAppDoubleTapMonitor();
+  void handleOpenAppDoubleTapMonitorEvent(NSEvent *event);
   NSPoint getInputCursorLocationOnScreen();
   void moveToScreen(NSScreen *screen);
   void setupApplicationObservers();
