@@ -120,7 +120,35 @@ export function keysToDisplayShortcut(keys: string[]): string {
 }
 
 export function shortcutToDisplayShortcut(shortcut: string): string {
+  if (isDoubleTapShortcut(shortcut)) {
+    const key = extractDoubleTapKey(shortcut);
+    if (key !== null) {
+      const displayKey = keysToDisplayShortcut(key.split(' + '));
+      return `${displayKey},${displayKey}`;
+    }
+  }
   return keysToDisplayShortcut(shortcut.split(' + '));
+}
+
+export const META_DOUBLE_TAP_SHORTCUT = 'MetaDoubleTap';
+export const DOUBLE_TAP_SHORTCUT_PREFIX = 'DoubleTap + ';
+
+export function createDoubleTapShortcut(key: string): string {
+  return `${DOUBLE_TAP_SHORTCUT_PREFIX}${key}`;
+}
+
+export function isDoubleTapShortcut(shortcut: string): boolean {
+  return shortcut === META_DOUBLE_TAP_SHORTCUT || shortcut.startsWith(DOUBLE_TAP_SHORTCUT_PREFIX);
+}
+
+export function extractDoubleTapKey(shortcut: string): string | null {
+  if (shortcut === META_DOUBLE_TAP_SHORTCUT) {
+    return 'MetaLeft';
+  }
+  if (shortcut.startsWith(DOUBLE_TAP_SHORTCUT_PREFIX)) {
+    return shortcut.slice(DOUBLE_TAP_SHORTCUT_PREFIX.length);
+  }
+  return null;
 }
 
 type ModifierKey = 'MetaLeft' | 'MetaRight' | 'AltLeft' | 'AltRight' | 'ControlLeft' | 'ControlRight' | 'ShiftLeft' | 'ShiftRight';
@@ -156,6 +184,9 @@ const parseShortcut = (shortcut: string): ParsedShortcut => {
 };
 
 export const isShortcutMatch = (shortcut: string, event: KeyboardEvent): boolean => {
+  if (isDoubleTapShortcut(shortcut)) {
+    return false;
+  }
   const {key, modifiers} = parseShortcut(shortcut);
 
   const metaKey = event.metaKey;

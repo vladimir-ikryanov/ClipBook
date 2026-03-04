@@ -1,7 +1,12 @@
 import '../app.css';
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { isModifierKey, keysToDisplayShortcut, shortcutToDisplayShortcut } from "@/lib/shortcuts";
+import {
+  createDoubleTapShortcut,
+  isModifierKey,
+  keysToDisplayShortcut,
+  shortcutToDisplayShortcut
+} from "@/lib/shortcuts";
 import { Button } from "@/components/ui/button";
 import { Undo2Icon, CircleXIcon } from "lucide-react";
 import { useTranslation } from 'react-i18next';
@@ -18,7 +23,10 @@ type ShortcutProps = {
   shortcut: string
   defaultShortcut?: string
   onSave: (shortcut: string) => void
+  allowDoubleTap?: boolean
 }
+
+const DOUBLE_TAP_INTERVAL_MS = 350;
 
 export default function ShortcutInput(props: ShortcutProps) {
   const { t } = useTranslation();
@@ -27,9 +35,36 @@ export default function ShortcutInput(props: ShortcutProps) {
   const [currentKeys, setCurrentKeys] = useState<string[]>([]);
   const [shortcut, setShortcut] = useState(props.shortcut);
   const [isHovered, setIsHovered] = useState(false);
+  const [lastTappedKey, setLastTappedKey] = useState<string | null>(null);
+  const [lastTapAt, setLastTapAt] = useState<number | null>(null);
+
+  function isDoubleTapCandidate(key: string, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.repeat) {
+      return false
+    }
+    if (!isModifierKey(key)) {
+      return !e.metaKey && !e.shiftKey && !e.altKey && !e.ctrlKey
+    }
+    if (key === 'MetaLeft' || key === 'MetaRight') {
+      return !e.shiftKey && !e.altKey && !e.ctrlKey
+    }
+    if (key === 'ShiftLeft' || key === 'ShiftRight') {
+      return !e.metaKey && !e.altKey && !e.ctrlKey
+    }
+    if (key === 'AltLeft' || key === 'AltRight') {
+      return !e.metaKey && !e.shiftKey && !e.ctrlKey
+    }
+    if (key === 'ControlLeft' || key === 'ControlRight') {
+      return !e.metaKey && !e.shiftKey && !e.altKey
+    }
+    return false
+  }
 
   function startEditing() {
     setIsEditing(true)
+    setCurrentKeys([])
+    setLastTappedKey(null)
+    setLastTapAt(null)
     disableOpenAppShortcut()
     disablePauseResumeShortcut()
     disablePasteNextItemShortcut()
@@ -37,6 +72,9 @@ export default function ShortcutInput(props: ShortcutProps) {
 
   function stopEditing() {
     setIsEditing(false)
+    setCurrentKeys([])
+    setLastTappedKey(null)
+    setLastTapAt(null)
     enableOpenAppShortcut()
     enablePauseResumeShortcut()
     enablePasteNextItemShortcut()
@@ -64,6 +102,27 @@ export default function ShortcutInput(props: ShortcutProps) {
       e.preventDefault()
       e.stopPropagation()
       const key = e.code
+
+      if (props.allowDoubleTap && isDoubleTapCandidate(key, e)) {
+        const now = Date.now()
+        if (lastTapAt !== null && lastTappedKey === key && now - lastTapAt <= DOUBLE_TAP_INTERVAL_MS) {
+          const newShortcut = createDoubleTapShortcut(key)
+          setShortcut(newShortcut)
+          setCurrentKeys([])
+          setLastTappedKey(null)
+          setLastTapAt(null)
+          stopEditing()
+          props.onSave(newShortcut)
+          return
+        }
+        setCurrentKeys([key])
+        setLastTappedKey(key)
+        setLastTapAt(now)
+        return
+      }
+
+      setLastTappedKey(null)
+      setLastTapAt(null)
       let keys: string[] = currentKeys;
       // Add the key to the current keys if it's not already there
       if (!currentKeys.includes(key)) {
