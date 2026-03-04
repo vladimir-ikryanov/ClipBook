@@ -1,4 +1,4 @@
-import Dexie, {Table} from 'dexie';
+import Dexie, { Table } from "dexie";
 
 export enum ClipType {
   Text,
@@ -6,7 +6,7 @@ export enum ClipType {
   Email,
   Color,
   Image,
-  File
+  File,
 }
 
 export class LinkPreviewDetails {
@@ -17,12 +17,18 @@ export class LinkPreviewDetails {
   imageFileName: string = "";
   faviconFileName: string = "";
 
-  constructor(url: string, title: string, description: string, imageFileName: string, faviconFileName: string) {
-    this.url = url
-    this.title = title
-    this.description = description
-    this.imageFileName = imageFileName
-    this.faviconFileName = faviconFileName
+  constructor(
+    url: string,
+    title: string,
+    description: string,
+    imageFileName: string,
+    faviconFileName: string,
+  ) {
+    this.url = url;
+    this.title = title;
+    this.description = description;
+    this.imageFileName = imageFileName;
+    this.faviconFileName = faviconFileName;
   }
 }
 
@@ -65,14 +71,18 @@ class AppDatabase extends Dexie {
   public linkPreviews!: Table<LinkPreviewDetails, number>;
 
   constructor() {
-    super('ClipBookDB');
+    super("ClipBookDB");
     this.version(1).stores({
-      history: '++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder, rtf, html',
-      linkPreviews: '++id, url, title, description, imageFileName, faviconFileName'
+      history:
+        "++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder, rtf, html",
+      linkPreviews:
+        "++id, url, title, description, imageFileName, faviconFileName",
     });
     this.version(2).stores({
-      history: '++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder, rtf, html, sequenceId, sequenceOrder',
-      linkPreviews: '++id, url, title, description, imageFileName, faviconFileName'
+      history:
+        "++id, title, content, type, sourceApp, favorite, firstTimeCopy, lastTimeCopy, numberOfCopies, imageFileName, imageThumbFileName, imageWidth, imageHeight, imageSizeInBytes, imageText, filePath, filePathFileName, filePathThumbFileName, fileSizeInBytes, fileFolder, rtf, html, sequenceId, sequenceOrder",
+      linkPreviews:
+        "++id, url, title, description, imageFileName, faviconFileName",
     });
   }
 }
@@ -80,54 +90,56 @@ class AppDatabase extends Dexie {
 const db = new AppDatabase();
 
 export async function getAllClips(): Promise<Clip[]> {
-  return db.history.toArray()
+  return db.history.toArray();
 }
 
 export async function addClip(clip: Clip) {
-  await db.history.add(clip)
+  await db.history.add(clip);
 }
 
 export async function updateClip(id: number, clip: Clip) {
-  await db.history.update(id, clip)
+  await db.history.update(id, { ...clip });
 }
 
 export async function deleteClip(id: number) {
-  await db.history.delete(id)
+  await db.history.delete(id);
 }
 
 export async function deleteAllClips() {
-  await db.history.clear()
+  await db.history.clear();
 }
 
 export async function saveLinkPreviewDetails(details: LinkPreviewDetails) {
-  await db.linkPreviews.where('url').equals(details.url).delete()
-  await db.linkPreviews.add(details)
+  await db.linkPreviews.where("url").equals(details.url).delete();
+  await db.linkPreviews.add(details);
 }
 
 export async function deleteLinkPreviewDetails(url: string) {
-  await db.linkPreviews.where('url').equals(url).delete()
+  await db.linkPreviews.where("url").equals(url).delete();
 }
 
-export async function getLinkPreviewDetails(url: string): Promise<LinkPreviewDetails | undefined> {
-  return db.linkPreviews.where('url').equals(url).first()
+export async function getLinkPreviewDetails(
+  url: string,
+): Promise<LinkPreviewDetails | undefined> {
+  return db.linkPreviews.where("url").equals(url).first();
 }
 
 export function getImageText(item: Clip): string {
-  return item && (item.imageText || "")
+  return item && (item.imageText || "");
 }
 
 export function getImageFileName(item: Clip): string {
-  return item && (item.imageFileName || "")
+  return item && (item.imageFileName || "");
 }
 
 export function getFilePath(item: Clip): string {
-  return item && (item.filePath || "")
+  return item && (item.filePath || "");
 }
 
 export function getRTF(item: Clip): string {
-  return item && (item.rtf || "")
+  return item && (item.rtf || "");
 }
 
 export function getHTML(item: Clip): string {
-  return item && (item.html || "")
+  return item && (item.html || "");
 }

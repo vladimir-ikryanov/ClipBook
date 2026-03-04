@@ -20,8 +20,8 @@ using namespace mobrowser;
 namespace fs = std::filesystem;
 
 /*
- * I have to use the deprecated LaunchServices functions for managing login items,
- * because there is no working alternative.
+ * I have to use the deprecated LaunchServices functions for managing login
+ * items, because there is no working alternative.
  */
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
@@ -33,7 +33,8 @@ static std::string kScreenWithCursor = "screenWithCursor";
 static std::string kMouseCursor = "mouseCursor";
 static std::string kInputCursor = "inputCursor";
 
-// The minimum width and height of an active app window we can use to center the ClipBook window.
+// The minimum width and height of an active app window we can use to center the
+// ClipBook window.
 static int kMinAppWindowSize = 200;
 
 static std::string kFilePathsSeparator = ":";
@@ -147,7 +148,8 @@ void copyCustomClip(NSPasteboard *pasteboard) {
   [pasteboard setData:data forType:@"com.clipbook.data"];
 }
 
-std::vector<std::string> split(const std::string &str, const std::string &delimiter) {
+std::vector<std::string> split(const std::string &str,
+                               const std::string &delimiter) {
   std::vector<std::string> result;
   size_t pos = 0;
   size_t start = 0;
@@ -179,10 +181,9 @@ int32_t extractKeyModifiers(const std::string &shortcut) {
 KeyCode extractKeyCode(const std::string &shortcut) {
   auto parts = split(shortcut, kShortcutSeparator);
   for (const auto &part : parts) {
-    if (part == kMetaLeft || part == kMetaRight
-        || part == kControlLeft || part == kControlRight
-        || part == kAltLeft || part == kAltRight
-        || part == kShiftLeft || part == kShiftRight) {
+    if (part == kMetaLeft || part == kMetaRight || part == kControlLeft ||
+        part == kControlRight || part == kAltLeft || part == kAltRight ||
+        part == kShiftLeft || part == kShiftRight) {
       continue;
     }
     auto it = kKeyCodes.find(part);
@@ -211,11 +212,12 @@ bool isAppleSilicon() {
 }
 
 MainAppMac::MainAppMac(const std::shared_ptr<App> &app,
-                       const std::shared_ptr<AppSettings> &settings) : MainApp(app, settings) {
+                       const std::shared_ptr<AppSettings> &settings)
+    : MainApp(app, settings) {
   clipboard_reader_ = std::make_shared<ClipboardReaderMac>();
 }
 
-void MainAppMac::setActiveAppInfo(NSRunningApplication* activeApp) {
+void MainAppMac::setActiveAppInfo(NSRunningApplication *activeApp) {
   if (activeApp) {
     auto app_path = [[activeApp bundleURL] fileSystemRepresentation];
     std::string app_name = getAppNameFromPath(app_path);
@@ -245,24 +247,25 @@ void MainAppMac::enableOpenAppShortcut() {
     return;
   }
   auto shortcuts = app()->globalShortcuts();
-  bool success = shortcuts->registerShortcut(open_app_shortcut_, [this](const Shortcut &) {
-    // Users can set the same shortcut for opening and closing the app.
-    auto openAppShortcut = settings_->getOpenAppShortcut();
-    auto closeAppShortcut = settings_->getCloseAppShortcut();
-    auto closeAppShortcut2 = settings_->getCloseAppShortcut2();
-    auto closeAppShortcut3 = settings_->getCloseAppShortcut3();
-    if (closeAppShortcut == openAppShortcut ||
-        closeAppShortcut2 == openAppShortcut ||
-        closeAppShortcut3 == openAppShortcut) {
-      if (app_window_visible_) {
-        hide(true);
-      } else {
-        show();
-      }
-    } else {
-      show();
-    }
-  });
+  bool success =
+      shortcuts->registerShortcut(open_app_shortcut_, [this](const Shortcut &) {
+        // Users can set the same shortcut for opening and closing the app.
+        auto openAppShortcut = settings_->getOpenAppShortcut();
+        auto closeAppShortcut = settings_->getCloseAppShortcut();
+        auto closeAppShortcut2 = settings_->getCloseAppShortcut2();
+        auto closeAppShortcut3 = settings_->getCloseAppShortcut3();
+        if (closeAppShortcut == openAppShortcut ||
+            closeAppShortcut2 == openAppShortcut ||
+            closeAppShortcut3 == openAppShortcut) {
+          if (app_window_visible_) {
+            hide(true);
+          } else {
+            show();
+          }
+        } else {
+          show();
+        }
+      });
   if (!success) {
     LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
     open_app_shortcut_ = mobrowser::Shortcut();
@@ -286,13 +289,14 @@ void MainAppMac::enablePauseResumeShortcut() {
     return;
   }
   auto shortcuts = app()->globalShortcuts();
-  bool success = shortcuts->registerShortcut(pause_resume_shortcut_, [this](const Shortcut &) {
-    if (isPaused()) {
-      resume();
-    } else {
-      pause();
-    }
-  });
+  bool success = shortcuts->registerShortcut(pause_resume_shortcut_,
+                                             [this](const Shortcut &) {
+                                               if (isPaused()) {
+                                                 resume();
+                                               } else {
+                                                 pause();
+                                               }
+                                             });
   if (!success) {
     LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
     pause_resume_shortcut_ = mobrowser::Shortcut();
@@ -315,13 +319,13 @@ void MainAppMac::enablePasteNextItemShortcut() {
     return;
   }
   auto shortcuts = app()->globalShortcuts();
-  bool success = shortcuts->registerShortcut(paste_next_item_shortcut_, [this](const Shortcut &) {
-    pasteNextItemToActiveApp();
-  });
+  bool success = shortcuts->registerShortcut(
+      paste_next_item_shortcut_,
+      [this](const Shortcut &) { pasteNextItemToActiveApp(); });
   if (!success) {
     LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
-    // Reset the shortcut to an empty one if registration fails to avoid crash when we try to
-    // unregister it later.
+    // Reset the shortcut to an empty one if registration fails to avoid crash
+    // when we try to unregister it later.
     paste_next_item_shortcut_ = mobrowser::Shortcut();
   }
 }
@@ -351,17 +355,26 @@ void MainAppMac::activate() {
 }
 
 void MainAppMac::show() {
-  // Update the active app info because it may be already active when the window is shown.
+  // Update the active app info because it may be already active when the window
+  // is shown.
   setActiveAppInfo([[NSWorkspace sharedWorkspace] frontmostApplication]);
   // Restore the window bounds before showing the window.
   restoreWindowBounds();
   // Show the browser window.
   MainApp::show();
+
+  // Make sure to configure the NSWindows so they can float over fullscreen apps
+  dispatch_async(dispatch_get_main_queue(), ^{
+    for (NSWindow *window in [NSApp windows]) {
+      window.collectionBehavior = window.collectionBehavior |
+                                  NSWindowCollectionBehaviorCanJoinAllSpaces |
+                                  NSWindowCollectionBehaviorFullScreenAuxiliary;
+      window.level = NSScreenSaverWindowLevel;
+    }
+  });
 }
 
-void MainAppMac::hide() {
-  MainApp::hide();
-}
+void MainAppMac::hide() { MainApp::hide(); }
 
 void MainAppMac::hide(bool force) {
   // Do not hide the window at some conditions.
@@ -387,7 +400,8 @@ void MainAppMac::hide(bool force) {
 }
 
 void MainAppMac::sendKey(MainApp::Key key) {
-  CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
+  CGEventSourceRef source =
+      CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
 
   CGEventRef key_down = nullptr;
   CGEventRef key_up = nullptr;
@@ -418,9 +432,7 @@ void MainAppMac::sendKey(MainApp::Key key) {
   usleep(50000);
 }
 
-void MainAppMac::paste() {
-  sendKey(Key::kCmdV);
-}
+void MainAppMac::paste() { sendKey(Key::kCmdV); }
 
 void MainAppMac::paste(const std::string &filePaths) {
   if (!isAccessibilityAccessGranted()) {
@@ -433,8 +445,7 @@ void MainAppMac::paste(const std::string &filePaths) {
   paste();
 }
 
-void MainAppMac::paste(const std::string &text,
-                       const std::string &rtf,
+void MainAppMac::paste(const std::string &text, const std::string &rtf,
                        const std::string &html,
                        const std::string &imageFileName,
                        const std::string &filePath) {
@@ -462,9 +473,11 @@ void MainAppMac::copyToClipboard(const std::string &filePaths, bool ghost) {
   // Copy files.
   auto paths = split(filePaths, kFilePathsSeparator);
   for (const auto &path : paths) {
-    auto fileUrl = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];
+    auto fileUrl =
+        [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];
     NSPasteboardItem *fileItem = [[NSPasteboardItem alloc] init];
-    [fileItem setString:[fileUrl absoluteString] forType:NSPasteboardTypeFileURL];
+    [fileItem setString:[fileUrl absoluteString]
+                forType:NSPasteboardTypeFileURL];
     [items addObject:fileItem];
   }
 
@@ -478,8 +491,7 @@ void MainAppMac::copyToClipboard(const std::string &text,
                                  const std::string &rtf,
                                  const std::string &html,
                                  const std::string &imageFileName,
-                                 const std::string &filePath,
-                                 bool ghost) {
+                                 const std::string &filePath, bool ghost) {
   auto pasteboard = [NSPasteboard generalPasteboard];
   // Clear the pasteboard and set the new text.
   [pasteboard clearContents];
@@ -488,20 +500,25 @@ void MainAppMac::copyToClipboard(const std::string &text,
 
   // Copy file.
   if (!filePath.empty()) {
-    auto fileUrl = [NSURL fileURLWithPath:[NSString stringWithUTF8String:filePath.c_str()]];
+    auto fileUrl = [NSURL
+        fileURLWithPath:[NSString stringWithUTF8String:filePath.c_str()]];
     NSPasteboardItem *fileItem = [[NSPasteboardItem alloc] init];
-    [fileItem setString:[fileUrl absoluteString] forType:NSPasteboardTypeFileURL];
+    [fileItem setString:[fileUrl absoluteString]
+                forType:NSPasteboardTypeFileURL];
     [items addObject:fileItem];
   }
 
   // Copy image.
   if (!imageFileName.empty()) {
     fs::path imagesDir = getImagesDir();
-    auto imageFilePath = [NSString stringWithUTF8String:imagesDir.append(imageFileName).c_str()];
+    auto imageFilePath =
+        [NSString stringWithUTF8String:imagesDir.append(imageFileName).c_str()];
     NSImage *image = [[NSImage alloc] initWithContentsOfFile:imageFilePath];
     if (image) {
-      NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithData:[image TIFFRepresentation]];
-      NSData *data = [imageRep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+      NSBitmapImageRep *imageRep =
+          [[NSBitmapImageRep alloc] initWithData:[image TIFFRepresentation]];
+      NSData *data = [imageRep representationUsingType:NSBitmapImageFileTypePNG
+                                            properties:@{}];
       NSPasteboardItem *imageItem = [[NSPasteboardItem alloc] init];
       [imageItem setData:data forType:NSPasteboardTypePNG];
       [items addObject:imageItem];
@@ -514,16 +531,19 @@ void MainAppMac::copyToClipboard(const std::string &text,
   if (!text.empty()) {
     // Copy plain text.
     NSPasteboardItem *textItem = [[NSPasteboardItem alloc] init];
-    [textItem setString:[NSString stringWithUTF8String:text.c_str()] forType:NSPasteboardTypeString];
+    [textItem setString:[NSString stringWithUTF8String:text.c_str()]
+                forType:NSPasteboardTypeString];
 
     // Copy RTF text.
     if (!rtf.empty()) {
-      [textItem setString:[NSString stringWithUTF8String:rtf.c_str()] forType:NSPasteboardTypeRTF];
+      [textItem setString:[NSString stringWithUTF8String:rtf.c_str()]
+                  forType:NSPasteboardTypeRTF];
     }
 
     // Copy HTML text.
     if (!html.empty()) {
-      [textItem setString:[NSString stringWithUTF8String:html.c_str()] forType:NSPasteboardTypeHTML];
+      [textItem setString:[NSString stringWithUTF8String:html.c_str()]
+                  forType:NSPasteboardTypeHTML];
     }
 
     [items addObject:textItem];
@@ -592,10 +612,14 @@ void MainAppMac::moveToScreen(NSScreen *screen) {
   auto primary_screen = [[NSScreen screens] firstObject];
   auto primary_screen_bounds = [primary_screen frame];
   auto screen_bounds = [screen frame];
-  auto x = static_cast<int32_t>((screen_bounds.size.width - window_size.width) / 2);
-  auto y = static_cast<int32_t>((screen_bounds.size.height - window_size.height) / 2);
+  auto x =
+      static_cast<int32_t>((screen_bounds.size.width - window_size.width) / 2);
+  auto y = static_cast<int32_t>(
+      (screen_bounds.size.height - window_size.height) / 2);
   x += static_cast<int32_t>(screen_bounds.origin.x);
-  y += static_cast<int32_t>(primary_screen_bounds.size.height - (screen_bounds.origin.y + screen_bounds.size.height));
+  y += static_cast<int32_t>(
+      primary_screen_bounds.size.height -
+      (screen_bounds.origin.y + screen_bounds.size.height));
   app_window_->setPosition(x, y);
 }
 
@@ -614,7 +638,8 @@ void MainAppMac::moveToMousePointerLocation() {
   auto x = static_cast<int32_t>(mouse_location.x);
   auto primary_screen = [[NSScreen screens] firstObject];
   auto primary_screen_bounds = [primary_screen frame];
-  auto y = static_cast<int32_t>(primary_screen_bounds.size.height - mouse_location.y);
+  auto y = static_cast<int32_t>(primary_screen_bounds.size.height -
+                                mouse_location.y);
   app_window_->setPosition(x + 5, y + 5);
 }
 
@@ -647,7 +672,8 @@ void MainAppMac::moveToActiveScreenCenter() {
 NSRect MainAppMac::getActiveWindowBounds(NSRunningApplication *app) {
   // Exclude desktop elements and include only on-screen windows.
   CFArrayRef windowListInfo = CGWindowListCopyWindowInfo(
-      kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+      kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements,
+      kCGNullWindowID);
   if (!windowListInfo) {
     return {};
   }
@@ -664,7 +690,8 @@ NSRect MainAppMac::getActiveWindowBounds(NSRunningApplication *app) {
         NSNumber *height = boundsDict[@"Height"];
         if (x && y && width && height) {
           // The last window in the list is the active window.
-          windowBounds = NSMakeRect(x.doubleValue, y.doubleValue, width.doubleValue, height.doubleValue);
+          windowBounds = NSMakeRect(x.doubleValue, y.doubleValue,
+                                    width.doubleValue, height.doubleValue);
         }
       }
     }
@@ -683,10 +710,12 @@ bool MainAppMac::moveToActiveWindowCenter() {
         (active_window_bounds.size.width > kMinAppWindowSize &&
          active_window_bounds.size.height > kMinAppWindowSize)) {
       // Move the window to the center of the active window.
-      auto x = static_cast<int32_t>(active_window_bounds.origin.x +
-                                    (active_window_bounds.size.width - window_size.width) / 2);
-      auto y = static_cast<int32_t>(active_window_bounds.origin.y +
-                                    (active_window_bounds.size.height - window_size.height) / 2);
+      auto x = static_cast<int32_t>(
+          active_window_bounds.origin.x +
+          (active_window_bounds.size.width - window_size.width) / 2);
+      auto y = static_cast<int32_t>(
+          active_window_bounds.origin.y +
+          (active_window_bounds.size.height - window_size.height) / 2);
       app_window_->setPosition(x, y);
       return true;
     }
@@ -696,15 +725,19 @@ bool MainAppMac::moveToActiveWindowCenter() {
 
 void MainAppMac::moveToLastPositionOnActiveScreen() {
   NSScreen *main_screen = [NSScreen mainScreen];
-  NSNumber *screen_number = [[main_screen deviceDescription] objectForKey:@"NSScreenNumber"];
+  NSNumber *screen_number =
+      [[main_screen deviceDescription] objectForKey:@"NSScreenNumber"];
   int screen_id = [screen_number intValue];
   auto screen_frame = [main_screen frame];
-  auto screen_origin = mobrowser::Point(static_cast<int32_t>(screen_frame.origin.x),
-                                       static_cast<int32_t>(screen_frame.origin.y));
-  auto screen_size = mobrowser::Size(static_cast<int32_t>(screen_frame.size.width),
-                                    static_cast<int32_t>(screen_frame.size.height));
+  auto screen_origin =
+      mobrowser::Point(static_cast<int32_t>(screen_frame.origin.x),
+                       static_cast<int32_t>(screen_frame.origin.y));
+  auto screen_size =
+      mobrowser::Size(static_cast<int32_t>(screen_frame.size.width),
+                      static_cast<int32_t>(screen_frame.size.height));
   auto screen_bounds = mobrowser::Rect(screen_origin, screen_size);
-  auto window_bounds = settings_->getWindowBoundsForScreen(screen_id, screen_bounds);
+  auto window_bounds =
+      settings_->getWindowBoundsForScreen(screen_id, screen_bounds);
   if (!window_bounds.size.isEmpty()) {
     app_window_->setBounds(window_bounds);
   } else {
@@ -714,13 +747,16 @@ void MainAppMac::moveToLastPositionOnActiveScreen() {
 
 void MainAppMac::saveWindowBounds() {
   NSScreen *main_screen = [NSScreen mainScreen];
-  NSNumber *screen_number = [[main_screen deviceDescription] objectForKey:@"NSScreenNumber"];
+  NSNumber *screen_number =
+      [[main_screen deviceDescription] objectForKey:@"NSScreenNumber"];
   int screen_id = [screen_number intValue];
   auto screen_frame = [main_screen frame];
-  auto screen_origin = mobrowser::Point(static_cast<int32_t>(screen_frame.origin.x),
-                                       static_cast<int32_t>(screen_frame.origin.y));
-  auto screen_size = mobrowser::Size(static_cast<int32_t>(screen_frame.size.width),
-                                    static_cast<int32_t>(screen_frame.size.height));
+  auto screen_origin =
+      mobrowser::Point(static_cast<int32_t>(screen_frame.origin.x),
+                       static_cast<int32_t>(screen_frame.origin.y));
+  auto screen_size =
+      mobrowser::Size(static_cast<int32_t>(screen_frame.size.width),
+                      static_cast<int32_t>(screen_frame.size.height));
   auto screen_bounds = mobrowser::Rect(screen_origin, screen_size);
   auto window_bounds = app_window_->bounds();
   settings_->saveWindowBoundsForScreen(screen_id, screen_bounds, window_bounds);
@@ -744,7 +780,8 @@ AppInfo MainAppMac::getAppInfo() {
 
 AppInfo MainAppMac::getActiveAppInfo() {
   AppInfo app_info;
-  NSRunningApplication *app = [[NSWorkspace sharedWorkspace] frontmostApplication];
+  NSRunningApplication *app =
+      [[NSWorkspace sharedWorkspace] frontmostApplication];
   if (app) {
     app_info.path = [[app bundleURL] fileSystemRepresentation];
     return app_info;
@@ -760,15 +797,9 @@ void MainAppMac::addAppToLoginItems() {
   }
 
   NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]];
-  LSSharedFileListItemRef item = LSSharedFileListInsertItemURL(
-      items,
-      kLSSharedFileListItemLast,
-      NULL,
-      NULL,
-      ( __bridge CFURLRef) url,
-      NULL,
-      NULL
-  );
+  LSSharedFileListItemRef item =
+      LSSharedFileListInsertItemURL(items, kLSSharedFileListItemLast, NULL,
+                                    NULL, (__bridge CFURLRef)url, NULL, NULL);
 
   if (item) {
     CFRelease(item);
@@ -787,16 +818,19 @@ void MainAppMac::removeAppFromLoginItems() {
   id login_item;
   CFURLRef path = NULL;
   UInt32 seed_value = 0;
-  CFArrayRef login_items = LSSharedFileListCopySnapshot(login_items_ref, &seed_value);
-  for (login_item in ( __bridge NSArray *) login_items) {
-    LSSharedFileListItemRef login_item_ref = ( __bridge LSSharedFileListItemRef) login_item;
-    if (LSSharedFileListItemResolve(login_item_ref, 0, (CFURLRef *) &path, NULL) == noErr) {
+  CFArrayRef login_items =
+      LSSharedFileListCopySnapshot(login_items_ref, &seed_value);
+  for (login_item in (__bridge NSArray *)login_items) {
+    LSSharedFileListItemRef login_item_ref =
+        (__bridge LSSharedFileListItemRef)login_item;
+    if (LSSharedFileListItemResolve(login_item_ref, 0, (CFURLRef *)&path,
+                                    NULL) == noErr) {
       {
         NSString *url_path = url.path;
         if (url_path == nil) {
           continue;
         }
-        if ([(( __bridge NSURL *) path).path hasPrefix:url_path]) {
+        if ([((__bridge NSURL *)path).path hasPrefix:url_path]) {
           CFRelease(path);
           LSSharedFileListItemRemove(login_items_ref, login_item_ref);
           break;
@@ -828,11 +862,12 @@ bool MainAppMac::init() {
 void MainAppMac::launch() {
   MainApp::launch();
   clipboard_reader_->start(shared_from_this());
-  ActiveAppObserver* active_app_watcher = nullptr;
-  active_app_watcher = [[ActiveAppObserver alloc] initWithCallback:[this](void* app) {
-    NSRunningApplication* activeApp = (__bridge NSRunningApplication *)app;
-    this->setActiveAppInfo(activeApp);
-  }];
+  ActiveAppObserver *active_app_watcher = nullptr;
+  active_app_watcher =
+      [[ActiveAppObserver alloc] initWithCallback:[this](void *app) {
+        NSRunningApplication *activeApp = (__bridge NSRunningApplication *)app;
+        this->setActiveAppInfo(activeApp);
+      }];
   [active_app_watcher startObserving];
 
   // Set up observer for application activation events.
@@ -853,16 +888,19 @@ bool MainAppMac::isAppInLoginItems() {
   id login_item;
   CFURLRef path = NULL;
   UInt32 seed_value = 0;
-  CFArrayRef login_items = LSSharedFileListCopySnapshot(login_items_ref, &seed_value);
-  for (login_item in ( __bridge NSArray *) login_items) {
-    LSSharedFileListItemRef login_item_ref = ( __bridge LSSharedFileListItemRef) login_item;
-    if (LSSharedFileListItemResolve(login_item_ref, 0, (CFURLRef *) &path, NULL) == noErr) {
+  CFArrayRef login_items =
+      LSSharedFileListCopySnapshot(login_items_ref, &seed_value);
+  for (login_item in (__bridge NSArray *)login_items) {
+    LSSharedFileListItemRef login_item_ref =
+        (__bridge LSSharedFileListItemRef)login_item;
+    if (LSSharedFileListItemResolve(login_item_ref, 0, (CFURLRef *)&path,
+                                    NULL) == noErr) {
       {
         NSString *url_path = url.path;
         if (url_path == nil) {
           continue;
         }
-        if ([(( __bridge NSURL *) path).path hasPrefix:url_path]) {
+        if ([((__bridge NSURL *)path).path hasPrefix:url_path]) {
           CFRelease(path);
           found = YES;
           break;
@@ -882,31 +920,36 @@ bool MainAppMac::isAppInLoginItems() {
   return found;
 }
 
-bool MainAppMac::isAccessibilityAccessGranted() {
-  return AXIsProcessTrusted();
-}
+bool MainAppMac::isAccessibilityAccessGranted() { return AXIsProcessTrusted(); }
 
 void MainAppMac::showAccessibilityAccessDialog(const std::string &filePaths) {
   MessageDialogOptions options;
   options.message = i18n("app.dialogs.accessibilityAccessRequired.message");
-  options.informative_text = i18n("app.dialogs.accessibilityAccessRequired.informativeText");
+  options.informative_text =
+      i18n("app.dialogs.accessibilityAccessRequired.informativeText");
   options.buttons = {
-      MessageDialogButton(i18n("app.dialogs.accessibilityAccessRequired.enableAccessibility"), MessageDialogButtonType::kDefault),
-      MessageDialogButton(i18n("app.dialogs.accessibilityAccessRequired.copyToClipboard")),
-      MessageDialogButton(i18n("app.dialogs.accessibilityAccessRequired.cancel"), MessageDialogButtonType::kCancel)
-  };
+      MessageDialogButton(
+          i18n("app.dialogs.accessibilityAccessRequired.enableAccessibility"),
+          MessageDialogButtonType::kDefault),
+      MessageDialogButton(
+          i18n("app.dialogs.accessibilityAccessRequired.copyToClipboard")),
+      MessageDialogButton(
+          i18n("app.dialogs.accessibilityAccessRequired.cancel"),
+          MessageDialogButtonType::kCancel)};
   auto_hide_disabled_ = true;
-  MessageDialog::show(app_window_, options, [this, filePaths](const MessageDialogResult &result) {
-    auto_hide_disabled_ = false;
-    if (result.button.type == MessageDialogButtonType::kDefault) {
-      hide();
-      showSystemAccessibilityPreferencesDialog();
-    }
-    if (result.button.type == MessageDialogButtonType::kNone) {
-      hide();
-      copyToClipboard(filePaths, true);
-    }
-  });
+  MessageDialog::show(
+      app_window_, options,
+      [this, filePaths](const MessageDialogResult &result) {
+        auto_hide_disabled_ = false;
+        if (result.button.type == MessageDialogButtonType::kDefault) {
+          hide();
+          showSystemAccessibilityPreferencesDialog();
+        }
+        if (result.button.type == MessageDialogButtonType::kNone) {
+          hide();
+          copyToClipboard(filePaths, true);
+        }
+      });
 }
 
 void MainAppMac::showAccessibilityAccessDialog(const std::string &text,
@@ -914,33 +957,42 @@ void MainAppMac::showAccessibilityAccessDialog(const std::string &text,
                                                const std::string &filePath) {
   MessageDialogOptions options;
   options.message = i18n("app.dialogs.accessibilityAccessRequired.message");
-  options.informative_text = i18n("app.dialogs.accessibilityAccessRequired.informativeText");
+  options.informative_text =
+      i18n("app.dialogs.accessibilityAccessRequired.informativeText");
   options.buttons = {
-      MessageDialogButton(i18n("app.dialogs.accessibilityAccessRequired.enableAccessibility"),
-                          MessageDialogButtonType::kDefault),
-      MessageDialogButton(i18n("app.dialogs.accessibilityAccessRequired.copyToClipboard")),
-      MessageDialogButton(i18n("app.dialogs.accessibilityAccessRequired.cancel"),
-                          MessageDialogButtonType::kCancel)
-  };
+      MessageDialogButton(
+          i18n("app.dialogs.accessibilityAccessRequired.enableAccessibility"),
+          MessageDialogButtonType::kDefault),
+      MessageDialogButton(
+          i18n("app.dialogs.accessibilityAccessRequired.copyToClipboard")),
+      MessageDialogButton(
+          i18n("app.dialogs.accessibilityAccessRequired.cancel"),
+          MessageDialogButtonType::kCancel)};
   auto_hide_disabled_ = true;
-  MessageDialog::show(app_window_, options, [this, text, imageFileName, filePath](const MessageDialogResult &result) {
-    auto_hide_disabled_ = false;
-    if (result.button.type == MessageDialogButtonType::kDefault) {
-      hide();
-      showSystemAccessibilityPreferencesDialog();
-    }
-    if (result.button.type == MessageDialogButtonType::kNone) {
-      hide();
-      copyToClipboard(text, "", "", imageFileName, filePath, true);
-    }
-  });
+  MessageDialog::show(
+      app_window_, options,
+      [this, text, imageFileName, filePath](const MessageDialogResult &result) {
+        auto_hide_disabled_ = false;
+        if (result.button.type == MessageDialogButtonType::kDefault) {
+          hide();
+          showSystemAccessibilityPreferencesDialog();
+        }
+        if (result.button.type == MessageDialogButtonType::kNone) {
+          hide();
+          copyToClipboard(text, "", "", imageFileName, filePath, true);
+        }
+      });
 }
 
 void MainAppMac::showSystemAccessibilityPreferencesDialog() {
-  [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"]];
+  [[NSWorkspace sharedWorkspace]
+      openURL:[NSURL
+                  URLWithString:@"x-apple.systempreferences:com.apple."
+                                @"preference.security?Privacy_Accessibility"]];
 }
 
-std::string MainAppMac::getFileIconAsBase64(const std::string &app_path, bool large) {
+std::string MainAppMac::getFileIconAsBase64(const std::string &app_path,
+                                            bool large) {
   @autoreleasepool {
     std::string path = app_path;
     // Check if the given app_path is "ClipBook.app".
@@ -949,16 +1001,20 @@ std::string MainAppMac::getFileIconAsBase64(const std::string &app_path, bool la
     }
 
     NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-    NSImage *image = [workspace iconForFile:[NSString stringWithUTF8String:path.c_str()]];
+    NSImage *image =
+        [workspace iconForFile:[NSString stringWithUTF8String:path.c_str()]];
     if (large) {
       [image setSize:NSMakeSize(512, 512)];
     }
     // Convert NSImage to NSData (using PNG format in this example).
-    CGImageRef cgRef = [image CGImageForProposedRect:nullptr context:nil hints:nil];
+    CGImageRef cgRef = [image CGImageForProposedRect:nullptr
+                                             context:nil
+                                               hints:nil];
     NSBitmapImageRep *newRep = [[NSBitmapImageRep alloc] initWithCGImage:cgRef];
-    [newRep setSize:[image size]];   // Ensure correct size
+    [newRep setSize:[image size]]; // Ensure correct size
 
-    NSData *imageData = [newRep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+    NSData *imageData = [newRep representationUsingType:NSBitmapImageFileTypePNG
+                                             properties:@{}];
 
     // Base64 encode the data
     NSString *base64String = [imageData base64EncodedStringWithOptions:0];
@@ -975,11 +1031,14 @@ std::string MainAppMac::getAppNameFromPath(const std::string &app_path) {
       path = getAppInfo().path;
     }
 
-    NSBundle *appBundle = [NSBundle bundleWithPath:[NSString stringWithUTF8String:path.c_str()]];
+    NSBundle *appBundle =
+        [NSBundle bundleWithPath:[NSString stringWithUTF8String:path.c_str()]];
     if (appBundle) {
-      NSString *appName = [[appBundle infoDictionary] objectForKey:@"CFBundleName"];
+      NSString *appName =
+          [[appBundle infoDictionary] objectForKey:@"CFBundleName"];
       if (!appName) {
-        appName = [[appBundle infoDictionary] objectForKey:@"CFBundleDisplayName"];
+        appName =
+            [[appBundle infoDictionary] objectForKey:@"CFBundleDisplayName"];
       }
       return appName ? [appName UTF8String] : "";
     }
@@ -988,10 +1047,11 @@ std::string MainAppMac::getAppNameFromPath(const std::string &app_path) {
 }
 
 long MainAppMac::getSystemBootTime() {
-  struct timeval boot_time{};
+  struct timeval boot_time {};
   size_t size = sizeof(boot_time);
   int mib[2] = {CTL_KERN, KERN_BOOTTIME};
-  if (sysctl(mib, 2, &boot_time, &size, nullptr, 0) != -1 && boot_time.tv_sec != 0) {
+  if (sysctl(mib, 2, &boot_time, &size, nullptr, 0) != -1 &&
+      boot_time.tv_sec != 0) {
     return boot_time.tv_sec;
   }
   return -1;
@@ -1003,7 +1063,9 @@ NSPoint MainAppMac::getInputCursorLocationOnScreen() {
 
   // Get the focused element
   AXUIElementRef focusedElement = nullptr;
-  AXError error = AXUIElementCopyAttributeValue(systemWideElement, kAXFocusedUIElementAttribute, (CFTypeRef *)&focusedElement);
+  AXError error = AXUIElementCopyAttributeValue(systemWideElement,
+                                                kAXFocusedUIElementAttribute,
+                                                (CFTypeRef *)&focusedElement);
   CFRelease(systemWideElement);
 
   if (error != kAXErrorSuccess || focusedElement == nullptr) {
@@ -1013,7 +1075,8 @@ NSPoint MainAppMac::getInputCursorLocationOnScreen() {
 
   // Check if the focused element supports the AXSelectedTextRange attribute
   Boolean hasTextRange = false;
-  error = AXUIElementIsAttributeSettable(focusedElement, kAXSelectedTextRangeAttribute, &hasTextRange);
+  error = AXUIElementIsAttributeSettable(
+      focusedElement, kAXSelectedTextRangeAttribute, &hasTextRange);
   if (error != kAXErrorSuccess || !hasTextRange) {
     NSLog(@"Focused element does not support text ranges");
     CFRelease(focusedElement);
@@ -1022,7 +1085,8 @@ NSPoint MainAppMac::getInputCursorLocationOnScreen() {
 
   // Get the selected text range (text caret location)
   CFTypeRef textRangeValue = nullptr;
-  error = AXUIElementCopyAttributeValue(focusedElement, kAXSelectedTextRangeAttribute, &textRangeValue);
+  error = AXUIElementCopyAttributeValue(
+      focusedElement, kAXSelectedTextRangeAttribute, &textRangeValue);
   if (error != kAXErrorSuccess || textRangeValue == nullptr) {
     NSLog(@"Failed to get the selected text range");
     CFRelease(focusedElement);
@@ -1031,7 +1095,9 @@ NSPoint MainAppMac::getInputCursorLocationOnScreen() {
 
   // Request the bounds for the selected text range
   CFTypeRef boundsValue = nullptr;
-  error = AXUIElementCopyParameterizedAttributeValue(focusedElement, kAXBoundsForRangeParameterizedAttribute, textRangeValue, &boundsValue);
+  error = AXUIElementCopyParameterizedAttributeValue(
+      focusedElement, kAXBoundsForRangeParameterizedAttribute, textRangeValue,
+      &boundsValue);
   CFRelease(textRangeValue);
 
   if (error != kAXErrorSuccess || boundsValue == nullptr) {
@@ -1041,8 +1107,11 @@ NSPoint MainAppMac::getInputCursorLocationOnScreen() {
   }
 
   CGRect caretBounds = CGRectZero;
-  if (AXValueGetValue((AXValueRef)boundsValue, kAXValueTypeCGRect, &caretBounds)) {
-    NSLog(@"Caret bounds: (%f, %f), size: (%f, %f)", caretBounds.origin.x, caretBounds.origin.y, caretBounds.size.width, caretBounds.size.height);
+  if (AXValueGetValue((AXValueRef)boundsValue, kAXValueTypeCGRect,
+                      &caretBounds)) {
+    NSLog(@"Caret bounds: (%f, %f), size: (%f, %f)", caretBounds.origin.x,
+          caretBounds.origin.y, caretBounds.size.width,
+          caretBounds.size.height);
   }
   CFRelease(boundsValue);
   CFRelease(focusedElement);
@@ -1068,7 +1137,10 @@ std::string MainAppMac::getAppInfo(const std::string &app_path) {
 std::string MainAppMac::getDefaultAppInfo(const std::string &file_path) {
   NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
   // Get the default app path for the given file path.
-  NSURL *appUrl = [workspace URLForApplicationToOpenURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:file_path.c_str()]]];
+  NSURL *appUrl = [workspace
+      URLForApplicationToOpenURL:
+          [NSURL fileURLWithPath:[NSString
+                                     stringWithUTF8String:file_path.c_str()]]];
   if (appUrl) {
     return getAppInfo([appUrl fileSystemRepresentation]);
   }
@@ -1078,8 +1150,10 @@ std::string MainAppMac::getDefaultAppInfo(const std::string &file_path) {
 std::string MainAppMac::getRecommendedAppsInfo(const std::string &file_path) {
   @autoreleasepool {
     std::string result;
-    NSURL *fileUrl = [NSURL fileURLWithPath:[NSString stringWithUTF8String:file_path.c_str()]];
-    NSArray<NSURL *> *appUrls = [[NSWorkspace sharedWorkspace] URLsForApplicationsToOpenURL:fileUrl];
+    NSURL *fileUrl = [NSURL
+        fileURLWithPath:[NSString stringWithUTF8String:file_path.c_str()]];
+    NSArray<NSURL *> *appUrls =
+        [[NSWorkspace sharedWorkspace] URLsForApplicationsToOpenURL:fileUrl];
     if (appUrls) {
       for (NSURL *appUrl in appUrls) {
         auto appInfo = getAppInfo([appUrl fileSystemRepresentation]);
@@ -1096,10 +1170,13 @@ std::string MainAppMac::getAllAppsInfo() {
   @autoreleasepool {
     std::string result;
     NSString *applicationsPath = @"/Applications";
-    NSArray<NSString *> *appList = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:applicationsPath error:nil];
+    NSArray<NSString *> *appList = [[NSFileManager defaultManager]
+        contentsOfDirectoryAtPath:applicationsPath
+                            error:nil];
     for (NSString *appName in appList) {
       if ([appName.pathExtension isEqualToString:@"app"]) {
-        NSString *fullPath = [applicationsPath stringByAppendingPathComponent:appName];
+        NSString *fullPath =
+            [applicationsPath stringByAppendingPathComponent:appName];
         auto appInfo = getAppInfo([fullPath UTF8String]);
         if (!appInfo.empty()) {
           result += appInfo + kAppInfoListSeparator;
@@ -1110,7 +1187,8 @@ std::string MainAppMac::getAllAppsInfo() {
   }
 }
 
-void MainAppMac::openInApp(const std::string &file_path, const std::string &app_path) {
+void MainAppMac::openInApp(const std::string &file_path,
+                           const std::string &app_path) {
   @autoreleasepool {
     NSString *nsFilePath = [NSString stringWithUTF8String:file_path.c_str()];
     NSString *nsAppPath = [NSString stringWithUTF8String:app_path.c_str()];
@@ -1119,11 +1197,12 @@ void MainAppMac::openInApp(const std::string &file_path, const std::string &app_
     NSURL *appURL = [NSURL fileURLWithPath:nsAppPath];
 
     NSError *error = nil;
-    NSRunningApplication *app = [[NSWorkspace sharedWorkspace] openURLs:@[fileURL]
-                                                   withApplicationAtURL:appURL
-                                                                options:NSWorkspaceLaunchDefault
-                                                          configuration:@{}
-                                                                  error:&error];
+    NSRunningApplication *app =
+        [[NSWorkspace sharedWorkspace] openURLs:@[ fileURL ]
+                           withApplicationAtURL:appURL
+                                        options:NSWorkspaceLaunchDefault
+                                  configuration:@{}
+                                          error:&error];
     if (app == nil) {
       NSLog(@"Failed to open file: %@", error.localizedDescription);
     }
@@ -1151,12 +1230,15 @@ void MainAppMac::setupApplicationObservers() {
                    queue:[NSOperationQueue mainQueue]
               usingBlock:^(NSNotification *notification) {
                 // When the app becomes active (e.g., launched by Raycast),
-                // check if we should hide it from dock and re-hide if necessary.
-                // Use a small delay to ensure the activation process is complete.
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 50 * NSEC_PER_MSEC),
-                               dispatch_get_main_queue(), ^{
+                // check if we should hide it from dock and re-hide if
+                // necessary. Use a small delay to ensure the activation process
+                // is complete.
+                dispatch_after(
+                    dispatch_time(DISPATCH_TIME_NOW, 50 * NSEC_PER_MSEC),
+                    dispatch_get_main_queue(), ^{
                       std::thread([this]() {
-                        if (app()->dock()->isVisible() && open_windows_number_ == 0) {
+                        if (app()->dock()->isVisible() &&
+                            open_windows_number_ == 0) {
                           app()->dock()->hide();
                         }
                       }).detach();

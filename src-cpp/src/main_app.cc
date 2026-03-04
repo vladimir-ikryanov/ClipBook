@@ -222,7 +222,7 @@ void MainApp::launch() {
   app_window_->setWindowAnimationEnabled(false);
 
   // Move window to the active desktop when it becomes active.
-  app_window_->setWindowDisplayPolicy(WindowDisplayPolicy::kMoveToActiveDesktop);
+  app_window_->setWindowDisplayPolicy(WindowDisplayPolicy::kAppearOnAllDesktops);
 
   // Set the initial window size and position if it's the first run.
   if (first_run_ || !app_->isProduction()) {
