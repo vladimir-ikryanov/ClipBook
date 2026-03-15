@@ -310,6 +310,10 @@ const HistoryItemPane = (props: HistoryItemPaneProps) => {
       return props.item.name
     }
     if (props.item.type === ClipType.Image) {
+      const fp = getFilePath(props.item)
+      if (fp && fp.length > 0) {
+        return getFileNameFromPath(fp)
+      }
       return "Image (" + props.item.imageWidth + "x" + props.item.imageHeight + ")"
     }
     if (props.item.type === ClipType.File) {
