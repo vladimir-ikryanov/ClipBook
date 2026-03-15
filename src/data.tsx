@@ -316,7 +316,7 @@ function findItemByContent(content: string): Clip | undefined {
 
 export function findItemByFilePath(filePath: string): Clip | undefined {
   for (let i = 0; i < history.length; i++) {
-    if (history[i].type === ClipType.File) {
+    if (history[i].type === ClipType.File || history[i].type === ClipType.Image) {
       if (history[i].content === filePath) {
         return history[i]
       }
