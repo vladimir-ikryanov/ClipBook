@@ -856,6 +856,10 @@ export function getFileOrImagePath(item: Clip) {
     return getFilePath(item)
   }
   if (item.type === ClipType.Image) {
+    const fp = getFilePath(item)
+    if (fp && fp.length > 0) {
+      return fp
+    }
     return getImagesDir() + "/" + getImageFileName(item)
   }
   return undefined

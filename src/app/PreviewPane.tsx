@@ -71,6 +71,12 @@ export default function PreviewPane(props: PreviewPaneProps) {
                                 onFinishEditing={props.onFinishEditing}/>
     }
     if (item.type === ClipType.Image) {
+      if (getFilePath(item).length > 0) {
+        return <PreviewFilePane filePath={getFilePath(item)}
+                                imageFileName={item.filePathFileName}
+                                fileSizeInBytes={item.fileSizeInBytes}
+                                isFolder={false}/>
+      }
       return <PreviewImagePane item={item}/>
     }
     if (item.type === ClipType.File) {
