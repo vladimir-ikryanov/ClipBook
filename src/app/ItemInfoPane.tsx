@@ -197,6 +197,14 @@ export default function ItemInfoPane(props: ItemInfoPaneProps) {
             </div>
         }
         {
+            isImage() && filePath.length > 0 &&
+            <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
+              <div className="flex-none text-preview-infoLabel font-semibold mr-4">{t("app.itemInfoPane.path")}</div>
+              <div className="flex-grow"></div>
+              <div className={`${fileExists(filePath) ? "text-foreground" : "text-primary-foreground"} flex-auto text-end break-all`}>{filePath}</div>
+            </div>
+        }
+        {
             isFile() && !isFolder() &&
             <div className="flex w-full border-b border-b-preview-infoBorder pb-1">
               <div className="flex-none text-preview-infoLabel font-semibold">{t("app.itemInfoPane.fileSize")}</div>
