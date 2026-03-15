@@ -63,13 +63,21 @@ export function isEmail(email: string): boolean {
   return emailRegex.test(email);
 }
 
+export function isImageFilePath(filePath: string): boolean {
+  const lower = filePath.toLowerCase();
+  return lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg') ||
+      lower.endsWith('.gif') || lower.endsWith('.bmp') || lower.endsWith('.tiff') ||
+      lower.endsWith('.tif') || lower.endsWith('.webp') || lower.endsWith('.heic') ||
+      lower.endsWith('.svg');
+}
+
 export function getClipType(content: string, imageFileName: string, filePath: string) {
   let type = getClipTypeFromText(content)
   if (imageFileName) {
     type = ClipType.Image
   }
   if (filePath) {
-    type = ClipType.File
+    type = isImageFilePath(filePath) ? ClipType.Image : ClipType.File
   }
   return type;
 }
