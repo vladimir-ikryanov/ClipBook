@@ -55,11 +55,25 @@ export default function SearchBar(props: SearchBarProps) {
     props.onSearchQueryChange(e.target.value)
   }
 
-  function handleKeyDown(e: React.KeyboardEvent) {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    // When the search query is empty, we don't need to handle keyboard shortcuts.
+    if (props.searchQuery.length === 0) {
+      return
+    }
+    // Frameless WebKit hosts often omit the native select-all editing command for web inputs.
+    // Selecting explicitly restores Cmd+A / Ctrl+A regardless of host menu wiring.
+    if (e.code === "KeyA" && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey) {
+      e.currentTarget.select()
+      e.preventDefault()
+      e.stopPropagation()
+      return
+    }
+    // Clear search query when the escape key is pressed and the search query is not empty.
     if (e.code === "Escape" && props.searchQuery.length > 0) {
       handleClearSearch()
       e.stopPropagation()
     }
+    // Allow selecting next and previous history items.
     if (e.code === "ArrowUp" || e.code === "ArrowDown") {
       e.preventDefault()
     }

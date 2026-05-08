@@ -700,7 +700,9 @@ export function isHistoryItemSelected(index: number): boolean {
 
 export function getSelectedHistoryItems(): Clip[] {
   let items = getHistoryItems()
-  return selectedItemIndices.map(index => items[index])
+  return selectedItemIndices
+    .map(index => items[index])
+    .filter((item): item is Clip => item !== undefined)
 }
 
 export function getVisibleHistoryLength() {

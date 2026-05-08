@@ -147,6 +147,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const { t } = useTranslation()
   const [history, setHistory] = useState<Clip[]>([])
   const [searchQuery, setSearchQuery] = useState("")
+  const searchQueryRef = useRef("")
+  searchQueryRef.current = searchQuery
+
+  const [editMode, setEditMode] = useState(false);
+  const editModeRef = useRef(false)
+  editModeRef.current = editMode
 
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
   const searchFieldRef = useRef<HTMLInputElement>(null);
@@ -156,7 +162,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
   const [detailsVisible, setDetailsVisible] = useState(getDetailsVisibleState())
   const [filterVisible, setFilterVisible] = useState(getFilterVisibleState())
   const [quickPasteModifierPressed, setQuickPasteModifierPressed] = useState(false);
-  const [editMode, setEditMode] = useState(false);
   const [hidePreviewOnEditFinish, setHidePreviewOnEditFinish] = useState(false);
   const [selectedItemIndices, setSelectedItemIndices] = useState(getSelectedHistoryItemIndices());
   const [activeItemIndex, setActiveItemIndex] = useState(getActiveHistoryItemIndex());
@@ -485,11 +490,11 @@ export default function HistoryPane(props: HistoryPaneProps) {
         jumpToPrevGroupOfItems()
         e.preventDefault()
       }
-      if (e.code === "ArrowLeft") {
+      if (e.code === "ArrowLeft" && !isInputLocked()) {
         handleRemoveItemFromSelection()
         e.preventDefault()
       }
-      if (e.code === "ArrowRight") {
+      if (e.code === "ArrowRight" && !isInputLocked()) {
         handleAddItemToSelection()
         e.preventDefault()
       }
@@ -659,10 +664,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
       }
 
       // Handle select all (Cmd+A) shortcut.
-      if (isShortcutMatch(prefGetSelectAllShortcut(), e)) {
-        if (handleSelectAll()) {
-          e.preventDefault()
-        }
+      // Keyboard focus remains on the history search field during normal use, so Cmd+A selects
+      // the full query when it is not empty and selects every visible item when the query is empty.
+      if (isShortcutMatch(prefGetSelectAllShortcut(), e) && !isInputLocked()) {
+        console.log("select all")
+        handleSelectAll()
+        e.preventDefault()
       }
     }
 
@@ -1006,6 +1013,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function handleAddItemToSelection() {
+    if (getVisibleHistoryLength() === 0) {
+      return
+    }
     setSelectionMode(true)
     addHistoryItemToSelection(getActiveHistoryItemIndex())
     setSelectedItemIndices(getSelectedHistoryItemIndices())
@@ -1013,6 +1023,9 @@ export default function HistoryPane(props: HistoryPaneProps) {
   }
 
   async function handleRemoveItemFromSelection() {
+    if (getVisibleHistoryLength() === 0) {
+      return
+    }
     removeHistoryItemFromSelection(getActiveHistoryItemIndex())
     setSelectedItemIndices(getSelectedHistoryItemIndices())
     scrollToActiveItem()
@@ -1681,6 +1694,8 @@ export default function HistoryPane(props: HistoryPaneProps) {
     if (!skipSelection) {
       if (items.length === 0) {
         clearSelection()
+        setActiveHistoryItemIndex(-1)
+        setActiveItemIndex(-1)
       } else {
         setActiveHistoryItemIndex(0)
       }
@@ -1767,16 +1782,16 @@ export default function HistoryPane(props: HistoryPaneProps) {
     setFilterVisible(visible)
   }
 
-  function handleSelectAll(): boolean {
-    if (editMode || searchQuery !== "" || renameItemMode) {
-      return false
-    }
+  function isInputLocked(): boolean {
+    return editModeRef.current || searchQueryRef.current !== "" || renameItemMode
+  }
+
+  function handleSelectAll() {
     clearSelection()
     for (let i = 0; i < getVisibleHistoryLength(); i++) {
       addHistoryItemToSelection(i)
     }
     setSelectedItemIndices(getSelectedHistoryItemIndices())
-    return true
   }
 
   function handleRenameItemModeEnabled(enabled: boolean) {
