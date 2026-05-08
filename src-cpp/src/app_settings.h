@@ -59,6 +59,9 @@ public:
   virtual bool shouldOpenAtLogin() = 0;
   virtual bool isOpenAtLoginManaged() = 0;
 
+  virtual void saveShowMainWindowAtStartup(bool show) = 0;
+  virtual bool shouldShowMainWindowAtStartup() = 0;
+
   virtual void saveCheckForUpdatesAutomatically(bool value) = 0;
   virtual bool shouldCheckForUpdatesAutomatically() = 0;
   virtual bool isCheckForUpdatesAutomaticallyManaged() = 0;

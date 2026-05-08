@@ -34,6 +34,10 @@
         "title": "登录时启动",
         "description": "登录时自动启动 ClipBook。"
       },
+      "showWindowAtStartup": {
+        "title": "启动时显示历史窗口",
+        "description": "应用启动时打开剪贴板历史窗口。"
+      },
       "automaticUpdates": {
         "title": "自动更新",
         "description": "在有新更新时自动下载并安装。",

@@ -10,6 +10,7 @@ import {
   prefGetLanguage,
   prefGetOpenAtLogin,
   prefGetOpenWindowStrategy,
+  prefGetShowMainWindowAtStartup,
   prefGetShowIconInMenuBar,
   prefGetTheme,
   prefIsCheckForUpdatesAutomaticallyManaged,
@@ -19,6 +20,7 @@ import {
   prefSetCheckForUpdatesAutomatically, prefSetLanguage,
   prefSetOpenAtLogin,
   prefSetOpenWindowStrategy,
+  prefSetShowMainWindowAtStartup,
   prefSetPlaySoundOnCopy,
   prefSetShowIconInMenuBar,
   prefSetTheme,
@@ -49,6 +51,7 @@ export default function General() {
   const [languageCode, setLanguageCode] = useState(prefGetLanguage())
   const [theme, setTheme] = useState(prefGetTheme())
   const [openAtLogin, setOpenAtLogin] = useState(prefGetOpenAtLogin())
+  const [showMainWindowAtStartup, setShowMainWindowAtStartup] = useState(prefGetShowMainWindowAtStartup())
   const [checkForUpdatesAutomatically, setCheckForUpdatesAutomatically] = useState(prefGetCheckForUpdatesAutomatically())
   const [showIconInMenuBar, setShowIconInMenuBar] = useState(prefGetShowIconInMenuBar())
   const [openWindowStrategy, setOpenWindowStrategy] = useState(prefGetOpenWindowStrategy())
@@ -85,6 +88,11 @@ export default function General() {
   function handleOpenAtLoginChange(openAtLogin: boolean) {
     setOpenAtLogin(openAtLogin)
     prefSetOpenAtLogin(openAtLogin)
+  }
+
+  function handleShowMainWindowAtStartupChange(show: boolean) {
+    setShowMainWindowAtStartup(show)
+    prefSetShowMainWindowAtStartup(show)
   }
 
   function handleCheckForUpdatesAutomaticallyChange(checkForUpdatesAutomatically: boolean) {
@@ -140,6 +148,17 @@ export default function General() {
               <Switch id="openAtLogin" checked={openAtLogin}
                       onCheckedChange={handleOpenAtLoginChange}
                       disabled={prefIsOpenAtLoginManaged()}/>
+            </div>
+
+            <div className="flex items-center justify-between space-x-20 py-1">
+              <Label htmlFor="showMainWindowAtStartup" className="flex flex-col text-base">
+                <span className="">{t('settings.general.showWindowAtStartup.title')}</span>
+                <span className="text-neutral-500 font-normal text-sm">
+                  {t('settings.general.showWindowAtStartup.description')}
+                </span>
+              </Label>
+              <Switch id="showMainWindowAtStartup" checked={showMainWindowAtStartup}
+                      onCheckedChange={handleShowMainWindowAtStartupChange}/>
             </div>
 
             <div className="flex items-center justify-between space-x-20 py-1">

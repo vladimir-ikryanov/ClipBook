@@ -34,6 +34,10 @@
         "title": "Launch at login",
         "description": "Launch ClipBook automatically at login."
       },
+      "showWindowAtStartup": {
+        "title": "Show history window at startup",
+        "description": "Open the clipboard history window when the app launches."
+      },
       "automaticUpdates": {
         "title": "Automatic updates",
         "description": "Download and install new updates when available.",

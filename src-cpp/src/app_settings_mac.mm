@@ -20,6 +20,7 @@ NSString *prefAppTheme = @"app.theme";
 NSString *prefIgnoreConfidentialContent = @"privacy.ignore_confidential_content";
 NSString *prefIgnoreTransientContent = @"privacy.ignore_transient_content";
 NSString *prefOpenAtLogin = @"app.open_at_login";
+NSString *prefShowMainWindowAtStartup = @"app.show_main_window_at_startup";
 NSString *prefCheckForUpdatesAutomatically = @"app.check_for_updates_automatically";
 NSString *prefAllowCheckForUpdates = @"app.allow_check_for_updates";
 NSString *prefLastUpdateCheckTime = @"app.last_update_check_time";
@@ -349,6 +350,16 @@ bool AppSettingsMac::shouldOpenAtLogin() {
 
 bool AppSettingsMac::isOpenAtLoginManaged() {
   return isManaged(prefOpenAtLogin);
+}
+
+void AppSettingsMac::saveShowMainWindowAtStartup(bool show) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:show forKey:prefShowMainWindowAtStartup];
+  [defaults synchronize];
+}
+
+bool AppSettingsMac::shouldShowMainWindowAtStartup() {
+  return prefReadBoolValue(prefShowMainWindowAtStartup, true);
 }
 
 void AppSettingsMac::saveCheckForUpdatesAutomatically(bool open) {

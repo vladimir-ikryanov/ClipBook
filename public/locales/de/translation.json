@@ -34,6 +34,10 @@
         "title": "Beim Anmelden starten",
         "description": "ClipBook automatisch beim Anmelden starten."
       },
+      "showWindowAtStartup": {
+        "title": "Verlaufsfenster beim Start anzeigen",
+        "description": "Das Verlaufsfenster beim Start von ClipBook öffnen."
+      },
       "automaticUpdates": {
         "title": "Automatische Updates",
         "description": "Neue Updates automatisch herunterladen und installieren.",

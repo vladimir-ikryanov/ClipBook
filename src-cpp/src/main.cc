@@ -48,8 +48,10 @@ void launch() {
     } else {
       // Hide the dock icon and make the app a background app.
       app->dock()->hide();
-      // Show the history window at the startup.
-      main_app->show();
+      const auto settings = main_app->settings();
+      if (!settings || settings->shouldShowMainWindowAtStartup()) {
+        main_app->show();
+      }
     }
   });
 }

@@ -34,6 +34,10 @@
         "title": "Avvia all'accesso",
         "description": "Avvia ClipBook automaticamente all'accesso."
       },
+      "showWindowAtStartup": {
+        "title": "Mostra finestra cronologia all'avvio",
+        "description": "Apri la finestra della cronologia degli appunti quando l'app viene avviata."
+      },
       "automaticUpdates": {
         "title": "Aggiornamenti automatici",
         "description": "Scarica e installa nuovi aggiornamenti quando disponibili.",

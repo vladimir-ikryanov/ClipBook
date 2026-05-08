@@ -13,6 +13,9 @@ declare const saveOpenAtLogin: (openAtLogin: boolean) => void;
 declare const shouldOpenAtLogin: () => boolean;
 declare const isOpenAtLoginManaged: () => boolean;
 
+declare const saveShowMainWindowAtStartup: (show: boolean) => void;
+declare const shouldShowMainWindowAtStartup: () => boolean;
+
 declare const saveCheckForUpdatesAutomatically: (value: boolean) => void;
 declare const shouldCheckForUpdatesAutomatically: () => boolean;
 declare const isCheckForUpdatesAutomaticallyManaged: () => boolean;
@@ -264,6 +267,14 @@ export function prefSetOpenAtLogin(openAtLogin: boolean) {
 
 export function prefIsOpenAtLoginManaged() {
   return isOpenAtLoginManaged()
+}
+
+export function prefGetShowMainWindowAtStartup() {
+  return shouldShowMainWindowAtStartup()
+}
+
+export function prefSetShowMainWindowAtStartup(show: boolean) {
+  saveShowMainWindowAtStartup(show)
 }
 
 export function prefGetCheckForUpdatesAutomatically() {

@@ -1018,6 +1018,13 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
     return settings_->isOpenAtLoginManaged();
   });
 
+  window->putProperty("saveShowMainWindowAtStartup", [this](bool show) -> void {
+    settings_->saveShowMainWindowAtStartup(show);
+  });
+  window->putProperty("shouldShowMainWindowAtStartup", [this]() -> bool {
+    return settings_->shouldShowMainWindowAtStartup();
+  });
+
   window->putProperty("saveCheckForUpdatesAutomatically", [this](bool value) -> void {
     settings_->saveCheckForUpdatesAutomatically(value);
   });

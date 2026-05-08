@@ -34,6 +34,10 @@
         "title": "Iniciar al iniciar sesión",
         "description": "Iniciar ClipBook automáticamente al iniciar sesión."
       },
+      "showWindowAtStartup": {
+        "title": "Mostrar ventana del historial al iniciar ClipBook",
+        "description": "Abrir la ventana del historial del portapapeles cuando se inicia la aplicación."
+      },
       "automaticUpdates": {
         "title": "Actualizaciones automáticas",
         "description": "Descargar e instalar nuevas actualizaciones cuando estén disponibles.",

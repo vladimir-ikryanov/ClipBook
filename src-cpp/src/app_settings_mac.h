@@ -41,6 +41,9 @@ class AppSettingsMac : public AppSettings {
   bool shouldOpenAtLogin() override;
   bool isOpenAtLoginManaged() override;
 
+  void saveShowMainWindowAtStartup(bool show) override;
+  bool shouldShowMainWindowAtStartup() override;
+
   void saveCheckForUpdatesAutomatically(bool open) override;
   bool shouldCheckForUpdatesAutomatically() override;
   bool isCheckForUpdatesAutomaticallyManaged() override;

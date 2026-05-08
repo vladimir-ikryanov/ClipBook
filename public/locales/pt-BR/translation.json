@@ -34,6 +34,10 @@
         "title": "Iniciar ao fazer login",
         "description": "Iniciar o ClipBook automaticamente ao fazer login."
       },
+      "showWindowAtStartup": {
+        "title": "Mostrar janela do histórico ao iniciar o ClipBook",
+        "description": "Abrir a janela do histórico da área de transferência ao iniciar o app."
+      },
       "automaticUpdates": {
         "title": "Atualizações automáticas",
         "description": "Baixe e instale novas atualizações quando disponíveis.",
