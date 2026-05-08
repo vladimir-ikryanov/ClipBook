@@ -179,6 +179,9 @@ class AppSettingsMac : public AppSettings {
   void savePasteNextItemShortcut(std::string shortcut) override;
   std::string getPasteNextItemShortcut() override;
 
+  void savePasteNextRichItemShortcut(std::string shortcut) override;
+  std::string getPasteNextRichItemShortcut() override;
+
   void saveEditHistoryItemShortcut(std::string shortcut) override;
   std::string getEditHistoryItemShortcut() override;
 

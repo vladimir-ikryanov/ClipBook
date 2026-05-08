@@ -138,6 +138,8 @@ declare const savePasteSelectedObjectToActiveAppShortcut: (shortcut: string) => 
 declare const getPasteSelectedObjectToActiveAppShortcut: () => string;
 declare const savePasteNextItemShortcut: (shortcut: string) => void;
 declare const getPasteNextItemShortcut: () => string;
+declare const savePasteNextRichItemShortcut: (shortcut: string) => void;
+declare const getPasteNextRichItemShortcut: () => string;
 declare const saveEditHistoryItemShortcut: (shortcut: string) => void;
 declare const getEditHistoryItemShortcut: () => string;
 declare const saveOpenInBrowserShortcut: (shortcut: string) => void;
@@ -410,6 +412,14 @@ export function prefGetPasteNextItemShortcut() {
 
 export function prefSetPasteNextItemShortcut(shortcut: string) {
   savePasteNextItemShortcut(shortcut)
+}
+
+export function prefGetPasteNextRichItemShortcut() {
+  return getPasteNextRichItemShortcut()
+}
+
+export function prefSetPasteNextRichItemShortcut(shortcut: string) {
+  savePasteNextRichItemShortcut(shortcut)
 }
 
 export function prefGetEditHistoryItemShortcut() {

@@ -590,7 +590,7 @@ export default function Commands(props: CommandsProps) {
                         {
                           getMultipleItemsIndicator().length > 0 ?
                               t('commands.pasteObjectsToApp', {itemsLabel: getMultipleItemsIndicator(), appName: getActiveAppName()}) :
-                              t('commands.pasteObjectToApp', {appName: getActiveAppName()})
+                              t('commands.pasteObjectToApp', {itemLabel: getItemLabel(), appName: getActiveAppName()})
                         }
                       </span>
                       <CommandShortcut className="flex flex-row">
@@ -661,7 +661,7 @@ export default function Commands(props: CommandsProps) {
                     canShowCopyObjectToClipboard() &&
                     <CommandItem onSelect={handleCopyObjectToClipboard}>
                       <CopyIcon className="mr-2 h-5 w-5"/>
-                      <span>{t('commands.copyObjectToClipboard')}</span>
+                      <span>{t('commands.copyObjectToClipboard', {itemLabel: getItemLabel()})}</span>
                       <CommandShortcut className="flex flex-row">
                         <ShortcutLabel shortcut={prefGetCopyObjectToClipboardShortcut()}/>
                       </CommandShortcut>

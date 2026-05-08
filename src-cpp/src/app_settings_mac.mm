@@ -97,6 +97,7 @@ NSString *prefStripAllWhitespacesShortcut = @"app.strip_all_whitespaces_shortcut
 NSString *prefTrimSurroundingWhitespacesShortcut = @"app.trim_surrounding_whitespaces_shortcut";
 NSString *prefToggleFilterShortcut = @"app.toggle_filter_shortcut";
 NSString *prefPasteNextItemShortcut = @"app.paste_next_item_shortcut";
+NSString *prefPasteNextRichItemShortcut = @"app.paste_next_rich_item_shortcut";
 
 /**
  * Checks if the device is managed by MDM.
@@ -649,6 +650,21 @@ std::string AppSettingsMac::getPasteNextItemShortcut() {
     return {[shortcut UTF8String]};
   }
   return "ControlLeft + KeyV";
+}
+
+void AppSettingsMac::savePasteNextRichItemShortcut(std::string shortcut) {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[NSString stringWithUTF8String:shortcut.c_str()] forKey:prefPasteNextRichItemShortcut];
+  [defaults synchronize];
+}
+
+std::string AppSettingsMac::getPasteNextRichItemShortcut() {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString *shortcut = [defaults objectForKey:prefPasteNextRichItemShortcut];
+  if (shortcut != nil) {
+    return {[shortcut UTF8String]};
+  }
+  return "ControlLeft + AltLeft + KeyV";
 }
 
 void AppSettingsMac::saveEditHistoryItemShortcut(std::string shortcut) {

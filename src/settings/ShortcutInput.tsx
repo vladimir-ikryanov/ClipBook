@@ -13,6 +13,8 @@ declare const enablePauseResumeShortcut: () => void;
 declare const disablePauseResumeShortcut: () => void;
 declare const enablePasteNextItemShortcut: () => void;
 declare const disablePasteNextItemShortcut: () => void;
+declare const enablePasteNextRichItemShortcut: () => void;
+declare const disablePasteNextRichItemShortcut: () => void;
 
 type ShortcutProps = {
   shortcut: string
@@ -33,6 +35,7 @@ export default function ShortcutInput(props: ShortcutProps) {
     disableOpenAppShortcut()
     disablePauseResumeShortcut()
     disablePasteNextItemShortcut()
+    disablePasteNextRichItemShortcut()
   }
 
   function stopEditing() {
@@ -40,6 +43,7 @@ export default function ShortcutInput(props: ShortcutProps) {
     enableOpenAppShortcut()
     enablePauseResumeShortcut()
     enablePasteNextItemShortcut()
+    enablePasteNextRichItemShortcut()
   }
 
   function handleClick() {

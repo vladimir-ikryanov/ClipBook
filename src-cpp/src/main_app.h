@@ -68,6 +68,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
 
  protected:
   void pasteNextItemToActiveApp();
+  void pasteNextRichItemToActiveApp();
   void setActiveAppInfo(const std::string &app_name, const std::string& app_icon);
   void clearHistory();
   void checkForUpdates(bool user_initiated = false);
@@ -112,6 +113,8 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   virtual void disableOpenAppShortcut() = 0;
   virtual void enablePasteNextItemShortcut() = 0;
   virtual void disablePasteNextItemShortcut() = 0;
+  virtual void enablePasteNextRichItemShortcut() = 0;
+  virtual void disablePasteNextRichItemShortcut() = 0;
   virtual void enablePauseResumeShortcut() = 0;
   virtual void disablePauseResumeShortcut() = 0;
   virtual void updateOpenSettingsShortcut() = 0;

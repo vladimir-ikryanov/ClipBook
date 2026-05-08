@@ -199,6 +199,9 @@ public:
   virtual void savePasteNextItemShortcut(std::string shortcut) = 0;
   virtual std::string getPasteNextItemShortcut() = 0;
 
+  virtual void savePasteNextRichItemShortcut(std::string shortcut) = 0;
+  virtual std::string getPasteNextRichItemShortcut() = 0;
+
   virtual void saveEditHistoryItemShortcut(std::string shortcut) = 0;
   virtual std::string getEditHistoryItemShortcut() = 0;
 

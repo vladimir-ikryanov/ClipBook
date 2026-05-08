@@ -53,6 +53,8 @@ class MainAppMac : public MainApp {
   void disableOpenAppShortcut() override;
   void enablePasteNextItemShortcut() override;
   void disablePasteNextItemShortcut() override;
+  void enablePasteNextRichItemShortcut() override;
+  void disablePasteNextRichItemShortcut() override;
   void enablePauseResumeShortcut() override;
   void disablePauseResumeShortcut() override;
   void updateOpenSettingsShortcut() override;
@@ -94,6 +96,7 @@ class MainAppMac : public MainApp {
   mobrowser::Shortcut pause_resume_shortcut_;
   mobrowser::Shortcut open_settings_shortcut_;
   mobrowser::Shortcut paste_next_item_shortcut_;
+  mobrowser::Shortcut paste_next_rich_item_shortcut_;
   std::shared_ptr<ClipboardReaderMac> clipboard_reader_;
   bool should_activate_app_ = false;
 #ifdef __OBJC__

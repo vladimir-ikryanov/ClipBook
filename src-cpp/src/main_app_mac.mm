@@ -337,6 +337,30 @@ void MainAppMac::disablePasteNextItemShortcut() {
   }
 }
 
+void MainAppMac::enablePasteNextRichItemShortcut() {
+  disablePasteNextRichItemShortcut();
+  auto shortcut_str = settings_->getPasteNextRichItemShortcut();
+  paste_next_rich_item_shortcut_ = createShortcut(shortcut_str);
+  if (paste_next_rich_item_shortcut_.key == KeyCode::UNKNOWN) {
+    return;
+  }
+  auto shortcuts = app()->globalShortcuts();
+  bool success = shortcuts->registerShortcut(
+      paste_next_rich_item_shortcut_,
+      [this](const Shortcut &) { pasteNextRichItemToActiveApp(); });
+  if (!success) {
+    LOG(ERROR) << "Failed to register global shortcut: " << shortcut_str;
+    paste_next_rich_item_shortcut_ = mobrowser::Shortcut();
+  }
+}
+
+void MainAppMac::disablePasteNextRichItemShortcut() {
+  if (paste_next_rich_item_shortcut_.key != KeyCode::UNKNOWN) {
+    app()->globalShortcuts()->unregisterShortcut(paste_next_rich_item_shortcut_);
+    paste_next_rich_item_shortcut_.key = KeyCode::UNKNOWN;
+  }
+}
+
 void MainAppMac::updateOpenSettingsShortcut() {
   auto shortcut_str = settings_->getOpenSettingsShortcut();
   open_settings_shortcut_ = createShortcut(shortcut_str);

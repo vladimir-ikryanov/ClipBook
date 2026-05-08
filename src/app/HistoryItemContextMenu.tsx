@@ -386,7 +386,7 @@ const HistoryItemContextMenu = (props: HistoryItemContextMenuProps) => {
               <ContextMenuItem onClick={handlePasteObject}>
                 <img src={toBase64Icon(props.appIcon)} className="mr-2 h-5 w-5"
                      alt="Application icon"/>
-                <span>{t('commands.pasteObjectToApp', {appName: props.appName})}</span>
+                <span>{t('commands.pasteObjectToApp', {itemLabel: getItemLabel(), appName: props.appName})}</span>
                 <CommandShortcut className="flex flex-row">
                   <ShortcutLabel shortcut={prefGetPasteSelectedObjectToActiveAppShortcut()}/>
                 </CommandShortcut>

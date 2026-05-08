@@ -418,6 +418,16 @@ export default function HistoryPane(props: HistoryPaneProps) {
     }
   }
 
+  async function pasteNextRichItemToActiveApp() {
+    let index = getNextItemIndexForPaste()
+    if (index >= 0) {
+      let item = getHistoryItem(index)
+      if (item) {
+        await pasteItem(item, true, item.type === ClipType.Text)
+      }
+    }
+  }
+
   function scrollToActiveItem() {
     scrollToIndex(getActiveHistoryItemIndex())
   }
@@ -1799,6 +1809,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   (window as any).clearColorOlderThan = clearColorOlderThan;
   (window as any).activateApp = activateApp;
   (window as any).pasteNextItemToActiveApp = pasteNextItemToActiveApp;
+  (window as any).pasteNextRichItemToActiveApp = pasteNextRichItemToActiveApp;
 
   if (isHistoryEmpty()) {
     return (

@@ -150,6 +150,8 @@ bool MainApp::init() {
   enablePauseResumeShortcut();
   // Register a global shortcut to paste the next item to the active app.
   enablePasteNextItemShortcut();
+  // Register a global shortcut to paste the next item with rich formatting when applicable.
+  enablePasteNextRichItemShortcut();
   // Update the open settings shortcut.
   updateOpenSettingsShortcut();
 
@@ -179,7 +181,7 @@ bool MainApp::init() {
 
 void MainApp::launch() {
   app_window_ = Browser::create(app_);
-  app_window_->settings()->disableOverscrollHistoryNavigation();
+  // app_window_->settings()->disableOverscrollHistoryNavigation();
   app_window_->setVibrancy(VibrancyEffect::kSidebar);
   app_window_->onInjectJs = [this](const InjectJsArgs &args, InjectJsAction action) {
     initJavaScriptApi(args.window);
@@ -314,6 +316,15 @@ void MainApp::pasteNextItemToActiveApp() {
     auto frame = app_window_->mainFrame();
     if (frame) {
       frame->executeJavaScript("pasteNextItemToActiveApp()");
+    }
+  }).detach();
+}
+
+void MainApp::pasteNextRichItemToActiveApp() {
+  std::thread([this]() {
+    auto frame = app_window_->mainFrame();
+    if (frame) {
+      frame->executeJavaScript("pasteNextRichItemToActiveApp()");
     }
   }).detach();
 }
@@ -790,6 +801,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
   window->putProperty("disablePasteNextItemShortcut", [this]() {
     disablePasteNextItemShortcut();
   });
+  window->putProperty("enablePasteNextRichItemShortcut", [this]() {
+    enablePasteNextRichItemShortcut();
+  });
+  window->putProperty("disablePasteNextRichItemShortcut", [this]() {
+    disablePasteNextRichItemShortcut();
+  });
   window->putProperty("updateOpenSettingsShortcut", [this]() {
     updateOpenSettingsShortcut();
   });
@@ -1226,6 +1243,12 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
   window->putProperty("getPasteNextItemShortcut", [this]() -> std::string {
     return settings_->getPasteNextItemShortcut();
   });
+  window->putProperty("savePasteNextRichItemShortcut", [this](std::string shortcut) -> void {
+    settings_->savePasteNextRichItemShortcut(shortcut);
+  });
+  window->putProperty("getPasteNextRichItemShortcut", [this]() -> std::string {
+    return settings_->getPasteNextRichItemShortcut();
+  });
   window->putProperty("saveEditHistoryItemShortcut", [this](std::string shortcut) -> void {
     settings_->saveEditHistoryItemShortcut(shortcut);
   });
@@ -1616,6 +1639,7 @@ void MainApp::quit() {
   disableOpenAppShortcut();
   disablePauseResumeShortcut();
   disablePasteNextItemShortcut();
+  disablePasteNextRichItemShortcut();
 
   if (welcome_window_) {
     welcome_window_->close();
