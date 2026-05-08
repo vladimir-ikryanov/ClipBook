@@ -418,6 +418,7 @@
     "showInFinder": "Finderで表示",
     "openInApp": "{{appName}}で開く",
     "openWith": "このアプリケーションで開く...",
+    "openInBrowser": "ブラウザで開く",
     "hidePreview": "プレビューを非表示",
     "showPreview": "プレビューを表示",
     "zoomIn": "拡大",

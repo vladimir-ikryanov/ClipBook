@@ -12,6 +12,7 @@ import {
   clear,
   clearSelection,
   deleteHistoryItem,
+  hasOtherHistoryLinkWithSameUrl,
   findItem,
   getDefaultApp,
   getFileOrImagePath,
@@ -100,7 +101,15 @@ import {
   prefShouldUpdateHistoryAfterAction
 } from "@/pref";
 import {FixedSizeList as List} from "react-window";
-import {Clip, ClipType, getFilePath, getHTML, getImageFileName, getImageText, getRTF} from "@/db";
+import {
+  Clip,
+  ClipType,
+  getFilePath,
+  getHTML,
+  getImageFileName,
+  getImageText,
+  getRTF,
+} from "@/db";
 import {formatText, getClipType, isUrl} from "@/lib/utils";
 import {ClipboardIcon} from "lucide-react";
 import {getTrialLicenseDaysLeft, isTrialLicense, isTrialLicenseExpired} from "@/licensing";
@@ -123,7 +132,6 @@ declare const pressReturn: () => void;
 declare const pressTab: () => void;
 declare const copyToClipboard: (text: string, rtf: string, html: string, imageFileName: string, filePath: string, ghost: boolean) => void;
 declare const copyToClipboardAfterMerge: (text: string) => void;
-declare const deleteImage: (imageFileName: string) => void;
 declare const clearEntireHistory: () => void;
 declare const openInBrowser: (url: string) => void;
 declare const showInFinder: (filePath: string) => void;
@@ -667,7 +675,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
       // Keyboard focus remains on the history search field during normal use, so Cmd+A selects
       // the full query when it is not empty and selects every visible item when the query is empty.
       if (isShortcutMatch(prefGetSelectAllShortcut(), e) && !isInputLocked()) {
-        console.log("select all")
         handleSelectAll()
         e.preventDefault()
       }
@@ -1585,14 +1592,6 @@ export default function HistoryPane(props: HistoryPaneProps) {
 
   async function deleteItem(item: Clip, skipUpdate: boolean = false) {
     await deleteHistoryItem(item, skipUpdate)
-    if (item.type === ClipType.Image) {
-      deleteImage(item.imageFileName)
-      deleteImage(item.imageThumbFileName)
-    }
-    if (item.type === ClipType.File) {
-      deleteImage(item.filePathFileName)
-      deleteImage(item.filePathThumbFileName)
-    }
 
     if (skipUpdate) {
       return

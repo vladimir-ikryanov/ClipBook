@@ -93,6 +93,7 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void destroyTray();
   void initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &window);
   void deleteImage(const std::string &imageFileName);
+  void deleteLinkImage(const std::string &imageFileName);
   void fetchLinkPreviewDetails(const std::string &url, const std::shared_ptr<mobrowser::JsObject> &callback);
   void previewLink(const std::string &url);
   void saveImageAsFile(const std::string &imageFileName, int imageWidth, int imageHeight);

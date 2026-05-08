@@ -418,6 +418,7 @@
     "showInFinder": "在访达中显示",
     "openInApp": "在 {{appName}} 中打开",
     "openWith": "打开方式...",
+    "openInBrowser": "在浏览器中打开",
     "hidePreview": "隐藏预览",
     "showPreview": "显示预览",
     "zoomIn": "放大",

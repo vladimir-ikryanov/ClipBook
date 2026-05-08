@@ -418,6 +418,7 @@
     "showInFinder": "Im Finder anzeigen",
     "openInApp": "In {{appName}} öffnen",
     "openWith": "Öffnen mit...",
+    "openInBrowser": "Im Browser öffnen",
     "hidePreview": "Vorschau ausblenden",
     "showPreview": "Vorschau anzeigen",
     "zoomIn": "Vergrößern",

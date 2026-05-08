@@ -727,6 +727,9 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
   window->putProperty("deleteImage", [this](std::string imageFileName) {
     deleteImage(std::move(imageFileName));
   });
+  window->putProperty("deleteLinkImage", [this](std::string imageFileName) {
+    deleteLinkImage(std::move(imageFileName));
+  });
   window->putProperty("openInBrowser", [this](std::string url) {
     app_->desktop()->openUrl(url);
     hide();
@@ -1697,6 +1700,20 @@ void MainApp::deleteImage(const std::string &imageFileName) {
       if (fs::exists(infoFilePath)) {
           fs::remove(infoFilePath);
       }
+  }
+}
+
+void MainApp::deleteLinkImage(const std::string &imageFileName) {
+  if (imageFileName.empty()) {
+    return;
+  }
+  std::string filePath = getLinkImagesDir() + "/" + imageFileName;
+  if (fs::exists(filePath)) {
+    fs::remove(filePath);
+    auto infoFilePath = fs::path(filePath).replace_extension(".info");
+    if (fs::exists(infoFilePath)) {
+      fs::remove(infoFilePath);
+    }
   }
 }
 
