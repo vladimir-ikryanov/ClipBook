@@ -12,7 +12,6 @@ import {
   clear,
   clearSelection,
   deleteHistoryItem,
-  hasOtherHistoryLinkWithSameUrl,
   findItem,
   getDefaultApp,
   getFileOrImagePath,
