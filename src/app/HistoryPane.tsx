@@ -1695,11 +1695,13 @@ export default function HistoryPane(props: HistoryPaneProps) {
         setActiveHistoryItemIndex(-1)
         setActiveItemIndex(-1)
       } else {
+        setActiveItemIndex(0)
         setActiveHistoryItemIndex(0)
       }
       // The props.items array won't be updated until the next render, so we need to get the updated
       // items right now to update the preview text.
       setSelectedItemIndices(getSelectedHistoryItemIndices())
+      scrollToActiveItem()
     }
     if (searchQuery == "") {
       focusSearchField()
