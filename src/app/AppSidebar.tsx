@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -59,6 +59,32 @@ export default function AppSidebar(props: AppSidebarProps) {
     };
   }, [])
 
+  const handleShowAll = useCallback(() => {
+    props.onSelectType("All")
+    resetFilter()
+    emitter.emit("FilterHistory")
+  }, [props.onSelectType])
+
+  useEffect(() => {
+    emitter.on("ShowAllHistory", handleShowAll)
+    return () => {
+      emitter.off("ShowAllHistory", handleShowAll)
+    }
+  }, [handleShowAll])
+
+  const handleShowFavorites = useCallback(() => {
+    props.onSelectType("Favorites")
+    filterByFavorites()
+    emitter.emit("FilterHistory")
+  }, [props.onSelectType])
+
+  useEffect(() => {
+    emitter.on("ShowFavoritesHistory", handleShowFavorites)
+    return () => {
+      emitter.off("ShowFavoritesHistory", handleShowFavorites)
+    }
+  }, [handleShowFavorites])
+
   function handleSelectType(type: AppSidebarItemType) {
     props.onSelectType(type)
   }
@@ -88,18 +114,6 @@ export default function AppSidebar(props: AppSidebarProps) {
     removeTag(tag)
     emitter.emit("DeleteTagById", tag.id)
     emitter.emit("UpdateTags")
-  }
-
-  function handleShowFavorites() {
-    handleSelectType("Favorites")
-    filterByFavorites()
-    emitter.emit("FilterHistory")
-  }
-
-  function handleShowAll() {
-    handleSelectType("All")
-    resetFilter()
-    emitter.emit("FilterHistory")
   }
 
   function handleShowByType(clipType: ClipType, type: AppSidebarItemType) {

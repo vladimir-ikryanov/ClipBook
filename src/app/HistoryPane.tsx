@@ -84,6 +84,8 @@ import {
   prefGetRenameItemShortcut,
   prefGetSaveImageAsFileShortcut,
   prefGetSelectAllShortcut,
+  prefGetShowAllHistoryShortcut,
+  prefGetShowFavoritesHistoryShortcut,
   prefGetSelectNextItemShortcut,
   prefGetSelectPreviousItemShortcut,
   prefGetSentenceCaseShortcut,
@@ -599,6 +601,16 @@ export default function HistoryPane(props: HistoryPaneProps) {
       // Toggle the filter when the corresponding shortcut is pressed.
       if (isShortcutMatch(prefGetToggleFilterShortcut(), e)) {
         handleToggleFilter()
+        e.preventDefault()
+      }
+      // Reset sidebar to All and clear filters when the show-all-history shortcut is pressed.
+      if (isShortcutMatch(prefGetShowAllHistoryShortcut(), e)) {
+        emitter.emit("ShowAllHistory")
+        e.preventDefault()
+      }
+      // Sidebar favorites filter when the show-favorites-history shortcut is pressed.
+      if (isShortcutMatch(prefGetShowFavoritesHistoryShortcut(), e)) {
+        emitter.emit("ShowFavoritesHistory")
         e.preventDefault()
       }
 

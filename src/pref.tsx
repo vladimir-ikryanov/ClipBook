@@ -897,6 +897,14 @@ export function prefGetSelectAllShortcut() {
   return "MetaLeft + KeyA"
 }
 
+export function prefGetShowAllHistoryShortcut() {
+  return "MetaLeft + ShiftLeft + KeyH"
+}
+
+export function prefGetShowFavoritesHistoryShortcut() {
+  return "MetaLeft + ShiftLeft + KeyF"
+}
+
 export function prefGetRetentionPeriodText() {
   return getRetentionPeriodText()
 }
