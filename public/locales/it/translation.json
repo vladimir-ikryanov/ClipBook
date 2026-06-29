@@ -277,6 +277,22 @@
         "close": "Chiudi"
       }
     },
+    "importExport": {
+      "title": "Importa/Esporta",
+      "description": "Sposta la cronologia e i tag di ClipBook tra installazioni di ClipBook. Le impostazioni non sono incluse.",
+      "export": {
+        "title": "Esporta cronologia e tag",
+        "description": "Crea un archivio ClipBook contenente elementi della cronologia, tag e risorse immagine copiate.",
+        "button": "Esporta..."
+      },
+      "import": {
+        "title": "Importa cronologia e tag",
+        "description": "Importa un archivio ClipBook. Gli elementi corrispondenti esistenti vengono aggiornati e i tag esistenti vengono riutilizzati per nome.",
+        "button": "Importa..."
+      },
+      "exportSuccess": "Esportato in {{fileName}}.",
+      "importSuccess": "Importati {{itemCount}} elementi e {{tagCount}} tag."
+    },
     "about": {
       "version": "Versione {{version}} ({{arch}})",
       "checkForUpdates": "Cerca Aggiornamenti...",

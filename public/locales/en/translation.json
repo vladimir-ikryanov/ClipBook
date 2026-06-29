@@ -24,6 +24,7 @@
       "storage": "Storage",
       "shortcuts": "Shortcuts",
       "privacy": "Privacy",
+      "importexport": "Import/Export",
       "license": "License",
       "about": "About",
       "managedByOrganization": "Some settings are managed by your organization."
@@ -276,6 +277,22 @@
         "help": "Help me",
         "close": "Close"
       }
+    },
+    "importExport": {
+      "title": "Import/Export",
+      "description": "Move ClipBook history and tags between ClipBook installations. Settings are not included.",
+      "export": {
+        "title": "Export history and tags",
+        "description": "Create a ClipBook archive containing history items, tags, and copied image assets.",
+        "button": "Export..."
+      },
+      "import": {
+        "title": "Import history and tags",
+        "description": "Import a ClipBook archive. Existing matching items are updated, and existing tags are reused by name.",
+        "button": "Import..."
+      },
+      "exportSuccess": "Exported to {{fileName}}.",
+      "importSuccess": "Imported {{itemCount}} items and {{tagCount}} tags."
     },
     "about": {
       "version": "Version {{version}} ({{arch}})",

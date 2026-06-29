@@ -29,6 +29,7 @@ import {
   loadHistory,
   markPasteAction,
   removeHistoryItemFromSelection,
+  reloadHistory,
   setFilterQuery,
   setPreviewVisibleState,
   TextFormatOperation,
@@ -1810,6 +1811,12 @@ export default function HistoryPane(props: HistoryPaneProps) {
     renameItemMode = enabled
   }
 
+  async function handleClipBookArchiveDidImport() {
+    await reloadHistory()
+    resetFilter()
+    updateHistory()
+  }
+
   function updateHistory() {
     let history = getHistoryItems()
     setHistory([...history])
@@ -1837,6 +1844,7 @@ export default function HistoryPane(props: HistoryPaneProps) {
   (window as any).activateApp = activateApp;
   (window as any).pasteNextItemToActiveApp = pasteNextItemToActiveApp;
   (window as any).pasteNextRichItemToActiveApp = pasteNextRichItemToActiveApp;
+  (window as any).clipBookArchiveDidImport = handleClipBookArchiveDidImport;
 
   if (isHistoryEmpty()) {
     return (

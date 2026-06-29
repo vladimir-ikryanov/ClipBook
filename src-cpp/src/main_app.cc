@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <sstream>
+#include <stdexcept>
 #include <utility>
 
 #include "main_app.h"
@@ -15,6 +17,63 @@
 using namespace mobrowser;
 
 namespace fs = std::filesystem;
+
+std::string escapeJavaScriptString(const std::string &value) {
+  std::string result;
+  result.reserve(value.size());
+  for (char c : value) {
+    switch (c) {
+      case '\\':
+        result += "\\\\";
+        break;
+      case '"':
+        result += "\\\"";
+        break;
+      case '\n':
+        result += "\\n";
+        break;
+      case '\r':
+        result += "\\r";
+        break;
+      case '\t':
+        result += "\\t";
+        break;
+      default:
+        result += c;
+        break;
+    }
+  }
+  return result;
+}
+
+std::string readTextFile(const fs::path &path) {
+  std::ifstream input(path, std::ios::binary);
+  if (!input) {
+    return "";
+  }
+  std::ostringstream contents;
+  contents << input.rdbuf();
+  return contents.str();
+}
+
+void writeTextFile(const fs::path &path, const std::string &contents) {
+  fs::create_directories(path.parent_path());
+  std::ofstream output(path, std::ios::binary);
+  output << contents;
+}
+
+bool isSafeArchiveRelativePath(const std::string &relativePath) {
+  fs::path path(relativePath);
+  if (path.empty() || path.is_absolute()) {
+    return false;
+  }
+  for (const auto &part : path) {
+    if (part == "..") {
+      return false;
+    }
+  }
+  return true;
+}
 
 std::string kKeyboardShortcutsUrl =
     "https://clipbook.app/blog/keyboard-shortcuts/?utm_source=clipbook";
@@ -761,6 +820,34 @@ void MainApp::initJavaScriptApi(const std::shared_ptr<mobrowser::JsObject> &wind
   window->putProperty("clearEntireHistory", [this]() {
     clearHistory();
   });
+  window->putProperty("exportClipBookArchive",
+                      [this](std::string manifestJson,
+                             std::string tagsJson,
+                             std::string historyJson,
+                             std::string assetRequests) {
+                        exportClipBookArchive(
+                            manifestJson,
+                            tagsJson,
+                            historyJson,
+                            assetRequests);
+                      });
+  window->putProperty("importClipBookArchive", [this]() {
+    importClipBookArchive();
+  });
+  window->putProperty("notifyClipBookArchiveImported", [this]() {
+    notifyClipBookArchiveImported();
+  });
+  window->putProperty("copyClipBookArchiveAsset",
+                      [this](std::string archiveRoot,
+                             std::string relativePath,
+                             bool linkPreview,
+                             std::string fallbackFileName) -> std::string {
+                        return copyClipBookArchiveAsset(
+                            archiveRoot,
+                            relativePath,
+                            linkPreview,
+                            fallbackFileName);
+                      });
   window->putProperty("zoomIn", [window]() {
     auto zoom = window->frame()->browser()->zoom();
     if (zoom->level() < mobrowser::k200) {
@@ -1691,6 +1778,149 @@ void MainApp::selectAppsToIgnore() {
   });
 }
 
+void MainApp::exportClipBookArchive(const std::string &manifestJson,
+                                    const std::string &tagsJson,
+                                    const std::string &historyJson,
+                                    const std::string &assetRequests) {
+  SaveDialogOptions options;
+  options.title = "Export History and Tags";
+  options.default_path = getUserHomeDir() + "/ClipBook Export.clipbookarchive";
+  options.button_label = "Export";
+  SaveDialog::show(settings_window_, options, [manifestJson, tagsJson, historyJson, assetRequests, this](SaveDialogResult result) {
+    if (result.canceled) {
+      settings_window_->mainFrame()->executeJavaScript(
+          "window.clipBookArchiveExportDidFinish && window.clipBookArchiveExportDidFinish(false, \"__CANCELED__\")");
+      return;
+    }
+
+    try {
+      fs::path archivePath(result.path);
+      if (fs::exists(archivePath)) {
+        fs::remove_all(archivePath);
+      }
+      fs::create_directories(archivePath);
+      writeTextFile(archivePath / "manifest.json", manifestJson);
+      writeTextFile(archivePath / "tags.json", tagsJson);
+      writeTextFile(archivePath / "history.json", historyJson);
+
+      std::stringstream requests(assetRequests);
+      std::string request;
+      while (std::getline(requests, request)) {
+        if (request.empty()) {
+          continue;
+        }
+        auto separator = request.find('\t');
+        if (separator == std::string::npos) {
+          continue;
+        }
+
+        auto sourcePath = request.substr(0, separator);
+        auto relativePath = request.substr(separator + 1);
+        if (!isSafeArchiveRelativePath(relativePath)) {
+          continue;
+        }
+
+        fs::path source(sourcePath);
+        fs::path destination = archivePath / fs::path(relativePath);
+        if (fs::exists(source) && fs::is_regular_file(source)) {
+          fs::create_directories(destination.parent_path());
+          fs::copy_file(source, destination, fs::copy_options::overwrite_existing);
+        }
+      }
+
+      settings_window_->mainFrame()->executeJavaScript(
+          "window.clipBookArchiveExportDidFinish && window.clipBookArchiveExportDidFinish(true, \"" +
+          escapeJavaScriptString(archivePath.filename().string()) + "\")");
+    } catch (const std::exception &error) {
+      settings_window_->mainFrame()->executeJavaScript(
+          "window.clipBookArchiveExportDidFinish && window.clipBookArchiveExportDidFinish(false, \"" +
+          escapeJavaScriptString(error.what()) + "\")");
+    }
+  });
+}
+
+void MainApp::importClipBookArchive() {
+  mobrowser::OpenDialogOptions options;
+  options.title = "Import History and Tags";
+  options.button_label = "Import";
+  options.selection_policy = OpenDialogSelectionPolicy::kDirectories;
+  options.filters = {{"ClipBook Archive", {"clipbookarchive"}}};
+  mobrowser::OpenDialog::show(settings_window_, options, [this](mobrowser::OpenDialogResult result) {
+    if (result.canceled || result.paths.empty()) {
+      settings_window_->mainFrame()->executeJavaScript(
+          "window.clipBookArchiveImportDidFail && window.clipBookArchiveImportDidFail(\"__CANCELED__\")");
+      return;
+    }
+
+    try {
+      fs::path archivePath(result.paths[0]);
+      if (archivePath.filename() == "manifest.json") {
+        archivePath = archivePath.parent_path();
+      }
+
+      auto manifestJson = readTextFile(archivePath / "manifest.json");
+      auto tagsJson = readTextFile(archivePath / "tags.json");
+      auto historyJson = readTextFile(archivePath / "history.json");
+      if (manifestJson.empty() || tagsJson.empty() || historyJson.empty()) {
+        throw std::runtime_error("The selected archive is missing manifest.json, tags.json, or history.json.");
+      }
+
+      settings_window_->mainFrame()->executeJavaScript(
+          "window.clipBookArchiveImportDidLoad && window.clipBookArchiveImportDidLoad(\"" +
+          escapeJavaScriptString(archivePath.string()) + "\", \"" +
+          escapeJavaScriptString(manifestJson) + "\", \"" +
+          escapeJavaScriptString(tagsJson) + "\", \"" +
+          escapeJavaScriptString(historyJson) + "\")");
+    } catch (const std::exception &error) {
+      settings_window_->mainFrame()->executeJavaScript(
+          "window.clipBookArchiveImportDidFail && window.clipBookArchiveImportDidFail(\"" +
+          escapeJavaScriptString(error.what()) + "\")");
+    }
+  });
+}
+
+void MainApp::notifyClipBookArchiveImported() {
+  if (!app_window_ || app_window_->isClosed()) {
+    return;
+  }
+
+  app_window_->mainFrame()->executeJavaScript(
+      "window.clipBookArchiveDidImport && window.clipBookArchiveDidImport()");
+}
+
+std::string MainApp::copyClipBookArchiveAsset(const std::string &archiveRoot,
+                                              const std::string &relativePath,
+                                              bool linkPreview,
+                                              const std::string &fallbackFileName) {
+  if (relativePath.empty() || !isSafeArchiveRelativePath(relativePath)) {
+    return "";
+  }
+
+  fs::path source = fs::path(archiveRoot) / fs::path(relativePath);
+  if (!fs::exists(source) || !fs::is_regular_file(source)) {
+    return "";
+  }
+
+  fs::path destinationDir = linkPreview ? fs::path(getLinkImagesDir()) : fs::path(getImagesDir());
+  fs::create_directories(destinationDir);
+  std::string fileName = source.filename().string();
+  if (fileName.empty()) {
+    fileName = fallbackFileName;
+  }
+
+  fs::path destination = destinationDir / fileName;
+  int index = 1;
+  while (fs::exists(destination)) {
+    auto stem = destination.stem().string();
+    auto extension = destination.extension().string();
+    destination = destinationDir / (stem + "-" + std::to_string(index) + extension);
+    index++;
+  }
+
+  fs::copy_file(source, destination, fs::copy_options::overwrite_existing);
+  return destination.filename().string();
+}
+
 std::string MainApp::getImagesDir() {
   return app_->profile()->path() + "/images";
 }
@@ -1700,11 +1930,15 @@ std::string MainApp::getLinkImagesDir() {
 }
 
 void MainApp::deleteImage(const std::string &imageFileName) {
+  if (imageFileName.empty()) {
+    return;
+  }
+
   std::string filePath = getImagesDir() + "/" + imageFileName;
-  if (fs::exists(filePath)) {
+  if (fs::exists(filePath) && fs::is_regular_file(filePath)) {
       fs::remove(filePath);
       auto infoFilePath = fs::path(filePath).replace_extension(".info");
-      if (fs::exists(infoFilePath)) {
+      if (fs::exists(infoFilePath) && fs::is_regular_file(infoFilePath)) {
           fs::remove(infoFilePath);
       }
   }

@@ -86,6 +86,16 @@ class MainApp : public std::enable_shared_from_this<MainApp> {
   void showSettingsWindow();
   void showSettingsWindow(const std::string &section);
   void selectAppsToIgnore();
+  void exportClipBookArchive(const std::string &manifestJson,
+                             const std::string &tagsJson,
+                             const std::string &historyJson,
+                             const std::string &assetRequests);
+  void importClipBookArchive();
+  void notifyClipBookArchiveImported();
+  std::string copyClipBookArchiveAsset(const std::string &archiveRoot,
+                                       const std::string &relativePath,
+                                       bool linkPreview,
+                                       const std::string &fallbackFileName);
 
   void setTheme(const std::string &theme);
   void setShowIconInMenuBar(bool show);

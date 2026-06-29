@@ -277,6 +277,22 @@
         "close": "Cerrar"
       }
     },
+    "importExport": {
+      "title": "Importar/Exportar",
+      "description": "Mueve el historial y las etiquetas de ClipBook entre instalaciones de ClipBook. La configuración no está incluida.",
+      "export": {
+        "title": "Exportar historial y etiquetas",
+        "description": "Crea un archivo de ClipBook que contiene elementos del historial, etiquetas y recursos de imagen copiados.",
+        "button": "Exportar..."
+      },
+      "import": {
+        "title": "Importar historial y etiquetas",
+        "description": "Importa un archivo de ClipBook. Los elementos coincidentes existentes se actualizan y las etiquetas existentes se reutilizan por nombre.",
+        "button": "Importar..."
+      },
+      "exportSuccess": "Exportado a {{fileName}}.",
+      "importSuccess": "Se importaron {{itemCount}} elementos y {{tagCount}} etiquetas."
+    },
     "about": {
       "version": "Versión {{version}} ({{arch}})",
       "checkForUpdates": "Buscar actualizaciones...",

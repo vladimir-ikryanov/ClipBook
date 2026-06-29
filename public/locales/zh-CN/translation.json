@@ -277,6 +277,22 @@
         "close": "关闭"
       }
     },
+    "importExport": {
+      "title": "导入/导出",
+      "description": "在 ClipBook 安装之间移动 ClipBook 历史记录和标签。不包含设置。",
+      "export": {
+        "title": "导出历史记录和标签",
+        "description": "创建包含历史记录项目、标签和已复制图像资源的 ClipBook 归档。",
+        "button": "导出..."
+      },
+      "import": {
+        "title": "导入历史记录和标签",
+        "description": "导入 ClipBook 归档。现有匹配项目会被更新，现有标签会按名称复用。",
+        "button": "导入..."
+      },
+      "exportSuccess": "已导出到 {{fileName}}。",
+      "importSuccess": "已导入 {{itemCount}} 个项目和 {{tagCount}} 个标签。"
+    },
     "about": {
       "version": "版本 {{version}} ({{arch}})",
       "checkForUpdates": "检查更新...",

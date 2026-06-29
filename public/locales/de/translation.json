@@ -277,6 +277,22 @@
         "close": "Schließen"
       }
     },
+    "importExport": {
+      "title": "Import/Export",
+      "description": "Verschieben Sie den ClipBook-Verlauf und Tags zwischen ClipBook-Installationen. Einstellungen sind nicht enthalten.",
+      "export": {
+        "title": "Verlauf und Tags exportieren",
+        "description": "Erstellen Sie ein ClipBook-Archiv mit Verlaufseinträgen, Tags und kopierten Bilddateien.",
+        "button": "Exportieren..."
+      },
+      "import": {
+        "title": "Verlauf und Tags importieren",
+        "description": "Importieren Sie ein ClipBook-Archiv. Vorhandene übereinstimmende Einträge werden aktualisiert, und vorhandene Tags werden nach Namen wiederverwendet.",
+        "button": "Importieren..."
+      },
+      "exportSuccess": "Exportiert nach {{fileName}}.",
+      "importSuccess": "{{itemCount}} Einträge und {{tagCount}} Tags importiert."
+    },
     "about": {
       "version": "Version {{version}} ({{arch}})",
       "checkForUpdates": "Nach Updates suchen...",

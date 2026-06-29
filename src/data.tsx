@@ -209,6 +209,13 @@ export async function loadHistory(isFirstRun: boolean = false) {
   requestHistoryUpdate()
 }
 
+export async function reloadHistory() {
+  loadTags()
+  history = await getAllClips()
+  sortHistory(sortType, history)
+  requestHistoryUpdate()
+}
+
 export function requestHistoryUpdate() {
   shouldUpdateHistory = true
   loadSourceApps(history)
@@ -517,12 +524,20 @@ export async function addHistoryItem(content: string,
 export async function deleteItemImages(item: Clip) {
   // Delete the image and thumbnail files.
   if (item.type === ClipType.Image) {
-    deleteImage(item.imageFileName)
-    deleteImage(item.imageThumbFileName)
+    if (item.imageFileName) {
+      deleteImage(item.imageFileName)
+    }
+    if (item.imageThumbFileName) {
+      deleteImage(item.imageThumbFileName)
+    }
   }
   if (item.type === ClipType.File) {
-    deleteImage(item.filePathFileName)
-    deleteImage(item.filePathThumbFileName)
+    if (item.filePathFileName) {
+      deleteImage(item.filePathFileName)
+    }
+    if (item.filePathThumbFileName) {
+      deleteImage(item.filePathThumbFileName)
+    }
   }
   // Delete the link preview images.
   if (item.type === ClipType.Link) {

@@ -277,6 +277,22 @@
         "close": "閉じる"
       }
     },
+    "importExport": {
+      "title": "インポート/エクスポート",
+      "description": "ClipBookの履歴とタグをClipBookのインストール間で移動します。設定は含まれません。",
+      "export": {
+        "title": "履歴とタグをエクスポート",
+        "description": "履歴アイテム、タグ、コピーされた画像アセットを含むClipBookアーカイブを作成します。",
+        "button": "エクスポート..."
+      },
+      "import": {
+        "title": "履歴とタグをインポート",
+        "description": "ClipBookアーカイブをインポートします。一致する既存のアイテムは更新され、既存のタグは名前で再利用されます。",
+        "button": "インポート..."
+      },
+      "exportSuccess": "{{fileName}}にエクスポートしました。",
+      "importSuccess": "{{itemCount}}個のアイテムと{{tagCount}}個のタグをインポートしました。"
+    },
     "about": {
       "version": "バージョン {{version}} ({{arch}})",
       "checkForUpdates": "アップデートを確認...",

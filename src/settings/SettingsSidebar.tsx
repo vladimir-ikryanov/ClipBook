@@ -9,6 +9,7 @@ import {SettingsSidebarItem, SettingsSidebarItemType} from "@/settings/SettingsS
 import {useState} from "react";
 import {
   CogIcon,
+  ArrowUpDownIcon,
   HardDriveIcon,
   InfoIcon,
   KeyboardIcon,
@@ -67,6 +68,11 @@ export default function SettingsSidebar(props: SettingsSidebarProps) {
                                      icon={HardDriveIcon}
                                      isSelected={selectedItemType === "Storage"}
                                      onSelect={() => handleSelect("Storage")}/>
+                <SettingsSidebarItem type={"ImportExport"}
+                                     url={"/"}
+                                     icon={ArrowUpDownIcon}
+                                     isSelected={selectedItemType === "ImportExport"}
+                                     onSelect={() => handleSelect("ImportExport")}/>
                 <SettingsSidebarItem type={"License"}
                                      url={"/"}
                                      icon={KeyRoundIcon}
