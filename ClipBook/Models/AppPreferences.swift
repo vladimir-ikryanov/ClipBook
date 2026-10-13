@@ -68,6 +68,8 @@ struct AppPreferences: Codable, Equatable {
     static let defaultPauseShortcut = "shift+cmd+p"
     static let defaultPasteNextShortcut = "control+v"
     static let defaultPasteNextRichShortcut = "shift+control+v"
+    static let defaultPasteNextAndDeleteShortcut = "option+control+v"
+    static let defaultPasteNextRichAndDeleteShortcut = "shift+option+control+v"
     static let defaultCloseHistoryShortcut = "escape"
     static let defaultCloseHistorySecondaryShortcut = "cmd+w"
     // Matches the shortcut that shows the history, so that the same
@@ -162,6 +164,8 @@ struct AppPreferences: Codable, Equatable {
     var pauseShortcut = Self.defaultPauseShortcut
     var pasteNextShortcut = Self.defaultPasteNextShortcut
     var pasteNextRichShortcut = Self.defaultPasteNextRichShortcut
+    var pasteNextAndDeleteShortcut = Self.defaultPasteNextAndDeleteShortcut
+    var pasteNextRichAndDeleteShortcut = Self.defaultPasteNextRichAndDeleteShortcut
     var closeHistoryShortcut = Self.defaultCloseHistoryShortcut
     var closeHistorySecondaryShortcut = Self.defaultCloseHistorySecondaryShortcut
     var closeHistoryTertiaryShortcut = Self.defaultCloseHistoryTertiaryShortcut
@@ -306,6 +310,14 @@ struct AppPreferences: Codable, Equatable {
         pasteNextRichShortcut = Self.sanitizedGlobalShortcut(
             try container.decodeIfPresent(String.self, forKey: .pasteNextRichShortcut),
             default: defaults.pasteNextRichShortcut
+        )
+        pasteNextAndDeleteShortcut = Self.sanitizedGlobalShortcut(
+            try container.decodeIfPresent(String.self, forKey: .pasteNextAndDeleteShortcut),
+            default: defaults.pasteNextAndDeleteShortcut
+        )
+        pasteNextRichAndDeleteShortcut = Self.sanitizedGlobalShortcut(
+            try container.decodeIfPresent(String.self, forKey: .pasteNextRichAndDeleteShortcut),
+            default: defaults.pasteNextRichAndDeleteShortcut
         )
         closeHistoryShortcut = try container.decodeIfPresent(String.self, forKey: .closeHistoryShortcut) ?? defaults.closeHistoryShortcut
         closeHistorySecondaryShortcut = try container.decodeIfPresent(String.self, forKey: .closeHistorySecondaryShortcut) ?? defaults.closeHistorySecondaryShortcut

@@ -8,4 +8,6 @@ enum GlobalShortcutIdentifier: UInt32 {
     case pauseCapture = 2
     case pasteNext = 3
     case pasteNextRich = 4
+    case pasteNextAndDelete = 5
+    case pasteNextRichAndDelete = 6
 }

@@ -666,15 +666,15 @@ final class AppCoordinator: ObservableObject {
   // While the history panel is open the highlighted item is what the user
   // expects to paste, so the paste-next hotkeys stay out of the way instead of
   // hiding the panel and pasting a different item.
-  private func pasteNextItemFromGlobalShortcut(variant: PasteVariant?) {
+  private func pasteNextItemFromGlobalShortcut(variant: PasteVariant?, deletesAfterPaste: Bool = false) {
     guard historyWindow?.isVisible != true else {
       return
     }
 
-    pasteNextItem(variant: variant)
+    pasteNextItem(variant: variant, deletesAfterPaste: deletesAfterPaste)
   }
 
-  private func pasteNextItem(variant: PasteVariant?) {
+  private func pasteNextItem(variant: PasteVariant?, deletesAfterPaste: Bool = false) {
     guard allowsUsingHistoryItems() else {
       return
     }
@@ -685,8 +685,14 @@ final class AppCoordinator: ObservableObject {
       return
     }
 
-    let nextItemID = nextHistoryItemID(after: item.id, in: pasteNextItems)
-    paste(item, variant: variant ?? preferredPasteVariant(for: item.kind)) { [weak self] in
+    // An item the history always keeps is pasted without being deleted, so the
+    // hotkey still moves on to the next item instead of getting stuck on it.
+    let deletesItem = deletesAfterPaste && canPasteAndDelete([item])
+    var nextItemID = nextHistoryItemID(after: item.id, in: pasteNextItems)
+    if deletesItem, nextItemID == item.id {
+      nextItemID = nil
+    }
+    paste(item, variant: variant ?? preferredPasteVariant(for: item.kind), deletesAfterPaste: deletesItem) { [weak self] in
       self?.clipboardMonitor.markCopySequencePasteBoundary()
       self?.pasteNextItemID = nextItemID
       self?.selectSingleHistoryItem(nextItemID)
@@ -706,7 +712,12 @@ final class AppCoordinator: ObservableObject {
     paste(item, variant: variant) {}
   }
 
-  private func paste(_ item: ClipboardItem, variant: PasteVariant, onSuccess: @escaping @MainActor () -> Void) {
+  private func paste(
+    _ item: ClipboardItem,
+    variant: PasteVariant,
+    deletesAfterPaste: Bool = false,
+    onSuccess: @escaping @MainActor () -> Void
+  ) {
     guard allowsUsingHistoryItems() else {
       return
     }
@@ -716,7 +727,7 @@ final class AppCoordinator: ObservableObject {
     // process, so there is no need to wait for the window server to settle key
     // focus after the panel is hidden; pasting runs synchronously right away.
     do {
-      try pasteRecordingHistory(item, variant: variant)
+      try pasteRecordingHistory(item, variant: variant, deletesAfterPaste: deletesAfterPaste)
       onSuccess()
     } catch {
       model.lastError = error.localizedDescription
@@ -2162,6 +2173,16 @@ final class AppCoordinator: ObservableObject {
     globalShortcuts.register(.pasteNextRich, shortcut: model.preferences.pasteNextRichShortcut) { [weak self] in
       Task { @MainActor in
         self?.pasteNextItemFromGlobalShortcut(variant: .standard)
+      }
+    }
+    globalShortcuts.register(.pasteNextAndDelete, shortcut: model.preferences.pasteNextAndDeleteShortcut) { [weak self] in
+      Task { @MainActor in
+        self?.pasteNextItemFromGlobalShortcut(variant: nil, deletesAfterPaste: true)
+      }
+    }
+    globalShortcuts.register(.pasteNextRichAndDelete, shortcut: model.preferences.pasteNextRichAndDeleteShortcut) { [weak self] in
+      Task { @MainActor in
+        self?.pasteNextItemFromGlobalShortcut(variant: .standard, deletesAfterPaste: true)
       }
     }
   }

@@ -30,7 +30,9 @@ struct ShortcutSettingsView: View {
             ShortcutEntry(title: L10n.string("Show clipboard history"), keyPath: \.showHistoryShortcut, defaultValue: AppPreferences.defaultShowHistoryShortcut),
             ShortcutEntry(title: L10n.string("Pause or resume capture"), keyPath: \.pauseShortcut, defaultValue: AppPreferences.defaultPauseShortcut),
             ShortcutEntry(title: L10n.string("Paste next item"), keyPath: \.pasteNextShortcut, defaultValue: AppPreferences.defaultPasteNextShortcut),
-            ShortcutEntry(title: L10n.string("Paste next rich item"), keyPath: \.pasteNextRichShortcut, defaultValue: AppPreferences.defaultPasteNextRichShortcut)
+            ShortcutEntry(title: L10n.string("Paste next rich item"), keyPath: \.pasteNextRichShortcut, defaultValue: AppPreferences.defaultPasteNextRichShortcut),
+            ShortcutEntry(title: L10n.string("Paste next item and delete"), keyPath: \.pasteNextAndDeleteShortcut, defaultValue: AppPreferences.defaultPasteNextAndDeleteShortcut),
+            ShortcutEntry(title: L10n.string("Paste next rich item and delete"), keyPath: \.pasteNextRichAndDeleteShortcut, defaultValue: AppPreferences.defaultPasteNextRichAndDeleteShortcut)
         ]
     }
 
