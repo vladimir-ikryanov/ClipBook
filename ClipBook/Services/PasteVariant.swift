@@ -23,6 +23,7 @@ enum PasteInterItemAction: String, CaseIterable, Identifiable {
     case keyDown
     case tab
     case space
+    case commaSpace
 
     static let defaultAction = PasteInterItemAction.shiftReturn
 
@@ -48,6 +49,8 @@ enum PasteInterItemAction: String, CaseIterable, Identifiable {
             return L10n.string("Tab")
         case .space:
             return L10n.string("Space")
+        case .commaSpace:
+            return L10n.string("Comma + Space")
         }
     }
 
@@ -67,6 +70,8 @@ enum PasteInterItemAction: String, CaseIterable, Identifiable {
             return "arrow.right.to.line"
         case .space:
             return "space"
+        case .commaSpace:
+            return "textformat"
         }
     }
 
@@ -84,6 +89,18 @@ enum PasteInterItemAction: String, CaseIterable, Identifiable {
             return 48
         case .space:
             return 49
+        case .commaSpace:
+            return nil
+        }
+    }
+
+    /// Text typed between items instead of a key press.
+    var text: String? {
+        switch self {
+        case .commaSpace:
+            return ", "
+        default:
+            return nil
         }
     }
 

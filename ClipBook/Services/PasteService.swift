@@ -123,6 +123,12 @@ final class PasteService {
   }
 
   func perform(_ action: PasteInterItemAction) async throws {
+    if let text = action.text {
+      try await Task.sleep(for: .milliseconds(80))
+      sendText(text)
+      return
+    }
+
     guard let keyCode = action.keyCode else {
       return
     }
@@ -198,6 +204,24 @@ final class PasteService {
     }
   }
   
+  // Types the text as a single keystroke carrying the characters, so it goes
+  // through neither the pasteboard nor the keyboard layout.
+  private func sendText(_ text: String) {
+    let source = CGEventSource(stateID: .combinedSessionState)
+    source?.setLocalEventsFilterDuringSuppressionState(
+      [.permitLocalMouseEvents, .permitSystemDefinedEvents],
+      state: .eventSuppressionStateSuppressionInterval
+    )
+    let characters = Array(text.utf16)
+    let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: true)
+    let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: false)
+    keyDown?.flags = []
+    keyUp?.flags = []
+    keyDown?.keyboardSetUnicodeString(stringLength: characters.count, unicodeString: characters)
+    keyUp?.keyboardSetUnicodeString(stringLength: characters.count, unicodeString: characters)
+    post(keyDown: keyDown, keyUp: keyUp)
+  }
+
   private func sendKey(keyCode: CGKeyCode, flags: CGEventFlags) {
     let source = CGEventSource(stateID: .combinedSessionState)
     // Suppress the user's currently pressed physical keys (e.g. the Control+V global
@@ -212,6 +236,10 @@ final class PasteService {
     let keyUp = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: false)
     keyDown?.flags = flags
     keyUp?.flags = flags
+    post(keyDown: keyDown, keyUp: keyUp)
+  }
+
+  private func post(keyDown: CGEvent?, keyUp: CGEvent?) {
     // The history panel is non-activating, so the paste target keeps keyboard
     // focus while the panel is up. Posting straight to its process bypasses the
     // window server's key focus routing, which would otherwise delay the
