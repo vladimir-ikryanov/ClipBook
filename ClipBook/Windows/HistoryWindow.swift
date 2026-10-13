@@ -351,7 +351,7 @@ final class HistoryWindow: NSObject, NSWindowDelegate {
       return
     }
 
-    contentViewController.selectFirstHistoryItem()
+    contentViewController.selectHistoryItemOnOpen()
 
     DispatchQueue.main.async { [weak self] in
       guard let self else {

@@ -220,6 +220,29 @@ final class HistoryContentViewController: NSViewController {
     selectFirstHistoryItem(syncsList: true)
   }
 
+  /// Selects the item the history opens with: the first item, or the item that
+  /// was selected when the history was closed if the selection is remembered
+  /// and that item is still listed.
+  func selectHistoryItemOnOpen() {
+    guard model.preferences.rememberHistorySelection,
+          let selectedItemID = model.selectedItemID,
+          model.filteredItems.contains(where: { $0.id == selectedItemID }) else {
+      selectFirstHistoryItem()
+      return
+    }
+
+    model.selectedItemIDs = [selectedItemID]
+    model.selectedItemIDsInSelectionOrder = [selectedItemID]
+
+    guard isViewLoaded else {
+      return
+    }
+
+    syncSelectionFromModel()
+    updateToolbarState()
+    listPaneView.scrollSelectionIntoView()
+  }
+
   private func selectFirstHistoryItem(syncsList: Bool) {
     model.selectedItemID = model.filteredItems.first?.id
     model.selectedItemIDs = model.selectedItemID.map { [$0] } ?? []
@@ -282,7 +305,7 @@ final class HistoryContentViewController: NSViewController {
     searchQueryDebounceWorkItem?.cancel()
     searchQueryDebounceWorkItem = nil
     pendingSearchQuery = nil
-    applySearchQuery("", shouldResetSelection: true)
+    applySearchQuery("", shouldResetSelection: !model.preferences.rememberHistorySelection)
   }
 
   override func viewDidLoad() {

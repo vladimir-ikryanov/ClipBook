@@ -132,6 +132,20 @@ final class History: NSView {
     }
   }
 
+  /// Scrolls once the list has caught up with the selection and the window
+  /// has been laid out.
+  func scrollSelectionIntoView() {
+    DispatchQueue.main.async { [weak self] in
+      DispatchQueue.main.async { [weak self] in
+        guard let self else {
+          return
+        }
+
+        self.scrollToRevealSelectedRow(self.currentSelectionFocusRow())
+      }
+    }
+  }
+
   func scrollInitialSelectionIntoViewIfNeeded() {
     let row = currentSelectionFocusRow()
     guard row >= 0, row == firstSelectableRow() else {

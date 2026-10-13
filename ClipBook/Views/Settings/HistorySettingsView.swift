@@ -7,6 +7,10 @@ struct HistorySettingsView: View {
     SettingsSectionGroup() {
       SettingsToggle(title: L10n.string("Update history after action"), description: L10n.string("Move an item to the top of the history after a copy or paste action."), isOn: $model.preferences.updateHistoryAfterAction)
         .disabled(model.preferences.copySequenceModeEnabled)
+      SettingsToggle(title: L10n.string("Remember selection"), description: L10n.string("Open the history with the last selected item instead of the first one."), isOn: $model.preferences.rememberHistorySelection)
+    }
+
+    SettingsSectionGroup() {
       SettingsToggle(title: L10n.string("Pin favorites to top"), description: L10n.string("Keep favorite items above regular clipboard history."), isOn: $model.preferences.pinFavoritesToTop)
       SettingsToggle(title: L10n.string("Show quick paste shortcuts"), isOn: $model.preferences.showCommandNumberShortcut)
       SettingsToggle(title: L10n.string("Show dividers between items"), isOn: $model.preferences.showHistoryDividers)

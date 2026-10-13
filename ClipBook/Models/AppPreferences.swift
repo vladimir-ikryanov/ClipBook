@@ -130,7 +130,22 @@ struct AppPreferences: Codable, Equatable {
     var copySequenceModeEnabled = false
     var pinFavoritesToTop = true
     var pasteOnClick = false
-    var updateHistoryAfterAction = true
+    // A remembered selection only helps while items stay in place, so it can't
+    // be on together with moving items to the top after an action.
+    var updateHistoryAfterAction = true {
+        didSet {
+            if updateHistoryAfterAction {
+                rememberHistorySelection = false
+            }
+        }
+    }
+    var rememberHistorySelection = false {
+        didSet {
+            if rememberHistorySelection {
+                updateHistoryAfterAction = false
+            }
+        }
+    }
     var copyAndMergeEnabled = false
     var copyToClipboardAfterMerge = true
     var copyAndMergeSeparator = CopyAndMergeSeparatorPreference.newLine.rawValue
@@ -257,6 +272,11 @@ struct AppPreferences: Codable, Equatable {
         pinFavoritesToTop = try container.decodeIfPresent(Bool.self, forKey: .pinFavoritesToTop) ?? defaults.pinFavoritesToTop
         pasteOnClick = try container.decodeIfPresent(Bool.self, forKey: .pasteOnClick) ?? defaults.pasteOnClick
         updateHistoryAfterAction = try container.decodeIfPresent(Bool.self, forKey: .updateHistoryAfterAction) ?? defaults.updateHistoryAfterAction
+        // Property observers don't run while decoding, so a stored pair with both
+        // settings on is resolved here, in favor of moving items to the top.
+        let storedRememberHistorySelection = try container.decodeIfPresent(Bool.self, forKey: .rememberHistorySelection)
+            ?? defaults.rememberHistorySelection
+        rememberHistorySelection = storedRememberHistorySelection && !updateHistoryAfterAction
         copyAndMergeEnabled = try container.decodeIfPresent(Bool.self, forKey: .copyAndMergeEnabled) ?? defaults.copyAndMergeEnabled
         copyToClipboardAfterMerge = try container.decodeIfPresent(Bool.self, forKey: .copyToClipboardAfterMerge) ?? defaults.copyToClipboardAfterMerge
         copyAndMergeSeparator = CopyAndMergeSeparatorPreference(
@@ -360,6 +380,12 @@ struct AppPreferences: Codable, Equatable {
     /// window, the global shortcut has to do the closing itself.
     var showHistoryShortcutClosesHistory: Bool {
         closeHistoryShortcuts.contains { ShortcutConflicts.isSameShortcut($0, showHistoryShortcut) }
+    }
+
+    /// Copy sequence mode relies on the original copy order, so items are never
+    /// moved to the top while it is on.
+    var updatesHistoryAfterAction: Bool {
+        updateHistoryAfterAction && !copySequenceModeEnabled
     }
 
     func isSoundEffectEnabled(_ effect: SoundEffect) -> Bool {

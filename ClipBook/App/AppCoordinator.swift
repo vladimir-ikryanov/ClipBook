@@ -760,7 +760,10 @@ final class AppCoordinator: ObservableObject {
       return nil
     }
 
-    if let pasteNextItemID,
+    // A remembered selection is what the history shows when it opens, so it is
+    // also what gets pasted next. Pasting the next item moves the selection on.
+    if !model.preferences.rememberHistorySelection,
+       let pasteNextItemID,
        let pasteNextItem = items.first(where: { $0.id == pasteNextItemID }) {
       return pasteNextItem
     }
@@ -1916,10 +1919,7 @@ final class AppCoordinator: ObservableObject {
   }
 
   private func recordHistoryAction(for item: ClipboardItem, incrementsCopyCount: Bool) throws -> ClipboardItem? {
-    // Copy sequence mode relies on the original copy order, so items must never be moved to the top.
-    let updatesHistoryAfterAction = model.preferences.updateHistoryAfterAction
-      && !model.preferences.copySequenceModeEnabled
-    let copiedAt = updatesHistoryAfterAction ? Date() : nil
+    let copiedAt = model.preferences.updatesHistoryAfterAction ? Date() : nil
     guard copiedAt != nil || incrementsCopyCount else {
       return nil
     }
