@@ -1,58 +1,48 @@
 # ClipBook
 
-ClipBook is a macOS clipboard history app that stores everything you copy and lets you quickly access your clipboard history.
+ClipBook is a clipboard manager for macOS.
 
-## Why open source?
+## Requirements
 
-ClipBook is open source to provide transparency and trust for the users. I want you to be confident that there's no hidden logic, tracking, or behavior in the app. Privacy is important, and I want you to know that ClipBook respects your privacy.
+- macOS 13.0 or later
+- Xcode with the macOS SDK
 
-You can analyze the source code and even build your own copy of the app using the instructions below.
+## Development
 
-**Note**: ClipBook remains a paid application. I rely on your support to continue development and maintenance. Purchasing a license helps me improve the app and offer ongoing support.
+To build ClipBook and launch it, run the following command in the root directory of the project:
 
-## Building ClipBook
-
-You can build your own copy of ClipBook from the source code by following these steps:
-
-### Prerequisites
-
-- macOS Sonoma 14 or later.
-- Install [Node.js](https://nodejs.org/en/download) version 20.11.0 or higher.
-- Install [Command Line Tools](http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/).
-
-**Note**: ClipBook is built using [MōBrowser](https://teamdev.com/mobrowser/docs/quick-start/), a commercial SDK for building cross-platform desktop applications using C++ and web technologies. You can use a [free 3-week trial](https://teamdev.com/mobrowser/#pricing) to build ClipBook.
-
-### Getting the source code
-
-```sh
-git clone git@github.com:vladimir-ikryanov/ClipBook.git
-cd ClipBook
+```bash
+./run.sh
 ```
 
-### Installing dependencies
+The app is built into `DerivedData/Debug` and relaunched, replacing the instance
+the script started previously. A copy installed in `/Applications` is left
+running, so a rebuild never quits the ClipBook you use day to day.
 
-```sh
-npm install
+Useful options:
+
+| Option | Description |
+| --- | --- |
+| `--configuration NAME` | Build configuration. Default: `Debug`. |
+| `--clean` | Clean the build before rebuilding. |
+| `--build-only` | Build without launching the app. |
+| `--foreground` | Run the app in the terminal, streaming its output. `Ctrl+C` quits. |
+| `-h`, `--help` | Show all options. |
+
+Build output is piped through [xcbeautify](https://github.com/cpisciotta/xcbeautify)
+or [xcpretty](https://github.com/xcpretty/xcpretty) when either is installed, and
+falls back to the raw `xcodebuild` log otherwise.
+
+## Release
+
+To build a signed and notarized release, run the following command in the root
+directory of the project:
+
+```bash
+./release.sh --version 2.0.0
 ```
 
-### Building ClipBook
-
-```sh
-npm run mobrowser build
-```
-
-This command will build and pack ClipBook into a native executable and place it in the project's `build-dist/bin` directory. It will also create a DMG installer in `build-dist/pack`.
-
-**Note**: The application will not be signed and notarized. You can sign and notarize it using your own Apple developer certificate by following the instructions in the [MōBrowser SDK documentation](https://teamdev.com/mobrowser/docs/distribution/signing.html#macos). 
-
-## License
-
-ClipBook’s source code is provided for transparency and personal use. However, its use in commercial or redistributed products is restricted without a license. Please refer to the [LICENSE](LICENSE.md) file for details.
-
-## Terms of Use
-
-By using ClipBook, you agree to the [Terms of Use](https://clipbook.app/terms/) and [Privacy Policy](https://clipbook.app/privacy/).
-
-## Support
-
-For questions or support, please [contact me](mailto:vladimir.ikryanov@clipbook.app).
+This archives a universal binary, packages it as a DMG, notarizes it, and updates
+the Sparkle appcast under `Releases`. Notarization needs a `notarytool` keychain
+profile; pass `--skip-notarization` to produce local artifacts without one. Run
+`./release.sh --help` for the full list of options.

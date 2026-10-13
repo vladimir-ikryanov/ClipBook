@@ -1,0 +1,500 @@
+import AppKit
+import ImageIO
+
+// Floating glass panel shown over the bottom edge of the item preview. The
+// fields are centered in a single row and wrap onto additional lines whenever
+// the dialog is too narrow to fit them all, in which case the panel grows
+// taller and its capsule corners are capped so it still reads as a panel.
+@MainActor
+final class ItemPreviewDetailsView: NSView {
+  // The gap between the panel and the bottom edge of the preview it floats
+  // over, and the wider gap kept on each side so the panel never hugs the
+  // window border.
+  static let floatingMargin: CGFloat = 20
+  static let horizontalFloatingMargin: CGFloat = 40
+  private static let horizontalInset: CGFloat = 24
+  private static let verticalInset: CGFloat = 10
+  private static let maximumCornerRadius: CGFloat = 24
+  // The gap on each side of a separator, so neighbouring fields are kept
+  // visually apart rather than reading as one run of text.
+  private static let fieldSpacing: CGFloat = 12
+  private static let lineSpacing: CGFloat = 8
+  private static let separatorWidth: CGFloat = 1
+  private static let separatorSpan = fieldSpacing * 2 + separatorWidth
+  private static let titleValueSpacing: CGFloat = 1
+  private static let appIconSize: CGFloat = 14
+  private static let appIconSpacing: CGFloat = 4
+
+  // Fields whose value follows the editor while the item is being edited.
+  private enum FieldKey {
+    case characters
+    case size
+  }
+
+  private struct Field {
+    let title: String
+    let value: String
+    var icon: NSImage?
+    var key: FieldKey?
+
+    init(title: String, value: String, icon: NSImage? = nil, key: FieldKey? = nil) {
+      self.title = title
+      self.value = value
+      self.icon = icon
+      self.key = key
+    }
+  }
+
+  // A row of fields that fit next to each other, together with the width they
+  // occupy, so the row can be centered once the packing is known.
+  private struct FieldLine {
+    var indices: [Int] = []
+    var width: CGFloat = 0
+  }
+
+  private var fieldViews: [NSView] = []
+  private var separatorViews: [NSView] = []
+  private var valueFieldsByKey: [FieldKey: NSTextField] = [:]
+  private var contentHeight: CGFloat = 0
+  // The translucent capsule behind the fields: real glass where the system
+  // offers it, a blurred material elsewhere.
+  private let backdropView: NSView
+  // The fields are laid out top-down, so they live in a flipped container
+  // rather than in the panel itself.
+  private let fieldsView = ItemPreviewDetailsFieldsView()
+
+  init(item: ClipboardItem) {
+    backdropView = Self.makeBackdropView(contentView: fieldsView)
+    super.init(frame: .zero)
+    translatesAutoresizingMaskIntoConstraints = false
+    wantsLayer = true
+    // Kept in front of whichever preview is installed under it.
+    layer?.zPosition = 1
+    setContentHuggingPriority(.required, for: .vertical)
+    setContentCompressionResistancePriority(.required, for: .vertical)
+    // The panel shrinks to the dialog and wraps its fields rather than
+    // forcing the dialog wider, so the width must be allowed to give way.
+    setContentHuggingPriority(.required, for: .horizontal)
+    setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+    backdropView.autoresizingMask = [.width, .height]
+    addSubview(backdropView)
+    rebuild(for: item)
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  override var intrinsicContentSize: NSSize {
+    NSSize(width: preferredWidth, height: contentHeight)
+  }
+
+  // Tooltips are the only thing the panel reacts to, and only over its fields,
+  // so a click on the translucent margin still goes to the preview below.
+  override func hitTest(_ point: NSPoint) -> NSView? {
+    guard let hitView = super.hitTest(point), hitView !== fieldsView,
+          hitView.isDescendant(of: fieldsView) else {
+      return nil
+    }
+    return hitView
+  }
+
+  func update(item: ClipboardItem) {
+    rebuild(for: item)
+  }
+
+  // While the item is being edited the committed values are stale, so the
+  // length of the text in the editor is shown instead.
+  func showLength(of text: String) {
+    valueFieldsByKey[.characters]?.stringValue = Self.numberString(text.count)
+    valueFieldsByKey[.size]?.stringValue = Self.sizeString(byteCount: text.utf8.count)
+    for (_, valueField) in valueFieldsByKey {
+      valueField.superview?.toolTip = valueField.stringValue
+    }
+    // The values change width, so the panel has to be resized and the row
+    // packed and centered again.
+    invalidateIntrinsicContentSize()
+    needsLayout = true
+  }
+
+  // The vertical room the floating panel needs over a preview of the given
+  // width: the panel itself plus the margin above and below it.
+  func reservedHeight(forWidth width: CGFloat) -> CGFloat {
+    preferredHeight(forWidth: width - Self.horizontalFloatingMargin * 2) + Self.floatingMargin * 2
+  }
+
+  // The dialog needs the height before the view is placed in the window, so the
+  // wrapping has to be measurable for an arbitrary width.
+  func preferredHeight(forWidth width: CGFloat) -> CGFloat {
+    layOutFields(inWidth: width, applyingFrames: false)
+  }
+
+  // The width at which all fields fit on a single line. The dialog uses it to
+  // widen itself instead of letting the fields wrap.
+  var preferredWidth: CGFloat {
+    guard !fieldViews.isEmpty else {
+      return 0
+    }
+
+    let fieldsWidth = fieldViews.reduce(0) { $0 + $1.fittingSize.width }
+    let separatorsWidth = CGFloat(separatorViews.count) * Self.separatorSpan
+    return fieldsWidth + separatorsWidth + Self.horizontalInset * 2
+  }
+
+  override func layout() {
+    super.layout()
+
+    backdropView.frame = bounds
+    fieldsView.frame = backdropView.bounds
+    let height = layOutFields(inWidth: bounds.width, applyingFrames: true)
+    Self.applyCornerRadius(min(height / 2, Self.maximumCornerRadius), to: backdropView)
+    guard abs(height - contentHeight) > 0.5 else {
+      return
+    }
+
+    contentHeight = height
+    invalidateIntrinsicContentSize()
+  }
+
+  // MARK: - Layout
+
+  // Returns the height the fields need for the given width, optionally moving
+  // the field and separator views into place while measuring them.
+  @discardableResult
+  private func layOutFields(inWidth width: CGFloat, applyingFrames: Bool) -> CGFloat {
+    guard !fieldViews.isEmpty else {
+      return 0
+    }
+
+    let availableWidth = max(1, width - Self.horizontalInset * 2)
+    let fieldSizes = fieldViews.map(\.fittingSize)
+    let lineHeight = fieldSizes.map(\.height).max() ?? 0
+    let lines = Self.packLines(fieldSizes: fieldSizes, availableWidth: availableWidth)
+
+    if applyingFrames {
+      var originY = Self.verticalInset
+      for line in lines {
+        var originX = Self.horizontalInset + max(0, (availableWidth - line.width) / 2)
+        for index in line.indices {
+          if index > 0 {
+            let separatorView = separatorViews[index - 1]
+            separatorView.isHidden = index == line.indices.first
+            if !separatorView.isHidden {
+              separatorView.frame = NSRect(
+                x: originX + Self.fieldSpacing,
+                y: originY,
+                width: Self.separatorWidth,
+                height: lineHeight
+              )
+              originX += Self.separatorSpan
+            }
+          }
+
+          fieldViews[index].frame = NSRect(
+            x: originX,
+            y: originY,
+            width: min(fieldSizes[index].width, availableWidth),
+            height: lineHeight
+          )
+          originX += fieldSizes[index].width
+        }
+        originY += lineHeight + Self.lineSpacing
+      }
+    }
+
+    let linesHeight = CGFloat(lines.count) * lineHeight
+      + CGFloat(lines.count - 1) * Self.lineSpacing
+    return linesHeight + Self.verticalInset * 2
+  }
+
+  // Greedily packs the fields into lines that fit the available width.
+  private static func packLines(fieldSizes: [NSSize], availableWidth: CGFloat) -> [FieldLine] {
+    var lines: [FieldLine] = []
+    var line = FieldLine()
+
+    for index in fieldSizes.indices {
+      let fieldWidth = fieldSizes[index].width
+      if !line.indices.isEmpty, line.width + separatorSpan + fieldWidth > availableWidth {
+        lines.append(line)
+        line = FieldLine()
+      }
+
+      line.width += (line.indices.isEmpty ? 0 : separatorSpan) + fieldWidth
+      line.indices.append(index)
+    }
+
+    if !line.indices.isEmpty {
+      lines.append(line)
+    }
+    return lines
+  }
+
+  // MARK: - Backdrop
+
+  private static func makeBackdropView(contentView: NSView) -> NSView {
+    if #available(macOS 26.0, *) {
+      let glassView = NSGlassEffectView()
+      glassView.contentView = contentView
+      return glassView
+    }
+
+    let effectView = NSVisualEffectView()
+    effectView.material = .hudWindow
+    effectView.blendingMode = .withinWindow
+    effectView.state = .active
+    effectView.wantsLayer = true
+    effectView.layer?.masksToBounds = true
+    contentView.autoresizingMask = [.width, .height]
+    effectView.addSubview(contentView)
+    return effectView
+  }
+
+  private static func applyCornerRadius(_ radius: CGFloat, to backdropView: NSView) {
+    if #available(macOS 26.0, *), let glassView = backdropView as? NSGlassEffectView {
+      glassView.cornerRadius = radius
+    } else {
+      backdropView.layer?.cornerRadius = radius
+    }
+  }
+
+  // MARK: - Building
+
+  private func rebuild(for item: ClipboardItem) {
+    fieldViews.forEach { $0.removeFromSuperview() }
+    separatorViews.forEach { $0.removeFromSuperview() }
+    fieldViews = []
+    separatorViews = []
+
+    valueFieldsByKey = [:]
+    let fields = Self.fields(for: item)
+    for (index, field) in fields.enumerated() {
+      if index > 0 {
+        let separatorView = ItemPreviewDetailsSeparatorView()
+        fieldsView.addSubview(separatorView)
+        separatorViews.append(separatorView)
+      }
+
+      let (fieldView, valueField) = Self.makeFieldView(field)
+      if let key = field.key {
+        valueFieldsByKey[key] = valueField
+      }
+      fieldsView.addSubview(fieldView)
+      fieldViews.append(fieldView)
+    }
+
+    needsLayout = true
+    // Measured for the unwrapped width, so the panel has a height before it
+    // is ever laid out; layout() corrects it once the fields wrap.
+    contentHeight = preferredHeight(forWidth: preferredWidth)
+    invalidateIntrinsicContentSize()
+  }
+
+  private static func makeFieldView(_ field: Field) -> (view: NSView, valueField: NSTextField) {
+    // The value is the prominent line and the title the quieter caption
+    // under it.
+    let valueField = NSTextField(labelWithString: field.value)
+    valueField.font = .systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold)
+    valueField.textColor = .labelColor
+    valueField.alignment = .natural
+    valueField.lineBreakMode = .byTruncatingTail
+
+    let titleField = NSTextField(labelWithString: field.title)
+    titleField.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+    titleField.textColor = .secondaryLabelColor
+    titleField.alignment = .natural
+    titleField.lineBreakMode = .byTruncatingTail
+
+    var valueView: NSView = valueField
+    if let icon = field.icon {
+      let iconView = NSImageView()
+      iconView.image = icon
+      iconView.imageScaling = .scaleProportionallyDown
+      iconView.translatesAutoresizingMaskIntoConstraints = false
+      iconView.setContentHuggingPriority(.required, for: .horizontal)
+      iconView.setContentCompressionResistancePriority(.required, for: .horizontal)
+      NSLayoutConstraint.activate([
+        iconView.widthAnchor.constraint(equalToConstant: Self.appIconSize),
+        iconView.heightAnchor.constraint(equalToConstant: Self.appIconSize)
+      ])
+
+      let valueStack = NSStackView(views: [iconView, valueField])
+      valueStack.orientation = .horizontal
+      valueStack.distribution = .fill
+      valueStack.alignment = .centerY
+      valueStack.spacing = Self.appIconSpacing
+      valueView = valueStack
+    }
+
+    let fieldStack = NSStackView(views: [valueView, titleField])
+    fieldStack.orientation = .vertical
+    fieldStack.distribution = .fill
+    fieldStack.alignment = .leading
+    fieldStack.spacing = Self.titleValueSpacing
+    // Long values are truncated to keep the bar compact, so the full value has
+    // to stay reachable.
+    fieldStack.toolTip = field.value
+    return (fieldStack, valueField)
+  }
+
+  // MARK: - Fields
+
+  private static func fields(for item: ClipboardItem) -> [Field] {
+    var fields = [Field(title: L10n.string("Type"), value: typeName(for: item))]
+    fields.append(contentsOf: contentFields(for: item))
+    fields.append(
+      Field(
+        title: L10n.string("Size"),
+        value: sizeString(byteCount: item.byteSize),
+        key: .size
+      )
+    )
+    if let sourceApplicationField = applicationField(for: item) {
+      fields.append(sourceApplicationField)
+    }
+    fields.append(
+      Field(title: L10n.string("First Copy"), value: dateString(item.firstCopiedAt))
+    )
+    fields.append(
+      Field(title: L10n.string("Last Copy"), value: dateString(item.copiedAt))
+    )
+    fields.append(
+      Field(title: L10n.string("Copies"), value: numberString(item.copyCount + 1))
+    )
+    return fields
+  }
+
+  // The leading field describes the payload itself and therefore depends on the
+  // kind of the item: pixels for images, characters for everything text based
+  // and nothing at all for files, whose size already says it all.
+  private static func contentFields(for item: ClipboardItem) -> [Field] {
+    switch item.kind {
+    case .image:
+      guard let dimensions = item.imageDimensions else {
+        return []
+      }
+      return [dimensionsField(width: dimensions.width, height: dimensions.height)]
+    case .file:
+      guard item.filePaths.count == 1,
+            let filePath = item.filePaths.first,
+            ClipboardItem.isImageFile(at: filePath),
+            let dimensions = imageDimensions(atPath: filePath) else {
+        return []
+      }
+      return [dimensionsField(width: dimensions.width, height: dimensions.height)]
+    case .text, .richText, .link, .email, .color:
+      return [
+        Field(
+          title: L10n.string("Characters"),
+          value: numberString(item.previewText.count),
+          key: .characters
+        )
+      ]
+    }
+  }
+
+  // The kind of the item, with the plural name for a multiple file item.
+  static func typeName(for item: ClipboardItem) -> String {
+    if item.kind == .file, item.filePaths.count > 1 {
+      return L10n.string("Files")
+    }
+    return item.kind.title
+  }
+
+  private static func dimensionsField(width: Int, height: Int) -> Field {
+    Field(
+      title: L10n.string("Dimensions"),
+      value: "\(numberString(width)) × \(numberString(height))"
+    )
+  }
+
+  private static func applicationField(for item: ClipboardItem) -> Field? {
+    guard item.hasSourceApp else {
+      return nil
+    }
+
+    let icon = HistorySourceAppIcon.image(
+      bundleIdentifier: item.sourceBundleIdentifier,
+      appName: item.sourceAppName,
+      size: appIconSize
+    )
+    return Field(
+      title: L10n.string("Application"),
+      value: item.sourceAppName ?? item.sourceBundleIdentifier ?? "",
+      icon: icon
+    )
+  }
+
+  private static func imageDimensions(atPath filePath: String) -> (width: Int, height: Int)? {
+    let fileURL = URL(fileURLWithPath: filePath)
+    guard let source = CGImageSourceCreateWithURL(fileURL as CFURL, nil),
+          let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+          let width = properties[kCGImagePropertyPixelWidth] as? Int,
+          let height = properties[kCGImagePropertyPixelHeight] as? Int else {
+      return nil
+    }
+
+    return (width, height)
+  }
+
+  // MARK: - Formatting
+
+  private static let dateFormatter = DateFormatter()
+  private static let numberFormatter = NumberFormatter()
+
+  private static func dateString(_ date: Date) -> String {
+    // The formatters are rebuilt lazily because the app language can change
+    // while it is running.
+    dateFormatter.locale = L10n.currentLocale
+    dateFormatter.dateStyle = .short
+    dateFormatter.timeStyle = .short
+    return dateFormatter.string(from: date)
+  }
+
+  private static func sizeString(byteCount: Int) -> String {
+    ByteCountFormatter.string(fromByteCount: Int64(byteCount), countStyle: .file)
+  }
+
+  private static func numberString(_ value: Int) -> String {
+    numberFormatter.locale = L10n.currentLocale
+    numberFormatter.numberStyle = .decimal
+    return numberFormatter.string(from: NSNumber(value: value)) ?? "\(value)"
+  }
+}
+
+// Holds the fields in top-down order inside the glass backdrop.
+private final class ItemPreviewDetailsFieldsView: NSView {
+  override var isFlipped: Bool {
+    true
+  }
+}
+
+// Layer backed rather than drawn: filling the dirty rect from draw(_:) is
+// composited over the whole dialog on macOS 26, and every separator then
+// darkens the dialog by the translucent separator color.
+private final class ItemPreviewDetailsSeparatorView: NSView {
+  override init(frame frameRect: NSRect) {
+    super.init(frame: frameRect)
+    wantsLayer = true
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  override var wantsUpdateLayer: Bool {
+    true
+  }
+
+  // Resolved here so the separator follows the system appearance when it
+  // switches between light and dark.
+  override func updateLayer() {
+    layer?.backgroundColor = NSColor.separatorColor.cgColor
+  }
+
+  override func viewDidChangeEffectiveAppearance() {
+    super.viewDidChangeEffectiveAppearance()
+    needsDisplay = true
+  }
+}

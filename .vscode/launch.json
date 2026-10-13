@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "ClipBook",
+      "program": "${workspaceFolder}/DerivedData/Build/Products/Debug/ClipBook.app/Contents/MacOS/ClipBook",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Prepare ClipBook Commercial Debug"
+    }
+  ]
+}

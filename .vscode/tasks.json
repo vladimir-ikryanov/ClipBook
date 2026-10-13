@@ -1,0 +1,121 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build ClipBook Commercial",
+      "type": "shell",
+      "command": "bash -lc 'set -euo pipefail; cleanup() { rm -rf \"ClipBook/GeneratedCommercialLicensing\"; }; trap cleanup EXIT; cleanup; mkdir -p \"ClipBook/GeneratedCommercialLicensing\"; ditto \"../ClipBook-Licensing/Sources/ClipBookCommercialLicensing\" \"ClipBook/GeneratedCommercialLicensing\"; xcodebuild -project ClipBook.xcodeproj -scheme ClipBook -configuration Debug -destination \"platform=macOS\" -derivedDataPath DerivedData build SWIFT_ACTIVE_COMPILATION_CONDITIONS=\"CLIPBOOK_COMMERCIAL CLIPBOOK_COMMERCIAL_IN_TREE \\$(inherited)\"'",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false
+      },
+      "problemMatcher": {
+        "owner": "swift",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      }
+    },
+    {
+      "label": "Build ClipBook Non-Commercial",
+      "type": "shell",
+      "command": "rm -rf \"ClipBook/GeneratedCommercialLicensing\" && xcodebuild -project ClipBook.xcodeproj -scheme ClipBook -configuration Debug -destination 'platform=macOS' -derivedDataPath DerivedData build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false
+      },
+      "problemMatcher": {
+        "owner": "swift",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      }
+    },
+    {
+      "label": "Quit ClipBook",
+      "type": "shell",
+      "command": "osascript -e 'quit app \"ClipBook\"' 2>/dev/null || true",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "never",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Prepare ClipBook Commercial Debug",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Quit ClipBook",
+        "Build ClipBook Commercial"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Prepare ClipBook Non-Commercial Debug",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Quit ClipBook",
+        "Build ClipBook Non-Commercial"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Run ClipBook Commercial",
+      "type": "shell",
+      "command": "osascript -e 'quit app \"ClipBook\"' 2>/dev/null || true; sleep 0.5; open DerivedData/Build/Products/Debug/ClipBook.app",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Build ClipBook Commercial",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run ClipBook Non-Commercial",
+      "type": "shell",
+      "command": "osascript -e 'quit app \"ClipBook\"' 2>/dev/null || true; sleep 0.5; open DerivedData/Build/Products/Debug/ClipBook.app",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Build ClipBook Non-Commercial",
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

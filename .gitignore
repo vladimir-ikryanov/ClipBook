@@ -1,42 +1,6 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# Dependencies
-node_modules
-
-# Build directories and files
-dist
-dist-ssr
-*.local
+ClipBook/GeneratedCommercialLicensing/
+DerivedData
+Releases
+.build
 build
-
-# Licensing
-src-cpp/src/licensing
-
-# Molybde build directories
-build-dev
-build-dist
-
-# Clion build directories
-cmake-build-release
-cmake-build-debug
-
-# The cache directory
-.cache
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
