@@ -224,6 +224,11 @@ final class HistoryContentViewController: NSViewController {
   /// was selected when the history was closed if the selection is remembered
   /// and that item is still listed.
   func selectHistoryItemOnOpen() {
+    if isViewLoaded {
+      // The pointer may rest over the list where the history opens.
+      listPaneView.pauseHoverSelectionUntilPointerMoves()
+    }
+
     guard model.preferences.rememberHistorySelection,
           let selectedItemID = model.selectedItemID,
           model.filteredItems.contains(where: { $0.id == selectedItemID }) else {
@@ -355,6 +360,15 @@ final class HistoryContentViewController: NSViewController {
     // $preferences publishes before the new value is stored, so the values it
     // delivers are compared rather than the ones read back from the model.
     reloadListOnChange(of: model.$preferences.map(HistoryListPreferences.init).removeDuplicates())
+
+    model.$preferences
+      .map(\.pasteOnClick)
+      .removeDuplicates()
+      .receive(on: RunLoop.main)
+      .sink { [weak self] pasteOnClick in
+        self?.listPaneView.selectsItemOnHover = pasteOnClick
+      }
+      .store(in: &cancellables)
 
     model.$preferences
       .map(HistoryToolbarPreferences.init)

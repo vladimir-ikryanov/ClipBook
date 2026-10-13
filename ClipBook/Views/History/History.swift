@@ -65,6 +65,27 @@ final class History: NSView {
   var selectionLeadRow: Int?
   private var selectionOrderIDs: [UUID] = []
   var isKeyboardMultipleSelectionMode = false
+  /// Selects the item under the pointer as the pointer moves over the list.
+  var selectsItemOnHover = false {
+    didSet {
+      guard selectsItemOnHover != oldValue else {
+        return
+      }
+
+      tableView.onMouseMovedOverRow = selectsItemOnHover
+        ? { [weak self] row in self?.selectItemOnHover(atRow: row) }
+        : nil
+      pauseHoverSelectionUntilPointerMoves()
+    }
+  }
+  // Where the pointer was when the selection last changed in some other way:
+  // the history opened, a key or a click moved it, or the list reloaded.
+  // Hover selection waits until the pointer moves away from there, so a
+  // pointer that happens to rest over the list, or a nudge of the mouse,
+  // doesn't take the selection away from the item the user just got to.
+  private var hoverSelectionPausedAtPointerLocation: NSPoint?
+  private var isSelectingItemOnHover = false
+  private static let hoverSelectionResumeDistance: CGFloat = 4
   let tableView = HistoryTableView()
   private let scrollView = OverlayScrollView()
   private static let scrollBottomPadding: CGFloat = 4
@@ -616,7 +637,7 @@ final class History: NSView {
     return indexes
   }
 
-  private func selectSingleRow(_ row: Int) {
+  private func selectSingleRow(_ row: Int, scrollsToReveal: Bool = true) {
     isKeyboardMultipleSelectionMode = false
     tableView.isKeyboardMultipleSelectionMode = false
     isSyncingSelection = true
@@ -627,7 +648,9 @@ final class History: NSView {
     selectionLeadRow = row
     selectionOrderIDs = selectionOrderIDs(for: IndexSet(integer: row), focusedRow: row)
     notifySelectionChanged(focusedRow: row)
-    scrollToRevealSelectedRow(row)
+    if scrollsToReveal {
+      scrollToRevealSelectedRow(row)
+    }
   }
 
   func handleTableSelectionDidChange(clickedRow: Int?) {
@@ -1017,6 +1040,39 @@ final class History: NSView {
     }
 
     tableView.reloadData(forRowIndexes: multipleFileRowIndexes, columnIndexes: IndexSet(integer: 0))
+  }
+
+  func pauseHoverSelectionUntilPointerMoves() {
+    guard !isSelectingItemOnHover else {
+      return
+    }
+
+    hoverSelectionPausedAtPointerLocation = NSEvent.mouseLocation
+  }
+
+  private func selectItemOnHover(atRow row: Int) {
+    if let pausedAtLocation = hoverSelectionPausedAtPointerLocation {
+      let location = NSEvent.mouseLocation
+      guard hypot(location.x - pausedAtLocation.x, location.y - pausedAtLocation.y)
+              >= Self.hoverSelectionResumeDistance else {
+        return
+      }
+      hoverSelectionPausedAtPointerLocation = nil
+    }
+
+    // A multiple selection was made on purpose, so the pointer leaves it be.
+    guard !isKeyboardMultipleSelectionMode,
+          tableView.selectedRowIndexes.count <= 1,
+          row != tableView.selectedRow,
+          isSelectableRow(row) else {
+      return
+    }
+
+    // The row is already under the pointer. Scrolling it into view would move
+    // another row under the pointer, which the next move would select.
+    isSelectingItemOnHover = true
+    selectSingleRow(row, scrollsToReveal: false)
+    isSelectingItemOnHover = false
   }
 
   private func handleMouseDownSelection(row: Int, event: NSEvent) -> Bool {

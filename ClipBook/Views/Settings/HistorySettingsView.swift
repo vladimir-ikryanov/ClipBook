@@ -20,7 +20,7 @@ struct HistorySettingsView: View {
     }
     
     SettingsSectionGroup(L10n.string("Actions")) {
-      SettingsToggle(title: L10n.string("Paste on single click"), description: L10n.string("Paste an item immediately when it is clicked."), isOn: $model.preferences.pasteOnClick)
+      SettingsToggle(title: L10n.string("Paste on single click"), description: L10n.string("Select the item under the mouse pointer and paste it when it is clicked."), isOn: $model.preferences.pasteOnClick)
       PickerRow(title: L10n.string("Double-click action"), description: L10n.string("Choose what double-clicking a history item does.")) {
         Picker(L10n.string("Double-click action"), selection: $model.preferences.doubleClickAction) {
           ForEach(HistoryItemActionPreference.allCases) { action in

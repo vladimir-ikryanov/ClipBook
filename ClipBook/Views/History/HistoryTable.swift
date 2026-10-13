@@ -240,6 +240,7 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
   func tableViewSelectionDidChange(_ notification: Notification) {
     let clickedRow = tableView.lastMouseDownRow
     tableView.lastMouseDownRow = nil
+    pauseHoverSelectionUntilPointerMoves()
     handleTableSelectionDidChange(clickedRow: clickedRow)
   }
 
@@ -735,6 +736,61 @@ final class HistoryTableView: NSTableView {
   var onKeyboardMultipleSelectionKeyDown: ((HistoryKeyboardMultipleSelectionCommand) -> Void)?
   var onKeyboardMultipleSelectionMoveKeyDown: ((HistorySelectionDirection) -> Void)?
   var onWidthChange: (() -> Void)?
+  /// Called with the row under the pointer each time the pointer moves over
+  /// the list. The list only tracks the pointer while this is set.
+  var onMouseMovedOverRow: ((Int) -> Void)? {
+    didSet {
+      if (oldValue == nil) != (onMouseMovedOverRow == nil) {
+        updateTrackingAreas()
+      }
+    }
+  }
+  private var mouseMovedTrackingArea: NSTrackingArea?
+
+  override func updateTrackingAreas() {
+    super.updateTrackingAreas()
+
+    if let mouseMovedTrackingArea {
+      removeTrackingArea(mouseMovedTrackingArea)
+      self.mouseMovedTrackingArea = nil
+    }
+
+    guard onMouseMovedOverRow != nil else {
+      return
+    }
+
+    let trackingArea = NSTrackingArea(
+      rect: .zero,
+      options: [.activeInKeyWindow, .inVisibleRect, .mouseMoved],
+      owner: self,
+      userInfo: nil
+    )
+    addTrackingArea(trackingArea)
+    mouseMovedTrackingArea = trackingArea
+  }
+
+  override func mouseMoved(with event: NSEvent) {
+    super.mouseMoved(with: event)
+
+    guard let onMouseMovedOverRow, !isDragSessionActive, isPointerOverList(event) else {
+      return
+    }
+
+    onMouseMovedOverRow(row(at: convert(event.locationInWindow, from: nil)))
+  }
+
+  /// The tracking area covers the whole visible part of the list, also where
+  /// the toolbar, the trial notice or another view covers it. Only a pointer
+  /// that would land on the list itself counts as being over it.
+  private func isPointerOverList(_ event: NSEvent) -> Bool {
+    // The frame view has no superview, so it is hit-tested in window coordinates.
+    guard let frameView = window?.contentView?.superview,
+          let hitView = frameView.hitTest(event.locationInWindow) else {
+      return false
+    }
+
+    return hitView.isDescendant(of: self)
+  }
 
   override func menu(for event: NSEvent) -> NSMenu? {
     let location = convert(event.locationInWindow, from: nil)
