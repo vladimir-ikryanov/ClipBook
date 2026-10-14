@@ -218,6 +218,7 @@ final class SQLiteHistoryStore: HistoryStore {
         defer { lock.unlock() }
 
         try execute("DELETE FROM clips WHERE id = ?;", binding: id.uuidString)
+        releaseFreePages()
     }
 
     func delete(ids: [UUID]) throws {
@@ -233,6 +234,7 @@ final class SQLiteHistoryStore: HistoryStore {
 
         try open()
         try exec("DELETE FROM clips;")
+        releaseFreePages()
     }
 
     func clear(keepingFavoritesAndTaggedItems: Bool) throws {
@@ -408,6 +410,47 @@ final class SQLiteHistoryStore: HistoryStore {
         // Durable at checkpoint rather than at every commit; in WAL mode this
         // cannot corrupt the database, only lose the last commits on power loss.
         try? exec("PRAGMA synchronous = NORMAL;")
+        // A checkpoint rewinds the WAL file but leaves it at its largest size,
+        // which a big import or clear can make as large as the database itself.
+        // Past this limit the file is truncated back after each checkpoint.
+        try? exec("PRAGMA journal_size_limit = \(Self.walSizeLimit);")
+    }
+
+    private static let walSizeLimit = 4 * 1024 * 1024
+
+    /// Deleted rows used to leave their pages in the file for good, so the
+    /// database never shrank below the largest it had been. With incremental
+    /// auto-vacuum the store hands those pages back after each deletion.
+    /// Switching an existing database takes one VACUUM, which also drops the
+    /// free space piled up so far. If it fails, for example on a full disk,
+    /// the database stays as it is and the next launch tries again.
+    private func enableIncrementalVacuum() {
+        guard queryPragma("PRAGMA auto_vacuum;") != Self.incrementalAutoVacuum else {
+            return
+        }
+
+        do {
+            try exec("PRAGMA auto_vacuum = INCREMENTAL;")
+            try exec("VACUUM;")
+            // The VACUUM went through the WAL file, which now holds a copy of
+            // the whole database until the next write truncates it.
+            try? exec("PRAGMA wal_checkpoint(TRUNCATE);")
+        } catch {
+            NSLog("ClipBook history database could not enable incremental vacuum: \(error.localizedDescription)")
+        }
+    }
+
+    private static let incrementalAutoVacuum = "2"
+
+    /// Shrinks the file by the pages deleted rows left free. The pragma frees
+    /// one page per step, so it runs through `exec`, which steps it to the end.
+    /// A database that is not in incremental mode yet ignores it.
+    private func releaseFreePages() {
+        try? exec("PRAGMA incremental_vacuum;")
+        // In WAL mode the file only shrinks once a checkpoint copies the
+        // shrinking commit into it, which SQLite otherwise puts off until the
+        // WAL file has grown past a thousand pages.
+        try? exec("PRAGMA wal_checkpoint(TRUNCATE);")
     }
 
     private func queryPragma(_ sql: String) -> String? {
@@ -467,6 +510,8 @@ final class SQLiteHistoryStore: HistoryStore {
             try migrateFormattingColumns()
             try migrateImageDigests()
         }
+        // VACUUM cannot run inside a transaction.
+        enableIncrementalVacuum()
     }
 
     /// `PRAGMA user_version`, bumped whenever stored rows have to be rewritten.
@@ -711,6 +756,7 @@ final class SQLiteHistoryStore: HistoryStore {
                 try execute("DELETE FROM clips WHERE id = ?;", binding: id.uuidString)
             }
         }
+        releaseFreePages()
     }
 
     private func fetchItem(_ id: UUID) throws -> ClipboardItem? {
