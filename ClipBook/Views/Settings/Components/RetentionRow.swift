@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-enum RetentionClipType {
+enum RetentionClipType: CaseIterable {
     case text
     case richText
     case image
@@ -101,7 +101,7 @@ enum RetentionPeriod {
             Step(days: 300, label: L10n.string("10 months")),
             Step(days: 330, label: L10n.string("11 months")),
             Step(days: 365, label: L10n.string("1 year")),
-            Step(days: -1, label: L10n.string("Unlimited")),
+            Step(days: AppPreferences.unlimitedRetentionDays, label: L10n.string("Unlimited")),
         ]
     }
 

@@ -44,6 +44,8 @@ struct HistoryRetentionPolicy {
 extension AppPreferences {
     /// A period of zero days: the kind is never captured.
     static let neverKeepRetentionDays = 0
+    /// A negative period: the kind never expires.
+    static let unlimitedRetentionDays = -1
 
     func retentionDays(for kind: ClipboardKind) -> Int {
         self[keyPath: RetentionClipType(kind: kind).preferenceKeyPath]

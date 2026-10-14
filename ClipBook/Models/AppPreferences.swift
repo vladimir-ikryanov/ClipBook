@@ -163,14 +163,13 @@ struct AppPreferences: Codable, Equatable {
     var detectSensitiveContent = true
     var showDuringScreenSharing = false
     var ignoredAppsText = ""
-    var maxHistoryItems = 5000
-    var textRetentionDays = 90
-    var richTextRetentionDays = 90
-    var imageRetentionDays = 90
-    var fileRetentionDays = 90
-    var linkRetentionDays = 90
-    var emailRetentionDays = 90
-    var colorRetentionDays = 90
+    var textRetentionDays = Self.unlimitedRetentionDays
+    var richTextRetentionDays = Self.unlimitedRetentionDays
+    var imageRetentionDays = Self.unlimitedRetentionDays
+    var fileRetentionDays = Self.unlimitedRetentionDays
+    var linkRetentionDays = Self.unlimitedRetentionDays
+    var emailRetentionDays = Self.unlimitedRetentionDays
+    var colorRetentionDays = Self.unlimitedRetentionDays
     var keepFavoritesOnClearHistory = true
     var warnOnClearHistory = true
     var clearHistoryOnQuit = false
@@ -301,7 +300,6 @@ struct AppPreferences: Codable, Equatable {
         detectSensitiveContent = try container.decodeIfPresent(Bool.self, forKey: .detectSensitiveContent) ?? defaults.detectSensitiveContent
         showDuringScreenSharing = try container.decodeIfPresent(Bool.self, forKey: .showDuringScreenSharing) ?? defaults.showDuringScreenSharing
         ignoredAppsText = try container.decodeIfPresent(String.self, forKey: .ignoredAppsText) ?? defaults.ignoredAppsText
-        maxHistoryItems = try container.decodeIfPresent(Int.self, forKey: .maxHistoryItems) ?? defaults.maxHistoryItems
         textRetentionDays = try container.decodeIfPresent(Int.self, forKey: .textRetentionDays) ?? defaults.textRetentionDays
         // Rich text used to share the Texts period, so a preferences file
         // written before it had a slider of its own keeps that behaviour.

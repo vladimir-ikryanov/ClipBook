@@ -24,15 +24,14 @@ final class SQLiteHistoryStore: HistoryStore {
         sqlite3_close(db)
     }
 
-    func fetch(limit: Int) throws -> [ClipboardItem] {
+    func fetchAll() throws -> [ClipboardItem] {
         lock.lock()
         defer { lock.unlock() }
 
         try open()
-        let sql = "SELECT payload, copiedAt FROM clips ORDER BY copiedAt DESC LIMIT ?;"
+        let sql = "SELECT payload, copiedAt FROM clips ORDER BY copiedAt DESC;"
         let statement = try prepare(sql)
         defer { sqlite3_finalize(statement) }
-        sqlite3_bind_int64(statement, 1, sqlite3_int64(limit))
 
         var items: [ClipboardItem] = []
         var seenItemIDs: Set<ClipboardItem.ID> = []

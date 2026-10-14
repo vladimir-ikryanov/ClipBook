@@ -1,8 +1,12 @@
 import Foundation
 
 struct ClipBookArchiveImportResult {
-    var itemCount: Int
+    var itemIDs: Set<ClipboardItem.ID>
     var tagCount: Int
+
+    var itemCount: Int {
+        itemIDs.count
+    }
 }
 
 struct ClipBookArchiveExportResult {
@@ -117,6 +121,7 @@ final class ClipBookArchiveService {
         var tagIDsByArchiveID: [String: Tag.ID] = [:]
         var tagNamesByID: [Tag.ID: String] = [:]
 
+        var importedItemIDs: Set<ClipboardItem.ID> = []
         var importedItemCount = 0
         // One transaction for the whole archive: a commit per item is the slow
         // part of a large import, and a failed import leaves nothing behind.
@@ -135,12 +140,13 @@ final class ClipBookArchiveService {
                     tagNamesByID: tagNamesByID
                 )
                 try historyStore.upsert(item)
+                importedItemIDs.insert(item.id)
                 importedItemCount += 1
                 progress?(ClipBookArchiveProgress(completedItemCount: importedItemCount, totalItemCount: archiveItems.count))
             }
         }
 
-        return ClipBookArchiveImportResult(itemCount: importedItemCount, tagCount: archiveTags.count)
+        return ClipBookArchiveImportResult(itemIDs: importedItemIDs, tagCount: archiveTags.count)
     }
 
     private func archiveItem(

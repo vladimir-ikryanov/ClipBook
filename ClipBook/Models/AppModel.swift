@@ -449,14 +449,6 @@ final class AppModel: ObservableObject {
         items[index].copyCount += 1
     }
 
-    func enforceRetentionLimit(_ limit: Int) {
-        guard items.count > limit else {
-            return
-        }
-        items = Array(items.prefix(limit))
-        clearUnavailableHistorySourceApplicationFilter()
-    }
-
     private func clearUnavailableHistorySourceApplicationFilter() {
         guard !selectedHistoryFilterSourceApplicationIDs.isEmpty else {
             return

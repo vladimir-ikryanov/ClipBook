@@ -339,10 +339,17 @@ final class AppCoordinator: ObservableObject {
           guard let self else {
             return
           }
+          // Checked before anything can run the retention check again, which
+          // would delete the expired items without asking.
+          let expiredItems = self.expiredItems(among: result.itemIDs)
+          self.isRetentionPromptPresented = !expiredItems.isEmpty
           self.clipboardMonitor.start(preferences: self.model.preferences)
           self.loadHistory()
           self.isHistoryArchiveOperationRunning = false
           completion(.success(result))
+          if !expiredItems.isEmpty {
+            self.confirmKeepingExpiredImportedItems(expiredItems)
+          }
         }
       } catch {
         DispatchQueue.main.async { [weak self] in
@@ -566,9 +573,6 @@ final class AppCoordinator: ObservableObject {
       }
       removeAssetFiles(for: deletedItems, remainingItems: model.items.filter { keepingItems && shouldKeepWhenClearingHistory($0) })
       model.remove(Set(deletedItems.map(\.id)))
-      // The store also cleared items past the loaded ones, whose files only
-      // the store knows about.
-      removeOrphanedStoredFiles()
     } catch {
       model.lastError = error.localizedDescription
     }
@@ -952,7 +956,6 @@ final class AppCoordinator: ObservableObject {
       try deleteExistingMatches(for: item)
       try historyStore.upsert(item)
       model.insert(item)
-      model.enforceRetentionLimit(model.preferences.maxHistoryItems)
     } catch {
       model.lastError = error.localizedDescription
     }
@@ -1082,6 +1085,60 @@ final class AppCoordinator: ObservableObject {
     )
   }
 
+  /// The items among `itemIDs` that have outlived their "Keep history" period.
+  private func expiredItems(among itemIDs: Set<ClipboardItem.ID>) -> [ClipboardItem] {
+    let policy = HistoryRetentionPolicy(preferences: model.preferences)
+    guard !policy.isEmpty, !itemIDs.isEmpty else {
+      return []
+    }
+
+    do {
+      return try historyStore.fetchItems(expiredBy: policy).filter { itemIDs.contains($0.id) }
+    } catch {
+      model.lastError = error.localizedDescription
+      return []
+    }
+  }
+
+  /// An archive can bring in items older than the "Keep history" period of
+  /// their type, which the next retention check would delete without a word.
+  /// The user either keeps them, which makes those types unlimited, or
+  /// deletes them right away. The retention check waits for the answer.
+  private func confirmKeepingExpiredImportedItems(_ expiredItems: [ClipboardItem]) {
+    let expiredKinds = Set(expiredItems.map(\.kind))
+    let clipTypes = RetentionClipType.allCases.filter { !$0.kinds.isDisjoint(with: expiredKinds) }
+    let listFormatter = ListFormatter()
+    listFormatter.locale = L10n.currentLocale
+    let clipTypeTitles = listFormatter.string(from: clipTypes.map(\.title)) ?? ""
+
+    let alert = NSAlert()
+    alert.alertStyle = .warning
+    alert.messageText = L10n.string("Some imported items are older than the history limit. Do you want to keep them?")
+    alert.informativeText = L10n.string("Keeping them sets the history limit for %@ to Unlimited. Otherwise they will be deleted.", clipTypeTitles)
+    alert.addButton(withTitle: L10n.string("Keep Items"))
+    let deleteButton = alert.addButton(withTitle: L10n.string("Delete"))
+    deleteButton.hasDestructiveAction = true
+
+    present(alert) { [weak self] response in
+      guard let self else {
+        return
+      }
+      isRetentionPromptPresented = false
+      if response == .alertFirstButtonReturn {
+        for clipType in clipTypes {
+          model.preferences[keyPath: clipType.preferenceKeyPath] = AppPreferences.unlimitedRetentionDays
+        }
+        savePreferences()
+      } else {
+        do {
+          try removeFromHistory(expiredItems)
+        } catch {
+          model.lastError = error.localizedDescription
+        }
+      }
+    }
+  }
+
   // MARK: - Ignored applications
 
   /// Adds applications to the ignore list. When the history already holds
@@ -1144,21 +1201,27 @@ final class AppCoordinator: ObservableObject {
     deleteButton.hasDestructiveAction = true
     alert.addButton(withTitle: L10n.string("Cancel"))
 
-    let handleResponse: (NSApplication.ModalResponse) -> Void = { response in
+    present(alert) { response in
       completion(response == .alertFirstButtonReturn)
     }
+  }
+
+  /// Shows the alert on the settings window, or as a modal alert when the
+  /// settings aren't open.
+  private func present(_ alert: NSAlert, completionHandler: @escaping (NSApplication.ModalResponse) -> Void) {
     if let settingsWindow {
-      settingsWindow.presentAlert(alert, completionHandler: handleResponse)
+      settingsWindow.presentAlert(alert, completionHandler: completionHandler)
     } else {
-      handleResponse(alert.runModal())
+      completionHandler(alert.runModal())
     }
   }
 
   /// Removes items that outlived their "Keep history" period. Nothing is
   /// deleted while the user is still deciding on a new period, since they
-  /// may cancel it.
+  /// may cancel it, nor while an archive is being imported, since its items
+  /// are checked once it is in.
   private func applyRetention() {
-    guard !isRetentionPromptPresented else {
+    guard !isRetentionPromptPresented, !isHistoryArchiveOperationRunning else {
       return
     }
 
@@ -1231,7 +1294,6 @@ final class AppCoordinator: ObservableObject {
       model.selectedItemID = newItems.first?.id
       model.selectedItemIDs = Set(newItems.map(\.id))
       model.selectedItemIDsInSelectionOrder = newItems.map(\.id)
-      model.enforceRetentionLimit(model.preferences.maxHistoryItems)
     } catch {
       model.lastError = error.localizedDescription
     }
@@ -2190,7 +2252,7 @@ final class AppCoordinator: ObservableObject {
   private func loadHistory() {
     do {
       model.tags = try historyStore.fetchTags()
-      model.items = try historyStore.fetch(limit: model.preferences.maxHistoryItems)
+      model.items = try historyStore.fetchAll()
       pruneFilePreviewCache()
       removeOrphanedStoredFiles()
       model.selectedItemID = model.items.first?.id
@@ -2319,7 +2381,6 @@ extension AppCoordinator: PasteboardMonitorDelegate {
   ) {
     updatedItems.forEach(model.replace)
     model.insert(item)
-    model.enforceRetentionLimit(model.preferences.maxHistoryItems)
     applyRetention()
     resetPasteNextPointer()
     playSound(.copy)

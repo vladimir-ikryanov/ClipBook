@@ -891,6 +891,98 @@
         }
       }
     },
+    "Keep Items" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objekte behalten"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep Items"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conservar elementos"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conserva elementi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイテムを保持"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manter itens"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留项目"
+          }
+        }
+      }
+    },
+    "Keeping them sets the history limit for %@ to Unlimited. Otherwise they will be deleted." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn du sie behältst, wird das Verlaufslimit für %@ auf „Unbegrenzt“ gesetzt. Andernfalls werden sie gelöscht."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keeping them sets the history limit for %@ to Unlimited. Otherwise they will be deleted."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si los conservas, el límite del historial para %@ pasará a Ilimitado. De lo contrario, se eliminarán."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se li conservi, il limite della cronologia per %@ diventa Illimitato. Altrimenti verranno eliminati."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保持すると、%@の履歴の保持期間が「無制限」に設定されます。保持しない場合は削除されます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se você mantê-los, o limite do histórico para %@ passará a ser Ilimitado. Caso contrário, eles serão excluídos."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果保留，%@的历史记录限制将设为“无限”。否则它们将被删除。"
+          }
+        }
+      }
+    },
     "Key between pasted items" : {
       "localizations" : {
         "de" : {
@@ -1715,6 +1807,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Shift+Return"
+          }
+        }
+      }
+    },
+    "Some imported items are older than the history limit. Do you want to keep them?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einige importierte Objekte sind älter als das Verlaufslimit. Möchtest du sie behalten?"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Some imported items are older than the history limit. Do you want to keep them?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algunos elementos importados son más antiguos que el límite del historial. ¿Quieres conservarlos?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alcuni elementi importati sono più vecchi del limite della cronologia. Vuoi conservarli?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込んだアイテムの一部が履歴の保持期間より古くなっています。保持しますか？"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alguns itens importados são mais antigos que o limite do histórico. Deseja mantê-los?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "部分导入的项目早于历史记录限制。是否保留它们？"
           }
         }
       }

@@ -6,7 +6,7 @@ import Combine
 import SQLite3
 
 protocol HistoryStore {
-    func fetch(limit: Int) throws -> [ClipboardItem]
+    func fetchAll() throws -> [ClipboardItem]
     func fetchTags() throws -> [Tag]
     func capture(_ item: ClipboardItem, updatesCopySequence: Bool) throws -> ClipboardItem
     func upsert(_ item: ClipboardItem) throws
@@ -28,7 +28,7 @@ protocol HistoryStore {
     /// that content updates.
     func fetchItem(kind: ClipboardKind, contentKey: String) throws -> ClipboardItem?
     /// The files every item in the store refers to, its image and its link
-    /// preview pictures, also for items past the limit the history loads.
+    /// preview pictures.
     func fetchStoredFilePaths() throws -> Set<String>
     func fetchItems(where isIncluded: (ClipboardItem) -> Bool) throws -> [ClipboardItem]
     /// The item copied last among those `isIncluded` accepts. Items are read
