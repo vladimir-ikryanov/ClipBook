@@ -61,6 +61,14 @@ final class AppCoordinator: ObservableObject {
   /// Fires when something tried to use an item while the history is read-only,
   /// so the notice above the history can point out why nothing happened.
   let readOnlyHistoryActionAttempts = PassthroughSubject<Void, Never>()
+  /// Undoes moving items to the Trash and putting them back. It belongs to
+  /// the history rather than to a window, so a deletion can be undone the next
+  /// time the history is opened.
+  private let historyUndoManager: UndoManager = {
+    let undoManager = UndoManager()
+    undoManager.levelsOfUndo = 50
+    return undoManager
+  }()
 
   /// After the trial the history keeps showing and taking in new items, but
   /// its items can no longer be copied, pasted, edited or otherwise reused.
@@ -131,6 +139,7 @@ final class AppCoordinator: ObservableObject {
     clearHistoryAfterRebootIfNeeded()
     applyRetention()
     scheduleRetentionChecks()
+    observeTrashVisibility()
     configurePanel()
     configureShortcuts()
     clipboardMonitor.delegate = self
@@ -559,10 +568,13 @@ final class AppCoordinator: ObservableObject {
     }
   }
   
+  /// Deletes the history for good, the Trash included, as clearing it on quit
+  /// or after a restart is meant to leave nothing behind.
   func clearHistory() {
     do {
       let keepingItems = model.preferences.keepFavoritesOnClearHistory
       let deletedItems = model.items.filter { !keepingItems || !shouldKeepWhenClearingHistory($0) }
+        + (try historyStore.fetchTrashedItems())
       try historyStore.clear(keepingFavoritesAndTaggedItems: keepingItems)
       if keepingItems {
         deletedItems.forEach(removeLinkPreviewFiles)
@@ -586,12 +598,28 @@ final class AppCoordinator: ObservableObject {
       return
     }
 
+    // What the Trash shows is already deleted, so deleting all of it empties it.
+    guard !model.isShowingTrash else {
+      emptyTrash()
+      return
+    }
+
     guard model.isHistoryNarrowed else {
       guard shouldProceedWithClearHistory(isNarrowed: false) else {
         return
       }
 
-      clearHistory()
+      guard model.preferences.isTrashEnabled else {
+        clearHistory()
+        return
+      }
+
+      let keepingItems = model.preferences.keepFavoritesOnClearHistory
+      do {
+        try moveToTrash(model.items.filter { !keepingItems || !shouldKeepWhenClearingHistory($0) })
+      } catch {
+        model.lastError = error.localizedDescription
+      }
       return
     }
 
@@ -601,7 +629,7 @@ final class AppCoordinator: ObservableObject {
     }
 
     do {
-      try removeFromHistory(deletedItems)
+      try moveToTrash(deletedItems)
     } catch {
       model.lastError = error.localizedDescription
     }
@@ -683,7 +711,7 @@ final class AppCoordinator: ObservableObject {
       return
     }
 
-    let items = model.filteredItems
+    let items = model.filteredHistoryItems
     let pasteNextItems = historyItemsForPasteNext(in: items)
     guard let item = historyItemForPasteNext(in: pasteNextItems) else {
       return
@@ -749,7 +777,7 @@ final class AppCoordinator: ObservableObject {
     // The pasteboard already holds the item's data at this point, so removing
     // the item (and its asset files) cannot affect what gets pasted.
     if deletesAfterPaste {
-      try removeFromHistory([item])
+      try moveToTrash([item])
       interruptCopySequenceTracking()
       return
     }
@@ -809,7 +837,7 @@ final class AppCoordinator: ObservableObject {
   }
 
   private func resetPasteNextPointer() {
-    pasteNextItemID = historyItemsForPasteNext(in: model.filteredItems).first?.id
+    pasteNextItemID = historyItemsForPasteNext(in: model.filteredHistoryItems).first?.id
   }
 
   var defaultMultiPasteKey: PasteInterItemAction {
@@ -1002,15 +1030,16 @@ final class AppCoordinator: ObservableObject {
     }
     
     do {
-      try removeFromHistory(items)
+      try moveToTrash(items)
       playSound(.delete)
     } catch {
       model.lastError = error.localizedDescription
     }
   }
 
-  /// Deletes the items from the store, drops their cached previews, and takes
-  /// them out of the model.
+  /// Deletes the items from the store for good, drops their cached previews,
+  /// and takes them out of the model. Items in the Trash are deleted the same
+  /// way as items in the history.
   private func removeFromHistory(_ items: [ClipboardItem]) throws {
     guard !items.isEmpty else {
       return
@@ -1021,15 +1050,267 @@ final class AppCoordinator: ObservableObject {
     // A menu or a row may hold a copy of an item from before its link preview
     // was saved, so the files are taken from the item as the history has it now.
     let currentItemsByID = Dictionary(
-      model.items.filter { deletedItemIDs.contains($0.id) }.map { ($0.id, $0) },
+      (model.items + model.trashedItems).filter { deletedItemIDs.contains($0.id) }.map { ($0.id, $0) },
       uniquingKeysWith: { first, _ in first }
     )
     let items = items.map { currentItemsByID[$0.id] ?? $0 }
+    // An item in the Trash keeps its files, so they are spared as long as it
+    // or an item in the history still names them.
     let remainingItems = model.items.filter { !deletedItemIDs.contains($0.id) }
+      + ((try? historyStore.fetchTrashedItems()) ?? []).filter { !deletedItemIDs.contains($0.id) }
     items.forEach(removeLinkPreviewFiles)
     removeFilePreviewFiles(for: items, remainingItems: remainingItems)
     removeAssetFiles(for: items, remainingItems: remainingItems)
     model.remove(deletedItemIDs)
+  }
+
+  // MARK: - Trash
+
+  /// Moves the items to the Trash, where they keep their files and can be
+  /// put back until the Trash period runs out. With the Trash turned off they
+  /// are deleted for good. So is an item whose content the history hides,
+  /// since a secret the user deletes is expected to be gone.
+  private func moveToTrash(_ items: [ClipboardItem]) throws {
+    guard !items.isEmpty else {
+      return
+    }
+
+    guard model.preferences.isTrashEnabled else {
+      try removeFromHistory(items)
+      return
+    }
+
+    let detectsSensitiveContent = model.preferences.detectSensitiveContent
+    let sensitiveItems = items.filter { SensitiveContent.isMasked($0, detectsAutomatically: detectsSensitiveContent) }
+    try removeFromHistory(sensitiveItems)
+
+    let sensitiveItemIDs = Set(sensitiveItems.map(\.id))
+    let trashedItemIDs = items.map(\.id).filter { !sensitiveItemIDs.contains($0) }
+    guard !trashedItemIDs.isEmpty else {
+      return
+    }
+
+    let selection = model.selection
+    let deletedAt = Date()
+    try historyStore.moveToTrash(ids: trashedItemIDs, at: deletedAt)
+    let trashedIDSet = Set(trashedItemIDs)
+    let currentItemsByID = Dictionary(
+      model.items.filter { trashedIDSet.contains($0.id) }.map { ($0.id, $0) },
+      uniquingKeysWith: { first, _ in first }
+    )
+    let trashedItems = items
+      .filter { trashedIDSet.contains($0.id) }
+      .map { item -> ClipboardItem in
+        var item = currentItemsByID[item.id] ?? item
+        item.deletedAt = deletedAt
+        return item
+      }
+    model.remove(trashedIDSet)
+    model.insertIntoTrash(trashedItems)
+
+    historyUndoManager.registerUndo(withTarget: self) { coordinator in
+      coordinator.restoreFromTrash(ids: trashedItemIDs, selection: selection)
+    }
+  }
+
+  /// Puts items in the Trash back in the history. Undoing it moves them back.
+  /// An undone deletion brings back the selection it was made with.
+  private func restoreFromTrash(ids: [ClipboardItem.ID], selection: HistorySelection? = nil) {
+    let idSet = Set(ids)
+    do {
+      let restoredItems = try historyStore.fetchTrashedItems().filter { idSet.contains($0.id) }
+      guard !restoredItems.isEmpty else {
+        return
+      }
+
+      try historyStore.restoreFromTrash(ids: restoredItems.map(\.id))
+      model.remove(Set(restoredItems.map(\.id)))
+      model.restore(restoredItems, selection: selection)
+      let restoredItemIDs = restoredItems.map(\.id)
+      historyUndoManager.registerUndo(withTarget: self) { coordinator in
+        coordinator.moveToTrash(ids: restoredItemIDs)
+      }
+    } catch {
+      model.lastError = error.localizedDescription
+    }
+  }
+
+  /// Moves items of the history to the Trash again, when a restore is undone.
+  private func moveToTrash(ids: [ClipboardItem.ID]) {
+    let idSet = Set(ids)
+    do {
+      try moveToTrash(model.items.filter { idSet.contains($0.id) })
+    } catch {
+      model.lastError = error.localizedDescription
+    }
+  }
+
+  func putBack(_ items: [ClipboardItem]) {
+    guard allowsUsingHistoryItems() else {
+      return
+    }
+
+    restoreFromTrash(ids: items.map(\.id))
+  }
+
+  func undoHistoryChange() {
+    guard allowsUsingHistoryItems(), historyUndoManager.canUndo else {
+      return
+    }
+
+    historyUndoManager.undo()
+  }
+
+  func redoHistoryChange() {
+    guard allowsUsingHistoryItems(), historyUndoManager.canRedo else {
+      return
+    }
+
+    historyUndoManager.redo()
+  }
+
+  /// Deletes items in the Trash for good, once the user confirms it.
+  func deleteImmediately(_ items: [ClipboardItem]) {
+    guard allowsUsingHistoryItems(), !items.isEmpty else {
+      return
+    }
+
+    let alert = NSAlert()
+    alert.alertStyle = .warning
+    alert.messageText = items.count == 1
+      ? L10n.string("Are you sure you want to delete this item immediately?")
+      : L10n.string("Are you sure you want to delete %d items immediately?", items.count)
+    alert.informativeText = L10n.string("You can't undo this action.")
+    let deleteButton = alert.addButton(withTitle: L10n.string("Delete"))
+    deleteButton.hasDestructiveAction = true
+    alert.addButton(withTitle: L10n.string("Cancel"))
+    presentOnHistoryWindow(alert) { [weak self] response in
+      guard let self, response == .alertFirstButtonReturn else {
+        return
+      }
+
+      do {
+        try removeFromHistory(items)
+        playSound(.delete)
+      } catch {
+        model.lastError = error.localizedDescription
+      }
+    }
+  }
+
+  /// Deletes everything in the Trash for good, once the user confirms it. From
+  /// Settings the confirmation is a sheet on the settings window.
+  func emptyTrash(fromSettings: Bool = false) {
+    guard allowsUsingHistoryItems() else {
+      return
+    }
+
+    let items: [ClipboardItem]
+    do {
+      items = try historyStore.fetchTrashedItems()
+    } catch {
+      model.lastError = error.localizedDescription
+      return
+    }
+    guard !items.isEmpty else {
+      return
+    }
+
+    let alert = NSAlert()
+    alert.alertStyle = .warning
+    alert.messageText = L10n.string("Are you sure you want to permanently erase the items in the Trash?")
+    alert.informativeText = L10n.string("You can't undo this action.")
+    let emptyButton = alert.addButton(withTitle: L10n.string("Empty Trash"))
+    emptyButton.hasDestructiveAction = true
+    alert.addButton(withTitle: L10n.string("Cancel"))
+    let deleteItems = { [weak self] in
+      do {
+        try self?.removeFromHistory(items)
+        self?.playSound(.delete)
+      } catch {
+        self?.model.lastError = error.localizedDescription
+      }
+    }
+    let completion = { (response: NSApplication.ModalResponse) in
+      if response == .alertFirstButtonReturn {
+        deleteItems()
+      }
+    }
+    if fromSettings {
+      present(alert, completionHandler: completion)
+    } else {
+      presentOnHistoryWindow(alert, completionHandler: completion)
+    }
+  }
+
+  /// Shows the alert as a sheet on the history window while it is on screen,
+  /// so the history stays open behind it, or as a modal alert otherwise. A
+  /// sheet still closing, such as the command palette, goes first.
+  private func presentOnHistoryWindow(
+    _ alert: NSAlert,
+    completionHandler: @escaping (NSApplication.ModalResponse) -> Void
+  ) {
+    guard let window = historyWindow?.window, window.isVisible else {
+      completionHandler(alert.runModal())
+      return
+    }
+
+    alert.beginSheetModal(for: window, completionHandler: completionHandler)
+  }
+
+  /// Applies a new Trash period. Items that have been in the Trash longer
+  /// are deleted right away, as they would be on the next check.
+  func setTrashRetentionDays(_ days: Int) {
+    guard days != model.preferences.trashRetentionDays else {
+      return
+    }
+
+    model.preferences.trashRetentionDays = days
+    savePreferences()
+    purgeExpiredTrashedItems()
+  }
+
+  /// Deletes the items that have been in the Trash longer than its period,
+  /// or all of them once the Trash is turned off.
+  private func purgeExpiredTrashedItems() {
+    let days = model.preferences.trashRetentionDays
+    let cutoff = days > 0
+      ? Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+      : Date.distantFuture
+    do {
+      try removeFromHistory(try historyStore.fetchItems(trashedBefore: cutoff))
+    } catch {
+      model.lastError = error.localizedDescription
+    }
+  }
+
+  /// The Trash is read from the store when it is shown and let go when it is
+  /// not. The change arrives before the filter is stored, so the list built
+  /// for the Trash already has its items.
+  private func observeTrashVisibility() {
+    model.$selectedHistoryFilterContentTypes
+      .map { $0.contains(.trash) }
+      .removeDuplicates()
+      .sink { [weak self] isShowingTrash in
+        self?.setTrashLoaded(isShowingTrash)
+      }
+      .store(in: &cancellables)
+  }
+
+  private func setTrashLoaded(_ isLoaded: Bool) {
+    guard isLoaded else {
+      if !model.trashedItems.isEmpty {
+        model.trashedItems = []
+      }
+      return
+    }
+
+    purgeExpiredTrashedItems()
+    do {
+      model.trashedItems = try historyStore.fetchTrashedItems()
+    } catch {
+      model.lastError = error.localizedDescription
+    }
   }
 
   // MARK: - History retention
@@ -1225,6 +1506,7 @@ final class AppCoordinator: ObservableObject {
       return
     }
 
+    purgeExpiredTrashedItems()
     let policy = HistoryRetentionPolicy(preferences: model.preferences)
     guard !policy.isEmpty else {
       return
@@ -1800,11 +2082,14 @@ final class AppCoordinator: ObservableObject {
     pendingLinkPreviewModelUpdatesByItemID.removeAll()
     linkPreviewModelUpdateTask = nil
 
-    guard !updates.isEmpty else {
+    // An item deleted while its preview was saved is not brought back.
+    let historyItemIDs = Set(model.items.map(\.id))
+    let historyUpdates = updates.filter { historyItemIDs.contains($0.id) }
+    guard !historyUpdates.isEmpty else {
       return
     }
 
-    model.replace(updates)
+    model.replace(historyUpdates)
   }
 
   private var linkPreviewsDirectory: URL {
@@ -1936,7 +2221,8 @@ final class AppCoordinator: ObservableObject {
   }
 
   private func pruneFilePreviewCache() {
-    filePreviewCache.prune(keepingFilePaths: Set(model.items.flatMap(\.filePaths)))
+    let trashedItems = (try? historyStore.fetchTrashedItems()) ?? []
+    filePreviewCache.prune(keepingFilePaths: Set((model.items + trashedItems).flatMap(\.filePaths)))
   }
 
   private func cancelLinkPreviewTasks() {
@@ -2253,6 +2539,9 @@ final class AppCoordinator: ObservableObject {
     do {
       model.tags = try historyStore.fetchTags()
       model.items = try historyStore.fetchAll()
+      if model.isShowingTrash {
+        model.trashedItems = try historyStore.fetchTrashedItems()
+      }
       pruneFilePreviewCache()
       removeOrphanedStoredFiles()
       model.selectedItemID = model.items.first?.id
@@ -2290,18 +2579,29 @@ final class AppCoordinator: ObservableObject {
     let alert = NSAlert()
     alert.alertStyle = .warning
     let keepsProtectedItems = model.preferences.keepFavoritesOnClearHistory
+    let movesToTrash = model.preferences.isTrashEnabled
     if isNarrowed {
       alert.messageText = L10n.string("Are you sure you want to delete all filtered history items?")
-      if keepsProtectedItems {
+      switch (keepsProtectedItems, movesToTrash) {
+      case (true, true):
+        alert.informativeText = L10n.string("The history items currently shown, except favorites and tagged items, will be moved to the Trash.")
+      case (false, true):
+        alert.informativeText = L10n.string("The history items currently shown, including favorites and tagged items, will be moved to the Trash.")
+      case (true, false):
         alert.informativeText = L10n.string("This will delete the history items currently shown, except favorites and tagged items. This action cannot be undone.")
-      } else {
+      case (false, false):
         alert.informativeText = L10n.string("This will delete the history items currently shown, including favorites and tagged items. This action cannot be undone.")
       }
     } else {
       alert.messageText = L10n.string("Are you sure you want to clear entire history?")
-      if keepsProtectedItems {
+      switch (keepsProtectedItems, movesToTrash) {
+      case (true, true):
+        alert.informativeText = L10n.string("All history items except favorites and tagged items will be moved to the Trash.")
+      case (false, true):
+        alert.informativeText = L10n.string("All history items including favorites and tagged items will be moved to the Trash.")
+      case (true, false):
         alert.informativeText = L10n.string("This will delete all history items except favorites and tagged items. This action cannot be undone.")
-      } else {
+      case (false, false):
         alert.informativeText = L10n.string("This will delete all history items including favorites and tagged items. This action cannot be undone.")
       }
     }
@@ -2380,6 +2680,10 @@ extension AppCoordinator: PasteboardMonitorDelegate {
     updatedItems: [ClipboardItem]
   ) {
     updatedItems.forEach(model.replace)
+    // Copying the content of an item in the Trash brings that item back.
+    if model.trashedItems.contains(where: { $0.id == item.id }) {
+      model.remove([item.id])
+    }
     model.insert(item)
     applyRetention()
     resetPasteNextPointer()

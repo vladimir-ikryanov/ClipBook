@@ -34,6 +34,7 @@ enum HistoryFilterContentType: String, CaseIterable, Equatable, Identifiable {
     case links
     case emails
     case colors
+    case trash
 
     var id: String {
         rawValue
@@ -49,13 +50,15 @@ enum HistoryFilterContentType: String, CaseIterable, Equatable, Identifiable {
         case .links: L10n.string("Links")
         case .emails: L10n.string("Emails")
         case .colors: L10n.string("Colors")
+        case .trash: L10n.string("Trash")
         }
     }
 
     /// `true` for the entries that narrow the history to a kind of item. `all`
-    /// only clears the group and `favorites` is applied on top of the kinds.
+    /// only clears the group, `favorites` is applied on top of the kinds, and
+    /// `trash` lists the deleted items instead of the history.
     var isKindFilter: Bool {
-        self != .all && self != .favorites
+        self != .all && self != .favorites && self != .trash
     }
 
     func matches(_ item: ClipboardItem) -> Bool {
@@ -76,6 +79,8 @@ enum HistoryFilterContentType: String, CaseIterable, Equatable, Identifiable {
             return item.kind == .email
         case .colors:
             return item.kind == .color
+        case .trash:
+            return item.deletedAt != nil
         }
     }
 }
@@ -115,11 +120,27 @@ struct HistorySourceApplication: Identifiable, Hashable {
     }
 }
 
+/// The selection of the history at one moment, kept to bring it back later.
+struct HistorySelection {
+    let itemID: ClipboardItem.ID?
+    let itemIDs: Set<ClipboardItem.ID>
+    let itemIDsInSelectionOrder: [ClipboardItem.ID]
+}
+
 @MainActor
 final class AppModel: ObservableObject {
     // Everything `filteredItems` depends on drops the list it keeps, so the
     // next read builds it again.
     @Published var items: [ClipboardItem] = [] {
+        didSet {
+            invalidateFilteredItems()
+            cachedHistorySourceApplications = nil
+        }
+    }
+    /// The items in the Trash. They are read from the store while the Trash
+    /// is shown and let go once it is not, so the Trash costs no memory while
+    /// the history is used as usual.
+    @Published var trashedItems: [ClipboardItem] = [] {
         didSet {
             invalidateFilteredItems()
             cachedHistorySourceApplications = nil
@@ -153,7 +174,12 @@ final class AppModel: ObservableObject {
     /// widening them, because a user picking "Favorites" and "Images" expects
     /// favorite images rather than everything favorite plus every image.
     @Published var selectedHistoryFilterContentTypes: Set<HistoryFilterContentType> = [] {
-        didSet { invalidateFilteredItems() }
+        didSet {
+            invalidateFilteredItems()
+            if oldValue.contains(.trash) != selectedHistoryFilterContentTypes.contains(.trash) {
+                cachedHistorySourceApplications = nil
+            }
+        }
     }
     @Published var selectedHistoryFilterTagIDs: Set<Tag.ID> = [] {
         didSet { invalidateFilteredItems() }
@@ -192,10 +218,47 @@ final class AppModel: ObservableObject {
         return result
     }
 
+    /// Whether the list shows the Trash instead of the history.
+    var isShowingTrash: Bool {
+        selectedHistoryFilterContentTypes.contains(.trash)
+    }
+
+    /// The items the list is made of: the Trash while it is shown, otherwise
+    /// the history.
+    private var listedItems: [ClipboardItem] {
+        isShowingTrash ? trashedItems : items
+    }
+
+    /// The history as the list would show it with the same filters, the
+    /// Trash aside. Pasting the next item takes from it, so it never pastes
+    /// a deleted item while the Trash happens to be shown.
+    var filteredHistoryItems: [ClipboardItem] {
+        guard isShowingTrash else {
+            return filteredItems
+        }
+
+        var contentTypes = selectedHistoryFilterContentTypes
+        contentTypes.remove(.trash)
+        return makeFilteredItems(from: items, contentTypes: contentTypes, order: historyOrder)
+    }
+
     private func makeFilteredItems() -> [ClipboardItem] {
+        if isShowingTrash {
+            return makeFilteredItems(from: trashedItems, contentTypes: selectedHistoryFilterContentTypes, order: nil)
+        }
+
+        return makeFilteredItems(from: items, contentTypes: selectedHistoryFilterContentTypes, order: historyOrder)
+    }
+
+    /// Without an order the items are sorted the way the Trash lists them,
+    /// the most recently deleted first.
+    private func makeFilteredItems(
+        from items: [ClipboardItem],
+        contentTypes: Set<HistoryFilterContentType>,
+        order: HistoryOrder?
+    ) -> [ClipboardItem] {
         var result = items
 
-        let contentTypes = selectedHistoryFilterContentTypes
         if !contentTypes.isEmpty {
             result = result.filter { Self.contentTypes(contentTypes, match: $0) }
         }
@@ -221,10 +284,26 @@ final class AppModel: ObservableObject {
             result = result.filter { $0.searchText.localizedCaseInsensitiveContains(query) }
         }
 
-        let order = historyOrder
-        result.sort(by: order.ordersBefore(_:_:))
+        if let order {
+            result.sort(by: order.ordersBefore(_:_:))
+        } else {
+            result.sort(by: Self.trashOrdersBefore(_:_:))
+        }
 
         return result
+    }
+
+    private static func trashOrdersBefore(_ lhs: ClipboardItem, _ rhs: ClipboardItem) -> Bool {
+        let lhsDeletedAt = lhs.deletedAt ?? .distantPast
+        let rhsDeletedAt = rhs.deletedAt ?? .distantPast
+        if lhsDeletedAt != rhsDeletedAt {
+            return lhsDeletedAt > rhsDeletedAt
+        }
+        if lhs.copiedAt != rhs.copiedAt {
+            return lhs.copiedAt > rhs.copiedAt
+        }
+
+        return lhs.id.uuidString < rhs.id.uuidString
     }
 
     /// Every favorite in the order the pinned favorites section lists them,
@@ -238,7 +317,7 @@ final class AppModel: ObservableObject {
         guard let selectedItemID else {
             return filteredItems.first
         }
-        return items.first { $0.id == selectedItemID }
+        return listedItems.first { $0.id == selectedItemID }
     }
 
     var selectedItems: [ClipboardItem] {
@@ -255,7 +334,7 @@ final class AppModel: ObservableObject {
         if !orderedIDs.isEmpty {
             let wantedIDs = Set(orderedIDs)
             var itemsByID: [ClipboardItem.ID: ClipboardItem] = [:]
-            for item in items where wantedIDs.contains(item.id) && itemsByID[item.id] == nil {
+            for item in listedItems where wantedIDs.contains(item.id) && itemsByID[item.id] == nil {
                 itemsByID[item.id] = item
             }
             let selectedItemsInOrder = orderedIDs.compactMap { itemsByID[$0] }
@@ -326,7 +405,7 @@ final class AppModel: ObservableObject {
         // Launch Services and the file system. Every application is therefore
         // considered once, however many items came from it.
         var seenSources = Set<SourceApplicationKey>()
-        let applications = items.compactMap { item -> HistorySourceApplication? in
+        let applications = listedItems.compactMap { item -> HistorySourceApplication? in
             guard let sourceAppName = item.sourceAppName,
                   seenSources.insert(SourceApplicationKey(name: sourceAppName, bundleIdentifier: item.sourceBundleIdentifier)).inserted,
                   let name = sourceAppName.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty else {
@@ -381,6 +460,9 @@ final class AppModel: ObservableObject {
             visibleItems.firstIndex { $0.id == selectedItemID }
         }
         items.removeAll { ids.contains($0.id) }
+        if trashedItems.contains(where: { ids.contains($0.id) }) {
+            trashedItems.removeAll { ids.contains($0.id) }
+        }
         clearUnavailableHistorySourceApplicationFilter()
         selectedItemIDs.subtract(ids)
         selectedItemIDsInSelectionOrder.removeAll { ids.contains($0) }
@@ -398,6 +480,65 @@ final class AppModel: ObservableObject {
             selectedItemIDs = selectedItemID.map { [$0] } ?? []
             selectedItemIDsInSelectionOrder = selectedItemID.map { [$0] } ?? []
         }
+    }
+
+    /// Adds items moved to the Trash to the list of the Trash, if it is shown.
+    func insertIntoTrash(_ trashedItems: [ClipboardItem]) {
+        guard isShowingTrash, !trashedItems.isEmpty else {
+            return
+        }
+
+        let ids = Set(trashedItems.map(\.id))
+        self.trashedItems = trashedItems.map { $0.unloadingFormatting() }
+            + self.trashedItems.filter { !ids.contains($0.id) }
+    }
+
+    var selection: HistorySelection {
+        HistorySelection(
+            itemID: selectedItemID,
+            itemIDs: selectedItemIDs,
+            itemIDsInSelectionOrder: selectedItemIDsInSelectionOrder
+        )
+    }
+
+    /// Puts items taken out of the Trash back in the history. Unless the Trash
+    /// is shown, where they are gone from, the selection goes back to what it
+    /// was when they were deleted, or else moves to them.
+    func restore(_ restoredItems: [ClipboardItem], selection: HistorySelection? = nil) {
+        guard !restoredItems.isEmpty else {
+            return
+        }
+
+        let ids = Set(restoredItems.map(\.id))
+        let restoredItems = restoredItems.map { item -> ClipboardItem in
+            var item = item.unloadingFormatting()
+            item.deletedAt = nil
+            return item
+        }
+        items = restoredItems + items.filter { !ids.contains($0.id) }
+        clearUnavailableHistorySourceApplicationFilter()
+        guard !isShowingTrash else {
+            return
+        }
+
+        let visibleItemIDs = Set(filteredItems.map(\.id))
+        if let selection,
+           let itemID = selection.itemID ?? selection.itemIDsInSelectionOrder.first,
+           visibleItemIDs.contains(itemID) {
+            selectedItemID = itemID
+            selectedItemIDs = selection.itemIDs.intersection(visibleItemIDs)
+            selectedItemIDsInSelectionOrder = selection.itemIDsInSelectionOrder.filter { visibleItemIDs.contains($0) }
+            return
+        }
+
+        let visibleRestoredItems = filteredItems.filter { ids.contains($0.id) }
+        guard let firstItem = visibleRestoredItems.first else {
+            return
+        }
+
+        selectedItemID = firstItem.id
+        selectedItemIDs = Set(visibleRestoredItems.map(\.id))
+        selectedItemIDsInSelectionOrder = visibleRestoredItems.map(\.id)
     }
 
     func replace(_ item: ClipboardItem) {

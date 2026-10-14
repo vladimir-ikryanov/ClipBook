@@ -102,6 +102,8 @@ struct AppPreferences: Codable, Equatable {
     static let defaultHistoryWindowHeight: Double = 700
     static let defaultSettingsWindowWidth: Double = 680
     static let defaultSettingsWindowHeight: Double = 720
+    static let defaultTrashRetentionDays = 30
+    static let trashRetentionDayOptions = [0, 1, 7, 30, 90]
 
     var appearance: AppAppearance = .system
     var language = "en"
@@ -171,6 +173,9 @@ struct AppPreferences: Codable, Equatable {
     var emailRetentionDays = Self.unlimitedRetentionDays
     var colorRetentionDays = Self.unlimitedRetentionDays
     var keepFavoritesOnClearHistory = true
+    /// How many days deleted items stay in the Trash. Zero turns the Trash
+    /// off, and deleting an item then deletes it for good.
+    var trashRetentionDays = Self.defaultTrashRetentionDays
     var warnOnClearHistory = true
     var clearHistoryOnQuit = false
     var clearHistoryOnReboot = false
@@ -310,6 +315,7 @@ struct AppPreferences: Codable, Equatable {
         emailRetentionDays = try container.decodeIfPresent(Int.self, forKey: .emailRetentionDays) ?? defaults.emailRetentionDays
         colorRetentionDays = try container.decodeIfPresent(Int.self, forKey: .colorRetentionDays) ?? defaults.colorRetentionDays
         keepFavoritesOnClearHistory = try container.decodeIfPresent(Bool.self, forKey: .keepFavoritesOnClearHistory) ?? defaults.keepFavoritesOnClearHistory
+        trashRetentionDays = try container.decodeIfPresent(Int.self, forKey: .trashRetentionDays) ?? defaults.trashRetentionDays
         warnOnClearHistory = try container.decodeIfPresent(Bool.self, forKey: .warnOnClearHistory) ?? defaults.warnOnClearHistory
         clearHistoryOnQuit = try container.decodeIfPresent(Bool.self, forKey: .clearHistoryOnQuit) ?? defaults.clearHistoryOnQuit
         clearHistoryOnReboot = try container.decodeIfPresent(Bool.self, forKey: .clearHistoryOnReboot) ?? defaults.clearHistoryOnReboot
@@ -384,6 +390,11 @@ struct AppPreferences: Codable, Equatable {
     /// moved to the top while it is on.
     var updatesHistoryAfterAction: Bool {
         updateHistoryAfterAction && !copySequenceModeEnabled
+    }
+
+    /// Whether deleted items go to the Trash rather than being deleted for good.
+    var isTrashEnabled: Bool {
+        trashRetentionDays > 0
     }
 
     func isSoundEffectEnabled(_ effect: SoundEffect) -> Bool {

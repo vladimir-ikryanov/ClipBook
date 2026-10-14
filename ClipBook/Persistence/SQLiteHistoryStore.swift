@@ -29,7 +29,7 @@ final class SQLiteHistoryStore: HistoryStore {
         defer { lock.unlock() }
 
         try open()
-        let sql = "SELECT payload, copiedAt FROM clips ORDER BY copiedAt DESC;"
+        let sql = "SELECT payload, copiedAt FROM clips WHERE deletedAt IS NULL ORDER BY copiedAt DESC;"
         let statement = try prepare(sql)
         defer { sqlite3_finalize(statement) }
 
@@ -42,6 +42,72 @@ final class SQLiteHistoryStore: HistoryStore {
             }
         }
         return items
+    }
+
+    func fetchTrashedItems() throws -> [ClipboardItem] {
+        lock.lock()
+        defer { lock.unlock() }
+
+        try open()
+        let statement = try prepare("""
+            SELECT payload, copiedAt, deletedAt FROM clips
+            WHERE deletedAt IS NOT NULL
+            ORDER BY deletedAt DESC;
+            """)
+        defer { sqlite3_finalize(statement) }
+
+        var items: [ClipboardItem] = []
+        while sqlite3_step(statement) == SQLITE_ROW {
+            if let item = try? decodeItem(from: statement) {
+                items.append(item)
+            }
+        }
+        return items
+    }
+
+    func fetchItems(trashedBefore date: Date) throws -> [ClipboardItem] {
+        lock.lock()
+        defer { lock.unlock() }
+
+        try open()
+        let statement = try prepare("SELECT payload, copiedAt, deletedAt FROM clips WHERE deletedAt < ?;")
+        defer { sqlite3_finalize(statement) }
+        sqlite3_bind_double(statement, 1, date.timeIntervalSince1970)
+
+        var items: [ClipboardItem] = []
+        while sqlite3_step(statement) == SQLITE_ROW {
+            if let item = try? decodeItem(from: statement) {
+                items.append(item)
+            }
+        }
+        return items
+    }
+
+    func moveToTrash(ids: [UUID], at date: Date) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard !ids.isEmpty else {
+            return
+        }
+
+        try performInTransaction {
+            let statement = try prepare("UPDATE clips SET deletedAt = ? WHERE id = ?;")
+            defer { sqlite3_finalize(statement) }
+            for id in ids {
+                sqlite3_reset(statement)
+                sqlite3_bind_double(statement, 1, date.timeIntervalSince1970)
+                try bind(id.uuidString, at: 2, statement: statement)
+                try step(statement)
+            }
+        }
+    }
+
+    func restoreFromTrash(ids: [UUID]) throws {
+        lock.lock()
+        defer { lock.unlock() }
+
+        try restoreClips(ids: ids)
     }
 
     func fetchTags() throws -> [Tag] {
@@ -102,6 +168,10 @@ final class SQLiteHistoryStore: HistoryStore {
             )
             existingItem.copyCount += 1
             try upsert(existingItem)
+            if existingItem.deletedAt != nil {
+                try restoreClips(ids: [existingItem.id])
+                existingItem.deletedAt = nil
+            }
             return existingItem
         }
 
@@ -116,12 +186,15 @@ final class SQLiteHistoryStore: HistoryStore {
         try open()
         // The formatting has its own columns. An item that has formatting but
         // does not hold it, such as one from the history marked as a favorite,
-        // leaves the stored formatting as it is.
+        // leaves the stored formatting as it is. Updating an item leaves it in
+        // or out of the Trash: a copy of the item taken before it was deleted,
+        // such as one whose link preview was still loading, must not bring it
+        // back.
         let writesFormatting = item.isFormattingLoaded || !item.hasFormatting
         let payload = try encoder.encode(item.unloadingFormatting())
         let sql = """
-        INSERT INTO clips (id, kind, copiedAt, favorite, sourceApp, searchText, contentKey, payload, html, rtf)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO clips (id, kind, copiedAt, favorite, sourceApp, searchText, contentKey, payload, html, rtf, deletedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
             kind = excluded.kind,
             copiedAt = excluded.copiedAt,
@@ -143,6 +216,11 @@ final class SQLiteHistoryStore: HistoryStore {
         bind(payload, at: 8, statement: statement)
         try bind(item.html, at: 9, statement: statement)
         bind(item.rtfData, at: 10, statement: statement)
+        if let deletedAt = item.deletedAt {
+            sqlite3_bind_double(statement, 11, deletedAt.timeIntervalSince1970)
+        } else {
+            sqlite3_bind_null(statement, 11)
+        }
         try step(statement)
     }
 
@@ -285,7 +363,7 @@ final class SQLiteHistoryStore: HistoryStore {
         defer { lock.unlock() }
 
         try open()
-        let statement = try prepare("SELECT payload, copiedAt FROM clips ORDER BY copiedAt DESC;")
+        let statement = try prepare("SELECT payload, copiedAt FROM clips WHERE deletedAt IS NULL ORDER BY copiedAt DESC;")
         defer { sqlite3_finalize(statement) }
 
         var items: [ClipboardItem] = []
@@ -302,7 +380,7 @@ final class SQLiteHistoryStore: HistoryStore {
         defer { lock.unlock() }
 
         try open()
-        let statement = try prepare("SELECT payload, copiedAt FROM clips ORDER BY copiedAt DESC;")
+        let statement = try prepare("SELECT payload, copiedAt FROM clips WHERE deletedAt IS NULL ORDER BY copiedAt DESC;")
         defer { sqlite3_finalize(statement) }
 
         while sqlite3_step(statement) == SQLITE_ROW {
@@ -367,7 +445,7 @@ final class SQLiteHistoryStore: HistoryStore {
 
         try open()
         let conditions = cutoffs.map { _ in "(kind = ? AND copiedAt < ?)" }.joined(separator: " OR ")
-        let statement = try prepare("SELECT payload, copiedAt FROM clips WHERE \(conditions) ORDER BY copiedAt DESC;")
+        let statement = try prepare("SELECT payload, copiedAt FROM clips WHERE deletedAt IS NULL AND (\(conditions)) ORDER BY copiedAt DESC;")
         defer { sqlite3_finalize(statement) }
         for (offset, (kind, cutoff)) in cutoffs.enumerated() {
             try bind(kind.rawValue, at: Int32(offset * 2 + 1), statement: statement)
@@ -489,9 +567,13 @@ final class SQLiteHistoryStore: HistoryStore {
         if try !columnExists("rtf", in: "clips") {
             try exec("ALTER TABLE clips ADD COLUMN rtf BLOB;")
         }
+        if try !columnExists("deletedAt", in: "clips") {
+            try exec("ALTER TABLE clips ADD COLUMN deletedAt REAL;")
+        }
         try exec("CREATE INDEX IF NOT EXISTS idx_clips_copiedAt ON clips(copiedAt DESC);")
         try exec("CREATE INDEX IF NOT EXISTS idx_clips_kind ON clips(kind);")
         try exec("CREATE INDEX IF NOT EXISTS idx_clips_contentKey ON clips(kind, contentKey);")
+        try exec("CREATE INDEX IF NOT EXISTS idx_clips_deletedAt ON clips(deletedAt);")
         // Earlier versions created a full-text index that was never filled or queried.
         try exec("DROP TABLE IF EXISTS clips_fts;")
         try exec("""
@@ -699,9 +781,11 @@ final class SQLiteHistoryStore: HistoryStore {
         try step(statement)
     }
 
+    /// Every item in the Trash, and the items in the history that are neither
+    /// favorites nor tagged.
     private func fetchDeletableClipIDs() throws -> [UUID] {
         try open()
-        let statement = try prepare("SELECT id, payload FROM clips;")
+        let statement = try prepare("SELECT id, payload, deletedAt FROM clips;")
         defer { sqlite3_finalize(statement) }
 
         var ids: [UUID] = []
@@ -709,6 +793,11 @@ final class SQLiteHistoryStore: HistoryStore {
             guard let idText = sqlite3_column_text(statement, 0),
                   let id = UUID(uuidString: String(cString: idText)),
                   let bytes = sqlite3_column_blob(statement, 1) else {
+                continue
+            }
+
+            guard sqlite3_column_type(statement, 2) == SQLITE_NULL else {
+                ids.append(id)
                 continue
             }
 
@@ -759,9 +848,23 @@ final class SQLiteHistoryStore: HistoryStore {
         releaseFreePages()
     }
 
+    private func restoreClips(ids: [UUID]) throws {
+        guard !ids.isEmpty else {
+            return
+        }
+
+        try performInTransaction {
+            for id in ids {
+                try execute("UPDATE clips SET deletedAt = NULL WHERE id = ?;", binding: id.uuidString)
+            }
+        }
+    }
+
+    /// The item in the history with the ID. An item in the Trash is left out,
+    /// so pasting or copying it does not write it back as a history item.
     private func fetchItem(_ id: UUID) throws -> ClipboardItem? {
         try open()
-        let sql = "SELECT payload, copiedAt FROM clips WHERE id = ? LIMIT 1;"
+        let sql = "SELECT payload, copiedAt FROM clips WHERE id = ? AND deletedAt IS NULL LIMIT 1;"
         let statement = try prepare(sql)
         defer { sqlite3_finalize(statement) }
         try bind(id.uuidString, at: 1, statement: statement)
@@ -775,7 +878,12 @@ final class SQLiteHistoryStore: HistoryStore {
 
     private func fetchMatchingItem(kind: ClipboardKind, contentKey: String) throws -> ClipboardItem? {
         try open()
-        let sql = "SELECT payload, copiedAt FROM clips WHERE kind = ? AND contentKey = ? ORDER BY copiedAt DESC LIMIT 1;"
+        let sql = """
+            SELECT payload, copiedAt, deletedAt FROM clips
+            WHERE kind = ? AND contentKey = ?
+            ORDER BY deletedAt IS NOT NULL, copiedAt DESC
+            LIMIT 1;
+            """
         let statement = try prepare(sql)
         defer { sqlite3_finalize(statement) }
         try bind(kind.rawValue, at: 1, statement: statement)
@@ -788,10 +896,10 @@ final class SQLiteHistoryStore: HistoryStore {
         return try decodeItem(from: statement)
     }
 
-    /// Decodes the row of a statement that selects `payload, copiedAt`. The
-    /// payload keeps dates to the whole second, so the copy time comes from
-    /// its own column, which keeps the fraction and with it the order of
-    /// items copied within the same second.
+    /// Decodes the row of a statement that selects `payload, copiedAt` and
+    /// optionally `deletedAt`. The payload keeps dates to the whole second, so
+    /// the copy time comes from its own column, which keeps the fraction and
+    /// with it the order of items copied within the same second.
     private func decodeItem(from statement: OpaquePointer?) throws -> ClipboardItem? {
         guard let bytes = sqlite3_column_blob(statement, 0) else {
             return nil
@@ -801,6 +909,9 @@ final class SQLiteHistoryStore: HistoryStore {
         var item = try decoder.decode(ClipboardItem.self, from: Data(bytes: bytes, count: count))
         if sqlite3_column_type(statement, 1) != SQLITE_NULL {
             item.copiedAt = Date(timeIntervalSince1970: sqlite3_column_double(statement, 1))
+        }
+        if sqlite3_column_count(statement) > 2, sqlite3_column_type(statement, 2) != SQLITE_NULL {
+            item.deletedAt = Date(timeIntervalSince1970: sqlite3_column_double(statement, 2))
         }
         return item
     }

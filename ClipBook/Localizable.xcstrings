@@ -523,6 +523,236 @@
         }
       }
     },
+    "All history items except favorites and tagged items will be moved to the Trash." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Verlaufsobjekte außer Favoriten und markierten Objekten werden in den Papierkorb gelegt."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All history items except favourites and tagged items will be moved to the Bin."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos los elementos del historial, excepto los favoritos y los etiquetados, se moverán a la papelera."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutti gli elementi della cronologia, tranne i preferiti e quelli con tag, verranno spostati nel cestino."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入りとタグ付きの項目を除くすべての履歴項目がゴミ箱に移動されます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos os itens do histórico, exceto favoritos e itens com tags, serão movidos para a Lixeira."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "除个人收藏和带标签的项目外，所有历史记录项目都将被移到废纸篓。"
+          }
+        }
+      }
+    },
+    "All history items including favorites and tagged items will be moved to the Trash." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Verlaufsobjekte einschließlich Favoriten und markierter Objekte werden in den Papierkorb gelegt."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All history items including favourites and tagged items will be moved to the Bin."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos los elementos del historial, incluidos los favoritos y los etiquetados, se moverán a la papelera."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutti gli elementi della cronologia, compresi i preferiti e quelli con tag, verranno spostati nel cestino."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入りとタグ付きの項目を含むすべての履歴項目がゴミ箱に移動されます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos os itens do histórico, incluindo favoritos e itens com tags, serão movidos para a Lixeira."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有历史记录项目（包括个人收藏和带标签的项目）都将被移到废纸篓。"
+          }
+        }
+      }
+    },
+    "Are you sure you want to delete %d items immediately?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Möchtest du %d Objekte wirklich sofort löschen?"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to delete %d items immediately?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Seguro que quieres eliminar %d elementos inmediatamente?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuoi davvero eliminare immediatamente %d elementi?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d 個の項目をすぐに削除してもよろしいですか？"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tem certeza de que deseja apagar %d itens imediatamente?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定要立即删除 %d 个项目吗？"
+          }
+        }
+      }
+    },
+    "Are you sure you want to delete this item immediately?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Möchtest du dieses Objekt wirklich sofort löschen?"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to delete this item immediately?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Seguro que quieres eliminar este elemento inmediatamente?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuoi davvero eliminare immediatamente questo elemento?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この項目をすぐに削除してもよろしいですか？"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tem certeza de que deseja apagar este item imediatamente?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定要立即删除此项目吗？"
+          }
+        }
+      }
+    },
+    "Are you sure you want to permanently erase the items in the Trash?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Möchtest du die Objekte im Papierkorb wirklich endgültig löschen?"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to permanently erase the items in the Bin?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Seguro que quieres borrar definitivamente los elementos de la papelera?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuoi davvero cancellare definitivamente gli elementi nel cestino?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゴミ箱内の項目を完全に消去してもよろしいですか？"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tem certeza de que deseja apagar permanentemente os itens da Lixeira?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定要永久抹掉废纸篓中的项目吗？"
+          }
+        }
+      }
+    },
     "Buy a license to keep using ClipBook." : {
       "localizations" : {
         "de" : {
@@ -753,6 +983,190 @@
         }
       }
     },
+    "Delete %d Items Immediately..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d Objekte sofort löschen …"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %d Items Immediately..."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar %d elementos inmediatamente..."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina immediatamente %d elementi..."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d 個の項目をすぐに削除..."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apagar %d itens imediatamente..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立即删除 %d 个项目…"
+          }
+        }
+      }
+    },
+    "Delete Immediately..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sofort löschen …"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Immediately..."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar inmediatamente..."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina immediatamente..."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すぐに削除..."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apagar imediatamente..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立即删除…"
+          }
+        }
+      }
+    },
+    "Deleted items can be put back until this period ends. Type Trash in the search field to see them." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelöschte Objekte können bis zum Ende dieses Zeitraums zurückgelegt werden. Gib „Papierkorb“ in das Suchfeld ein, um sie anzuzeigen."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted items can be put back until this period ends. Type Bin in the search field to see them."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los elementos eliminados se pueden restaurar hasta que termine este período. Escribe Papelera en el campo de búsqueda para verlos."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gli elementi eliminati possono essere ripristinati fino alla fine di questo periodo. Digita Cestino nel campo di ricerca per vederli."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この期間が終わるまで、削除した項目を元に戻せます。検索フィールドに「ゴミ箱」と入力すると表示されます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os itens apagados podem ser restaurados até o fim deste período. Digite Lixeira no campo de busca para vê-los."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在此期限结束前，可以将已删除的项目放回原处。在搜索栏中输入“废纸篓”即可查看。"
+          }
+        }
+      }
+    },
+    "Deleted items stay here for a while, so you can put them back." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelöschte Objekte bleiben eine Weile hier, damit du sie zurücklegen kannst."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted items stay here for a while, so you can put them back."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los elementos eliminados se quedan aquí un tiempo para que puedas restaurarlos."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gli elementi eliminati restano qui per un po', così puoi ripristinarli."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除した項目はしばらくここに残るので、元に戻すことができます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os itens apagados ficam aqui por um tempo para que você possa restaurá-los."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除的项目会在这里保留一段时间，以便你将其放回原处。"
+          }
+        }
+      }
+    },
     "Down Arrow" : {
       "localizations" : {
         "de" : {
@@ -795,6 +1209,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "下箭头"
+          }
+        }
+      }
+    },
+    "Empty Trash" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Papierkorb entleeren"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empty Bin"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaciar papelera"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Svuota il cestino"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゴミ箱を空にする"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esvaziar Lixeira"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清倒废纸篓"
+          }
+        }
+      }
+    },
+    "Empty Trash..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Papierkorb entleeren …"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empty Bin..."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaciar papelera..."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Svuota il cestino..."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゴミ箱を空にする..."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esvaziar Lixeira..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清倒废纸篓…"
           }
         }
       }
@@ -887,6 +1393,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ClipBook 享 %@ 折扣"
+          }
+        }
+      }
+    },
+    "Keep deleted items in Trash" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelöschte Objekte im Papierkorb behalten"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep deleted items in Bin"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conservar los elementos eliminados en la papelera"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conserva gli elementi eliminati nel cestino"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除した項目をゴミ箱に残す"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manter itens apagados na Lixeira"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在废纸篓中保留已删除的项目"
           }
         }
       }
@@ -1163,6 +1715,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "无"
+          }
+        }
+      }
+    },
+    "Off" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desactivado"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disattivato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オフ"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desativado"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
           }
         }
       }
@@ -1535,6 +2133,52 @@
         }
       }
     },
+    "Permanently delete the items in the Trash." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Objekte im Papierkorb endgültig löschen."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permanently delete the items in the Bin."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar definitivamente los elementos de la papelera."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina definitivamente gli elementi nel cestino."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゴミ箱内の項目を完全に削除します。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apagar permanentemente os itens da Lixeira."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "永久删除废纸篓中的项目。"
+          }
+        }
+      }
+    },
     "Press Between Items" : {
       "localizations" : {
         "de" : {
@@ -1623,6 +2267,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在项目之间按下 %@。"
+          }
+        }
+      }
+    },
+    "Put Back" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurücklegen"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put Back"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ripristina"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "戻す"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放回原处"
+          }
+        }
+      }
+    },
+    "Put Back %d Items" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d Objekte zurücklegen"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put Back %d Items"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar %d elementos"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ripristina %d elementi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d 個の項目を戻す"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar %d itens"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放回 %d 个项目"
           }
         }
       }
@@ -1949,6 +2685,98 @@
         }
       }
     },
+    "The history items currently shown, except favorites and tagged items, will be moved to the Trash." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die aktuell angezeigten Verlaufsobjekte, außer Favoriten und markierten Objekten, werden in den Papierkorb gelegt."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The history items currently shown, except favourites and tagged items, will be moved to the Bin."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los elementos del historial que se muestran, excepto los favoritos y los etiquetados, se moverán a la papelera."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gli elementi della cronologia attualmente visualizzati, tranne i preferiti e quelli con tag, verranno spostati nel cestino."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在表示されている履歴項目は、お気に入りとタグ付きの項目を除いてゴミ箱に移動されます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os itens do histórico exibidos no momento, exceto favoritos e itens com tags, serão movidos para a Lixeira."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前显示的历史记录项目（个人收藏和带标签的项目除外）将被移到废纸篓。"
+          }
+        }
+      }
+    },
+    "The history items currently shown, including favorites and tagged items, will be moved to the Trash." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die aktuell angezeigten Verlaufsobjekte, einschließlich Favoriten und markierter Objekte, werden in den Papierkorb gelegt."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The history items currently shown, including favourites and tagged items, will be moved to the Bin."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los elementos del historial que se muestran, incluidos los favoritos y los etiquetados, se moverán a la papelera."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gli elementi della cronologia attualmente visualizzati, compresi i preferiti e quelli con tag, verranno spostati nel cestino."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在表示されている履歴項目は、お気に入りとタグ付きの項目も含めてゴミ箱に移動されます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os itens do histórico exibidos no momento, incluindo favoritos e itens com tags, serão movidos para a Lixeira."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前显示的历史记录项目（包括个人收藏和带标签的项目）将被移到废纸篓。"
+          }
+        }
+      }
+    },
     "The offer ends %@." : {
       "localizations" : {
         "de" : {
@@ -2133,6 +2961,98 @@
         }
       }
     },
+    "Trash" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Papierkorb"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bin"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Papelera"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cestino"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゴミ箱"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lixeira"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "废纸篓"
+          }
+        }
+      }
+    },
+    "Trash is empty" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Papierkorb ist leer"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Bin is empty"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La papelera está vacía"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il cestino è vuoto"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゴミ箱は空です"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Lixeira está vazia"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "废纸篓为空"
+          }
+        }
+      }
+    },
     "Trial has ended" : {
       "localizations" : {
         "de" : {
@@ -2221,6 +3141,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "上箭头"
+          }
+        }
+      }
+    },
+    "You can't undo this action." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Vorgang kann nicht widerrufen werden."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can't undo this action."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta acción no se puede deshacer."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa azione non può essere annullata."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この操作は取り消せません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta ação não pode ser desfeita."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此操作无法撤销。"
           }
         }
       }

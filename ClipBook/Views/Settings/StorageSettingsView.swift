@@ -32,6 +32,22 @@ struct StorageSettingsView: View {
     }
     
     SettingsSectionGroup() {
+      PickerRow(title: L10n.string("Keep deleted items in Trash"), description: L10n.string("Deleted items can be put back until this period ends. Type Trash in the search field to see them.")) {
+        Picker(L10n.string("Keep deleted items in Trash"), selection: trashRetentionDays) {
+          ForEach(AppPreferences.trashRetentionDayOptions, id: \.self) { days in
+            Text(trashRetentionTitle(for: days)).tag(days)
+          }
+        }
+        .labelsHidden()
+      }
+      SettingsRow(title: L10n.string("Empty Trash"), description: L10n.string("Permanently delete the items in the Trash.")) {
+        Button(L10n.string("Empty Trash...")) {
+          coordinator.emptyTrash(fromSettings: true)
+        }
+      }
+    }
+
+    SettingsSectionGroup() {
       SettingsToggle(title: L10n.string("Warn before manually clearing history"), description: L10n.string("Display a confirmation dialog when clearing history manually using the 'Delete All' command."), isOn: $model.preferences.warnOnClearHistory)
     }
     
@@ -39,6 +55,23 @@ struct StorageSettingsView: View {
       SettingsToggle(title: L10n.string("Clear history on quit"), description: L10n.string("Delete unprotected items when ClipBook quits."), isOn: $model.preferences.clearHistoryOnQuit)
       SettingsToggle(title: L10n.string("Clear history after Mac reboot"), description: L10n.string("Delete unprotected items after a system restart."), isOn: $model.preferences.clearHistoryOnReboot)
     }
+  }
+
+  // A shorter period deletes the items that have been in the Trash longer,
+  // which the coordinator takes care of.
+  private var trashRetentionDays: Binding<Int> {
+    Binding(
+      get: { model.preferences.trashRetentionDays },
+      set: { coordinator.setTrashRetentionDays($0) }
+    )
+  }
+
+  private func trashRetentionTitle(for days: Int) -> String {
+    guard days > 0 else {
+      return L10n.string("Off")
+    }
+
+    return RetentionPeriod.label(forStepIndex: RetentionPeriod.stepIndex(forDays: days))
   }
 
   // Changes go through the coordinator, which asks before deleting items

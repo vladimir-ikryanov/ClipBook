@@ -46,6 +46,8 @@ extension HistoryFilterContentType {
       return ClipboardKind.email.systemImage
     case .colors:
       return ClipboardKind.color.systemImage
+    case .trash:
+      return "trash"
     }
   }
 }

@@ -103,6 +103,8 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
   private weak var toolbar: NSToolbar?
   private var canPaste = false
   private var canCopy = false
+  // The Trash puts items back with the button that pastes them elsewhere.
+  private var isShowingTrash = false
   private var pasteItemCount: Int?
   private var copyItemCount: Int?
   private var showsCopy = true
@@ -173,7 +175,8 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     showsMerge: Bool,
     sortOption: HistorySortOption,
     isSortReversed: Bool,
-    isReadOnly: Bool = false
+    isReadOnly: Bool = false,
+    isShowingTrash: Bool = false
   ) {
     self.isPinned = isPinned
     updatePinItem(isPinned: isPinned)
@@ -181,6 +184,7 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     updateSortItem(sortOption: sortOption, isSortReversed: isSortReversed)
     self.canPaste = canPaste
     self.canCopy = canCopy
+    self.isShowingTrash = isShowingTrash
     self.pasteItemCount = pasteItemCount
     self.copyItemCount = copyItemCount
     updateActionsGroup(
@@ -1129,6 +1133,11 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     let menu = NSMenu()
 
     for contentType in HistoryFilterContentType.allCases {
+      // The Trash lists the deleted items instead of narrowing the history,
+      // so it sits apart from the filters that do.
+      if contentType == .trash {
+        menu.addItem(.separator())
+      }
       let item = NSMenuItem(title: contentType.title, action: #selector(selectFilterContentType(_:)), keyEquivalent: "")
       item.target = self
       item.image = Self.symbolImage(symbolName: contentType.systemImage, label: contentType.title)
@@ -1340,6 +1349,10 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
   private func actionLabel(for action: ToolbarAction, targetApp: NSRunningApplication?) -> String {
     switch action {
     case .paste:
+      if isShowingTrash {
+        return L10n.string("Put Back")
+      }
+
       if let pasteItemCount {
         if let appName = targetApp?.localizedName {
           return L10n.string("Paste %d Items to %@", pasteItemCount, appName)
@@ -1373,6 +1386,10 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
   private func actionImage(for action: ToolbarAction, targetApp: NSRunningApplication?) -> NSImage? {
     switch action {
     case .paste:
+      if isShowingTrash {
+        return Self.symbolImage(symbolName: "arrow.uturn.backward", label: actionLabel(for: action, targetApp: targetApp))
+      }
+
       return Self.applicationIcon(for: targetApp)
     case .copy:
       if isShowingCopySuccess {

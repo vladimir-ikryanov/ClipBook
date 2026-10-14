@@ -52,7 +52,7 @@ extension HistoryFilterContentType {
   /// its titles from `ClipboardKind` instead of `title`.
   var searchTokenTitle: String {
     switch self {
-    case .all, .favorites:
+    case .all, .favorites, .trash:
       return title
     case .text:
       return ClipboardKind.text.title

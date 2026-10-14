@@ -415,6 +415,7 @@ final class HistoryContentViewController: NSViewController {
     reloadListOnChange(of: model.$selectedHistoryFilterContentTypes)
     reloadListOnChange(of: model.$selectedHistoryFilterTagIDs)
     reloadListOnChange(of: model.$selectedHistoryFilterSourceApplicationIDs)
+    reloadListOnChange(of: model.$trashedItems)
   }
 
   private func reloadListOnChange<Value>(of publisher: some Publisher<Value, Never>) {
@@ -450,13 +451,15 @@ final class HistoryContentViewController: NSViewController {
       selectedItemID: model.selectedItemID,
       selectedItemIDs: model.selectedItemIDs,
       searchQuery: model.searchQuery,
-      showCommandNumberShortcut: model.preferences.showCommandNumberShortcut,
+      // The Trash has no quick paste, so its rows show no number shortcuts.
+      showCommandNumberShortcut: model.preferences.showCommandNumberShortcut && !model.isShowingTrash,
       showPreviewForLinks: model.preferences.showPreviewForLinks,
       detectSensitiveContent: model.preferences.detectSensitiveContent,
       showDividers: model.preferences.showHistoryDividers,
       preferPastingAsPlainText: model.preferences.preferPastingAsPlainText,
-      groupPinnedFavorites: model.preferences.pinFavoritesToTop,
-      sectionDate: historySectionDate(for: model.historySortOption)
+      groupPinnedFavorites: model.preferences.pinFavoritesToTop && !model.isShowingTrash,
+      sectionDate: historySectionDate(for: model.historySortOption),
+      isShowingTrash: model.isShowingTrash
     ) { [weak self] firstItem in
       self?.model.selectedItemID = firstItem.id
       self?.model.selectedItemIDs = [firstItem.id]
@@ -477,6 +480,11 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func historySectionDate(for sortOption: HistorySortOption) -> ((ClipboardItem) -> Date?)? {
+    // The Trash lists items by when they were deleted, whatever the sort.
+    guard !model.isShowingTrash else {
+      return { $0.deletedAt }
+    }
+
     guard !model.preferences.copySequenceModeEnabled else {
       return { $0.copiedAt }
     }
@@ -581,6 +589,25 @@ final class HistoryContentViewController: NSViewController {
     // A read-only history keeps the buttons that use items, disabled, so they
     // don't jump around once a license is activated.
     let canUseItems = !coordinator.isHistoryReadOnly
+    // The Trash offers putting items back in place of pasting, and nothing else.
+    guard !model.isShowingTrash else {
+      historyToolbar?.update(
+        searchQuery: pendingSearchQuery ?? model.searchQuery,
+        isPinned: !model.preferences.hideOnFocusLoss,
+        isCopySequenceModeEnabled: model.preferences.copySequenceModeEnabled,
+        canPaste: canUseItems && hasSelection,
+        canCopy: false,
+        showsCopyTextFromImage: false,
+        showsCopyTextFromQRCode: false,
+        showsOpenInBrowser: false,
+        showsMerge: false,
+        sortOption: model.historySortOption,
+        isSortReversed: model.isHistorySortReversed,
+        isShowingTrash: true
+      )
+      return
+    }
+
     let canMergeSelection = canUseItems && hasMultipleSelection && coordinator.canMerge(selectedItems)
     let pasteItemCount = selectedItem?.isMultipleFileItem == true ? selectedItem?.filePaths.count : nil
     let copyItemCount = selectedItem?.isMultipleFileItem == true ? selectedItem?.filePaths.count : nil
@@ -709,6 +736,10 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func performNumberKeyAction(at index: Int) {
+    guard !model.isShowingTrash else {
+      return
+    }
+
     let itemIndex = index - 1
     let items = model.filteredItems
     guard items.indices.contains(itemIndex) else {
@@ -725,6 +756,10 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func performDoubleClickAction(for item: ClipboardItem) {
+    guard !model.isShowingTrash else {
+      return
+    }
+
     switch HistoryItemActionPreference(preferenceValue: model.preferences.doubleClickAction) {
     case .copy:
       copy(item)
@@ -743,6 +778,10 @@ final class HistoryContentViewController: NSViewController {
     // The search suggestions take priority over the window shortcuts, otherwise
     // Return would paste and Escape would clear the whole query.
     if historyToolbar?.handleSearchSuggestionsKeyDown(event) == true {
+      return true
+    }
+
+    if handleUndoKeyDown(event, firstResponder: firstResponder) {
       return true
     }
 
@@ -784,6 +823,31 @@ final class HistoryContentViewController: NSViewController {
     return false
   }
 
+  /// Cmd+Z undoes deleting items and putting them back, and Shift+Cmd+Z
+  /// redoes it. While the search field has typing to undo, the keys are left
+  /// to it.
+  private func handleUndoKeyDown(_ event: NSEvent, firstResponder: NSResponder?) -> Bool {
+    let isUndo = KeyboardShortcutParser.event(event, matches: "cmd+z")
+    let isRedo = KeyboardShortcutParser.event(event, matches: "shift+cmd+z")
+    guard isUndo || isRedo else {
+      return false
+    }
+
+    if isTextInputFocused(firstResponder) {
+      let textUndoManager = firstResponder?.undoManager
+      if isUndo ? textUndoManager?.canUndo == true : textUndoManager?.canRedo == true {
+        return false
+      }
+    }
+
+    if isUndo {
+      coordinator.undoHistoryChange()
+    } else {
+      coordinator.redoHistoryChange()
+    }
+    return true
+  }
+
   private func handlePreviewKeyDown(_ event: NSEvent, firstResponder: NSResponder?) -> Bool {
     let modifiers = event.modifierFlags.intersection([.command, .shift, .option, .control])
     guard modifiers.isEmpty, event.keyCode == 49 else {
@@ -815,7 +879,10 @@ final class HistoryContentViewController: NSViewController {
 
 
   private func showPreview(for item: ClipboardItem, startsInEditMode: Bool = false) {
-    guard previewSheetWindow == nil,
+    // The preview edits and uses the item, which an item in the Trash is not
+    // open to.
+    guard !model.isShowingTrash,
+          previewSheetWindow == nil,
           view.window?.attachedSheet == nil,
           let window = view.window else {
       return
@@ -1248,6 +1315,10 @@ final class HistoryContentViewController: NSViewController {
       return
     }
 
+    if model.isShowingTrash, performTrashShortcutAction(action) {
+      return
+    }
+
     switch action {
     case .closeHistory:
       coordinator.hideHistoryPanel()
@@ -1318,6 +1389,27 @@ final class HistoryContentViewController: NSViewController {
         return
       }
       showInHistory(item)
+    }
+  }
+
+  /// The Trash only lets items be put back or deleted for good. The paste
+  /// shortcuts put the selected items back, the delete shortcut deletes them
+  /// for good, and the shortcuts that use or change items do nothing. Returns
+  /// false for the shortcuts that work the same as in the history.
+  private func performTrashShortcutAction(_ action: HistoryShortcutAction) -> Bool {
+    switch action {
+    case .pasteSelected, .pasteSelectedSecondary:
+      coordinator.putBack(model.selectedItems)
+      return true
+    case .deleteItem:
+      coordinator.deleteImmediately(model.selectedItems)
+      return true
+    case .pasteAndDeleteSelected, .pasteAndDeleteSelectedSecondary, .copySelected, .copySelectedSecondary,
+         .toggleFavorite, .showInFinder, .openInBrowser, .editItem, .renameItem, .transformItem, .showInHistory:
+      return true
+    case .closeHistory, .selectNextItem, .selectPreviousItem, .toggleSensitiveContentVisibility,
+         .focusSearchField, .openSettings, .showCommandPalette:
+      return false
     }
   }
 
@@ -1834,7 +1926,7 @@ extension HistoryContentViewController: HistoryDelegate {
   }
 
   func listPane(_ pane: History, didClickItem item: ClipboardItem) {
-    guard model.preferences.pasteOnClick, !coordinator.isHistoryReadOnly else {
+    guard model.preferences.pasteOnClick, !coordinator.isHistoryReadOnly, !model.isShowingTrash else {
       return
     }
 
@@ -1850,6 +1942,11 @@ extension HistoryContentViewController: HistoryDelegate {
   }
 
   func listPane(_ pane: History, actionsMenuFor selectedItems: [ClipboardItem], focusedItem: ClipboardItem?) -> NSMenu {
+    if model.isShowingTrash {
+      let items = selectedItems.count > 1 ? selectedItems : [focusedItem ?? selectedItems.first].compactMap { $0 }
+      return makeTrashContextMenu(for: items)
+    }
+
     guard selectedItems.count > 1 else {
       guard let item = focusedItem ?? selectedItems.first else {
         return NSMenu()
@@ -1858,6 +1955,25 @@ extension HistoryContentViewController: HistoryDelegate {
     }
 
     return makeMultipleSelectionContextMenu(for: selectedItems)
+  }
+
+  /// The commands of the Trash as a menu, Settings and Empty Trash aside.
+  private func makeTrashContextMenu(for items: [ClipboardItem]) -> NSMenu {
+    let menu = NSMenu()
+    guard !items.isEmpty else {
+      return menu
+    }
+
+    var previousSection: Int?
+    for command in trashItemCommands(for: items) {
+      if let previousSection, previousSection != command.section {
+        menu.addItem(.separator())
+      }
+      menu.addItem(makeContextMenuItem(for: command))
+      previousSection = command.section
+    }
+    menu.showsItemImagesRegardlessOfSystemSetting()
+    return menu
   }
 
   func makeItemContextMenu(for item: ClipboardItem) -> NSMenu {
@@ -1869,6 +1985,11 @@ extension HistoryContentViewController: HistoryDelegate {
   }
 
   func listPane(_ pane: History, shouldLoadLinkPreviewFor item: ClipboardItem) {
+    // A preview loaded for an item in the Trash would not be saved.
+    guard !model.isShowingTrash else {
+      return
+    }
+
     coordinator.loadLinkPreviewIfNeeded(for: item)
   }
 
@@ -1951,6 +2072,11 @@ extension HistoryContentViewController: HistoryToolbarDelegate {
   }
 
   func historyToolbarDidRequestPaste(_ toolbar: HistoryToolbar) {
+    guard !model.isShowingTrash else {
+      coordinator.putBack(model.selectedItems)
+      return
+    }
+
     coordinator.pasteSelection()
   }
 
@@ -2142,6 +2268,13 @@ extension HistoryContentViewController: HistoryToolbarDelegate {
     let appName = Self.pasteTargetApplicationName(for: targetApplication)
     let appIcon = Self.applicationIcon(for: targetApplication)
     let selectedItems = model.selectedItems
+    if model.isShowingTrash {
+      return trashItemCommands(for: selectedItems) + [
+        settingsCommand(section: 2, shortcut: preferences.openSettingsShortcut),
+        emptyTrashCommand(section: 3)
+      ]
+    }
+
     if selectedItems.count > 1 {
       return multipleSelectionCommandPaletteCommands(
         for: selectedItems,
@@ -3319,6 +3452,44 @@ extension HistoryContentViewController: HistoryToolbarDelegate {
   private func deleteCommand(for item: ClipboardItem, shortcut: String?, section: Int) -> CommandPaletteCommand {
     command(title: "Delete", shortcut: shortcut, systemImageName: "trash", section: section, isDestructive: true) { [weak self] in
       self?.coordinator.delete(item)
+    }
+  }
+
+  /// Putting the items back and deleting them for good, the only things the
+  /// Trash does with its items.
+  private func trashItemCommands(for items: [ClipboardItem]) -> [CommandPaletteCommand] {
+    guard !items.isEmpty else {
+      return []
+    }
+
+    let preferences = model.preferences
+    return [
+      command(
+        title: items.count == 1 ? L10n.string("Put Back") : L10n.string("Put Back %d Items", items.count),
+        shortcut: preferences.pasteSelectedShortcut,
+        systemImageName: "arrow.uturn.backward",
+        section: 0
+      ) { [weak self] in
+        self?.coordinator.putBack(items)
+      },
+      command(
+        title: items.count == 1 ? L10n.string("Delete Immediately...") : L10n.string("Delete %d Items Immediately...", items.count),
+        shortcut: preferences.deleteItemShortcut,
+        systemImageName: "trash",
+        section: 1,
+        isDestructive: true
+      ) { [weak self] in
+        // The confirmation is a sheet, which waits for the palette to close.
+        self?.closeCommandPalette()
+        self?.coordinator.deleteImmediately(items)
+      }
+    ]
+  }
+
+  private func emptyTrashCommand(section: Int) -> CommandPaletteCommand {
+    command(title: L10n.string("Empty Trash..."), shortcut: nil, systemImageName: "trash.slash", section: section, isDestructive: true) { [weak self] in
+      self?.closeCommandPalette()
+      self?.coordinator.emptyTrash()
     }
   }
 

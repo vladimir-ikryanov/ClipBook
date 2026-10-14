@@ -144,6 +144,9 @@ final class ClipBookArchiveService {
                 importedItemCount += 1
                 progress?(ClipBookArchiveProgress(completedItemCount: importedItemCount, totalItemCount: archiveItems.count))
             }
+            // Importing an export taken before items were deleted brings them
+            // back, so an item in the Trash that the archive holds leaves it.
+            try historyStore.restoreFromTrash(ids: Array(importedItemIDs))
         }
 
         return ClipBookArchiveImportResult(itemIDs: importedItemIDs, tagCount: archiveTags.count)

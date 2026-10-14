@@ -76,6 +76,10 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
     /// or to show it although it looks like a secret. None leaves it to the
     /// app to tell.
     var sensitivity: ItemSensitivity?
+    /// When the item was moved to the Trash, or nil while it is in the
+    /// history. The store keeps it in a column of its own rather than in the
+    /// payload, so it is not among the coding keys.
+    var deletedAt: Date? = nil
 
     init(
         id: UUID = UUID(),

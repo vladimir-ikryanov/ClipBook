@@ -122,6 +122,11 @@ final class History: NSView {
     title: L10n.string("No results"),
     symbolName: "magnifyingglass"
   )
+  private let emptyTrashView = EmptyHistory(
+    title: L10n.string("Trash is empty"),
+    message: L10n.string("Deleted items stay here for a while, so you can put them back."),
+    symbolName: "trash"
+  )
   override init(frame frameRect: NSRect) {
     super.init(frame: frameRect)
     configure()
@@ -189,6 +194,7 @@ final class History: NSView {
     preferPastingAsPlainText: Bool,
     groupPinnedFavorites: Bool,
     sectionDate: ((ClipboardItem) -> Date?)?,
+    isShowingTrash: Bool = false,
     onSelectFirstItem: @escaping (ClipboardItem) -> Void
   ) {
     let previousRows = tableRows
@@ -211,7 +217,8 @@ final class History: NSView {
     // the window's automatic titlebar separator lose the scroll view it tracks,
     // and a permanent separator line appears above the empty view.
     let isSearchActive = !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    emptyListView.isHidden = !items.isEmpty || isSearchActive
+    emptyListView.isHidden = !items.isEmpty || isSearchActive || isShowingTrash
+    emptyTrashView.isHidden = !items.isEmpty || isSearchActive || !isShowingTrash
     emptySearchResultsView.isHidden = !items.isEmpty || !isSearchActive
     syncSelection(
       selectedItemID: selectedItemID,
@@ -304,6 +311,14 @@ final class History: NSView {
     if !selectedRows.isEmpty {
       let focusedRow = selectedItemID.flatMap(tableRowIndex(forItemID:)) ?? selectedRows.first
       if tableView.selectedRowIndexes != selectedRows {
+        // The model sets a selection of its own once the selected items are
+        // gone, deleted or put back for instance, which ends the multiple
+        // selection they were picked with. Rows that only moved, under an item
+        // copied meanwhile, keep it.
+        if Set(selectionOrderIDs) != selectedIDs {
+          isKeyboardMultipleSelectionMode = false
+          tableView.isKeyboardMultipleSelectionMode = false
+        }
         isSyncingSelection = true
         defer { isSyncingSelection = false }
         tableView.selectRowIndexes(selectedRows, byExtendingSelection: false)
@@ -324,6 +339,8 @@ final class History: NSView {
     } else if let firstItem = items.first {
       onSelectFirstItem(firstItem)
     } else {
+      isKeyboardMultipleSelectionMode = false
+      tableView.isKeyboardMultipleSelectionMode = false
       isSyncingSelection = true
       defer { isSyncingSelection = false }
       selectionAnchorRow = nil
@@ -993,10 +1010,13 @@ final class History: NSView {
     emptyListView.translatesAutoresizingMaskIntoConstraints = false
     emptySearchResultsView.translatesAutoresizingMaskIntoConstraints = false
     emptySearchResultsView.isHidden = true
+    emptyTrashView.translatesAutoresizingMaskIntoConstraints = false
+    emptyTrashView.isHidden = true
 
     addSubview(scrollView)
     addSubview(emptyListView)
     addSubview(emptySearchResultsView)
+    addSubview(emptyTrashView)
 
     NSLayoutConstraint.activate([
       scrollView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0),
@@ -1012,7 +1032,11 @@ final class History: NSView {
       emptySearchResultsView.leadingAnchor.constraint(equalTo: leadingAnchor),
       emptySearchResultsView.trailingAnchor.constraint(equalTo: trailingAnchor),
       emptySearchResultsView.topAnchor.constraint(equalTo: topAnchor),
-      emptySearchResultsView.bottomAnchor.constraint(equalTo: bottomAnchor)
+      emptySearchResultsView.bottomAnchor.constraint(equalTo: bottomAnchor),
+      emptyTrashView.leadingAnchor.constraint(equalTo: leadingAnchor),
+      emptyTrashView.trailingAnchor.constraint(equalTo: trailingAnchor),
+      emptyTrashView.topAnchor.constraint(equalTo: topAnchor),
+      emptyTrashView.bottomAnchor.constraint(equalTo: bottomAnchor)
     ])
   }
 
