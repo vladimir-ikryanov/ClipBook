@@ -975,9 +975,14 @@ final class AppCoordinator: ObservableObject {
     }
 
     do {
+      // The merged item comes from the app of the item its text starts with,
+      // as Copy & Merge keeps the app of the item it appends to. The app in
+      // front while merging has nothing to do with the content.
       let item = ClipboardItem(
         kind: .text,
         text: text,
+        sourceAppName: items[0].sourceAppName,
+        sourceBundleIdentifier: items[0].sourceBundleIdentifier,
         byteSize: text.utf8.count,
         searchText: text
       )
