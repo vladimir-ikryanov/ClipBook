@@ -24,6 +24,8 @@ private enum HistoryShortcutAction {
   case openSettings
   case showCommandPalette
   case showInHistory
+  case togglePreviewPane
+  case toggleDetails
 }
 
 private extension HistoryShortcutAction {
@@ -34,7 +36,7 @@ private extension HistoryShortcutAction {
     switch self {
     case .closeHistory, .selectNextItem, .selectPreviousItem, .toggleFavorite,
          .toggleSensitiveContentVisibility, .focusSearchField, .openSettings,
-         .showCommandPalette, .showInHistory:
+         .showCommandPalette, .showInHistory, .togglePreviewPane, .toggleDetails:
       return true
     case .pasteSelected, .pasteSelectedSecondary, .pasteAndDeleteSelected,
          .pasteAndDeleteSelectedSecondary, .copySelected, .copySelectedSecondary,
@@ -86,6 +88,18 @@ final class HistoryContentViewController: NSViewController {
   private var isNewTagSheetPresented = false
 
   private let listPaneView = History()
+  private let previewPane = HistoryPreviewPane()
+  private lazy var splitView = HistoryPreviewSplitView(listView: listPaneView, previewPane: previewPane)
+  // Shows the selected item in the preview pane. It is the controller of the
+  // preview sheet, presented as a pane, and exists while the pane is shown and
+  // has an item.
+  private var previewPaneController: ItemPreviewDialogController?
+  // The settings the pane's controller was made with, which it can't change.
+  private var previewPaneControllerConfiguration: PreviewPaneControllerConfiguration?
+  private var isPreviewPaneUpdateScheduled = false
+  // The details of the selected item, shown on their own in the pane while
+  // the preview is hidden.
+  private var detailsPaneView: ItemPreviewDetailsView?
   private var commandPalette: CommandPalette?
   private var commandPaletteOutsideClickMonitor: OutsideClickDismissalMonitor?
   private var isModalSheetPresentationPending = false
@@ -131,7 +145,9 @@ final class HistoryContentViewController: NSViewController {
     #selector(toggleTagMenuItem(_:)),
     #selector(applyTagMenuItem(_:)),
     #selector(newTagMenuItem(_:)),
-    #selector(editTagsMenuItem(_:))
+    #selector(editTagsMenuItem(_:)),
+    #selector(togglePreviewPaneDetailsMenuItem(_:)),
+    #selector(hidePreviewPaneMenuItem(_:))
   ]
 
   /// Whether a context menu action still works once the trial is over and the
@@ -179,6 +195,7 @@ final class HistoryContentViewController: NSViewController {
   func attachToolbar(_ toolbar: HistoryToolbar) {
     historyToolbar = toolbar
     updateToolbarState()
+    updatePreviewPaneToolbarItem()
   }
 
   override func loadView() {
@@ -196,15 +213,15 @@ final class HistoryContentViewController: NSViewController {
     }
 
     listPaneView.delegate = self
-    listPaneView.translatesAutoresizingMaskIntoConstraints = false
 
-    view.addSubview(listPaneView)
+    configurePreviewPane()
+    view.addSubview(splitView)
 
     NSLayoutConstraint.activate([
-      listPaneView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-      listPaneView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-      listPaneView.topAnchor.constraint(equalTo: view.topAnchor),
-      listPaneView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+      splitView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+      splitView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+      splitView.topAnchor.constraint(equalTo: view.topAnchor),
+      splitView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
     ])
   }
 
@@ -272,6 +289,8 @@ final class HistoryContentViewController: NSViewController {
     for delay in [0, 0.35] {
       DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
         self?.listPaneView.needsLayout = true
+        // The pane on the right starts below the toolbar and its accessories.
+        self?.splitView.needsLayout = true
       }
     }
   }
@@ -292,6 +311,7 @@ final class HistoryContentViewController: NSViewController {
     }
 
     listPaneView.hideRevealedSensitiveContent()
+    setNeedsPreviewPaneUpdate()
   }
 
   func exitMultipleSelectionMode() {
@@ -336,6 +356,7 @@ final class HistoryContentViewController: NSViewController {
       .sink { [weak self] _ in
         self?.reloadListIfNeeded()
         self?.refreshPreviewSheetItem()
+        self?.setNeedsPreviewPaneUpdate()
       }
       .store(in: &cancellables)
 
@@ -388,6 +409,16 @@ final class HistoryContentViewController: NSViewController {
 
         self.listPaneView.isReadOnly = self.coordinator.isHistoryReadOnly
         self.updateToolbarState()
+        self.setNeedsPreviewPaneUpdate()
+      }
+      .store(in: &cancellables)
+
+    model.$preferences
+      .map(HistoryPreviewPanePreferences.init)
+      .removeDuplicates()
+      .receive(on: RunLoop.main)
+      .sink { [weak self] preferences in
+        self?.applyPreviewPanePreferences(preferences)
       }
       .store(in: &cancellables)
 
@@ -405,6 +436,7 @@ final class HistoryContentViewController: NSViewController {
       .receive(on: RunLoop.main)
       .sink { [weak self] _ in
         self?.historyToolbar?.refreshLocalization()
+        self?.previewPane.refreshLocalization()
         self?.reloadListIfNeeded()
       }
       .store(in: &cancellables)
@@ -467,6 +499,7 @@ final class HistoryContentViewController: NSViewController {
     }
     updateToolbarFilterState()
     updateToolbarState()
+    setNeedsPreviewPaneUpdate()
   }
 
   private func updateToolbarFilterState() {
@@ -530,6 +563,7 @@ final class HistoryContentViewController: NSViewController {
       self.isSelectionSyncFromModelScheduled = false
       self.syncSelectionFromModel()
       self.updateToolbarState()
+      self.setNeedsPreviewPaneUpdate()
     }
   }
 
@@ -783,6 +817,10 @@ final class HistoryContentViewController: NSViewController {
 
     if handleUndoKeyDown(event, firstResponder: firstResponder) {
       return true
+    }
+
+    if previewPaneTextSelectionOwnsCopy(event, firstResponder: firstResponder) {
+      return false
     }
 
     if handlePreviewKeyDown(event, firstResponder: firstResponder) {
@@ -1193,6 +1231,247 @@ final class HistoryContentViewController: NSViewController {
     )
   }
 
+  // MARK: - Preview pane
+
+  private func configurePreviewPane() {
+    let preferences = model.preferences
+    splitView.isPreviewShown = preferences.showPreviewPane
+    splitView.preferredPaneHeight = preferences.previewPaneHeight.map { CGFloat($0) }
+    splitView.preferredPaneWidthRatio = preferences.previewPaneWidthRatio.map { CGFloat($0) }
+    splitView.onPositionChange = { [weak self] _ in
+      self?.updatePreviewPaneToolbarItem()
+    }
+    splitView.onPreferredPaneSizeChange = { [weak self] in
+      self?.savePreviewPaneSize()
+    }
+    splitView.onListBottomFadeChange = { [weak self] height in
+      self?.listPaneView.additionalBottomContentInset = height
+    }
+    splitView.detailsPaneHeight = { [weak self] width in
+      self?.detailsPaneView?.preferredHeight(forWidth: width) ?? 0
+    }
+    previewPane.grabberMenu = makePreviewPaneMenu(showsDetails: preferences.showPreviewPaneDetails)
+    updatePreviewPaneToolbarItem()
+  }
+
+  // $preferences publishes before the new value is stored, so the delivered
+  // values are used here; the pane itself is updated once they are stored.
+  private func applyPreviewPanePreferences(_ preferences: HistoryPreviewPanePreferences) {
+    guard isViewLoaded else {
+      return
+    }
+
+    splitView.isPreviewShown = preferences.showPreviewPane
+    splitView.preferredPaneHeight = preferences.previewPaneHeight.map { CGFloat($0) }
+    splitView.preferredPaneWidthRatio = preferences.previewPaneWidthRatio.map { CGFloat($0) }
+    previewPane.grabberMenu = makePreviewPaneMenu(showsDetails: preferences.showPreviewPaneDetails)
+    previewPaneController?.showsDetails = preferences.showPreviewPaneDetails
+    previewPaneController?.showsWebPages = preferences.showPreviewForLinks
+    updatePreviewPaneToolbarItem(preferences)
+    setNeedsPreviewPaneUpdate()
+  }
+
+  private func updatePreviewPaneToolbarItem(_ preferences: HistoryPreviewPanePreferences? = nil) {
+    let preferences = preferences ?? HistoryPreviewPanePreferences(model.preferences)
+    historyToolbar?.updatePreviewPane(
+      isShown: preferences.showPreviewPane,
+      showsDetails: preferences.showPreviewPaneDetails,
+      position: splitView.position,
+      togglePreviewShortcut: preferences.togglePreviewPaneShortcut,
+      toggleDetailsShortcut: preferences.toggleDetailsShortcut
+    )
+  }
+
+  /// Shows or hides the details of the selected item: under its preview, or
+  /// in a pane of their own while the preview is hidden.
+  private func toggleDetails() {
+    var preferences = model.preferences
+    preferences.showPreviewPaneDetails.toggle()
+    model.preferences = preferences
+    coordinator.persistPreferences()
+  }
+
+  private func togglePreviewPane() {
+    var preferences = model.preferences
+    preferences.showPreviewPane.toggle()
+    model.preferences = preferences
+    coordinator.persistPreferences()
+  }
+
+  private func savePreviewPaneSize() {
+    var preferences = model.preferences
+    preferences.previewPaneHeight = splitView.preferredPaneHeight.map { Double($0) }
+    preferences.previewPaneWidthRatio = splitView.preferredPaneWidthRatio.map { Double($0) }
+    guard preferences != model.preferences else {
+      return
+    }
+
+    model.preferences = preferences
+    coordinator.persistPreferences()
+  }
+
+  private func makePreviewPaneMenu(showsDetails: Bool) -> NSMenu {
+    let menu = NSMenu()
+    let detailsItem = NSMenuItem(
+      title: L10n.string("Show Details"),
+      action: #selector(togglePreviewPaneDetailsMenuItem(_:)),
+      keyEquivalent: ""
+    )
+    detailsItem.target = self
+    detailsItem.state = showsDetails ? .on : .off
+    menu.addItem(detailsItem)
+    menu.addItem(.separator())
+    let hideItem = NSMenuItem(
+      title: L10n.string("Hide Preview"),
+      action: #selector(hidePreviewPaneMenuItem(_:)),
+      keyEquivalent: ""
+    )
+    hideItem.target = self
+    menu.addItem(hideItem)
+    return menu
+  }
+
+  @objc func togglePreviewPaneDetailsMenuItem(_ sender: NSMenuItem) {
+    toggleDetails()
+  }
+
+  @objc func hidePreviewPaneMenuItem(_ sender: NSMenuItem) {
+    guard model.preferences.showPreviewPane else {
+      return
+    }
+    togglePreviewPane()
+  }
+
+  // The selection changes in many ways, often several at once, so the pane
+  // catches up once per pass of the run loop.
+  private func setNeedsPreviewPaneUpdate() {
+    guard !isPreviewPaneUpdateScheduled else {
+      return
+    }
+
+    isPreviewPaneUpdateScheduled = true
+    DispatchQueue.main.async { [weak self] in
+      guard let self else {
+        return
+      }
+
+      self.isPreviewPaneUpdateScheduled = false
+      self.updatePreviewPane()
+    }
+  }
+
+  private func updatePreviewPane() {
+    guard isViewLoaded else {
+      return
+    }
+
+    // An empty list has nothing to show, while the selected item may still
+    // name one that a search has just hidden.
+    let selectedItem = model.filteredItems.isEmpty ? nil : model.selectedItem
+    guard model.preferences.showPreviewPane else {
+      tearDownPreviewPaneController()
+      updateDetailsPane(for: model.preferences.showPreviewPaneDetails ? selectedItem : nil)
+      return
+    }
+
+    updateDetailsPane(for: nil)
+    guard let item = selectedItem else {
+      tearDownPreviewPaneController()
+      return
+    }
+
+    let revealsSensitiveContent = listPaneView.revealsSensitiveContent(of: item)
+    let configuration = PreviewPaneControllerConfiguration(
+      detectsSensitiveContent: model.preferences.detectSensitiveContent,
+      isReadOnly: coordinator.isHistoryReadOnly
+    )
+    if let previewPaneController, previewPaneControllerConfiguration == configuration {
+      guard previewPaneController.item != item
+              || previewPaneController.revealsSensitiveContent != revealsSensitiveContent else {
+        return
+      }
+
+      previewPaneController.update(item: item, revealsSensitiveContent: revealsSensitiveContent)
+      return
+    }
+
+    tearDownPreviewPaneController()
+    let controller = ItemPreviewDialogController(
+      item: item,
+      maximumContentSize: Self.previewPaneMaximumContentSize,
+      detectsSensitiveContent: configuration.detectsSensitiveContent,
+      revealsSensitiveContent: revealsSensitiveContent,
+      isReadOnly: configuration.isReadOnly,
+      presentation: .pane,
+      loadFormatting: { [weak coordinator] item in coordinator?.loadingFormatting(of: item) ?? item }
+    )
+    controller.showsDetails = model.preferences.showPreviewPaneDetails
+    controller.showsWebPages = model.preferences.showPreviewForLinks
+    controller.onContentFocusLost = { [weak self] in
+      self?.listPaneView.focusTableView()
+    }
+    controller.onCancel = { [weak self] in
+      self?.listPaneView.focusTableView()
+    }
+    addChild(controller)
+    previewPane.contentView = controller.view
+    previewPaneController = controller
+    previewPaneControllerConfiguration = configuration
+  }
+
+  // While the preview is hidden, the pane can still show the details of the
+  // selected item on their own, in a card as tall as they are. Without an
+  // item, or with the details turned off, the card goes away.
+  private func updateDetailsPane(for item: ClipboardItem?) {
+    guard let item else {
+      if detailsPaneView != nil {
+        previewPane.contentView = nil
+        detailsPaneView = nil
+      }
+      splitView.isDetailsPaneShown = false
+      return
+    }
+
+    if let detailsPaneView {
+      detailsPaneView.update(item: item)
+    } else {
+      let detailsView = ItemPreviewDetailsView(item: item, style: .standalone)
+      previewPane.contentView = detailsView
+      detailsPaneView = detailsView
+    }
+    splitView.isDetailsPaneShown = true
+    // The details wrap onto more lines for some items than for others.
+    splitView.needsLayout = true
+  }
+
+  // Only used for the size the preview starts out with, before the pane
+  // gives it its own.
+  private static let previewPaneMaximumContentSize = NSSize(width: 800, height: 600)
+
+  private func tearDownPreviewPaneController() {
+    guard let previewPaneController else {
+      return
+    }
+
+    previewPaneController.tearDownContent()
+    previewPane.contentView = nil
+    previewPaneController.removeFromParent()
+    self.previewPaneController = nil
+    previewPaneControllerConfiguration = nil
+  }
+
+  // Text selected in the preview pane keeps ⌘C for itself, as it does in the
+  // preview sheet; the whole item is copied when nothing is selected.
+  private func previewPaneTextSelectionOwnsCopy(_ event: NSEvent, firstResponder: NSResponder?) -> Bool {
+    guard KeyboardShortcutParser.event(event, matches: "cmd+c"),
+          let textView = firstResponder as? NSTextView,
+          textView.isDescendant(of: previewPane) else {
+      return false
+    }
+
+    return textView.selectedRange().length > 0
+  }
+
   private var historyShortcutBindings: [(String, HistoryShortcutAction)] {
     let preferences = model.preferences
     return [
@@ -1217,6 +1496,8 @@ final class HistoryContentViewController: NSViewController {
       (preferences.transformItemShortcut, .transformItem),
       (preferences.toggleSensitiveContentShortcut, .toggleSensitiveContentVisibility),
       (preferences.focusSearchFieldShortcut, .focusSearchField),
+      (preferences.togglePreviewPaneShortcut, .togglePreviewPane),
+      (preferences.toggleDetailsShortcut, .toggleDetails),
       (preferences.showCommandPaletteShortcut, .showCommandPalette),
       (preferences.openSettingsShortcut, .openSettings)
     ]
@@ -1389,6 +1670,10 @@ final class HistoryContentViewController: NSViewController {
         return
       }
       showInHistory(item)
+    case .togglePreviewPane:
+      togglePreviewPane()
+    case .toggleDetails:
+      toggleDetails()
     }
   }
 
@@ -1408,7 +1693,7 @@ final class HistoryContentViewController: NSViewController {
          .toggleFavorite, .showInFinder, .openInBrowser, .editItem, .renameItem, .transformItem, .showInHistory:
       return true
     case .closeHistory, .selectNextItem, .selectPreviousItem, .toggleSensitiveContentVisibility,
-         .focusSearchField, .openSettings, .showCommandPalette:
+         .focusSearchField, .openSettings, .showCommandPalette, .togglePreviewPane, .toggleDetails:
       return false
     }
   }
@@ -1672,6 +1957,7 @@ final class HistoryContentViewController: NSViewController {
 
     let reveals = !listPaneView.revealsSensitiveContent(of: item)
     listPaneView.setRevealsSensitiveContent(reveals, of: item)
+    setNeedsPreviewPaneUpdate()
 
     guard let previewSheetController, previewSheetWindow != nil,
           previewSheetController.item.id == item.id else {
@@ -1923,6 +2209,7 @@ extension HistoryContentViewController: HistoryDelegate {
     }
     updateToolbarState()
     updatePreviewSheet(for: focusedItem ?? items.first)
+    setNeedsPreviewPaneUpdate()
   }
 
   func listPane(_ pane: History, didClickItem item: ClipboardItem) {
@@ -2124,6 +2411,14 @@ extension HistoryContentViewController: HistoryToolbarDelegate {
   func historyToolbarDidRequestToggleCopySequenceMode(_ toolbar: HistoryToolbar) {
     coordinator.toggleCopySequenceMode()
     reloadList()
+  }
+
+  func historyToolbarDidRequestTogglePreviewPane(_ toolbar: HistoryToolbar) {
+    togglePreviewPane()
+  }
+
+  func historyToolbarDidRequestToggleDetails(_ toolbar: HistoryToolbar) {
+    toggleDetails()
   }
 
   func historyToolbarDidRequestCommandDialog(_ toolbar: HistoryToolbar) {
@@ -3254,6 +3549,26 @@ extension HistoryContentViewController: HistoryToolbarDelegate {
         }
       }
     ]
+    commands.append(command(
+      title: model.preferences.showPreviewPane ? "Hide Preview" : "Show Preview",
+      shortcut: model.preferences.togglePreviewPaneShortcut,
+      systemImageName: splitView.position == .bottom ? "rectangle.bottomhalf.inset.filled" : "rectangle.righthalf.inset.filled",
+      section: section,
+      isAvailableInReadOnlyHistory: true
+    ) { [weak self] in
+      self?.closeCommandPalette()
+      self?.togglePreviewPane()
+    })
+    commands.append(command(
+      title: model.preferences.showPreviewPaneDetails ? "Hide Details" : "Show Details",
+      shortcut: model.preferences.toggleDetailsShortcut,
+      systemImageName: "info.circle",
+      section: section,
+      isAvailableInReadOnlyHistory: true
+    ) { [weak self] in
+      self?.closeCommandPalette()
+      self?.toggleDetails()
+    })
     if canShowInHistory {
       commands.append(command(
         title: "Show in History",
@@ -3763,6 +4078,37 @@ private struct HistoryListPreferences: Equatable {
     pinFavoritesToTop = preferences.pinFavoritesToTop
     copySequenceModeEnabled = preferences.copySequenceModeEnabled
   }
+}
+
+/// The preferences the preview pane follows.
+private struct HistoryPreviewPanePreferences: Equatable {
+  let showPreviewPane: Bool
+  let showPreviewPaneDetails: Bool
+  let showPreviewForLinks: Bool
+  let detectSensitiveContent: Bool
+  let previewPaneHeight: Double?
+  let previewPaneWidthRatio: Double?
+  // Shown next to the commands in the toolbar's More menu.
+  let togglePreviewPaneShortcut: String
+  let toggleDetailsShortcut: String
+
+  init(_ preferences: AppPreferences) {
+    showPreviewPane = preferences.showPreviewPane
+    showPreviewPaneDetails = preferences.showPreviewPaneDetails
+    showPreviewForLinks = preferences.showPreviewForLinks
+    detectSensitiveContent = preferences.detectSensitiveContent
+    previewPaneHeight = preferences.previewPaneHeight
+    previewPaneWidthRatio = preferences.previewPaneWidthRatio
+    togglePreviewPaneShortcut = preferences.togglePreviewPaneShortcut
+    toggleDetailsShortcut = preferences.toggleDetailsShortcut
+  }
+}
+
+/// What the controller of the preview pane is made with and can't change
+/// afterwards, so a change of any of them makes a new controller.
+private struct PreviewPaneControllerConfiguration: Equatable {
+  let detectsSensitiveContent: Bool
+  let isReadOnly: Bool
 }
 
 /// The preferences the history toolbar shows.

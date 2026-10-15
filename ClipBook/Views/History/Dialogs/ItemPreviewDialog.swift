@@ -4,6 +4,14 @@ import WebKit
 
 @MainActor
 final class ItemPreviewDialogController: NSViewController {
+  enum Presentation {
+    /// A sheet of its own, with a toolbar, sized to fit the item.
+    case sheet
+    /// The preview pane of the history window, which decides its size. It
+    /// follows the history selection without ever taking the focus.
+    case pane
+  }
+
   static let minimumContentSize = NSSize(width: 360, height: 300)
   // The toolbar sits outside the content view, so its height has to be reserved
   // separately when the sheet is sized against the available screen space.
@@ -79,7 +87,10 @@ final class ItemPreviewDialogController: NSViewController {
   private var hasUserResizedWindow = false
   // Created eagerly on first access, because the dialog size depends on how
   // tall the details bar is before the view hierarchy exists.
-  private lazy var detailsView = ItemPreviewDetailsView(item: item)
+  private lazy var detailsView = ItemPreviewDetailsView(
+    item: item,
+    style: presentation == .sheet ? .floating : .docked
+  )
   // The web page preview of a link, and the two views layered over it while it
   // loads or when it fails to.
   private weak var webView: WKWebView?
@@ -110,6 +121,34 @@ final class ItemPreviewDialogController: NSViewController {
   // A read-only history (after the trial) is previewed without editing and
   // without selecting its text to copy.
   private let isReadOnly: Bool
+  private let presentation: Presentation
+  // Called in the pane when the content the focus was in goes away, so the
+  // focus can go back to the history list instead of being left nowhere.
+  var onContentFocusLost: (() -> Void)?
+  // A web page in the pane would load for every link the selection passes
+  // over, so the pane shows pages only when link previews are wanted.
+  var showsWebPages = true {
+    didSet {
+      guard showsWebPages != oldValue, item.kind == .link else {
+        return
+      }
+      reinstallContentView()
+    }
+  }
+  // The details panel can be turned off in the pane, which then gives its
+  // room to the preview.
+  var showsDetails = true {
+    didSet {
+      guard showsDetails != oldValue else {
+        return
+      }
+      detailsView.isHidden = !showsDetails
+      reinstallContentView()
+    }
+  }
+  // A page loads only once the selection has rested on its link for a moment,
+  // so moving through the list in the pane does not start a load per link.
+  private static let paneWebPageLoadDelay: TimeInterval = 0.3
 
   init(
     item: ClipboardItem,
@@ -117,10 +156,12 @@ final class ItemPreviewDialogController: NSViewController {
     detectsSensitiveContent: Bool,
     revealsSensitiveContent: Bool,
     isReadOnly: Bool = false,
+    presentation: Presentation = .sheet,
     loadFormatting: @escaping (ClipboardItem) -> ClipboardItem
   ) {
     self.item = item
     self.isReadOnly = isReadOnly
+    self.presentation = presentation
     self.loadFormatting = loadFormatting
     self.detectsSensitiveContent = detectsSensitiveContent
     self.revealsSensitiveContent = revealsSensitiveContent
@@ -183,6 +224,8 @@ final class ItemPreviewDialogController: NSViewController {
     let rootView = ItemPreviewKeyHandlingView(
       frame: NSRect(origin: .zero, size: contentSize)
     )
+    // The pane leaves the keys to the history list and its search field.
+    rootView.acceptsFocus = presentation == .sheet
     rootView.onCancel = { [weak self] in
       guard let self, !self.isEditing else {
         return
@@ -213,21 +256,33 @@ final class ItemPreviewDialogController: NSViewController {
 
     view = rootView
 
-    // The details float over the preview as a centered capsule: as wide as
-    // their fields when the dialog allows it, and as wide as the dialog minus
-    // the margin otherwise, with the fields wrapping inside.
+    detailsView.isHidden = !showsDetails
     rootView.addSubview(detailsView)
-    NSLayoutConstraint.activate([
-      detailsView.centerXAnchor.constraint(equalTo: rootView.centerXAnchor),
-      detailsView.leadingAnchor.constraint(
-        greaterThanOrEqualTo: rootView.leadingAnchor,
-        constant: ItemPreviewDetailsView.horizontalFloatingMargin
-      ),
-      detailsView.bottomAnchor.constraint(
-        equalTo: rootView.bottomAnchor,
-        constant: -ItemPreviewDetailsView.floatingMargin
-      )
-    ])
+    switch presentation {
+    case .sheet:
+      // The details float over the preview as a centered capsule: as wide as
+      // their fields when the dialog allows it, and as wide as the dialog
+      // minus the margin otherwise, with the fields wrapping inside.
+      NSLayoutConstraint.activate([
+        detailsView.centerXAnchor.constraint(equalTo: rootView.centerXAnchor),
+        detailsView.leadingAnchor.constraint(
+          greaterThanOrEqualTo: rootView.leadingAnchor,
+          constant: ItemPreviewDetailsView.horizontalFloatingMargin
+        ),
+        detailsView.bottomAnchor.constraint(
+          equalTo: rootView.bottomAnchor,
+          constant: -ItemPreviewDetailsView.floatingMargin
+        )
+      ])
+    case .pane:
+      // The details are a bar across the bottom of the pane, and the preview
+      // ends where the bar begins.
+      NSLayoutConstraint.activate([
+        detailsView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor),
+        detailsView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor),
+        detailsView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor)
+      ])
+    }
 
     windowContentSize = contentSize
     installContentView(for: content)
@@ -247,7 +302,9 @@ final class ItemPreviewDialogController: NSViewController {
     self.item = item
     self.revealsSensitiveContent = revealsSensitiveContent
     toolbar.update(item: item, sensitiveContent: sensitiveContent)
-    view.window?.title = dialogTitle
+    if presentation == .sheet {
+      view.window?.title = dialogTitle
+    }
     // The details are rebuilt unconditionally, because values such as the copy
     // count and the last copy date change without the preview content changing.
     detailsView.update(item: item)
@@ -260,6 +317,11 @@ final class ItemPreviewDialogController: NSViewController {
     }
 
     let content = makeContent(for: item)
+    guard presentation == .sheet else {
+      installPaneContentView(for: content)
+      return
+    }
+
     let contentSize = dialogContentSize(for: content)
     windowContentSize = contentSize
 
@@ -270,11 +332,36 @@ final class ItemPreviewDialogController: NSViewController {
     view.window?.makeFirstResponder(view)
   }
 
+  // The pane never takes the focus. When it had it, in its text for instance,
+  // the focus is handed back once that text is gone.
+  private func installPaneContentView(for content: PreviewContent) {
+    let hadFocus = (view.window?.firstResponder as? NSView)?.isDescendant(of: view) == true
+    installContentView(for: content)
+    if hadFocus {
+      onContentFocusLost?()
+    }
+  }
+
+  // Rebuilds the preview of the same item, after a change in how it is shown.
+  private func reinstallContentView() {
+    guard isViewLoaded, !isEditing else {
+      return
+    }
+    let content = makeContent(for: item)
+    if presentation == .pane {
+      installPaneContentView(for: content)
+    } else {
+      installContentView(for: content)
+    }
+  }
+
   // A resize changes how much of the name fits next to the toolbar items, and
   // how many lines the details panel wraps onto.
   override func viewDidLayout() {
     super.viewDidLayout()
-    toolbar.refreshAccessoryLayout()
+    if presentation == .sheet {
+      toolbar.refreshAccessoryLayout()
+    }
     updateDetailsInset()
     refreshTextViewport()
   }
@@ -479,6 +566,12 @@ final class ItemPreviewDialogController: NSViewController {
     addContentView(makeContentView(for: content, frame: contentFrame))
   }
 
+  /// Stops what the preview has going, such as a page loading, before the
+  /// pane lets go of it.
+  func tearDownContent() {
+    tearDownContentView()
+  }
+
   private func tearDownContentView() {
     if let quickLookView = contentView as? QLPreviewView {
       quickLookView.close()
@@ -503,10 +596,14 @@ final class ItemPreviewDialogController: NSViewController {
         constant: -Self.contentInset
       ),
       newContentView.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.contentInset),
-      newContentView.bottomAnchor.constraint(
-        equalTo: view.bottomAnchor,
-        constant: -Self.contentInset
-      )
+      // In the pane the preview stops at the details bar rather than going
+      // on underneath it.
+      presentation == .pane && !detailsView.isHidden
+        ? newContentView.bottomAnchor.constraint(equalTo: detailsView.topAnchor)
+        : newContentView.bottomAnchor.constraint(
+            equalTo: view.bottomAnchor,
+            constant: -Self.contentInset
+          )
     ]
     NSLayoutConstraint.activate(constraints)
     contentView = newContentView
@@ -524,7 +621,7 @@ final class ItemPreviewDialogController: NSViewController {
     // Rich text is shown with its formatting, which history items come without.
     let item = item.kind == .richText ? loadFormatting(item) : item
     guard sensitiveContent.hidesContent else {
-      return Self.makeContent(for: item, showsSVGMarkup: showsSVGMarkup)
+      return Self.makeContent(for: item, showsSVGMarkup: showsSVGMarkup, showsWebPages: showsWebPages)
     }
 
     // The page of a link would show what its address hides, so a link with hidden
@@ -561,7 +658,11 @@ final class ItemPreviewDialogController: NSViewController {
     return styledText
   }
 
-  private static func makeContent(for item: ClipboardItem, showsSVGMarkup: Bool) -> PreviewContent {
+  private static func makeContent(
+    for item: ClipboardItem,
+    showsSVGMarkup: Bool,
+    showsWebPages: Bool
+  ) -> PreviewContent {
     // Text that is an SVG document is previewed as the picture it draws, unless
     // the user switched the preview to its markup.
     if !showsSVGMarkup, let rendering = SVGImageRenderer.shared.rendering(for: item) {
@@ -582,7 +683,7 @@ final class ItemPreviewDialogController: NSViewController {
       }
       return .text(plainTextContent(item.previewText))
     case .link:
-      if let browserURL = item.browserURL, Self.isWebPageURL(browserURL) {
+      if showsWebPages, let browserURL = item.browserURL, Self.isWebPageURL(browserURL) {
         return .webPage(browserURL)
       }
       return .text(plainTextContent(item.previewText))
@@ -693,8 +794,12 @@ final class ItemPreviewDialogController: NSViewController {
     }
 
     // Before the first layout the panel has no frame yet, so its top edge is
-    // estimated from the height it needs at the width of the dialog.
-    let panelTop = detailsView.frame.height > 0
+    // estimated from the height it needs at the width of the dialog. A hidden
+    // panel covers nothing, and neither does the bar of the pane, which the
+    // preview ends above.
+    let panelTop = detailsView.isHidden || presentation == .pane
+      ? Self.contentInset
+      : detailsView.frame.height > 0
       ? detailsView.frame.maxY
       : detailsView.reservedHeight(forWidth: view.bounds.width) - ItemPreviewDetailsView.floatingMargin
     let spacing = scrollView.documentView is NSTextView ? Self.textBottomSpacing : 0
@@ -779,7 +884,13 @@ final class ItemPreviewDialogController: NSViewController {
     )
   }
 
+  // The pane decides its own size, so an image there is always centred in the
+  // room it gets and only ever scaled down to fit.
   private func imageFitsAtNaturalSize(_ imageSize: NSSize) -> Bool {
+    guard presentation == .sheet else {
+      return true
+    }
+
     let availableSize = availableImageSize
     return imageSize.width <= availableSize.width && imageSize.height <= availableSize.height
   }
@@ -1083,7 +1194,18 @@ final class ItemPreviewDialogController: NSViewController {
       )
     ])
 
-    webView.load(URLRequest(url: url))
+    guard presentation == .pane else {
+      webView.load(URLRequest(url: url))
+      return containerView
+    }
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + Self.paneWebPageLoadDelay) { [weak webView] in
+      // The preview has moved on when the web view is gone or no longer shown.
+      guard let webView, webView.navigationDelegate != nil else {
+        return
+      }
+      webView.load(URLRequest(url: url))
+    }
     return containerView
   }
 
@@ -1320,7 +1442,9 @@ private class AboveDetailsPreviewContentView: NSView {
       return
     }
 
-    let constraint = previewArea.bottomAnchor.constraint(equalTo: detailsView.topAnchor)
+    let constraint = detailsView.isHidden
+      ? previewArea.bottomAnchor.constraint(equalTo: bottomAnchor)
+      : previewArea.bottomAnchor.constraint(equalTo: detailsView.topAnchor)
     constraint.isActive = true
     previewAreaBottomConstraint = constraint
   }
@@ -1362,6 +1486,7 @@ private final class ItemPreviewKeyHandlingView: NSView {
   var onEscape: (() -> Void)?
   var onKeyDown: ((NSEvent) -> Bool)?
   var onSaveKeyEquivalent: (() -> Bool)?
+  var acceptsFocus = true
 
   override init(frame frameRect: NSRect) {
     super.init(frame: frameRect)
@@ -1374,7 +1499,7 @@ private final class ItemPreviewKeyHandlingView: NSView {
   }
 
   override var acceptsFirstResponder: Bool {
-    true
+    acceptsFocus
   }
 
   override var wantsUpdateLayer: Bool {

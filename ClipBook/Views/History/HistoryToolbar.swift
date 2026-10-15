@@ -30,6 +30,8 @@ protocol HistoryToolbarDelegate: AnyObject {
   func historyToolbarDidRequestMergeSelection(_ toolbar: HistoryToolbar)
   func historyToolbarDidRequestTogglePin(_ toolbar: HistoryToolbar)
   func historyToolbarDidRequestToggleCopySequenceMode(_ toolbar: HistoryToolbar)
+  func historyToolbarDidRequestTogglePreviewPane(_ toolbar: HistoryToolbar)
+  func historyToolbarDidRequestToggleDetails(_ toolbar: HistoryToolbar)
   func historyToolbarDidRequestCommandDialog(_ toolbar: HistoryToolbar)
 }
 
@@ -121,6 +123,11 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
   private var selectedFilterSourceApplicationIDs: Set<HistorySourceApplication.ID> = []
   private var isPinned = false
   private var isCopySequenceModeEnabled = false
+  private var isPreviewPaneShown = false
+  private var showsDetails = false
+  private var togglePreviewShortcut = ""
+  private var toggleDetailsShortcut = ""
+  private var previewPanePosition: HistoryPreviewPanePosition = .bottom
   // The copy sequence mode the sort menu was built for: the menu leaves sorting
   // out in that mode.
   private var sortMenuIsForCopySequenceMode = false
@@ -333,18 +340,35 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
       Self.searchIdentifier,
       .flexibleSpace,
       Self.pasteIdentifier,
-      Self.copyIdentifier,
-      Self.sortIdentifier,
-      Self.copySequenceIdentifier,
-      Self.commandIdentifier,
-      Self.pinIdentifier
+      Self.copyIdentifier
     ]
+      + Self.groupSeparatorIdentifiers
+      + [Self.sortIdentifier]
+      + Self.groupSeparatorIdentifiers
+      + [
+        Self.copySequenceIdentifier,
+        Self.commandIdentifier,
+        Self.pinIdentifier
+      ]
+  }
+
+  // On macOS 26 neighbouring toolbar buttons share one glass background. The
+  // More button sits in a group of its own between the item actions and the
+  // window controls, and without a menu indicator nothing sets it apart, so
+  // a space on each side splits the buttons into their groups.
+  private static var groupSeparatorIdentifiers: [NSToolbarItem.Identifier] {
+    if #available(macOS 26.0, *) {
+      return [.space]
+    }
+
+    return []
   }
 
   func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
     [
       Self.searchIdentifier,
       .flexibleSpace,
+      .space,
       Self.pasteIdentifier,
       Self.copyIdentifier,
       Self.openInBrowserIdentifier,
@@ -1016,18 +1040,18 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     item.isBordered = true
     Self.applyPlainStyle(to: item)
     item.visibilityPriority = .high
-    item.showsIndicator = true
+    item.showsIndicator = false
     updateSortItemLocalization(item: item)
     return item
   }
 
   private func updateSortItemLocalization(item: NSMenuToolbarItem? = nil) {
     let item = item ?? sortItem as? NSMenuToolbarItem
-    let label = L10n.string("Sort")
+    let label = L10n.string("More")
     item?.label = label
     item?.paletteLabel = label
-    item?.toolTip = L10n.string("Sort history")
-    item?.image = Self.symbolImage(symbolName: "line.3.horizontal.decrease", label: label)
+    item?.toolTip = L10n.string("More options")
+    item?.image = Self.symbolImage(symbolName: "ellipsis", label: label)
     item?.menu = makeSortMenu()
   }
 
@@ -1065,6 +1089,9 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     filterByItem.image = Self.symbolImage(symbolName: "line.3.horizontal.decrease", label: L10n.string("Filter By"))
     filterByItem.submenu = makeFilterByMenu()
     menu.addItem(filterByItem)
+    menu.addItem(.separator())
+    menu.addItem(makePreviewPaneMenuItem())
+    menu.addItem(makeDetailsMenuItem())
 
     menu.showsItemImagesRegardlessOfSystemSetting()
     return menu
@@ -1444,6 +1471,59 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     return item
   }
 
+  /// Showing or hiding the preview pane lives in the sort menu, whose item
+  /// names where the pane sits, at the bottom or on the right of the window.
+  func updatePreviewPane(
+    isShown: Bool,
+    showsDetails: Bool,
+    position: HistoryPreviewPanePosition,
+    togglePreviewShortcut: String,
+    toggleDetailsShortcut: String
+  ) {
+    guard isShown != isPreviewPaneShown
+            || showsDetails != self.showsDetails
+            || position != previewPanePosition
+            || togglePreviewShortcut != self.togglePreviewShortcut
+            || toggleDetailsShortcut != self.toggleDetailsShortcut else {
+      return
+    }
+
+    isPreviewPaneShown = isShown
+    self.showsDetails = showsDetails
+    previewPanePosition = position
+    self.togglePreviewShortcut = togglePreviewShortcut
+    self.toggleDetailsShortcut = toggleDetailsShortcut
+    if let item = sortItem as? NSMenuToolbarItem {
+      item.menu = makeSortMenu()
+    }
+  }
+
+  private func makePreviewPaneMenuItem() -> NSMenuItem {
+    let title = isPreviewPaneShown ? L10n.string("Hide Preview") : L10n.string("Show Preview")
+    let item = NSMenuItem(title: title, action: #selector(togglePreviewPane), keyEquivalent: "")
+    item.target = self
+    let symbolName: String
+    switch previewPanePosition {
+    case .bottom:
+      symbolName = "rectangle.bottomhalf.inset.filled"
+    case .right:
+      symbolName = "rectangle.righthalf.inset.filled"
+    }
+    item.image = Self.symbolImage(symbolName: symbolName, label: title)
+      ?? Self.symbolImage(symbolName: "eye", label: title)
+    HistoryItemContextMenu.applyShortcut(togglePreviewShortcut, to: item)
+    return item
+  }
+
+  private func makeDetailsMenuItem() -> NSMenuItem {
+    let title = showsDetails ? L10n.string("Hide Details") : L10n.string("Show Details")
+    let item = NSMenuItem(title: title, action: #selector(toggleDetails), keyEquivalent: "")
+    item.target = self
+    item.image = Self.symbolImage(symbolName: "info.circle", label: title)
+    HistoryItemContextMenu.applyShortcut(toggleDetailsShortcut, to: item)
+    return item
+  }
+
   private func makeCommandItem() -> NSToolbarItem {
     let item = NSToolbarItem(itemIdentifier: Self.commandIdentifier)
     item.target = self
@@ -1523,7 +1603,11 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
       .compactMap(toolbarIndex(for:))
       .first
 
-    let insertionIndex = previousIndex.map { $0 + 1 } ?? toolbarIndex(for: Self.sortIdentifier) ?? toolbar.items.count
+    // The first action goes at the end of the actions group, which ends
+    // before the space that keeps it apart from the More button.
+    let actionsGroupEndIndex = toolbarIndex(for: Self.sortIdentifier)
+      .map { $0 - Self.groupSeparatorIdentifiers.count }
+    let insertionIndex = previousIndex.map { $0 + 1 } ?? actionsGroupEndIndex ?? toolbar.items.count
     toolbar.insertItem(withItemIdentifier: Self.itemIdentifier(for: action), at: insertionIndex)
   }
 
@@ -1619,6 +1703,14 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
 
   @objc private func toggleCopySequenceMode() {
     delegate?.historyToolbarDidRequestToggleCopySequenceMode(self)
+  }
+
+  @objc private func togglePreviewPane() {
+    delegate?.historyToolbarDidRequestTogglePreviewPane(self)
+  }
+
+  @objc private func toggleDetails() {
+    delegate?.historyToolbarDidRequestToggleDetails(self)
   }
 
   @objc private func showCommandDialog() {

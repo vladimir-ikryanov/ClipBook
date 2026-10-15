@@ -45,6 +45,8 @@ struct ShortcutSettingsView: View {
             ShortcutEntry(title: L10n.string("Select previous item"), keyPath: \.selectPreviousItemShortcut, defaultValue: AppPreferences.defaultSelectPreviousItemShortcut),
             ShortcutEntry(title: L10n.string("Show Command Palette"), keyPath: \.showCommandPaletteShortcut, defaultValue: AppPreferences.defaultShowCommandPaletteShortcut),
             ShortcutEntry(title: L10n.string("Focus search field"), keyPath: \.focusSearchFieldShortcut, defaultValue: AppPreferences.defaultFocusSearchFieldShortcut),
+            ShortcutEntry(title: L10n.string("Show or hide preview"), keyPath: \.togglePreviewPaneShortcut, defaultValue: AppPreferences.defaultTogglePreviewPaneShortcut),
+            ShortcutEntry(title: L10n.string("Show or hide details"), keyPath: \.toggleDetailsShortcut, defaultValue: AppPreferences.defaultToggleDetailsShortcut),
             ShortcutEntry(title: L10n.string("Open settings"), keyPath: \.openSettingsShortcut, defaultValue: AppPreferences.defaultOpenSettingsShortcut)
         ]
     }

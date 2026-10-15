@@ -103,6 +103,18 @@ final class History: NSView {
     }
   }
 
+  /// Extra room below the last row, for a fade laid over the bottom of the
+  /// list: scrolled all the way down, the last row ends above it.
+  var additionalBottomContentInset: CGFloat = 0 {
+    didSet {
+      guard additionalBottomContentInset != oldValue else {
+        return
+      }
+
+      needsLayout = true
+    }
+  }
+
   // Before macOS 26 the history window's titlebar is transparent, so rows
   // scrolled under the toolbar would show through it. The list starts below
   // the toolbar there instead of scrolling beneath it.
@@ -557,7 +569,7 @@ final class History: NSView {
     let insets = NSEdgeInsets(
       top: (Self.scrollsUnderToolbar ? safeAreaInsets.top : 0) + firstRowPadding,
       left: 0,
-      bottom: max(safeAreaInsets.bottom, Self.scrollBottomPadding),
+      bottom: max(safeAreaInsets.bottom, Self.scrollBottomPadding) + additionalBottomContentInset,
       right: 0
     )
     let previousInsets = scrollView.contentInsets

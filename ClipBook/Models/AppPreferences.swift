@@ -94,6 +94,8 @@ struct AppPreferences: Codable, Equatable {
     static let defaultOpenSettingsShortcut = "cmd+,"
     static let defaultShowCommandPaletteShortcut = "cmd+k"
     static let defaultShowInHistoryShortcut = "cmd+l"
+    static let defaultTogglePreviewPaneShortcut = "cmd+p"
+    static let defaultToggleDetailsShortcut = "cmd+i"
     static let defaultToggleSensitiveContentShortcut = "cmd+u"
     // The filter panel used to own Cmd+F, which now focuses the search field.
     // The copy sequence mode used to be one of the "Sort By" options.
@@ -156,6 +158,13 @@ struct AppPreferences: Codable, Equatable {
     var showPreviewForLinks = true
     var showCommandNumberShortcut = true
     var showHistoryDividers = false
+    var showPreviewPane = true
+    var showPreviewPaneDetails = true
+    /// The height of the preview pane at the bottom of the history window,
+    /// and the share of the window width it takes on the right. Nil until
+    /// the user resizes the pane.
+    var previewPaneHeight: Double?
+    var previewPaneWidthRatio: Double?
     var treatDigitNumbersAsColor = true
     var preferPastingAsPlainText = true
     var doubleClickAction = HistoryItemActionPreference.paste.rawValue
@@ -207,6 +216,8 @@ struct AppPreferences: Codable, Equatable {
     var openSettingsShortcut = Self.defaultOpenSettingsShortcut
     var showCommandPaletteShortcut = Self.defaultShowCommandPaletteShortcut
     var showInHistoryShortcut = Self.defaultShowInHistoryShortcut
+    var togglePreviewPaneShortcut = Self.defaultTogglePreviewPaneShortcut
+    var toggleDetailsShortcut = Self.defaultToggleDetailsShortcut
     var toggleSensitiveContentShortcut = Self.defaultToggleSensitiveContentShortcut
     var licenseKey = ""
     var hasMigratedV1LicenseKey = false
@@ -292,6 +303,10 @@ struct AppPreferences: Codable, Equatable {
         showPreviewForLinks = try container.decodeIfPresent(Bool.self, forKey: .showPreviewForLinks) ?? defaults.showPreviewForLinks
         showCommandNumberShortcut = try container.decodeIfPresent(Bool.self, forKey: .showCommandNumberShortcut) ?? defaults.showCommandNumberShortcut
         showHistoryDividers = try container.decodeIfPresent(Bool.self, forKey: .showHistoryDividers) ?? defaults.showHistoryDividers
+        showPreviewPane = try container.decodeIfPresent(Bool.self, forKey: .showPreviewPane) ?? defaults.showPreviewPane
+        showPreviewPaneDetails = try container.decodeIfPresent(Bool.self, forKey: .showPreviewPaneDetails) ?? defaults.showPreviewPaneDetails
+        previewPaneHeight = try container.decodeIfPresent(Double.self, forKey: .previewPaneHeight)
+        previewPaneWidthRatio = try container.decodeIfPresent(Double.self, forKey: .previewPaneWidthRatio)
         treatDigitNumbersAsColor = try container.decodeIfPresent(Bool.self, forKey: .treatDigitNumbersAsColor) ?? defaults.treatDigitNumbersAsColor
         preferPastingAsPlainText = try container.decodeIfPresent(Bool.self, forKey: .preferPastingAsPlainText) ?? defaults.preferPastingAsPlainText
         doubleClickAction = HistoryItemActionPreference(
@@ -365,6 +380,8 @@ struct AppPreferences: Codable, Equatable {
         openSettingsShortcut = try container.decodeIfPresent(String.self, forKey: .openSettingsShortcut) ?? defaults.openSettingsShortcut
         showCommandPaletteShortcut = try container.decodeIfPresent(String.self, forKey: .showCommandPaletteShortcut) ?? defaults.showCommandPaletteShortcut
         showInHistoryShortcut = try container.decodeIfPresent(String.self, forKey: .showInHistoryShortcut) ?? defaults.showInHistoryShortcut
+        togglePreviewPaneShortcut = try container.decodeIfPresent(String.self, forKey: .togglePreviewPaneShortcut) ?? defaults.togglePreviewPaneShortcut
+        toggleDetailsShortcut = try container.decodeIfPresent(String.self, forKey: .toggleDetailsShortcut) ?? defaults.toggleDetailsShortcut
         toggleSensitiveContentShortcut = try container.decodeIfPresent(String.self, forKey: .toggleSensitiveContentShortcut) ?? defaults.toggleSensitiveContentShortcut
         licenseKey = try container.decodeIfPresent(String.self, forKey: .licenseKey) ?? defaults.licenseKey
         hasMigratedV1LicenseKey = try container.decodeIfPresent(Bool.self, forKey: .hasMigratedV1LicenseKey) ?? defaults.hasMigratedV1LicenseKey

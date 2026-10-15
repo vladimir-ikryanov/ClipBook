@@ -5,8 +5,21 @@ import ImageIO
 // fields are centered in a single row and wrap onto additional lines whenever
 // the dialog is too narrow to fit them all, in which case the panel grows
 // taller and its capsule corners are capped so it still reads as a panel.
+// The preview pane of the history window shows the same fields docked along
+// its bottom edge instead, as a part of the pane.
 @MainActor
 final class ItemPreviewDetailsView: NSView {
+  enum Style {
+    /// A glass capsule floating over the bottom of the preview sheet.
+    case floating
+    /// A plain bar along the bottom of the preview pane, set apart from the
+    /// preview above it by a line, with its fields centered.
+    case docked
+    /// The docked bar on its own, filling the pane of the history window
+    /// while the preview is hidden. Nothing is above it to set apart.
+    case standalone
+  }
+
   // The gap between the panel and the bottom edge of the preview it floats
   // over, and the wider gap kept on each side so the panel never hugs the
   // window border.
@@ -14,6 +27,8 @@ final class ItemPreviewDetailsView: NSView {
   static let horizontalFloatingMargin: CGFloat = 40
   private static let horizontalInset: CGFloat = 24
   private static let verticalInset: CGFloat = 10
+  private static let dockedHorizontalInset: CGFloat = 20
+  private static let dockedVerticalInset: CGFloat = 12
   private static let maximumCornerRadius: CGFloat = 24
   // The gap on each side of a separator, so neighbouring fields are kept
   // visually apart rather than reading as one run of text.
@@ -21,6 +36,9 @@ final class ItemPreviewDetailsView: NSView {
   private static let lineSpacing: CGFloat = 8
   private static let separatorWidth: CGFloat = 1
   private static let separatorSpan = fieldSpacing * 2 + separatorWidth
+  // The docked bar keeps its fields apart by space alone, which is more
+  // compact than a divider with room on both sides.
+  private static let dockedFieldSpacing: CGFloat = 16
   private static let titleValueSpacing: CGFloat = 1
   private static let appIconSize: CGFloat = 14
   private static let appIconSpacing: CGFloat = 4
@@ -36,12 +54,15 @@ final class ItemPreviewDetailsView: NSView {
     let value: String
     var icon: NSImage?
     var key: FieldKey?
+    // An icon can stand for the value, which then shows only in the tooltip.
+    var showsValue: Bool
 
-    init(title: String, value: String, icon: NSImage? = nil, key: FieldKey? = nil) {
+    init(title: String, value: String, icon: NSImage? = nil, key: FieldKey? = nil, showsValue: Bool = true) {
       self.title = title
       self.value = value
       self.icon = icon
       self.key = key
+      self.showsValue = showsValue
     }
   }
 
@@ -62,9 +83,15 @@ final class ItemPreviewDetailsView: NSView {
   // The fields are laid out top-down, so they live in a flipped container
   // rather than in the panel itself.
   private let fieldsView = ItemPreviewDetailsFieldsView()
+  private let style: Style
+  // The line between the docked bar and the preview above it.
+  private var topSeparatorView: NSView?
 
-  init(item: ClipboardItem) {
-    backdropView = Self.makeBackdropView(contentView: fieldsView)
+  init(item: ClipboardItem, style: Style = .floating) {
+    self.style = style
+    backdropView = style == .floating
+      ? Self.makeBackdropView(contentView: fieldsView)
+      : Self.makeDockedBackgroundView(contentView: fieldsView)
     super.init(frame: .zero)
     translatesAutoresizingMaskIntoConstraints = false
     wantsLayer = true
@@ -78,6 +105,11 @@ final class ItemPreviewDetailsView: NSView {
     setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
     backdropView.autoresizingMask = [.width, .height]
     addSubview(backdropView)
+    if style == .docked {
+      let separatorView = ItemPreviewDetailsSeparatorView()
+      addSubview(separatorView)
+      topSeparatorView = separatorView
+    }
     rebuild(for: item)
   }
 
@@ -86,8 +118,12 @@ final class ItemPreviewDetailsView: NSView {
     fatalError("init(coder:) has not been implemented")
   }
 
+  // The docked bar spans the pane, so only its height comes from the fields.
   override var intrinsicContentSize: NSSize {
-    NSSize(width: preferredWidth, height: contentHeight)
+    NSSize(
+      width: style == .floating ? preferredWidth : NSView.noIntrinsicMetric,
+      height: contentHeight
+    )
   }
 
   // Tooltips are the only thing the panel reacts to, and only over its fields,
@@ -138,8 +174,21 @@ final class ItemPreviewDetailsView: NSView {
     }
 
     let fieldsWidth = fieldViews.reduce(0) { $0 + $1.fittingSize.width }
-    let separatorsWidth = CGFloat(separatorViews.count) * Self.separatorSpan
-    return fieldsWidth + separatorsWidth + Self.horizontalInset * 2
+    let gapsWidth = CGFloat(fieldViews.count - 1) * fieldGap
+    return fieldsWidth + gapsWidth + horizontalInset * 2
+  }
+
+  // The room between two fields on the same line.
+  private var fieldGap: CGFloat {
+    style == .floating ? Self.separatorSpan : Self.dockedFieldSpacing
+  }
+
+  private var horizontalInset: CGFloat {
+    style == .floating ? Self.horizontalInset : Self.dockedHorizontalInset
+  }
+
+  private var verticalInset: CGFloat {
+    style == .floating ? Self.verticalInset : Self.dockedVerticalInset
   }
 
   override func layout() {
@@ -148,7 +197,13 @@ final class ItemPreviewDetailsView: NSView {
     backdropView.frame = bounds
     fieldsView.frame = backdropView.bounds
     let height = layOutFields(inWidth: bounds.width, applyingFrames: true)
-    Self.applyCornerRadius(min(height / 2, Self.maximumCornerRadius), to: backdropView)
+    if style == .floating {
+      Self.applyCornerRadius(min(height / 2, Self.maximumCornerRadius), to: backdropView)
+    }
+    if let topSeparatorView {
+      let lineWidth = 1 / (window?.backingScaleFactor ?? 2)
+      topSeparatorView.frame = NSRect(x: 0, y: bounds.height - lineWidth, width: bounds.width, height: lineWidth)
+    }
     guard abs(height - contentHeight) > 0.5 else {
       return
     }
@@ -167,28 +222,31 @@ final class ItemPreviewDetailsView: NSView {
       return 0
     }
 
-    let availableWidth = max(1, width - Self.horizontalInset * 2)
+    let availableWidth = max(1, width - horizontalInset * 2)
     let fieldSizes = fieldViews.map(\.fittingSize)
     let lineHeight = fieldSizes.map(\.height).max() ?? 0
-    let lines = Self.packLines(fieldSizes: fieldSizes, availableWidth: availableWidth)
+    let lines = Self.packLines(fieldSizes: fieldSizes, availableWidth: availableWidth, fieldGap: fieldGap)
 
     if applyingFrames {
-      var originY = Self.verticalInset
+      var originY = verticalInset
       for line in lines {
-        var originX = Self.horizontalInset + max(0, (availableWidth - line.width) / 2)
+        var originX = horizontalInset + max(0, (availableWidth - line.width) / 2)
         for index in line.indices {
-          if index > 0 {
-            let separatorView = separatorViews[index - 1]
-            separatorView.isHidden = index == line.indices.first
-            if !separatorView.isHidden {
-              separatorView.frame = NSRect(
+          // Only the floating panel has dividers; a field that starts a
+          // line has none before it.
+          if index > 0, separatorViews.indices.contains(index - 1) {
+            separatorViews[index - 1].isHidden = index == line.indices.first
+          }
+          if index != line.indices.first {
+            if index > 0, separatorViews.indices.contains(index - 1) {
+              separatorViews[index - 1].frame = NSRect(
                 x: originX + Self.fieldSpacing,
                 y: originY,
                 width: Self.separatorWidth,
                 height: lineHeight
               )
-              originX += Self.separatorSpan
             }
+            originX += fieldGap
           }
 
           fieldViews[index].frame = NSRect(
@@ -205,22 +263,22 @@ final class ItemPreviewDetailsView: NSView {
 
     let linesHeight = CGFloat(lines.count) * lineHeight
       + CGFloat(lines.count - 1) * Self.lineSpacing
-    return linesHeight + Self.verticalInset * 2
+    return linesHeight + verticalInset * 2
   }
 
   // Greedily packs the fields into lines that fit the available width.
-  private static func packLines(fieldSizes: [NSSize], availableWidth: CGFloat) -> [FieldLine] {
+  private static func packLines(fieldSizes: [NSSize], availableWidth: CGFloat, fieldGap: CGFloat) -> [FieldLine] {
     var lines: [FieldLine] = []
     var line = FieldLine()
 
     for index in fieldSizes.indices {
       let fieldWidth = fieldSizes[index].width
-      if !line.indices.isEmpty, line.width + separatorSpan + fieldWidth > availableWidth {
+      if !line.indices.isEmpty, line.width + fieldGap + fieldWidth > availableWidth {
         lines.append(line)
         line = FieldLine()
       }
 
-      line.width += (line.indices.isEmpty ? 0 : separatorSpan) + fieldWidth
+      line.width += (line.indices.isEmpty ? 0 : fieldGap) + fieldWidth
       line.indices.append(index)
     }
 
@@ -250,6 +308,15 @@ final class ItemPreviewDetailsView: NSView {
     return effectView
   }
 
+  // The docked bar sits on the pane's own background, so it needs no
+  // material of its own.
+  private static func makeDockedBackgroundView(contentView: NSView) -> NSView {
+    let backgroundView = NSView()
+    contentView.autoresizingMask = [.width, .height]
+    backgroundView.addSubview(contentView)
+    return backgroundView
+  }
+
   private static func applyCornerRadius(_ radius: CGFloat, to backdropView: NSView) {
     if #available(macOS 26.0, *), let glassView = backdropView as? NSGlassEffectView {
       glassView.cornerRadius = radius
@@ -269,7 +336,7 @@ final class ItemPreviewDetailsView: NSView {
     valueFieldsByKey = [:]
     let fields = Self.fields(for: item)
     for (index, field) in fields.enumerated() {
-      if index > 0 {
+      if index > 0, style == .floating {
         let separatorView = ItemPreviewDetailsSeparatorView()
         fieldsView.addSubview(separatorView)
         separatorViews.append(separatorView)
@@ -309,6 +376,7 @@ final class ItemPreviewDetailsView: NSView {
     if let icon = field.icon {
       let iconView = NSImageView()
       iconView.image = icon
+      iconView.setAccessibilityLabel(field.value)
       iconView.imageScaling = .scaleProportionallyDown
       iconView.translatesAutoresizingMaskIntoConstraints = false
       iconView.setContentHuggingPriority(.required, for: .horizontal)
@@ -318,7 +386,7 @@ final class ItemPreviewDetailsView: NSView {
         iconView.heightAnchor.constraint(equalToConstant: Self.appIconSize)
       ])
 
-      let valueStack = NSStackView(views: [iconView, valueField])
+      let valueStack = NSStackView(views: field.showsValue ? [iconView, valueField] : [iconView])
       valueStack.orientation = .horizontal
       valueStack.distribution = .fill
       valueStack.alignment = .centerY
@@ -352,12 +420,18 @@ final class ItemPreviewDetailsView: NSView {
     if let sourceApplicationField = applicationField(for: item) {
       fields.append(sourceApplicationField)
     }
-    fields.append(
-      Field(title: L10n.string("First Copy"), value: dateString(item.firstCopiedAt))
-    )
-    fields.append(
-      Field(title: L10n.string("Last Copy"), value: dateString(item.copiedAt))
-    )
+    let firstCopyDate = dateString(item.firstCopiedAt)
+    let lastCopyDate = dateString(item.copiedAt)
+    // Copied again within the same minute, the last copy would read the same,
+    // so a single date says when the item was copied.
+    if lastCopyDate == firstCopyDate {
+      // Keyed apart from the "Copied" confirmation, which some languages word
+      // as a message rather than a label.
+      fields.append(Field(title: L10n.string(forKey: "Copied (date)"), value: firstCopyDate))
+    } else {
+      fields.append(Field(title: L10n.string("First Copied"), value: firstCopyDate))
+      fields.append(Field(title: L10n.string("Last Copied"), value: lastCopyDate))
+    }
     fields.append(
       Field(title: L10n.string("Copies"), value: numberString(item.copyCount + 1))
     )
@@ -418,10 +492,13 @@ final class ItemPreviewDetailsView: NSView {
       appName: item.sourceAppName,
       size: appIconSize
     )
+    // The icon alone names the application, which saves room for the other
+    // fields; its name stays in the tooltip. Without an icon the name is shown.
     return Field(
-      title: L10n.string("Application"),
+      title: L10n.string("Source"),
       value: item.sourceAppName ?? item.sourceBundleIdentifier ?? "",
-      icon: icon
+      icon: icon,
+      showsValue: icon == nil
     )
   }
 
