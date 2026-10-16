@@ -27,7 +27,7 @@ final class ItemPreviewDetailsView: NSView {
   static let horizontalFloatingMargin: CGFloat = 40
   private static let horizontalInset: CGFloat = 24
   private static let verticalInset: CGFloat = 10
-  private static let dockedHorizontalInset: CGFloat = 20
+  private static let dockedHorizontalInset: CGFloat = 12
   private static let dockedVerticalInset: CGFloat = 12
   private static let maximumCornerRadius: CGFloat = 24
   // The gap on each side of a separator, so neighbouring fields are kept
