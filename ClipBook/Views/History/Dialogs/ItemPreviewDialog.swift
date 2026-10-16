@@ -160,6 +160,13 @@ final class ItemPreviewDialogController: NSViewController {
     }
   }
 
+  /// How the pane sets out the details under the preview: next to each other,
+  /// or listed one per row when the pane has the height for it.
+  var detailsArrangement: ItemPreviewDetailsView.Arrangement {
+    get { detailsView.arrangement }
+    set { detailsView.arrangement = newValue }
+  }
+
   /// The height the details need at the given width, which is the height of
   /// the pane while it shows only them.
   func detailsHeight(forWidth width: CGFloat) -> CGFloat {

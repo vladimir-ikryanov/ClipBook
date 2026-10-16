@@ -17,11 +17,30 @@ final class ItemPreviewDetailsView: NSView {
     case docked
   }
 
+  /// How the docked details are set out: the fields next to each other,
+  /// wrapping onto more lines as needed, or one field per row, its title on
+  /// the left and its value on the right, the rows shaded in turn. The pane
+  /// lists them while it sits beside the history and has the height for it.
+  enum Arrangement {
+    case inline
+    case list
+  }
+
+  var arrangement: Arrangement = .inline {
+    didSet {
+      guard arrangement != oldValue else {
+        return
+      }
+      updateTopSeparatorVisibility()
+      rebuild(for: item)
+    }
+  }
+
   /// Whether the docked bar draws the line that sets it apart from the
   /// preview. The pane leaves it out while it shows the details alone.
   var showsTopSeparator = true {
     didSet {
-      topSeparatorView?.isHidden = !showsTopSeparator
+      updateTopSeparatorVisibility()
     }
   }
 
@@ -45,6 +64,10 @@ final class ItemPreviewDetailsView: NSView {
   private static let titleValueSpacing: CGFloat = 1
   private static let appIconSize: CGFloat = 14
   private static let appIconSpacing: CGFloat = 4
+  private static let listRowHeight: CGFloat = 24
+  private static let listHorizontalInset: CGFloat = 10
+  private static let listTopInset: CGFloat = 6
+  private static let listBottomInset: CGFloat = 10
 
   // Fields whose value follows the editor while the item is being edited.
   private enum FieldKey {
@@ -87,11 +110,13 @@ final class ItemPreviewDetailsView: NSView {
   // rather than in the panel itself.
   private let fieldsView = ItemPreviewDetailsFieldsView()
   private let style: Style
+  private var item: ClipboardItem
   // The line between the docked bar and the preview above it.
   private var topSeparatorView: NSView?
 
   init(item: ClipboardItem, style: Style = .floating) {
     self.style = style
+    self.item = item
     backdropView = style == .floating
       ? Self.makeBackdropView(contentView: fieldsView)
       : Self.makeDockedBackgroundView(contentView: fieldsView)
@@ -140,7 +165,13 @@ final class ItemPreviewDetailsView: NSView {
   }
 
   func update(item: ClipboardItem) {
+    self.item = item
     rebuild(for: item)
+  }
+
+  // The shaded rows of the list set it apart well enough on their own.
+  private func updateTopSeparatorVisibility() {
+    topSeparatorView?.isHidden = !showsTopSeparator || arrangement == .list
   }
 
   // While the item is being edited the committed values are stale, so the
@@ -229,6 +260,10 @@ final class ItemPreviewDetailsView: NSView {
       return 0
     }
 
+    if arrangement == .list {
+      return layOutRows(inWidth: width, applyingFrames: applyingFrames)
+    }
+
     let availableWidth = max(1, width - horizontalInset * 2)
     let fieldSizes = fieldViews.map(\.fittingSize)
     let lineHeight = fieldSizes.map(\.height).max() ?? 0
@@ -268,6 +303,23 @@ final class ItemPreviewDetailsView: NSView {
     let linesHeight = CGFloat(lines.count) * lineHeight
       + CGFloat(lines.count - 1) * Self.lineSpacing
     return linesHeight + verticalInset * 2
+  }
+
+  // One row per field, as wide as the bar allows, stacked top-down.
+  private func layOutRows(inWidth width: CGFloat, applyingFrames: Bool) -> CGFloat {
+    if applyingFrames {
+      let rowWidth = max(0, width - Self.listHorizontalInset * 2)
+      for (index, rowView) in fieldViews.enumerated() {
+        rowView.frame = NSRect(
+          x: Self.listHorizontalInset,
+          y: Self.listTopInset + CGFloat(index) * Self.listRowHeight,
+          width: rowWidth,
+          height: Self.listRowHeight
+        )
+      }
+    }
+
+    return CGFloat(fieldViews.count) * Self.listRowHeight + Self.listTopInset + Self.listBottomInset
   }
 
   // Greedily packs the fields into lines that fit the available width.
@@ -341,6 +393,26 @@ final class ItemPreviewDetailsView: NSView {
     // The history row already shows the source app of the item next to it,
     // so the pane of the history window leaves it out of its details.
     let fields = Self.fields(for: item, includesSource: style == .floating)
+    if arrangement == .list {
+      for (index, field) in fields.enumerated() {
+        let rowView = ItemPreviewDetailsListRowView(
+          title: field.title,
+          value: field.value,
+          icon: field.icon,
+          isShaded: index.isMultiple(of: 2)
+        )
+        if let key = field.key {
+          valueFieldsByKey[key] = rowView.valueField
+        }
+        fieldsView.addSubview(rowView)
+        fieldViews.append(rowView)
+      }
+      needsLayout = true
+      contentHeight = preferredHeight(forWidth: bounds.width)
+      invalidateIntrinsicContentSize()
+      return
+    }
+
     for (index, field) in fields.enumerated() {
       if index > 0 {
         let separatorView = ItemPreviewDetailsSeparatorView()
@@ -542,6 +614,115 @@ final class ItemPreviewDetailsView: NSView {
     numberFormatter.locale = L10n.currentLocale
     numberFormatter.numberStyle = .decimal
     return numberFormatter.string(from: NSNumber(value: value)) ?? "\(value)"
+  }
+}
+
+// A row of the details listed one per row: the title on the left in the
+// quieter color, the value on the right. Every other row is shaded, so the
+// eye can follow a title across to its value.
+private final class ItemPreviewDetailsListRowView: NSView {
+  private static let horizontalPadding: CGFloat = 6
+  private static let titleValueSpacing: CGFloat = 12
+  private static let iconSize: CGFloat = 14
+  private static let iconSpacing: CGFloat = 4
+  private static let cornerRadius: CGFloat = 7
+
+  let valueField: NSTextField
+  private let titleField: NSTextField
+  private let iconView: NSImageView?
+  private let isShaded: Bool
+
+  init(title: String, value: String, icon: NSImage?, isShaded: Bool) {
+    titleField = NSTextField(labelWithString: title)
+    titleField.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+    titleField.textColor = .secondaryLabelColor
+    titleField.lineBreakMode = .byTruncatingTail
+
+    valueField = NSTextField(labelWithString: value)
+    valueField.font = .systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold)
+    valueField.textColor = .labelColor
+    valueField.alignment = .right
+    valueField.lineBreakMode = .byTruncatingTail
+
+    if let icon {
+      let iconView = NSImageView()
+      iconView.image = icon
+      iconView.imageScaling = .scaleProportionallyDown
+      self.iconView = iconView
+    } else {
+      iconView = nil
+    }
+    self.isShaded = isShaded
+    super.init(frame: .zero)
+    wantsLayer = true
+    layer?.cornerRadius = Self.cornerRadius
+    layer?.cornerCurve = .continuous
+    addSubview(titleField)
+    addSubview(valueField)
+    iconView.map(addSubview)
+    // Values are truncated when the pane is narrow, so the full value has to
+    // stay reachable.
+    toolTip = value
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  override var wantsUpdateLayer: Bool {
+    true
+  }
+
+  override func updateLayer() {
+    guard isShaded else {
+      layer?.backgroundColor = nil
+      return
+    }
+
+    var color = NSColor.alternatingContentBackgroundColors.last?.cgColor
+    effectiveAppearance.performAsCurrentDrawingAppearance {
+      color = NSColor.alternatingContentBackgroundColors.last?.cgColor
+    }
+    layer?.backgroundColor = color
+  }
+
+  override func viewDidChangeEffectiveAppearance() {
+    super.viewDidChangeEffectiveAppearance()
+    needsDisplay = true
+  }
+
+  // The title keeps its width; the value takes what is left and gives way
+  // first when there is not enough.
+  override func layout() {
+    super.layout()
+
+    let contentWidth = max(0, bounds.width - Self.horizontalPadding * 2)
+    let titleSize = titleField.fittingSize
+    let titleWidth = min(titleSize.width, contentWidth)
+    titleField.frame = NSRect(
+      x: Self.horizontalPadding,
+      y: (bounds.height - titleSize.height) / 2,
+      width: titleWidth,
+      height: titleSize.height
+    ).integral
+
+    let iconRoom = iconView == nil ? 0 : Self.iconSize + Self.iconSpacing
+    let valueSize = valueField.fittingSize
+    let valueWidth = max(0, min(valueSize.width, contentWidth - titleWidth - Self.titleValueSpacing - iconRoom))
+    let valueMaxX = bounds.width - Self.horizontalPadding
+    valueField.frame = NSRect(
+      x: valueMaxX - valueWidth,
+      y: (bounds.height - valueSize.height) / 2,
+      width: valueWidth,
+      height: valueSize.height
+    ).integral
+    iconView?.frame = NSRect(
+      x: valueField.frame.minX - Self.iconSpacing - Self.iconSize,
+      y: (bounds.height - Self.iconSize) / 2,
+      width: Self.iconSize,
+      height: Self.iconSize
+    ).integral
   }
 }
 

@@ -1237,6 +1237,7 @@ final class HistoryContentViewController: NSViewController {
     splitView.preferredPaneWidthRatio = preferences.previewPaneWidthRatio.map { CGFloat($0) }
     splitView.onPositionChange = { [weak self] _ in
       self?.updatePreviewPaneToolbarItem()
+      self?.updatePreviewPaneDetailsArrangement()
     }
     splitView.onPreferredPaneSizeChange = { [weak self] in
       self?.savePreviewPaneSize()
@@ -1405,6 +1406,7 @@ final class HistoryContentViewController: NSViewController {
       previewPaneController.showsWebPages = showsWebPages
       previewPaneController.showsDetails = showsDetails
       previewPaneController.showsPreview = showsPreview
+      previewPaneController.detailsArrangement = previewPaneDetailsArrangement(showsPreview: showsPreview)
       if previewPaneController.item != item
           || previewPaneController.revealsSensitiveContent != revealsSensitiveContent {
         previewPaneController.update(item: item, revealsSensitiveContent: revealsSensitiveContent)
@@ -1423,6 +1425,7 @@ final class HistoryContentViewController: NSViewController {
       controller.showsDetails = showsDetails
       controller.showsWebPages = showsWebPages
       controller.showsPreview = showsPreview
+      controller.detailsArrangement = previewPaneDetailsArrangement(showsPreview: showsPreview)
       controller.onContentFocusLost = { [weak self] in
         self?.listPaneView.focusTableView()
       }
@@ -1438,6 +1441,18 @@ final class HistoryContentViewController: NSViewController {
     splitView.isDetailsPaneShown = !showsPreview
     // Alone, the details are as tall as they need, which depends on the item.
     splitView.needsLayout = true
+  }
+
+  // Beside the list the pane is tall enough to list the details one per row.
+  // Under the list, or alone in their card, they stay compact.
+  private func previewPaneDetailsArrangement(showsPreview: Bool) -> ItemPreviewDetailsView.Arrangement {
+    showsPreview && splitView.position == .right ? .list : .inline
+  }
+
+  private func updatePreviewPaneDetailsArrangement() {
+    previewPaneController?.detailsArrangement = previewPaneDetailsArrangement(
+      showsPreview: model.preferences.showPreviewPane
+    )
   }
 
   // Only used for the size the preview starts out with, before the pane
