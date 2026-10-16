@@ -545,7 +545,15 @@ final class HistoryPreviewSplitView: NSView {
         width: width,
         height: max(0, bounds.height - topInset - inset)
       ).integral
-      listView.frame = NSRect(x: 0, y: 0, width: previewPane.frame.minX, height: bounds.height)
+      // The toolbar blurs whatever scrolls under it, which here would be the
+      // list alone, leaving the part over the pane plain. The list stops below
+      // the toolbar instead, so the toolbar looks the same all the way across.
+      listView.frame = NSRect(
+        x: 0,
+        y: 0,
+        width: previewPane.frame.minX,
+        height: max(0, bounds.height - safeAreaInsets.top)
+      )
       // Side by side, the pane has no edge running across the list.
       setListBottomFade(0)
     }
