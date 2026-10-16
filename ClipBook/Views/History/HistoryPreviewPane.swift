@@ -341,8 +341,9 @@ private final class HistoryPreviewPaneGrabberView: NSView {
 }
 
 /// A gradient from the background of the history up to clear, laid over the
-/// bottom of the list. It never takes clicks, which go to the rows beneath.
-private final class HistoryListFadeView: NSView {
+/// bottom of the list, or of a preview above its details. It never takes
+/// clicks, which go to whatever it covers.
+final class HistoryListFadeView: NSView {
   private let gradientLayer = CAGradientLayer()
 
   override init(frame frameRect: NSRect) {

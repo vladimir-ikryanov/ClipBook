@@ -144,6 +144,7 @@ final class ItemPreviewDialogController: NSViewController {
         return
       }
       detailsView.isHidden = !showsDetails
+      detailsFadeView.isHidden = !showsDetailsFade
       reinstallContentView()
     }
   }
@@ -156,6 +157,7 @@ final class ItemPreviewDialogController: NSViewController {
         return
       }
       detailsView.showsTopSeparator = showsPreview
+      detailsFadeView.isHidden = !showsDetailsFade
       reinstallContentView()
     }
   }
@@ -164,7 +166,24 @@ final class ItemPreviewDialogController: NSViewController {
   /// or listed one per row when the pane has the height for it.
   var detailsArrangement: ItemPreviewDetailsView.Arrangement {
     get { detailsView.arrangement }
-    set { detailsView.arrangement = newValue }
+    set {
+      detailsView.arrangement = newValue
+      updateDetailsFade()
+    }
+  }
+
+  // Listed details have no line above them, so the preview fades out into
+  // them instead of being cut off where they begin.
+  private let detailsFadeView = HistoryListFadeView()
+  private static let detailsFadeHeight: CGFloat = 24
+
+  private var showsDetailsFade: Bool {
+    presentation == .pane && showsPreview && showsDetails && detailsView.arrangement == .list
+  }
+
+  private func updateDetailsFade() {
+    detailsFadeView.isHidden = !showsDetailsFade
+    updateDetailsInset()
   }
 
   /// The height the details need at the given width, which is the height of
@@ -310,6 +329,19 @@ final class ItemPreviewDialogController: NSViewController {
         detailsView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor),
         detailsView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor)
       ])
+      // Kept in front of whichever preview is installed under it, like the
+      // details themselves.
+      detailsFadeView.translatesAutoresizingMaskIntoConstraints = false
+      detailsFadeView.wantsLayer = true
+      detailsFadeView.layer?.zPosition = 1
+      rootView.addSubview(detailsFadeView)
+      NSLayoutConstraint.activate([
+        detailsFadeView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor),
+        detailsFadeView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor),
+        detailsFadeView.bottomAnchor.constraint(equalTo: detailsView.topAnchor),
+        detailsFadeView.heightAnchor.constraint(equalToConstant: Self.detailsFadeHeight)
+      ])
+      detailsFadeView.isHidden = !showsDetailsFade
     }
 
     windowContentSize = contentSize
@@ -840,7 +872,9 @@ final class ItemPreviewDialogController: NSViewController {
       ? detailsView.frame.maxY
       : detailsView.reservedHeight(forWidth: view.bounds.width) - ItemPreviewDetailsView.floatingMargin
     let spacing = scrollView.documentView is NSTextView ? Self.textBottomSpacing : 0
-    let bottomInset = max(0, panelTop - Self.contentInset + spacing)
+    // Scrolled all the way down, the last line ends above the fade.
+    let fadeHeight = showsDetailsFade ? Self.detailsFadeHeight : 0
+    let bottomInset = max(0, panelTop - Self.contentInset + spacing + fadeHeight)
     guard scrollView.automaticallyAdjustsContentInsets
             || abs(scrollView.contentInsets.bottom - bottomInset) > 0.5 else {
       return
