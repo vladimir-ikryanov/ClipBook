@@ -634,12 +634,12 @@ private final class ItemPreviewDetailsListRowView: NSView {
 
   init(title: String, value: String, icon: NSImage?, isShaded: Bool) {
     titleField = NSTextField(labelWithString: title)
-    titleField.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+    titleField.font = .systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold)
     titleField.textColor = .secondaryLabelColor
     titleField.lineBreakMode = .byTruncatingTail
 
     valueField = NSTextField(labelWithString: value)
-    valueField.font = .systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold)
+    valueField.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
     valueField.textColor = .labelColor
     valueField.alignment = .right
     valueField.lineBreakMode = .byTruncatingTail
