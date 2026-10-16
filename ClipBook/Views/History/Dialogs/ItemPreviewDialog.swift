@@ -42,6 +42,7 @@ final class ItemPreviewDialogController: NSViewController {
   private static let svgContentPadding: CGFloat = 24
   private static let colorSwatchDiameter: CGFloat = 180
   private static let colorContentHorizontalMargin: CGFloat = 16
+  private static let colorContentVerticalMargin: CGFloat = 16
   // Kept small vertically, so the first line sits close to the toolbar. The
   // inset applies to the bottom too, so the last line gets the rest of its gap
   // above the details panel from `textBottomSpacing`.
@@ -1071,13 +1072,8 @@ final class ItemPreviewDialogController: NSViewController {
   private func makeColorContentView(color: NSColor, colorText: String, frame: NSRect) -> NSView {
     // A circle rather than a rectangle, so the swatch reads as a colour sample
     // instead of a filled area of the dialog.
-    let swatchView = NSView()
+    let swatchView = ColorSwatchView(color: color)
     swatchView.translatesAutoresizingMaskIntoConstraints = false
-    swatchView.wantsLayer = true
-    swatchView.layer?.backgroundColor = color.cgColor
-    swatchView.layer?.cornerRadius = Self.colorSwatchDiameter / 2
-    swatchView.layer?.borderWidth = 1
-    swatchView.layer?.borderColor = NSColor.separatorColor.cgColor
 
     let colorField = NSTextField(labelWithString: colorText)
     colorField.translatesAutoresizingMaskIntoConstraints = false
@@ -1085,6 +1081,8 @@ final class ItemPreviewDialogController: NSViewController {
     colorField.textColor = .labelColor
     colorField.lineBreakMode = .byTruncatingMiddle
     colorField.alignment = .center
+    // The swatch gives way when room is short, never the name of the colour.
+    colorField.setContentCompressionResistancePriority(.required, for: .vertical)
 
     let contentStack = NSStackView(views: [swatchView, colorField])
     contentStack.orientation = .vertical
@@ -1092,9 +1090,14 @@ final class ItemPreviewDialogController: NSViewController {
     contentStack.spacing = 16
     contentStack.translatesAutoresizingMaskIntoConstraints = false
 
+    // As large as the full size allows, and smaller in a preview too short for
+    // it, such as the pane of the history window.
+    let preferredDiameter = swatchView.widthAnchor.constraint(equalToConstant: Self.colorSwatchDiameter)
+    preferredDiameter.priority = .defaultHigh
     NSLayoutConstraint.activate([
-      swatchView.widthAnchor.constraint(equalToConstant: Self.colorSwatchDiameter),
-      swatchView.heightAnchor.constraint(equalToConstant: Self.colorSwatchDiameter)
+      preferredDiameter,
+      swatchView.widthAnchor.constraint(lessThanOrEqualToConstant: Self.colorSwatchDiameter),
+      swatchView.heightAnchor.constraint(equalTo: swatchView.widthAnchor)
     ])
 
     // Centred in the room above the details panel rather than in the whole preview.
@@ -1110,6 +1113,14 @@ final class ItemPreviewDialogController: NSViewController {
       contentStack.trailingAnchor.constraint(
         lessThanOrEqualTo: containerView.trailingAnchor,
         constant: -Self.colorContentHorizontalMargin
+      ),
+      contentStack.topAnchor.constraint(
+        greaterThanOrEqualTo: containerView.previewArea.topAnchor,
+        constant: Self.colorContentVerticalMargin
+      ),
+      contentStack.bottomAnchor.constraint(
+        lessThanOrEqualTo: containerView.previewArea.bottomAnchor,
+        constant: -Self.colorContentVerticalMargin
       )
     ])
     containerView.wantsLayer = true
@@ -1467,6 +1478,47 @@ private final class ItemPreviewCanvasView: AboveDetailsPreviewContentView {
   override func draw(_ dirtyRect: NSRect) {
     canvasColor.setFill()
     dirtyRect.fill()
+  }
+
+  override func viewDidChangeEffectiveAppearance() {
+    super.viewDidChangeEffectiveAppearance()
+    needsDisplay = true
+  }
+}
+
+// A colour sample drawn as a circle of whatever size it is given, with a
+// hairline that keeps a pale colour visible against the background.
+private final class ColorSwatchView: NSView {
+  private let color: NSColor
+
+  init(color: NSColor) {
+    self.color = color
+    super.init(frame: .zero)
+    wantsLayer = true
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  override var wantsUpdateLayer: Bool {
+    true
+  }
+
+  override func updateLayer() {
+    layer?.backgroundColor = color.cgColor
+    layer?.borderWidth = 1
+    var borderColor = NSColor.separatorColor.cgColor
+    effectiveAppearance.performAsCurrentDrawingAppearance {
+      borderColor = NSColor.separatorColor.cgColor
+    }
+    layer?.borderColor = borderColor
+  }
+
+  override func layout() {
+    super.layout()
+    layer?.cornerRadius = min(bounds.width, bounds.height) / 2
   }
 
   override func viewDidChangeEffectiveAppearance() {
