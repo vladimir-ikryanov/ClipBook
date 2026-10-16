@@ -147,6 +147,25 @@ final class ItemPreviewDialogController: NSViewController {
       reinstallContentView()
     }
   }
+  // The pane can show the details alone, as a bar the height of its fields,
+  // while the preview is hidden. Showing the preview again fills in the
+  // content above the same bar.
+  var showsPreview = true {
+    didSet {
+      guard showsPreview != oldValue else {
+        return
+      }
+      detailsView.showsTopSeparator = showsPreview
+      reinstallContentView()
+    }
+  }
+
+  /// The height the details need at the given width, which is the height of
+  /// the pane while it shows only them.
+  func detailsHeight(forWidth width: CGFloat) -> CGFloat {
+    detailsView.preferredHeight(forWidth: width)
+  }
+
   // A page loads only once the selection has rested on its link for a moment,
   // so moving through the list in the pane does not start a load per link.
   private static let paneWebPageLoadDelay: TimeInterval = 0.3
@@ -220,8 +239,9 @@ final class ItemPreviewDialogController: NSViewController {
   }
 
   override func loadView() {
-    let content = makeContent(for: item)
-    let contentSize = dialogContentSize(for: content)
+    // Nothing is built for a preview the pane hides.
+    let content = presentation == .sheet || showsPreview ? makeContent(for: item) : nil
+    let contentSize = content.map(dialogContentSize(for:)) ?? Self.minimumContentSize
     let rootView = ItemPreviewKeyHandlingView(
       frame: NSRect(origin: .zero, size: contentSize)
     )
@@ -286,7 +306,10 @@ final class ItemPreviewDialogController: NSViewController {
     }
 
     windowContentSize = contentSize
-    installContentView(for: content)
+    detailsView.showsTopSeparator = showsPreview
+    if let content {
+      installContentView(for: content)
+    }
   }
 
   // Replaces the previewed item in place, so the sheet can follow the history
@@ -317,11 +340,12 @@ final class ItemPreviewDialogController: NSViewController {
       return
     }
 
-    let content = makeContent(for: item)
     guard presentation == .sheet else {
-      installPaneContentView(for: content)
+      installPaneContentView(for: showsPreview ? makeContent(for: item) : nil)
       return
     }
+
+    let content = makeContent(for: item)
 
     let contentSize = dialogContentSize(for: content)
     windowContentSize = contentSize
@@ -334,10 +358,16 @@ final class ItemPreviewDialogController: NSViewController {
   }
 
   // The pane never takes the focus. When it had it, in its text for instance,
-  // the focus is handed back once that text is gone.
-  private func installPaneContentView(for content: PreviewContent) {
+  // the focus is handed back once that text is gone. Without content, while
+  // the pane hides the preview, only the details are left.
+  private func installPaneContentView(for content: PreviewContent?) {
     let hadFocus = (view.window?.firstResponder as? NSView)?.isDescendant(of: view) == true
-    installContentView(for: content)
+    if let content {
+      installContentView(for: content)
+    } else {
+      tearDownContentView()
+      contentView = nil
+    }
     if hadFocus {
       onContentFocusLost?()
     }
@@ -348,11 +378,10 @@ final class ItemPreviewDialogController: NSViewController {
     guard isViewLoaded, !isEditing else {
       return
     }
-    let content = makeContent(for: item)
     if presentation == .pane {
-      installPaneContentView(for: content)
+      installPaneContentView(for: showsPreview ? makeContent(for: item) : nil)
     } else {
-      installContentView(for: content)
+      installContentView(for: makeContent(for: item))
     }
   }
 

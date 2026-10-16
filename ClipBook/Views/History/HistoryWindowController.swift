@@ -97,9 +97,6 @@ final class HistoryContentViewController: NSViewController {
   // The settings the pane's controller was made with, which it can't change.
   private var previewPaneControllerConfiguration: PreviewPaneControllerConfiguration?
   private var isPreviewPaneUpdateScheduled = false
-  // The details of the selected item, shown on their own in the pane while
-  // the preview is hidden.
-  private var detailsPaneView: ItemPreviewDetailsView?
   private var commandPalette: CommandPalette?
   private var commandPaletteOutsideClickMonitor: OutsideClickDismissalMonitor?
   private var isModalSheetPresentationPending = false
@@ -1248,7 +1245,7 @@ final class HistoryContentViewController: NSViewController {
       self?.listPaneView.additionalBottomContentInset = height
     }
     splitView.detailsPaneHeight = { [weak self] width in
-      self?.detailsPaneView?.preferredHeight(forWidth: width) ?? 0
+      self?.previewPaneController?.detailsHeight(forWidth: width) ?? 0
     }
     previewPane.grabberMenu = makePreviewPaneMenu(showsDetails: preferences.showPreviewPaneDetails)
     updatePreviewPaneToolbarItem()
@@ -1261,14 +1258,19 @@ final class HistoryContentViewController: NSViewController {
       return
     }
 
-    splitView.isPreviewShown = preferences.showPreviewPane
     splitView.preferredPaneHeight = preferences.previewPaneHeight.map { CGFloat($0) }
     splitView.preferredPaneWidthRatio = preferences.previewPaneWidthRatio.map { CGFloat($0) }
     previewPane.grabberMenu = makePreviewPaneMenu(showsDetails: preferences.showPreviewPaneDetails)
-    previewPaneController?.showsDetails = preferences.showPreviewPaneDetails
     previewPaneController?.showsWebPages = preferences.showPreviewForLinks
     updatePreviewPaneToolbarItem(preferences)
-    setNeedsPreviewPaneUpdate()
+    // The pane changes its shape and its content together, in this pass, so
+    // showing or hiding a part of it never leaves a frame with neither.
+    updatePreviewPane(
+      showsPreview: preferences.showPreviewPane,
+      showsDetails: preferences.showPreviewPaneDetails,
+      showsWebPages: preferences.showPreviewForLinks,
+      detectsSensitiveContent: preferences.detectSensitiveContent
+    )
   }
 
   private func updatePreviewPaneToolbarItem(_ preferences: HistoryPreviewPanePreferences? = nil) {
@@ -1361,86 +1363,80 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func updatePreviewPane() {
+    let preferences = model.preferences
+    updatePreviewPane(
+      showsPreview: preferences.showPreviewPane,
+      showsDetails: preferences.showPreviewPaneDetails,
+      showsWebPages: preferences.showPreviewForLinks,
+      detectsSensitiveContent: preferences.detectSensitiveContent
+    )
+  }
+
+  // One preview controller fills the pane whichever parts of it are shown:
+  // the preview with or without the details under it, or the details alone
+  // while the preview is hidden. Showing or hiding a part changes what the
+  // same controller shows, rather than replacing it.
+  private func updatePreviewPane(
+    showsPreview: Bool,
+    showsDetails: Bool,
+    showsWebPages: Bool,
+    detectsSensitiveContent: Bool
+  ) {
     guard isViewLoaded else {
       return
     }
 
+    splitView.isPreviewShown = showsPreview
     // An empty list has nothing to show, while the selected item may still
     // name one that a search has just hidden.
     let selectedItem = model.filteredItems.isEmpty ? nil : model.selectedItem
-    guard model.preferences.showPreviewPane else {
+    guard showsPreview || showsDetails, let item = selectedItem else {
       tearDownPreviewPaneController()
-      updateDetailsPane(for: model.preferences.showPreviewPaneDetails ? selectedItem : nil)
-      return
-    }
-
-    updateDetailsPane(for: nil)
-    guard let item = selectedItem else {
-      tearDownPreviewPaneController()
+      splitView.isDetailsPaneShown = false
       return
     }
 
     let revealsSensitiveContent = listPaneView.revealsSensitiveContent(of: item)
     let configuration = PreviewPaneControllerConfiguration(
-      detectsSensitiveContent: model.preferences.detectSensitiveContent,
+      detectsSensitiveContent: detectsSensitiveContent,
       isReadOnly: coordinator.isHistoryReadOnly
     )
     if let previewPaneController, previewPaneControllerConfiguration == configuration {
-      guard previewPaneController.item != item
-              || previewPaneController.revealsSensitiveContent != revealsSensitiveContent else {
-        return
+      previewPaneController.showsWebPages = showsWebPages
+      previewPaneController.showsDetails = showsDetails
+      previewPaneController.showsPreview = showsPreview
+      if previewPaneController.item != item
+          || previewPaneController.revealsSensitiveContent != revealsSensitiveContent {
+        previewPaneController.update(item: item, revealsSensitiveContent: revealsSensitiveContent)
       }
-
-      previewPaneController.update(item: item, revealsSensitiveContent: revealsSensitiveContent)
-      return
-    }
-
-    tearDownPreviewPaneController()
-    let controller = ItemPreviewDialogController(
-      item: item,
-      maximumContentSize: Self.previewPaneMaximumContentSize,
-      detectsSensitiveContent: configuration.detectsSensitiveContent,
-      revealsSensitiveContent: revealsSensitiveContent,
-      isReadOnly: configuration.isReadOnly,
-      presentation: .pane,
-      loadFormatting: { [weak coordinator] item in coordinator?.loadingFormatting(of: item) ?? item }
-    )
-    controller.showsDetails = model.preferences.showPreviewPaneDetails
-    controller.showsWebPages = model.preferences.showPreviewForLinks
-    controller.onContentFocusLost = { [weak self] in
-      self?.listPaneView.focusTableView()
-    }
-    controller.onCancel = { [weak self] in
-      self?.listPaneView.focusTableView()
-    }
-    addChild(controller)
-    previewPane.contentView = controller.view
-    previewPaneController = controller
-    previewPaneControllerConfiguration = configuration
-  }
-
-  // While the preview is hidden, the pane can still show the details of the
-  // selected item on their own, in a card as tall as they are. Without an
-  // item, or with the details turned off, the card goes away.
-  private func updateDetailsPane(for item: ClipboardItem?) {
-    guard let item else {
-      if detailsPaneView != nil {
-        previewPane.contentView = nil
-        detailsPaneView = nil
-      }
-      splitView.isDetailsPaneShown = false
-      return
-    }
-
-    if let detailsPaneView {
-      detailsPaneView.update(item: item)
     } else {
-      let detailsView = ItemPreviewDetailsView(item: item, style: .standalone)
-      previewPane.contentView = detailsView
-      detailsPaneView = detailsView
+      tearDownPreviewPaneController()
+      let controller = ItemPreviewDialogController(
+        item: item,
+        maximumContentSize: Self.previewPaneMaximumContentSize,
+        detectsSensitiveContent: configuration.detectsSensitiveContent,
+        revealsSensitiveContent: revealsSensitiveContent,
+        isReadOnly: configuration.isReadOnly,
+        presentation: .pane,
+        loadFormatting: { [weak coordinator] item in coordinator?.loadingFormatting(of: item) ?? item }
+      )
+      controller.showsDetails = showsDetails
+      controller.showsWebPages = showsWebPages
+      controller.showsPreview = showsPreview
+      controller.onContentFocusLost = { [weak self] in
+        self?.listPaneView.focusTableView()
+      }
+      controller.onCancel = { [weak self] in
+        self?.listPaneView.focusTableView()
+      }
+      addChild(controller)
+      previewPane.contentView = controller.view
+      previewPaneController = controller
+      previewPaneControllerConfiguration = configuration
     }
-    splitView.isDetailsPaneShown = true
-    // The details wrap onto more lines for some items than for others.
+
+    splitView.isDetailsPaneShown = !showsPreview
+    // Alone, the details are as tall as they need, which depends on the item.
     splitView.needsLayout = true
   }
 

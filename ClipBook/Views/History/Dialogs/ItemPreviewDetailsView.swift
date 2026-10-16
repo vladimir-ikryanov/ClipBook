@@ -15,9 +15,14 @@ final class ItemPreviewDetailsView: NSView {
     /// A plain bar along the bottom of the preview pane, set apart from the
     /// preview above it by a line, with its fields centered.
     case docked
-    /// The docked bar on its own, filling the pane of the history window
-    /// while the preview is hidden. Nothing is above it to set apart.
-    case standalone
+  }
+
+  /// Whether the docked bar draws the line that sets it apart from the
+  /// preview. The pane leaves it out while it shows the details alone.
+  var showsTopSeparator = true {
+    didSet {
+      topSeparatorView?.isHidden = !showsTopSeparator
+    }
   }
 
   // The gap between the panel and the bottom edge of the preview it floats
