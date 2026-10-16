@@ -31,14 +31,12 @@ final class ItemPreviewDetailsView: NSView {
   private static let dockedVerticalInset: CGFloat = 12
   private static let maximumCornerRadius: CGFloat = 24
   // The gap on each side of a separator, so neighbouring fields are kept
-  // visually apart rather than reading as one run of text.
+  // visually apart rather than reading as one run of text. The bar of the
+  // history window sits in a narrow pane, so it keeps its fields closer.
   private static let fieldSpacing: CGFloat = 12
+  private static let dockedFieldSpacing: CGFloat = 8
   private static let lineSpacing: CGFloat = 8
   private static let separatorWidth: CGFloat = 1
-  private static let separatorSpan = fieldSpacing * 2 + separatorWidth
-  // The docked bar keeps its fields apart by space alone, which is more
-  // compact than a divider with room on both sides.
-  private static let dockedFieldSpacing: CGFloat = 16
   private static let titleValueSpacing: CGFloat = 1
   private static let appIconSize: CGFloat = 14
   private static let appIconSpacing: CGFloat = 4
@@ -174,13 +172,8 @@ final class ItemPreviewDetailsView: NSView {
     }
 
     let fieldsWidth = fieldViews.reduce(0) { $0 + $1.fittingSize.width }
-    let gapsWidth = CGFloat(fieldViews.count - 1) * fieldGap
-    return fieldsWidth + gapsWidth + horizontalInset * 2
-  }
-
-  // The room between two fields on the same line.
-  private var fieldGap: CGFloat {
-    style == .floating ? Self.separatorSpan : Self.dockedFieldSpacing
+    let separatorsWidth = CGFloat(separatorViews.count) * separatorSpan
+    return fieldsWidth + separatorsWidth + horizontalInset * 2
   }
 
   private var horizontalInset: CGFloat {
@@ -189,6 +182,15 @@ final class ItemPreviewDetailsView: NSView {
 
   private var verticalInset: CGFloat {
     style == .floating ? Self.verticalInset : Self.dockedVerticalInset
+  }
+
+  private var fieldSpacing: CGFloat {
+    style == .floating ? Self.fieldSpacing : Self.dockedFieldSpacing
+  }
+
+  // The room a separator takes between two fields on the same line.
+  private var separatorSpan: CGFloat {
+    fieldSpacing * 2 + Self.separatorWidth
   }
 
   override func layout() {
@@ -225,28 +227,25 @@ final class ItemPreviewDetailsView: NSView {
     let availableWidth = max(1, width - horizontalInset * 2)
     let fieldSizes = fieldViews.map(\.fittingSize)
     let lineHeight = fieldSizes.map(\.height).max() ?? 0
-    let lines = Self.packLines(fieldSizes: fieldSizes, availableWidth: availableWidth, fieldGap: fieldGap)
+    let lines = Self.packLines(fieldSizes: fieldSizes, availableWidth: availableWidth, separatorSpan: separatorSpan)
 
     if applyingFrames {
       var originY = verticalInset
       for line in lines {
         var originX = horizontalInset + max(0, (availableWidth - line.width) / 2)
         for index in line.indices {
-          // Only the floating panel has dividers; a field that starts a
-          // line has none before it.
-          if index > 0, separatorViews.indices.contains(index - 1) {
-            separatorViews[index - 1].isHidden = index == line.indices.first
-          }
-          if index != line.indices.first {
-            if index > 0, separatorViews.indices.contains(index - 1) {
-              separatorViews[index - 1].frame = NSRect(
-                x: originX + Self.fieldSpacing,
+          if index > 0 {
+            let separatorView = separatorViews[index - 1]
+            separatorView.isHidden = index == line.indices.first
+            if !separatorView.isHidden {
+              separatorView.frame = NSRect(
+                x: originX + fieldSpacing,
                 y: originY,
                 width: Self.separatorWidth,
                 height: lineHeight
               )
+              originX += separatorSpan
             }
-            originX += fieldGap
           }
 
           fieldViews[index].frame = NSRect(
@@ -267,18 +266,18 @@ final class ItemPreviewDetailsView: NSView {
   }
 
   // Greedily packs the fields into lines that fit the available width.
-  private static func packLines(fieldSizes: [NSSize], availableWidth: CGFloat, fieldGap: CGFloat) -> [FieldLine] {
+  private static func packLines(fieldSizes: [NSSize], availableWidth: CGFloat, separatorSpan: CGFloat) -> [FieldLine] {
     var lines: [FieldLine] = []
     var line = FieldLine()
 
     for index in fieldSizes.indices {
       let fieldWidth = fieldSizes[index].width
-      if !line.indices.isEmpty, line.width + fieldGap + fieldWidth > availableWidth {
+      if !line.indices.isEmpty, line.width + separatorSpan + fieldWidth > availableWidth {
         lines.append(line)
         line = FieldLine()
       }
 
-      line.width += (line.indices.isEmpty ? 0 : fieldGap) + fieldWidth
+      line.width += (line.indices.isEmpty ? 0 : separatorSpan) + fieldWidth
       line.indices.append(index)
     }
 
@@ -338,7 +337,7 @@ final class ItemPreviewDetailsView: NSView {
     // so the pane of the history window leaves it out of its details.
     let fields = Self.fields(for: item, includesSource: style == .floating)
     for (index, field) in fields.enumerated() {
-      if index > 0, style == .floating {
+      if index > 0 {
         let separatorView = ItemPreviewDetailsSeparatorView()
         fieldsView.addSubview(separatorView)
         separatorViews.append(separatorView)
