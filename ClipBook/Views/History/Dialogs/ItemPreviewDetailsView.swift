@@ -334,7 +334,9 @@ final class ItemPreviewDetailsView: NSView {
     separatorViews = []
 
     valueFieldsByKey = [:]
-    let fields = Self.fields(for: item)
+    // The history row already shows the source app of the item next to it,
+    // so the pane of the history window leaves it out of its details.
+    let fields = Self.fields(for: item, includesSource: style == .floating)
     for (index, field) in fields.enumerated() {
       if index > 0, style == .floating {
         let separatorView = ItemPreviewDetailsSeparatorView()
@@ -407,7 +409,7 @@ final class ItemPreviewDetailsView: NSView {
 
   // MARK: - Fields
 
-  private static func fields(for item: ClipboardItem) -> [Field] {
+  private static func fields(for item: ClipboardItem, includesSource: Bool) -> [Field] {
     var fields = [Field(title: L10n.string("Type"), value: typeName(for: item))]
     fields.append(contentsOf: contentFields(for: item))
     fields.append(
@@ -417,7 +419,7 @@ final class ItemPreviewDetailsView: NSView {
         key: .size
       )
     )
-    if let sourceApplicationField = applicationField(for: item) {
+    if includesSource, let sourceApplicationField = applicationField(for: item) {
       fields.append(sourceApplicationField)
     }
     let firstCopyDate = dateString(item.firstCopiedAt)
