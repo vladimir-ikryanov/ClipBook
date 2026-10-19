@@ -36,6 +36,8 @@ struct GeneralSettingsView: View {
                 coordinator.savePreferences()
             }
             SettingsToggle(title: L10n.string("Show icon in menu bar"), description: L10n.string("Display the ClipBook app icon in the menu bar. You can always open Settings by pressing ⌘ + , inside the clipboard history window."), isOn: $model.preferences.showMenuBarIcon)
+            SettingsToggle(title: L10n.string("Open with a click on the menu bar icon"), description: L10n.string("Open the clipboard history window when you click the ClipBook icon in the menu bar. Right-click the icon to show its menu."), isOn: $model.preferences.openHistoryOnMenuBarIconClick)
+                .disabled(!model.preferences.showMenuBarIcon)
         }
 
         SettingsSectionGroup(L10n.string("Window")) {

@@ -119,6 +119,7 @@ struct AppPreferences: Codable, Equatable {
     var playSoundOnSelectionAdd = true
     var playSoundOnSelectionRemove = true
     var showMenuBarIcon = true
+    var openHistoryOnMenuBarIconClick = false
     var hideOnFocusLoss = true
     var openWindowStrategy = "activeScreenCenter"
     var historyWindowX: Double?
@@ -266,6 +267,7 @@ struct AppPreferences: Codable, Equatable {
         playSoundOnSelectionAdd = try container.decodeIfPresent(Bool.self, forKey: .playSoundOnSelectionAdd) ?? defaults.playSoundOnSelectionAdd
         playSoundOnSelectionRemove = try container.decodeIfPresent(Bool.self, forKey: .playSoundOnSelectionRemove) ?? defaults.playSoundOnSelectionRemove
         showMenuBarIcon = try container.decodeIfPresent(Bool.self, forKey: .showMenuBarIcon) ?? defaults.showMenuBarIcon
+        openHistoryOnMenuBarIconClick = try container.decodeIfPresent(Bool.self, forKey: .openHistoryOnMenuBarIconClick) ?? defaults.openHistoryOnMenuBarIconClick
         hideOnFocusLoss = try container.decodeIfPresent(Bool.self, forKey: .hideOnFocusLoss) ?? defaults.hideOnFocusLoss
         openWindowStrategy = HistoryWindowOpenStrategy(
             preferenceValue: try container.decodeIfPresent(String.self, forKey: .openWindowStrategy) ?? defaults.openWindowStrategy

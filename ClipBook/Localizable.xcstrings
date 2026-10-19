@@ -15606,6 +15606,52 @@
         }
       }
     },
+    "Open the clipboard history window when you click the ClipBook icon in the menu bar. Right-click the icon to show its menu." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne das Fenster mit dem Zwischenablageverlauf, wenn du auf das ClipBook-Symbol in der Menüleiste klickst. Klicke mit der rechten Maustaste auf das Symbol, um sein Menü anzuzeigen."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open the clipboard history window when you click the ClipBook icon in the menu bar. Right-click the icon to show its menu."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre la ventana del historial del portapapeles al hacer clic en el icono de ClipBook en la barra de menú. Haz clic derecho en el icono para mostrar su menú."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri la finestra della cronologia degli appunti quando fai clic sull'icona di ClipBook nella barra dei menu. Fai clic con il tasto destro sull'icona per mostrarne il menu."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メニューバーの ClipBook アイコンをクリックすると、クリップボード履歴ウインドウが開きます。アイコンを右クリックするとメニューが表示されます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abra a janela do histórico da área de transferência ao clicar no ícone do ClipBook na barra de menu. Clique com o botão direito no ícone para mostrar o menu."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点按菜单栏中的 ClipBook 图标时打开剪贴板历史记录窗口。右键点按图标可显示其菜单。"
+          }
+        }
+      }
+    },
     "Open the history with the last selected item instead of the first one." : {
       "localizations" : {
         "de" : {
@@ -15694,6 +15740,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "开窗位置"
+          }
+        }
+      }
+    },
+    "Open with a click on the menu bar icon" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit einem Klick auf das Menüleistensymbol öffnen"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open with a click on the menu bar icon"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir con un clic en el icono de la barra de menú"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri con un clic sull'icona nella barra dei menu"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メニューバーのアイコンをクリックして開く"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir com um clique no ícone da barra de menu"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点按菜单栏图标打开"
           }
         }
       }

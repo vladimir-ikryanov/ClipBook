@@ -17,6 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   private let licensingService: LicensingService
   private var statusItem: NSStatusItem?
   private var historyMenuItem: NSMenuItem?
+  private var isStatusMenuShown = false
   private var isQuitConfirmed = false
   private var isQuitConfirmationPresented = false
   private var statusCancellables: Set<AnyCancellable> = []
@@ -142,7 +143,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     item.button?.image = Self.statusBarImage(isPaused: model.isPaused)
     item.button?.imagePosition = .imageOnly
     item.button?.toolTip = "ClipBook"
-    item.menu = makeStatusMenu()
+    if model.preferences.openHistoryOnMenuBarIconClick {
+      // A click toggles the history window, and the menu is attached only for
+      // as long as a right-click or Control-click shows it. The action is sent
+      // on mouse up: a menu opened on mouse down takes the mouse up away from
+      // the button, which then swallows the next click to finish tracking it.
+      item.button?.target = self
+      item.button?.action = #selector(statusItemClicked)
+      item.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
+      if !isStatusMenuShown {
+        item.menu = nil
+      }
+    } else {
+      item.button?.action = nil
+      item.menu = makeStatusMenu()
+    }
     statusItem = item
   }
   
@@ -289,6 +304,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     return image
   }
   
+  @objc private func statusItemClicked() {
+    let event = NSApp.currentEvent
+    if event?.type == .rightMouseUp || event?.modifierFlags.contains(.control) == true {
+      showStatusMenu()
+    } else {
+      toggleHistory()
+    }
+  }
+
+  /// Opens the status bar menu from the icon that otherwise toggles the
+  /// history window. The menu tracks the mouse inside `performClick`, so it is
+  /// detached again once the menu has closed.
+  private func showStatusMenu() {
+    guard let item = statusItem, let button = item.button else {
+      return
+    }
+
+    isStatusMenuShown = true
+    item.menu = makeStatusMenu()
+    button.performClick(nil)
+    item.menu = nil
+    isStatusMenuShown = false
+  }
+
   @objc private func showHistory() {
     DispatchQueue.main.async { [coordinator] in
       coordinator.showHistoryPanel()
