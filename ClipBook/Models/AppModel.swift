@@ -448,9 +448,25 @@ final class AppModel: ObservableObject {
         updatedItems.insert(item, at: 0)
         items = updatedItems
         clearUnavailableHistorySourceApplicationFilter()
-        selectedItemID = item.id
-        selectedItemIDs = [item.id]
-        selectedItemIDsInSelectionOrder = [item.id]
+        let selectedID = firstItemIDOfCopySequence(of: item)
+        selectedItemID = selectedID
+        selectedItemIDs = [selectedID]
+        selectedItemIDsInSelectionOrder = [selectedID]
+    }
+
+    /// A new copy heads the history unless the copy sequence mode lists it after
+    /// the items copied before it in its sequence. The sequence is pasted from
+    /// its first item, so that item is the one selected.
+    private func firstItemIDOfCopySequence(of item: ClipboardItem) -> ClipboardItem.ID {
+        guard preferences.copySequenceModeEnabled,
+              let sequenceID = item.copySequenceID else {
+            return item.id
+        }
+
+        let firstItem = items
+            .filter { $0.copySequenceID == sequenceID }
+            .min { ($0.copySequenceOrder ?? 0) < ($1.copySequenceOrder ?? 0) }
+        return firstItem?.id ?? item.id
     }
 
     func remove(_ id: ClipboardItem.ID) {
