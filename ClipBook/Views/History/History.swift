@@ -304,7 +304,7 @@ final class History: NSView {
     tableView.removeRows(at: removedRowIndexes, withAnimation: [])
     tableView.endUpdates()
 
-    let changedAccessoryRows = firstItemRows(limit: 9)
+    let changedAccessoryRows = rowsToReloadForQuickPasteIndexes(firstItemRows(limit: 9))
     if !changedAccessoryRows.isEmpty {
       tableView.reloadData(forRowIndexes: changedAccessoryRows, columnIndexes: IndexSet(integer: 0))
     }

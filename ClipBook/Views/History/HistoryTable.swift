@@ -28,7 +28,11 @@ enum HistoryTableRowBuilder {
     calendar: Calendar = .current
   ) -> [HistoryTableRow] {
     var rows: [HistoryTableRow] = []
-    var currentDay: Date?
+    // Finding the day of a date looks up the time zone's daylight saving
+    // transitions, which for every item of a history of thousands took several
+    // milliseconds each time the list changed. Items of one day come one after
+    // another, so the day is found again only for an item outside it.
+    var currentDay: DateInterval?
     var isInFavoritesSection = false
 
     for (itemIndex, item) in items.enumerated() {
@@ -46,10 +50,13 @@ enum HistoryTableRowBuilder {
         continue
       }
 
-      let day = calendar.startOfDay(for: date)
-      if currentDay != day {
+      if currentDay.map({ $0.start <= date && date < $0.end }) != true {
+        let day = calendar.dateInterval(of: .day, for: date)
+          ?? DateInterval(start: calendar.startOfDay(for: date), duration: 0)
+        if day.start != currentDay?.start {
+          rows.append(.sectionHeader(sectionTitle(for: date, calendar: calendar)))
+        }
         currentDay = day
-        rows.append(.sectionHeader(sectionTitle(for: date, calendar: calendar)))
       }
       rows.append(.item(item, itemIndex: itemIndex))
     }
@@ -318,6 +325,20 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
     }
 
     return dropRow
+  }
+
+  /// Brings the quick paste numbers of the rows that are shown up to date in
+  /// place, and returns those of them that have to be set up again for it.
+  /// Rows not shown get their number once they are.
+  func rowsToReloadForQuickPasteIndexes(_ rows: IndexSet) -> IndexSet {
+    IndexSet(rows.filter { row in
+      guard case .item(_, let itemIndex) = tableRows[safe: row],
+            let cell = tableView.view(atColumn: 0, row: row, makeIfNecessary: false) as? HistoryItemRowView else {
+        return false
+      }
+
+      return !cell.updateQuickPasteIndex(quickPasteIndex(forItemIndex: itemIndex))
+    })
   }
 
   private func quickPasteIndex(forItemIndex itemIndex: Int) -> Int? {

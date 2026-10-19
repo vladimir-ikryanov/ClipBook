@@ -134,6 +134,8 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
   private var isShowingCopySuccess = false
   private var copySuccessResetWorkItem: DispatchWorkItem?
   private var copyIconAnimationWorkItems: [DispatchWorkItem] = []
+  // What the image each toolbar item was last given shows, see `setImage(of:key:makeImage:)`.
+  private var toolbarItemImageKeys: [ObjectIdentifier: String] = [:]
   private var copyIconAnimationID = 0
   private var resolvedPlaceholderColor: NSColor?
   private var searchContainerWidthConstraint: NSLayoutConstraint?
@@ -1333,6 +1335,9 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     }
 
     cancelCopyIconAnimation()
+    // The animation sets the images itself, so the next update sets the image
+    // again rather than taking it for the one it last set.
+    toolbarItemImageKeys[ObjectIdentifier(item)] = nil
     let animationID = copyIconAnimationID
     let sourceImage = item.image
     guard sourceImage != nil, targetImage != nil else {
@@ -1365,12 +1370,53 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
   }
 
   private func updateActionItem(_ item: NSToolbarItem, for action: ToolbarAction, targetApp: NSRunningApplication?) {
-    let label = actionLabel(for: action, targetApp: targetApp)
+    setLabel(actionLabel(for: action, targetApp: targetApp), of: item)
+    setImage(of: item, key: actionImageKey(for: action, targetApp: targetApp)) {
+      actionImage(for: action, targetApp: targetApp)
+    }
+    let isEnabled = isActionEnabled(action)
+    if item.isEnabled != isEnabled {
+      item.isEnabled = isEnabled
+    }
+  }
+
+  /// What `actionImage(for:targetApp:)` shows, told apart without making it.
+  private func actionImageKey(for action: ToolbarAction, targetApp: NSRunningApplication?) -> String {
+    switch action {
+    case .paste:
+      return isShowingTrash ? "putBack" : "app:\(targetApp?.bundleURL?.path ?? "")"
+    case .copy:
+      return isShowingCopySuccess ? "copied" : "copy"
+    case .copyTextFromImage, .copyTextFromQRCode, .openInBrowser, .merge:
+      return "\(action)"
+    }
+  }
+
+  private func setLabel(_ label: String, of item: NSToolbarItem) {
+    guard item.label != label || item.toolTip != label else {
+      return
+    }
+
     item.label = label
     item.paletteLabel = label
     item.toolTip = label
-    item.image = actionImage(for: action, targetApp: targetApp)
-    item.isEnabled = isActionEnabled(action)
+  }
+
+  /// Gives the item the image `key` stands for, unless it already shows it.
+  /// Setting an item's image lays out the toolbar and the regions of the title
+  /// bar again, even for an image like the one it had, and the toolbar is
+  /// updated on every change of the history. That took several milliseconds
+  /// on each deletion before the list could show the item gone. The label is
+  /// part of the key, since a symbol image is described by it.
+  private func setImage(of item: NSToolbarItem, key: String, makeImage: () -> NSImage?) {
+    let itemID = ObjectIdentifier(item)
+    let key = "\(key)\n\(item.label)"
+    guard item.image == nil || toolbarItemImageKeys[itemID] != key else {
+      return
+    }
+
+    item.image = makeImage()
+    toolbarItemImageKeys[itemID] = key
   }
 
   private func actionLabel(for action: ToolbarAction, targetApp: NSRunningApplication?) -> String {
@@ -1549,10 +1595,10 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     let label = isPinned ? L10n.string("Stop always displaying") : L10n.string("Always display")
     let symbolName = isPinned ? "pin.fill" : "pin"
 
-    item.label = label
-    item.paletteLabel = label
-    item.toolTip = label
-    item.image = Self.symbolImage(symbolName: symbolName, label: label)
+    setLabel(label, of: item)
+    setImage(of: item, key: symbolName) {
+      Self.symbolImage(symbolName: symbolName, label: label)
+    }
     Self.applyToggleStyle(to: item, isOn: isPinned)
   }
 
@@ -1563,31 +1609,36 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
       ? L10n.string("Disable Copy Sequence")
       : L10n.string("Enable Copy Sequence")
 
-    item.label = label
-    item.paletteLabel = label
-    item.toolTip = label
+    setLabel(label, of: item)
     // The button keeps its regular style; only the icon is tinted, so the
     // enabled state reads from the icon rather than from the background.
-    item.image = isCopySequenceModeEnabled
-      ? Self.symbolImage(
-          symbolName: "square.stack.3d.up.fill",
-          label: label,
-          color: .controlAccentColor
-        )
-      : Self.symbolImage(symbolName: "square.stack.3d.up", label: label)
+    setImage(of: item, key: isCopySequenceModeEnabled ? "on" : "off") {
+      isCopySequenceModeEnabled
+        ? Self.symbolImage(
+            symbolName: "square.stack.3d.up.fill",
+            label: label,
+            color: .controlAccentColor
+          )
+        : Self.symbolImage(symbolName: "square.stack.3d.up", label: label)
+    }
     Self.applyPlainStyle(to: item)
   }
 
   private static func applyPlainStyle(to item: NSToolbarItem) {
-    if #available(macOS 26.0, *) {
+    if #available(macOS 26.0, *), item.style != .plain {
       item.style = .plain
     }
   }
 
   private static func applyToggleStyle(to item: NSToolbarItem, isOn: Bool) {
     if #available(macOS 26.0, *) {
-      item.style = isOn ? .prominent : .plain
-      item.backgroundTintColor = nil
+      let style: NSToolbarItem.Style = isOn ? .prominent : .plain
+      if item.style != style {
+        item.style = style
+      }
+      if item.backgroundTintColor != nil {
+        item.backgroundTintColor = nil
+      }
     }
   }
 

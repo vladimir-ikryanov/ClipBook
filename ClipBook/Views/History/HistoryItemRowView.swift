@@ -670,6 +670,21 @@ class HistoryItemRowView: NSTableCellView {
     updateSelectionAppearance()
   }
 
+  /// Shows another quick paste number in place of the one the row shows. The
+  /// rows below a deleted item move up a number, and setting each of them up
+  /// again, which for a file looks the file up on disk, kept the list from
+  /// showing the item gone. The digits are all of one width, so the row keeps
+  /// its layout. Returns `false` when the row shows no number or is to show
+  /// none, since its accessories are then laid out again by `configure`.
+  func updateQuickPasteIndex(_ quickPasteIndex: Int?) -> Bool {
+    guard let quickPasteIndex, !accessoryControlsView.isHidden, !quickPasteField.isHidden else {
+      return false
+    }
+
+    quickPasteField.stringValue = "⌘\(quickPasteIndex)"
+    return true
+  }
+
   // MARK: - Subclass hooks
 
   func typeIconSystemImageName(for item: ClipboardItem) -> String {

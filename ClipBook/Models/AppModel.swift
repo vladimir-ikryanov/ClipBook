@@ -334,8 +334,15 @@ final class AppModel: ObservableObject {
         if !orderedIDs.isEmpty {
             let wantedIDs = Set(orderedIDs)
             var itemsByID: [ClipboardItem.ID: ClipboardItem] = [:]
-            for item in listedItems where wantedIDs.contains(item.id) && itemsByID[item.id] == nil {
-                itemsByID[item.id] = item
+            // Reading the IDs through the buffer copies only the selected
+            // items, see `containsItem(from:in:)`.
+            listedItems.withUnsafeBufferPointer { buffer in
+                for index in buffer.indices {
+                    let id = buffer[index].id
+                    if wantedIDs.contains(id) && itemsByID[id] == nil {
+                        itemsByID[id] = buffer[index]
+                    }
+                }
             }
             let selectedItemsInOrder = orderedIDs.compactMap { itemsByID[$0] }
             if !selectedItemsInOrder.isEmpty {
@@ -459,9 +466,30 @@ final class AppModel: ObservableObject {
         let selectedVisibleIndex = selectedItemID.flatMap { selectedItemID in
             visibleItems.firstIndex { $0.id == selectedItemID }
         }
-        items.removeAll { ids.contains($0.id) }
-        if trashedItems.contains(where: { ids.contains($0.id) }) {
-            trashedItems.removeAll { ids.contains($0.id) }
+        let sourceApplications = cachedHistorySourceApplications
+        // Taking items out leaves the others in the same order and still
+        // matching the same filters, so the list keeps them rather than
+        // filtering and sorting the whole history again on every deletion.
+        var remainingVisibleItems = visibleItems
+        Self.removeItems(withIDs: ids, from: &remainingVisibleItems)
+        var remainingItems = items
+        let removedItems = Self.removeItems(withIDs: ids, from: &remainingItems)
+        items = remainingItems
+        var remainingTrashedItems = trashedItems
+        let removedTrashedItems = Self.removeItems(withIDs: ids, from: &remainingTrashedItems)
+        if !removedTrashedItems.isEmpty {
+            trashedItems = remainingTrashedItems
+        }
+        cachedFilteredItems = remainingVisibleItems
+        // The applications stay the same while each one a removed item came
+        // from still has items, so they are not looked up again, each of them
+        // with Launch Services, on every deletion.
+        let listedItems = listedItems
+        if let sourceApplications,
+           (isShowingTrash ? removedTrashedItems : removedItems).allSatisfy({ item in
+               Self.sourceApplicationKey(for: item).map { Self.containsItem(from: $0, in: listedItems) } ?? true
+           }) {
+            cachedHistorySourceApplications = sourceApplications
         }
         clearUnavailableHistorySourceApplicationFilter()
         selectedItemIDs.subtract(ids)
@@ -480,6 +508,48 @@ final class AppModel: ObservableObject {
             selectedItemIDs = selectedItemID.map { [$0] } ?? []
             selectedItemIDsInSelectionOrder = selectedItemID.map { [$0] } ?? []
         }
+    }
+
+    private static func sourceApplicationKey(for item: ClipboardItem) -> SourceApplicationKey? {
+        item.sourceAppName.map { SourceApplicationKey(name: $0, bundleIdentifier: item.sourceBundleIdentifier) }
+    }
+
+    // The items are read through the buffer of the list, which reads only the
+    // fields asked for. Indexing the list itself copies whole items in a debug
+    // build, which for thousands of them was felt on every deletion.
+    private static func containsItem(from sourceApplication: SourceApplicationKey, in items: [ClipboardItem]) -> Bool {
+        items.withUnsafeBufferPointer { buffer in
+            buffer.indices.contains { index in
+                buffer[index].sourceAppName == sourceApplication.name
+                    && buffer[index].sourceBundleIdentifier == sourceApplication.bundleIdentifier
+            }
+        }
+    }
+
+    /// Returns the items taken out. `removeAll(where:)` swaps every item after
+    /// the first one taken out, copying each of them, which took a few
+    /// milliseconds on every deletion in a history of thousands. The few items
+    /// a deletion usually takes out are removed by index instead, which moves
+    /// the others along without copying them. Many items go through a single
+    /// copy of the rest.
+    @discardableResult
+    private static func removeItems(withIDs ids: Set<ClipboardItem.ID>, from items: inout [ClipboardItem]) -> [ClipboardItem] {
+        let indexes = items.withUnsafeBufferPointer { buffer in
+            buffer.indices.filter { ids.contains(buffer[$0].id) }
+        }
+        guard !indexes.isEmpty else {
+            return []
+        }
+
+        let removedItems = indexes.map { items[$0] }
+        if indexes.count <= 16 {
+            for index in indexes.reversed() {
+                items.remove(at: index)
+            }
+        } else {
+            items = items.filter { !ids.contains($0.id) }
+        }
+        return removedItems
     }
 
     /// Adds items moved to the Trash to the list of the Trash, if it is shown.
