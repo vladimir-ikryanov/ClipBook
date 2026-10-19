@@ -304,17 +304,42 @@ enum HistoryTextPreviewFormatter {
   static let leadingSpaceSymbol = "·"
   static let layoutCharacterLimit = 2_000
 
+  // The text shown in a row, with the ranges of the symbols put in place of whitespace.
+  // The same characters typed in the text itself are not in the ranges, so they keep
+  // the color of the text.
+  struct Preview {
+    fileprivate(set) var text = ""
+    fileprivate(set) var symbolRanges: [NSRange] = []
+    private var length = 0
+
+    fileprivate mutating func append(_ string: String) {
+      text += string
+      length += string.utf16.count
+    }
+
+    fileprivate mutating func appendSymbol(_ symbol: String) {
+      symbolRanges.append(NSRange(location: length, length: symbol.utf16.count))
+      append(symbol)
+    }
+  }
+
   // Line breaks are shown as return symbols instead of actual breaks, so multi-line text
   // flows as one compact wrapped paragraph in the row view.
-  static func displayString(from text: String, characterLimit: Int? = layoutCharacterLimit) -> String {
-    boundedString(from: trimmingLeadingWhitespace(text), characterLimit: characterLimit)
+  static func preview(from text: String, characterLimit: Int? = layoutCharacterLimit) -> Preview {
+    var preview = Preview()
+    let lines = boundedString(from: trimmingLeadingWhitespace(text), characterLimit: characterLimit)
       .split(omittingEmptySubsequences: false) { character in
         character.isNewline
       }
-      .map { line in
-        isBlankLine(line) ? "" : displayLine(from: String(line))
+    for (lineIndex, line) in lines.enumerated() {
+      if lineIndex > 0 {
+        preview.appendSymbol(returnSymbol)
       }
-      .joined(separator: returnSymbol)
+      if !isBlankLine(line) {
+        appendDisplayLine(line, to: &preview)
+      }
+    }
+    return preview
   }
 
   // Leading spaces and line breaks are left out of the preview. Text made only of
@@ -343,24 +368,28 @@ enum HistoryTextPreviewFormatter {
     }
   }
 
-  private static func displayLine(from line: String) -> String {
-    var result = ""
+  private static func appendDisplayLine(_ line: Substring, to preview: inout Preview) {
     var index = line.startIndex
 
     while index < line.endIndex {
       switch line[index] {
       case " ":
-        result += leadingSpaceSymbol
+        preview.appendSymbol(leadingSpaceSymbol)
       case "\t":
-        result += tabSymbol
+        preview.appendSymbol(tabSymbol)
       default:
-        return result + line[index...].replacingOccurrences(of: "\t", with: tabSymbol)
+        let parts = line[index...].split(separator: "\t", omittingEmptySubsequences: false)
+        for (partIndex, part) in parts.enumerated() {
+          if partIndex > 0 {
+            preview.appendSymbol(tabSymbol)
+          }
+          preview.append(String(part))
+        }
+        return
       }
 
       index = line.index(after: index)
     }
-
-    return result
   }
 }
 
@@ -370,6 +399,7 @@ enum HistoryTextPreviewFormatter {
 private final class HistoryTextPreviewField: NSTextField {
   private var previewText = ""
   private var displayText = ""
+  private var symbolRanges: [NSRange] = []
   private var searchQuery = ""
   private var textFont = HistoryRow.makePrimaryFont()
   private var lineCount = 1
@@ -419,7 +449,9 @@ private final class HistoryTextPreviewField: NSTextField {
   ) {
     if previewText != self.previewText {
       self.previewText = previewText
-      displayText = HistoryTextPreviewFormatter.displayString(from: previewText)
+      let preview = HistoryTextPreviewFormatter.preview(from: previewText)
+      displayText = preview.text
+      symbolRanges = preview.symbolRanges
     }
     self.searchQuery = searchQuery
     self.wrappingMode = wrappingMode
@@ -474,21 +506,9 @@ private final class HistoryTextPreviewField: NSTextField {
       searchQuery: searchQuery
     )
 
-    applySecondaryColor(
-      to: attributedString,
-      for: HistoryTextPreviewFormatter.returnSymbol,
-      in: displayText
-    )
-    applySecondaryColor(
-      to: attributedString,
-      for: HistoryTextPreviewFormatter.tabSymbol,
-      in: displayText
-    )
-    applySecondaryColor(
-      to: attributedString,
-      for: HistoryTextPreviewFormatter.leadingSpaceSymbol,
-      in: displayText
-    )
+    for range in symbolRanges {
+      attributedString.addAttribute(.foregroundColor, value: previewSymbolColor, range: range)
+    }
     HistoryPreviewSymbolAppearance.applyMaskStyle(
       to: attributedString,
       text: displayText,
@@ -497,18 +517,6 @@ private final class HistoryTextPreviewField: NSTextField {
     )
 
     return attributedString
-  }
-
-  private func applySecondaryColor(
-    to attributedString: NSMutableAttributedString,
-    for symbol: String,
-    in displayText: String
-  ) {
-    var searchRange = displayText.startIndex..<displayText.endIndex
-    while let range = displayText.range(of: symbol, range: searchRange) {
-      attributedString.addAttribute(.foregroundColor, value: previewSymbolColor, range: NSRange(range, in: displayText))
-      searchRange = range.upperBound..<displayText.endIndex
-    }
   }
 
   private var previewSymbolColor: NSColor {
