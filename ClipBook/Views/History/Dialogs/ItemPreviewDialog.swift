@@ -47,6 +47,13 @@ final class ItemPreviewDialogController: NSViewController {
   // inset applies to the bottom too, so the last line gets the rest of its gap
   // above the details panel from `textBottomSpacing`.
   private static let textContainerInset = NSSize(width: 14, height: 4)
+  // The pane keeps its text as far from the sides as from the top, 16 from
+  // its edges: the content inset of 6, plus the text container's own line
+  // padding of 5 on each side.
+  private static let paneTextContainerInset = NSSize(width: 5, height: 10)
+  // The pane is a glance at the item next to the history, so its text is set
+  // a size smaller than in the preview dialog.
+  private static let paneTextScale: CGFloat = 12 / 13
   private static let textBottomSpacing: CGFloat = 10
 
   private enum PreviewContent {
@@ -806,6 +813,20 @@ final class ItemPreviewDialogController: NSViewController {
     // and reload the page underneath the user.
   }
 
+  // Every font in the text, rich text included, is made smaller or larger by
+  // the same factor, so the text keeps its proportions.
+  private static func scalingFonts(of text: NSAttributedString, by scale: CGFloat) -> NSAttributedString {
+    let scaledText = NSMutableAttributedString(attributedString: text)
+    text.enumerateAttribute(.font, in: NSRange(location: 0, length: text.length)) { value, range, _ in
+      guard let font = value as? NSFont,
+            let scaledFont = NSFont(descriptor: font.fontDescriptor, size: font.pointSize * scale) else {
+        return
+      }
+      scaledText.addAttribute(.font, value: scaledFont, range: range)
+    }
+    return scaledText
+  }
+
   private static func plainTextContent(_ text: String) -> NSAttributedString {
     NSAttributedString(
       string: text,
@@ -1323,7 +1344,10 @@ final class ItemPreviewDialogController: NSViewController {
 
   private func makeTextContentView(attributedText: NSAttributedString, frame: NSRect) -> NSView {
     let scrollView = makeTextScrollView(frame: frame)
-    (scrollView.documentView as? NSTextView)?.textStorage?.setAttributedString(attributedText)
+    let text = presentation == .pane
+      ? Self.scalingFonts(of: attributedText, by: Self.paneTextScale)
+      : attributedText
+    (scrollView.documentView as? NSTextView)?.textStorage?.setAttributedString(text)
     return scrollView
   }
 
@@ -1350,7 +1374,9 @@ final class ItemPreviewDialogController: NSViewController {
       textView.isSelectable = !isReadOnly
       textView.drawsBackground = true
       textView.backgroundColor = .textBackgroundColor
-      textView.textContainerInset = Self.textContainerInset
+      textView.textContainerInset = presentation == .sheet
+        ? Self.textContainerInset
+        : Self.paneTextContainerInset
     }
 
     return scrollView

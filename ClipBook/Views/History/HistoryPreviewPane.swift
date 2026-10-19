@@ -36,10 +36,6 @@ final class HistoryPreviewPane: NSView {
     return 10
   }
 
-  // The room kept above the preview at the bottom of the window, so its
-  // text starts as far from the top edge as from the side edges. On the
-  // right the preview's own inset is enough.
-  private static let bottomContentTopInset: CGFloat = 10
   // How far into the pane its edge can be grabbed. It lies over the inset
   // of the preview, so it does not take clicks from the content.
   private static let resizeEdgeThickness: CGFloat = 6
@@ -169,21 +165,9 @@ final class HistoryPreviewPane: NSView {
   }
 
   private var contentFrame: NSRect {
-    guard isResizable else {
-      return bounds
-    }
-
-    switch position {
-    case .bottom:
-      return NSRect(
-        x: 0,
-        y: 0,
-        width: bounds.width,
-        height: max(0, bounds.height - Self.bottomContentTopInset)
-      )
-    case .right:
-      return bounds
-    }
+    // The preview keeps the same inset on every side, at the bottom of the
+    // window and on the right alike.
+    bounds
   }
 
   private func configure() {
