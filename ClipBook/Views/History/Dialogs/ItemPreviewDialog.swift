@@ -1192,7 +1192,11 @@ final class ItemPreviewDialogController: NSViewController {
     ])
 
     // Centred in the room above the details panel rather than in the whole preview.
-    let containerView = AboveDetailsPreviewContentView(frame: frame, detailsView: detailsView)
+    let containerView = ItemPreviewCanvasView(
+      frame: frame,
+      detailsView: detailsView,
+      backgroundColor: .textBackgroundColor
+    )
     containerView.addSubview(contentStack)
     NSLayoutConstraint.activate([
       contentStack.centerXAnchor.constraint(equalTo: containerView.previewArea.centerXAnchor),
@@ -1214,8 +1218,6 @@ final class ItemPreviewDialogController: NSViewController {
         constant: -Self.colorContentVerticalMargin
       )
     ])
-    containerView.wantsLayer = true
-    containerView.layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
     return containerView
   }
 
@@ -1249,9 +1251,7 @@ final class ItemPreviewDialogController: NSViewController {
   }
 
   private func makeWebPageContentView(url: URL, frame: NSRect) -> NSView {
-    let containerView = NSView(frame: frame)
-    containerView.wantsLayer = true
-    containerView.layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
+    let containerView = TextBackgroundView(frame: frame)
 
     let configuration = WKWebViewConfiguration()
     // A preview is not a browser: it never starts playing media on its own.
@@ -1574,6 +1574,35 @@ private final class ItemPreviewCanvasView: AboveDetailsPreviewContentView {
   override func draw(_ dirtyRect: NSRect) {
     canvasColor.setFill()
     dirtyRect.fill()
+  }
+
+  override func viewDidChangeEffectiveAppearance() {
+    super.viewDidChangeEffectiveAppearance()
+    needsDisplay = true
+  }
+}
+
+// A plain view on the text background, kept in step with the appearance, which a
+// layer background set once would keep at the color of the appearance it was set in.
+private final class TextBackgroundView: NSView {
+  override init(frame: NSRect) {
+    super.init(frame: frame)
+    wantsLayer = true
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  override var wantsUpdateLayer: Bool {
+    true
+  }
+
+  override func updateLayer() {
+    effectiveAppearance.performAsCurrentDrawingAppearance {
+      layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
+    }
   }
 
   override func viewDidChangeEffectiveAppearance() {
