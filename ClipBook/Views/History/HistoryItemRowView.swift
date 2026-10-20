@@ -1391,7 +1391,7 @@ private enum HistorySymbolIcon {
 
 // The circle a row shows in multiple selection: filled with the item's place in the
 // selection, or an empty ring for a row that is not selected.
-private final class HistorySelectionOrderBadgeView: NSView {
+final class HistorySelectionOrderBadgeView: NSView {
   private static let fontSize: CGFloat = 11
   private static let smallFontSize: CGFloat = 8
   private static let ringLineWidth: CGFloat = 1.5

@@ -91,6 +91,13 @@ enum HistoryRow {
   static let selectionHorizontalInset: CGFloat = 9
   static let selectionAccentColor = NSColor.gray.withAlphaComponent(0.2)
 
+  /// The selection of the items of a multiple selection other than the one in focus.
+  static func secondarySelectionColor(for view: NSView) -> NSColor {
+    view.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+      ? NSColor.gray.withAlphaComponent(0.16)
+      : NSColor.gray.withAlphaComponent(0.12)
+  }
+
   // The row content sits inside the selection shape with the same inset on both sides.
   static let contentHorizontalInset: CGFloat = selectionHorizontalInset + 8
   static let contentVerticalInset: CGFloat = 4
@@ -153,8 +160,9 @@ enum HistoryRow {
 }
 
 extension History: NSTableViewDataSource, NSTableViewDelegate {
+  // The list is left empty while the tiles show the rows.
   func numberOfRows(in tableView: NSTableView) -> Int {
-    tableRows.count
+    showsTiles ? 0 : tableRows.count
   }
 
   func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
@@ -245,6 +253,10 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
   }
 
   func tableViewSelectionDidChange(_ notification: Notification) {
+    guard !showsTiles else {
+      return
+    }
+
     let clickedRow = tableView.lastMouseDownRow
     tableView.lastMouseDownRow = nil
     pauseHoverSelectionUntilPointerMoves()
@@ -341,7 +353,7 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
     })
   }
 
-  private func quickPasteIndex(forItemIndex itemIndex: Int) -> Int? {
+  func quickPasteIndex(forItemIndex itemIndex: Int) -> Int? {
     guard showCommandNumberShortcut, itemIndex < 9 else {
       return nil
     }
@@ -400,6 +412,11 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
   }
 
   func updateVisibleRowDividers() {
+    guard !showsTiles else {
+      tileGrid.updateVisibleTileSelectionStates()
+      return
+    }
+
     let visibleRows = tableView.rows(in: tableView.visibleRect)
     guard visibleRows.location != NSNotFound else {
       return
@@ -457,14 +474,16 @@ extension History: NSMenuDelegate {
   func menuNeedsUpdate(_ menu: NSMenu) {
     menu.removeAllItems()
 
-    let clickedRow = tableView.contextualMenuRow ?? tableView.clickedRow
-    let row = clickedRow >= 0 ? clickedRow : tableView.selectedRow
+    let clickedRow = showsTiles
+      ? tileGrid.contextualMenuRow ?? -1
+      : tableView.contextualMenuRow ?? tableView.clickedRow
+    let row = clickedRow >= 0 ? clickedRow : rowsView.selectedRow
     guard case .item(let focusedItem, _) = tableRows[safe: row] else {
       return
     }
 
-    if !tableView.selectedRowIndexes.contains(row) {
-      tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+    if !rowsView.selectedRowIndexes.contains(row) {
+      rowsView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
     }
 
     guard let delegate else {
@@ -482,10 +501,11 @@ extension History: NSMenuDelegate {
 
   func menuDidClose(_ menu: NSMenu) {
     tableView.contextualMenuRow = nil
+    tileGrid.contextualMenuRow = nil
   }
 
   private func selectedItemsForMenu() -> [ClipboardItem] {
-    tableView.selectedRowIndexes.compactMap { row in
+    rowsView.selectedRowIndexes.compactMap { row in
       guard case .item(let item, _) = tableRows[safe: row] else {
         return nil
       }
@@ -508,7 +528,7 @@ private enum HistorySectionHeaderAppearance {
   }
 }
 
-private final class HistorySectionHeaderCellView: NSTableCellView {
+final class HistorySectionHeaderCellView: NSTableCellView {
   private let titleField = NSTextField(labelWithString: "")
   private var titleTopConstraint: NSLayoutConstraint?
 
@@ -693,9 +713,7 @@ private final class RoundedSelectionRowView: NSTableRowView {
   }
 
   private var secondarySelectionColor: NSColor {
-    return isDarkAppearance
-      ? NSColor.gray.withAlphaComponent(0.16)
-      : NSColor.gray.withAlphaComponent(0.12)
+    HistoryRow.secondarySelectionColor(for: self)
   }
 
   private var rowBackgroundColor: NSColor {
@@ -732,6 +750,22 @@ private final class RoundedSelectionRowView: NSTableRowView {
     effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
   }
 }
+
+/// What the selection of the history needs from the view that shows its rows,
+/// the list or the tiles. Both count the rows the same way, section headers
+/// included.
+@MainActor
+protocol HistoryRowsView: NSView {
+  var selectedRowIndexes: IndexSet { get }
+  var selectedRow: Int { get }
+  func selectRowIndexes(_ indexes: IndexSet, byExtendingSelection extend: Bool)
+  func deselectAll(_ sender: Any?)
+  func rect(ofRow row: Int) -> NSRect
+  func scrollRowToVisible(_ row: Int)
+}
+
+extension HistoryTableView: HistoryRowsView {}
+extension HistoryTileGridView: HistoryRowsView {}
 
 final class HistoryTableView: NSTableView {
   var contextualMenuRow: Int?

@@ -32,6 +32,7 @@ protocol HistoryToolbarDelegate: AnyObject {
   func historyToolbarDidRequestToggleCopySequenceMode(_ toolbar: HistoryToolbar)
   func historyToolbarDidRequestTogglePreviewPane(_ toolbar: HistoryToolbar)
   func historyToolbarDidRequestToggleDetails(_ toolbar: HistoryToolbar)
+  func historyToolbarDidRequestToggleImageTiles(_ toolbar: HistoryToolbar)
   func historyToolbarDidRequestCommandDialog(_ toolbar: HistoryToolbar)
 }
 
@@ -124,6 +125,9 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
   private var isPinned = false
   private var isCopySequenceModeEnabled = false
   private var isPreviewPaneShown = false
+  // Images can be shown as tiles while the history is filtered to them.
+  private var canShowImageTiles = false
+  private var showsImageTiles = false
   private var showsDetails = false
   private var togglePreviewShortcut = ""
   private var toggleDetailsShortcut = ""
@@ -1092,6 +1096,9 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     filterByItem.submenu = makeFilterByMenu()
     menu.addItem(filterByItem)
     menu.addItem(.separator())
+    if canShowImageTiles {
+      menu.addItem(makeImageTilesMenuItem())
+    }
     menu.addItem(makePreviewPaneMenuItem())
     menu.addItem(makeDetailsMenuItem())
 
@@ -1544,6 +1551,28 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     }
   }
 
+  /// The More menu offers the other way to show the images while the history
+  /// is filtered to them.
+  func updateImageTiles(isAvailable: Bool, isShown: Bool) {
+    guard isAvailable != canShowImageTiles || isShown != showsImageTiles else {
+      return
+    }
+
+    canShowImageTiles = isAvailable
+    showsImageTiles = isShown
+    if let item = sortItem as? NSMenuToolbarItem {
+      item.menu = makeSortMenu()
+    }
+  }
+
+  private func makeImageTilesMenuItem() -> NSMenuItem {
+    let title = showsImageTiles ? L10n.string("Show as List") : L10n.string("Show as Tiles")
+    let item = NSMenuItem(title: title, action: #selector(toggleImageTiles), keyEquivalent: "")
+    item.target = self
+    item.image = Self.symbolImage(symbolName: showsImageTiles ? "list.bullet" : "square.grid.2x2", label: title)
+    return item
+  }
+
   private func makePreviewPaneMenuItem() -> NSMenuItem {
     let title = isPreviewPaneShown ? L10n.string("Hide Preview") : L10n.string("Show Preview")
     let item = NSMenuItem(title: title, action: #selector(togglePreviewPane), keyEquivalent: "")
@@ -1758,6 +1787,10 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
 
   @objc private func togglePreviewPane() {
     delegate?.historyToolbarDidRequestTogglePreviewPane(self)
+  }
+
+  @objc private func toggleImageTiles() {
+    delegate?.historyToolbarDidRequestToggleImageTiles(self)
   }
 
   @objc private func toggleDetails() {

@@ -488,7 +488,8 @@ final class HistoryContentViewController: NSViewController {
       preferPastingAsPlainText: model.preferences.preferPastingAsPlainText,
       groupPinnedFavorites: model.preferences.pinFavoritesToTop && !model.isShowingTrash,
       sectionDate: historySectionDate(for: model.historySortOption),
-      isShowingTrash: model.isShowingTrash
+      isShowingTrash: model.isShowingTrash,
+      showsTiles: showsImageTiles
     ) { [weak self] firstItem in
       self?.model.selectedItemID = firstItem.id
       self?.model.selectedItemIDs = [firstItem.id]
@@ -499,7 +500,25 @@ final class HistoryContentViewController: NSViewController {
     setNeedsPreviewPaneUpdate()
   }
 
+  /// A history filtered to images only is where the pictures matter most, so
+  /// it shows as tiles, unless the user asked to keep the list there.
+  private var showsOnlyImages: Bool {
+    model.selectedHistoryFilterContentTypes.filter(\.isKindFilter) == [.images]
+  }
+
+  private var showsImageTiles: Bool {
+    showsOnlyImages && model.preferences.showImagesAsTiles
+  }
+
+  private func toggleImageTiles() {
+    var preferences = model.preferences
+    preferences.showImagesAsTiles.toggle()
+    model.preferences = preferences
+    coordinator.persistPreferences()
+  }
+
   private func updateToolbarFilterState() {
+    historyToolbar?.updateImageTiles(isAvailable: showsOnlyImages, isShown: showsImageTiles)
     historyToolbar?.updateFilterState(
       selectedContentTypes: model.selectedHistoryFilterContentTypes,
       tags: model.availableTags,
@@ -1531,11 +1550,7 @@ final class HistoryContentViewController: NSViewController {
   /// Up and down move focus there from the search field, which is what tells
   /// the two apart: until then the arrows belong to the text being typed.
   private func isHistoryListFocused(_ firstResponder: NSResponder?) -> Bool {
-    guard let view = firstResponder as? NSView else {
-      return false
-    }
-
-    return view === listPaneView.tableView || view.isDescendant(of: listPaneView.tableView)
+    listPaneView.isFocused(firstResponder)
   }
 
   private func isTextInputFocused(_ firstResponder: NSResponder?) -> Bool {
@@ -1552,6 +1567,16 @@ final class HistoryContentViewController: NSViewController {
     }
 
     let modifiers = event.modifierFlags.intersection([.command, .shift, .option, .control])
+    // Left and right go from tile to tile, so the tiles leave picking items
+    // one by one to Command-click.
+    if listPaneView.showsTiles {
+      guard modifiers.isEmpty, event.keyCode == 123 || event.keyCode == 124 else {
+        return false
+      }
+      listPaneView.moveSelection(by: event.keyCode == 123 ? .previous : .next)
+      return true
+    }
+
     if modifiers.isEmpty {
       switch event.keyCode {
       case 124:
@@ -1596,6 +1621,12 @@ final class HistoryContentViewController: NSViewController {
       return true
     case 125:
       listPaneView.extendSelection(.down)
+      return true
+    case 123 where listPaneView.showsTiles:
+      listPaneView.extendSelection(by: .previous)
+      return true
+    case 124 where listPaneView.showsTiles:
+      listPaneView.extendSelection(by: .next)
       return true
     default:
       return false
@@ -2426,6 +2457,10 @@ extension HistoryContentViewController: HistoryToolbarDelegate {
 
   func historyToolbarDidRequestTogglePreviewPane(_ toolbar: HistoryToolbar) {
     togglePreviewPane()
+  }
+
+  func historyToolbarDidRequestToggleImageTiles(_ toolbar: HistoryToolbar) {
+    toggleImageTiles()
   }
 
   func historyToolbarDidRequestToggleDetails(_ toolbar: HistoryToolbar) {
@@ -4079,6 +4114,7 @@ private struct HistoryListPreferences: Equatable {
   let preferPastingAsPlainText: Bool
   let pinFavoritesToTop: Bool
   let copySequenceModeEnabled: Bool
+  let showImagesAsTiles: Bool
 
   init(_ preferences: AppPreferences) {
     showCommandNumberShortcut = preferences.showCommandNumberShortcut
@@ -4088,6 +4124,7 @@ private struct HistoryListPreferences: Equatable {
     preferPastingAsPlainText = preferences.preferPastingAsPlainText
     pinFavoritesToTop = preferences.pinFavoritesToTop
     copySequenceModeEnabled = preferences.copySequenceModeEnabled
+    showImagesAsTiles = preferences.showImagesAsTiles
   }
 }
 

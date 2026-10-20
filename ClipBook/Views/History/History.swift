@@ -64,7 +64,12 @@ final class History: NSView {
   private var selectionAnchorRow: Int?
   var selectionLeadRow: Int?
   private var selectionOrderIDs: [UUID] = []
-  var isKeyboardMultipleSelectionMode = false
+  var isKeyboardMultipleSelectionMode = false {
+    didSet {
+      tableView.isKeyboardMultipleSelectionMode = isKeyboardMultipleSelectionMode
+      tileGrid.isKeyboardMultipleSelectionMode = isKeyboardMultipleSelectionMode
+    }
+  }
   /// Selects the item under the pointer as the pointer moves over the list.
   var selectsItemOnHover = false {
     didSet {
@@ -72,9 +77,11 @@ final class History: NSView {
         return
       }
 
-      tableView.onMouseMovedOverRow = selectsItemOnHover
+      let onMouseMovedOverRow: ((Int) -> Void)? = selectsItemOnHover
         ? { [weak self] row in self?.selectItemOnHover(atRow: row) }
         : nil
+      tableView.onMouseMovedOverRow = onMouseMovedOverRow
+      tileGrid.onMouseMovedOverRow = onMouseMovedOverRow
       pauseHoverSelectionUntilPointerMoves()
     }
   }
@@ -87,6 +94,13 @@ final class History: NSView {
   private var isSelectingItemOnHover = false
   private static let hoverSelectionResumeDistance: CGFloat = 4
   let tableView = HistoryTableView()
+  let tileGrid = HistoryTileGridView()
+  /// Whether the items show as tiles rather than as rows of the list.
+  private(set) var showsTiles = false
+  /// The view that shows the rows now, the list or the tiles.
+  var rowsView: HistoryRowsView {
+    showsTiles ? tileGrid : tableView
+  }
   private let scrollView = OverlayScrollView()
   private static let scrollBottomPadding: CGFloat = 4
   private static let firstRowPaddingBelowNotice: CGFloat = 8
@@ -149,7 +163,16 @@ final class History: NSView {
   }
 
   func focusTableView() {
-    window?.makeFirstResponder(tableView)
+    window?.makeFirstResponder(rowsView)
+  }
+
+  /// Whether the keyboard focus is on the rows of the history, the list or the tiles.
+  func isFocused(_ responder: NSResponder?) -> Bool {
+    guard let view = responder as? NSView else {
+      return false
+    }
+
+    return view.isDescendant(of: rowsView)
   }
 
   /// Scrolls the item's row to the middle of the list, so the items copied
@@ -207,11 +230,13 @@ final class History: NSView {
     groupPinnedFavorites: Bool,
     sectionDate: ((ClipboardItem) -> Date?)?,
     isShowingTrash: Bool = false,
+    showsTiles: Bool = false,
     onSelectFirstItem: @escaping (ClipboardItem) -> Void
   ) {
     let previousRows = tableRows
     let newRows = HistoryTableRowBuilder.build(from: items, groupPinnedFavorites: groupPinnedFavorites, sectionDate: sectionDate)
-    let removedRowIndexes = removedRowIndexes(from: previousRows, to: newRows)
+    let changesLayout = showsTiles != self.showsTiles
+    let removedRowIndexes = changesLayout ? nil : removedRowIndexes(from: previousRows, to: newRows)
 
     self.items = items
     self.availableTags = availableTags
@@ -223,6 +248,9 @@ final class History: NSView {
     preferDraggingAsPlainText = preferPastingAsPlainText
     groupsPinnedFavorites = groupPinnedFavorites
     tableRows = newRows
+    if changesLayout {
+      setShowsTiles(showsTiles)
+    }
     applyTableReload(removedRowIndexes: removedRowIndexes)
     updateScrollContentInsets()
     // Keep the scroll view visible even when the list is empty. Hiding it makes
@@ -254,7 +282,7 @@ final class History: NSView {
       sensitiveContentRevealedItemIDs.remove(item.id)
     }
     if let row = tableRowIndex(forItemID: item.id) {
-      tableView.reloadData(forRowIndexes: IndexSet(integer: row), columnIndexes: IndexSet(integer: 0))
+      reloadRows(IndexSet(integer: row))
     }
   }
 
@@ -265,10 +293,23 @@ final class History: NSView {
 
     let rows = tableRowIndexes(forItemIDs: sensitiveContentRevealedItemIDs)
     sensitiveContentRevealedItemIDs = []
-    tableView.reloadData(forRowIndexes: rows, columnIndexes: IndexSet(integer: 0))
+    reloadRows(rows)
+  }
+
+  private func reloadRows(_ rows: IndexSet) {
+    if showsTiles {
+      tileGrid.reloadRows(rows)
+    } else {
+      tableView.reloadData(forRowIndexes: rows, columnIndexes: IndexSet(integer: 0))
+    }
   }
 
   func refreshVisibleFilePreviewRows() {
+    guard !showsTiles else {
+      tileGrid.reloadVisibleRows()
+      return
+    }
+
     let visibleRows = tableView.rows(in: tableView.visibleRect)
     guard visibleRows.location != NSNotFound else {
       return
@@ -291,9 +332,35 @@ final class History: NSView {
     tableView.reloadData(forRowIndexes: fileRows, columnIndexes: IndexSet(integer: 0))
   }
 
+  /// Shows the rows as tiles or as the list. The view that goes away is left
+  /// empty, and the one that comes in takes over the keyboard focus.
+  private func setShowsTiles(_ showsTiles: Bool) {
+    let hadFocus = isFocused(window?.firstResponder)
+    self.showsTiles = showsTiles
+    isKeyboardMultipleSelectionMode = false
+
+    isSyncingSelection = true
+    if showsTiles {
+      tableView.reloadData()
+    } else {
+      tileGrid.reload(rows: [])
+    }
+    isSyncingSelection = false
+
+    scrollView.documentView = rowsView
+    if hadFocus {
+      focusTableView()
+    }
+  }
+
   private func applyTableReload(removedRowIndexes: IndexSet?) {
     isSyncingSelection = true
     defer { isSyncingSelection = false }
+
+    guard !showsTiles else {
+      tileGrid.reload(rows: tableRows)
+      return
+    }
 
     guard let removedRowIndexes else {
       tableView.reloadData()
@@ -322,18 +389,17 @@ final class History: NSView {
 
     if !selectedRows.isEmpty {
       let focusedRow = selectedItemID.flatMap(tableRowIndex(forItemID:)) ?? selectedRows.first
-      if tableView.selectedRowIndexes != selectedRows {
+      if rowsView.selectedRowIndexes != selectedRows {
         // The model sets a selection of its own once the selected items are
         // gone, deleted or put back for instance, which ends the multiple
         // selection they were picked with. Rows that only moved, under an item
         // copied meanwhile, keep it.
         if Set(selectionOrderIDs) != selectedIDs {
           isKeyboardMultipleSelectionMode = false
-          tableView.isKeyboardMultipleSelectionMode = false
         }
         isSyncingSelection = true
         defer { isSyncingSelection = false }
-        tableView.selectRowIndexes(selectedRows, byExtendingSelection: false)
+        rowsView.selectRowIndexes(selectedRows, byExtendingSelection: false)
         selectionAnchorRow = focusedRow
         selectionLeadRow = focusedRow
         selectionOrderIDs = selectionOrderIDs(for: selectedRows, focusedRow: focusedRow)
@@ -352,13 +418,12 @@ final class History: NSView {
       onSelectFirstItem(firstItem)
     } else {
       isKeyboardMultipleSelectionMode = false
-      tableView.isKeyboardMultipleSelectionMode = false
       isSyncingSelection = true
       defer { isSyncingSelection = false }
       selectionAnchorRow = nil
       selectionLeadRow = nil
       selectionOrderIDs = []
-      tableView.deselectAll(nil)
+      rowsView.deselectAll(nil)
     }
 
     updateVisibleRowDividers()
@@ -370,32 +435,33 @@ final class History: NSView {
   /// somewhere else instead.
   @discardableResult
   func moveSelection(_ direction: HistorySelectionDirection) -> Bool {
+    moveSelection(by: selectionStep(for: direction))
+  }
+
+  /// Moves the selection a step: up and down go to the previous and the next
+  /// item of the list, or to the tile above and below; the previous and the
+  /// next item are the tile on the left and on the right.
+  @discardableResult
+  func moveSelection(by step: HistorySelectionStep) -> Bool {
     guard !items.isEmpty else {
       return false
     }
 
-    let selectedRow = selectionLeadRow ?? tableView.selectedRow
+    let selectedRow = selectionLeadRow ?? rowsView.selectedRow
     let nextRow: Int
 
-    switch direction {
-    case .up:
-      if selectedRow < 0 {
+    if selectedRow < 0 {
+      switch step {
+      case .previous, .up:
         nextRow = lastSelectableRow() ?? 0
-      } else {
-        guard let previousRow = previousSelectableRow(before: selectedRow) else {
-          return false
-        }
-        nextRow = previousRow
-      }
-    case .down:
-      if selectedRow < 0 {
+      case .next, .down:
         nextRow = firstSelectableRow() ?? 0
-      } else {
-        guard let followingRow = nextSelectableRow(after: selectedRow) else {
-          return false
-        }
-        nextRow = followingRow
       }
+    } else {
+      guard let adjacentRow = adjacentSelectableRow(to: selectedRow, step) else {
+        return false
+      }
+      nextRow = adjacentRow
     }
 
     guard isSelectableRow(nextRow) else {
@@ -408,15 +474,18 @@ final class History: NSView {
   }
 
   func extendSelection(_ direction: HistorySelectionDirection) {
+    extendSelection(by: selectionStep(for: direction))
+  }
+
+  func extendSelection(by step: HistorySelectionStep) {
     guard !items.isEmpty else {
       return
     }
 
     focusTableView()
     isKeyboardMultipleSelectionMode = false
-    tableView.isKeyboardMultipleSelectionMode = false
 
-    let currentLeadRow = selectionLeadRow ?? tableView.selectedRow
+    let currentLeadRow = selectionLeadRow ?? rowsView.selectedRow
     let leadRow: Int
     if currentLeadRow < 0 {
       leadRow = firstSelectableRow() ?? 0
@@ -425,15 +494,7 @@ final class History: NSView {
     }
 
     let anchorRow = selectionAnchorRow ?? leadRow
-    let nextRow: Int?
-    switch direction {
-    case .up:
-      nextRow = previousSelectableRow(before: leadRow)
-    case .down:
-      nextRow = nextSelectableRow(after: leadRow)
-    }
-
-    guard let nextRow, isSelectableRow(nextRow) else {
+    guard let nextRow = adjacentSelectableRow(to: leadRow, step), isSelectableRow(nextRow) else {
       return
     }
 
@@ -442,7 +503,7 @@ final class History: NSView {
     let selectedRows = IndexSet((lowerBound...upperBound).filter(isSelectableRow(_:)))
 
     isSyncingSelection = true
-    tableView.selectRowIndexes(selectedRows, byExtendingSelection: false)
+    rowsView.selectRowIndexes(selectedRows, byExtendingSelection: false)
     isSyncingSelection = false
 
     selectionAnchorRow = anchorRow
@@ -465,8 +526,7 @@ final class History: NSView {
 
     let wasKeyboardMultipleSelectionMode = isKeyboardMultipleSelectionMode
     isKeyboardMultipleSelectionMode = true
-    tableView.isKeyboardMultipleSelectionMode = true
-    var selectedRows = tableView.selectedRowIndexes
+    var selectedRows = rowsView.selectedRowIndexes
     var selectionChange: HistoryMultipleSelectionChange?
 
     switch command {
@@ -509,7 +569,6 @@ final class History: NSView {
     }
 
     isKeyboardMultipleSelectionMode = false
-    tableView.isKeyboardMultipleSelectionMode = false
     updateVisibleRowDividers()
     updateVisibleRowSelectionOrderBadges()
   }
@@ -522,15 +581,7 @@ final class History: NSView {
     focusTableView()
 
     let currentRow = currentKeyboardSelectionFocusRow()
-    let nextRow: Int?
-    switch direction {
-    case .up:
-      nextRow = previousSelectableRow(before: currentRow)
-    case .down:
-      nextRow = nextSelectableRow(after: currentRow)
-    }
-
-    guard let nextRow else {
+    guard let nextRow = adjacentSelectableRow(to: currentRow, selectionStep(for: direction)) else {
       return
     }
 
@@ -542,7 +593,7 @@ final class History: NSView {
 
   private func applyKeyboardMultipleSelection(_ selectedRows: IndexSet, focusedRow: Int) {
     isSyncingSelection = true
-    tableView.selectRowIndexes(selectedRows, byExtendingSelection: false)
+    rowsView.selectRowIndexes(selectedRows, byExtendingSelection: false)
     isSyncingSelection = false
 
     notifySelectionChanged(focusedRow: focusedRow)
@@ -668,9 +719,8 @@ final class History: NSView {
 
   private func selectSingleRow(_ row: Int, scrollsToReveal: Bool = true) {
     isKeyboardMultipleSelectionMode = false
-    tableView.isKeyboardMultipleSelectionMode = false
     isSyncingSelection = true
-    tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+    rowsView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
     isSyncingSelection = false
 
     selectionAnchorRow = row
@@ -688,13 +738,12 @@ final class History: NSView {
     }
 
     isKeyboardMultipleSelectionMode = false
-    tableView.isKeyboardMultipleSelectionMode = false
 
     let focusedRow: Int?
-    if let clickedRow, tableView.selectedRowIndexes.contains(clickedRow) {
+    if let clickedRow, rowsView.selectedRowIndexes.contains(clickedRow) {
       focusedRow = clickedRow
     } else {
-      focusedRow = tableView.selectedRowIndexes.first
+      focusedRow = rowsView.selectedRowIndexes.first
     }
 
     selectionAnchorRow = focusedRow
@@ -735,8 +784,8 @@ final class History: NSView {
       return selectionLeadRow
     }
 
-    if tableView.selectedRow >= 0, isSelectableRow(tableView.selectedRow) {
-      return tableView.selectedRow
+    if rowsView.selectedRow >= 0, isSelectableRow(rowsView.selectedRow) {
+      return rowsView.selectedRow
     }
 
     return firstSelectableRow() ?? 0
@@ -747,11 +796,11 @@ final class History: NSView {
       return currentKeyboardSelectionFocusRow()
     }
 
-    return tableView.selectedRow
+    return rowsView.selectedRow
   }
 
   private func selectedItemsInRowOrder() -> [ClipboardItem] {
-    tableView.selectedRowIndexes.compactMap { row -> ClipboardItem? in
+    rowsView.selectedRowIndexes.compactMap { row -> ClipboardItem? in
       guard tableRows.indices.contains(row),
             case .item(let item, _) = tableRows[row] else {
         return nil
@@ -761,11 +810,11 @@ final class History: NSView {
   }
 
   private func updateSelectionOrder(focusedRow: Int?) {
-    selectionOrderIDs = selectionOrderIDs(for: tableView.selectedRowIndexes, focusedRow: focusedRow)
+    selectionOrderIDs = selectionOrderIDs(for: rowsView.selectedRowIndexes, focusedRow: focusedRow)
   }
 
   var isMultipleSelectionOrderBadgeMode: Bool {
-    isKeyboardMultipleSelectionMode || tableView.selectedRowIndexes.count > 1
+    isKeyboardMultipleSelectionMode || rowsView.selectedRowIndexes.count > 1
   }
 
   func selectionOrderBadgeNumber(forItemID id: UUID) -> Int? {
@@ -778,6 +827,11 @@ final class History: NSView {
   }
 
   func updateVisibleRowSelectionOrderBadges() {
+    guard !showsTiles else {
+      tileGrid.updateVisibleTileSelectionStates()
+      return
+    }
+
     let showsPlaceholder = isMultipleSelectionOrderBadgeMode
     tableView.enumerateAvailableRowViews { _, row in
       guard tableRows.indices.contains(row),
@@ -846,6 +900,28 @@ final class History: NSView {
     return (row + 1..<tableRows.count).first(where: isSelectableRow(_:))
   }
 
+  private func selectionStep(for direction: HistorySelectionDirection) -> HistorySelectionStep {
+    switch direction {
+    case .up:
+      return .up
+    case .down:
+      return .down
+    }
+  }
+
+  private func adjacentSelectableRow(to row: Int, _ step: HistorySelectionStep) -> Int? {
+    switch step {
+    case .previous:
+      return previousSelectableRow(before: row)
+    case .next:
+      return nextSelectableRow(after: row)
+    case .up:
+      return showsTiles ? tileGrid.row(above: row) : previousSelectableRow(before: row)
+    case .down:
+      return showsTiles ? tileGrid.row(below: row) : nextSelectableRow(after: row)
+    }
+  }
+
   private func previousSelectableRow(before row: Int) -> Int? {
     guard row > 0 else {
       return nil
@@ -868,12 +944,16 @@ final class History: NSView {
       return
     }
 
-    if row == firstSelectableRow(), let headerRow = firstSectionHeaderRow() {
+    // In the tiles every tile of the first line is the first of a column.
+    let isInFirstLine = showsTiles ? tileGrid.line(ofRow: row) == 0 : row == firstSelectableRow()
+    if isInFirstLine, let headerRow = firstSectionHeaderRow() {
       scrollRowFullyIntoView(headerRow, alignToTop: true)
       return
     }
 
-    if row == lastSelectableRow() {
+    // The tiles scroll the way the last row of the list does, so the content
+    // insets keep them clear of the toolbar and the bottom of the window.
+    if showsTiles || row == lastSelectableRow() {
       scrollRowFullyIntoView(row, alignToTop: false)
       return
     }
@@ -894,10 +974,10 @@ final class History: NSView {
   }
 
   private func scrollRowToCenter(_ row: Int) {
-    tableView.layoutSubtreeIfNeeded()
-    let rowRect = tableView.rect(ofRow: row)
+    rowsView.layoutSubtreeIfNeeded()
+    let rowRect = rowsView.rect(ofRow: row)
     guard !rowRect.isEmpty else {
-      tableView.scrollRowToVisible(row)
+      rowsView.scrollRowToVisible(row)
       return
     }
 
@@ -905,7 +985,7 @@ final class History: NSView {
     let insets = scrollView.contentInsets
     let visibleHeight = max(0, clipView.bounds.height - insets.top - insets.bottom)
     let minScrollY = -insets.top
-    let maxScrollY = max(minScrollY, tableView.frame.height - clipView.bounds.height + insets.bottom)
+    let maxScrollY = max(minScrollY, rowsView.frame.height - clipView.bounds.height + insets.bottom)
 
     var origin = clipView.bounds.origin
     origin.y = min(max(rowRect.midY - visibleHeight / 2 - insets.top, minScrollY), maxScrollY)
@@ -914,10 +994,10 @@ final class History: NSView {
   }
 
   private func scrollRowFullyIntoView(_ row: Int, alignToTop: Bool) {
-    tableView.layoutSubtreeIfNeeded()
-    let rowRect = tableView.rect(ofRow: row)
+    rowsView.layoutSubtreeIfNeeded()
+    let rowRect = rowsView.rect(ofRow: row)
     guard !rowRect.isEmpty else {
-      tableView.scrollRowToVisible(row)
+      rowsView.scrollRowToVisible(row)
       return
     }
 
@@ -931,7 +1011,7 @@ final class History: NSView {
       height: visibleHeight
     )
     let minScrollY = -insets.top
-    let maxScrollY = max(minScrollY, tableView.frame.height - clipView.bounds.height + insets.bottom)
+    let maxScrollY = max(minScrollY, rowsView.frame.height - clipView.bounds.height + insets.bottom)
 
     if alignToTop {
       guard rowRect.minY < visibleRect.minY || rowRect.maxY > visibleRect.maxY else {
@@ -1019,6 +1099,8 @@ final class History: NSView {
     menu.delegate = self
     tableView.menu = menu
 
+    configureTileGrid(menu: menu)
+
     emptyListView.translatesAutoresizingMaskIntoConstraints = false
     emptySearchResultsView.translatesAutoresizingMaskIntoConstraints = false
     emptySearchResultsView.isHidden = true
@@ -1050,6 +1132,63 @@ final class History: NSView {
       emptyTrashView.topAnchor.constraint(equalTo: topAnchor),
       emptyTrashView.bottomAnchor.constraint(equalTo: bottomAnchor)
     ])
+  }
+
+  private func configureTileGrid(menu: NSMenu) {
+    tileGrid.menu = menu
+    tileGrid.configureTile = { [weak self] tileView, item, itemIndex in
+      tileView.configure(item: item, quickPasteIndex: self?.quickPasteIndex(forItemIndex: itemIndex))
+    }
+    tileGrid.selectionState = { [weak self] row in
+      self?.tileSelectionState(forRow: row) ?? HistoryTileSelectionState()
+    }
+    tileGrid.onSelectionDidChange = { [weak self] in
+      guard let self, !self.isSyncingSelection else {
+        return
+      }
+
+      let clickedRow = self.tileGrid.lastMouseDownRow
+      self.tileGrid.lastMouseDownRow = nil
+      self.pauseHoverSelectionUntilPointerMoves()
+      self.handleTableSelectionDidChange(clickedRow: clickedRow)
+    }
+    tileGrid.onMouseDownSelection = { [weak self] row, event in
+      self?.handleMouseDownSelection(row: row, event: event) ?? false
+    }
+    tileGrid.onMouseUpSelection = { [weak self] row, event in
+      self?.handleMouseUpSelection(row: row, event: event)
+    }
+    tileGrid.onItemClick = { [weak self] row, event in
+      self?.handleItemClick(row: row, event: event)
+    }
+    tileGrid.dragPayloadForRow = { [weak self] row, modifierFlags in
+      self?.dragPayload(forRow: row, modifierFlags: modifierFlags)
+    }
+    tileGrid.onMoveSelectionKeyDown = { [weak self] step in
+      self?.moveSelection(by: step)
+    }
+    tileGrid.onExtendSelectionKeyDown = { [weak self] step in
+      self?.extendSelection(by: step)
+    }
+    tileGrid.onSearchKeyDown = { [weak self] event in
+      guard let self else {
+        return
+      }
+      self.delegate?.listPane(self, didReceiveSearchKeyDown: event)
+    }
+  }
+
+  private func tileSelectionState(forRow row: Int) -> HistoryTileSelectionState {
+    let selectedRows = tileGrid.selectedRowIndexes
+    var state = HistoryTileSelectionState()
+    state.isSelected = selectedRows.contains(row)
+    state.isPartOfMultipleSelection = selectedRows.count > 1
+    state.isKeyboardMultipleSelectionMode = isKeyboardMultipleSelectionMode
+    state.isKeyboardSelectionFocused = selectionLeadRow == row
+    if case .item(let item, _) = tableRows[safe: row] {
+      state.selectionOrderNumber = selectionOrderBadgeNumber(forItemID: item.id)
+    }
+    return state
   }
 
   // The number of file previews a multiple files row shows depends on the row width.
@@ -1098,8 +1237,8 @@ final class History: NSView {
 
     // A multiple selection was made on purpose, so the pointer leaves it be.
     guard !isKeyboardMultipleSelectionMode,
-          tableView.selectedRowIndexes.count <= 1,
-          row != tableView.selectedRow,
+          rowsView.selectedRowIndexes.count <= 1,
+          row != rowsView.selectedRow,
           isSelectableRow(row) else {
       return
     }
@@ -1113,7 +1252,6 @@ final class History: NSView {
 
   private func handleMouseDownSelection(row: Int, event: NSEvent) -> Bool {
     isKeyboardMultipleSelectionMode = false
-    tableView.isKeyboardMultipleSelectionMode = false
 
     guard isSelectableRow(row) else {
       return false
@@ -1122,7 +1260,7 @@ final class History: NSView {
     // Option is the drag modifier (it flips the plain-text payload), so it is
     // ignored for selection: an Option press selects like a plain one.
     let modifiers = event.modifierFlags.intersection([.command, .shift, .control])
-    let previousSelectedRows = tableView.selectedRowIndexes
+    let previousSelectedRows = rowsView.selectedRowIndexes
     let selectedRows: IndexSet
     var shiftSelectionRowOrder: [Int]?
 
@@ -1162,7 +1300,7 @@ final class History: NSView {
     if let shiftSelectionRowOrder {
       selectionOrderIDs = shiftSelectionOrderIDs(forOrderedRows: shiftSelectionRowOrder)
     }
-    tableView.selectRowIndexes(selectedRows, byExtendingSelection: false)
+    rowsView.selectRowIndexes(selectedRows, byExtendingSelection: false)
     return true
   }
 
@@ -1195,12 +1333,12 @@ final class History: NSView {
       return
     }
 
-    let selectedRows = tableView.selectedRowIndexes
+    let selectedRows = rowsView.selectedRowIndexes
     guard selectedRows.count > 1, selectedRows.contains(row) else {
       return
     }
 
-    tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+    rowsView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
   }
 
   /// Text-like items follow the "prefer pasting as plain text" setting, and
@@ -1257,5 +1395,11 @@ final class History: NSView {
     default:
       return
     }
+  }
+}
+
+private extension Array {
+  subscript(safe index: Int) -> Element? {
+    indices.contains(index) ? self[index] : nil
   }
 }
