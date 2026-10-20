@@ -332,20 +332,24 @@ final class History: NSView {
     tableView.reloadData(forRowIndexes: fileRows, columnIndexes: IndexSet(integer: 0))
   }
 
-  /// Shows the rows as tiles or as the list. The view that goes away is left
-  /// empty, and the one that comes in takes over the keyboard focus.
+  /// Shows the rows as tiles or as the list, and the view that comes in
+  /// takes over the keyboard focus.
+  ///
+  /// The list leaves the window with its rows as they are, and gets the rows
+  /// of the moment once it is back. Emptying it on the way out parked its
+  /// row views in `NSTableView`'s row view purgatory, which only the list's
+  /// next pass in the window empties, so every switch to the tiles left the
+  /// row views shown at the time behind for good.
   private func setShowsTiles(_ showsTiles: Bool) {
     let hadFocus = isFocused(window?.firstResponder)
     self.showsTiles = showsTiles
     isKeyboardMultipleSelectionMode = false
 
-    isSyncingSelection = true
-    if showsTiles {
-      tableView.reloadData()
-    } else {
+    if !showsTiles {
+      isSyncingSelection = true
       tileGrid.reload(rows: [])
+      isSyncingSelection = false
     }
-    isSyncingSelection = false
 
     scrollView.documentView = rowsView
     if hadFocus {

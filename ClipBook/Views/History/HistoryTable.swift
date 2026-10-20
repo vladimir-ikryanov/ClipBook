@@ -160,9 +160,8 @@ enum HistoryRow {
 }
 
 extension History: NSTableViewDataSource, NSTableViewDelegate {
-  // The list is left empty while the tiles show the rows.
   func numberOfRows(in tableView: NSTableView) -> Int {
-    showsTiles ? 0 : tableRows.count
+    tableRows.count
   }
 
   func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
