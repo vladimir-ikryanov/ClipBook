@@ -23,6 +23,7 @@ enum HistoryTile {
   static let captionVerticalPadding: CGFloat = 6
   static let accessorySpacing: CGFloat = 4
   static let favoriteSymbolSize: CGFloat = 10
+  static let sourceAppIconSize: CGFloat = 16
   // The selection order badge sits in the top left corner of the card.
   static let selectionOrderBadgeInset: CGFloat = 8
 
@@ -30,10 +31,15 @@ enum HistoryTile {
     HistoryRow.makeDetailsFont()
   }
 
+  // The caption is a line of text, or as tall as the icon of the app the
+  // item was copied from when that is taller.
+  static func captionHeight() -> CGFloat {
+    max(ceil(makeCaptionFont().historyLineHeight), sourceAppIconSize)
+  }
+
   static func height(forWidth width: CGFloat) -> CGFloat {
-    let captionHeight = ceil(makeCaptionFont().historyLineHeight)
-    return cardInset + picturePadding + pictureHeight(forWidth: width)
-      + captionVerticalPadding * 2 + captionHeight + cardInset
+    cardInset + picturePadding + pictureHeight(forWidth: width)
+      + captionVerticalPadding * 2 + captionHeight() + cardInset
   }
 
   static func pictureHeight(forWidth width: CGFloat) -> CGFloat {
@@ -752,6 +758,7 @@ final class HistoryTileView: NSView {
   private let titleField = NSTextField(labelWithString: "")
   private let favoriteView = FavoriteView.make(isFavorite: false)
   private let quickPasteField = NSTextField(labelWithString: "")
+  private let sourceAppIconView = NSImageView()
   private let selectionOrderBadgeView = HistorySelectionOrderBadgeView()
   private var configuredItemID: UUID?
 
@@ -793,6 +800,14 @@ final class HistoryTileView: NSView {
     favoriteView.isHidden = !item.isFavorite
     quickPasteField.stringValue = quickPasteIndex.map { "⌘\($0)" } ?? ""
     quickPasteField.isHidden = quickPasteIndex == nil
+    let sourceAppIcon = HistorySourceAppIcon.image(
+      bundleIdentifier: item.sourceBundleIdentifier,
+      appName: item.sourceAppName,
+      size: HistoryTile.sourceAppIconSize
+    )
+    sourceAppIconView.image = sourceAppIcon
+    sourceAppIconView.toolTip = item.sourceAppName
+    sourceAppIconView.isHidden = sourceAppIcon == nil
     needsLayout = true
 
     if !isSameItem {
@@ -877,12 +892,18 @@ final class HistoryTileView: NSView {
       height: HistoryRow.selectionOrderBadgeSize
     )
 
-    let captionHeight = ceil(HistoryTile.makeCaptionFont().historyLineHeight)
+    let captionHeight = HistoryTile.captionHeight()
     let captionY = pictureFrame.maxY + HistoryTile.captionVerticalPadding
     let captionMinX = HistoryTile.captionHorizontalPadding
-    var trailingX = cardView.bounds.width - HistoryTile.captionHorizontalPadding
-    for accessoryView in [quickPasteField, favoriteView] as [NSView] where !accessoryView.isHidden {
-      let size = accessoryView.fittingSize
+    // The app icon sits in the corner of the card, as far from its right
+    // edge as from its bottom edge.
+    var trailingX = cardView.bounds.width
+      - (sourceAppIconView.isHidden ? HistoryTile.captionHorizontalPadding : HistoryTile.captionVerticalPadding)
+    // The same order as in a row of the list: favorite, shortcut, app.
+    for accessoryView in [sourceAppIconView, quickPasteField, favoriteView] as [NSView] where !accessoryView.isHidden {
+      let size = accessoryView === sourceAppIconView
+        ? NSSize(width: HistoryTile.sourceAppIconSize, height: HistoryTile.sourceAppIconSize)
+        : accessoryView.fittingSize
       trailingX -= size.width
       accessoryView.frame = NSRect(
         x: trailingX,
@@ -892,11 +913,12 @@ final class HistoryTileView: NSView {
       )
       trailingX -= HistoryTile.accessorySpacing
     }
+    let titleHeight = ceil(HistoryTile.makeCaptionFont().historyLineHeight)
     titleField.frame = NSRect(
       x: captionMinX,
-      y: captionY,
+      y: captionY + (captionHeight - titleHeight) / 2,
       width: max(0, trailingX - captionMinX),
-      height: captionHeight
+      height: titleHeight
     )
   }
 
@@ -970,11 +992,13 @@ final class HistoryTileView: NSView {
       weight: .regular
     )
 
+    sourceAppIconView.imageScaling = .scaleProportionallyDown
+
     selectionOrderBadgeView.isHidden = true
 
     cardView.translatesAutoresizingMaskIntoConstraints = true
     addSubview(cardView)
-    for subview in [imageView, selectionOrderBadgeView, titleField, favoriteView, quickPasteField] as [NSView] {
+    for subview in [imageView, selectionOrderBadgeView, titleField, favoriteView, quickPasteField, sourceAppIconView] as [NSView] {
       subview.translatesAutoresizingMaskIntoConstraints = true
       cardView.addSubview(subview)
     }
