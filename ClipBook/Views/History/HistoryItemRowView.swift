@@ -124,19 +124,23 @@ private enum HistorySearchMatchHighlighter {
   }
 
   static func applyHighlight(to attributedString: NSMutableAttributedString, text: String, searchQuery: String) {
-    let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !query.isEmpty else {
+    let tokens = searchQuery.split(whereSeparator: \.isWhitespace)
+    guard !tokens.isEmpty else {
       return
     }
 
-    var searchRange = text.startIndex..<text.endIndex
-    while let range = text.range(
-      of: query,
-      options: [.caseInsensitive, .diacriticInsensitive],
-      range: searchRange
-    ) {
-      attributedString.addAttribute(.foregroundColor, value: highlightColor, range: NSRange(range, in: text))
-      searchRange = range.upperBound..<text.endIndex
+    let locale = Locale.current
+    for token in tokens {
+      var searchRange = text.startIndex..<text.endIndex
+      while let range = text.range(
+        of: token,
+        options: [.caseInsensitive, .diacriticInsensitive],
+        range: searchRange,
+        locale: locale
+      ) {
+        attributedString.addAttribute(.foregroundColor, value: highlightColor, range: NSRange(range, in: text))
+        searchRange = range.upperBound..<text.endIndex
+      }
     }
   }
 

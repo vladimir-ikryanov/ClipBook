@@ -70,7 +70,7 @@ private struct HistoryMultiTagMenuSelection {
 @MainActor
 final class HistoryContentViewController: NSViewController {
   private static let minimumViewSize = NSSize(width: 640, height: 400)
-  private static let searchDebounceDelay: TimeInterval = 0.5
+  private static let searchDebounceDelay: TimeInterval = 0.04
 
   private let model: AppModel
   private let coordinator: AppCoordinator
@@ -608,7 +608,7 @@ final class HistoryContentViewController: NSViewController {
 
     pendingSearchQuery = nil
     searchQueryDebounceWorkItem = nil
-    applySearchQuery(query)
+    applySearchQuery(query, shouldResetSelection: true)
   }
 
   private func applySearchQuery(_ query: String, shouldResetSelection: Bool = false) {
