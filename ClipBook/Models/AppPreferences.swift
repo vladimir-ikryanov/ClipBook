@@ -109,7 +109,7 @@ struct AppPreferences: Codable, Equatable {
 
     var appearance: AppAppearance = .system
     var language = "en"
-    var launchAtLogin = false
+    var launchAtLogin = true
     var showMainWindowAtStartup = false
     var checkForUpdatesAutomatically = true
     var soundEffectsEnabled = true
