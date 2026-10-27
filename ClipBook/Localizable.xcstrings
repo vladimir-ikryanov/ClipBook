@@ -1588,6 +1588,52 @@
         }
       }
     },
+    "Ignore sensitive content" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sensible Inhalte ignorieren"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignore sensitive content"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorar contenido sensible"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignora contenuti sensibili"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "機密性の高いコンテンツを無視"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorar conteúdo sensível"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "忽略敏感内容"
+          }
+        }
+      }
+    },
     "Keep deleted items in Trash" : {
       "localizations" : {
         "de" : {
@@ -3382,6 +3428,52 @@
         }
       }
     },
+    "Skip copied passwords, API keys, access tokens and card numbers, and do not save them in the history." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopierte Passwörter, API-Schlüssel, Zugriffstoken und Kartennummern überspringen und nicht im Verlauf speichern."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip copied passwords, API keys, access tokens and card numbers, and do not save them in the history."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omite las contraseñas, claves de API, tokens de acceso y números de tarjeta copiados y no los guarda en el historial."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salta password, chiavi API, token di accesso e numeri di carta copiati e non li salva nella cronologia."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピーしたパスワード、APIキー、アクセストークン、カード番号をスキップし、履歴に保存しません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignora senhas, chaves de API, tokens de acesso e números de cartão copiados e não os salva no histórico."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跳过复制的密码、API 密钥、访问令牌和卡号，不将其保存到历史记录中。"
+          }
+        }
+      }
+    },
     "Some imported items are older than the history limit. Do you want to keep them?" : {
       "localizations" : {
         "de" : {
@@ -4068,6 +4160,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "此操作无法撤销。"
+          }
+        }
+      }
+    },
+    "Your history contains %d items with sensitive content. Do you want to delete these items?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Verlauf enthält %d Objekte mit sensiblen Inhalten. Möchtest du diese Objekte löschen?"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your history contains %d items with sensitive content. Do you want to delete these items?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu historial contiene %d elementos con contenido sensible. ¿Quieres eliminar estos elementos?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La cronologia contiene %d elementi con contenuti sensibili. Vuoi eliminare questi elementi?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "履歴に機密性の高いコンテンツを含むアイテムが%d個あります。これらのアイテムを削除しますか？"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu histórico contém %d itens com conteúdo sensível. Deseja excluir esses itens?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "历史记录中有 %d 个包含敏感内容的项目。是否删除这些项目？"
+          }
+        }
+      }
+    },
+    "Your history contains an item with sensitive content. Do you want to delete it?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Verlauf enthält ein Objekt mit sensiblen Inhalten. Möchtest du es löschen?"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your history contains an item with sensitive content. Do you want to delete it?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu historial contiene un elemento con contenido sensible. ¿Quieres eliminarlo?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La cronologia contiene un elemento con contenuti sensibili. Vuoi eliminarlo?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "履歴に機密性の高いコンテンツを含むアイテムがあります。削除しますか？"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu histórico contém um item com conteúdo sensível. Deseja excluí-lo?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "历史记录中有一个包含敏感内容的项目。是否删除？"
           }
         }
       }

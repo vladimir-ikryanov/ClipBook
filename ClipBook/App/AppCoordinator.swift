@@ -1472,6 +1472,46 @@ final class AppCoordinator: ObservableObject {
     }
   }
 
+  // MARK: - Sensitive content
+
+  /// Applies the "Ignore sensitive content" setting. Turning it on only stops
+  /// new secrets from coming in: when the history already holds some, the user
+  /// is asked whether to delete them, and declining keeps them.
+  func ignoreSensitiveContentDidChange() {
+    savePreferences()
+    guard model.preferences.ignoreSensitiveContent else {
+      return
+    }
+
+    let keepsProtectedItems = model.preferences.keepFavoritesOnClearHistory
+    var items: [ClipboardItem] = []
+    do {
+      items = try historyStore.fetchItems { item in
+        SensitiveContent.containsSensitiveContent(item)
+          && !(keepsProtectedItems && shouldKeepWhenClearingHistory(item))
+      }
+    } catch {
+      model.lastError = error.localizedDescription
+    }
+    guard !items.isEmpty else {
+      return
+    }
+
+    let message = items.count == 1
+      ? L10n.string("Your history contains an item with sensitive content. Do you want to delete it?")
+      : L10n.string("Your history contains %d items with sensitive content. Do you want to delete these items?", items.count)
+    presentDeletionAlert(message: message) { [weak self] confirmed in
+      guard let self, confirmed else {
+        return
+      }
+      do {
+        try removeFromHistory(items)
+      } catch {
+        model.lastError = error.localizedDescription
+      }
+    }
+  }
+
   /// A Delete/Cancel alert on the settings window whose details spell out
   /// whether favorites and tagged items are spared.
   private func presentDeletionAlert(message: String, completion: @escaping (Bool) -> Void) {

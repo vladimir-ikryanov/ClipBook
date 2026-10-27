@@ -176,6 +176,7 @@ struct AppPreferences: Codable, Equatable {
     var ignoreTransientContent = true
     var ignoreConcealedContent = true
     var detectSensitiveContent = true
+    var ignoreSensitiveContent = false
     var showDuringScreenSharing = false
     var ignoredAppsText = ""
     var textRetentionDays = Self.unlimitedRetentionDays
@@ -324,6 +325,7 @@ struct AppPreferences: Codable, Equatable {
         ignoreTransientContent = try container.decodeIfPresent(Bool.self, forKey: .ignoreTransientContent) ?? defaults.ignoreTransientContent
         ignoreConcealedContent = try container.decodeIfPresent(Bool.self, forKey: .ignoreConcealedContent) ?? defaults.ignoreConcealedContent
         detectSensitiveContent = try container.decodeIfPresent(Bool.self, forKey: .detectSensitiveContent) ?? defaults.detectSensitiveContent
+        ignoreSensitiveContent = try container.decodeIfPresent(Bool.self, forKey: .ignoreSensitiveContent) ?? defaults.ignoreSensitiveContent
         showDuringScreenSharing = try container.decodeIfPresent(Bool.self, forKey: .showDuringScreenSharing) ?? defaults.showDuringScreenSharing
         ignoredAppsText = try container.decodeIfPresent(String.self, forKey: .ignoredAppsText) ?? defaults.ignoredAppsText
         textRetentionDays = try container.decodeIfPresent(Int.self, forKey: .textRetentionDays) ?? defaults.textRetentionDays

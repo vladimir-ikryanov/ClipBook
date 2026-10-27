@@ -126,6 +126,30 @@ enum SensitiveContent {
         }
     }
 
+    /// Whether the item holds a secret anywhere in its content, which decides
+    /// whether it stays out of the history. What the user said about the item
+    /// wins over what is found in it.
+    static func containsSensitiveContent(_ item: ClipboardItem) -> Bool {
+        guard item.kind.canHoldSensitiveContent else {
+            return false
+        }
+
+        switch item.sensitivity {
+        case .sensitive:
+            return true
+        case .notSensitive:
+            return false
+        case .none:
+            // Each item is checked once here, so what is found is not
+            // remembered for the rows.
+            let detectsPasswordLikeText = item.kind == .text || item.kind == .richText
+            return !SensitiveContentDetector.secrets(
+                in: String(item.previewText.prefix(previewCharacterLimit)),
+                detectsPasswordLikeText: detectsPasswordLikeText
+            ).isEmpty
+        }
+    }
+
     /// The text to show in place of `text`, which is the item's content or a
     /// part of it.
     static func maskedText(

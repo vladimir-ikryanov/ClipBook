@@ -292,9 +292,10 @@ final class PasteboardMonitor {
     }
 
     /// An item of a kind whose "Keep history" period is Never is dropped,
-    /// together with any file the reader has already stored for it.
+    /// together with any file the reader has already stored for it. So is a
+    /// secret when sensitive content is ignored.
     private func capturableItem(_ item: ClipboardItem, ownsAssetFile: Bool) -> ClipboardItem? {
-        guard !preferences.capturesHistory(for: item.kind) else {
+        guard !preferences.capturesHistory(for: item.kind) || isIgnoredSensitiveContent(item) else {
             return item
         }
 
@@ -302,6 +303,17 @@ final class PasteboardMonitor {
             try? fileManager.removeItem(atPath: assetPath)
         }
         return nil
+    }
+
+    /// A copy of an item the user said is not sensitive still goes to the
+    /// history, whatever its content looks like.
+    private func isIgnoredSensitiveContent(_ item: ClipboardItem) -> Bool {
+        guard preferences.ignoreSensitiveContent, SensitiveContent.containsSensitiveContent(item) else {
+            return false
+        }
+
+        let storedItem = try? historyStore.fetchItem(kind: item.kind, contentKey: item.contentKey)
+        return storedItem?.sensitivity != .notSensitive
     }
 
     private func handleCopyAndMerge(_ item: ClipboardItem?) throws {

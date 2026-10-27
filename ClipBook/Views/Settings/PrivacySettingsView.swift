@@ -16,6 +16,10 @@ struct PrivacySettingsView: View {
         SettingsSectionGroup() {
             SettingsToggle(title: L10n.string("Ignore confidential content"), description: L10n.string("Skip password-manager and other concealed pasteboard data."), isOn: $model.preferences.ignoreConcealedContent)
             SettingsToggle(title: L10n.string("Ignore transient content"), description: L10n.string("Skip temporary pasteboard values that apps do not intend to store."), isOn: $model.preferences.ignoreTransientContent)
+            SettingsToggle(title: L10n.string("Ignore sensitive content"), description: L10n.string("Skip copied passwords, API keys, access tokens and card numbers, and do not save them in the history."), isOn: $model.preferences.ignoreSensitiveContent)
+                .onChange(of: model.preferences.ignoreSensitiveContent) { _ in
+                    coordinator.ignoreSensitiveContentDidChange()
+                }
         }
 
         VStack(alignment: .leading, spacing: 10) {
