@@ -320,7 +320,9 @@ final class HistoryWindow: NSObject, NSWindowDelegate {
     window.toolbarStyle = .unified
   }
   
-  func show(ignoresNextResignKey: Bool = false) {
+  /// With an anchor window the history opens beside it rather than where the
+  /// settings say, so it leaves that window in view (onboarding, for one).
+  func show(ignoresNextResignKey: Bool = false, beside anchorWindow: NSWindow? = nil) {
     let wasVisible = window.isVisible
     cancelSearchClearAfterHide()
     if ignoresNextResignKey {
@@ -334,7 +336,7 @@ final class HistoryWindow: NSObject, NSWindowDelegate {
     if !wasVisible {
       rebuildToolbarAfterHiddenAppearanceChangeIfNeeded()
       historyToolbar.applyAppearance(window.effectiveAppearance)
-      openingOrigin = positionWindow()
+      openingOrigin = anchorWindow.flatMap(positionWindow(beside:)) ?? positionWindow()
     }
     window.applyMacOS26CornerRadiusIfNeeded()
     coordinator.rememberPasteTarget()
@@ -433,6 +435,39 @@ final class HistoryWindow: NSObject, NSWindowDelegate {
 
   func toggle() {
     window.isVisible ? hide() : show()
+  }
+
+  private static let anchorWindowGap: CGFloat = 16
+
+  // Beside the anchor window's right edge, or its left one. When neither side
+  // has room, the anchor window moves over so the two sit side by side in the
+  // middle of the screen. Returns nil when even that does not fit.
+  private func positionWindow(beside anchorWindow: NSWindow) -> NSPoint? {
+    guard let visibleFrame = (anchorWindow.screen ?? NSScreen.main)?.visibleFrame else {
+      return nil
+    }
+
+    let size = window.frame.size
+    let gap = Self.anchorWindowGap
+    var anchorFrame = anchorWindow.frame
+    guard size.width + gap + anchorFrame.width <= visibleFrame.width,
+          size.height <= visibleFrame.height else {
+      return nil
+    }
+
+    let y = min(max(anchorFrame.midY - size.height / 2, visibleFrame.minY), visibleFrame.maxY - size.height)
+    let origin: NSPoint
+    if anchorFrame.maxX + gap + size.width <= visibleFrame.maxX {
+      origin = NSPoint(x: anchorFrame.maxX + gap, y: y)
+    } else if anchorFrame.minX - gap - size.width >= visibleFrame.minX {
+      origin = NSPoint(x: anchorFrame.minX - gap - size.width, y: y)
+    } else {
+      anchorFrame.origin.x = visibleFrame.midX - (anchorFrame.width + gap + size.width) / 2
+      anchorWindow.setFrame(anchorFrame, display: true, animate: true)
+      origin = NSPoint(x: anchorFrame.maxX + gap, y: y)
+    }
+    window.setFrameOrigin(origin)
+    return origin
   }
 
   @discardableResult

@@ -61,6 +61,10 @@ final class AppCoordinator: ObservableObject {
   /// Fires when something tried to use an item while the history is read-only,
   /// so the notice above the history can point out why nothing happened.
   let readOnlyHistoryActionAttempts = PassthroughSubject<Void, Never>()
+  /// Fires each time the history window is brought on screen.
+  let historyPanelDidShow = PassthroughSubject<Void, Never>()
+  /// Fires for every item taken from the clipboard into the history.
+  let capturedClipboardItems = PassthroughSubject<ClipboardItem, Never>()
   /// Undoes moving items to the Trash and putting them back. It belongs to
   /// the history rather than to a window, so a deletion can be undone the next
   /// time the history is opened.
@@ -145,7 +149,14 @@ final class AppCoordinator: ObservableObject {
     clipboardMonitor.delegate = self
     clipboardMonitor.start(preferences: model.preferences)
     applyAppearance()
-    if !model.preferences.hasCompletedOnboarding {
+    #if DEBUG
+    // `-ClipBookShowOnboarding YES` on the command line shows onboarding
+    // again without resetting the preferences it is recorded in.
+    let forcesOnboarding = UserDefaults.standard.bool(forKey: "ClipBookShowOnboarding")
+    #else
+    let forcesOnboarding = false
+    #endif
+    if !model.preferences.hasCompletedOnboarding || forcesOnboarding {
       showOnboarding()
     } else if model.preferences.showMainWindowAtStartup {
       showHistoryPanel()
@@ -191,8 +202,9 @@ final class AppCoordinator: ObservableObject {
     if activatesApp {
       NSApp.activate(ignoringOtherApps: true)
     }
-    historyWindow?.show(ignoresNextResignKey: ignoresNextResignKey)
+    historyWindow?.show(ignoresNextResignKey: ignoresNextResignKey, beside: visibleOnboardingWindow?.window)
     presentTrialSheetIfNeeded()
+    historyPanelDidShow.send()
   }
   
   func hideHistoryPanel() {
@@ -210,8 +222,15 @@ final class AppCoordinator: ObservableObject {
   // back to it once this panel gives it up. The target window is made key
   // explicitly instead, and a pinned panel takes key focus back afterwards.
   private func hideHistoryWindowForPaste() {
-    pasteService.resolvePasteTarget()
     let isPinned = !model.preferences.hideOnFocusLoss
+    guard onboardingPasteTarget == nil else {
+      if !isPinned {
+        historyWindow?.hideForPaste()
+      }
+      return
+    }
+
+    pasteService.resolvePasteTarget()
     if !isPinned {
       historyWindow?.hideForPaste()
     }
@@ -237,8 +256,9 @@ final class AppCoordinator: ObservableObject {
     recordTrialUsage()
     interruptCopySequenceTracking()
     resetPasteNextPointer()
-    historyWindow?.toggle()
+    historyWindow?.show(beside: visibleOnboardingWindow?.window)
     presentTrialSheetIfNeeded()
+    historyPanelDidShow.send()
   }
 
   func toggleHistoryPanelPin() {
@@ -395,6 +415,18 @@ final class AppCoordinator: ObservableObject {
     } else if model.preferences.showMainWindowAtStartup {
       showHistoryPanel()
     }
+  }
+
+  private var visibleOnboardingWindow: OnboardingWindow? {
+    onboardingWindow?.isVisible == true ? onboardingWindow : nil
+  }
+
+  /// The onboarding window, when a paste from the history goes there. While
+  /// ClipBook itself is the active app the history pastes into onboarding
+  /// within the app, which needs no Accessibility permission; onboarding asks
+  /// for that permission only after the user has tried pasting.
+  private var onboardingPasteTarget: OnboardingWindow? {
+    NSApp.isActive ? visibleOnboardingWindow : nil
   }
 
   func onboardingDidClose() {
@@ -772,7 +804,12 @@ final class AppCoordinator: ObservableObject {
     variant: PasteVariant,
     deletesAfterPaste: Bool = false
   ) throws {
-    try pasteService.paste(item, variant: variant)
+    if let onboardingPasteTarget {
+      try pasteService.copy(item, variant: variant)
+      onboardingPasteTarget.paste(item)
+    } else {
+      try pasteService.paste(item, variant: variant)
+    }
     playSound(.paste)
     // The pasteboard already holds the item's data at this point, so removing
     // the item (and its asset files) cannot affect what gets pasted.
@@ -884,8 +921,10 @@ final class AppCoordinator: ObservableObject {
       return
     }
 
+    // Onboarding takes a single item, and the keys typed between items
+    // would need Accessibility permission anyway.
     let remainingItems = items.dropFirst()
-    guard !remainingItems.isEmpty else {
+    guard !remainingItems.isEmpty, onboardingPasteTarget == nil else {
       return
     }
 
@@ -2733,6 +2772,7 @@ extension AppCoordinator: PasteboardMonitorDelegate {
     applyRetention()
     resetPasteNextPointer()
     playSound(.copy)
+    capturedClipboardItems.send(item)
   }
 
   func pasteboardMonitor(
