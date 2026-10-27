@@ -109,8 +109,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     alert.informativeText = L10n.string("ClipBook won't save what you copy until you open it again.")
     alert.addButton(withTitle: L10n.string("Quit"))
     alert.addButton(withTitle: L10n.string("Cancel"))
-    // The status bar menu can be used while another app is active, and the
-    // alert would open behind that app's windows.
+    // The history window can take keys without ClipBook being the active app,
+    // and the alert would open behind the active app's windows.
     NSApp.activate(ignoringOtherApps: true)
 
     guard let window = coordinator.quitConfirmationWindow else {
@@ -364,18 +364,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     coordinator.openBuyLicenseURL()
   }
   
+  /// Quit in the status bar menu is two deliberate clicks away, so it can't be
+  /// chosen by accident and doesn't ask first.
   @objc private func quit() {
     guard !isQuitConfirmationPresented else {
       return
     }
 
-    confirmQuit { [weak self] confirmed in
-      guard confirmed else {
-        return
-      }
-
-      self?.isQuitConfirmed = true
-      NSApp.terminate(nil)
-    }
+    isQuitConfirmed = true
+    NSApp.terminate(nil)
   }
 }
