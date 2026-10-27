@@ -74,6 +74,11 @@ enum OnboardingSample: Int, CaseIterable, Identifiable {
   }
 }
 
+enum OnboardingNavigationDirection {
+  case forward
+  case backward
+}
+
 enum OnboardingAccessibilityState {
   /// Explains the permission and offers to open System Settings.
   case request
@@ -87,6 +92,9 @@ final class OnboardingModel: ObservableObject {
   private static let accessibilityCheckInterval: TimeInterval = 0.4
 
   @Published private(set) var step: OnboardingStep = .welcome
+  /// Which way the last move between steps went, so the steps slide the
+  /// same way.
+  @Published private(set) var navigationDirection: OnboardingNavigationDirection = .forward
   @Published private(set) var savedSamples: Set<OnboardingSample> = []
   /// What was pasted from the history into the onboarding window, or nil
   /// until something was.
@@ -210,6 +218,21 @@ final class OnboardingModel: ObservableObject {
   }
 
   private func go(to newStep: OnboardingStep) {
+    let direction: OnboardingNavigationDirection = newStep.rawValue < step.rawValue ? .backward : .forward
+    guard direction != navigationDirection else {
+      show(newStep)
+      return
+    }
+
+    // The step that leaves slides out with the transition it was last drawn
+    // with, so the new direction is drawn first and the step changes after.
+    navigationDirection = direction
+    DispatchQueue.main.async { [weak self] in
+      self?.show(newStep)
+    }
+  }
+
+  private func show(_ newStep: OnboardingStep) {
     step = newStep
     if newStep == .accessibility {
       if Self.isAccessibilityTrusted {

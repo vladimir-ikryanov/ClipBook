@@ -5,6 +5,7 @@ struct OnboardingView: View {
   @ObservedObject var model: OnboardingModel
   @ObservedObject var appModel: AppModel
   @State private var selectedLanguage = L10n.languageIdentifier
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
   init(model: OnboardingModel) {
     self.model = model
@@ -15,14 +16,14 @@ struct OnboardingView: View {
     VStack(spacing: 0) {
       stepContent
         .id(model.step)
-        .transition(.opacity)
+        .transition(stepTransition)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 40)
         .padding(.top, 28)
 
       bottomBar
     }
-    .animation(.easeOut(duration: 0.18), value: model.step)
+    .animation(stepAnimation, value: model.step)
     .id(appModel.localizationRevision)
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color(nsColor: OnboardingPalette.windowBackground))
@@ -30,6 +31,26 @@ struct OnboardingView: View {
     .onAppear {
       selectedLanguage = appModel.preferences.language
     }
+  }
+
+  private static let stepSlideDistance: CGFloat = 80
+
+  // The next step comes in from the side it lies on: from the right going
+  // forward, from the left going back. With Reduce Motion the steps only fade.
+  private var stepTransition: AnyTransition {
+    guard !reduceMotion else {
+      return .opacity
+    }
+
+    let distance = model.navigationDirection == .forward ? Self.stepSlideDistance : -Self.stepSlideDistance
+    return .asymmetric(
+      insertion: .offset(x: distance).combined(with: .opacity),
+      removal: .offset(x: -distance).combined(with: .opacity)
+    )
+  }
+
+  private var stepAnimation: Animation {
+    reduceMotion ? .easeOut(duration: 0.18) : .spring(response: 0.36, dampingFraction: 0.9)
   }
 
   @ViewBuilder
