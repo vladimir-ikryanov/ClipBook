@@ -220,12 +220,10 @@ struct OnboardingView: View {
         .padding(.top, 10)
 
       OnboardingWaitingShortcut(shortcut: model.showHistoryShortcut)
-        .padding(.top, 24)
+        .padding(.top, 36)
 
-      Text(L10n.string("Waiting for you to press it…"))
-        .font(.system(size: 13, weight: .semibold))
-        .foregroundStyle(OnboardingPalette.accent)
-        .padding(.top, 14)
+      OnboardingShimmeringText(L10n.string("Waiting for you to press it…"))
+        .padding(.top, 30)
     }
   }
 
@@ -549,29 +547,159 @@ private struct OnboardingProgressDots: View {
   }
 }
 
-/// The history shortcut in a frame that gently pulses while onboarding waits
-/// for the user to press it.
+/// The history shortcut drawn as the keys of a Mac keyboard.
 private struct OnboardingWaitingShortcut: View {
   let shortcut: String
-  @State private var isPulsing = false
+
+  // The keys' proportions follow a keyboard: everything is a share of the
+  // height of a key, and the whole row shrinks to fit the window.
+  private static let maximumKeyHeight: CGFloat = 62
+  private static let maximumWidth: CGFloat = 400
+  private static let gap: CGFloat = 0.16
 
   var body: some View {
-    OnboardingShortcutKeys(shortcut: shortcut)
-      .padding(10)
-      .background(OnboardingPalette.accentTint, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-      .overlay(
-        RoundedRectangle(cornerRadius: 16, style: .continuous)
-          .strokeBorder(OnboardingPalette.accent, lineWidth: 2)
-      )
-      .overlay(
-        RoundedRectangle(cornerRadius: 20, style: .continuous)
-          .strokeBorder(OnboardingPalette.accent.opacity(isPulsing ? 0 : 0.35), lineWidth: 4)
-          .padding(-5)
-      )
-      .animation(.easeOut(duration: 1.4).repeatForever(autoreverses: false), value: isPulsing)
-      .onAppear {
-        isPulsing = true
+    let keys = OnboardingKeyboardKey.keys(for: shortcut)
+    let units = keys.reduce(0) { $0 + $1.width } + Self.gap * CGFloat(max(keys.count - 1, 0))
+    let keyHeight = min(Self.maximumKeyHeight, Self.maximumWidth / units)
+
+    HStack(spacing: keyHeight * Self.gap) {
+      ForEach(Array(keys.enumerated()), id: \.offset) { _, key in
+        OnboardingKeyCapView(key: key, height: keyHeight)
       }
+    }
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel(OnboardingShortcut.displayText(for: shortcut))
+  }
+}
+
+/// Gray text with a highlight that sweeps across it from left to right,
+/// to show that something is waiting. With Reduce Motion it stays still.
+private struct OnboardingShimmeringText: View {
+  let text: String
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @State private var progress: CGFloat = 0
+
+  init(_ text: String) {
+    self.text = text
+  }
+
+  var body: some View {
+    label
+      .foregroundStyle(.secondary)
+      .overlay {
+        if !reduceMotion {
+          GeometryReader { geometry in
+            let bandWidth = geometry.size.width * 0.35
+            LinearGradient(
+              colors: [.clear, Color.primary.opacity(0.85), .clear],
+              startPoint: .leading,
+              endPoint: .trailing
+            )
+            .frame(width: bandWidth)
+            .offset(x: -bandWidth + progress * (geometry.size.width + bandWidth))
+          }
+          .mask(label)
+        }
+      }
+      .onAppear {
+        withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
+          progress = 1
+        }
+      }
+  }
+
+  private var label: some View {
+    Text(text)
+      .font(.system(size: 13, weight: .medium))
+  }
+}
+
+/// A key of a Mac keyboard: a modifier shows its word at the bottom left and
+/// its symbol at the top right, any other key its label in the middle.
+struct OnboardingKeyboardKey {
+  let word: String?
+  let symbol: String?
+  /// The width as a share of the key's height.
+  let width: CGFloat
+
+  static func keys(for shortcut: String) -> [OnboardingKeyboardKey] {
+    let parts = shortcut.lowercased().split(separator: "+").map(String.init)
+    guard let key = parts.last, !shortcut.isEmpty else {
+      return [OnboardingKeyboardKey(word: nil, symbol: L10n.string("Not set"), width: 1.6)]
+    }
+
+    // In the order macOS lists modifiers in.
+    var keys: [OnboardingKeyboardKey] = []
+    if parts.contains("control") || parts.contains("ctrl") {
+      keys.append(OnboardingKeyboardKey(word: "control", symbol: "⌃", width: 1.3))
+    }
+    if parts.contains("option") || parts.contains("alt") {
+      keys.append(OnboardingKeyboardKey(word: "option", symbol: "⌥", width: 1.3))
+    }
+    if parts.contains("shift") {
+      keys.append(OnboardingKeyboardKey(word: "shift", symbol: nil, width: 2.2))
+    }
+    if parts.contains("cmd") || parts.contains("command") {
+      keys.append(OnboardingKeyboardKey(word: "command", symbol: "⌘", width: 1.3))
+    }
+    let label = KeyboardShortcutParser.keyDisplayText(for: key)
+    keys.append(OnboardingKeyboardKey(word: nil, symbol: label, width: label.count > 1 ? 1.6 : 1))
+    return keys
+  }
+}
+
+struct OnboardingKeyCapView: View {
+  static let cornerRadiusRatio: CGFloat = 0.095
+
+  let key: OnboardingKeyboardKey
+  let height: CGFloat
+
+  var body: some View {
+    let shape = RoundedRectangle(cornerRadius: height * Self.cornerRadiusRatio, style: .continuous)
+    ZStack {
+      if let word = key.word {
+        VStack(alignment: .leading, spacing: 0) {
+          if let symbol = key.symbol {
+            Text(symbol)
+              .font(.system(size: height * 0.24, weight: .medium))
+              .frame(maxWidth: .infinity, alignment: .trailing)
+              .padding(.top, height * 0.02)
+          }
+          Spacer(minLength: 0)
+          Text(word)
+            .font(.system(size: height * 0.22))
+            .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+        .padding(.top, height * 0.116)
+        .padding(.horizontal, height * 0.126)
+        .padding(.bottom, height * 0.126)
+      } else if let symbol = key.symbol {
+        Text(symbol)
+          .font(.system(size: height * 0.25))
+          .lineLimit(1)
+      }
+    }
+    .foregroundStyle(OnboardingPalette.keyLabel)
+    .frame(width: height * key.width, height: height)
+    .background(
+      LinearGradient(colors: [OnboardingPalette.keyTop, OnboardingPalette.keyBottom], startPoint: .top, endPoint: .bottom),
+      in: shape
+    )
+    // The light catching the top edge and the shade at the bottom of a key.
+    .overlay(
+      shape
+        .strokeBorder(
+          LinearGradient(colors: [OnboardingPalette.keyHighlight, .clear], startPoint: .top, endPoint: .center),
+          lineWidth: 1
+        )
+        .padding(1)
+    )
+    .overlay(
+      LinearGradient(colors: [.clear, OnboardingPalette.keyShade], startPoint: .init(x: 0.5, y: 0.7), endPoint: .bottom)
+        .clipShape(shape)
+    )
+    .overlay(shape.strokeBorder(OnboardingPalette.keyBorder, lineWidth: 1))
   }
 }
 

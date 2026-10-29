@@ -27,6 +27,26 @@ enum OnboardingPalette {
   static let fill = Color.primary.opacity(0.05)
   static let placeholder = Color.primary.opacity(0.12)
   static let border = Color.primary.opacity(0.14)
+  // The keys of the keyboard the history shortcut is drawn with: the dark
+  // keys of a Mac keyboard in dark mode, light keys in light mode.
+  static let keyTop = Color(nsColor: NSColor(name: nil) { appearance in
+    appearance.isDark ? NSColor(white: 0x1E / 255, alpha: 1) : .white
+  })
+  static let keyBottom = Color(nsColor: NSColor(name: nil) { appearance in
+    appearance.isDark ? NSColor(white: 0x16 / 255, alpha: 1) : NSColor(white: 0.955, alpha: 1)
+  })
+  static let keyBorder = Color(nsColor: NSColor(name: nil) { appearance in
+    appearance.isDark ? NSColor(white: 0x4A / 255, alpha: 1) : NSColor(white: 0.82, alpha: 1)
+  })
+  static let keyHighlight = Color(nsColor: NSColor(name: nil) { appearance in
+    appearance.isDark ? NSColor(white: 1, alpha: 0.07) : NSColor(white: 1, alpha: 0.9)
+  })
+  static let keyShade = Color(nsColor: NSColor(name: nil) { appearance in
+    appearance.isDark ? NSColor(white: 0, alpha: 0.35) : NSColor(white: 0, alpha: 0.035)
+  })
+  static let keyLabel = Color(nsColor: NSColor(name: nil) { appearance in
+    appearance.isDark ? NSColor(white: 0xF4 / 255, alpha: 1) : NSColor(white: 0.36, alpha: 1)
+  })
 }
 
 private extension NSAppearance {
