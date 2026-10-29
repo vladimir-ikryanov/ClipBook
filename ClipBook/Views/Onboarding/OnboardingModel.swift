@@ -155,11 +155,6 @@ final class OnboardingModel: ObservableObject {
     go(to: next)
   }
 
-  func setLanguage(_ language: String) {
-    appModel.preferences.language = language
-    coordinator.savePreferences()
-  }
-
   // MARK: - Copying
 
   /// Puts the sample on the clipboard the way any app would, so ClipBook

@@ -4,7 +4,7 @@ import Combine
 
 @MainActor
 final class OnboardingWindow: NSObject, NSWindowDelegate {
-  static let contentSize = NSSize(width: 500, height: 600)
+  static let contentSize = NSSize(width: 500, height: 640)
   private static let toolbarIdentifier = NSToolbar.Identifier("OnboardingToolbar")
 
   private let coordinator: AppCoordinator

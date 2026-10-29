@@ -4,7 +4,6 @@ import SwiftUI
 struct OnboardingView: View {
   @ObservedObject var model: OnboardingModel
   @ObservedObject var appModel: AppModel
-  @State private var selectedLanguage = L10n.languageIdentifier
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
   init(model: OnboardingModel) {
@@ -28,9 +27,6 @@ struct OnboardingView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color(nsColor: OnboardingPalette.windowBackground))
     .ignoresSafeArea()
-    .onAppear {
-      selectedLanguage = appModel.preferences.language
-    }
   }
 
   private static let stepSlideDistance: CGFloat = 80
@@ -86,26 +82,39 @@ struct OnboardingView: View {
 
   private var welcomeStep: some View {
     VStack(spacing: 0) {
-      OnboardingAppIcon(size: 104)
+      OnboardingAppIcon(size: 88)
 
       OnboardingTitle(L10n.string("Welcome to ClipBook"))
-        .padding(.top, 18)
+        .padding(.top, 16)
 
       OnboardingSubtitle(L10n.string("Keep, organize, find, and reuse everything you copy."))
-        .padding(.top, 10)
+        .padding(.top, 8)
 
-      Picker(L10n.string("Language"), selection: $selectedLanguage) {
-        ForEach(OnboardingLanguage.allCases) { language in
-          Text(language.title).tag(language.identifier)
-        }
+      VStack(alignment: .leading, spacing: 18) {
+        OnboardingFeatureRow(
+          systemImage: "keyboard",
+          title: L10n.string("Keyboard first"),
+          description: L10n.string(
+            "Press %@, type to search, and press Return to paste. You never need to reach for the mouse.",
+            OnboardingShortcut.displayText(for: model.showHistoryShortcut)
+          )
+        )
+        OnboardingFeatureRow(
+          systemImage: "lock.shield",
+          // The shield is narrow and tall, so it needs a larger size to look
+          // as big as the other icons.
+          iconSize: 24,
+          title: L10n.string("Private by design"),
+          description: L10n.string("Your history stays on this Mac. Passwords are masked, the history is hidden during screen sharing, and you can ignore specific apps. You decide what is kept and for how long.")
+        )
+        OnboardingFeatureRow(
+          systemImage: "square.stack.3d.up",
+          title: L10n.string("Built for power users"),
+          description: L10n.string("Copy and merge, paste a copy sequence without opening the history, paste several items at once with separators, filters, a trash, and more.")
+        )
       }
-      .labelsHidden()
-      .controlSize(.large)
-      .frame(width: 170)
-      .padding(.top, 22)
-      .onChange(of: selectedLanguage) { language in
-        model.setLanguage(language)
-      }
+      .frame(maxWidth: 400)
+      .padding(.top, 44)
     }
   }
 
@@ -416,6 +425,49 @@ struct OnboardingView: View {
   }
 }
 
+/// One of the features the welcome step introduces ClipBook with.
+private struct OnboardingFeatureRow: View {
+  let systemImage: String
+  var iconSize: CGFloat = 20
+  let title: String
+  let description: String
+
+  var body: some View {
+    // Each icon is centered on the line of its title, whatever its height.
+    HStack(alignment: .featureTitleCenter, spacing: 14) {
+      Image(systemName: systemImage)
+        .font(.system(size: iconSize, weight: .medium))
+        .foregroundStyle(OnboardingPalette.buttonAccent)
+        .frame(width: 28)
+        .alignmentGuide(.featureTitleCenter) { $0[VerticalAlignment.center] }
+
+      VStack(alignment: .leading, spacing: 3) {
+        Text(title)
+          .font(.system(size: 14, weight: .semibold))
+          .alignmentGuide(.featureTitleCenter) { $0[VerticalAlignment.center] }
+
+        Text(description)
+          .font(.system(size: 13))
+          .foregroundStyle(.secondary)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+
+      Spacer(minLength: 0)
+    }
+    .accessibilityElement(children: .combine)
+  }
+}
+
+private extension VerticalAlignment {
+  private enum FeatureTitleCenter: AlignmentID {
+    static func defaultValue(in dimensions: ViewDimensions) -> CGFloat {
+      dimensions[VerticalAlignment.center]
+    }
+  }
+
+  static let featureTitleCenter = VerticalAlignment(FeatureTitleCenter.self)
+}
+
 private struct OnboardingProgressDots: View {
   static let dotSize: CGFloat = 7
 
@@ -541,45 +593,5 @@ private struct OnboardingMenuBarIllustration: View {
     .padding(.horizontal, 8)
     .frame(height: 22)
     .background(isHighlighted ? OnboardingPalette.accent : Color.clear, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
-  }
-}
-
-enum OnboardingLanguage: String, CaseIterable, Identifiable {
-  case english = "en"
-  case englishUnitedKingdom = "en-GB"
-  case german = "de"
-  case italian = "it"
-  case portugueseBrazil = "pt-BR"
-  case spanish = "es"
-  case japanese = "ja"
-  case simplifiedChinese = "zh-Hans"
-
-  var id: String {
-    rawValue
-  }
-
-  var identifier: String {
-    rawValue
-  }
-
-  var title: String {
-    switch self {
-    case .english:
-      return "English"
-    case .englishUnitedKingdom:
-      return "English (UK)"
-    case .german:
-      return "Deutsch"
-    case .italian:
-      return "Italiano"
-    case .portugueseBrazil:
-      return "Português (Brasil)"
-    case .spanish:
-      return "Español"
-    case .japanese:
-      return "日本語"
-    case .simplifiedChinese:
-      return "简体中文"
-    }
   }
 }

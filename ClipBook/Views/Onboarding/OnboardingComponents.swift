@@ -4,6 +4,14 @@ import SwiftUI
 enum OnboardingPalette {
   static let accent = Color(red: 0.25, green: 0.36, blue: 0.89)
   static let accentTint = accent.opacity(0.1)
+  /// The color of the primary button: the system accent color of the glass
+  /// buttons on macOS 26 and later, and the onboarding accent before that.
+  static var buttonAccent: Color {
+    if #available(macOS 26.0, *) {
+      return .accentColor
+    }
+    return accent
+  }
   static let success = Color(nsColor: NSColor(name: nil) { appearance in
     appearance.isDark
       ? NSColor(red: 0.45, green: 0.78, blue: 0.47, alpha: 1)
