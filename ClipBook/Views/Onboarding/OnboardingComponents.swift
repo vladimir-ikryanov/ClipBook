@@ -301,17 +301,18 @@ struct OnboardingTextButtonStyle: ButtonStyle {
 }
 
 struct OnboardingCopyButtonStyle: ButtonStyle {
+  let height: CGFloat
+  let cornerRadius: CGFloat
+
   func makeBody(configuration: Configuration) -> some View {
+    let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
     configuration.label
-      .font(.system(size: 13, weight: .semibold))
+      .font(.system(size: 12, weight: .semibold))
       .foregroundStyle(.primary)
-      .padding(.horizontal, 18)
-      .frame(minHeight: 34)
-      .background(OnboardingPalette.cardBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-      .overlay(
-        RoundedRectangle(cornerRadius: 8, style: .continuous)
-          .strokeBorder(OnboardingPalette.border)
-      )
+      .padding(.horizontal, 12)
+      .frame(minHeight: height)
+      .background(OnboardingPalette.cardBackground, in: shape)
+      .overlay(shape.strokeBorder(OnboardingPalette.border))
       .opacity(configuration.isPressed ? 0.7 : 1)
       .contentShape(Rectangle())
   }

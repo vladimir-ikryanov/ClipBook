@@ -1259,48 +1259,94 @@
         }
       }
     },
-    "ClipBook saves each one in the background as you copy." : {
+    "ClipBook runs in the background and remembers everything you copy, so you can find and copy/paste it again." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ClipBook speichert jedes davon im Hintergrund, sobald du es kopierst."
+            "value" : "ClipBook läuft im Hintergrund und merkt sich alles, was du kopierst, damit du es wiederfinden und erneut kopieren oder einfügen kannst."
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ClipBook saves each one in the background as you copy."
+            "value" : "ClipBook runs in the background and remembers everything you copy, so you can find and copy/paste it again."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ClipBook guarda cada una en segundo plano mientras copias."
+            "value" : "ClipBook funciona en segundo plano y recuerda todo lo que copias, para que puedas encontrarlo y volver a copiarlo o pegarlo."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ClipBook salva ciascuno in background mentre copi."
+            "value" : "ClipBook funziona in background e ricorda tutto ciò che copi, così puoi ritrovarlo e copiarlo o incollarlo di nuovo."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "コピーするたびに、ClipBook がバックグラウンドで保存します。"
+            "value" : "ClipBook はバックグラウンドで動作し、コピーしたものをすべて記憶します。あとから探して、もう一度コピーやペーストができます。"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O ClipBook salva cada uma em segundo plano enquanto você copia."
+            "value" : "O ClipBook funciona em segundo plano e lembra tudo o que você copia, para que você possa encontrar e copiar ou colar de novo."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "你每复制一项，ClipBook 都会在后台保存。"
+            "value" : "ClipBook 在后台运行，记住你复制的所有内容，方便你随时找到并再次复制或粘贴。"
+          }
+        }
+      }
+    },
+    "ClipBook screenshot" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipBook-Bildschirmfoto"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipBook screenshot"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Captura de ClipBook"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screenshot di ClipBook"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipBook のスクリーンショット"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Captura de tela do ClipBook"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipBook 截图"
           }
         }
       }
@@ -1496,48 +1542,48 @@
         }
       }
     },
-    "Copy these three things" : {
+    "Copy these four things" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kopiere diese drei Dinge"
+            "value" : "Kopiere diese vier Dinge"
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Copy these three things"
+            "value" : "Copy these four things"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Copia estas tres cosas"
+            "value" : "Copia estas cuatro cosas"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Copia questi tre elementi"
+            "value" : "Copia questi quattro elementi"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "この 3 つをコピーしてください"
+            "value" : "この 4 つをコピーしてください"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Copie estas três coisas"
+            "value" : "Copie estas quatro coisas"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "复制这三项内容"
+            "value" : "复制这四项内容"
           }
         }
       }

@@ -5,6 +5,7 @@ struct OnboardingView: View {
   @ObservedObject var model: OnboardingModel
   @ObservedObject var appModel: AppModel
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @Environment(\.colorScheme) private var colorScheme
 
   init(model: OnboardingModel) {
     self.model = model
@@ -82,7 +83,7 @@ struct OnboardingView: View {
 
   private var welcomeStep: some View {
     VStack(spacing: 0) {
-      OnboardingAppIcon(size: 88)
+      OnboardingAppIcon(size: 100)
 
       OnboardingTitle(L10n.string("Welcome to ClipBook"))
         .padding(.top, 16)
@@ -120,23 +121,26 @@ struct OnboardingView: View {
 
   private var copyItemsStep: some View {
     VStack(spacing: 0) {
-      OnboardingTitle(L10n.string("Copy these three things"))
+      OnboardingClipKindsIllustration()
 
-      OnboardingSubtitle(L10n.string("ClipBook saves each one in the background as you copy."))
-        .padding(.top, 10)
+      OnboardingTitle(L10n.string("Copy these four things"))
+        .padding(.top, 14)
 
-      VStack(spacing: 9) {
+      OnboardingSubtitle(L10n.string("ClipBook runs in the background and remembers everything you copy, so you can find and copy/paste it again."))
+        .padding(.top, 8)
+
+      VStack(spacing: 8) {
         ForEach(OnboardingSample.allCases) { sample in
           sampleRow(sample)
         }
       }
-      .padding(.top, 22)
+      .padding(.top, 18)
 
       Text(L10n.string("%@ of %@ saved", String(model.savedSamples.count), String(OnboardingSample.allCases.count)))
         .font(.system(size: 13))
         .foregroundStyle(.secondary)
         .monospacedDigit()
-        .padding(.top, 14)
+        .padding(.top, 12)
     }
   }
 
@@ -144,52 +148,67 @@ struct OnboardingView: View {
     HStack(spacing: 12) {
       sampleIcon(sample)
 
-      Text(sample.text)
-        .font(.system(size: 14))
-        .lineLimit(1)
-        .textSelection(.enabled)
+      // The screenshot speaks for itself; its name is only read out by
+      // VoiceOver.
+      if sample != .image {
+        Text(sample.text)
+          .font(.system(size: 14))
+          .lineLimit(1)
+          .textSelection(.enabled)
+      }
 
       Spacer(minLength: 8)
 
       if model.savedSamples.contains(sample) {
         HStack(spacing: 6) {
           Image(systemName: "checkmark")
-            .font(.system(size: 12, weight: .bold))
+            .font(.system(size: 11, weight: .bold))
           Text(L10n.string("Saved"))
-            .font(.system(size: 13, weight: .semibold))
+            .font(.system(size: 12, weight: .semibold))
         }
         .foregroundStyle(OnboardingPalette.success)
-        .padding(.trailing, 10)
-        .frame(minHeight: 34)
+        .padding(.horizontal, 8)
+        .frame(minHeight: SampleRowMetrics.controlHeight)
         .transition(.opacity)
       } else {
         Button(L10n.string("Copy")) {
           model.copy(sample)
         }
-        .buttonStyle(OnboardingCopyButtonStyle())
+        .buttonStyle(OnboardingCopyButtonStyle(
+          height: SampleRowMetrics.controlHeight,
+          cornerRadius: SampleRowMetrics.innerCornerRadius
+        ))
         .focusable(false)
       }
     }
-    .padding(.leading, 12)
-    .padding(.trailing, 4)
-    .frame(height: 44)
-    .background(OnboardingPalette.fill, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+    .padding(SampleRowMetrics.inset)
+    .background(OnboardingPalette.fill, in: RoundedRectangle(cornerRadius: SampleRowMetrics.cornerRadius, style: .continuous))
     .frame(maxWidth: 420)
   }
 
   @ViewBuilder
   private func sampleIcon(_ sample: OnboardingSample) -> some View {
-    let shape = RoundedRectangle(cornerRadius: 6, style: .continuous)
-    if let systemImage = sample.systemImage {
-      Image(systemName: systemImage)
+    let shape = RoundedRectangle(cornerRadius: SampleRowMetrics.innerCornerRadius, style: .continuous)
+    let size = SampleRowMetrics.controlHeight
+    switch sample {
+    case .image:
+      Image(OnboardingSample.screenshotImageName(isDark: colorScheme == .dark))
+        .resizable()
+        .aspectRatio(contentMode: .fill)
+        .frame(width: SampleRowMetrics.imageHeight * 1.58, height: SampleRowMetrics.imageHeight)
+        .clipShape(shape)
+        .overlay(shape.strokeBorder(Color.primary.opacity(0.1)))
+        .accessibilityLabel(sample.text)
+    case .color:
+      Circle()
+        .fill(Color(red: 0x3B / 255, green: 0x6C / 255, blue: 0xF6 / 255))
+        .frame(width: size, height: size)
+    case .note, .link:
+      Image(systemName: sample.systemImage ?? "doc")
         .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(.secondary)
-        .frame(width: 24, height: 24)
+        .frame(width: size, height: size)
         .background(OnboardingPalette.placeholder, in: shape)
-    } else {
-      shape
-        .fill(Color(red: 0x3B / 255, green: 0x6C / 255, blue: 0xF6 / 255))
-        .frame(width: 24, height: 24)
     }
   }
 
@@ -229,8 +248,23 @@ struct OnboardingView: View {
       OnboardingTitle(L10n.string("That's the whole idea"))
         .padding(.top, 16)
 
-      pasteField(isEditable: false)
-        .padding(.top, 14)
+      if let image = model.pastedImage {
+        // Only the height is set, so the width follows the image and the
+        // border hugs it instead of a wider box around it.
+        Image(nsImage: image)
+          .resizable()
+          .aspectRatio(contentMode: .fit)
+          .frame(height: 140)
+          .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+          .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+              .strokeBorder(OnboardingPalette.border)
+          )
+          .padding(.top, 14)
+      } else {
+        pasteField(isEditable: false)
+          .padding(.top, 14)
+      }
 
       OnboardingSubtitle(L10n.string("Anything you copy can be pasted again, even hours later."))
         .padding(.top, 12)
@@ -422,6 +456,33 @@ struct OnboardingView: View {
     case .ready:
       return .primary(L10n.string("Done"))
     }
+  }
+}
+
+/// The rows of the things to copy. The controls inside a row are inset the
+/// same distance from every edge, and their corners are concentric with the
+/// row's.
+private enum SampleRowMetrics {
+  static let cornerRadius: CGFloat = 16
+  static let inset: CGFloat = 10
+  static let innerCornerRadius: CGFloat = cornerRadius - inset
+  static let controlHeight: CGFloat = 26
+  static let imageHeight: CGFloat = 58
+}
+
+/// Cards of the kinds of things ClipBook remembers: text, images, links,
+/// colors and files.
+private struct OnboardingClipKindsIllustration: View {
+  var body: some View {
+    Image("OnboardingClipKinds")
+      .resizable()
+      .interpolation(.high)
+      .aspectRatio(contentMode: .fit)
+      .frame(width: 240)
+      // The cards' shadow fills the bottom of the picture, so the title moves
+      // up into it rather than leaving a gap.
+      .padding(.bottom, -14)
+      .accessibilityHidden(true)
   }
 }
 

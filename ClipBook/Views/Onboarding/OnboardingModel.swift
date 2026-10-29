@@ -46,11 +46,13 @@ enum OnboardingSample: Int, CaseIterable, Identifiable {
   case note
   case link
   case color
+  case image
 
   var id: Int {
     rawValue
   }
 
+  /// The text that is copied, or for the image what the row calls it.
   var text: String {
     switch self {
     case .note:
@@ -59,6 +61,8 @@ enum OnboardingSample: Int, CaseIterable, Identifiable {
       return "https://clipbook.app"
     case .color:
       return "#3B6CF6"
+    case .image:
+      return L10n.string("ClipBook screenshot")
     }
   }
 
@@ -68,9 +72,15 @@ enum OnboardingSample: Int, CaseIterable, Identifiable {
       return "text.alignleft"
     case .link:
       return "link"
-    case .color:
+    case .color, .image:
       return nil
     }
+  }
+
+  /// The image sample is a picture of ClipBook in the appearance the user
+  /// sees it in.
+  static func screenshotImageName(isDark: Bool) -> String {
+    isDark ? "AppearancePreviewDark" : "AppearancePreviewLight"
   }
 }
 
@@ -99,6 +109,9 @@ final class OnboardingModel: ObservableObject {
   /// What was pasted from the history into the onboarding window, or nil
   /// until something was.
   @Published private(set) var pastedText: String?
+  /// The picture of an image item pasted from the history, which a text
+  /// field cannot show.
+  @Published private(set) var pastedImage: NSImage?
   @Published var pasteFieldText = ""
   @Published private(set) var accessibilityState: OnboardingAccessibilityState
 
@@ -161,13 +174,37 @@ final class OnboardingModel: ObservableObject {
   /// captures it like everything else the user copies.
   func copy(_ sample: OnboardingSample) {
     let pasteboard = NSPasteboard.general
+    guard sample == .image else {
+      pasteboard.clearContents()
+      pasteboard.setString(sample.text, forType: .string)
+      return
+    }
+
+    let isDark = NSApp.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+    guard let image = NSImage(named: OnboardingSample.screenshotImageName(isDark: isDark)),
+          let tiffData = image.tiffRepresentation,
+          let pngData = NSBitmapImageRep(data: tiffData)?.representation(using: .png, properties: [:]) else {
+      return
+    }
+
+    let item = NSPasteboardItem()
+    item.setData(pngData, forType: .png)
+    item.setData(tiffData, forType: .tiff)
     pasteboard.clearContents()
-    pasteboard.setString(sample.text, forType: .string)
+    pasteboard.writeObjects([item])
   }
 
   private func markSaved(_ item: ClipboardItem) {
-    let text = item.previewText.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard let sample = OnboardingSample.allCases.first(where: { $0.text == text }) else {
+    let sample: OnboardingSample?
+    if item.kind == .image {
+      // Any picture ClipBook put on the clipboard is the screenshot, in
+      // whichever appearance it was copied.
+      sample = item.sourceBundleIdentifier == Bundle.main.bundleIdentifier ? .image : nil
+    } else {
+      let text = item.previewText.trimmingCharacters(in: .whitespacesAndNewlines)
+      sample = OnboardingSample.allCases.first { $0 != .image && $0.text == text }
+    }
+    guard let sample else {
       return
     }
     withAnimation(.easeOut(duration: 0.2)) {
@@ -182,6 +219,14 @@ final class OnboardingModel: ObservableObject {
   /// the user has not been asked for yet at this point.
   func receivePaste(of item: ClipboardItem, in window: NSWindow) {
     guard step == .pasteBack, pastedText == nil else {
+      return
+    }
+
+    if item.kind == .image, let url = item.assetURL, let image = NSImage(contentsOf: url) {
+      withAnimation(.easeOut(duration: 0.2)) {
+        pastedImage = image
+        pastedText = item.previewText
+      }
       return
     }
 
