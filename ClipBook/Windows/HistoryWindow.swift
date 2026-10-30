@@ -130,6 +130,7 @@ final class HistoryWindow: NSObject, NSWindowDelegate {
   private static let minimumWindowSize = NSSize(width: 400, height: 400)
   private static let searchClearDelayAfterHide: TimeInterval = 15
   private static let keyFocusReturnDelayAfterPaste: TimeInterval = 0.25
+  private static let levelAboveModalPanels = NSWindow.Level(rawValue: NSWindow.Level.modalPanel.rawValue + 1)
   private static let defaultWindowSize = NSSize(
     width: AppPreferences.defaultHistoryWindowWidth,
     height: AppPreferences.defaultHistoryWindowHeight
@@ -213,9 +214,6 @@ final class HistoryWindow: NSObject, NSWindowDelegate {
     window.minSize = Self.minimumWindowSize
     // Disable window animation.
     window.animationBehavior = .none
-    // Make the window behave as a floating window that doesn't steal focus from the current active app.
-    window.isFloatingPanel = true
-    window.level = .floating
   }
 
   private func setScreenCaptureSharingType(_ sharingType: NSWindow.SharingType) {
@@ -429,8 +427,22 @@ final class HistoryWindow: NSObject, NSWindowDelegate {
 
   func applyPreferences() {
     window.hidesOnDeactivate = false
+    // Make the window behave as a floating window that doesn't steal focus from the current active app.
     window.isFloatingPanel = true
-    window.level = .floating
+    updateWindowLevel()
+  }
+
+  // Some apps (Adobe Lightroom, for one) show their open and save dialogs at the
+  // modal panel level, above floating windows. A panel that closes on focus loss
+  // opens above them, as it can't get in the way for long. A pinned panel stays
+  // floating so it never covers another app's dialog for as long as it is pinned,
+  // and so does any panel while one of ClipBook's own modal dialogs is open.
+  private func updateWindowLevel() {
+    let level = model.preferences.hideOnFocusLoss && NSApp.modalWindow == nil
+      ? Self.levelAboveModalPanels
+      : NSWindow.Level.floating
+    window.level = level
+    window.childWindows?.forEach { $0.level = level }
   }
 
   func toggle() {
@@ -495,7 +507,12 @@ final class HistoryWindow: NSObject, NSWindowDelegate {
     clearSearchAfterHideWorkItem = nil
   }
   
+  func windowDidBecomeKey(_ notification: Notification) {
+    updateWindowLevel()
+  }
+
   func windowDidResignKey(_ notification: Notification) {
+    updateWindowLevel()
     // Focus has not moved yet when this fires, and how long the window server
     // takes to settle varies, so look it up a few times over a short window.
     for delay in [0.05, 0.2, 0.5] {
