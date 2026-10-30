@@ -3934,52 +3934,6 @@
         }
       }
     },
-    "Preview the selected item at the bottom or on the right of the history window, depending on its shape." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zeigt eine Vorschau des ausgewählten Eintrags unten oder rechts im Verlaufsfenster, je nach dessen Form."
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preview the selected item at the bottom or on the right of the history window, depending on its shape."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muestra una vista previa del elemento seleccionado en la parte inferior o a la derecha de la ventana del historial, según su forma."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra l'anteprima dell'elemento selezionato in basso o a destra della finestra della cronologia, a seconda della sua forma."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択した項目のプレビューを、履歴ウインドウの形に応じて下部または右側に表示します。"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra a pré-visualização do item selecionado na parte inferior ou à direita da janela do histórico, conforme o formato dela."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "根据历史记录窗口的形状，在其底部或右侧预览所选项目。"
-          }
-        }
-      }
-    },
     "Privacy & Security › Accessibility" : {
       "localizations" : {
         "de" : {
@@ -4486,52 +4440,6 @@
         }
       }
     },
-    "Show details" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Details anzeigen"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show details"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar detalles"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra dettagli"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "詳細を表示する"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar detalhes"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示详细信息"
-          }
-        }
-      }
-    },
     "Show or hide details" : {
       "localizations" : {
         "de" : {
@@ -4758,98 +4666,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "显示预览"
-          }
-        }
-      }
-    },
-    "Show preview" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vorschau anzeigen"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show preview"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar vista previa"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra anteprima"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "プレビューを表示する"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar pré-visualização"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示预览"
-          }
-        }
-      }
-    },
-    "Show the type, size, source, and copy dates of the selected item under its preview, or on their own while the preview is hidden." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zeigt Typ, Größe, Quelle und Kopierdaten des ausgewählten Eintrags unter seiner Vorschau oder für sich allein, solange die Vorschau ausgeblendet ist."
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show the type, size, source, and copy dates of the selected item under its preview, or on their own while the preview is hidden."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muestra el tipo, el tamaño, el origen y las fechas de copia del elemento seleccionado debajo de su vista previa, o solos mientras la vista previa está oculta."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra tipo, dimensione, origine e date di copia dell'elemento selezionato sotto la sua anteprima, oppure da soli quando l'anteprima è nascosta."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択した項目の種類、サイズ、コピー元、コピー日時をプレビューの下に表示します。プレビューを非表示にしている間は詳細だけを表示します。"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra o tipo, o tamanho, a origem e as datas de cópia do item selecionado abaixo da pré-visualização, ou sozinhos enquanto a pré-visualização estiver oculta."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在所选项目的预览下方显示其类型、大小、来源和复制日期；隐藏预览时单独显示这些信息。"
           }
         }
       }

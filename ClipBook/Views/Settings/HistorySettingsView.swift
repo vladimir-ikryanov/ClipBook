@@ -14,8 +14,6 @@ struct HistorySettingsView: View {
       SettingsToggle(title: L10n.string("Pin favorites to top"), description: L10n.string("Keep favorite items above regular clipboard history."), isOn: $model.preferences.pinFavoritesToTop)
       SettingsToggle(title: L10n.string("Show quick paste shortcuts"), isOn: $model.preferences.showCommandNumberShortcut)
       SettingsToggle(title: L10n.string("Show dividers between items"), isOn: $model.preferences.showHistoryDividers)
-      SettingsToggle(title: L10n.string("Show preview"), description: L10n.string("Preview the selected item at the bottom or on the right of the history window, depending on its shape."), isOn: $model.preferences.showPreviewPane)
-      SettingsToggle(title: L10n.string("Show details"), description: L10n.string("Show the type, size, source, and copy dates of the selected item under its preview, or on their own while the preview is hidden."), isOn: $model.preferences.showPreviewPaneDetails)
       SettingsToggle(title: L10n.string("Show preview for links"), description: L10n.string("Fetch and display link preview details when available."), isOn: $model.preferences.showPreviewForLinks)
       SettingsToggle(title: L10n.string("Treat digit numbers as colors"), description: L10n.string("Detect hex color values copied without a leading number sign."), isOn: $model.preferences.treatDigitNumbersAsColor)
       SettingsToggle(title: L10n.string("Prefer pasting as plain text"), description: L10n.string("Use the default paste shortcut for plain-text paste actions."), isOn: $model.preferences.preferPastingAsPlainText)
