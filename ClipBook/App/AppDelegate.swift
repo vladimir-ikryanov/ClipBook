@@ -63,6 +63,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     NSApp.setActivationPolicy(.accessory)
+    coordinator.menuBarIconFrame = { [weak self] in
+      self?.statusItemFrame
+    }
+    coordinator.highlightMenuBarIcon = { [weak self] in
+      self?.pulseStatusItem()
+    }
     coordinator.start()
     configureStatusItem()
     configureHistoryMenu()
@@ -130,6 +136,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     coordinator.stop()
   }
   
+  // Nil when the icon isn't on any screen, which is where macOS leaves an icon
+  // that doesn't fit in the menu bar.
+  private var statusItemFrame: NSRect? {
+    guard let frame = statusItem?.button?.window?.frame,
+          statusItem?.isVisible == true,
+          NSScreen.screens.contains(where: { $0.frame.intersects(frame) }) else {
+      return nil
+    }
+
+    return frame
+  }
+
+  // The same highlight the icon gets when clicked, twice, to draw the eye.
+  private func pulseStatusItem() {
+    guard let button = statusItem?.button else {
+      return
+    }
+
+    for (index, isHighlighted) in [true, false, true, false].enumerated() {
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2 * Double(index)) {
+        button.highlight(isHighlighted)
+      }
+    }
+  }
+
   private func configureStatusItem() {
     guard model.preferences.showMenuBarIcon else {
       if let item = statusItem {

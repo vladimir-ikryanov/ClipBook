@@ -117,10 +117,10 @@ struct OnboardingView: View {
 
   private var copyItemsStep: some View {
     VStack(spacing: 0) {
-      OnboardingClipKindsIllustration()
+      OnboardingHeroIcon(systemName: "doc.on.doc")
 
       OnboardingTitle(L10n.string("Copy these four things"))
-        .padding(.top, 14)
+        .padding(.top, 16)
 
       OnboardingSubtitle(L10n.string("ClipBook runs in the background and remembers everything you copy, so you can find and copy/paste it again."))
         .padding(.top, 8)
@@ -215,7 +215,7 @@ struct OnboardingView: View {
       OnboardingSubtitle(L10n.string("Press this shortcut to open your clipboard history."))
         .padding(.top, 10)
 
-      OnboardingWaitingShortcut(shortcut: model.showHistoryShortcut)
+      OnboardingHistoryShortcutKeys(shortcut: model.showHistoryShortcut)
         .padding(.top, 36)
 
       OnboardingShimmeringText(L10n.string("Waiting for you to press it…"))
@@ -288,12 +288,7 @@ struct OnboardingView: View {
 
   private var accessibilityRequestStep: some View {
     VStack(spacing: 0) {
-      Image(systemName: "accessibility")
-        .font(.system(size: 34, weight: .medium))
-        .foregroundStyle(OnboardingPalette.keyLabel)
-        .frame(width: 64, height: 64)
-        .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .accessibilityHidden(true)
+      OnboardingHeroIcon(systemName: "accessibility")
 
       OnboardingTitle(L10n.string("Paste like that in any app"))
         .padding(.top, 16)
@@ -362,26 +357,30 @@ struct OnboardingView: View {
 
   private var readyStep: some View {
     VStack(spacing: 0) {
+      Text(verbatim: "🎉")
+        .font(.system(size: 56))
+        .accessibilityHidden(true)
+
       OnboardingTitle(L10n.string("You are ready"))
+        .padding(.top, 12)
 
-      VStack(spacing: 10) {
-        OnboardingMenuBarIllustration(shortcut: model.showHistoryShortcut)
+      OnboardingSubtitle(L10n.string("ClipBook is ready to use. It runs in the background. You can access your clipboard history in the menu bar:"))
+        .padding(.top, 8)
 
-        HStack(spacing: 14) {
-          OnboardingShortcutKeys(shortcut: model.showHistoryShortcut, keySize: 26)
+      Image("OnboardingMenuBar")
+        .resizable()
+        .interpolation(.high)
+        .aspectRatio(contentMode: .fit)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .frame(maxWidth: 320)
+        .accessibilityHidden(true)
+        .padding(.top, 14)
 
-          Text(L10n.string("opens your history in any app."))
-            .font(.system(size: 13))
-            .fixedSize(horizontal: false, vertical: true)
+      OnboardingSubtitle(L10n.string("or by pressing the global keyboard shortcut:"))
+        .padding(.top, 16)
 
-          Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 14)
-        .frame(height: 70)
-        .background(OnboardingPalette.fill, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-      }
-      .frame(maxWidth: 320)
-      .padding(.top, 24)
+      OnboardingHistoryShortcutKeys(shortcut: model.showHistoryShortcut)
+        .padding(.top, 4)
     }
   }
 
@@ -466,22 +465,6 @@ private enum SampleRowMetrics {
   static let imageHeight: CGFloat = 58
 }
 
-/// Cards of the kinds of things ClipBook remembers: text, images, links,
-/// colors and files.
-private struct OnboardingClipKindsIllustration: View {
-  var body: some View {
-    Image("OnboardingClipKinds")
-      .resizable()
-      .interpolation(.high)
-      .aspectRatio(contentMode: .fit)
-      .frame(width: 240)
-      // The cards' shadow fills the bottom of the picture, so the title moves
-      // up into it rather than leaving a gap.
-      .padding(.bottom, -14)
-      .accessibilityHidden(true)
-  }
-}
-
 /// One of the features the welcome step introduces ClipBook with.
 private struct OnboardingFeatureRow: View {
   let systemImage: String
@@ -547,7 +530,7 @@ private struct OnboardingProgressDots: View {
 
 /// The keys of the history shortcut: a picture for the default shortcut, and
 /// keys drawn the same way for a shortcut that was changed.
-private struct OnboardingWaitingShortcut: View {
+private struct OnboardingHistoryShortcutKeys: View {
   let shortcut: String
 
   // The keys' proportions follow a keyboard: everything is a share of the
@@ -712,87 +695,5 @@ struct OnboardingKeyCapView: View {
         .clipShape(shape)
     )
     .overlay(shape.strokeBorder(OnboardingPalette.keyBorder, lineWidth: 1))
-  }
-}
-
-/// A drawing of the menu bar with ClipBook's icon and its menu open.
-private struct OnboardingMenuBarIllustration: View {
-  let shortcut: String
-
-  var body: some View {
-    VStack(spacing: 0) {
-      HStack(spacing: 10) {
-        Spacer()
-
-        Circle()
-          .fill(Color.primary.opacity(0.35))
-          .frame(width: 10, height: 10)
-
-        Image("StatusBarIcon")
-          .renderingMode(.template)
-          .foregroundStyle(.primary)
-          .frame(width: 24, height: 20)
-          .background(OnboardingPalette.cardBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
-          .overlay(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-              .strokeBorder(OnboardingPalette.accent, lineWidth: 1.5)
-          )
-
-        RoundedRectangle(cornerRadius: 2, style: .continuous)
-          .fill(Color.primary.opacity(0.35))
-          .frame(width: 10, height: 10)
-
-        Capsule()
-          .fill(Color.primary.opacity(0.35))
-          .frame(width: 28, height: 6)
-      }
-      .padding(.horizontal, 10)
-      .frame(height: 26)
-      .background(Color.primary.opacity(0.1))
-
-      VStack(alignment: .leading, spacing: 8) {
-        VStack(spacing: 0) {
-          menuItem(L10n.string("Open ClipBook"), shortcut: OnboardingShortcut.displayText(for: shortcut), isHighlighted: true)
-          menuItem(L10n.string("Settings..."))
-          menuItem(L10n.string("Quit"))
-        }
-        .padding(4)
-        .background(OnboardingPalette.cardBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .overlay(
-          RoundedRectangle(cornerRadius: 8, style: .continuous)
-            .strokeBorder(Color.primary.opacity(0.1))
-        )
-        .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
-        .padding(.leading, 30)
-
-        Text(L10n.string("ClipBook lives in the menu bar, not in the Dock."))
-          .font(.system(size: 12))
-          .fixedSize(horizontal: false, vertical: true)
-      }
-      .padding(.horizontal, 10)
-      .padding(.top, 4)
-      .padding(.bottom, 12)
-    }
-    .background(OnboardingPalette.fill)
-    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-    .overlay(
-      RoundedRectangle(cornerRadius: 12, style: .continuous)
-        .strokeBorder(Color.primary.opacity(0.08))
-    )
-  }
-
-  private func menuItem(_ title: String, shortcut: String? = nil, isHighlighted: Bool = false) -> some View {
-    HStack {
-      Text(title)
-      Spacer()
-      if let shortcut {
-        Text(shortcut)
-      }
-    }
-    .font(.system(size: 12))
-    .foregroundStyle(isHighlighted ? Color.white : Color.primary)
-    .padding(.horizontal, 8)
-    .frame(height: 22)
-    .background(isHighlighted ? OnboardingPalette.accent : Color.clear, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
   }
 }

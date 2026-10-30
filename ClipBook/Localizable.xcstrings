@@ -1121,48 +1121,48 @@
         }
       }
     },
-    "ClipBook lives in the menu bar, not in the Dock." : {
+    "ClipBook is ready to use. It runs in the background. You can access your clipboard history in the menu bar:" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ClipBook befindet sich in der Menüleiste, nicht im Dock."
+            "value" : "ClipBook ist startklar und läuft im Hintergrund. Deinen Zwischenablageverlauf erreichst du über die Menüleiste:"
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ClipBook lives in the menu bar, not in the Dock."
+            "value" : "ClipBook is ready to use. It runs in the background. You can access your clipboard history in the menu bar:"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ClipBook vive en la barra de menús, no en el Dock."
+            "value" : "ClipBook está listo para usarse. Funciona en segundo plano. Puedes acceder al historial del portapapeles desde la barra de menús:"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ClipBook si trova nella barra dei menu, non nel Dock."
+            "value" : "ClipBook è pronto all'uso. Funziona in background. Puoi accedere alla cronologia degli appunti dalla barra dei menu:"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ClipBook は Dock ではなく、メニューバーにあります。"
+            "value" : "ClipBook を使う準備ができました。バックグラウンドで動作します。クリップボード履歴には、メニューバーからアクセスできます："
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O ClipBook fica na barra de menus, não no Dock."
+            "value" : "O ClipBook está pronto para uso. Ele funciona em segundo plano. Você pode acessar o histórico da área de transferência pela barra de menus:"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ClipBook 位于菜单栏中，而不在程序坞中。"
+            "value" : "ClipBook 已可以使用。它在后台运行。你可以通过菜单栏访问剪贴板历史记录："
           }
         }
       }
@@ -6234,48 +6234,48 @@
         }
       }
     },
-    "opens your history in any app." : {
+    "or by pressing the global keyboard shortcut:" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "öffnet deinen Verlauf in jeder App."
+            "value" : "oder mit dem globalen Kurzbefehl:"
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "opens your history in any app."
+            "value" : "or by pressing the global keyboard shortcut:"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "abre tu historial en cualquier app."
+            "value" : "o pulsando el atajo de teclado global:"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "apre la cronologia in qualsiasi app."
+            "value" : "o premendo la scorciatoia da tastiera globale:"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "で、どのアプリからでも履歴を開けます。"
+            "value" : "または、グローバルキーボードショートカットを押します："
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "abre seu histórico em qualquer app."
+            "value" : "ou pressionando o atalho de teclado global:"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可在任何应用中打开历史记录。"
+            "value" : "或者按下全局键盘快捷键："
           }
         }
       }

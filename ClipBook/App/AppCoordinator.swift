@@ -47,6 +47,10 @@ final class AppCoordinator: ObservableObject {
   private var historyWindow: HistoryWindow?
   private var settingsWindow: SettingsWindow?
   private var onboardingWindow: OnboardingWindow?
+  /// Where the menu bar icon is on screen, or nil when it isn't showing. The
+  /// app delegate owns the icon and sets this and the highlight below.
+  var menuBarIconFrame: (() -> NSRect?)?
+  var highlightMenuBarIcon: (() -> Void)?
   private var cancellables: Set<AnyCancellable> = []
   private var pasteNextItemID: ClipboardItem.ID?
   private var isTrialSheetPresented = false
@@ -407,14 +411,28 @@ final class AppCoordinator: ObservableObject {
   func completeOnboarding(openHistory: Bool = false) {
     model.preferences.hasCompletedOnboarding = true
     savePreferences()
-    onboardingWindow?.close()
-    onboardingWindow = nil
-    NSApp.setActivationPolicy(.accessory)
-    if openHistory {
-      showHistoryPanel(ignoresNextResignKey: true, activatesApp: true)
-    } else if model.preferences.showMainWindowAtStartup {
-      showHistoryPanel()
+    let finish = { [weak self] in
+      guard let self else {
+        return
+      }
+      self.highlightMenuBarIcon?()
+      NSApp.setActivationPolicy(.accessory)
+      if openHistory {
+        self.showHistoryPanel(ignoresNextResignKey: true, activatesApp: true)
+      } else if self.model.preferences.showMainWindowAtStartup {
+        self.showHistoryPanel()
+      }
     }
+
+    // The window flies into the menu bar icon to show where ClipBook lives
+    // from now on. Closing the window clears `onboardingWindow`.
+    if let iconFrame = menuBarIconFrame?(), !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+      onboardingWindow?.closeFlying(toMenuBarIconAt: iconFrame, completion: finish)
+    } else {
+      onboardingWindow?.close()
+      finish()
+    }
+    onboardingWindow = nil
   }
 
   private var visibleOnboardingWindow: OnboardingWindow? {

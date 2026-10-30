@@ -98,6 +98,20 @@ struct OnboardingSubtitle: View {
   }
 }
 
+/// The symbol at the top of a step, on a neutral tile.
+struct OnboardingHeroIcon: View {
+  let systemName: String
+
+  var body: some View {
+    Image(systemName: systemName)
+      .font(.system(size: 30, weight: .medium))
+      .foregroundStyle(OnboardingPalette.keyLabel)
+      .frame(width: 64, height: 64)
+      .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+      .accessibilityHidden(true)
+  }
+}
+
 struct OnboardingSuccessBadge: View {
   var body: some View {
     Image(systemName: "checkmark")
@@ -105,36 +119,6 @@ struct OnboardingSuccessBadge: View {
       .foregroundStyle(.white)
       .frame(width: 54, height: 54)
       .background(OnboardingPalette.successFill, in: Circle())
-  }
-}
-
-/// A key of a keyboard shortcut drawn as a key cap.
-struct OnboardingKeyCap: View {
-  let text: String
-  var size: CGFloat = 46
-
-  var body: some View {
-    Text(text)
-      .font(.system(size: size * 0.4, weight: .semibold))
-      .foregroundStyle(.primary)
-      .frame(minWidth: size, minHeight: size)
-      .padding(.horizontal, text.count > 1 ? size * 0.3 : 0)
-      .background(OnboardingPalette.cardBackground, in: RoundedRectangle(cornerRadius: size * 0.2, style: .continuous))
-      .shadow(color: .black.opacity(0.16), radius: 0.5, y: 1)
-      .shadow(color: .black.opacity(0.06), radius: 2, y: 1)
-  }
-}
-
-struct OnboardingShortcutKeys: View {
-  let shortcut: String
-  var keySize: CGFloat = 46
-
-  var body: some View {
-    HStack(spacing: keySize * 0.2) {
-      ForEach(Array(OnboardingShortcut.displayParts(for: shortcut).enumerated()), id: \.offset) { _, part in
-        OnboardingKeyCap(text: part, size: keySize)
-      }
-    }
   }
 }
 
