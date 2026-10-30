@@ -4348,48 +4348,48 @@
         }
       }
     },
-    "Select the item under the mouse pointer and paste it when it is clicked." : {
+    "Choose what clicking a history item does. Paste and Copy also select the item under the mouse pointer." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das Objekt unter dem Mauszeiger auswählen und es beim Anklicken einfügen."
+            "value" : "Wähle, was ein Klick auf ein Verlaufsobjekt bewirkt. „Einfügen“ und „Kopieren“ wählen auch das Objekt unter dem Mauszeiger aus."
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Select the item under the mouse pointer and paste it when it is clicked."
+            "value" : "Choose what clicking a history item does. Paste and Copy also select the item under the mouse pointer."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Selecciona el elemento bajo el puntero del ratón y lo pega al hacer clic en él."
+            "value" : "Elija qué hace al hacer clic en un elemento del historial. Pegar y Copiar también seleccionan el elemento bajo el puntero del ratón."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seleziona l'elemento sotto il puntatore del mouse e lo incolla quando viene cliccato."
+            "value" : "Scegli cosa fa il clic su un elemento della cronologia. Incolla e Copia selezionano anche l'elemento sotto il puntatore del mouse."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "マウスポインタの下にある項目を選択し、クリックしたらペーストします。"
+            "value" : "履歴項目をクリックした場合の動作を選択します。「ペースト」と「コピー」では、マウスポインタの下にある項目も選択します。"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seleciona o item sob o ponteiro do mouse e o cola quando ele for clicado."
+            "value" : "Escolha o que o clique em um item do histórico faz. Colar e Copiar também selecionam o item sob o ponteiro do mouse."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "选择鼠标指针下方的项目，点击时粘贴。"
+            "value" : "选择单击历史记录项目的作用。“粘贴”和“复制”还会选择鼠标指针下方的项目。"
           }
         }
       }
@@ -18466,48 +18466,94 @@
         }
       }
     },
-    "Paste on single click" : {
+    "Select" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bei einfachem Klick einfügen"
+            "value" : "Auswählen"
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paste on single click"
+            "value" : "Select"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pegar con un solo clic"
+            "value" : "Seleccionar"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Incolla con un clic"
+            "value" : "Seleziona"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "シングルクリックで貼り付け"
+            "value" : "選択"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Colar com um único clique"
+            "value" : "Selecionar"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "单击粘贴"
+            "value" : "选择"
+          }
+        }
+      }
+    },
+    "Single-click action" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einfachklick-Aktion"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Single-click action"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acción de clic simple"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Azione clic singolo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シングルクリックアクション"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ação de clique simples"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "单击操作"
           }
         }
       }

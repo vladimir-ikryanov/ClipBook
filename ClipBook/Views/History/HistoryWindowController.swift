@@ -380,11 +380,11 @@ final class HistoryContentViewController: NSViewController {
     reloadListOnChange(of: model.$preferences.map(HistoryListPreferences.init).removeDuplicates())
 
     model.$preferences
-      .map(\.pasteOnClick)
+      .map { HistoryItemClickActionPreference(preferenceValue: $0.singleClickAction) != .select }
       .removeDuplicates()
       .receive(on: RunLoop.main)
-      .sink { [weak self] pasteOnClick in
-        self?.listPaneView.selectsItemOnHover = pasteOnClick
+      .sink { [weak self] clickActsOnItem in
+        self?.listPaneView.selectsItemOnHover = clickActsOnItem
       }
       .store(in: &cancellables)
 
@@ -2255,11 +2255,22 @@ extension HistoryContentViewController: HistoryDelegate {
   }
 
   func listPane(_ pane: History, didClickItem item: ClipboardItem) {
-    guard model.preferences.pasteOnClick, !coordinator.isHistoryReadOnly, !model.isShowingTrash else {
+    guard !coordinator.isHistoryReadOnly, !model.isShowingTrash else {
       return
     }
 
-    coordinator.paste(item, variant: item.kind.selectedShortcutVariant(preferences: model.preferences))
+    switch HistoryItemClickActionPreference(preferenceValue: model.preferences.singleClickAction) {
+    case .select:
+      return
+    case .paste:
+      coordinator.paste(item, variant: item.kind.selectedShortcutVariant(preferences: model.preferences))
+    case .copy:
+      // A pinned panel is meant to stay on screen, the same as when pasting.
+      if copy(item, variant: item.kind.selectedCopyShortcutVariant(preferences: model.preferences)),
+         model.preferences.hideOnFocusLoss {
+        coordinator.hideHistoryPanel()
+      }
+    }
   }
 
   func listPane(_ pane: History, didDoubleClickItem item: ClipboardItem) {

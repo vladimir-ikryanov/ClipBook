@@ -30,6 +30,26 @@ enum HistoryItemActionPreference: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+enum HistoryItemClickActionPreference: String, Codable, CaseIterable, Identifiable {
+    case select
+    case paste
+    case copy
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .select: L10n.string("Select")
+        case .paste: L10n.string("Paste")
+        case .copy: L10n.string("Copy")
+        }
+    }
+
+    init(preferenceValue: String) {
+        self = Self(rawValue: preferenceValue) ?? .select
+    }
+}
+
 enum CopyAndMergeSeparatorPreference: String, Codable, CaseIterable, Identifiable {
     case newLine
     case space
@@ -100,6 +120,10 @@ struct AppPreferences: Codable, Equatable {
     // The filter panel used to own Cmd+F, which now focuses the search field.
     // The copy sequence mode used to be one of the "Sort By" options.
     private static let legacyCopySequenceSortOption = "Copy Sequence"
+    // The single-click action used to be a toggle that could only paste.
+    private enum LegacyCodingKeys: String, CodingKey {
+        case pasteOnClick
+    }
     static let defaultHistoryWindowWidth: Double = 620
     static let defaultHistoryWindowHeight: Double = 700
     static let defaultSettingsWindowWidth: Double = 680
@@ -134,7 +158,7 @@ struct AppPreferences: Codable, Equatable {
     var isHistorySortReversed = false
     var copySequenceModeEnabled = false
     var pinFavoritesToTop = true
-    var pasteOnClick = false
+    var singleClickAction = HistoryItemClickActionPreference.select.rawValue
     // A remembered selection only helps while items stay in place, so it can't
     // be on together with moving items to the top after an action.
     var updateHistoryAfterAction = true {
@@ -291,7 +315,13 @@ struct AppPreferences: Codable, Equatable {
         copySequenceModeEnabled = try container.decodeIfPresent(Bool.self, forKey: .copySequenceModeEnabled)
             ?? (storedHistorySortOption == Self.legacyCopySequenceSortOption)
         pinFavoritesToTop = try container.decodeIfPresent(Bool.self, forKey: .pinFavoritesToTop) ?? defaults.pinFavoritesToTop
-        pasteOnClick = try container.decodeIfPresent(Bool.self, forKey: .pasteOnClick) ?? defaults.pasteOnClick
+        if let storedSingleClickAction = try container.decodeIfPresent(String.self, forKey: .singleClickAction) {
+            singleClickAction = HistoryItemClickActionPreference(preferenceValue: storedSingleClickAction).rawValue
+        } else {
+            let legacyContainer = try decoder.container(keyedBy: LegacyCodingKeys.self)
+            let pasteOnClick = try legacyContainer.decodeIfPresent(Bool.self, forKey: .pasteOnClick) ?? false
+            singleClickAction = pasteOnClick ? HistoryItemClickActionPreference.paste.rawValue : defaults.singleClickAction
+        }
         updateHistoryAfterAction = try container.decodeIfPresent(Bool.self, forKey: .updateHistoryAfterAction) ?? defaults.updateHistoryAfterAction
         // Property observers don't run while decoding, so a stored pair with both
         // settings on is resolved here, in favor of moving items to the top.
