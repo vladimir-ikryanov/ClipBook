@@ -17,7 +17,7 @@ enum OnboardingPalette {
       ? NSColor(red: 0.45, green: 0.78, blue: 0.47, alpha: 1)
       : NSColor(red: 0.22, green: 0.45, blue: 0.24, alpha: 1)
   })
-  static let successTint = Color(red: 0.3, green: 0.65, blue: 0.33).opacity(0.18)
+  static let successFill = Color(red: 0.13, green: 0.6, blue: 0.27)
   static let windowBackground = NSColor(name: nil) { appearance in
     appearance.isDark ? .windowBackgroundColor : .white
   }
@@ -102,9 +102,9 @@ struct OnboardingSuccessBadge: View {
   var body: some View {
     Image(systemName: "checkmark")
       .font(.system(size: 22, weight: .bold))
-      .foregroundStyle(OnboardingPalette.success)
+      .foregroundStyle(.white)
       .frame(width: 54, height: 54)
-      .background(OnboardingPalette.successTint, in: Circle())
+      .background(OnboardingPalette.successFill, in: Circle())
   }
 }
 
@@ -174,8 +174,6 @@ enum OnboardingShortcut {
 /// A drawing of the System Settings Accessibility list with ClipBook in it.
 struct OnboardingAccessibilityList: View {
   let isClipBookSwitchedOn: Bool
-  var showsPlaceholderName = false
-  var outlinesClipBook = false
 
   var body: some View {
     VStack(spacing: 0) {
@@ -184,15 +182,9 @@ struct OnboardingAccessibilityList: View {
           .fill(OnboardingPalette.placeholder)
           .frame(width: 22, height: 22)
 
-        if showsPlaceholderName {
-          Text(L10n.string("Another app"))
-            .font(.system(size: 13))
-            .foregroundStyle(.secondary)
-        } else {
-          Capsule()
-            .fill(OnboardingPalette.placeholder)
-            .frame(width: 110, height: 7)
-        }
+        Text(L10n.string("Another app"))
+          .font(.system(size: 13))
+          .foregroundStyle(.secondary)
 
         Spacer(minLength: 0)
 
@@ -202,7 +194,6 @@ struct OnboardingAccessibilityList: View {
       .frame(height: 42)
 
       Divider()
-        .opacity(outlinesClipBook ? 0 : 1)
 
       HStack(spacing: 12) {
         OnboardingAppIcon(size: 24)
@@ -217,11 +208,6 @@ struct OnboardingAccessibilityList: View {
       .padding(.horizontal, 12)
       .frame(height: 42)
       .background(OnboardingPalette.accentTint)
-      .overlay(
-        RoundedRectangle(cornerRadius: 8, style: .continuous)
-          .strokeBorder(OnboardingPalette.accent, lineWidth: 1.5)
-          .opacity(outlinesClipBook ? 1 : 0)
-      )
     }
     .background(OnboardingPalette.cardBackground)
     .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
@@ -374,8 +360,17 @@ struct OnboardingPasteField: NSViewRepresentable {
     field.drawsBackground = false
     field.focusRingType = .none
     field.font = .systemFont(ofSize: 15)
-    field.lineBreakMode = .byTruncatingTail
-    field.cell?.usesSingleLineMode = true
+    // The text wraps and fills the height the field is given, with the
+    // placeholder and the text starting at the top left.
+    field.lineBreakMode = .byWordWrapping
+    field.cell?.wraps = true
+    field.cell?.isScrollable = false
+    field.cell?.usesSingleLineMode = false
+    field.cell?.truncatesLastVisibleLine = true
+    field.setContentHuggingPriority(.defaultLow, for: .vertical)
+    field.setContentHuggingPriority(.defaultLow, for: .horizontal)
+    field.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+    field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     field.delegate = context.coordinator
     onMake(field)
     return field

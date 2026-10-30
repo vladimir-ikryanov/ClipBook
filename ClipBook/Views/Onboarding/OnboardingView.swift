@@ -60,11 +60,7 @@ struct OnboardingView: View {
     case .openHistory:
       openHistoryStep
     case .pasteBack:
-      if let pastedText = model.pastedText {
-        pastedStep(pastedText)
-      } else {
-        pasteBackStep
-      }
+      pasteBackStep
     case .accessibility:
       switch model.accessibilityState {
       case .request:
@@ -214,7 +210,7 @@ struct OnboardingView: View {
 
   private var openHistoryStep: some View {
     VStack(spacing: 0) {
-      OnboardingTitle(L10n.string("Now bring them back"))
+      OnboardingTitle(L10n.string("Open your clipboard history"))
 
       OnboardingSubtitle(L10n.string("Press this shortcut to open your clipboard history."))
         .padding(.top, 10)
@@ -228,75 +224,79 @@ struct OnboardingView: View {
   }
 
   private var pasteBackStep: some View {
-    VStack(spacing: 0) {
-      OnboardingTitle(L10n.string("Paste one back"))
+    let isPasted = model.pastedText != nil
+    return VStack(spacing: 0) {
+      // Its place is kept from the start, so nothing moves when it appears.
+      OnboardingSuccessBadge()
+        .opacity(isPasted ? 1 : 0)
+        .scaleEffect(isPasted || reduceMotion ? 1 : 0.7)
+        .accessibilityHidden(!isPasted)
 
-      OnboardingSubtitle(L10n.string("Choose any item in the history and press Return. It will be pasted here."))
-        .padding(.top, 10)
+      OnboardingTitle(isPasted ? L10n.string("That's the whole idea") : L10n.string("Paste one back"))
+        .padding(.top, 16)
 
-      pasteField(isEditable: true)
+      OnboardingSubtitle(
+        isPasted
+          ? L10n.string("Open your history anytime, find what you copied, and copy or paste it again.")
+          : L10n.string("Choose any item in the history and press Return. It will be pasted here.")
+      )
+      .padding(.top, 10)
+
+      pasteArea(isPasted: isPasted)
         .padding(.top, 24)
     }
   }
 
-  private func pastedStep(_ text: String) -> some View {
-    VStack(spacing: 0) {
-      OnboardingSuccessBadge()
-
-      OnboardingTitle(L10n.string("That's the whole idea"))
-        .padding(.top, 16)
-
+  // Three rows of text, which keeps its size once something is pasted. A
+  // pasted image sits at the top left of it like text does.
+  private func pasteArea(isPasted: Bool) -> some View {
+    let shape = RoundedRectangle(cornerRadius: 10, style: .continuous)
+    return Group {
       if let image = model.pastedImage {
-        // Only the height is set, so the width follows the image and the
-        // border hugs it instead of a wider box around it.
         Image(nsImage: image)
           .resizable()
           .aspectRatio(contentMode: .fit)
-          .frame(height: 140)
-          .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-          .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-              .strokeBorder(OnboardingPalette.border)
-          )
-          .padding(.top, 14)
+          .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+          .frame(maxWidth: .infinity, alignment: .leading)
       } else {
-        pasteField(isEditable: false)
-          .padding(.top, 14)
-      }
-
-      OnboardingSubtitle(L10n.string("Anything you copy can be pasted again, even hours later."))
-        .padding(.top, 12)
-    }
-  }
-
-  private func pasteField(isEditable: Bool) -> some View {
-    OnboardingPasteField(
-      text: $model.pasteFieldText,
-      placeholder: L10n.string("Your pasted item appears here"),
-      isEditable: isEditable
-    ) { field in
-      if isEditable {
-        model.pasteField = field
-        // The field is where the paste lands, so it holds the focus from the
-        // start, even while the history window is the key window.
-        DispatchQueue.main.async {
-          field.window?.makeFirstResponder(field)
+        OnboardingPasteField(
+          text: $model.pasteFieldText,
+          placeholder: L10n.string("Your pasted item appears here"),
+          isEditable: !isPasted
+        ) { field in
+          model.pasteField = field
+          guard !isPasted else {
+            return
+          }
+          // The field is where the paste lands, so it holds the focus from the
+          // start, even while the history window is the key window.
+          DispatchQueue.main.async {
+            field.window?.makeFirstResponder(field)
+          }
         }
       }
     }
     .padding(.horizontal, 14)
-    .frame(height: 44)
+    .padding(.vertical, 12)
+    .frame(height: 84)
     .frame(maxWidth: 380)
-    .background(OnboardingPalette.cardBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+    .background(OnboardingPalette.cardBackground, in: shape)
     .overlay(
-      RoundedRectangle(cornerRadius: 10, style: .continuous)
-        .strokeBorder(isEditable ? OnboardingPalette.accent : OnboardingPalette.border, lineWidth: isEditable ? 2 : 1)
+      shape.strokeBorder(isPasted ? OnboardingPalette.border : OnboardingPalette.accent, lineWidth: isPasted ? 1 : 2)
     )
   }
 
   private var accessibilityRequestStep: some View {
     VStack(spacing: 0) {
+      Image(systemName: "accessibility")
+        .font(.system(size: 34, weight: .medium))
+        .foregroundStyle(OnboardingPalette.keyLabel)
+        .frame(width: 64, height: 64)
+        .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .accessibilityHidden(true)
+
       OnboardingTitle(L10n.string("Paste like that in any app"))
+        .padding(.top, 16)
 
       OnboardingSubtitle(L10n.string("ClipBook needs Accessibility permission to paste into other apps. In System Settings, switch on ClipBook in this list:"))
         .padding(.top, 10)
@@ -306,16 +306,14 @@ struct OnboardingView: View {
           .font(.system(size: 11))
           .foregroundStyle(.secondary)
 
-        OnboardingAccessibilityList(isClipBookSwitchedOn: true, outlinesClipBook: true)
+        Image("OnboardingAccessibilityPermission")
+          .resizable()
+          .interpolation(.high)
+          .aspectRatio(contentMode: .fit)
+          .frame(width: 340)
+          .accessibilityHidden(true)
       }
-      .padding(12)
-      .frame(maxWidth: 360)
-      .background(OnboardingPalette.fill, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-      .overlay(
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
-          .strokeBorder(Color.primary.opacity(0.06))
-      )
-      .padding(.top, 18)
+      .padding(.top, 30)
 
       Button(L10n.string("Open System Settings")) {
         model.openAccessibilitySettings()
@@ -340,7 +338,7 @@ struct OnboardingView: View {
         .font(.system(size: 12))
         .foregroundStyle(.secondary)
         .multilineTextAlignment(.center)
-        .padding(.top, 12)
+        .padding(.top, 32)
 
       Button(L10n.string("Open Settings again")) {
         model.openAccessibilitySettings()
@@ -547,7 +545,8 @@ private struct OnboardingProgressDots: View {
   }
 }
 
-/// The history shortcut drawn as the keys of a Mac keyboard.
+/// The keys of the history shortcut: a picture for the default shortcut, and
+/// keys drawn the same way for a shortcut that was changed.
 private struct OnboardingWaitingShortcut: View {
   let shortcut: String
 
@@ -558,11 +557,24 @@ private struct OnboardingWaitingShortcut: View {
   private static let gap: CGFloat = 0.16
 
   var body: some View {
+    if shortcut == AppPreferences.defaultShowHistoryShortcut {
+      Image("OnboardingHistoryShortcut")
+        .resizable()
+        .interpolation(.high)
+        .aspectRatio(contentMode: .fit)
+        .frame(width: 340)
+        .accessibilityLabel(OnboardingShortcut.displayText(for: shortcut))
+    } else {
+      drawnKeys
+    }
+  }
+
+  private var drawnKeys: some View {
     let keys = OnboardingKeyboardKey.keys(for: shortcut)
     let units = keys.reduce(0) { $0 + $1.width } + Self.gap * CGFloat(max(keys.count - 1, 0))
     let keyHeight = min(Self.maximumKeyHeight, Self.maximumWidth / units)
 
-    HStack(spacing: keyHeight * Self.gap) {
+    return HStack(spacing: keyHeight * Self.gap) {
       ForEach(Array(keys.enumerated()), id: \.offset) { _, key in
         OnboardingKeyCapView(key: key, height: keyHeight)
       }

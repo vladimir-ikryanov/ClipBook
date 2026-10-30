@@ -145,7 +145,7 @@ private struct AccessibilityGuideView: View {
           .fixedSize(horizontal: false, vertical: true)
           .padding(.top, 6)
 
-        OnboardingAccessibilityList(isClipBookSwitchedOn: false, showsPlaceholderName: true)
+        OnboardingAccessibilityList(isClipBookSwitchedOn: false)
           .padding(.top, 12)
       }
       .padding(14)

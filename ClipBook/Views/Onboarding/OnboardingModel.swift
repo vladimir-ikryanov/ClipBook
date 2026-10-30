@@ -223,6 +223,7 @@ final class OnboardingModel: ObservableObject {
     }
 
     if item.kind == .image, let url = item.assetURL, let image = NSImage(contentsOf: url) {
+      window.makeFirstResponder(nil)
       withAnimation(.easeOut(duration: 0.2)) {
         pastedImage = image
         pastedText = item.previewText
@@ -243,6 +244,8 @@ final class OnboardingModel: ObservableObject {
     if text.isEmpty {
       text = item.previewText
     }
+    // The paste is in, so the field stops being edited and shows it as it is.
+    window.makeFirstResponder(nil)
     pasteFieldText = text
     withAnimation(.easeOut(duration: 0.2)) {
       pastedText = text
