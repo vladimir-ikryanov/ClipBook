@@ -183,6 +183,10 @@ final class HistoryTileGridView: NSView {
     onSelectionDidChange?()
   }
 
+  override func selectAll(_ sender: Any?) {
+    selectRowIndexes(IndexSet(rows.indices), byExtendingSelection: false)
+  }
+
   func deselectAll(_ sender: Any?) {
     selectRowIndexes([], byExtendingSelection: false)
   }
