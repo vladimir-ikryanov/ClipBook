@@ -222,10 +222,6 @@ final class PasteboardMonitor {
     private func makeItem(from content: PasteboardContent) -> ClipboardItem {
         switch content.payload {
         case .files(let paths, let byteSize, let recognizedContent):
-            let fileNames = paths.map { URL(fileURLWithPath: $0).lastPathComponent }.joined(separator: " ")
-            let searchText = [fileNames, recognizedContent.text, recognizedContent.qrCodeText]
-                .compactMap { $0 }
-                .joined(separator: " ")
             return ClipboardItem(
                 kind: .file,
                 text: recognizedContent.text,
@@ -233,8 +229,7 @@ final class PasteboardMonitor {
                 filePaths: paths,
                 sourceAppName: content.sourceAppName,
                 sourceBundleIdentifier: content.sourceBundleIdentifier,
-                byteSize: byteSize,
-                searchText: searchText
+                byteSize: byteSize
             )
         case .image(let id, let assetPath, let byteSize, let recognizedContent, let digest, _):
             let searchText = ClipboardItem.makeSearchText(
@@ -276,8 +271,7 @@ final class PasteboardMonitor {
                 html: html,
                 sourceAppName: content.sourceAppName,
                 sourceBundleIdentifier: content.sourceBundleIdentifier,
-                byteSize: (rtf?.count ?? 0) + (html?.utf8.count ?? 0) + (plainText?.utf8.count ?? 0),
-                searchText: ClipboardItem.makeSearchText(title: nil, text: plainText, filePaths: [], tagNames: [], sourceAppName: content.sourceAppName)
+                byteSize: (rtf?.count ?? 0) + (html?.utf8.count ?? 0) + (plainText?.utf8.count ?? 0)
             )
         case .text(let text):
             return ClipboardItem(
@@ -285,8 +279,7 @@ final class PasteboardMonitor {
                 text: text,
                 sourceAppName: content.sourceAppName,
                 sourceBundleIdentifier: content.sourceBundleIdentifier,
-                byteSize: text.utf8.count,
-                searchText: text
+                byteSize: text.utf8.count
             )
         }
     }

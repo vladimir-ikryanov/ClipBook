@@ -1022,8 +1022,7 @@ final class AppCoordinator: ObservableObject {
         text: text,
         sourceAppName: items[0].sourceAppName,
         sourceBundleIdentifier: items[0].sourceBundleIdentifier,
-        byteSize: text.utf8.count,
-        searchText: text
+        byteSize: text.utf8.count
       )
       try deleteExistingMatches(for: item)
       try historyStore.upsert(item)
@@ -2342,7 +2341,7 @@ final class AppCoordinator: ObservableObject {
   }
 
   private func deleteExistingMatches(for item: ClipboardItem) throws {
-    for existingItem in model.items where existingItem.kind == item.kind && existingItem.searchText == item.searchText {
+    for existingItem in model.items where existingItem.hasSameContent(as: item) {
       try historyStore.delete(existingItem.id)
       let remainingItems = model.items.filter { $0.id != existingItem.id }
       removeFilePreviewFiles(for: [existingItem], remainingItems: remainingItems)

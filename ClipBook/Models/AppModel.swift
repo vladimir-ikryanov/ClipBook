@@ -1,4 +1,5 @@
 import Foundation
+import Darwin
 import SwiftUI
 import AppKit
 import Carbon
@@ -142,6 +143,11 @@ final class AppModel: ObservableObject {
     /// the history is used as usual.
     @Published var trashedItems: [ClipboardItem] = [] {
         didSet {
+            if trashedItems.isEmpty {
+                for item in oldValue {
+                    cachedFoldedSearchByItemID.removeValue(forKey: item.id)
+                }
+            }
             invalidateFilteredItems()
             cachedHistorySourceApplications = nil
         }
@@ -193,9 +199,31 @@ final class AppModel: ObservableObject {
     // app language does.
     @Published var localizationRevision = UUID() {
         didSet {
+            cachedFoldedSearchByItemID.removeAll()
             invalidateFilteredItems()
             cachedHistorySourceApplications = nil
         }
+    }
+
+    private struct FoldedSearchEntry {
+        let searchText: String
+        let foldedSearchText: String
+    }
+
+    private var cachedFoldedSearchByItemID: [UUID: FoldedSearchEntry] = [:]
+
+    private func foldedSearchText(for item: ClipboardItem, locale: Locale) -> String {
+        if let entry = cachedFoldedSearchByItemID[item.id],
+           entry.searchText == item.searchText {
+            return entry.foldedSearchText
+        }
+
+        let folded = item.searchText.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: locale)
+        cachedFoldedSearchByItemID[item.id] = FoldedSearchEntry(
+            searchText: item.searchText,
+            foldedSearchText: folded
+        )
+        return folded
     }
 
     // The history as the list shows it. Showing the history, moving the
@@ -279,9 +307,24 @@ final class AppModel: ObservableObject {
             }
         }
 
-        let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !query.isEmpty {
-            result = result.filter { $0.searchText.localizedCaseInsensitiveContains(query) }
+        let rawTokens = searchQuery.split(whereSeparator: \.isWhitespace)
+        if !rawTokens.isEmpty {
+            let locale = Locale.current
+            let foldedTokens = rawTokens
+                .map { String($0).folding(options: [.caseInsensitive, .diacriticInsensitive], locale: locale) }
+                .filter { !$0.isEmpty }
+            if !foldedTokens.isEmpty {
+                result = result.filter { item in
+                    let haystack = foldedSearchText(for: item, locale: locale)
+                    return haystack.withCString { haystackPtr in
+                        foldedTokens.allSatisfy { token in
+                            token.withCString { needlePtr in
+                                strstr(haystackPtr, needlePtr) != nil
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         if let order {
@@ -443,6 +486,9 @@ final class AppModel: ObservableObject {
         // The list is published once, so the history reloads once per item.
         // Its items never hold their formatting; the store reads it when needed.
         let item = item.unloadingFormatting()
+        for existing in items where existing.id != item.id && existing.hasSameContent(as: item) {
+            cachedFoldedSearchByItemID.removeValue(forKey: existing.id)
+        }
         var updatedItems = items
         updatedItems.removeAll { $0.id == item.id || $0.hasSameContent(as: item) }
         updatedItems.insert(item, at: 0)
@@ -476,6 +522,10 @@ final class AppModel: ObservableObject {
     func remove(_ ids: Set<ClipboardItem.ID>) {
         guard !ids.isEmpty else {
             return
+        }
+
+        for id in ids {
+            cachedFoldedSearchByItemID.removeValue(forKey: id)
         }
 
         let visibleItems = filteredItems
