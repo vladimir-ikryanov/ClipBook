@@ -143,7 +143,7 @@ struct AppPreferences: Codable, Equatable {
     var playSoundOnSelectionAdd = true
     var playSoundOnSelectionRemove = true
     var showMenuBarIcon = true
-    var openHistoryOnMenuBarIconClick = false
+    var openHistoryOnMenuBarIconClick = true
     var hideOnFocusLoss = true
     var openWindowStrategy = "activeScreenCenter"
     var historyWindowX: Double?
