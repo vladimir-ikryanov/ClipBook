@@ -896,7 +896,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Für Profis gemacht"
+            "value" : "Für Profis entwickelt"
           }
         },
         "en-GB" : {
@@ -914,7 +914,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pensato per utenti esperti"
+            "value" : "Creato per utenti esperti"
           }
         },
         "ja" : {
@@ -1467,7 +1467,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Copiar y combinar, pegar una secuencia de copia sin abrir el historial, pegar varios elementos a la vez con separadores, filtros, papelera y mucho más."
+            "value" : "Copiar y fusionar, pegar una secuencia de copia sin abrir el historial, pegar varios elementos a la vez con separadores, filtros, papelera y mucho más."
           }
         },
         "it" : {
@@ -1479,7 +1479,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "コピーして結合、履歴を開かずにコピーシーケンスをペースト、区切り文字付きで複数の項目を一度にペースト、フィルタ、ゴミ箱など。"
+            "value" : "コピーとマージ、履歴を開かずにコピーシーケンスをペースト、区切り文字付きで複数の項目を一度にペースト、フィルタ、ゴミ箱など。"
           }
         },
         "pt-BR" : {
@@ -1491,7 +1491,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "复制并合并、无需打开历史记录即可粘贴复制序列、使用分隔符一次粘贴多个项目、过滤器、废纸篓等等。"
+            "value" : "复制和合并、无需打开历史记录即可粘贴复制序列、使用分隔符一次粘贴多个项目、过滤器、废纸篓等等。"
           }
         }
       }
@@ -2589,7 +2589,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Feito para o teclado"
+            "value" : "Pensado para o teclado"
           }
         },
         "zh-Hans" : {
@@ -5549,7 +5549,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Warte auf die Berechtigung …"
+            "value" : "Warten auf die Berechtigung …"
           }
         },
         "en-GB" : {
@@ -5595,7 +5595,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wartet auf deinen Tastendruck …"
+            "value" : "Warten auf deinen Tastendruck …"
           }
         },
         "en-GB" : {
@@ -7241,52 +7241,6 @@
         }
       }
     },
-    "Access your clipboard history everywhere by pressing this global shortcut." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Greife überall auf deinen Zwischenablageverlauf zu, indem du dieses globale Tastenkürzel drückst."
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Access your clipboard history everywhere by pressing this global shortcut."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accede a tu historial del portapapeles desde cualquier lugar pulsando este atajo global."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accedi alla cronologia degli appunti ovunque premendo questa scorciatoia globale."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "このグローバルショートカットを押すと、どこからでもクリップボード履歴にアクセスできます。"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Acesse o histórico da área de transferência em qualquer lugar pressionando este atalho global."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按下此全局快捷键，即可在任何位置访问剪贴板历史记录。"
-          }
-        }
-      }
-    },
     "Accessibility" : {
       "localizations" : {
         "de" : {
@@ -7329,52 +7283,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "辅助功能"
-          }
-        }
-      }
-    },
-    "Accessibility access granted" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bedienungshilfenzugriff gewährt"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accessibility access granted"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Acceso de Accesibilidad concedido"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accesso ad Accessibilità concesso"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アクセシビリティアクセスが許可されました"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Acesso de Acessibilidade concedido"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已授予辅助功能访问权限"
           }
         }
       }
@@ -9782,52 +9690,6 @@
     "ClipBook archive version %d is not supported." : {
       "comment" : "A description of an error that might occur when importing a ClipBook archive. The argument is the version number of the archive.",
       "isCommentAutoGenerated" : true
-    },
-    "ClipBook is now watching your clipboard. Copy something, open history, and paste it back whenever you need it." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ClipBook überwacht jetzt deine Zwischenablage. Kopiere etwas, öffne den Verlauf und füge es bei Bedarf wieder ein."
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ClipBook is now watching your clipboard. Copy something, open history, and paste it back whenever you need it."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ClipBook ahora vigila tu portapapeles. Copia algo, abre el historial y pégalo cuando lo necesites."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ClipBook ora controlla i tuoi appunti. Copia qualcosa, apri la cronologia e incollalo quando ti serve."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ClipBook がクリップボードを監視しています。何かをコピーし、履歴を開いて、必要なときに貼り付けましょう。"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O ClipBook agora está monitorando sua área de transferência. Copie algo, abra o histórico e cole quando precisar."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ClipBook 现在正在监视你的剪贴板。复制内容、打开历史记录，并在需要时粘贴回来。"
-          }
-        }
-      }
     },
     "ClipBook needs Accessibility permission to paste into the previously active app." : {
       "comment" : "Alert message when the user does not have Accessibility permission to paste into the previously active app.",
@@ -14176,52 +14038,6 @@
         }
       }
     },
-    "Grant Access" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zugriff gewähren"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grant Access"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Conceder acceso"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Concedi accesso"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アクセスを許可"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Conceder acesso"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "授予访问权限"
-          }
-        }
-      }
-    },
     "Help me" : {
       "localizations" : {
         "de" : {
@@ -15038,52 +14854,6 @@
         }
       }
     },
-    "Intro" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Einführung"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Intro"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Introducción"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Introduzione"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "イントロ"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Introdução"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "介绍"
-          }
-        }
-      }
-    },
     "Italiano" : {
       "comment" : "The name of the Italian language.",
       "isCommentAutoGenerated" : true,
@@ -15228,52 +14998,6 @@
     "Kebab Case" : {
       "comment" : "Name",
       "isCommentAutoGenerated" : true
-    },
-    "Keep everything you copy and quickly access your\nclipboard history whenever you need it." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bewahre alles auf, was du kopierst, und greife schnell auf deinen\nZwischenablageverlauf zu, wann immer du ihn brauchst."
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep everything you copy and quickly access your\nclipboard history whenever you need it."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Guarda todo lo que copias y accede rápidamente a tu\nhistorial del portapapeles cuando lo necesites."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Conserva tutto ciò che copi e accedi rapidamente alla\ncronologia degli appunti quando ti serve."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コピーしたものをすべて保存し、必要なときに\nクリップボード履歴へすばやくアクセスできます。"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Guarde tudo o que você copia e acesse rapidamente seu\nhistórico da área de transferência sempre que precisar."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "保存你复制的所有内容，并在需要时快速访问\n剪贴板历史记录。"
-          }
-        }
-      }
     },
     "Keep favorite items above regular clipboard history." : {
       "localizations" : {
@@ -15977,10 +15701,6 @@
           }
         }
       }
-    },
-    "Mark important clips as favorites and add tags to easily find them later." : {
-      "comment" : "Text describing how to organize your ClipBook history.",
-      "isCommentAutoGenerated" : true
     },
     "MD5 Hash" : {
       "comment" : "Name",
@@ -17128,7 +16848,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Progreso de introducción"
+            "value" : "Progreso de la introducción"
           }
         },
         "it" : {
@@ -17160,52 +16880,6 @@
     "Open" : {
       "comment" : "Title of a menu item that opens an application associated with a clipboard item.",
       "isCommentAutoGenerated" : true
-    },
-    "Open clipboard history" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zwischenablageverlauf öffnen"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open clipboard history"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abrir historial del portapapeles"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apri cronologia degli appunti"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "クリップボード履歴を開く"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abrir histórico da área de transferência"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开剪贴板历史记录"
-          }
-        }
-      }
     },
     "Open ClipBook" : {
       "localizations" : {
@@ -17265,52 +16939,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open history"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abrir historial"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apri cronologia"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "履歴を開く"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abrir histórico"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开历史记录"
-          }
-        }
-      }
-    },
-    "Open History" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verlauf öffnen"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open History"
           }
         },
         "es" : {
@@ -17764,98 +17392,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "点按菜单栏图标打开"
-          }
-        }
-      }
-    },
-    "Organize" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Organisieren"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Organise"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Organizar"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Organizza"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "整理"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Organizar"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "整理"
-          }
-        }
-      }
-    },
-    "Organize your history" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Organisiere deinen Verlauf"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Organise your history"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Organiza tu historial"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Organizza la cronologia"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "履歴を整理"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Organize seu histórico"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "整理你的历史记录"
           }
         }
       }
@@ -20683,102 +20219,6 @@
         }
       }
     },
-    "Select & Paste" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auswählen und Einfügen"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select & Paste"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seleccionar y pegar"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seleziona e incolla"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択して貼り付け"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Selecionar e colar"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择并粘贴"
-          }
-        }
-      }
-    },
-    "Select an item and press Return to paste it directly to the active app." : {
-      "comment" : "Text describing the action to select an item and paste it directly to the active app.",
-      "isCommentAutoGenerated" : true
-    },
-    "Select and search" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auswählen und suchen"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select and search"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seleccionar y buscar"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seleziona e cerca"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択と検索"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Selecionar e pesquisar"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择和搜索"
-          }
-        }
-      }
-    },
     "Select how long to keep individual history items. Items older than this period will be automatically removed from the history. Choose Never to stop capturing a type of content." : {
       "localizations" : {
         "de" : {
@@ -23150,52 +22590,6 @@
     },
     "Title case with lowercase minor words (AP style)." : {
 
-    },
-    "To paste directly into other apps, ClipBook needs Accessibility permission." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Um direkt in andere Apps einzufügen, benötigt ClipBook die Berechtigung für Bedienungshilfen."
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To paste directly into other apps, ClipBook needs Accessibility permission."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Para pegar directamente en otras apps, ClipBook necesita permiso de Accesibilidad."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Per incollare direttamente in altre app, ClipBook ha bisogno del permesso Accessibilità."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ほかのアプリに直接貼り付けるには、ClipBook にアクセシビリティ権限が必要です。"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Para colar diretamente em outros apps, o ClipBook precisa da permissão de Acessibilidade."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "若要直接粘贴到其他 App，ClipBook 需要辅助功能权限。"
-          }
-        }
-      }
     },
     "Toggle favorite" : {
       "localizations" : {
