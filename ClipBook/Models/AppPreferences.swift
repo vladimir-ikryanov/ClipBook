@@ -181,6 +181,8 @@ struct AppPreferences: Codable, Equatable {
     /// The key pressed between items when several items are pasted at once.
     var multiPasteKey = PasteInterItemAction.defaultAction.rawValue
     var showPreviewForLinks = true
+    /// Colors code copied as plain text in the preview by its language.
+    var highlightCodeSyntax = true
     var showCommandNumberShortcut = true
     var showHistoryDividers = false
     var showPreviewPane = true
@@ -337,6 +339,7 @@ struct AppPreferences: Codable, Equatable {
             preferenceValue: try container.decodeIfPresent(String.self, forKey: .multiPasteKey) ?? defaults.multiPasteKey
         ).rawValue
         showPreviewForLinks = try container.decodeIfPresent(Bool.self, forKey: .showPreviewForLinks) ?? defaults.showPreviewForLinks
+        highlightCodeSyntax = try container.decodeIfPresent(Bool.self, forKey: .highlightCodeSyntax) ?? defaults.highlightCodeSyntax
         showCommandNumberShortcut = try container.decodeIfPresent(Bool.self, forKey: .showCommandNumberShortcut) ?? defaults.showCommandNumberShortcut
         showHistoryDividers = try container.decodeIfPresent(Bool.self, forKey: .showHistoryDividers) ?? defaults.showHistoryDividers
         showPreviewPane = try container.decodeIfPresent(Bool.self, forKey: .showPreviewPane) ?? defaults.showPreviewPane

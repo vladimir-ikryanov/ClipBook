@@ -962,6 +962,7 @@ final class HistoryContentViewController: NSViewController {
       isReadOnly: coordinator.isHistoryReadOnly,
       loadFormatting: { [weak coordinator] item in coordinator?.loadingFormatting(of: item) ?? item }
     )
+    dialogController.highlightsSyntax = model.preferences.highlightCodeSyntax
     let dialogWindow = NSWindow(contentViewController: dialogController)
     // The sheet style is set up front: beginSheet adds it otherwise, and that
     // change takes the height of the hidden title bar away from the content,
@@ -1289,6 +1290,7 @@ final class HistoryContentViewController: NSViewController {
       showsPreview: preferences.showPreviewPane,
       showsDetails: preferences.showPreviewPaneDetails,
       showsWebPages: preferences.showPreviewForLinks,
+      highlightsSyntax: preferences.highlightCodeSyntax,
       detectsSensitiveContent: preferences.detectSensitiveContent
     )
   }
@@ -1388,6 +1390,7 @@ final class HistoryContentViewController: NSViewController {
       showsPreview: preferences.showPreviewPane,
       showsDetails: preferences.showPreviewPaneDetails,
       showsWebPages: preferences.showPreviewForLinks,
+      highlightsSyntax: preferences.highlightCodeSyntax,
       detectsSensitiveContent: preferences.detectSensitiveContent
     )
   }
@@ -1400,6 +1403,7 @@ final class HistoryContentViewController: NSViewController {
     showsPreview: Bool,
     showsDetails: Bool,
     showsWebPages: Bool,
+    highlightsSyntax: Bool,
     detectsSensitiveContent: Bool
   ) {
     guard isViewLoaded else {
@@ -1423,6 +1427,7 @@ final class HistoryContentViewController: NSViewController {
     )
     if let previewPaneController, previewPaneControllerConfiguration == configuration {
       previewPaneController.showsWebPages = showsWebPages
+      previewPaneController.highlightsSyntax = highlightsSyntax
       previewPaneController.showsDetails = showsDetails
       previewPaneController.showsPreview = showsPreview
       previewPaneController.detailsArrangement = previewPaneDetailsArrangement(showsPreview: showsPreview)
@@ -1443,6 +1448,7 @@ final class HistoryContentViewController: NSViewController {
       )
       controller.showsDetails = showsDetails
       controller.showsWebPages = showsWebPages
+      controller.highlightsSyntax = highlightsSyntax
       controller.showsPreview = showsPreview
       controller.detailsArrangement = previewPaneDetailsArrangement(showsPreview: showsPreview)
       controller.onContentFocusLost = { [weak self] in
@@ -4144,6 +4150,7 @@ private struct HistoryPreviewPanePreferences: Equatable {
   let showPreviewPane: Bool
   let showPreviewPaneDetails: Bool
   let showPreviewForLinks: Bool
+  let highlightCodeSyntax: Bool
   let detectSensitiveContent: Bool
   let previewPaneHeight: Double?
   let previewPaneWidthRatio: Double?
@@ -4155,6 +4162,7 @@ private struct HistoryPreviewPanePreferences: Equatable {
     showPreviewPane = preferences.showPreviewPane
     showPreviewPaneDetails = preferences.showPreviewPaneDetails
     showPreviewForLinks = preferences.showPreviewForLinks
+    highlightCodeSyntax = preferences.highlightCodeSyntax
     detectSensitiveContent = preferences.detectSensitiveContent
     previewPaneHeight = preferences.previewPaneHeight
     previewPaneWidthRatio = preferences.previewPaneWidthRatio

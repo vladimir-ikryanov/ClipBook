@@ -143,6 +143,18 @@ final class ItemPreviewDialogController: NSViewController {
       reinstallContentView()
     }
   }
+  // Code in a text item is colored by its language.
+  var highlightsSyntax = true {
+    didSet {
+      guard highlightsSyntax != oldValue, item.kind == .text else {
+        return
+      }
+      reinstallContentView()
+    }
+  }
+  // Counts the texts handed to the highlighter, so colors that come back from
+  // the background after the preview moved on are dropped.
+  private var syntaxHighlightingGeneration = 0
   // The details panel can be turned off in the pane, which then gives its
   // room to the preview.
   var showsDetails = true {
@@ -1347,8 +1359,38 @@ final class ItemPreviewDialogController: NSViewController {
     let text = presentation == .pane
       ? Self.scalingFonts(of: attributedText, by: Self.paneTextScale)
       : attributedText
-    (scrollView.documentView as? NSTextView)?.textStorage?.setAttributedString(text)
+    if let textStorage = (scrollView.documentView as? NSTextView)?.textStorage {
+      textStorage.setAttributedString(text)
+      highlightSyntax(of: text.string, in: textStorage)
+    }
     return scrollView
+  }
+
+  // Only plain text is colored: rich text has colors of its own, and hidden
+  // content shows nothing to color. A typical snippet is colored before it is
+  // first drawn; longer text shows plain until the background pass is done.
+  private func highlightSyntax(of text: String, in textStorage: NSTextStorage) {
+    syntaxHighlightingGeneration += 1
+    guard highlightsSyntax, item.kind == .text, !sensitiveContent.hidesContent,
+          textStorage.length <= SyntaxHighlighter.characterLimit else {
+      return
+    }
+
+    guard textStorage.length > SyntaxHighlighter.synchronousCharacterLimit else {
+      SyntaxHighlighter.apply(SyntaxHighlighter.tokens(in: text), to: textStorage)
+      return
+    }
+
+    let generation = syntaxHighlightingGeneration
+    Task { [weak self, weak textStorage] in
+      let tokens = await Task.detached(priority: .userInitiated) {
+        SyntaxHighlighter.tokens(in: text)
+      }.value
+      guard let self, let textStorage, generation == self.syntaxHighlightingGeneration else {
+        return
+      }
+      SyntaxHighlighter.apply(tokens, to: textStorage)
+    }
   }
 
   // Shared by the read-only text preview and the in-place editor, so both

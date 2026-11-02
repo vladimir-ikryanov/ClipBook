@@ -1305,6 +1305,52 @@
         }
       }
     },
+    "Color code copied as plain text in the preview by its programming language." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als reiner Text kopierten Code in der Vorschau nach seiner Programmiersprache einfärben."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colour code copied as plain text in the preview by its programming language."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colorear en la vista previa el código copiado como texto sin formato según su lenguaje de programación."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colora nell'anteprima il codice copiato come testo semplice in base al suo linguaggio di programmazione."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレーンテキストとしてコピーされたコードを、プレビューでプログラミング言語に応じて色分けします。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colorir na visualização o código copiado como texto simples de acordo com sua linguagem de programação."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在预览中按编程语言为以纯文本复制的代码着色。"
+          }
+        }
+      }
+    },
     "Copied" : {
       "localizations" : {
         "de" : {
@@ -2228,6 +2274,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "隐藏预览"
+          }
+        }
+      }
+    },
+    "Highlight code syntax" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code-Syntax hervorheben"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highlight code syntax"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resaltar la sintaxis del código"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evidenzia la sintassi del codice"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コードのシンタックスをハイライトする"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destacar a sintaxe do código"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高亮代码语法"
           }
         }
       }

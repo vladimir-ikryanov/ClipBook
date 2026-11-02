@@ -15,6 +15,7 @@ struct HistorySettingsView: View {
       SettingsToggle(title: L10n.string("Show quick paste shortcuts"), isOn: $model.preferences.showCommandNumberShortcut)
       SettingsToggle(title: L10n.string("Show dividers between items"), isOn: $model.preferences.showHistoryDividers)
       SettingsToggle(title: L10n.string("Show preview for links"), description: L10n.string("Fetch and display link preview details when available."), isOn: $model.preferences.showPreviewForLinks)
+      SettingsToggle(title: L10n.string("Highlight code syntax"), description: L10n.string("Color code copied as plain text in the preview by its programming language."), isOn: $model.preferences.highlightCodeSyntax)
       SettingsToggle(title: L10n.string("Treat digit numbers as colors"), description: L10n.string("Detect hex color values copied without a leading number sign."), isOn: $model.preferences.treatDigitNumbersAsColor)
       SettingsToggle(title: L10n.string("Prefer pasting as plain text"), description: L10n.string("Use the default paste shortcut for plain-text paste actions."), isOn: $model.preferences.preferPastingAsPlainText)
     }
