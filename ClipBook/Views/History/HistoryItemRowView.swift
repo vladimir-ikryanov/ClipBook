@@ -155,24 +155,43 @@ private enum HistorySearchMatchHighlighter {
   }
 
   static func applyHighlight(to attributedString: NSMutableAttributedString, text: String, searchQuery: String) {
-    let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !query.isEmpty else {
+    let terms = HistorySearchTerms(query: searchQuery)
+    guard !terms.isEmpty else {
       return
     }
 
+    let locale = Locale.current
+    let nsText = text as NSString
+    let fullLength = nsText.length
+    guard fullLength > 0 else {
+      return
+    }
     var didBeginEditing = false
-    var searchRange = text.startIndex..<text.endIndex
-    while let range = text.range(
-      of: query,
-      options: [.caseInsensitive, .diacriticInsensitive],
-      range: searchRange
-    ) {
-      if !didBeginEditing {
-        didBeginEditing = true
-        attributedString.beginEditing()
+    for index in terms.values.indices {
+      let term = terms.values[index]
+      if terms.asciiTerms[index] != nil,
+         !HistorySearchMatcher.matches(text, HistorySearchTerms(values: [term]), locale: locale) {
+        continue
       }
-      attributedString.addAttribute(.foregroundColor, value: highlightColor, range: NSRange(range, in: text))
-      searchRange = range.upperBound..<text.endIndex
+      var searchRange = NSRange(location: 0, length: fullLength)
+      while searchRange.length > 0 {
+        let range = nsText.range(
+          of: term,
+          options: .caseInsensitive,
+          range: searchRange,
+          locale: locale
+        )
+        guard range.location != NSNotFound, range.length > 0 else {
+          break
+        }
+        if !didBeginEditing {
+          didBeginEditing = true
+          attributedString.beginEditing()
+        }
+        attributedString.addAttribute(.foregroundColor, value: highlightColor, range: range)
+        let nextLocation = NSMaxRange(range)
+        searchRange = NSRange(location: nextLocation, length: fullLength - nextLocation)
+      }
     }
     if didBeginEditing {
       attributedString.endEditing()
@@ -460,7 +479,13 @@ private final class HistoryTextPreviewField: NSTextField {
   private var previewText = ""
   private var displayText = ""
   private var symbolRanges: [NSRange] = []
-  private var searchQuery = ""
+  var searchQuery = "" {
+    didSet {
+      if !isUpdating, searchQuery != oldValue {
+        applyPreviewAttributedStringIfNeeded()
+      }
+    }
+  }
   private var textFont = defaultPrimaryFont
   private var lineCount = 1
   private var wrappingMode: NSLineBreakMode = .byWordWrapping
@@ -806,6 +831,16 @@ class HistoryItemRowView: NSTableCellView {
       measuredAccessoryControlsWidth = nil
     }
     return true
+  }
+
+  func updateSearchQuery(_ query: String) {
+    searchQuery = query
+    for label in labels.prefix(nextLabelIndex) {
+      label.searchHighlightQuery = query
+    }
+    for field in textPreviewFields.prefix(nextTextPreviewFieldIndex) {
+      field.searchQuery = query
+    }
   }
 
   // MARK: - Subclass hooks

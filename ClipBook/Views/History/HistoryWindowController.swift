@@ -446,7 +446,7 @@ final class HistoryContentViewController: NSViewController {
       }
       .store(in: &cancellables)
 
-    reloadListOnChange(of: model.$searchQuery)
+    reloadListOnChange(of: model.$searchQuery.map(HistorySearchTerms.init(query:)).removeDuplicates())
     reloadListOnChange(of: model.$historySortOption)
     reloadListOnChange(of: model.$isHistorySortReversed)
     reloadListOnChange(of: model.$selectedHistoryFilterContentTypes)
@@ -614,17 +614,32 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func scheduleSearchQueryUpdate(_ query: String) {
-    searchQueryDebounceWorkItem?.cancel()
-    searchQueryDebounceWorkItem = nil
-    cancelPendingSearchJob()
-    cancelSearchRefresh()
-
-    guard !HistorySearchTerms(query: query).isEmpty else {
+    let terms = HistorySearchTerms(query: query)
+    guard !terms.isEmpty else {
+      searchQueryDebounceWorkItem?.cancel()
+      searchQueryDebounceWorkItem = nil
+      cancelPendingSearchJob()
+      cancelSearchRefresh()
       let shouldResetSelection = isSearchActive
       pendingSearchQuery = nil
       applySearchQuery(query, shouldResetSelection: shouldResetSelection)
       return
     }
+
+    if terms == HistorySearchTerms(query: pendingSearchQuery ?? model.searchQuery) {
+      if pendingSearchQuery != nil {
+        pendingSearchQuery = query
+        updateToolbarState()
+      } else {
+        applySearchQuery(query)
+      }
+      return
+    }
+
+    searchQueryDebounceWorkItem?.cancel()
+    searchQueryDebounceWorkItem = nil
+    cancelPendingSearchJob()
+    cancelSearchRefresh()
 
     pendingSearchQuery = query
     let workItem = DispatchWorkItem { [weak self] in
@@ -635,21 +650,28 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func applyPendingSearchQuery(_ query: String) {
-    guard pendingSearchQuery == query else {
+    guard let currentPendingQuery = pendingSearchQuery,
+          HistorySearchTerms(query: currentPendingQuery) == HistorySearchTerms(query: query) else {
       return
     }
 
     searchQueryDebounceWorkItem = nil
     cancelSearchRefresh()
 
-    let terms = HistorySearchTerms(query: query)
+    let terms = HistorySearchTerms(query: currentPendingQuery)
     guard !terms.isEmpty else {
       pendingSearchQuery = nil
-      applySearchQuery(query)
+      applySearchQuery(currentPendingQuery)
       return
     }
 
-    pendingSearchQuery = query
+    guard terms != HistorySearchTerms(query: model.searchQuery) else {
+      pendingSearchQuery = nil
+      applySearchQuery(currentPendingQuery)
+      scheduleSearchRefreshIfNeeded()
+      return
+    }
+
     let corpus = model.makeSearchCorpus()
     let locale = Locale.current
     let previousResult = model.searchResult
@@ -664,15 +686,16 @@ final class HistoryContentViewController: NSViewController {
         resultBox.withLock { $0 = result }
       }
       DispatchQueue.main.async { [weak self] in
-        self?.completeSearchJob(job, query: query, result: result)
+        self?.completeSearchJob(job, result: result)
       }
     }
   }
 
-  private func completeSearchJob(_ job: HistorySearchJob, query: String, result: HistorySearchResult?) {
+  private func completeSearchJob(_ job: HistorySearchJob, result: HistorySearchResult?) {
     guard let result,
           searchJob === job,
-          pendingSearchQuery == query else {
+          let query = pendingSearchQuery,
+          HistorySearchTerms(query: query) == result.terms else {
       return
     }
 
@@ -801,9 +824,13 @@ final class HistoryContentViewController: NSViewController {
       return
     }
 
+    let changesTerms = HistorySearchTerms(query: model.searchQuery) != HistorySearchTerms(query: query)
     model.searchQuery = query
     if shouldResetSelection {
-      selectFirstHistoryItem(syncsList: false)
+      selectFirstHistoryItem(syncsList: !changesTerms)
+    }
+    if !changesTerms {
+      updateToolbarState()
     }
   }
 

@@ -237,6 +237,8 @@ final class History: NSView {
     let previousItems = self.items
     let previousRows = tableRows
     let previousIdentities = tableRowIdentities
+    let previousSearchQuery = self.searchQuery
+    let changesSearchTerms = HistorySearchTerms(query: searchQuery) != HistorySearchTerms(query: previousSearchQuery)
     let changesLayout = showsTiles != self.showsTiles
     let built = HistoryTableRowBuilder.buildWithIdentities(
       from: items,
@@ -245,13 +247,10 @@ final class History: NSView {
     )
     let newRows = built.rows
     let newIdentities = built.identities
-    // Typing in the search field mostly takes rows out of the list. The rows
-    // that stay are set up again, since they highlight the matches of the query.
-    let changesSearchQuery = searchQuery != self.searchQuery
-    let removedRowIndexes = changesLayout || changesSearchQuery || previousIdentities.count - newIdentities.count > Self.largeRemovalReloadThreshold
+    let removedRowIndexes = changesLayout || previousIdentities.count - newIdentities.count > Self.largeRemovalReloadThreshold
       ? nil
-      : self.removedRowIndexes(from: previousIdentities, to: newIdentities)
-    let insertedRowIndexes = changesLayout || changesSearchQuery || removedRowIndexes != nil || previousIdentities.isEmpty || newIdentities.count - previousIdentities.count > Self.largeInsertionReloadThreshold
+      : self.removedRowIndexes(from: previousIdentities, to: newIdentities, allowEmpty: changesSearchTerms)
+    let insertedRowIndexes = changesLayout || removedRowIndexes != nil || previousIdentities.isEmpty || newIdentities.count - previousIdentities.count > Self.largeInsertionReloadThreshold
       ? nil
       : self.removedRowIndexes(from: newIdentities, to: previousIdentities)
 
@@ -270,6 +269,18 @@ final class History: NSView {
       setShowsTiles(showsTiles)
     }
     applyTableReload(removedRowIndexes: removedRowIndexes, insertedRowIndexes: insertedRowIndexes)
+    // Typing in the search field mostly takes rows out of the list or puts them back.
+    // The rows that stay keep their views, so they highlight the new query's matches here.
+    if !showsTiles,
+       removedRowIndexes != nil || insertedRowIndexes != nil,
+       changesSearchTerms {
+      tableView.enumerateAvailableRowViews { _, row in
+        guard let cell = tableView.view(atColumn: 0, row: row, makeIfNecessary: false) as? HistoryItemRowView else {
+          return
+        }
+        cell.updateSearchQuery(searchQuery)
+      }
+    }
     updateScrollContentInsets()
     // Keep the scroll view visible even when the list is empty. Hiding it makes
     // the window's automatic titlebar separator lose the scroll view it tracks,
@@ -393,6 +404,10 @@ final class History: NSView {
     let quickPasteLimit: Int
     let affectsFirstRow: Bool
     if let removedRowIndexes {
+      guard !removedRowIndexes.isEmpty else {
+        return
+      }
+
       tableView.beginUpdates()
       tableView.removeRows(at: removedRowIndexes, withAnimation: [])
       tableView.endUpdates()
@@ -737,9 +752,10 @@ final class History: NSView {
 
   private func removedRowIndexes(
     from previousRows: [HistoryTableRowIdentity],
-    to newRows: [HistoryTableRowIdentity]
+    to newRows: [HistoryTableRowIdentity],
+    allowEmpty: Bool = false
   ) -> IndexSet? {
-    guard previousRows.count > newRows.count else {
+    guard previousRows.count > newRows.count || (allowEmpty && previousRows.count == newRows.count) else {
       return nil
     }
 
@@ -767,7 +783,7 @@ final class History: NSView {
 
         guard newRowIndex == newBuffer.endIndex,
               prevBuffer.count - removedIndexes.count == newBuffer.count,
-              !removedIndexes.isEmpty,
+              allowEmpty || !removedIndexes.isEmpty,
               !(prevBuffer.count > 2_000 && newBuffer.count < 200 && removedIndexes.rangeView.count > 10) else {
           return nil
         }

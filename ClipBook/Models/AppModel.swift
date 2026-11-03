@@ -154,14 +154,17 @@ final class AppModel: ObservableObject {
     @Published var selectedItemIDsInSelectionOrder: [ClipboardItem.ID] = []
     @Published var searchQuery = "" {
         didSet {
-            if HistorySearchTerms(query: searchQuery).isEmpty {
+            let terms = HistorySearchTerms(query: searchQuery)
+            if terms.isEmpty {
                 let oldResult = searchResult
                 let oldCorpus = cachedSearchCorpus
                 searchResult = nil
                 cachedSearchCorpus = nil
                 dropSearchStateOffMainThread(result: oldResult, corpus: oldCorpus)
             }
-            invalidateFilteredItems()
+            if terms != HistorySearchTerms(query: oldValue) {
+                invalidateFilteredItems()
+            }
         }
     }
     @Published var preferences = AppPreferences() {
