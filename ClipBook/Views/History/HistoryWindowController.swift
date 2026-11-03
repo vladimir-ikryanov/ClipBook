@@ -273,6 +273,9 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func selectFirstHistoryItem(syncsList: Bool) {
+    if isViewLoaded {
+      selectionModelUpdatesOriginatingFromList += 2
+    }
     model.selectedItemID = model.filteredItems.first?.id
     model.selectedItemIDs = model.selectedItemID.map { [$0] } ?? []
     model.selectedItemIDsInSelectionOrder = model.selectedItemID.map { [$0] } ?? []
@@ -283,6 +286,7 @@ final class HistoryContentViewController: NSViewController {
 
     syncSelectionFromModel()
     updateToolbarState()
+    setNeedsPreviewPaneUpdate()
   }
 
   /// The list insets its content by the safe area, which AppKit changes without
@@ -703,7 +707,7 @@ final class HistoryContentViewController: NSViewController {
     latestSearchJobResult.withLock { $0 = nil }
     pendingSearchQuery = nil
     model.installSearchResult(result)
-    applySearchQuery(query)
+    applySearchQuery(query, shouldResetSelection: true)
     scheduleSearchRefreshIfNeeded()
   }
 
@@ -727,7 +731,7 @@ final class HistoryContentViewController: NSViewController {
         if let result {
           model.installSearchResult(result)
         }
-        applySearchQuery(query)
+        applySearchQuery(query, shouldResetSelection: true)
         scheduleSearchRefreshIfNeeded()
       }
     }
