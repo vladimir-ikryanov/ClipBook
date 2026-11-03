@@ -244,7 +244,7 @@ final class PasteboardMonitor {
             let searchText = ClipboardItem.makeSearchText(
                 title: nil,
                 text: recognizedContent.text,
-                filePaths: [URL(fileURLWithPath: assetPath).lastPathComponent],
+                filePaths: [],
                 tagNames: [],
                 sourceAppName: content.sourceAppName,
                 qrCodeText: recognizedContent.qrCodeText
