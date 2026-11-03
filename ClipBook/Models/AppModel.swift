@@ -133,6 +133,7 @@ final class AppModel: ObservableObject {
     // next read builds it again.
     @Published var items: [ClipboardItem] = [] {
         didSet {
+            invalidateSortedListedItems()
             invalidateFilteredItems()
             cachedHistorySourceApplications = nil
         }
@@ -142,6 +143,7 @@ final class AppModel: ObservableObject {
     /// the history is used as usual.
     @Published var trashedItems: [ClipboardItem] = [] {
         didSet {
+            invalidateSortedListedItems()
             invalidateFilteredItems()
             cachedHistorySourceApplications = nil
         }
@@ -151,21 +153,37 @@ final class AppModel: ObservableObject {
     @Published var selectedItemIDs: Set<ClipboardItem.ID> = []
     @Published var selectedItemIDsInSelectionOrder: [ClipboardItem.ID] = []
     @Published var searchQuery = "" {
-        didSet { invalidateFilteredItems() }
+        didSet {
+            if HistorySearchTerms(query: searchQuery).isEmpty {
+                let oldResult = searchResult
+                let oldCorpus = cachedSearchCorpus
+                searchResult = nil
+                cachedSearchCorpus = nil
+                dropSearchStateOffMainThread(result: oldResult, corpus: oldCorpus)
+            }
+            invalidateFilteredItems()
+        }
     }
     @Published var preferences = AppPreferences() {
         didSet {
             if oldValue.pinFavoritesToTop != preferences.pinFavoritesToTop
                 || oldValue.copySequenceModeEnabled != preferences.copySequenceModeEnabled {
+                invalidateSortedListedItems()
                 invalidateFilteredItems()
             }
         }
     }
     @Published var historySortOption: HistorySortOption = .lastCopyTime {
-        didSet { invalidateFilteredItems() }
+        didSet {
+            invalidateSortedListedItems()
+            invalidateFilteredItems()
+        }
     }
     @Published var isHistorySortReversed = false {
-        didSet { invalidateFilteredItems() }
+        didSet {
+            invalidateSortedListedItems()
+            invalidateFilteredItems()
+        }
     }
     /// Filters combine as an intersection across the groups and a union inside
     /// each group: an item is shown when it matches at least one selected
@@ -175,10 +193,11 @@ final class AppModel: ObservableObject {
     /// favorite images rather than everything favorite plus every image.
     @Published var selectedHistoryFilterContentTypes: Set<HistoryFilterContentType> = [] {
         didSet {
-            invalidateFilteredItems()
             if oldValue.contains(.trash) != selectedHistoryFilterContentTypes.contains(.trash) {
+                invalidateSortedListedItems()
                 cachedHistorySourceApplications = nil
             }
+            invalidateFilteredItems()
         }
     }
     @Published var selectedHistoryFilterTagIDs: Set<Tag.ID> = [] {
@@ -203,9 +222,114 @@ final class AppModel: ObservableObject {
     // filtering and sorting thousands of items every time kept the main
     // thread busy for hundreds of milliseconds whenever the history appeared.
     private var cachedFilteredItems: [ClipboardItem]?
+    // The listed items' sorted order as indexes into `listedItems`, kept across
+    // searches and filter changes so only changes to the items or their sort
+    // order sort the list again. A background search builds its corpus from the
+    // same order and installs a bitmap of matches keyed by `sortedListRevision`;
+    // when the list changes before the next search finishes, `makeFilteredItems`
+    // looks each item up in the installed result by ID and falls back to inline
+    // matching for items whose search text changed.
+    private var cachedSortedListedIndexes: [Int]?
+    private var cachedSearchCorpus: HistorySearchCorpus?
+    private(set) var sortedListRevision = 0
+    private(set) var searchResult: HistorySearchResult?
 
     private func invalidateFilteredItems() {
-        cachedFilteredItems = nil
+        if let old = cachedFilteredItems, old.count > 2_000 {
+            cachedFilteredItems = nil
+            let dropped = old
+            DispatchQueue.global(qos: .utility).async {
+                _ = dropped
+            }
+        } else {
+            cachedFilteredItems = nil
+        }
+    }
+
+    private func invalidateSortedListedItems() {
+        let oldCorpus = cachedSearchCorpus
+        cachedSortedListedIndexes = nil
+        cachedSearchCorpus = nil
+        sortedListRevision &+= 1
+        dropSearchStateOffMainThread(result: nil, corpus: oldCorpus)
+    }
+
+    private func dropSearchStateOffMainThread(
+        result: HistorySearchResult?,
+        corpus: HistorySearchCorpus?
+    ) {
+        guard (result?.matches.count ?? 0) > 2_000 || (corpus?.ids.count ?? 0) > 2_000 else {
+            return
+        }
+        let dropped = (result, corpus)
+        DispatchQueue.global(qos: .utility).async {
+            _ = dropped
+        }
+    }
+
+    func makeSearchCorpus() -> HistorySearchCorpus {
+        if let cachedSearchCorpus, cachedSearchCorpus.revision == sortedListRevision {
+            return cachedSearchCorpus
+        }
+
+        let items = listedItems
+        let sortedIndexes = sortedListedIndexes(for: items)
+        let count = sortedIndexes.count
+        let ids = [UUID](unsafeUninitializedCapacity: count) { idsBuffer, initializedCount in
+            items.withUnsafeBufferPointer { itemsBuffer in
+                sortedIndexes.withUnsafeBufferPointer { indexesBuffer in
+                    for i in 0..<count {
+                        idsBuffer.baseAddress!.advanced(by: i).initialize(to: itemsBuffer[indexesBuffer[i]].id)
+                    }
+                }
+            }
+            initializedCount = count
+        }
+        let texts = [String](unsafeUninitializedCapacity: count) { textsBuffer, initializedCount in
+            items.withUnsafeBufferPointer { itemsBuffer in
+                sortedIndexes.withUnsafeBufferPointer { indexesBuffer in
+                    for i in 0..<count {
+                        textsBuffer.baseAddress!.advanced(by: i).initialize(to: itemsBuffer[indexesBuffer[i]].searchText)
+                    }
+                }
+            }
+            initializedCount = count
+        }
+
+        let corpus = HistorySearchCorpus(revision: sortedListRevision, ids: ids, texts: texts)
+        cachedSearchCorpus = corpus
+        return corpus
+    }
+
+    func installSearchResult(_ result: HistorySearchResult) {
+        let oldResult = searchResult
+        searchResult = result
+        invalidateFilteredItems()
+        dropSearchStateOffMainThread(result: oldResult, corpus: nil)
+    }
+
+    private func sortedListedIndexes(for items: [ClipboardItem]) -> [Int] {
+        if let cachedSortedListedIndexes {
+            return cachedSortedListedIndexes
+        }
+
+        var indexes = Array(items.indices)
+        if isShowingTrash {
+            items.withUnsafeBufferPointer { buffer in
+                indexes.sort { lhsIndex, rhsIndex in
+                    Self.trashOrdersBefore(buffer[lhsIndex], buffer[rhsIndex])
+                }
+            }
+        } else {
+            let order = historyOrder
+            items.withUnsafeBufferPointer { buffer in
+                indexes.sort { lhsIndex, rhsIndex in
+                    order.ordersBefore(buffer[lhsIndex], buffer[rhsIndex])
+                }
+            }
+        }
+        cachedSortedListedIndexes = indexes
+        return indexes
     }
 
     var filteredItems: [ClipboardItem] {
@@ -243,11 +367,90 @@ final class AppModel: ObservableObject {
     }
 
     private func makeFilteredItems() -> [ClipboardItem] {
-        if isShowingTrash {
-            return makeFilteredItems(from: trashedItems, contentTypes: selectedHistoryFilterContentTypes, order: nil)
+        let items = listedItems
+        let sortedIndexes = sortedListedIndexes(for: items)
+        let contentTypes = selectedHistoryFilterContentTypes
+        let hasContentTypes = !contentTypes.isEmpty
+        let tagIDs = selectedHistoryFilterTagIDs
+        let hasTags = !tagIDs.isEmpty
+        let sourceApplicationIDs = selectedHistoryFilterSourceApplicationIDs
+        let hasSources = !sourceApplicationIDs.isEmpty
+        let terms = HistorySearchTerms(query: searchQuery)
+        let hasSearch = !terms.isEmpty
+
+        if !hasContentTypes && !hasTags && !hasSources && !hasSearch {
+            var result: [ClipboardItem] = []
+            result.reserveCapacity(sortedIndexes.count)
+            items.withUnsafeBufferPointer { buffer in
+                for itemIndex in sortedIndexes {
+                    result.append(buffer[itemIndex])
+                }
+            }
+            return result
         }
 
-        return makeFilteredItems(from: items, contentTypes: selectedHistoryFilterContentTypes, order: historyOrder)
+        let installedResult = (hasSearch && searchResult?.terms == terms) ? searchResult : nil
+        let isPositionalMatch = installedResult?.revision == sortedListRevision
+            && installedResult?.matches.count == sortedIndexes.count
+        let locale = Locale.current
+
+        var result: [ClipboardItem] = []
+        if isPositionalMatch, let installedResult, !hasContentTypes, !hasTags, !hasSources {
+            let matches = installedResult.matches
+            result.reserveCapacity(installedResult.matchCount)
+            items.withUnsafeBufferPointer { buffer in
+                for position in sortedIndexes.indices where matches[position] {
+                    result.append(buffer[sortedIndexes[position]])
+                }
+            }
+            return result
+        }
+
+        items.withUnsafeBufferPointer { buffer in
+            for (position, itemIndex) in sortedIndexes.enumerated() {
+                if hasSearch {
+                    if isPositionalMatch, let installedResult {
+                        if !installedResult.matches[position] {
+                            continue
+                        }
+                    } else if let installedResult {
+                        let id = buffer[itemIndex].id
+                        let searchText = buffer[itemIndex].searchText
+                        if let corpusIndex = installedResult.indexByID[id],
+                           installedResult.corpus.texts[corpusIndex] == searchText {
+                            if !installedResult.matches[corpusIndex] {
+                                continue
+                            }
+                        } else if !HistorySearchMatcher.matches(searchText, terms, locale: locale) {
+                            continue
+                        }
+                    } else {
+                        let searchText = buffer[itemIndex].searchText
+                        if !HistorySearchMatcher.matches(searchText, terms, locale: locale) {
+                            continue
+                        }
+                    }
+                }
+
+                let item = buffer[itemIndex]
+                if hasContentTypes, !Self.contentTypes(contentTypes, match: item) {
+                    continue
+                }
+                if hasTags, !item.tags.contains(where: { tagIDs.contains($0) }) {
+                    continue
+                }
+                if hasSources {
+                    guard let sourceApplicationID = Self.sourceApplicationID(for: item),
+                          sourceApplicationIDs.contains(sourceApplicationID) else {
+                        continue
+                    }
+                }
+
+                result.append(item)
+            }
+        }
+
+        return result
     }
 
     /// Without an order the items are sorted the way the Trash lists them,
@@ -279,9 +482,10 @@ final class AppModel: ObservableObject {
             }
         }
 
-        let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !query.isEmpty {
-            result = result.filter { $0.searchText.localizedCaseInsensitiveContains(query) }
+        let terms = HistorySearchTerms(query: searchQuery)
+        if !terms.isEmpty {
+            let locale = Locale.current
+            result = result.filter { HistorySearchMatcher.matches($0.searchText, terms, locale: locale) }
         }
 
         if let order {
@@ -317,7 +521,15 @@ final class AppModel: ObservableObject {
         guard let selectedItemID else {
             return filteredItems.first
         }
-        return listedItems.first { $0.id == selectedItemID }
+        if let cached = cachedFilteredItems?.first, cached.id == selectedItemID {
+            return cached
+        }
+        return listedItems.withUnsafeBufferPointer { buffer in
+            for index in buffer.indices where buffer[index].id == selectedItemID {
+                return buffer[index]
+            }
+            return nil
+        }
     }
 
     var selectedItems: [ClipboardItem] {
@@ -332,6 +544,11 @@ final class AppModel: ObservableObject {
         // item in it.
         let orderedIDs = selectedItemIDsInSelectionOrder.filter { ids.contains($0) }
         if !orderedIDs.isEmpty {
+            if orderedIDs.count == 1,
+               let cached = cachedFilteredItems?.first,
+               cached.id == orderedIDs[0] {
+                return [cached]
+            }
             let wantedIDs = Set(orderedIDs)
             var itemsByID: [ClipboardItem.ID: ClipboardItem] = [:]
             // Reading the IDs through the buffer copies only the selected
@@ -341,6 +558,9 @@ final class AppModel: ObservableObject {
                     let id = buffer[index].id
                     if wantedIDs.contains(id) && itemsByID[id] == nil {
                         itemsByID[id] = buffer[index]
+                        if itemsByID.count == wantedIDs.count {
+                            break
+                        }
                     }
                 }
             }

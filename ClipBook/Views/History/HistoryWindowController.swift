@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import os
 import UniformTypeIdentifiers
 
 private enum HistoryShortcutAction {
@@ -71,6 +72,7 @@ private struct HistoryMultiTagMenuSelection {
 final class HistoryContentViewController: NSViewController {
   private static let minimumViewSize = NSSize(width: 640, height: 400)
   private static let searchDebounceDelay: TimeInterval = 0.5
+  private static let searchRefreshDelay: TimeInterval = 0.04
 
   private let model: AppModel
   private let coordinator: AppCoordinator
@@ -81,6 +83,11 @@ final class HistoryContentViewController: NSViewController {
   private var pendingSearchQuery: String?
   private var needsListReload = false
   private var searchQueryDebounceWorkItem: DispatchWorkItem?
+  private let searchQueue = DispatchQueue(label: "com.ikryanov.clipbook.v2.history-search", qos: .userInitiated)
+  private var searchJob: HistorySearchJob?
+  private let latestSearchJobResult = OSAllocatedUnfairLock<HistorySearchResult?>(initialState: nil)
+  private var searchRefreshDebounceWorkItem: DispatchWorkItem?
+  private var searchRefreshJob: HistorySearchJob?
   private var copyTextFromImageTitle: String { L10n.string("Copy Text from Image") }
   private let copyTextFromImageSystemImageName = "text.viewfinder"
   private var copyTextFromQRCodeTitle: String { L10n.string("Copy Text from QR Code") }
@@ -187,6 +194,9 @@ final class HistoryContentViewController: NSViewController {
 
   deinit {
     searchQueryDebounceWorkItem?.cancel()
+    searchJob?.cancel()
+    searchRefreshDebounceWorkItem?.cancel()
+    searchRefreshJob?.cancel()
   }
 
   func attachToolbar(_ toolbar: HistoryToolbar) {
@@ -324,9 +334,7 @@ final class HistoryContentViewController: NSViewController {
       return
     }
 
-    searchQueryDebounceWorkItem?.cancel()
-    searchQueryDebounceWorkItem = nil
-    pendingSearchQuery = nil
+    cancelPendingSearchAndRefresh()
     applySearchQuery("", shouldResetSelection: !model.preferences.rememberHistorySelection)
   }
 
@@ -498,6 +506,7 @@ final class HistoryContentViewController: NSViewController {
     updateToolbarFilterState()
     updateToolbarState()
     setNeedsPreviewPaneUpdate()
+    scheduleSearchRefreshIfNeeded()
   }
 
   /// A history filtered to images only is where the pictures matter most, so
@@ -583,10 +592,34 @@ final class HistoryContentViewController: NSViewController {
     }
   }
 
+  private func cancelPendingSearchJob() {
+    searchJob?.cancel()
+    searchJob = nil
+    latestSearchJobResult.withLock { $0 = nil }
+  }
+
+  private func cancelSearchRefresh() {
+    searchRefreshDebounceWorkItem?.cancel()
+    searchRefreshDebounceWorkItem = nil
+    searchRefreshJob?.cancel()
+    searchRefreshJob = nil
+  }
+
+  private func cancelPendingSearchAndRefresh() {
+    searchQueryDebounceWorkItem?.cancel()
+    searchQueryDebounceWorkItem = nil
+    cancelPendingSearchJob()
+    cancelSearchRefresh()
+    pendingSearchQuery = nil
+  }
+
   private func scheduleSearchQueryUpdate(_ query: String) {
     searchQueryDebounceWorkItem?.cancel()
+    searchQueryDebounceWorkItem = nil
+    cancelPendingSearchJob()
+    cancelSearchRefresh()
 
-    guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+    guard !HistorySearchTerms(query: query).isEmpty else {
       let shouldResetSelection = isSearchActive
       pendingSearchQuery = nil
       applySearchQuery(query, shouldResetSelection: shouldResetSelection)
@@ -606,9 +639,157 @@ final class HistoryContentViewController: NSViewController {
       return
     }
 
-    pendingSearchQuery = nil
     searchQueryDebounceWorkItem = nil
+    cancelSearchRefresh()
+
+    let terms = HistorySearchTerms(query: query)
+    guard !terms.isEmpty else {
+      pendingSearchQuery = nil
+      applySearchQuery(query)
+      return
+    }
+
+    pendingSearchQuery = query
+    let corpus = model.makeSearchCorpus()
+    let locale = Locale.current
+    let previousResult = model.searchResult
+    let job = HistorySearchJob()
+    searchJob = job
+    latestSearchJobResult.withLock { $0 = nil }
+    let resultBox = latestSearchJobResult
+
+    searchQueue.async { [weak self] in
+      let result = job.run(corpus: corpus, terms: terms, locale: locale, previous: previousResult)
+      if let result {
+        resultBox.withLock { $0 = result }
+      }
+      DispatchQueue.main.async { [weak self] in
+        self?.completeSearchJob(job, query: query, result: result)
+      }
+    }
+  }
+
+  private func completeSearchJob(_ job: HistorySearchJob, query: String, result: HistorySearchResult?) {
+    guard let result,
+          searchJob === job,
+          pendingSearchQuery == query else {
+      return
+    }
+
+    searchJob = nil
+    latestSearchJobResult.withLock { $0 = nil }
+    pendingSearchQuery = nil
+    model.installSearchResult(result)
     applySearchQuery(query)
+    scheduleSearchRefreshIfNeeded()
+  }
+
+  private func flushPendingSearch() {
+    if searchQueryDebounceWorkItem != nil, let query = pendingSearchQuery {
+      searchQueryDebounceWorkItem?.cancel()
+      searchQueryDebounceWorkItem = nil
+      applyPendingSearchQuery(query)
+    }
+
+    if let job = searchJob, let query = pendingSearchQuery {
+      searchQueue.sync {}
+      let result = latestSearchJobResult.withLock { stored -> HistorySearchResult? in
+        let value = stored
+        stored = nil
+        return value
+      }
+      if searchJob === job {
+        searchJob = nil
+        pendingSearchQuery = nil
+        if let result {
+          model.installSearchResult(result)
+        }
+        applySearchQuery(query)
+        scheduleSearchRefreshIfNeeded()
+      }
+    }
+
+    reloadListIfNeeded()
+  }
+
+  private func scheduleSearchRefreshIfNeeded() {
+    let terms = HistorySearchTerms(query: model.searchQuery)
+    guard !terms.isEmpty,
+          searchQueryDebounceWorkItem == nil,
+          pendingSearchQuery == nil,
+          searchJob == nil else {
+      cancelSearchRefresh()
+      return
+    }
+
+    guard model.searchResult?.terms != terms || model.searchResult?.revision != model.sortedListRevision else {
+      cancelSearchRefresh()
+      return
+    }
+
+    searchRefreshJob?.cancel()
+    searchRefreshJob = nil
+    guard searchRefreshDebounceWorkItem == nil else {
+      return
+    }
+
+    let workItem = DispatchWorkItem { [weak self] in
+      self?.startSearchRefresh()
+    }
+    searchRefreshDebounceWorkItem = workItem
+    DispatchQueue.main.asyncAfter(deadline: .now() + Self.searchRefreshDelay, execute: workItem)
+  }
+
+  private func startSearchRefresh() {
+    searchRefreshDebounceWorkItem = nil
+    let terms = HistorySearchTerms(query: model.searchQuery)
+    guard !terms.isEmpty,
+          searchQueryDebounceWorkItem == nil,
+          pendingSearchQuery == nil,
+          searchJob == nil else {
+      searchRefreshJob?.cancel()
+      searchRefreshJob = nil
+      return
+    }
+
+    guard model.searchResult?.terms != terms || model.searchResult?.revision != model.sortedListRevision else {
+      searchRefreshJob?.cancel()
+      searchRefreshJob = nil
+      return
+    }
+
+    searchRefreshJob?.cancel()
+    let corpus = model.makeSearchCorpus()
+    let locale = Locale.current
+    let previousResult = model.searchResult
+    let job = HistorySearchJob()
+    searchRefreshJob = job
+
+    searchQueue.async { [weak self] in
+      let result = job.run(corpus: corpus, terms: terms, locale: locale, previous: previousResult)
+      DispatchQueue.main.async { [weak self] in
+        self?.completeSearchRefreshJob(job, result: result)
+      }
+    }
+  }
+
+  private func completeSearchRefreshJob(_ job: HistorySearchJob, result: HistorySearchResult?) {
+    guard searchRefreshJob === job else {
+      return
+    }
+
+    searchRefreshJob = nil
+    guard let result,
+          searchQueryDebounceWorkItem == nil,
+          pendingSearchQuery == nil,
+          searchJob == nil,
+          HistorySearchTerms(query: model.searchQuery) == result.terms,
+          model.sortedListRevision == result.revision else {
+      scheduleSearchRefreshIfNeeded()
+      return
+    }
+
+    model.installSearchResult(result)
   }
 
   private func applySearchQuery(_ query: String, shouldResetSelection: Bool = false) {
@@ -685,6 +866,7 @@ final class HistoryContentViewController: NSViewController {
       return
     }
 
+    flushPendingSearch()
     var contentTypes = model.selectedHistoryFilterContentTypes
     if isSelected {
       contentTypes.insert(contentType)
@@ -699,6 +881,7 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func setHistoryFilterTagID(_ tagID: Tag.ID, isSelected: Bool) {
+    flushPendingSearch()
     var tagIDs = model.selectedHistoryFilterTagIDs
     if isSelected {
       tagIDs.insert(tagID)
@@ -713,6 +896,7 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func setHistoryFilterSourceApplicationID(_ sourceApplicationID: HistorySourceApplication.ID, isSelected: Bool) {
+    flushPendingSearch()
     var sourceApplicationIDs = model.selectedHistoryFilterSourceApplicationIDs
     if isSelected {
       sourceApplicationIDs.insert(sourceApplicationID)
@@ -727,6 +911,7 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func clearHistoryFilterGroup(_ group: SearchTokenGroup) {
+    flushPendingSearch()
     switch group {
     case .contentType:
       guard !model.selectedHistoryFilterContentTypes.isEmpty else {
@@ -748,6 +933,7 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func clearHistoryFilters() {
+    flushPendingSearch()
     guard model.isHistoryFilterActive else {
       return
     }
@@ -769,9 +955,7 @@ final class HistoryContentViewController: NSViewController {
       return
     }
 
-    searchQueryDebounceWorkItem?.cancel()
-    searchQueryDebounceWorkItem = nil
-    pendingSearchQuery = nil
+    cancelPendingSearchAndRefresh()
     historyToolbar?.hideSearchSuggestions()
 
     model.selectedItemID = item.id
@@ -844,6 +1028,7 @@ final class HistoryContentViewController: NSViewController {
     }
 
     if let index = quickNumberIndex(for: event) {
+      flushPendingSearch()
       performNumberKeyAction(at: index)
       return true
     }
@@ -870,6 +1055,7 @@ final class HistoryContentViewController: NSViewController {
         return true
       }
 
+      flushPendingSearch()
       performHistoryShortcutAction(action)
       return true
     }
@@ -913,6 +1099,7 @@ final class HistoryContentViewController: NSViewController {
       return false
     }
 
+    flushPendingSearch()
     if let item = model.selectedItem {
       showPreview(for: item)
     }
@@ -1579,6 +1766,7 @@ final class HistoryContentViewController: NSViewController {
       guard modifiers.isEmpty, event.keyCode == 123 || event.keyCode == 124 else {
         return false
       }
+      flushPendingSearch()
       listPaneView.moveSelection(by: event.keyCode == 123 ? .previous : .next)
       return true
     }
@@ -1586,21 +1774,25 @@ final class HistoryContentViewController: NSViewController {
     if modifiers.isEmpty {
       switch event.keyCode {
       case 124:
+        flushPendingSearch()
         listPaneView.updateKeyboardMultipleSelection(.addCurrent)
         return true
       case 123:
+        flushPendingSearch()
         listPaneView.updateKeyboardMultipleSelection(.removeCurrent)
         return true
       case 126:
         guard listPaneView.isKeyboardMultipleSelectionMode else {
           return false
         }
+        flushPendingSearch()
         listPaneView.moveKeyboardMultipleSelectionFocus(.up)
         return true
       case 125:
         guard listPaneView.isKeyboardMultipleSelectionMode else {
           return false
         }
+        flushPendingSearch()
         listPaneView.moveKeyboardMultipleSelectionFocus(.down)
         return true
       default:
@@ -1623,15 +1815,19 @@ final class HistoryContentViewController: NSViewController {
 
     switch event.keyCode {
     case 126:
+      flushPendingSearch()
       listPaneView.extendSelection(.up)
       return true
     case 125:
+      flushPendingSearch()
       listPaneView.extendSelection(.down)
       return true
     case 123 where listPaneView.showsTiles:
+      flushPendingSearch()
       listPaneView.extendSelection(by: .previous)
       return true
     case 124 where listPaneView.showsTiles:
+      flushPendingSearch()
       listPaneView.extendSelection(by: .next)
       return true
     default:
@@ -2373,6 +2569,7 @@ extension HistoryContentViewController: HistoryToolbarDelegate {
   }
 
   func historyToolbar(_ toolbar: HistoryToolbar, didRequestMoveSelection direction: HistorySelectionDirection) {
+    flushPendingSearch()
     listPaneView.moveSelection(direction)
     listPaneView.focusTableView()
   }
