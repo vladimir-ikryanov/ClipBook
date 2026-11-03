@@ -12,8 +12,7 @@ nonisolated struct HistorySearchTerms: Equatable, Sendable {
     let asciiTerms: [ASCIITerm?]
 
     init(query: String) {
-        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        self.init(values: trimmed.isEmpty ? [] : [trimmed])
+        self.init(values: query.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty })
     }
 
     init(values: [String]) {
