@@ -1,9 +1,41 @@
 import AppKit
 import ImageIO
 
+struct HistoryTableRowIdentity: Equatable {
+  let high: UInt64
+  let low: UInt64
+
+  static func sectionHeader(_ title: String) -> HistoryTableRowIdentity {
+    var hash: UInt64 = 0xcbf29ce484222325
+    for byte in title.utf8 {
+      hash ^= UInt64(byte)
+      hash &*= 0x00000100000001B3
+    }
+    return HistoryTableRowIdentity(high: 0, low: hash == 0 ? 1 : hash)
+  }
+
+  static func item(_ id: UUID) -> HistoryTableRowIdentity {
+    let u = id.uuid
+    let high = (UInt64(u.0) << 56) | (UInt64(u.1) << 48) | (UInt64(u.2) << 40) | (UInt64(u.3) << 32)
+      | (UInt64(u.4) << 24) | (UInt64(u.5) << 16) | (UInt64(u.6) << 8) | UInt64(u.7)
+    let low = (UInt64(u.8) << 56) | (UInt64(u.9) << 48) | (UInt64(u.10) << 40) | (UInt64(u.11) << 32)
+      | (UInt64(u.12) << 24) | (UInt64(u.13) << 16) | (UInt64(u.14) << 8) | UInt64(u.15)
+    return HistoryTableRowIdentity(high: high == 0 ? 1 : high, low: low)
+  }
+}
+
 enum HistoryTableRow: Equatable {
   case sectionHeader(String)
   case item(ClipboardItem, itemIndex: Int)
+
+  var isSectionHeader: Bool {
+    switch self {
+    case .sectionHeader:
+      return true
+    case .item:
+      return false
+    }
+  }
 }
 
 enum HistoryAppearance {
@@ -21,47 +53,128 @@ enum HistoryAppearance {
 }
 
 enum HistoryTableRowBuilder {
+  private struct DayCacheKey: Hashable {
+    let calendar: Calendar
+    let localeIdentifier: String
+    let todayStart: TimeInterval
+    let bucket: Int
+  }
+
+  private struct CachedDay {
+    let start: TimeInterval
+    let end: TimeInterval
+    let title: String
+  }
+
+  private static var dayCache: [DayCacheKey: CachedDay] = [:]
+
   static func build(
     from items: [ClipboardItem],
     groupPinnedFavorites: Bool = false,
     sectionDate: ((ClipboardItem) -> Date?)? = { $0.copiedAt },
     calendar: Calendar = .current
   ) -> [HistoryTableRow] {
+    buildWithIdentities(
+      from: items,
+      groupPinnedFavorites: groupPinnedFavorites,
+      sectionDate: sectionDate,
+      calendar: calendar
+    ).rows
+  }
+
+  static func buildWithIdentities(
+    from items: [ClipboardItem],
+    groupPinnedFavorites: Bool = false,
+    sectionDate: ((ClipboardItem) -> Date?)? = { $0.copiedAt },
+    calendar: Calendar = .current
+  ) -> (rows: [HistoryTableRow], identities: [HistoryTableRowIdentity]) {
     var rows: [HistoryTableRow] = []
+    var identities: [HistoryTableRowIdentity] = []
+    if let sectionDate {
+      var minTime = TimeInterval.greatestFiniteMagnitude
+      var maxTime = -TimeInterval.greatestFiniteMagnitude
+      for index in items.indices {
+        if let time = sectionDate(items[index])?.timeIntervalSinceReferenceDate {
+          if time < minTime { minTime = time }
+          if time > maxTime { maxTime = time }
+        }
+      }
+      let spanDays = minTime <= maxTime ? Int((maxTime - minTime) / 86_400) : 0
+      let capacity = items.count + min(items.count, spanDays + 2)
+      rows.reserveCapacity(capacity)
+      identities.reserveCapacity(capacity)
+    } else {
+      rows.reserveCapacity(items.count)
+      identities.reserveCapacity(items.count)
+    }
     // Finding the day of a date looks up the time zone's daylight saving
     // transitions, which for every item of a history of thousands took several
     // milliseconds each time the list changed. Items of one day come one after
     // another, so the day is found again only for an item outside it.
-    var currentDay: DateInterval?
+    let todayStart = calendar.startOfDay(for: Date()).timeIntervalSinceReferenceDate
+    let localeIdentifier = Locale.current.identifier
+    var currentDayStart = TimeInterval.greatestFiniteMagnitude
+    var currentDayEnd = -TimeInterval.greatestFiniteMagnitude
     var isInFavoritesSection = false
 
-    for (itemIndex, item) in items.enumerated() {
-      if groupPinnedFavorites, item.isFavorite {
-        if !isInFavoritesSection {
-          isInFavoritesSection = true
-          rows.append(.sectionHeader("Favorites"))
+    items.withUnsafeBufferPointer { buffer in
+      for itemIndex in buffer.indices {
+        let id = buffer[itemIndex].id
+        if groupPinnedFavorites, buffer[itemIndex].isFavorite {
+          if !isInFavoritesSection {
+            isInFavoritesSection = true
+            rows.append(.sectionHeader("Favorites"))
+            identities.append(.sectionHeader("Favorites"))
+          }
+          rows.append(.item(buffer[itemIndex], itemIndex: itemIndex))
+          identities.append(.item(id))
+          continue
         }
-        rows.append(.item(item, itemIndex: itemIndex))
-        continue
-      }
 
-      guard let date = sectionDate?(item) else {
-        rows.append(.item(item, itemIndex: itemIndex))
-        continue
-      }
-
-      if currentDay.map({ $0.start <= date && date < $0.end }) != true {
-        let day = calendar.dateInterval(of: .day, for: date)
-          ?? DateInterval(start: calendar.startOfDay(for: date), duration: 0)
-        if day.start != currentDay?.start {
-          rows.append(.sectionHeader(sectionTitle(for: date, calendar: calendar)))
+        guard let date = sectionDate?(items[itemIndex]) else {
+          rows.append(.item(buffer[itemIndex], itemIndex: itemIndex))
+          identities.append(.item(id))
+          continue
         }
-        currentDay = day
+
+        let timestamp = date.timeIntervalSinceReferenceDate
+        if timestamp < currentDayStart || timestamp >= currentDayEnd {
+          let key = DayCacheKey(
+            calendar: calendar,
+            localeIdentifier: localeIdentifier,
+            todayStart: todayStart,
+            bucket: Int(floor(timestamp / 86_400))
+          )
+          let day: CachedDay
+          if let cached = dayCache[key], cached.start <= timestamp && timestamp < cached.end {
+            day = cached
+          } else {
+            let interval = calendar.dateInterval(of: .day, for: date)
+              ?? DateInterval(start: calendar.startOfDay(for: date), duration: 0)
+            let computed = CachedDay(
+              start: interval.start.timeIntervalSinceReferenceDate,
+              end: interval.end.timeIntervalSinceReferenceDate,
+              title: sectionTitle(for: date, calendar: calendar)
+            )
+            if dayCache.count > 4_096 {
+              dayCache.removeAll(keepingCapacity: true)
+            }
+            dayCache[key] = computed
+            day = computed
+          }
+          if day.start != currentDayStart {
+            rows.append(.sectionHeader(day.title))
+            identities.append(.sectionHeader(day.title))
+          }
+          currentDayStart = day.start
+          currentDayEnd = day.end
+        }
+        rows.append(.item(buffer[itemIndex], itemIndex: itemIndex))
+        identities.append(.item(id))
       }
-      rows.append(.item(item, itemIndex: itemIndex))
     }
 
-    return rows
+    return (rows, identities)
   }
 
   static func sectionTitle(for date: Date, calendar: Calendar = .current) -> String {
@@ -165,14 +278,14 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
   }
 
   func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
-    guard tableRows.indices.contains(row) else {
-      return HistoryRow.height
-    }
+    tableRows.withUnsafeBufferPointer { buffer in
+      guard buffer.indices.contains(row) else {
+        return HistoryRow.height
+      }
 
-    switch tableRows[row] {
-    case .sectionHeader:
-      return row == 0 ? HistoryRow.sectionHeaderFirstHeight : HistoryRow.sectionHeaderHeight
-    case .item:
+      if buffer[row].isSectionHeader {
+        return row == 0 ? HistoryRow.sectionHeaderFirstHeight : HistoryRow.sectionHeaderHeight
+      }
       return HistoryRow.height
     }
   }

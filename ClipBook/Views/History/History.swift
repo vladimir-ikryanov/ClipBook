@@ -21,11 +21,6 @@ enum HistoryMultipleSelectionChange {
   case removed
 }
 
-private enum HistoryTableRowIdentity: Equatable {
-  case sectionHeader(String)
-  case item(UUID)
-}
-
 enum HistoryKeyboardMultipleSelectionCommand {
   case addCurrent
   case removeCurrent
@@ -48,6 +43,7 @@ final class History: NSView {
   private(set) var availableTagsByID: [Int: Tag] = [:]
   var searchQuery = ""
   private(set) var tableRows: [HistoryTableRow] = []
+  private var tableRowIdentities: [HistoryTableRowIdentity] = []
   private var groupsPinnedFavorites = false
   var showCommandNumberShortcut = true
   var showPreviewForLinks = true
@@ -104,6 +100,11 @@ final class History: NSView {
   private let scrollView = OverlayScrollView()
   private static let scrollBottomPadding: CGFloat = 4
   private static let firstRowPaddingBelowNotice: CGFloat = 8
+  /// Removing many rows in place updates the table's row spans across every
+  /// removed range, which costs more than reloading the table from scratch.
+  static let largeRemovalReloadThreshold: Int = 18_000
+  private static let largeInsertionReloadThreshold: Int = 2_000
+
   /// The trial notice sits right on top of the list. A section header (such as
   /// Today) keeps the first row away from it; without one, as in a list sorted
   /// by size, the list gets the room itself.
@@ -233,15 +234,26 @@ final class History: NSView {
     showsTiles: Bool = false,
     onSelectFirstItem: @escaping (ClipboardItem) -> Void
   ) {
+    let previousItems = self.items
     let previousRows = tableRows
-    let newRows = HistoryTableRowBuilder.build(from: items, groupPinnedFavorites: groupPinnedFavorites, sectionDate: sectionDate)
+    let previousIdentities = tableRowIdentities
     let changesLayout = showsTiles != self.showsTiles
+    let built = HistoryTableRowBuilder.buildWithIdentities(
+      from: items,
+      groupPinnedFavorites: groupPinnedFavorites,
+      sectionDate: sectionDate
+    )
+    let newRows = built.rows
+    let newIdentities = built.identities
     // Typing in the search field mostly takes rows out of the list. The rows
     // that stay are set up again, since they highlight the matches of the query.
     let changesSearchQuery = searchQuery != self.searchQuery
-    let removedRowIndexes = changesLayout || changesSearchQuery
+    let removedRowIndexes = changesLayout || changesSearchQuery || previousIdentities.count - newIdentities.count > Self.largeRemovalReloadThreshold
       ? nil
-      : removedRowIndexes(from: previousRows, to: newRows)
+      : self.removedRowIndexes(from: previousIdentities, to: newIdentities)
+    let insertedRowIndexes = changesLayout || changesSearchQuery || removedRowIndexes != nil || previousIdentities.isEmpty || newIdentities.count - previousIdentities.count > Self.largeInsertionReloadThreshold
+      ? nil
+      : self.removedRowIndexes(from: newIdentities, to: previousIdentities)
 
     self.items = items
     self.availableTags = availableTags
@@ -253,10 +265,11 @@ final class History: NSView {
     preferDraggingAsPlainText = preferPastingAsPlainText
     groupsPinnedFavorites = groupPinnedFavorites
     tableRows = newRows
+    tableRowIdentities = newIdentities
     if changesLayout {
       setShowsTiles(showsTiles)
     }
-    applyTableReload(removedRowIndexes: removedRowIndexes)
+    applyTableReload(removedRowIndexes: removedRowIndexes, insertedRowIndexes: insertedRowIndexes)
     updateScrollContentInsets()
     // Keep the scroll view visible even when the list is empty. Hiding it makes
     // the window's automatic titlebar separator lose the scroll view it tracks,
@@ -270,6 +283,12 @@ final class History: NSView {
       selectedItemIDs: selectedItemIDs,
       onSelectFirstItem: onSelectFirstItem
     )
+    if previousRows.count > 2_000 || previousItems.count > 2_000 {
+      let dropped = (previousItems, previousRows, previousIdentities)
+      DispatchQueue.global(qos: .utility).async {
+        _ = dropped
+      }
+    }
   }
 
   func revealsSensitiveContent(of item: ClipboardItem) -> Bool {
@@ -362,7 +381,7 @@ final class History: NSView {
     }
   }
 
-  private func applyTableReload(removedRowIndexes: IndexSet?) {
+  private func applyTableReload(removedRowIndexes: IndexSet?, insertedRowIndexes: IndexSet? = nil) {
     isSyncingSelection = true
     defer { isSyncingSelection = false }
 
@@ -371,16 +390,45 @@ final class History: NSView {
       return
     }
 
-    guard let removedRowIndexes else {
+    let quickPasteLimit: Int
+    let affectsFirstRow: Bool
+    if let removedRowIndexes {
+      tableView.beginUpdates()
+      tableView.removeRows(at: removedRowIndexes, withAnimation: [])
+      tableView.endUpdates()
+      quickPasteLimit = 9
+      affectsFirstRow = removedRowIndexes.contains(0)
+    } else if let insertedRowIndexes {
+      tableView.beginUpdates()
+      tableView.insertRows(at: insertedRowIndexes, withAnimation: [])
+      tableView.endUpdates()
+      quickPasteLimit = 9 + insertedRowIndexes.count
+      affectsFirstRow = insertedRowIndexes.contains(0)
+    } else {
       tableView.reloadData()
       return
     }
 
-    tableView.beginUpdates()
-    tableView.removeRows(at: removedRowIndexes, withAnimation: [])
-    tableView.endUpdates()
+    if affectsFirstRow {
+      var changedHeaderHeightRows = IndexSet(integersIn: 0..<min(2, tableRows.count))
+      if let secondHeaderRow = tableRows.dropFirst().firstIndex(where: \.isSectionHeader) {
+        changedHeaderHeightRows.insert(secondHeaderRow)
+      }
+      tableView.enumerateAvailableRowViews { _, row in
+        guard tableRows.indices.contains(row),
+              case .sectionHeader(let title) = tableRows[row],
+              let cell = tableView.view(atColumn: 0, row: row, makeIfNecessary: false) as? HistorySectionHeaderCellView else {
+          return
+        }
+        cell.configure(title: title, isFirst: row == 0)
+        changedHeaderHeightRows.insert(row)
+      }
+      if !changedHeaderHeightRows.isEmpty {
+        tableView.noteHeightOfRows(withIndexesChanged: changedHeaderHeightRows)
+      }
+    }
 
-    let changedAccessoryRows = rowsToReloadForQuickPasteIndexes(firstItemRows(limit: 9))
+    let changedAccessoryRows = rowsToReloadForQuickPasteIndexes(firstItemRows(limit: quickPasteLimit))
     if !changedAccessoryRows.isEmpty {
       tableView.reloadData(forRowIndexes: changedAccessoryRows, columnIndexes: IndexSet(integer: 0))
     }
@@ -650,11 +698,12 @@ final class History: NSView {
   }
 
   private func tableRowIndex(forItemID id: UUID) -> Int? {
-    tableRows.firstIndex { row in
-      guard case .item(let item, _) = row else {
-        return false
+    let target = HistoryTableRowIdentity.item(id)
+    return tableRowIdentities.withUnsafeBufferPointer { buffer in
+      for row in buffer.indices where buffer[row] == target {
+        return row
       }
-      return item.id == id
+      return nil
     }
   }
 
@@ -662,47 +711,69 @@ final class History: NSView {
     guard !ids.isEmpty else {
       return []
     }
-
-    return IndexSet(tableRows.indices.filter { row in
-      guard case .item(let item, _) = tableRows[row] else {
-        return false
+    if ids.count == 1, let singleID = ids.first {
+      if let row = tableRowIndex(forItemID: singleID) {
+        return IndexSet(integer: row)
       }
-      return ids.contains(item.id)
-    })
+      return []
+    }
+
+    var indexes = IndexSet()
+    var remaining = ids.count
+    for row in tableRows.indices {
+      guard case .item(let item, _) = tableRows[row] else {
+        continue
+      }
+      if ids.contains(item.id) {
+        indexes.insert(row)
+        remaining -= 1
+        if remaining == 0 {
+          break
+        }
+      }
+    }
+    return indexes
   }
 
-  private func removedRowIndexes(from previousRows: [HistoryTableRow], to newRows: [HistoryTableRow]) -> IndexSet? {
+  private func removedRowIndexes(
+    from previousRows: [HistoryTableRowIdentity],
+    to newRows: [HistoryTableRowIdentity]
+  ) -> IndexSet? {
     guard previousRows.count > newRows.count else {
       return nil
     }
 
-    var newRowIndex = newRows.startIndex
-    var removedIndexes = IndexSet()
+    return previousRows.withUnsafeBufferPointer { prevBuffer in
+      newRows.withUnsafeBufferPointer { newBuffer in
+        var newRowIndex = newBuffer.startIndex
+        var removedIndexes = IndexSet()
+        var removedRunStart: Int?
 
-    for previousRowIndex in previousRows.indices {
-      if newRowIndex < newRows.endIndex,
-         rowIdentity(previousRows[previousRowIndex]) == rowIdentity(newRows[newRowIndex]) {
-        newRowIndex += 1
-      } else {
-        removedIndexes.insert(previousRowIndex)
+        for previousRowIndex in prevBuffer.indices {
+          if newRowIndex < newBuffer.endIndex,
+             prevBuffer[previousRowIndex] == newBuffer[newRowIndex] {
+            if let start = removedRunStart {
+              removedIndexes.insert(integersIn: start..<previousRowIndex)
+              removedRunStart = nil
+            }
+            newRowIndex += 1
+          } else if removedRunStart == nil {
+            removedRunStart = previousRowIndex
+          }
+        }
+        if let start = removedRunStart {
+          removedIndexes.insert(integersIn: start..<prevBuffer.endIndex)
+        }
+
+        guard newRowIndex == newBuffer.endIndex,
+              prevBuffer.count - removedIndexes.count == newBuffer.count,
+              !removedIndexes.isEmpty,
+              !(prevBuffer.count > 2_000 && newBuffer.count < 200 && removedIndexes.rangeView.count > 10) else {
+          return nil
+        }
+
+        return removedIndexes
       }
-    }
-
-    guard newRowIndex == newRows.endIndex,
-          previousRows.count - removedIndexes.count == newRows.count,
-          !removedIndexes.isEmpty else {
-      return nil
-    }
-
-    return removedIndexes
-  }
-
-  private func rowIdentity(_ row: HistoryTableRow) -> HistoryTableRowIdentity {
-    switch row {
-    case .sectionHeader(let title):
-      return .sectionHeader(title)
-    case .item(let item, _):
-      return .item(item.id)
     }
   }
 
@@ -1003,6 +1074,15 @@ final class History: NSView {
   }
 
   private func scrollRowFullyIntoView(_ row: Int, alignToTop: Bool) {
+    if alignToTop, row == 0, !showsTiles {
+      let clipView = scrollView.contentView
+      let insets = scrollView.contentInsets
+      if abs(clipView.bounds.origin.y + insets.top) > 0.5 {
+        clipView.scroll(to: NSPoint(x: clipView.bounds.origin.x, y: -insets.top))
+        scrollView.reflectScrolledClipView(clipView)
+      }
+      return
+    }
     rowsView.layoutSubtreeIfNeeded()
     let rowRect = rowsView.rect(ofRow: row)
     guard !rowRect.isEmpty else {
