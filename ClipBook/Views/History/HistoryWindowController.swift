@@ -70,9 +70,20 @@ private struct HistoryMultiTagMenuSelection {
 
 @MainActor
 final class HistoryContentViewController: NSViewController {
+  private enum HeldSearchUpdate {
+    case search(result: HistorySearchResult, query: String)
+    case clear(query: String, shouldResetSelection: Bool)
+  }
+
   private static let minimumViewSize = NSSize(width: 640, height: 400)
-  private static let searchDebounceDelay: TimeInterval = 0.5
+  private static let searchDebounceDelay: TimeInterval = 0.04
   private static let searchRefreshDelay: TimeInterval = 0.04
+  /// A result set larger than this takes longer than a frame to rebuild in the
+  /// table, so it is held until typing pauses.
+  static let largeResultRowCount = 20_000
+  private static let largeClearRowCount = 4_500
+  /// How long typing stays still before a held large result set is applied.
+  static let typingPause: TimeInterval = 0.2
 
   private let model: AppModel
   private let coordinator: AppCoordinator
@@ -86,6 +97,11 @@ final class HistoryContentViewController: NSViewController {
   private let searchQueue = DispatchQueue(label: "com.ikryanov.clipbook.v2.history-search", qos: .userInitiated)
   private var searchJob: HistorySearchJob?
   private let latestSearchJobResult = OSAllocatedUnfairLock<HistorySearchResult?>(initialState: nil)
+  private var lastCompletedSearchResult: HistorySearchResult?
+  private var heldSearchUpdate: HeldSearchUpdate?
+  private var heldSearchWorkItem: DispatchWorkItem?
+  private var lastTermsChangingKeystrokeTime: TimeInterval = 0
+  private var previousTermsChangingKeystrokeTime: TimeInterval = 0
   private var searchRefreshDebounceWorkItem: DispatchWorkItem?
   private var searchRefreshJob: HistorySearchJob?
   private var copyTextFromImageTitle: String { L10n.string("Copy Text from Image") }
@@ -103,7 +119,7 @@ final class HistoryContentViewController: NSViewController {
   private var previewPaneController: ItemPreviewDialogController?
   // The settings the pane's controller was made with, which it can't change.
   private var previewPaneControllerConfiguration: PreviewPaneControllerConfiguration?
-  private var isPreviewPaneUpdateScheduled = false
+  private var previewPaneUpdateWorkItem: DispatchWorkItem?
   private var commandPalette: CommandPalette?
   private var commandPaletteOutsideClickMonitor: OutsideClickDismissalMonitor?
   private var isModalSheetPresentationPending = false
@@ -195,8 +211,10 @@ final class HistoryContentViewController: NSViewController {
   deinit {
     searchQueryDebounceWorkItem?.cancel()
     searchJob?.cancel()
+    heldSearchWorkItem?.cancel()
     searchRefreshDebounceWorkItem?.cancel()
     searchRefreshJob?.cancel()
+    previewPaneUpdateWorkItem?.cancel()
   }
 
   func attachToolbar(_ toolbar: HistoryToolbar) {
@@ -334,7 +352,7 @@ final class HistoryContentViewController: NSViewController {
   }
 
   func clearSearchAfterHiddenInterval() {
-    guard isSearchActive else {
+    guard isSearchActive || heldSearchUpdate != nil else {
       return
     }
 
@@ -602,6 +620,20 @@ final class HistoryContentViewController: NSViewController {
     latestSearchJobResult.withLock { $0 = nil }
   }
 
+  private func cancelHeldSearchUpdate() {
+    heldSearchWorkItem?.cancel()
+    heldSearchWorkItem = nil
+    if case .search(let result, _) = heldSearchUpdate, result.matches.count > 2_000 {
+      heldSearchUpdate = nil
+      let dropped = result
+      DispatchQueue.global(qos: .utility).async {
+        _ = dropped
+      }
+    } else {
+      heldSearchUpdate = nil
+    }
+  }
+
   private func cancelSearchRefresh() {
     searchRefreshDebounceWorkItem?.cancel()
     searchRefreshDebounceWorkItem = nil
@@ -610,9 +642,11 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func cancelPendingSearchAndRefresh() {
+    lastCompletedSearchResult = nil
     searchQueryDebounceWorkItem?.cancel()
     searchQueryDebounceWorkItem = nil
     cancelPendingSearchJob()
+    cancelHeldSearchUpdate()
     cancelSearchRefresh()
     pendingSearchQuery = nil
   }
@@ -620,17 +654,42 @@ final class HistoryContentViewController: NSViewController {
   private func scheduleSearchQueryUpdate(_ query: String) {
     let terms = HistorySearchTerms(query: query)
     guard !terms.isEmpty else {
+      lastCompletedSearchResult = nil
       searchQueryDebounceWorkItem?.cancel()
       searchQueryDebounceWorkItem = nil
       cancelPendingSearchJob()
       cancelSearchRefresh()
+      if case .clear(_, let capturedReset) = heldSearchUpdate {
+        heldSearchUpdate = .clear(query: query, shouldResetSelection: capturedReset)
+        pendingSearchQuery = query
+        updateToolbarState()
+        return
+      }
       let shouldResetSelection = isSearchActive
+      cancelHeldSearchUpdate()
+      let now = ProcessInfo.processInfo.systemUptime
+      let isTypingBurst = (now - lastTermsChangingKeystrokeTime) < Self.typingPause
+      let listedItemCount = model.isShowingTrash ? model.trashedItems.count : model.items.count
+      if !HistorySearchTerms(query: model.searchQuery).isEmpty,
+         listedItemCount > Self.largeResultRowCount || (isTypingBurst && listedItemCount > Self.largeClearRowCount) {
+        previousTermsChangingKeystrokeTime = lastTermsChangingKeystrokeTime
+        lastTermsChangingKeystrokeTime = now
+        previewPaneUpdateWorkItem?.cancel()
+        previewPaneUpdateWorkItem = nil
+        pendingSearchQuery = query
+        scheduleHeldSearchUpdate(.clear(query: query, shouldResetSelection: shouldResetSelection), delay: Self.typingPause)
+        updateToolbarState()
+        return
+      }
       pendingSearchQuery = nil
       applySearchQuery(query, shouldResetSelection: shouldResetSelection)
       return
     }
 
     if terms == HistorySearchTerms(query: pendingSearchQuery ?? model.searchQuery) {
+      if case .search(let result, _) = heldSearchUpdate {
+        heldSearchUpdate = .search(result: result, query: query)
+      }
       if pendingSearchQuery != nil {
         pendingSearchQuery = query
         updateToolbarState()
@@ -640,9 +699,14 @@ final class HistoryContentViewController: NSViewController {
       return
     }
 
+    previousTermsChangingKeystrokeTime = lastTermsChangingKeystrokeTime
+    lastTermsChangingKeystrokeTime = ProcessInfo.processInfo.systemUptime
+    previewPaneUpdateWorkItem?.cancel()
+    previewPaneUpdateWorkItem = nil
     searchQueryDebounceWorkItem?.cancel()
     searchQueryDebounceWorkItem = nil
     cancelPendingSearchJob()
+    cancelHeldSearchUpdate()
     cancelSearchRefresh()
 
     pendingSearchQuery = query
@@ -678,7 +742,7 @@ final class HistoryContentViewController: NSViewController {
 
     let corpus = model.makeSearchCorpus()
     let locale = Locale.current
-    let previousResult = model.searchResult
+    let previousResult = model.searchResult ?? lastCompletedSearchResult
     let job = HistorySearchJob()
     searchJob = job
     latestSearchJobResult.withLock { $0 = nil }
@@ -705,17 +769,70 @@ final class HistoryContentViewController: NSViewController {
 
     searchJob = nil
     latestSearchJobResult.withLock { $0 = nil }
+    lastCompletedSearchResult = result
+
+    let isRapidTypingBurst = (lastTermsChangingKeystrokeTime - previousTermsChangingKeystrokeTime) < Self.typingPause
+    if result.matchCount > Self.largeResultRowCount
+        || (isRapidTypingBurst && listPaneView.items.count > Self.largeResultRowCount && result.matchCount > 15_000) {
+      let remainingDelay = Self.typingPause - (ProcessInfo.processInfo.systemUptime - lastTermsChangingKeystrokeTime)
+      if remainingDelay > 0 {
+        scheduleHeldSearchUpdate(.search(result: result, query: query), delay: remainingDelay)
+        return
+      }
+    }
+
     pendingSearchQuery = nil
     model.installSearchResult(result)
     applySearchQuery(query, shouldResetSelection: true)
     scheduleSearchRefreshIfNeeded()
   }
 
+  private func scheduleHeldSearchUpdate(_ update: HeldSearchUpdate, delay: TimeInterval) {
+    cancelHeldSearchUpdate()
+    heldSearchUpdate = update
+    let workItem = DispatchWorkItem { [weak self] in
+      self?.applyHeldSearchUpdate()
+    }
+    heldSearchWorkItem = workItem
+    DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
+  }
+
+  private func applyHeldSearchUpdate() {
+    heldSearchWorkItem = nil
+    guard let held = heldSearchUpdate else {
+      return
+    }
+    heldSearchUpdate = nil
+
+    switch held {
+    case .search(let result, let heldQuery):
+      let query = pendingSearchQuery ?? heldQuery
+      guard HistorySearchTerms(query: query) == result.terms else {
+        return
+      }
+      pendingSearchQuery = nil
+      model.installSearchResult(result)
+      applySearchQuery(query, shouldResetSelection: true)
+      scheduleSearchRefreshIfNeeded()
+    case .clear(let heldQuery, let shouldResetSelection):
+      let query = pendingSearchQuery ?? heldQuery
+      guard HistorySearchTerms(query: query).isEmpty else {
+        return
+      }
+      lastCompletedSearchResult = nil
+      pendingSearchQuery = nil
+      applySearchQuery(query, shouldResetSelection: shouldResetSelection)
+    }
+  }
+
   private func flushPendingSearch() {
+    var didApplySearchUpdate = false
+
     if searchQueryDebounceWorkItem != nil, let query = pendingSearchQuery {
       searchQueryDebounceWorkItem?.cancel()
       searchQueryDebounceWorkItem = nil
       applyPendingSearchQuery(query)
+      didApplySearchUpdate = true
     }
 
     if let job = searchJob, let query = pendingSearchQuery {
@@ -733,10 +850,21 @@ final class HistoryContentViewController: NSViewController {
         }
         applySearchQuery(query, shouldResetSelection: true)
         scheduleSearchRefreshIfNeeded()
+        didApplySearchUpdate = true
       }
     }
 
-    reloadListIfNeeded()
+    if heldSearchUpdate != nil {
+      heldSearchWorkItem?.cancel()
+      heldSearchWorkItem = nil
+      applyHeldSearchUpdate()
+      didApplySearchUpdate = true
+    }
+
+    if didApplySearchUpdate || needsListReload {
+      lastTermsChangingKeystrokeTime = 0
+      reloadList()
+    }
   }
 
   private func scheduleSearchRefreshIfNeeded() {
@@ -744,7 +872,8 @@ final class HistoryContentViewController: NSViewController {
     guard !terms.isEmpty,
           searchQueryDebounceWorkItem == nil,
           pendingSearchQuery == nil,
-          searchJob == nil else {
+          searchJob == nil,
+          heldSearchUpdate == nil else {
       cancelSearchRefresh()
       return
     }
@@ -820,6 +949,9 @@ final class HistoryContentViewController: NSViewController {
   }
 
   private func applySearchQuery(_ query: String, shouldResetSelection: Bool = false) {
+    if HistorySearchTerms(query: query).isEmpty {
+      lastCompletedSearchResult = nil
+    }
     guard model.searchQuery != query else {
       updateToolbarState()
       if shouldResetSelection {
@@ -1585,21 +1717,21 @@ final class HistoryContentViewController: NSViewController {
   }
 
   // The selection changes in many ways, often several at once, so the pane
-  // catches up once per pass of the run loop.
+  // catches up once the list has drawn its own update.
   private func setNeedsPreviewPaneUpdate() {
-    guard !isPreviewPaneUpdateScheduled else {
-      return
-    }
-
-    isPreviewPaneUpdateScheduled = true
-    DispatchQueue.main.async { [weak self] in
+    previewPaneUpdateWorkItem?.cancel()
+    let typingRemaining = Self.typingPause - (ProcessInfo.processInfo.systemUptime - lastTermsChangingKeystrokeTime)
+    let delay = typingRemaining > 0 ? typingRemaining + 0.03 : 0.03
+    let workItem = DispatchWorkItem { [weak self] in
       guard let self else {
         return
       }
 
-      self.isPreviewPaneUpdateScheduled = false
+      self.previewPaneUpdateWorkItem = nil
       self.updatePreviewPane()
     }
+    previewPaneUpdateWorkItem = workItem
+    DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
   }
 
   private func updatePreviewPane() {
