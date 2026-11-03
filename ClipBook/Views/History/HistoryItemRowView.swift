@@ -44,18 +44,45 @@ private class NormalBackgroundTextFieldCell: NSTextFieldCell {
 // Draws the text in the vertical middle of the field, so a preview that needs one line sits
 // centered in the space reserved for two, and a longer one fills both lines.
 private final class VerticallyCenteredTextFieldCell: NormalBackgroundTextFieldCell {
+  private struct MeasureKey: Hashable {
+    let text: String
+    let font: NSFont?
+    let lineBreakMode: NSLineBreakMode
+    let width: Int
+    let height: Int
+  }
+
+  private static var cachedHeights: [MeasureKey: CGFloat] = [:]
+
   override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
     super.drawInterior(withFrame: centeredFrame(in: cellFrame), in: controlView)
   }
 
   private func centeredFrame(in cellFrame: NSRect) -> NSRect {
-    let measuringBounds = NSRect(
-      x: 0,
-      y: 0,
-      width: cellFrame.width,
-      height: CGFloat.greatestFiniteMagnitude
+    let key = MeasureKey(
+      text: attributedStringValue.string,
+      font: font,
+      lineBreakMode: lineBreakMode,
+      width: Int(cellFrame.width * 2),
+      height: Int(cellFrame.height * 2)
     )
-    let contentHeight = min(ceil(cellSize(forBounds: measuringBounds).height), cellFrame.height)
+    let contentHeight: CGFloat
+    if let cached = Self.cachedHeights[key] {
+      contentHeight = cached
+    } else {
+      let measuringBounds = NSRect(
+        x: 0,
+        y: 0,
+        width: cellFrame.width,
+        height: cellFrame.height
+      )
+      let measured = min(ceil(cellSize(forBounds: measuringBounds).height), cellFrame.height)
+      if Self.cachedHeights.count > 2_048 {
+        Self.cachedHeights.removeAll(keepingCapacity: true)
+      }
+      Self.cachedHeights[key] = measured
+      contentHeight = measured
+    }
     guard contentHeight < cellFrame.height else {
       return cellFrame
     }
@@ -82,6 +109,10 @@ private enum HistoryPreviewSymbolAppearance {
     font: NSFont,
     in view: NSView
   ) {
+    // 0x97 is the middle UTF-8 byte of "●" (U+25CF, 0xE2 0x97 0x8F); skip regex scanning when no mask dot is present.
+    guard text.utf8.contains(0x97) else {
+      return
+    }
     let ranges = SensitiveContent.maskRanges(in: text)
     guard !ranges.isEmpty else {
       return
@@ -129,14 +160,22 @@ private enum HistorySearchMatchHighlighter {
       return
     }
 
+    var didBeginEditing = false
     var searchRange = text.startIndex..<text.endIndex
     while let range = text.range(
       of: query,
       options: [.caseInsensitive, .diacriticInsensitive],
       range: searchRange
     ) {
+      if !didBeginEditing {
+        didBeginEditing = true
+        attributedString.beginEditing()
+      }
       attributedString.addAttribute(.foregroundColor, value: highlightColor, range: NSRange(range, in: text))
       searchRange = range.upperBound..<text.endIndex
+    }
+    if didBeginEditing {
+      attributedString.endEditing()
     }
   }
 
@@ -303,6 +342,7 @@ enum HistoryTextPreviewFormatter {
   static let tabSymbol = "→"
   static let leadingSpaceSymbol = "·"
   static let layoutCharacterLimit = 2_000
+  private static var previewCache: [String: Preview] = [:]
 
   // The text shown in a row, with the ranges of the symbols put in place of whitespace.
   // The same characters typed in the text itself are not in the ranges, so they keep
@@ -326,6 +366,9 @@ enum HistoryTextPreviewFormatter {
   // Line breaks are shown as return symbols instead of actual breaks, so multi-line text
   // flows as one compact wrapped paragraph in the row view.
   static func preview(from text: String, characterLimit: Int? = layoutCharacterLimit) -> Preview {
+    if characterLimit == layoutCharacterLimit, let cached = previewCache[text] {
+      return cached
+    }
     var preview = Preview()
     let lines = boundedString(from: trimmingLeadingWhitespace(text), characterLimit: characterLimit)
       .split(omittingEmptySubsequences: false) { character in
@@ -338,6 +381,12 @@ enum HistoryTextPreviewFormatter {
       if !isBlankLine(line) {
         appendDisplayLine(line, to: &preview)
       }
+    }
+    if characterLimit == layoutCharacterLimit {
+      if previewCache.count > 2_048 {
+        previewCache.removeAll(keepingCapacity: true)
+      }
+      previewCache[text] = preview
     }
     return preview
   }
@@ -397,11 +446,22 @@ enum HistoryTextPreviewFormatter {
 // drawn centered in that space; longer text wraps and is cut with an ellipsis at the end.
 // A row keeps its preview fields and updates them for each item it shows.
 private final class HistoryTextPreviewField: NSTextField {
+  private struct RenderedState: Equatable {
+    let displayText: String
+    let searchQuery: String
+    let font: NSFont
+    let textColor: NSColor
+    let lineBreakMode: NSLineBreakMode
+    let appearanceName: NSAppearance.Name
+  }
+
+  private static let defaultPrimaryFont = HistoryRow.makePrimaryFont()
+  private var renderedState: RenderedState?
   private var previewText = ""
   private var displayText = ""
   private var symbolRanges: [NSRange] = []
   private var searchQuery = ""
-  private var textFont = HistoryRow.makePrimaryFont()
+  private var textFont = defaultPrimaryFont
   private var lineCount = 1
   private var wrappingMode: NSLineBreakMode = .byWordWrapping
   private var textHeight: CGFloat = 0
@@ -409,7 +469,7 @@ private final class HistoryTextPreviewField: NSTextField {
   var preferredTextColor: NSColor = .labelColor {
     didSet {
       if !isUpdating, preferredTextColor != oldValue {
-        attributedStringValue = makeAttributedPreviewString()
+        applyPreviewAttributedStringIfNeeded()
       }
     }
   }
@@ -447,6 +507,7 @@ private final class HistoryTextPreviewField: NSTextField {
     maximumNumberOfLines: Int,
     wrappingMode: NSLineBreakMode
   ) {
+    isUpdating = true
     if previewText != self.previewText {
       self.previewText = previewText
       let preview = HistoryTextPreviewFormatter.preview(from: previewText)
@@ -469,19 +530,34 @@ private final class HistoryTextPreviewField: NSTextField {
       cell.usesSingleLineMode = lineCount == 1
       cell.lineBreakMode = textLineBreakMode
     }
-    isUpdating = true
     preferredTextColor = textColor
     isUpdating = false
-    attributedStringValue = makeAttributedPreviewString()
+    applyPreviewAttributedStringIfNeeded()
   }
 
   override func viewDidChangeEffectiveAppearance() {
     super.viewDidChangeEffectiveAppearance()
-    attributedStringValue = makeAttributedPreviewString()
+    applyPreviewAttributedStringIfNeeded()
   }
 
   override var intrinsicContentSize: NSSize {
     NSSize(width: NSView.noIntrinsicMetric, height: textHeight)
+  }
+
+  private func applyPreviewAttributedStringIfNeeded() {
+    let state = RenderedState(
+      displayText: displayText,
+      searchQuery: searchQuery,
+      font: textFont,
+      textColor: preferredTextColor,
+      lineBreakMode: textLineBreakMode,
+      appearanceName: effectiveAppearance.name
+    )
+    guard state != renderedState else {
+      return
+    }
+    renderedState = state
+    attributedStringValue = makeAttributedPreviewString()
   }
 
   private func makeAttributedPreviewString() -> NSAttributedString {
@@ -500,14 +576,18 @@ private final class HistoryTextPreviewField: NSTextField {
       ]
     )
 
+    attributedString.beginEditing()
     HistorySearchMatchHighlighter.applyHighlight(
       to: attributedString,
       text: displayText,
       searchQuery: searchQuery
     )
 
-    for range in symbolRanges {
-      attributedString.addAttribute(.foregroundColor, value: previewSymbolColor, range: range)
+    if !symbolRanges.isEmpty {
+      let symbolColor = previewSymbolColor
+      for range in symbolRanges {
+        attributedString.addAttribute(.foregroundColor, value: symbolColor, range: range)
+      }
     }
     HistoryPreviewSymbolAppearance.applyMaskStyle(
       to: attributedString,
@@ -515,6 +595,7 @@ private final class HistoryTextPreviewField: NSTextField {
       font: textFont,
       in: self
     )
+    attributedString.endEditing()
 
     return attributedString
   }
@@ -585,15 +666,20 @@ class HistoryItemRowView: NSTableCellView {
   private var textPreviewFields: [HistoryTextPreviewField] = []
   private var nextTextPreviewFieldIndex = 0
 
-  // The accessory controls are made once and shown or hidden for each item.
+  // The accessory controls are made once when first needed and shown or hidden for each item.
+  private static let quickPasteFont = NSFont.monospacedDigitSystemFont(
+    ofSize: NSFont.systemFontSize,
+    weight: .regular
+  )
+  private var isSelectionOrderColumnConfigured = false
   private let accessoryControlsView = NSStackView()
-  private let sensitiveContentButton = NSButton()
-  private let expiryIndicatorView = ExpiryIndicatorView()
-  private let tagIconsView = NSStackView()
+  private var sensitiveContentButton: NSButton?
+  private var expiryIndicatorView: ExpiryIndicatorView?
+  private var tagIconsView: NSStackView?
   private var tagIconViews: [NSImageView] = []
-  private let favoriteView = FavoriteView.make(isFavorite: false)
+  private var favoriteView: NSImageView?
   private let quickPasteField = QuickPasteLabel(labelWithString: "")
-  private let sourceAppIconView = NSImageView()
+  private let sourceAppIconView = SourceAppIconView()
   private var measuredAccessoryControlsWidth: CGFloat?
 
   /// The width of the accessory controls the row shows, 0 when it shows none.
@@ -667,7 +753,7 @@ class HistoryItemRowView: NSTableCellView {
     self.showsLinkPreview = showsLinkPreview
     self.detectsSensitiveContent = detectsSensitiveContent
     self.onToggleSensitiveContentVisibility = onToggleSensitiveContentVisibility
-    let isMasked = SensitiveContent.isMasked(item, detectsAutomatically: detectsSensitiveContent)
+    let isMasked = Self.isItemMasked(item, detectsAutomatically: detectsSensitiveContent)
     hidesSensitiveContent = isMasked && !revealsSensitiveContent
 
     configureAccessoryControls(item: item, quickPasteIndex: quickPasteIndex, isMasked: isMasked)
@@ -683,14 +769,42 @@ class HistoryItemRowView: NSTableCellView {
   /// rows below a deleted item move up a number, and setting each of them up
   /// again, which for a file looks the file up on disk, kept the list from
   /// showing the item gone. The digits are all of one width, so the row keeps
-  /// its layout. Returns `false` when the row shows no number or is to show
-  /// none, since its accessories are then laid out again by `configure`.
+  /// its layout. Returns `false` when the row has a trailing preview whose
+  /// width depends on whether the number is shown, since its accessories are
+  /// then laid out again by `configure`.
   func updateQuickPasteIndex(_ quickPasteIndex: Int?) -> Bool {
-    guard let quickPasteIndex, !accessoryControlsView.isHidden, !quickPasteField.isHidden else {
-      return false
+    if let quickPasteIndex {
+      guard (!accessoryControlsView.isHidden && !quickPasteField.isHidden) || trailingView == nil else {
+        return false
+      }
+      let shortcut = "⌘\(quickPasteIndex)"
+      if quickPasteField.stringValue != shortcut {
+        quickPasteField.stringValue = shortcut
+      }
+      if quickPasteField.isHidden {
+        quickPasteField.isHidden = false
+        measuredAccessoryControlsWidth = nil
+      }
+      if accessoryControlsView.isHidden {
+        accessoryControlsView.isHidden = false
+        measuredAccessoryControlsWidth = nil
+      }
+      return true
     }
 
-    quickPasteField.stringValue = "⌘\(quickPasteIndex)"
+    guard trailingView == nil else {
+      return quickPasteField.isHidden
+    }
+    if !quickPasteField.isHidden {
+      quickPasteField.stringValue = ""
+      quickPasteField.isHidden = true
+      measuredAccessoryControlsWidth = nil
+    }
+    let shouldHideAccessoryControls = !hasVisibleNonQuickPasteAccessoryControls
+    if accessoryControlsView.isHidden != shouldHideAccessoryControls {
+      accessoryControlsView.isHidden = shouldHideAccessoryControls
+      measuredAccessoryControlsWidth = nil
+    }
     return true
   }
 
@@ -919,12 +1033,16 @@ class HistoryItemRowView: NSTableCellView {
   /// selected while the column is shown, or nothing. The column slides in and out when
   /// `animated`; rows being configured for display take the new state at once.
   func setSelectionOrderBadge(number: Int?, showsPlaceholder: Bool, animated: Bool = false) {
-    selectionOrderBadgeView.number = number
     let shows = number != nil || showsPlaceholder
     guard shows != showsSelectionOrderColumn else {
+      if shows {
+        selectionOrderBadgeView.number = number
+      }
       return
     }
 
+    ensureSelectionOrderColumnConfigured()
+    selectionOrderBadgeView.number = number
     showsSelectionOrderColumn = shows
     let width = shows ? HistoryRow.selectionOrderColumnWidth : 0
     let alpha: CGFloat = shows ? 1 : 0
@@ -1003,7 +1121,6 @@ class HistoryItemRowView: NSTableCellView {
 
   private func configure() {
     typeIconView.translatesAutoresizingMaskIntoConstraints = false
-    configureSelectionOrderColumn()
 
     textColumn.orientation = .vertical
     textColumn.distribution = .fill
@@ -1021,11 +1138,9 @@ class HistoryItemRowView: NSTableCellView {
     rowStack.alignment = .centerY
     rowStack.spacing = HistoryRow.accessorySpacing
     rowStack.translatesAutoresizingMaskIntoConstraints = false
-    rowStack.addArrangedSubview(selectionOrderColumn)
     rowStack.addArrangedSubview(typeIconView)
     rowStack.addArrangedSubview(textColumn)
     rowStack.addArrangedSubview(accessoryControlsView)
-    rowStack.setCustomSpacing(0, after: selectionOrderColumn)
     rowStack.setCustomSpacing(HistoryRow.typeIconContentSpacing, after: typeIconView)
     updateContentSpacing()
 
@@ -1056,7 +1171,11 @@ class HistoryItemRowView: NSTableCellView {
   // The column is a clipping container whose width animates between zero and its full
   // width, so the circle slides in from under the row's leading edge and the content moves
   // right with it.
-  private func configureSelectionOrderColumn() {
+  private func ensureSelectionOrderColumnConfigured() {
+    guard !isSelectionOrderColumnConfigured else {
+      return
+    }
+    isSelectionOrderColumnConfigured = true
     selectionOrderColumn.translatesAutoresizingMaskIntoConstraints = false
     selectionOrderColumn.wantsLayer = true
     selectionOrderColumn.layer?.masksToBounds = true
@@ -1077,6 +1196,8 @@ class HistoryItemRowView: NSTableCellView {
       selectionOrderBadgeView.leadingAnchor.constraint(equalTo: selectionOrderColumn.leadingAnchor),
       selectionOrderBadgeView.centerYAnchor.constraint(equalTo: selectionOrderColumn.centerYAnchor)
     ])
+    rowStack.insertArrangedSubview(selectionOrderColumn, at: 0)
+    rowStack.setCustomSpacing(0, after: selectionOrderColumn)
   }
 
   // Rows of the same kind usually ask for the same views in the same order, and then the
@@ -1117,23 +1238,54 @@ class HistoryItemRowView: NSTableCellView {
   private func configureAccessoryControls(item: ClipboardItem, quickPasteIndex: Int?, isMasked: Bool) {
     measuredAccessoryControlsWidth = nil
     guard isMasked || hasVisibleAccessoryControls(item: item, quickPasteIndex: quickPasteIndex) else {
+      sensitiveContentButton?.isHidden = true
+      expiryIndicatorView?.expiresAt = nil
+      tagIconsView?.isHidden = true
+      favoriteView?.isHidden = true
+      if !quickPasteField.isHidden {
+        quickPasteField.stringValue = ""
+        quickPasteField.isHidden = true
+      }
+      sourceAppIconView.image = nil
+      sourceAppIconView.isHidden = true
       accessoryControlsView.isHidden = true
       return
     }
 
-    sensitiveContentButton.isHidden = !isMasked
     if isMasked {
+      let button = ensureSensitiveContentButton()
+      button.isHidden = false
       let label = hidesSensitiveContent
         ? L10n.string("Show Sensitive Content")
         : L10n.string("Hide Sensitive Content")
-      sensitiveContentButton.toolTip = label
-      sensitiveContentButton.setAccessibilityLabel(label)
+      button.toolTip = label
+      button.setAccessibilityLabel(label)
+    } else if let button = sensitiveContentButton, !button.isHidden {
+      button.isHidden = true
     }
-    expiryIndicatorView.expiresAt = item.expiresAt
+    if let expiresAt = item.expiresAt {
+      ensureExpiryIndicatorView().expiresAt = expiresAt
+    } else if let expiryIndicatorView, expiryIndicatorView.expiresAt != nil {
+      expiryIndicatorView.expiresAt = nil
+    }
     configureTagIcons()
-    favoriteView.isHidden = !item.isFavorite
-    quickPasteField.stringValue = quickPasteIndex.map { "⌘\($0)" } ?? ""
-    quickPasteField.isHidden = quickPasteIndex == nil
+    if item.isFavorite {
+      ensureFavoriteView().isHidden = false
+    } else if let favoriteView, !favoriteView.isHidden {
+      favoriteView.isHidden = true
+    }
+    if let quickPasteIndex {
+      let shortcut = "⌘\(quickPasteIndex)"
+      if quickPasteField.stringValue != shortcut {
+        quickPasteField.stringValue = shortcut
+      }
+      if quickPasteField.isHidden {
+        quickPasteField.isHidden = false
+      }
+    } else if !quickPasteField.isHidden {
+      quickPasteField.stringValue = ""
+      quickPasteField.isHidden = true
+    }
     configureSourceAppIcon(for: item)
     accessoryControlsView.isHidden = false
   }
@@ -1153,7 +1305,7 @@ class HistoryItemRowView: NSTableCellView {
       }
     }
     quickPasteField.preferredTextColor = makeQuickPasteTextColor(isSelected: isSelected)
-    if !sensitiveContentButton.isHidden {
+    if let sensitiveContentButton, !sensitiveContentButton.isHidden {
       sensitiveContentButton.image = makeSensitiveContentButtonImage(isSelected: isSelected)
     }
   }
@@ -1169,28 +1321,15 @@ class HistoryItemRowView: NSTableCellView {
 
   // The controls sit in this order, and a stack view leaves the hidden ones out.
   private func makeAccessoryControls() {
-    configureSensitiveContentButton()
-
-    tagIconsView.orientation = .horizontal
-    tagIconsView.distribution = .fill
-    tagIconsView.spacing = HistoryRow.tagIconSpacing
-    tagIconsView.alignment = .centerY
-    tagIconsView.translatesAutoresizingMaskIntoConstraints = false
-    tagIconsView.setContentHuggingPriority(.required, for: .horizontal)
-    tagIconsView.setContentCompressionResistancePriority(.required, for: .horizontal)
-
     quickPasteField.preferredTextColor = .tertiaryLabelColor
-    quickPasteField.font = .monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+    quickPasteField.font = Self.quickPasteFont
     quickPasteField.alignment = .right
+    quickPasteField.isHidden = true
 
-    sourceAppIconView.imageScaling = .scaleProportionallyDown
     sourceAppIconView.translatesAutoresizingMaskIntoConstraints = false
-    NSLayoutConstraint.activate([
-      sourceAppIconView.widthAnchor.constraint(equalToConstant: HistoryRow.sourceAppIconSize),
-      sourceAppIconView.heightAnchor.constraint(equalToConstant: HistoryRow.sourceAppIconSize)
-    ])
+    sourceAppIconView.isHidden = true
 
-    [sensitiveContentButton, expiryIndicatorView, tagIconsView, favoriteView, quickPasteField, sourceAppIconView].forEach { view in
+    [quickPasteField, sourceAppIconView].forEach { view in
       view.setContentHuggingPriority(.required, for: .horizontal)
       accessoryControlsView.addArrangedSubview(view)
     }
@@ -1207,15 +1346,70 @@ class HistoryItemRowView: NSTableCellView {
 
   // An eye shows the hidden content and a crossed out eye hides it again, as in a
   // password field.
-  private func configureSensitiveContentButton() {
-    sensitiveContentButton.target = self
-    sensitiveContentButton.action = #selector(toggleSensitiveContentVisibility)
-    sensitiveContentButton.isBordered = false
-    sensitiveContentButton.imagePosition = .imageOnly
-    sensitiveContentButton.refusesFirstResponder = true
-    sensitiveContentButton.translatesAutoresizingMaskIntoConstraints = false
-    sensitiveContentButton.setContentCompressionResistancePriority(.required, for: .horizontal)
-    sensitiveContentButton.isHidden = true
+  private func ensureSensitiveContentButton() -> NSButton {
+    if let sensitiveContentButton {
+      return sensitiveContentButton
+    }
+    let button = NSButton()
+    button.title = ""
+    button.target = self
+    button.action = #selector(toggleSensitiveContentVisibility)
+    button.isBordered = false
+    button.imagePosition = .imageOnly
+    button.refusesFirstResponder = true
+    button.translatesAutoresizingMaskIntoConstraints = false
+    button.setContentHuggingPriority(.required, for: .horizontal)
+    button.setContentCompressionResistancePriority(.required, for: .horizontal)
+    sensitiveContentButton = button
+    accessoryControlsView.insertArrangedSubview(button, at: 0)
+    return button
+  }
+
+  private func ensureTagIconsView() -> NSStackView {
+    if let tagIconsView {
+      return tagIconsView
+    }
+    let stack = NSStackView()
+    stack.orientation = .horizontal
+    stack.distribution = .fill
+    stack.spacing = HistoryRow.tagIconSpacing
+    stack.alignment = .centerY
+    stack.translatesAutoresizingMaskIntoConstraints = false
+    stack.setContentHuggingPriority(.required, for: .horizontal)
+    stack.setContentCompressionResistancePriority(.required, for: .horizontal)
+    tagIconsView = stack
+    let index = [sensitiveContentButton as NSView?, expiryIndicatorView].compactMap { $0 }.count
+    accessoryControlsView.insertArrangedSubview(stack, at: index)
+    return stack
+  }
+
+  private func ensureExpiryIndicatorView() -> ExpiryIndicatorView {
+    if let expiryIndicatorView {
+      return expiryIndicatorView
+    }
+    let indicator = ExpiryIndicatorView()
+    expiryIndicatorView = indicator
+    accessoryControlsView.insertArrangedSubview(indicator, at: sensitiveContentButton != nil ? 1 : 0)
+    return indicator
+  }
+
+  private func ensureFavoriteView() -> NSImageView {
+    if let favoriteView {
+      return favoriteView
+    }
+    let imageView = NSImageView()
+    imageView.image = HistorySymbolIcon.make(
+      systemName: "star",
+      tintColor: .labelColor,
+      pointSize: NSFont.systemFontSize,
+      weight: .regular
+    )
+    imageView.setContentHuggingPriority(.required, for: .horizontal)
+    favoriteView = imageView
+    let quickPasteIndex = accessoryControlsView.arrangedSubviews.firstIndex(of: quickPasteField)
+      ?? accessoryControlsView.arrangedSubviews.count
+    accessoryControlsView.insertArrangedSubview(imageView, at: quickPasteIndex)
+    return imageView
   }
 
   // The eye takes the color of the quick paste shortcut next to it. The color is part of
@@ -1259,7 +1453,9 @@ class HistoryItemRowView: NSTableCellView {
       bundleIdentifier: item.sourceBundleIdentifier,
       appName: item.sourceAppName
     )
-    sourceAppIconView.image = icon
+    if sourceAppIconView.image !== icon {
+      sourceAppIconView.image = icon
+    }
     sourceAppIconView.toolTip = item.sourceAppName
     sourceAppIconView.isHidden = icon == nil
   }
@@ -1268,11 +1464,70 @@ class HistoryItemRowView: NSTableCellView {
     item.isFavorite || item.expiresAt != nil || quickPasteIndex != nil || !itemTags.isEmpty || item.hasSourceApp
   }
 
+  private static func isItemMasked(_ item: ClipboardItem, detectsAutomatically: Bool) -> Bool {
+    guard item.kind.canHoldSensitiveContent else {
+      return false
+    }
+    switch item.sensitivity {
+    case .sensitive:
+      return true
+    case .notSensitive:
+      return false
+    case .none:
+      guard detectsAutomatically, mayContainAutoDetectedSecret(in: item.previewText) else {
+        return false
+      }
+      return SensitiveContent.isMasked(item, detectsAutomatically: true)
+    }
+  }
+
+  // Every SensitiveContentDetector pattern contains at least one ASCII digit (0-9),
+  // delimiter (-, _, :, =), or 2-byte prefix ("AI" for AIza, "IA" for AKIA/ASIA,
+  // "G." for SG., "yJ" for eyJ) within the 4,000-character row detection prefix.
+  private static func mayContainAutoDetectedSecret(in text: String) -> Bool {
+    var previousByte: UInt8 = 0
+    var inspectedBytes = 0
+    for byte in text.utf8 {
+      if (byte >= 0x30 && byte <= 0x39)
+          || byte == 0x2D || byte == 0x5F
+          || byte == 0x3A || byte == 0x3D {
+        return true
+      }
+      if (previousByte == 0x41 && byte == 0x49)
+          || (previousByte == 0x49 && byte == 0x41)
+          || (previousByte == 0x47 && byte == 0x2E)
+          || (previousByte == 0x79 && byte == 0x4A) {
+        return true
+      }
+      previousByte = byte
+      inspectedBytes += 1
+      if inspectedBytes >= 16_000 {
+        return true
+      }
+    }
+    return false
+  }
+
+  private var hasVisibleNonQuickPasteAccessoryControls: Bool {
+    (sensitiveContentButton?.isHidden == false)
+      || (expiryIndicatorView?.isHidden == false)
+      || (tagIconsView?.isHidden == false)
+      || (favoriteView?.isHidden == false)
+      || !sourceAppIconView.isHidden
+  }
+
   private func configureTagIcons() {
+    guard !itemTags.isEmpty else {
+      if let tagIconsView, !tagIconsView.isHidden {
+        tagIconsView.isHidden = true
+      }
+      return
+    }
+    let stack = ensureTagIconsView()
     while tagIconViews.count < itemTags.count {
       let imageView = makeTagIconView()
       tagIconViews.append(imageView)
-      tagIconsView.addArrangedSubview(imageView)
+      stack.addArrangedSubview(imageView)
     }
 
     for (index, imageView) in tagIconViews.enumerated() {
@@ -1291,7 +1546,7 @@ class HistoryItemRowView: NSTableCellView {
       imageView.toolTip = tag.name
       imageView.isHidden = false
     }
-    tagIconsView.isHidden = itemTags.isEmpty
+    stack.isHidden = false
   }
 
   private func makeTagIconView() -> NSImageView {
@@ -1305,6 +1560,29 @@ class HistoryItemRowView: NSTableCellView {
       imageView.heightAnchor.constraint(equalToConstant: HistoryRow.tagIconSize)
     ])
     return imageView
+  }
+}
+
+// Draws the 20pt source application icon without NSImageView's per-row
+// IconServices placeholder lookup or NSControl gesture recognizer setup.
+private final class SourceAppIconView: NSView {
+  var image: NSImage? {
+    didSet {
+      if image !== oldValue {
+        needsDisplay = true
+      }
+    }
+  }
+
+  override var intrinsicContentSize: NSSize {
+    NSSize(width: HistoryRow.sourceAppIconSize, height: HistoryRow.sourceAppIconSize)
+  }
+
+  override func draw(_ dirtyRect: NSRect) {
+    guard let image else {
+      return
+    }
+    image.draw(in: bounds)
   }
 }
 
@@ -1479,12 +1757,19 @@ private final class HistoryItemTypeIconView: NSView {
   )
 
   private let symbolImageView = NSImageView()
-  private let lockBadgeView = NSImageView()
+  private var lockBadgeView: NSImageView?
   private var content: Content?
 
   var showsLockBadge = false {
     didSet {
-      lockBadgeView.isHidden = !showsLockBadge
+      guard showsLockBadge != oldValue else {
+        return
+      }
+      if showsLockBadge {
+        ensureLockBadgeView().isHidden = false
+      } else {
+        lockBadgeView?.isHidden = true
+      }
     }
   }
 
@@ -1505,12 +1790,14 @@ private final class HistoryItemTypeIconView: NSView {
       width: Self.smallImageSize,
       height: Self.smallImageSize
     )
-    lockBadgeView.frame = NSRect(
-      x: newSize.width - Self.lockBadgeSize - Self.lockBadgeInset,
-      y: Self.lockBadgeInset,
-      width: Self.lockBadgeSize,
-      height: Self.lockBadgeSize
-    )
+    if let lockBadgeView {
+      lockBadgeView.frame = NSRect(
+        x: newSize.width - Self.lockBadgeSize - Self.lockBadgeInset,
+        y: Self.lockBadgeInset,
+        width: Self.lockBadgeSize,
+        height: Self.lockBadgeSize
+      )
+    }
   }
 
   override func draw(_ dirtyRect: NSRect) {
@@ -1582,18 +1869,31 @@ private final class HistoryItemTypeIconView: NSView {
     symbolImageView.translatesAutoresizingMaskIntoConstraints = true
     translatesAutoresizingMaskIntoConstraints = false
     addSubview(symbolImageView)
+  }
 
-    lockBadgeView.image = HistorySymbolIcon.make(
+  private func ensureLockBadgeView() -> NSImageView {
+    if let lockBadgeView {
+      return lockBadgeView
+    }
+    let badge = NSImageView()
+    badge.image = HistorySymbolIcon.make(
       systemName: "lock.circle.fill",
       paletteColors: [.white, .systemGreen],
       pointSize: Self.lockBadgeSymbolSize,
       weight: .regular
     )
-    lockBadgeView.imageScaling = .scaleNone
-    lockBadgeView.imageAlignment = .alignCenter
-    lockBadgeView.translatesAutoresizingMaskIntoConstraints = true
-    lockBadgeView.isHidden = true
-    addSubview(lockBadgeView)
+    badge.imageScaling = .scaleNone
+    badge.imageAlignment = .alignCenter
+    badge.translatesAutoresizingMaskIntoConstraints = true
+    badge.frame = NSRect(
+      x: bounds.width - Self.lockBadgeSize - Self.lockBadgeInset,
+      y: Self.lockBadgeInset,
+      width: Self.lockBadgeSize,
+      height: Self.lockBadgeSize
+    )
+    addSubview(badge)
+    lockBadgeView = badge
+    return badge
   }
 
   private var showsSymbol: Bool {
