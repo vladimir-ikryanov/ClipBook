@@ -67,7 +67,7 @@ struct HistoryTileSelectionState: Equatable {
 /// smoothly as a short one.
 @MainActor
 final class HistoryTileGridView: NSView {
-  var rows: [HistoryTableRow] = []
+  var rows = HistoryTableRows()
   var configureTile: ((HistoryTileView, ClipboardItem, Int) -> Void)?
   var selectionState: ((Int) -> HistoryTileSelectionState)?
   var contextualMenuRow: Int?
@@ -132,7 +132,7 @@ final class HistoryTileGridView: NSView {
 
   /// Shows `rows` from scratch: the selection is cleared and every tile in
   /// sight is set up again.
-  func reload(rows: [HistoryTableRow]) {
+  func reload(rows: HistoryTableRows) {
     self.rows = rows
     selectedRowIndexes = []
     contextualMenuRow = nil
@@ -340,9 +340,8 @@ final class HistoryTileGridView: NSView {
     var y: CGFloat = 0
     var column = 0
 
-    for (row, tableRow) in rows.enumerated() {
-      switch tableRow {
-      case .sectionHeader:
+    for row in rows.indices {
+      if rows.isSectionHeader(at: row) {
         if column > 0 {
           y += tileHeight
           column = 0
@@ -350,7 +349,7 @@ final class HistoryTileGridView: NSView {
         let height = row == 0 ? HistoryRow.sectionHeaderFirstHeight : HistoryRow.sectionHeaderHeight
         frames.append(NSRect(x: 0, y: y, width: width, height: height))
         y += height
-      case .item:
+      } else {
         if column == 0 {
           lines.append([])
         }
