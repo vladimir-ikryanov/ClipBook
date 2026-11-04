@@ -42,7 +42,7 @@ final class History: NSView {
   }
   private(set) var availableTagsByID: [Int: Tag] = [:]
   var searchQuery = ""
-  private(set) var tableRows: [HistoryTableRow] = []
+  private(set) var tableRows = HistoryTableRows()
   private var tableRowIdentities: [HistoryTableRowIdentity] = []
   private var groupsPinnedFavorites = false
   var showCommandNumberShortcut = true
@@ -382,7 +382,7 @@ final class History: NSView {
 
     if !showsTiles {
       isSyncingSelection = true
-      tileGrid.reload(rows: [])
+      tileGrid.reload(rows: HistoryTableRows())
       isSyncingSelection = false
     }
 
@@ -426,7 +426,7 @@ final class History: NSView {
 
     if affectsFirstRow {
       var changedHeaderHeightRows = IndexSet(integersIn: 0..<min(2, tableRows.count))
-      if let secondHeaderRow = tableRows.dropFirst().firstIndex(where: \.isSectionHeader) {
+      if let secondHeaderRow = tableRows.indices.dropFirst().first(where: tableRows.isSectionHeader(at:)) {
         changedHeaderHeightRows.insert(secondHeaderRow)
       }
       tableView.enumerateAvailableRowViews { _, row in
@@ -736,10 +736,10 @@ final class History: NSView {
     var indexes = IndexSet()
     var remaining = ids.count
     for row in tableRows.indices {
-      guard case .item(let item, _) = tableRows[row] else {
+      guard let itemID = tableRows.itemID(at: row) else {
         continue
       }
-      if ids.contains(item.id) {
+      if ids.contains(itemID) {
         indexes.insert(row)
         remaining -= 1
         if remaining == 0 {
@@ -800,7 +800,7 @@ final class History: NSView {
 
     var indexes = IndexSet()
     for row in tableRows.indices {
-      guard case .item = tableRows[row] else {
+      guard tableRows.isItem(at: row) else {
         continue
       }
 
@@ -969,15 +969,7 @@ final class History: NSView {
   }
 
   private func isSelectableRow(_ row: Int) -> Bool {
-    guard tableRows.indices.contains(row) else {
-      return false
-    }
-
-    if case .item = tableRows[row] {
-      return true
-    }
-
-    return false
+    tableRows.isItem(at: row)
   }
 
   private func firstSelectableRow() -> Int? {
@@ -1027,12 +1019,7 @@ final class History: NSView {
   }
 
   private func firstSectionHeaderRow() -> Int? {
-    tableRows.firstIndex { row in
-      if case .sectionHeader = row {
-        return true
-      }
-      return false
-    }
+    tableRows.indices.first(where: tableRows.isSectionHeader(at:))
   }
 
   private func scrollToRevealSelectedRow(_ row: Int) {
