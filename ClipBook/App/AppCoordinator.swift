@@ -57,6 +57,7 @@ final class AppCoordinator: ObservableObject {
   private static let retentionCheckInterval: TimeInterval = 60 * 60
   private static let orphanedStoredFileMinimumAge: TimeInterval = 10 * 60
   private var retentionTimer: Timer?
+  private var expiryTimer: Timer?
   private var isRetentionPromptPresented = false
   private var isHistoryArchiveOperationRunning = false
   private var areGlobalShortcutsSuspended = false
@@ -147,6 +148,8 @@ final class AppCoordinator: ObservableObject {
     clearHistoryAfterRebootIfNeeded()
     applyRetention()
     scheduleRetentionChecks()
+    deleteExpiredItems()
+    observeWakeForExpiredItems()
     observeTrashVisibility()
     configurePanel()
     configureShortcuts()
@@ -175,6 +178,7 @@ final class AppCoordinator: ObservableObject {
     }
     cancelLinkPreviewTasks()
     retentionTimer?.invalidate()
+    expiryTimer?.invalidate()
     clipboardMonitor.stop()
     globalShortcuts.unregisterAll()
   }
@@ -301,7 +305,8 @@ final class AppCoordinator: ObservableObject {
       return false
     }
 
-    let items = model.items
+    // Content kept for a limited time does not outlive it in an archive.
+    let items = model.items.filter { $0.expiresAt == nil }
     let tags = model.tags
     // FileManager is thread-safe; the archive is written on a background queue.
     nonisolated(unsafe) let fileManager = self.fileManager
@@ -323,11 +328,13 @@ final class AppCoordinator: ObservableObject {
         let result = ClipBookArchiveExportResult(url: url, itemCount: items.count, tagCount: tags.count)
         DispatchQueue.main.async {
           self.isHistoryArchiveOperationRunning = false
+          self.deleteExpiredItems()
           completion(.success(result))
         }
       } catch {
         DispatchQueue.main.async {
           self.isHistoryArchiveOperationRunning = false
+          self.deleteExpiredItems()
           completion(.failure(error))
         }
       }
@@ -379,6 +386,7 @@ final class AppCoordinator: ObservableObject {
           self.clipboardMonitor.start(preferences: self.model.preferences)
           self.loadHistory()
           self.isHistoryArchiveOperationRunning = false
+          self.deleteExpiredItems()
           completion(.success(result))
           if !expiredItems.isEmpty {
             self.confirmKeepingExpiredImportedItems(expiredItems)
@@ -391,6 +399,7 @@ final class AppCoordinator: ObservableObject {
           }
           self.clipboardMonitor.start(preferences: self.model.preferences)
           self.isHistoryArchiveOperationRunning = false
+          self.deleteExpiredItems()
           completion(.failure(error))
         }
       }
@@ -1531,12 +1540,29 @@ final class AppCoordinator: ObservableObject {
 
   // MARK: - Sensitive content
 
-  /// Applies the "Ignore sensitive content" setting. Turning it on only stops
-  /// new secrets from coming in: when the history already holds some, the user
-  /// is asked whether to delete them, and declining keeps them.
-  func ignoreSensitiveContentDidChange() {
+  /// Applies how long confidential content is kept. It applies to content
+  /// copied from now on.
+  func setConfidentialContentLifetime(_ lifetime: Int) {
+    guard lifetime != model.preferences.confidentialContentLifetime else {
+      return
+    }
+
+    model.preferences.confidentialContentLifetime = lifetime
     savePreferences()
-    guard model.preferences.ignoreSensitiveContent else {
+  }
+
+  /// Applies how long sensitive content is kept. A period applies to secrets
+  /// copied from now on. Not saving them only stops new secrets from coming
+  /// in: when the history already holds some, the user is asked whether to
+  /// delete them, and declining keeps them.
+  func setSensitiveContentLifetime(_ lifetime: Int) {
+    guard lifetime != model.preferences.sensitiveContentLifetime else {
+      return
+    }
+
+    model.preferences.sensitiveContentLifetime = lifetime
+    savePreferences()
+    guard lifetime == ContentLifetime.dontSave else {
       return
     }
 
@@ -1619,6 +1645,54 @@ final class AppCoordinator: ObservableObject {
     } catch {
       model.lastError = error.localizedDescription
     }
+  }
+
+  /// Deletes the items whose own expiry date has come, such as confidential
+  /// content kept for a limited time, and sets a timer for the next one.
+  /// They skip the Trash. While an archive is written or read, the items are
+  /// left alone; this runs again once that is done.
+  private func deleteExpiredItems() {
+    expiryTimer?.invalidate()
+    expiryTimer = nil
+    guard !isHistoryArchiveOperationRunning else {
+      return
+    }
+
+    do {
+      let now = Date()
+      let expiredItems = try historyStore.fetchItems(expiringBy: now)
+      if !expiredItems.isEmpty {
+        try removeFromHistory(expiredItems)
+      }
+      if let nextExpiryDate = try historyStore.nextExpiryDate() {
+        scheduleExpiryCheck(at: max(nextExpiryDate, now.addingTimeInterval(1)))
+      }
+    } catch {
+      model.lastError = error.localizedDescription
+    }
+  }
+
+  private func scheduleExpiryCheck(at date: Date) {
+    let timer = Timer(fire: date, interval: 0, repeats: false) { [weak self] _ in
+      Task { @MainActor [weak self] in
+        self?.deleteExpiredItems()
+      }
+    }
+    timer.tolerance = 1
+    RunLoop.main.add(timer, forMode: .common)
+    expiryTimer = timer
+  }
+
+  /// A timer does not count the time the Mac sleeps, so items that came due
+  /// during sleep are deleted on wake.
+  private func observeWakeForExpiredItems() {
+    NSWorkspace.shared.notificationCenter
+      .publisher(for: NSWorkspace.didWakeNotification)
+      .receive(on: RunLoop.main)
+      .sink { [weak self] _ in
+        self?.deleteExpiredItems()
+      }
+      .store(in: &cancellables)
   }
 
   /// Items also expire while nothing is being copied, so the check repeats
@@ -2788,6 +2862,9 @@ extension AppCoordinator: PasteboardMonitorDelegate {
     }
     model.insert(item)
     applyRetention()
+    if item.expiresAt != nil {
+      deleteExpiredItems()
+    }
     resetPasteNextPointer()
     playSound(.copy)
     capturedClipboardItems.send(item)

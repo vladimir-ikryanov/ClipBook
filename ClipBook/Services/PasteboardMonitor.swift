@@ -119,7 +119,7 @@ final class PasteboardMonitor {
             lastChangeCount: lastChangeCount,
             retriesUnchangedPasteboard: deferredReadAttemptsRemaining > 0,
             ignoresTransientContent: preferences.ignoreTransientContent,
-            ignoresConcealedContent: preferences.ignoreConcealedContent,
+            ignoresConcealedContent: preferences.confidentialContentLifetime == ContentLifetime.dontSave,
             ignoredApplicationEntries: ignoredApplicationEntries,
             imagesDirectory: supportDirectory.appendingPathComponent("Images", isDirectory: true),
             findStoredImage: findStoredImage
@@ -210,7 +210,11 @@ final class PasteboardMonitor {
             case .richText, .text:
                 break
             }
-            guard let item = capturableItem(makeItem(from: content), ownsAssetFile: ownsAssetFile) else {
+            guard let item = capturableItem(
+                makeItem(from: content),
+                isConcealed: content.isConcealed,
+                ownsAssetFile: ownsAssetFile
+            ) else {
                 return nil
             }
 
@@ -293,22 +297,39 @@ final class PasteboardMonitor {
 
     /// An item of a kind whose "Keep history" period is Never is dropped,
     /// together with any file the reader has already stored for it. So is a
-    /// secret when sensitive content is ignored.
-    private func capturableItem(_ item: ClipboardItem, ownsAssetFile: Bool) -> ClipboardItem? {
-        guard !preferences.capturesHistory(for: item.kind) || isIgnoredSensitiveContent(item) else {
-            return item
+    /// secret when sensitive content is not saved. Confidential content and
+    /// secrets kept for a limited time get their expiry date here, and
+    /// confidential content is hidden in the history.
+    private func capturableItem(_ item: ClipboardItem, isConcealed: Bool, ownsAssetFile: Bool) -> ClipboardItem? {
+        var lifetimes: [Int] = []
+        if isConcealed {
+            lifetimes.append(preferences.confidentialContentLifetime)
+        }
+        if preferences.sensitiveContentLifetime != ContentLifetime.keep, isSensitiveContent(item) {
+            lifetimes.append(preferences.sensitiveContentLifetime)
         }
 
-        if ownsAssetFile, let assetPath = item.assetPath {
-            try? fileManager.removeItem(atPath: assetPath)
+        guard preferences.capturesHistory(for: item.kind), !lifetimes.contains(ContentLifetime.dontSave) else {
+            if ownsAssetFile, let assetPath = item.assetPath {
+                try? fileManager.removeItem(atPath: assetPath)
+            }
+            return nil
         }
-        return nil
+
+        var item = item
+        if isConcealed {
+            item.sensitivity = .sensitive
+        }
+        if let lifetime = lifetimes.filter({ $0 > 0 }).min() {
+            item.expiresAt = ContentLifetime.expiryDate(for: lifetime, from: item.copiedAt)
+        }
+        return item
     }
 
-    /// A copy of an item the user said is not sensitive still goes to the
-    /// history, whatever its content looks like.
-    private func isIgnoredSensitiveContent(_ item: ClipboardItem) -> Bool {
-        guard preferences.ignoreSensitiveContent, SensitiveContent.containsSensitiveContent(item) else {
+    /// A copy of an item the user said is not sensitive is not treated as a
+    /// secret, whatever its content looks like.
+    private func isSensitiveContent(_ item: ClipboardItem) -> Bool {
+        guard SensitiveContent.containsSensitiveContent(item) else {
             return false
         }
 
@@ -463,6 +484,11 @@ final class PasteboardMonitor {
         targetItem.byteSize = mergedText.utf8.count
         targetItem.copyCount += 1
         targetItem.linkPreviewDetails = nil
+        // The merged text holds the copied content, so it goes when that
+        // content would have gone, unless the user keeps the item.
+        if let sourceExpiry = sourceItem.expiresAt, !targetItem.isKeptByUser {
+            targetItem.expiresAt = min(targetItem.expiresAt ?? sourceExpiry, sourceExpiry)
+        }
         targetItem = targetItem.rebuildingSearchText(tagNames: targetItem.tags.compactMap { tagNamesByID[$0] })
         return targetItem
     }

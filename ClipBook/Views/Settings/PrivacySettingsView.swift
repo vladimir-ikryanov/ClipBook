@@ -14,12 +14,13 @@ struct PrivacySettingsView: View {
         }
 
         SettingsSectionGroup() {
-            SettingsToggle(title: L10n.string("Ignore confidential content"), description: L10n.string("Skip password-manager and other concealed pasteboard data."), isOn: $model.preferences.ignoreConcealedContent)
+            SettingsRow(title: L10n.string("Keep confidential content"), description: L10n.string("Passwords and other data that password managers mark as confidential.")) {
+                lifetimePicker(L10n.string("Keep confidential content"), selection: confidentialContentLifetime)
+            }
+            SettingsRow(title: L10n.string("Keep sensitive content"), description: L10n.string("Passwords, API keys, access tokens and card numbers found in copied text.")) {
+                lifetimePicker(L10n.string("Keep sensitive content"), selection: sensitiveContentLifetime)
+            }
             SettingsToggle(title: L10n.string("Ignore transient content"), description: L10n.string("Skip temporary pasteboard values that apps do not intend to store."), isOn: $model.preferences.ignoreTransientContent)
-            SettingsToggle(title: L10n.string("Ignore sensitive content"), description: L10n.string("Skip copied passwords, API keys, access tokens and card numbers, and do not save them in the history."), isOn: $model.preferences.ignoreSensitiveContent)
-                .onChange(of: model.preferences.ignoreSensitiveContent) { _ in
-                    coordinator.ignoreSensitiveContentDidChange()
-                }
         }
 
         VStack(alignment: .leading, spacing: 10) {
@@ -39,5 +40,37 @@ struct PrivacySettingsView: View {
                 .padding(.horizontal, 0)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    // The pop-up is as wide as its longest period, so it stays small next
+    // to the description. Never and Unlimited are set apart from the periods.
+    private func lifetimePicker(_ title: String, selection: Binding<Int>) -> some View {
+        Picker(title, selection: selection) {
+            Text(ContentLifetime.title(for: ContentLifetime.dontSave)).tag(ContentLifetime.dontSave)
+            Divider()
+            ForEach(ContentLifetime.periods, id: \.self) { lifetime in
+                Text(ContentLifetime.title(for: lifetime)).tag(lifetime)
+            }
+            Divider()
+            Text(ContentLifetime.title(for: ContentLifetime.keep)).tag(ContentLifetime.keep)
+        }
+        .labelsHidden()
+        .fixedSize()
+    }
+
+    // Changes go through the coordinator, which asks before deleting the
+    // secrets already in the history when they are no longer to be saved.
+    private var confidentialContentLifetime: Binding<Int> {
+        Binding(
+            get: { model.preferences.confidentialContentLifetime },
+            set: { coordinator.setConfidentialContentLifetime($0) }
+        )
+    }
+
+    private var sensitiveContentLifetime: Binding<Int> {
+        Binding(
+            get: { model.preferences.sensitiveContentLifetime },
+            set: { coordinator.setSensitiveContentLifetime($0) }
+        )
     }
 }

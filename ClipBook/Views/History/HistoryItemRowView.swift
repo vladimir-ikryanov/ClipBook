@@ -588,6 +588,7 @@ class HistoryItemRowView: NSTableCellView {
   // The accessory controls are made once and shown or hidden for each item.
   private let accessoryControlsView = NSStackView()
   private let sensitiveContentButton = NSButton()
+  private let expiryIndicatorView = ExpiryIndicatorView()
   private let tagIconsView = NSStackView()
   private var tagIconViews: [NSImageView] = []
   private let favoriteView = FavoriteView.make(isFavorite: false)
@@ -1128,6 +1129,7 @@ class HistoryItemRowView: NSTableCellView {
       sensitiveContentButton.toolTip = label
       sensitiveContentButton.setAccessibilityLabel(label)
     }
+    expiryIndicatorView.expiresAt = item.expiresAt
     configureTagIcons()
     favoriteView.isHidden = !item.isFavorite
     quickPasteField.stringValue = quickPasteIndex.map { "⌘\($0)" } ?? ""
@@ -1188,7 +1190,7 @@ class HistoryItemRowView: NSTableCellView {
       sourceAppIconView.heightAnchor.constraint(equalToConstant: HistoryRow.sourceAppIconSize)
     ])
 
-    [sensitiveContentButton, tagIconsView, favoriteView, quickPasteField, sourceAppIconView].forEach { view in
+    [sensitiveContentButton, expiryIndicatorView, tagIconsView, favoriteView, quickPasteField, sourceAppIconView].forEach { view in
       view.setContentHuggingPriority(.required, for: .horizontal)
       accessoryControlsView.addArrangedSubview(view)
     }
@@ -1263,7 +1265,7 @@ class HistoryItemRowView: NSTableCellView {
   }
 
   private func hasVisibleAccessoryControls(item: ClipboardItem, quickPasteIndex: Int?) -> Bool {
-    item.isFavorite || quickPasteIndex != nil || !itemTags.isEmpty || item.hasSourceApp
+    item.isFavorite || item.expiresAt != nil || quickPasteIndex != nil || !itemTags.isEmpty || item.hasSourceApp
   }
 
   private func configureTagIcons() {

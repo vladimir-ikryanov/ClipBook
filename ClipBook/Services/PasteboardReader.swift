@@ -64,6 +64,8 @@ nonisolated struct PasteboardContent: Sendable {
     var payload: Payload
     var sourceAppName: String?
     var sourceBundleIdentifier: String?
+    /// The writer marked the content as confidential, as password managers do.
+    var isConcealed = false
 }
 
 // What an image is read for when it is captured: the text it shows, and the
@@ -102,7 +104,8 @@ nonisolated enum PasteboardReader {
         let content = PasteboardContent(
             payload: payload,
             sourceAppName: frontmostApplication?.localizedName,
-            sourceBundleIdentifier: frontmostApplication?.bundleIdentifier
+            sourceBundleIdentifier: frontmostApplication?.bundleIdentifier,
+            isConcealed: isConcealed(pasteboard)
         )
         return PasteboardReadResult(changeCount: changeCount, outcome: .content(content))
     }
@@ -122,8 +125,7 @@ nonisolated enum PasteboardReader {
             return false
         }
 
-        if request.ignoresConcealedContent,
-           types.contains(.init("org.nspasteboard.ConcealedType")) {
+        if request.ignoresConcealedContent, isConcealed(pasteboard) {
             return false
         }
 
@@ -137,6 +139,10 @@ nonisolated enum PasteboardReader {
         }
 
         return true
+    }
+
+    private static func isConcealed(_ pasteboard: NSPasteboard) -> Bool {
+        (pasteboard.types ?? []).contains(.init("org.nspasteboard.ConcealedType"))
     }
 
     private static func readPayload(from pasteboard: NSPasteboard, request: PasteboardReadRequest) -> PasteboardContent.Payload? {

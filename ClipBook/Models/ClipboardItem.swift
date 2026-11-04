@@ -61,8 +61,22 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
     var copiedAt: Date
     var firstCopiedAt: Date
     var byteSize: Int
-    var isFavorite: Bool
-    var tags: [Int]
+    /// Starring an item keeps it for good, so it no longer expires.
+    var isFavorite: Bool {
+        didSet {
+            if isFavorite {
+                expiresAt = nil
+            }
+        }
+    }
+    /// Tagging an item keeps it for good, so it no longer expires.
+    var tags: [Int] {
+        didSet {
+            if !tags.isEmpty {
+                expiresAt = nil
+            }
+        }
+    }
     var searchText: String
     var copyCount: Int
     var linkPreviewDetails: LinkPreviewDetails?
@@ -76,6 +90,10 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
     /// or to show it although it looks like a secret. None leaves it to the
     /// app to tell.
     var sensitivity: ItemSensitivity?
+    /// When the item is deleted for good, or nil when it stays until the
+    /// history's own limits remove it. Confidential and sensitive content can
+    /// be kept for a limited time only. Starring or tagging the item keeps it.
+    var expiresAt: Date?
     /// When the item was moved to the Trash, or nil while it is in the
     /// history. The store keeps it in a column of its own rather than in the
     /// payload, so it is not among the coding keys.
@@ -105,7 +123,8 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
         copySequenceID: Date? = nil,
         copySequenceOrder: Int? = nil,
         favoriteOrder: Int? = nil,
-        sensitivity: ItemSensitivity? = nil
+        sensitivity: ItemSensitivity? = nil,
+        expiresAt: Date? = nil
     ) {
         self.id = id
         self.kind = kind
@@ -141,6 +160,7 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
         self.copySequenceOrder = copySequenceOrder
         self.favoriteOrder = favoriteOrder
         self.sensitivity = sensitivity
+        self.expiresAt = expiresAt
     }
 
     enum CodingKeys: String, CodingKey {
@@ -170,6 +190,7 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
         case copySequenceOrder
         case favoriteOrder
         case sensitivity
+        case expiresAt
     }
 
     init(from decoder: Decoder) throws {
@@ -208,6 +229,13 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
         sensitivity = (try? container.decodeIfPresent(String.self, forKey: .sensitivity))
             .flatMap { $0 }
             .flatMap(ItemSensitivity.init(rawValue:))
+        expiresAt = try container.decodeIfPresent(Date.self, forKey: .expiresAt)
+    }
+
+    /// Whether the item is kept for good whatever its content: the user
+    /// starred or tagged it.
+    var isKeptByUser: Bool {
+        isFavorite || !tags.isEmpty
     }
 
     /// Whether this value holds the formatting, rather than only knowing the

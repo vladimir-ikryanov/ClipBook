@@ -42,6 +42,11 @@ protocol HistoryStore {
     func incrementCopyCount(_ id: UUID) throws
     func recordAction(_ id: UUID, copiedAt: Date?, incrementsCopyCount: Bool) throws -> ClipboardItem?
     func fetchItems(expiredBy policy: HistoryRetentionPolicy) throws -> [ClipboardItem]
+    /// The items whose own expiry date is at or before `date`, the items in
+    /// the Trash included.
+    func fetchItems(expiringBy date: Date) throws -> [ClipboardItem]
+    /// The earliest expiry date of an item in the store, if any item has one.
+    func nextExpiryDate() throws -> Date?
     /// The latest item of the kind with the content key, the one a capture of
     /// that content updates. It may be in the Trash, which a capture brings
     /// it back from, but an item in the history comes first.

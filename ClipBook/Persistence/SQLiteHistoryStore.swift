@@ -167,6 +167,9 @@ final class SQLiteHistoryStore: HistoryStore {
                 qrCodeText: existingItem.qrCodeText
             )
             existingItem.copyCount += 1
+            // How long the content is kept follows its latest copy, unless
+            // the user starred or tagged the item to keep it.
+            existingItem.expiresAt = existingItem.isKeptByUser ? nil : item.expiresAt
             try upsert(existingItem)
             if existingItem.deletedAt != nil {
                 try restoreClips(ids: [existingItem.id])
@@ -193,8 +196,8 @@ final class SQLiteHistoryStore: HistoryStore {
         let writesFormatting = item.isFormattingLoaded || !item.hasFormatting
         let payload = try encoder.encode(item.unloadingFormatting())
         let sql = """
-        INSERT INTO clips (id, kind, copiedAt, favorite, sourceApp, searchText, contentKey, payload, html, rtf, deletedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO clips (id, kind, copiedAt, favorite, sourceApp, searchText, contentKey, payload, html, rtf, deletedAt, expiresAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
             kind = excluded.kind,
             copiedAt = excluded.copiedAt,
@@ -202,7 +205,8 @@ final class SQLiteHistoryStore: HistoryStore {
             sourceApp = excluded.sourceApp,
             searchText = excluded.searchText,
             contentKey = excluded.contentKey,
-            payload = excluded.payload\(writesFormatting ? ", html = excluded.html, rtf = excluded.rtf" : "");
+            payload = excluded.payload,
+            expiresAt = excluded.expiresAt\(writesFormatting ? ", html = excluded.html, rtf = excluded.rtf" : "");
         """
         let statement = try prepare(sql)
         defer { sqlite3_finalize(statement) }
@@ -220,6 +224,13 @@ final class SQLiteHistoryStore: HistoryStore {
             sqlite3_bind_double(statement, 11, deletedAt.timeIntervalSince1970)
         } else {
             sqlite3_bind_null(statement, 11)
+        }
+        // The payload has the expiry date too; the column is there to find
+        // the items that are due without reading every payload.
+        if let expiresAt = item.expiresAt {
+            sqlite3_bind_double(statement, 12, expiresAt.timeIntervalSince1970)
+        } else {
+            sqlite3_bind_null(statement, 12)
         }
         try step(statement)
     }
@@ -463,6 +474,43 @@ final class SQLiteHistoryStore: HistoryStore {
         return items
     }
 
+    func fetchItems(expiringBy date: Date) throws -> [ClipboardItem] {
+        lock.lock()
+        defer { lock.unlock() }
+
+        try open()
+        let statement = try prepare("""
+            SELECT payload, copiedAt, deletedAt FROM clips
+            WHERE expiresAt IS NOT NULL AND expiresAt <= ?
+            ORDER BY copiedAt DESC;
+            """)
+        defer { sqlite3_finalize(statement) }
+        sqlite3_bind_double(statement, 1, date.timeIntervalSince1970)
+
+        var items: [ClipboardItem] = []
+        while sqlite3_step(statement) == SQLITE_ROW {
+            if let item = try? decodeItem(from: statement) {
+                items.append(item)
+            }
+        }
+        return items
+    }
+
+    func nextExpiryDate() throws -> Date? {
+        lock.lock()
+        defer { lock.unlock() }
+
+        try open()
+        let statement = try prepare("SELECT MIN(expiresAt) FROM clips WHERE expiresAt IS NOT NULL;")
+        defer { sqlite3_finalize(statement) }
+        guard sqlite3_step(statement) == SQLITE_ROW,
+              sqlite3_column_type(statement, 0) != SQLITE_NULL else {
+            return nil
+        }
+
+        return Date(timeIntervalSince1970: sqlite3_column_double(statement, 0))
+    }
+
     private func open() throws {
         guard db == nil else {
             return
@@ -570,10 +618,14 @@ final class SQLiteHistoryStore: HistoryStore {
         if try !columnExists("deletedAt", in: "clips") {
             try exec("ALTER TABLE clips ADD COLUMN deletedAt REAL;")
         }
+        if try !columnExists("expiresAt", in: "clips") {
+            try exec("ALTER TABLE clips ADD COLUMN expiresAt REAL;")
+        }
         try exec("CREATE INDEX IF NOT EXISTS idx_clips_copiedAt ON clips(copiedAt DESC);")
         try exec("CREATE INDEX IF NOT EXISTS idx_clips_kind ON clips(kind);")
         try exec("CREATE INDEX IF NOT EXISTS idx_clips_contentKey ON clips(kind, contentKey);")
         try exec("CREATE INDEX IF NOT EXISTS idx_clips_deletedAt ON clips(deletedAt);")
+        try exec("CREATE INDEX IF NOT EXISTS idx_clips_expiresAt ON clips(expiresAt) WHERE expiresAt IS NOT NULL;")
         // Earlier versions created a full-text index that was never filled or queried.
         try exec("DROP TABLE IF EXISTS clips_fts;")
         try exec("""

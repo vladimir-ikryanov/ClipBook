@@ -123,6 +123,10 @@ struct AppPreferences: Codable, Equatable {
     // The single-click action used to be a toggle that could only paste.
     private enum LegacyCodingKeys: String, CodingKey {
         case pasteOnClick
+        // Confidential and sensitive content used to be either ignored or
+        // kept, before it could be kept for a while.
+        case ignoreConcealedContent
+        case ignoreSensitiveContent
     }
     static let defaultHistoryWindowWidth: Double = 620
     static let defaultHistoryWindowHeight: Double = 700
@@ -200,9 +204,13 @@ struct AppPreferences: Codable, Equatable {
     var doubleClickAction = HistoryItemActionPreference.paste.rawValue
     var numberKeyAction = HistoryItemActionPreference.paste.rawValue
     var ignoreTransientContent = true
-    var ignoreConcealedContent = true
+    /// How long content a password manager marks as confidential is kept,
+    /// in seconds. See `ContentLifetime` for the special values.
+    var confidentialContentLifetime = ContentLifetime.dontSave
     var detectSensitiveContent = true
-    var ignoreSensitiveContent = false
+    /// How long copied passwords, keys, tokens and card numbers are kept, in
+    /// seconds. See `ContentLifetime` for the special values.
+    var sensitiveContentLifetime = ContentLifetime.keep
     var showDuringScreenSharing = false
     var ignoredAppsText = ""
     var textRetentionDays = Self.unlimitedRetentionDays
@@ -356,9 +364,22 @@ struct AppPreferences: Codable, Equatable {
             preferenceValue: try container.decodeIfPresent(String.self, forKey: .numberKeyAction) ?? defaults.numberKeyAction
         ).rawValue
         ignoreTransientContent = try container.decodeIfPresent(Bool.self, forKey: .ignoreTransientContent) ?? defaults.ignoreTransientContent
-        ignoreConcealedContent = try container.decodeIfPresent(Bool.self, forKey: .ignoreConcealedContent) ?? defaults.ignoreConcealedContent
+        let legacyContentContainer = try decoder.container(keyedBy: LegacyCodingKeys.self)
+        if let lifetime = try container.decodeIfPresent(Int.self, forKey: .confidentialContentLifetime) {
+            confidentialContentLifetime = ContentLifetime.validated(lifetime)
+        } else if let ignores = try legacyContentContainer.decodeIfPresent(Bool.self, forKey: .ignoreConcealedContent) {
+            confidentialContentLifetime = ignores ? ContentLifetime.dontSave : ContentLifetime.keep
+        } else {
+            confidentialContentLifetime = defaults.confidentialContentLifetime
+        }
         detectSensitiveContent = try container.decodeIfPresent(Bool.self, forKey: .detectSensitiveContent) ?? defaults.detectSensitiveContent
-        ignoreSensitiveContent = try container.decodeIfPresent(Bool.self, forKey: .ignoreSensitiveContent) ?? defaults.ignoreSensitiveContent
+        if let lifetime = try container.decodeIfPresent(Int.self, forKey: .sensitiveContentLifetime) {
+            sensitiveContentLifetime = ContentLifetime.validated(lifetime)
+        } else if let ignores = try legacyContentContainer.decodeIfPresent(Bool.self, forKey: .ignoreSensitiveContent) {
+            sensitiveContentLifetime = ignores ? ContentLifetime.dontSave : ContentLifetime.keep
+        } else {
+            sensitiveContentLifetime = defaults.sensitiveContentLifetime
+        }
         showDuringScreenSharing = try container.decodeIfPresent(Bool.self, forKey: .showDuringScreenSharing) ?? defaults.showDuringScreenSharing
         ignoredAppsText = try container.decodeIfPresent(String.self, forKey: .ignoredAppsText) ?? defaults.ignoredAppsText
         textRetentionDays = try container.decodeIfPresent(Int.self, forKey: .textRetentionDays) ?? defaults.textRetentionDays
