@@ -103,7 +103,10 @@ final class History: NSView {
   /// Removing many rows in place updates the table's row spans across every
   /// removed range, which costs more than reloading the table from scratch.
   static let largeRemovalReloadThreshold: Int = 18_000
-  private static let largeInsertionReloadThreshold: Int = 2_000
+  /// Inserting rows in place lets rows that stay on screen keep their row views, as
+  /// when clearing a search that found the newest items, while a reload makes every
+  /// visible row anew. Past this many rows, inserting them costs more than that.
+  private static let largeInsertionReloadThreshold: Int = 10_000
 
   /// The trial notice sits right on top of the list. A section header (such as
   /// Today) keeps the first row away from it; without one, as in a list sorted
