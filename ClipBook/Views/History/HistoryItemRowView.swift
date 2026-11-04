@@ -369,7 +369,7 @@ enum HistoryTextPreviewFormatter {
   struct Preview {
     fileprivate(set) var text = ""
     fileprivate(set) var symbolRanges: [NSRange] = []
-    private var length = 0
+    fileprivate var length = 0
 
     fileprivate mutating func append(_ string: String) {
       text += string
@@ -408,6 +408,77 @@ enum HistoryTextPreviewFormatter {
       previewCache[text] = preview
     }
     return preview
+  }
+
+  // No character a row draws is narrower than this share of the font size, apart from
+  // those `drawsNarrowly` picks out, which are not counted as taking room.
+  static let narrowestCharacterWidthInEms: CGFloat = 0.1
+
+  /// More characters than `lineCount` lines of `width` points can show in a font of
+  /// `fontSize`: as many as fit if every one were as narrow as a character can be.
+  static func visibleCharacterBudget(width: CGFloat, fontSize: CGFloat, lineCount: Int) -> Int {
+    let perLine = Int((width / (fontSize * narrowestCharacterWidthInEms)).rounded(.up))
+    return max(1, lineCount) * perLine + 16
+  }
+
+  /// Whether a character can draw nothing or next to nothing: format and control
+  /// characters, marks and modifiers, ignorable and unassigned code points, private use
+  /// characters whose look is unknown, the thin spaces, and the few letters and symbols
+  /// the system font draws empty on their own. Such characters do not count toward what
+  /// a row can show.
+  static func drawsNarrowly(_ scalar: Unicode.Scalar) -> Bool {
+    let properties = scalar.properties
+    if properties.isDefaultIgnorableCodePoint {
+      return true
+    }
+    switch scalar.value {
+    case 0x0674, 0x0D4E, 0x0EB3, 0x1CD3, 0xFC5E...0xFC63, 0xFE70...0xFE7F, 0xFFFC:
+      return true
+    default:
+      break
+    }
+    switch properties.generalCategory {
+    case .control, .format, .nonspacingMark, .enclosingMark, .spacingMark, .modifierLetter, .modifierSymbol,
+         .lineSeparator, .paragraphSeparator, .surrogate, .privateUse, .unassigned:
+      return true
+    case .spaceSeparator:
+      return scalar.value != 0x20 && scalar.value != 0xA0 && scalar.value != 0x3000
+    default:
+      return false
+    }
+  }
+
+  /// `preview` cut after `budget` characters that take room, when it has more. Drawing
+  /// a long text takes time in proportion to its length even though a row shows only
+  /// its start, so a row is given no more than it could show.
+  static func cut(_ preview: Preview, toVisibleCharacters budget: Int) -> (preview: Preview, isCut: Bool) {
+    let text = preview.text
+    var counted = 0
+    var index = text.startIndex
+    while index < text.endIndex {
+      if text[index].unicodeScalars.contains(where: { !drawsNarrowly($0) }) {
+        counted += 1
+        if counted > budget {
+          break
+        }
+      }
+      index = text.index(after: index)
+    }
+    guard index < text.endIndex else {
+      return (preview, false)
+    }
+
+    let cutLength = text.utf16.distance(from: text.utf16.startIndex, to: index.samePosition(in: text.utf16) ?? text.utf16.endIndex)
+    var result = Preview()
+    result.text = String(text[..<index]) + "..."
+    result.length = cutLength + 3
+    result.symbolRanges = preview.symbolRanges.compactMap { range in
+      guard range.location < cutLength else {
+        return nil
+      }
+      return NSRange(location: range.location, length: min(range.length, cutLength - range.location))
+    }
+    return (result, true)
   }
 
   // Leading spaces and line breaks are left out of the preview. Text made only of
@@ -477,8 +548,13 @@ private final class HistoryTextPreviewField: NSTextField {
   private static let defaultPrimaryFont = HistoryRow.makePrimaryFont()
   private var renderedState: RenderedState?
   private var previewText = ""
+  private var fullPreview = HistoryTextPreviewFormatter.Preview()
   private var displayText = ""
   private var symbolRanges: [NSRange] = []
+  // The width the field is known to be at most, and the width its cut preview still fills
+  // (unlimited while it shows the whole preview).
+  private var widthHint: CGFloat?
+  private var coveredWidth = CGFloat.infinity
   var searchQuery = "" {
     didSet {
       if !isUpdating, searchQuery != oldValue {
@@ -530,15 +606,15 @@ private final class HistoryTextPreviewField: NSTextField {
     font: NSFont,
     textColor: NSColor,
     maximumNumberOfLines: Int,
-    wrappingMode: NSLineBreakMode
+    wrappingMode: NSLineBreakMode,
+    widthHint: CGFloat? = nil
   ) {
     isUpdating = true
     if previewText != self.previewText {
       self.previewText = previewText
-      let preview = HistoryTextPreviewFormatter.preview(from: previewText)
-      displayText = preview.text
-      symbolRanges = preview.symbolRanges
+      fullPreview = HistoryTextPreviewFormatter.preview(from: previewText)
     }
+    self.widthHint = widthHint
     self.searchQuery = searchQuery
     self.wrappingMode = wrappingMode
     if font != textFont || maximumNumberOfLines != lineCount || textHeight == 0 {
@@ -557,7 +633,41 @@ private final class HistoryTextPreviewField: NSTextField {
     }
     preferredTextColor = textColor
     isUpdating = false
+    cutPreviewToWidth()
     applyPreviewAttributedStringIfNeeded()
+  }
+
+  // The preview is cut to what the field could show at the wider of its own width and
+  // the width it was given, rounded up so a window being resized cuts it again only now
+  // and then. Without a width it keeps the whole preview.
+  private func cutPreviewToWidth() {
+    let width = max(bounds.width, widthHint ?? 0)
+    guard width > 0 else {
+      displayText = fullPreview.text
+      symbolRanges = fullPreview.symbolRanges
+      coveredWidth = .infinity
+      return
+    }
+
+    let roundedWidth = (width / 256).rounded(.up) * 256
+    let budget = HistoryTextPreviewFormatter.visibleCharacterBudget(
+      width: roundedWidth,
+      fontSize: textFont.pointSize,
+      lineCount: lineCount
+    )
+    let (preview, isCut) = HistoryTextPreviewFormatter.cut(fullPreview, toVisibleCharacters: budget)
+    displayText = preview.text
+    symbolRanges = preview.symbolRanges
+    coveredWidth = isCut ? roundedWidth : .infinity
+  }
+
+  // A field grown wider than its cut preview fills gets more of it.
+  override func setFrameSize(_ newSize: NSSize) {
+    super.setFrameSize(newSize)
+    if newSize.width > coveredWidth {
+      cutPreviewToWidth()
+      applyPreviewAttributedStringIfNeeded()
+    }
   }
 
   override func viewDidChangeEffectiveAppearance() {
@@ -962,7 +1072,8 @@ class HistoryItemRowView: NSTableCellView {
       font: font,
       textColor: textColor,
       maximumNumberOfLines: maximumNumberOfLines,
-      wrappingMode: wrappingMode
+      wrappingMode: wrappingMode,
+      widthHint: rowTableWidth
     )
     return field
   }
