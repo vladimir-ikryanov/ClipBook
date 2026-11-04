@@ -4,3 +4,5 @@ Releases
 .build
 build
 .DS_Store
+# Per-user Xcode state: window layout, selection, scheme visibility
+xcuserdata/
