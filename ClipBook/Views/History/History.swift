@@ -236,7 +236,12 @@ final class History: NSView {
     let previousRows = tableRows
     let newRows = HistoryTableRowBuilder.build(from: items, groupPinnedFavorites: groupPinnedFavorites, sectionDate: sectionDate)
     let changesLayout = showsTiles != self.showsTiles
-    let removedRowIndexes = changesLayout ? nil : removedRowIndexes(from: previousRows, to: newRows)
+    // Typing in the search field mostly takes rows out of the list. The rows
+    // that stay are set up again, since they highlight the matches of the query.
+    let changesSearchQuery = searchQuery != self.searchQuery
+    let removedRowIndexes = changesLayout || changesSearchQuery
+      ? nil
+      : removedRowIndexes(from: previousRows, to: newRows)
 
     self.items = items
     self.availableTags = availableTags
