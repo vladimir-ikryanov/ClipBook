@@ -99,7 +99,33 @@ final class ItemPreviewDetailsView: NSView {
     var width: CGFloat = 0
   }
 
+  // Everything about a field except its value. Fields of the same shapes are shown
+  // by the same views, which then only take the new values.
+  private struct FieldShape: Equatable {
+    let title: String
+    let key: FieldKey?
+    let hasIcon: Bool
+    let showsValue: Bool
+
+    init(_ field: Field) {
+      title = field.title
+      key = field.key
+      hasIcon = field.icon != nil
+      showsValue = field.showsValue
+    }
+  }
+
+  // The parts of a field view that hold its value.
+  private struct FieldValueViews {
+    let container: NSView
+    let valueField: NSTextField
+    let iconView: NSImageView?
+  }
+
   private var fieldViews: [NSView] = []
+  private var fieldValueViews: [FieldValueViews] = []
+  private var fieldShapes: [FieldShape] = []
+  private var fieldsArrangement: Arrangement?
   private var separatorViews: [NSView] = []
   private var valueFieldsByKey: [FieldKey: NSTextField] = [:]
   private var contentHeight: CGFloat = 0
@@ -384,15 +410,47 @@ final class ItemPreviewDetailsView: NSView {
   // MARK: - Building
 
   private func rebuild(for item: ClipboardItem) {
-    fieldViews.forEach { $0.removeFromSuperview() }
-    separatorViews.forEach { $0.removeFromSuperview() }
-    fieldViews = []
-    separatorViews = []
-
-    valueFieldsByKey = [:]
     // The history row already shows the source app of the item next to it,
     // so the pane of the history window leaves it out of its details.
     let fields = Self.fields(for: item, includesSource: style == .floating)
+    let shapes = fields.map(FieldShape.init)
+    // Moving through the history mostly shows items with the same fields, and
+    // replacing their views each time is far slower than updating their values.
+    if !fieldViews.isEmpty, fieldsArrangement == arrangement, shapes == fieldShapes {
+      for (field, views) in zip(fields, fieldValueViews) {
+        views.valueField.stringValue = field.value
+        views.iconView?.image = field.icon
+        if arrangement == .inline {
+          views.iconView?.setAccessibilityLabel(field.value)
+        }
+        views.container.toolTip = field.value
+        // List rows place their value by hand, from its new width.
+        views.container.needsLayout = true
+      }
+    } else {
+      buildFieldViews(for: fields)
+      fieldShapes = shapes
+      fieldsArrangement = arrangement
+    }
+
+    needsLayout = true
+    // The list is measured for the pane's width. The inline fields are measured
+    // for the unwrapped width, so the panel has a height before it is ever laid
+    // out; layout() corrects it once the fields wrap.
+    contentHeight = arrangement == .list
+      ? preferredHeight(forWidth: bounds.width)
+      : preferredHeight(forWidth: preferredWidth)
+    invalidateIntrinsicContentSize()
+  }
+
+  private func buildFieldViews(for fields: [Field]) {
+    fieldViews.forEach { $0.removeFromSuperview() }
+    separatorViews.forEach { $0.removeFromSuperview() }
+    fieldViews = []
+    fieldValueViews = []
+    separatorViews = []
+    valueFieldsByKey = [:]
+
     if arrangement == .list {
       for (index, field) in fields.enumerated() {
         let rowView = ItemPreviewDetailsListRowView(
@@ -406,10 +464,8 @@ final class ItemPreviewDetailsView: NSView {
         }
         fieldsView.addSubview(rowView)
         fieldViews.append(rowView)
+        fieldValueViews.append(FieldValueViews(container: rowView, valueField: rowView.valueField, iconView: rowView.iconView))
       }
-      needsLayout = true
-      contentHeight = preferredHeight(forWidth: bounds.width)
-      invalidateIntrinsicContentSize()
       return
     }
 
@@ -420,22 +476,17 @@ final class ItemPreviewDetailsView: NSView {
         separatorViews.append(separatorView)
       }
 
-      let (fieldView, valueField) = Self.makeFieldView(field)
+      let views = Self.makeFieldView(field)
       if let key = field.key {
-        valueFieldsByKey[key] = valueField
+        valueFieldsByKey[key] = views.valueField
       }
-      fieldsView.addSubview(fieldView)
-      fieldViews.append(fieldView)
+      fieldsView.addSubview(views.container)
+      fieldViews.append(views.container)
+      fieldValueViews.append(views)
     }
-
-    needsLayout = true
-    // Measured for the unwrapped width, so the panel has a height before it
-    // is ever laid out; layout() corrects it once the fields wrap.
-    contentHeight = preferredHeight(forWidth: preferredWidth)
-    invalidateIntrinsicContentSize()
   }
 
-  private static func makeFieldView(_ field: Field) -> (view: NSView, valueField: NSTextField) {
+  private static func makeFieldView(_ field: Field) -> FieldValueViews {
     // The value is the prominent line and the title the quieter caption
     // under it.
     let valueField = NSTextField(labelWithString: field.value)
@@ -451,8 +502,10 @@ final class ItemPreviewDetailsView: NSView {
     titleField.lineBreakMode = .byTruncatingTail
 
     var valueView: NSView = valueField
+    var fieldIconView: NSImageView?
     if let icon = field.icon {
       let iconView = NSImageView()
+      fieldIconView = iconView
       iconView.image = icon
       iconView.setAccessibilityLabel(field.value)
       iconView.imageScaling = .scaleProportionallyDown
@@ -480,7 +533,7 @@ final class ItemPreviewDetailsView: NSView {
     // Long values are truncated to keep the bar compact, so the full value has
     // to stay reachable.
     fieldStack.toolTip = field.value
-    return (fieldStack, valueField)
+    return FieldValueViews(container: fieldStack, valueField: valueField, iconView: fieldIconView)
   }
 
   // MARK: - Fields
@@ -629,7 +682,7 @@ private final class ItemPreviewDetailsListRowView: NSView {
 
   let valueField: NSTextField
   private let titleField: NSTextField
-  private let iconView: NSImageView?
+  let iconView: NSImageView?
   private let isShaded: Bool
 
   init(title: String, value: String, icon: NSImage?, isShaded: Bool) {
