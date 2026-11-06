@@ -51,6 +51,7 @@ struct LicenseSettingsView: View {
     @EnvironmentObject private var coordinator: AppCoordinator
 
     @State private var showActivationError = false
+    @State private var errorAlertTitle = ""
     @State private var activationErrorMessage = ""
     @State private var draftLicenseKey = ""
     @State private var isRequestInProgress = false
@@ -125,7 +126,7 @@ struct LicenseSettingsView: View {
             fillLicenseKeyFromClipboardIfNeeded()
             coordinator.refreshLicensingState()
         }
-        .alert(L10n.string("The license key cannot be activated :("), isPresented: $showActivationError) {
+        .alert(errorAlertTitle, isPresented: $showActivationError) {
             Button(L10n.string("Help me")) {
                 openActivationHelp()
             }
@@ -201,6 +202,7 @@ struct LicenseSettingsView: View {
                 try await coordinator.activateLicenseKey(draftLicenseKey)
                 draftLicenseKey = model.preferences.licenseKey
             } catch {
+                errorAlertTitle = L10n.string("The license key cannot be activated :(")
                 activationErrorMessage = error.localizedDescription
                 showActivationError = true
             }
@@ -214,6 +216,7 @@ struct LicenseSettingsView: View {
             do {
                 try await coordinator.deactivateLicenseKey()
             } catch {
+                errorAlertTitle = L10n.string("The license key cannot be deactivated :(")
                 activationErrorMessage = error.localizedDescription
                 showActivationError = true
             }
