@@ -248,6 +248,29 @@ enum ViewsAndWindowsTests {
             #expect(harness.preferencesStore.load().historyWindowWidth == Double(frame.width))
         }
 
+        @Test
+        @MainActor
+        func windowFrameIsNotSavedBeforeTheWindowHasBeenShown() throws {
+            TestSupport.ensureAppKitInitialized()
+
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+
+            var initialPrefs = harness.model.preferences
+            initialPrefs.openWindowStrategy = HistoryWindowOpenStrategy.lastLocation.rawValue
+            initialPrefs.historyWindowX = 222
+            initialPrefs.historyWindowY = 333
+            initialPrefs.historyWindowWidth = 520
+            initialPrefs.historyWindowHeight = 460
+            harness.model.preferences = initialPrefs
+            harness.preferencesStore.save(initialPrefs)
+
+            let historyWindow = HistoryWindow(model: harness.model, coordinator: harness.coordinator)
+            historyWindow.saveWindowFrame()
+            #expect(harness.model.preferences.historyWindowX == 222)
+            #expect(harness.model.preferences.historyWindowY == 333)
+        }
+
         @MainActor
         private static func findEditableTextView(in root: NSView) -> NSTextView? {
             if let textView = root as? NSTextView, textView.isEditable {
