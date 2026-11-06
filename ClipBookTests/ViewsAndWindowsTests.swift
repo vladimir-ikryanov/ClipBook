@@ -842,6 +842,37 @@ enum ViewsAndWindowsTests {
 extension SharedProcessStateTests {
     @Suite
     struct SettingsViewWiringTests {
+        @Test(.timeLimit(.minutes(1)))
+        @MainActor
+        func changingAPreferenceInTheSettingsWindowSavesIt() async throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+
+            let hostingView = NSHostingView(
+                rootView: SettingsView(model: harness.model).environmentObject(harness.coordinator)
+            )
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 680, height: 500),
+                styleMask: [.titled],
+                backing: .buffered,
+                defer: false
+            )
+            window.isReleasedWhenClosed = false
+            window.alphaValue = 0
+            window.contentView = hostingView
+            window.orderFront(nil)
+            defer { window.orderOut(nil) }
+            hostingView.layoutSubtreeIfNeeded()
+
+            let original = harness.model.preferences.warnOnClearHistory
+            #expect(harness.preferencesStore.load().warnOnClearHistory == original)
+
+            harness.model.preferences.warnOnClearHistory.toggle()
+            let saved = await TestSupport.waitUntil(timeout: .seconds(5)) {
+                harness.preferencesStore.load().warnOnClearHistory != original
+            }
+            #expect(saved, "The view did not save the changed preference")
+        }
     }
 }
 

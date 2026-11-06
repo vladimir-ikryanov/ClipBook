@@ -32,6 +32,9 @@ final class AppCoordinator: ObservableObject {
   private let licensingService: LicensingService
   private let fileManager: FileManager
   private let supportDirectory: URL
+  /// What `savePreferences()` last applied. Comparing against it keeps a change to one
+  /// setting from registering the hotkeys again or touching the login item.
+  private var lastAppliedPreferences: AppPreferences?
   let filePreviewCache: FilePreviewCache
   #if (CLIPBOOK_COMMERCIAL && canImport(ClipBookCommercialLicensing)) || CLIPBOOK_COMMERCIAL_IN_TREE
   private static let v1PreferencesDomain = "com.ikryanov.clipbook"
@@ -489,17 +492,57 @@ final class AppCoordinator: ObservableObject {
     clipboardMonitor.isPaused = model.isPaused
   }
   
+  /// The settings whose effects `savePreferences()` applies again.
+  struct PreferenceChanges: Equatable {
+    var appearance: Bool
+    var language: Bool
+    var launchAtLogin: Bool
+    var automaticUpdateChecks: Bool
+    var globalShortcuts: Bool
+  }
+
+  /// What changed from `previous` to `current`. Everything counts as changed
+  /// when nothing has been applied yet.
+  static func preferenceChanges(from previous: AppPreferences?, to current: AppPreferences) -> PreferenceChanges {
+    func changed<Value: Equatable>(_ keyPath: KeyPath<AppPreferences, Value>) -> Bool {
+      previous?[keyPath: keyPath] != current[keyPath: keyPath]
+    }
+
+    return PreferenceChanges(
+      appearance: changed(\.appearance),
+      language: changed(\.language),
+      launchAtLogin: changed(\.launchAtLogin),
+      automaticUpdateChecks: changed(\.checkForUpdatesAutomatically),
+      globalShortcuts: changed(\.globalShortcuts)
+    )
+  }
+
   func savePreferences() {
-    preferencesStore.save(model.preferences)
-    applyAppearance()
-    applyLanguage()
+    let current = model.preferences
+    let changes = Self.preferenceChanges(from: lastAppliedPreferences, to: current)
+
+    preferencesStore.save(current)
+    if changes.appearance {
+      applyAppearance()
+    }
+    if changes.language {
+      applyLanguage()
+    }
     clipboardMonitor.updatePreferences(model.preferences)
     if !model.preferences.showPreviewForLinks {
       cancelLinkPreviewTasks()
     }
-    LaunchAtLoginService.setEnabled(model.preferences.launchAtLogin)
-    updateService.setAutomaticallyChecksForUpdates(model.preferences.checkForUpdatesAutomatically)
-    configureShortcuts()
+    if changes.launchAtLogin {
+      LaunchAtLoginService.setEnabled(current.launchAtLogin)
+    }
+    if changes.automaticUpdateChecks {
+      updateService.setAutomaticallyChecksForUpdates(current.checkForUpdatesAutomatically)
+    }
+    if changes.globalShortcuts {
+      configureShortcuts()
+    }
+    // After applyLanguage, which can normalize `language`, so the next call sees no change.
+    lastAppliedPreferences = model.preferences
   }
 
   func persistPreferences() {
