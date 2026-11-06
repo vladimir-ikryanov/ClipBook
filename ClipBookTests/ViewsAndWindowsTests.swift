@@ -354,6 +354,52 @@ enum ViewsAndWindowsTests {
 
         @Test
         @MainActor
+        func itemPreviewDialogSavesEditedText() throws {
+            TestSupport.ensureAppKitInitialized()
+
+            let item = ClipboardItem.fixture(kind: .richText, text: "Bold Text", html: "<b>Bold Text</b>")
+            var saved: [(ClipboardItem, String)] = []
+            let controller = ItemPreviewDialogController(
+                item: item,
+                maximumContentSize: NSSize(width: 800, height: 600),
+                detectsSensitiveContent: true,
+                revealsSensitiveContent: false,
+                loadFormatting: { $0 }
+            )
+            controller.onSave = { saved.append(($0, $1)) }
+            _ = controller.view
+
+            // Saving without a change saves nothing and keeps the formatting.
+            controller.beginEditing()
+            #expect(controller.isEditing)
+            controller.saveEditing()
+            #expect(!controller.isEditing)
+            #expect(saved.isEmpty)
+            #expect(controller.item.html == "<b>Bold Text</b>")
+
+            // Restoring the original text leaves nothing to save either.
+            controller.beginEditing()
+            let textView = try #require(Self.findEditableTextView(in: controller.view))
+            #expect(textView.string == "Bold Text")
+            textView.string = "Changed"
+            controller.restoreEditingText()
+            #expect(textView.string == "Bold Text")
+            controller.saveEditing()
+            #expect(saved.isEmpty)
+
+            // A real edit is saved exactly once, with the new text.
+            controller.beginEditing()
+            let editor = try #require(Self.findEditableTextView(in: controller.view))
+            editor.string = "Edited text"
+            controller.saveEditing()
+            #expect(!controller.isEditing)
+            #expect(saved.count == 1)
+            #expect(saved.first?.0.id == item.id)
+            #expect(saved.first?.1 == "Edited text")
+        }
+
+        @Test
+        @MainActor
         func windowFrameIsSavedOnceTheWindowHasBeenShown() throws {
             TestSupport.ensureAppKitInitialized()
 
