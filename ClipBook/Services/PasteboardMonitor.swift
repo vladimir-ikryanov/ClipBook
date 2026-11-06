@@ -7,7 +7,19 @@ final class PasteboardMonitor {
     static let ghostType = PasteboardReader.ghostType
 
     weak var delegate: PasteboardMonitorDelegate?
-    var isPaused = false
+    // Pausing or resuming skips whatever was copied while capture was paused:
+    // the change count moves up to the pasteboard's, a deferred re-read of an
+    // earlier change is dropped, and a read already in flight is abandoned,
+    // since it may be looking at content copied after the switch.
+    var isPaused = false {
+        didSet {
+            if isPaused != oldValue {
+                lastChangeCount = pasteboard.changeCount
+                deferredReadAttemptsRemaining = 0
+                readGeneration += 1
+            }
+        }
+    }
 
     private let pasteboard: NSPasteboard
     private let now: @Sendable () -> Date
