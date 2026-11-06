@@ -9,7 +9,8 @@ final class PasteboardMonitor {
     weak var delegate: PasteboardMonitorDelegate?
     var isPaused = false
 
-    private let pasteboard = NSPasteboard.general
+    private let pasteboard: NSPasteboard
+    private let now: @Sendable () -> Date
     private let historyStore: HistoryStore
     private let findStoredImage: @Sendable (String) -> StoredImage?
     private let fileManager: FileManager
@@ -55,10 +56,18 @@ final class PasteboardMonitor {
     // one when it finishes, and its result is dropped.
     private var readGeneration = 0
 
-    init(historyStore: HistoryStore, fileManager: FileManager, supportDirectory: URL) {
+    init(
+        historyStore: HistoryStore,
+        fileManager: FileManager,
+        supportDirectory: URL,
+        pasteboard: NSPasteboard = .general,
+        now: @escaping @Sendable () -> Date = { Date() }
+    ) {
         self.historyStore = historyStore
         self.fileManager = fileManager
         self.supportDirectory = supportDirectory
+        self.pasteboard = pasteboard
+        self.now = now
         // The store guards itself with a lock, so the read queue may ask it.
         nonisolated(unsafe) let store = historyStore
         findStoredImage = { digest in
@@ -99,19 +108,28 @@ final class PasteboardMonitor {
     }
 
     func markCopySequencePasteBoundary() {
-        lastCopySequencePasteTime = Date()
+        lastCopySequencePasteTime = now()
     }
 
-    private func poll() {
+    #if DEBUG
+    func processReadResultForTesting(_ result: PasteboardReadResult) {
+        finishRead(result, generation: readGeneration)
+    }
+    #endif
+
+    /// One timer tick. Internal so tests can drive a poll without the timer;
+    /// awaiting the returned task waits for the read to finish.
+    @discardableResult
+    func poll() -> Task<Void, Never>? {
         guard !isPaused else {
-            return
+            return nil
         }
 
         guard !isReadInFlight else {
             // The read is waiting for the application that owns the pasteboard.
             // An item held for Copy & Merge still goes to the history on time.
             flushPendingCopyAndMergeItemIfExpiredLoggingFailure()
-            return
+            return nil
         }
 
         isReadInFlight = true
@@ -126,10 +144,11 @@ final class PasteboardMonitor {
         )
         let generation = readGeneration
         let readQueue = readQueue
-        Task { [weak self] in
+        nonisolated(unsafe) let pasteboard = self.pasteboard
+        return Task { [weak self] in
             let result = await withCheckedContinuation { continuation in
                 readQueue.async {
-                    continuation.resume(returning: PasteboardReader.read(request))
+                    continuation.resume(returning: PasteboardReader.read(request, from: pasteboard))
                 }
             }
             self?.finishRead(result, generation: generation)
@@ -224,6 +243,7 @@ final class PasteboardMonitor {
     }
 
     private func makeItem(from content: PasteboardContent) -> ClipboardItem {
+        let copiedAt = now()
         switch content.payload {
         case .files(let paths, let byteSize, let recognizedContent):
             let fileNames = paths.map { URL(fileURLWithPath: $0).lastPathComponent }.joined(separator: " ")
@@ -237,6 +257,7 @@ final class PasteboardMonitor {
                 filePaths: paths,
                 sourceAppName: content.sourceAppName,
                 sourceBundleIdentifier: content.sourceBundleIdentifier,
+                copiedAt: copiedAt,
                 byteSize: byteSize,
                 searchText: searchText
             )
@@ -259,6 +280,7 @@ final class PasteboardMonitor {
                 imageDigest: digest,
                 sourceAppName: content.sourceAppName,
                 sourceBundleIdentifier: content.sourceBundleIdentifier,
+                copiedAt: copiedAt,
                 byteSize: byteSize,
                 searchText: searchText
             )
@@ -280,6 +302,7 @@ final class PasteboardMonitor {
                 html: html,
                 sourceAppName: content.sourceAppName,
                 sourceBundleIdentifier: content.sourceBundleIdentifier,
+                copiedAt: copiedAt,
                 byteSize: (rtf?.count ?? 0) + (html?.utf8.count ?? 0) + (plainText?.utf8.count ?? 0),
                 searchText: ClipboardItem.makeSearchText(title: nil, text: plainText, filePaths: [], tagNames: [], sourceAppName: content.sourceAppName)
             )
@@ -289,6 +312,7 @@ final class PasteboardMonitor {
                 text: text,
                 sourceAppName: content.sourceAppName,
                 sourceBundleIdentifier: content.sourceBundleIdentifier,
+                copiedAt: copiedAt,
                 byteSize: text.utf8.count,
                 searchText: text
             )
@@ -358,7 +382,7 @@ final class PasteboardMonitor {
 
     private func flushPendingCopyAndMergeItemIfExpired() throws {
         guard let pendingItem = pendingCopyAndMergeItem,
-              Date() >= pendingCopyAndMergeDeadline else {
+              now() >= pendingCopyAndMergeDeadline else {
             return
         }
 
@@ -377,7 +401,7 @@ final class PasteboardMonitor {
 
     private func holdPendingCopyAndMergeItem(_ item: ClipboardItem) {
         pendingCopyAndMergeItem = item
-        pendingCopyAndMergeDeadline = Date().addingTimeInterval(copyAndMergeHoldInterval)
+        pendingCopyAndMergeDeadline = now().addingTimeInterval(copyAndMergeHoldInterval)
     }
 
     private func clearPendingCopyAndMergeItem() {

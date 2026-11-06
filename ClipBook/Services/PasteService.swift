@@ -6,12 +6,13 @@ import UniformTypeIdentifiers
 final class PasteService {
   private static let interKeyDelay: TimeInterval = 0.06
 
-  private let pasteboard = NSPasteboard.general
+  private let pasteboard: NSPasteboard
   // History items come without their formatting; this reads it for the one
   // item being pasted or copied.
   private let loadFormatting: (ClipboardItem) -> ClipboardItem
 
-  init(loadFormatting: @escaping (ClipboardItem) -> ClipboardItem) {
+  init(pasteboard: NSPasteboard = .general, loadFormatting: @escaping (ClipboardItem) -> ClipboardItem) {
+    self.pasteboard = pasteboard
     self.loadFormatting = loadFormatting
   }
 

@@ -6,12 +6,17 @@ import Combine
 import SQLite3
 
 final class PreferencesStore {
+    private let userDefaults: UserDefaults
     private let key = "ClipBookPreferencesV2"
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
+    init(userDefaults: UserDefaults = .standard) {
+        self.userDefaults = userDefaults
+    }
+
     func load() -> AppPreferences {
-        guard let data = UserDefaults.standard.data(forKey: key),
+        guard let data = userDefaults.data(forKey: key),
               let preferences = try? decoder.decode(AppPreferences.self, from: data) else {
             return AppPreferences()
         }
@@ -20,7 +25,7 @@ final class PreferencesStore {
 
     func save(_ preferences: AppPreferences) {
         if let data = try? encoder.encode(preferences) {
-            UserDefaults.standard.set(data, forKey: key)
+            userDefaults.set(data, forKey: key)
         }
     }
 }

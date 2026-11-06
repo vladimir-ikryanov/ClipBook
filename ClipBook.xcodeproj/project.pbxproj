@@ -10,8 +10,19 @@
 		E77DF5402FBE260100FAC6DD /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E77DF53F2FBE260100FAC6DD /* Sparkle */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		E77DF5462FBE300100FAC6DD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E77DF5282FBE007100FAC6DD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E77DF52F2FBE007100FAC6DD;
+			remoteInfo = ClipBook;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		E77DF5302FBE007100FAC6DD /* ClipBook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClipBook.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E77DF5412FBE300100FAC6DD /* ClipBookTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClipBookTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -33,6 +44,11 @@
 			path = ClipBook;
 			sourceTree = "<group>";
 		};
+		E77DF5422FBE300100FAC6DD /* ClipBookTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ClipBookTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +60,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E77DF5432FBE300100FAC6DD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -51,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				E77DF5322FBE007100FAC6DD /* ClipBook */,
+				E77DF5422FBE300100FAC6DD /* ClipBookTests */,
 				E77DF5312FBE007100FAC6DD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -59,6 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				E77DF5302FBE007100FAC6DD /* ClipBook.app */,
+				E77DF5412FBE300100FAC6DD /* ClipBookTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -89,6 +114,29 @@
 			productReference = E77DF5302FBE007100FAC6DD /* ClipBook.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E77DF5452FBE300100FAC6DD /* ClipBookTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E77DF54A2FBE300100FAC6DD /* Build configuration list for PBXNativeTarget "ClipBookTests" */;
+			buildPhases = (
+				E77DF5442FBE300100FAC6DD /* Sources */,
+				E77DF5432FBE300100FAC6DD /* Frameworks */,
+				E77DF54B2FBE300100FAC6DD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E77DF5472FBE300100FAC6DD /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				E77DF5422FBE300100FAC6DD /* ClipBookTests */,
+			);
+			name = ClipBookTests;
+			packageProductDependencies = (
+			);
+			productName = ClipBookTests;
+			productReference = E77DF5412FBE300100FAC6DD /* ClipBookTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -101,6 +149,10 @@
 				TargetAttributes = {
 					E77DF52F2FBE007100FAC6DD = {
 						CreatedOnToolsVersion = 26.5;
+					};
+					E77DF5452FBE300100FAC6DD = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = E77DF52F2FBE007100FAC6DD;
 					};
 				};
 			};
@@ -129,12 +181,20 @@
 			projectRoot = "";
 			targets = (
 				E77DF52F2FBE007100FAC6DD /* ClipBook */,
+				E77DF5452FBE300100FAC6DD /* ClipBookTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		E77DF52E2FBE007100FAC6DD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E77DF54B2FBE300100FAC6DD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -151,7 +211,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E77DF5442FBE300100FAC6DD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E77DF5472FBE300100FAC6DD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E77DF52F2FBE007100FAC6DD /* ClipBook */;
+			targetProxy = E77DF5462FBE300100FAC6DD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		E77DF5392FBE007200FAC6DD /* Debug */ = {
@@ -344,6 +419,58 @@
 			};
 			name = Release;
 		};
+			E77DF5482FBE300100FAC6DD /* Debug */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					BUNDLE_LOADER = "$(TEST_HOST)";
+					CODE_SIGN_STYLE = Automatic;
+					CURRENT_PROJECT_VERSION = 1;
+					DEVELOPMENT_TEAM = 96B3X7S47C;
+					GENERATE_INFOPLIST_FILE = YES;
+					LD_RUNPATH_SEARCH_PATHS = (
+						"$(inherited)",
+						"@executable_path/../Frameworks",
+						"@loader_path/../Frameworks",
+					);
+					MACOSX_DEPLOYMENT_TARGET = 13.0;
+					MARKETING_VERSION = 2.0.0;
+					PRODUCT_BUNDLE_IDENTIFIER = com.ikryanov.clipbook.v2.tests;
+					PRODUCT_NAME = "$(TARGET_NAME)";
+					SWIFT_APPROACHABLE_CONCURRENCY = YES;
+					SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+					SWIFT_EMIT_LOC_STRINGS = NO;
+					SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+					SWIFT_VERSION = 5.0;
+					TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ClipBook.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ClipBook";
+				};
+				name = Debug;
+			};
+			E77DF5492FBE300100FAC6DD /* Release */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					BUNDLE_LOADER = "$(TEST_HOST)";
+					CODE_SIGN_STYLE = Automatic;
+					CURRENT_PROJECT_VERSION = 1;
+					DEVELOPMENT_TEAM = 96B3X7S47C;
+					GENERATE_INFOPLIST_FILE = YES;
+					LD_RUNPATH_SEARCH_PATHS = (
+						"$(inherited)",
+						"@executable_path/../Frameworks",
+						"@loader_path/../Frameworks",
+					);
+					MACOSX_DEPLOYMENT_TARGET = 13.0;
+					MARKETING_VERSION = 2.0.0;
+					PRODUCT_BUNDLE_IDENTIFIER = com.ikryanov.clipbook.v2.tests;
+					PRODUCT_NAME = "$(TARGET_NAME)";
+					SWIFT_APPROACHABLE_CONCURRENCY = YES;
+					SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+					SWIFT_EMIT_LOC_STRINGS = NO;
+					SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+					SWIFT_VERSION = 5.0;
+					TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ClipBook.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ClipBook";
+				};
+				name = Release;
+			};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -361,6 +488,15 @@
 			buildConfigurations = (
 				E77DF53C2FBE007200FAC6DD /* Debug */,
 				E77DF53D2FBE007200FAC6DD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E77DF54A2FBE300100FAC6DD /* Build configuration list for PBXNativeTarget "ClipBookTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E77DF5482FBE300100FAC6DD /* Debug */,
+				E77DF5492FBE300100FAC6DD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -120,7 +120,7 @@ final class SearchTokenField: NSView, NSTextFieldDelegate {
     return SearchTokenPlaceholderLabel()
   }()
   private var chipViews: [SearchTokenChipView] = []
-  private var selectedChipIndex: Int? {
+  private(set) var selectedChipIndex: Int? {
     didSet {
       guard selectedChipIndex != oldValue else {
         return

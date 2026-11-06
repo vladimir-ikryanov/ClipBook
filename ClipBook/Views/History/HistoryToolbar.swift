@@ -87,8 +87,8 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
   weak var delegate: HistoryToolbarDelegate?
 
   private let searchLogoView = NSImageView()
-  private let searchField = SearchTokenField()
-  private let suggestionsPopup = SearchSuggestionsPopup()
+  let searchField = SearchTokenField()
+  let suggestionsPopup = SearchSuggestionsPopup()
   private lazy var searchContainer = makeSearchContainer()
   private lazy var searchCursorView = SearchTextCursorView(
     textFrameInWindow: { [weak self] in

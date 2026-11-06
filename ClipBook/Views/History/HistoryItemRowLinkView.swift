@@ -284,14 +284,14 @@ final class LinkPreviewFetcher {
   }
 }
 
-private struct LinkPreviewMetadata {
+struct LinkPreviewMetadata {
   let title: String?
   let description: String?
   let imageURL: URL?
   let faviconURLs: [URL]
 }
 
-private enum LinkPreviewHTMLParser {
+enum LinkPreviewHTMLParser {
   private nonisolated static let titlePattern = #"<title\b[^>]*>(.*?)</title>"#
   private nonisolated static let metaPattern = #"<meta\b[^>]*>"#
   private nonisolated static let linkPattern = #"<link\b[^>]*>"#
