@@ -400,6 +400,70 @@ enum ViewsAndWindowsTests {
 
         @Test
         @MainActor
+        func commandPaletteRunsCommandShortcuts() async throws {
+            TestSupport.ensureAppKitInitialized()
+
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+            let item = ClipboardItem.fixture(kind: .text, text: "Editable clip")
+            try harness.seedHistory([item])
+
+            let historyWindow = HistoryWindow(model: harness.model, coordinator: harness.coordinator)
+            historyWindow.window.alphaValue = 0
+            historyWindow.show()
+            defer {
+                if let sheet = historyWindow.window.attachedSheet {
+                    historyWindow.window.endSheet(sheet)
+                }
+                historyWindow.window.orderOut(nil)
+            }
+
+            // ⌘K opens the command palette sheet.
+            historyWindow.window.sendEvent(try TestSupport.keyDownEvent(keyCode: 40, modifiers: [.command]))
+            let paletteSheet = try #require(historyWindow.window.attachedSheet as? CommandPaletteSheetWindow)
+
+            // Space is a plain key for typing in the search field, not a command shortcut.
+            #expect(!paletteSheet.performKeyEquivalent(with: try TestSupport.keyDownEvent(keyCode: 49)))
+            #expect(historyWindow.window.attachedSheet === paletteSheet)
+
+            // ⌘S runs Add to Favorites and closes the command palette.
+            #expect(paletteSheet.performKeyEquivalent(with: try TestSupport.keyDownEvent(keyCode: 1, modifiers: [.command])))
+            #expect(harness.currentItem(item.id)?.isFavorite == true)
+            #expect(historyWindow.window.attachedSheet == nil)
+
+            // ⌘K then ⌘E closes the command palette and opens the preview editor sheet.
+            historyWindow.window.sendEvent(try TestSupport.keyDownEvent(keyCode: 40, modifiers: [.command]))
+            let editPaletteSheet = try #require(historyWindow.window.attachedSheet as? CommandPaletteSheetWindow)
+            #expect(editPaletteSheet.performKeyEquivalent(with: try TestSupport.keyDownEvent(keyCode: 14, modifiers: [.command])))
+            let editorOpened = await TestSupport.waitUntil(timeout: .seconds(5)) {
+                guard let sheet = historyWindow.window.attachedSheet,
+                      !(sheet is CommandPaletteSheetWindow),
+                      let contentView = sheet.contentView else {
+                    return false
+                }
+                return Self.findEditableTextView(in: contentView) != nil
+            }
+            #expect(editorOpened)
+            if let editSheet = historyWindow.window.attachedSheet {
+                historyWindow.window.endSheet(editSheet)
+            }
+
+            // ⌘K then ⌘R closes the command palette and opens the Rename sheet.
+            historyWindow.window.sendEvent(try TestSupport.keyDownEvent(keyCode: 40, modifiers: [.command]))
+            let renamePaletteSheet = try #require(historyWindow.window.attachedSheet as? CommandPaletteSheetWindow)
+            #expect(renamePaletteSheet.performKeyEquivalent(with: try TestSupport.keyDownEvent(keyCode: 15, modifiers: [.command])))
+            let renameOpened = await TestSupport.waitUntil(timeout: .seconds(5)) {
+                guard let sheet = historyWindow.window.attachedSheet,
+                      !(sheet is CommandPaletteSheetWindow) else {
+                    return false
+                }
+                return true
+            }
+            #expect(renameOpened)
+        }
+
+        @Test
+        @MainActor
         func windowFrameIsSavedOnceTheWindowHasBeenShown() throws {
             TestSupport.ensureAppKitInitialized()
 
