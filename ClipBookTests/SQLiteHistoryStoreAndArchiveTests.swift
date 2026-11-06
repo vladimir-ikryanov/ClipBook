@@ -8,6 +8,78 @@ enum SQLiteHistoryStoreAndArchiveTests {
     @Suite
     struct SQLiteHistoryStoreTests {
         @Test
+        func capturePreservesMetadataAndRevivesTrash() throws {
+            try TestSupport.withTemporaryHistoryStore { store, _ in
+                let tag = try store.createTag(name: "Reference", color: "#3B85ED")
+                let initialTime = Date(timeIntervalSince1970: 1_700_000_100.125)
+                let sequenceID = Date(timeIntervalSince1970: 1_700_000_100.000)
+
+                let original = ClipboardItem.fixture(
+                    kind: .image,
+                    title: "Custom Diagram Title",
+                    text: "Recognized OCR Text From Vision",
+                    qrCodeText: "https://example.com/qr",
+                    assetPath: "/tmp/diagram.png",
+                    imageDigest: "sha256-diagram-digest-001",
+                    sourceAppName: "Preview",
+                    sourceBundleIdentifier: "com.apple.Preview",
+                    copiedAt: initialTime,
+                    firstCopiedAt: initialTime,
+                    byteSize: 4096,
+                    isFavorite: true,
+                    tags: [tag.id],
+                    copyCount: 1,
+                    copySequenceID: sequenceID,
+                    copySequenceOrder: 2
+                )
+                let firstCaptured = try store.capture(original, updatesCopySequence: true)
+                #expect(firstCaptured.id == original.id)
+                #expect(firstCaptured.copySequenceID == sequenceID)
+                #expect(firstCaptured.copySequenceOrder == 2)
+
+                let trashedAt = Date(timeIntervalSince1970: 1_700_000_200.500)
+                try store.moveToTrash(ids: [original.id], at: trashedAt)
+                #expect(try store.fetchAll().isEmpty)
+                #expect(try store.fetchTrashedItems().map(\.id) == [original.id])
+
+                let recopyTime = Date(timeIntervalSince1970: 1_700_000_300.875)
+                let recopyWithoutOCR = ClipboardItem.fixture(
+                    kind: .image,
+                    title: nil,
+                    text: nil,
+                    qrCodeText: nil,
+                    assetPath: "/tmp/diagram-recopy.png",
+                    imageDigest: "sha256-diagram-digest-001",
+                    sourceAppName: "Safari",
+                    sourceBundleIdentifier: "com.apple.Safari",
+                    copiedAt: recopyTime,
+                    byteSize: 4096,
+                    copyCount: 1
+                )
+
+                let revived = try store.capture(recopyWithoutOCR, updatesCopySequence: false)
+                #expect(revived.id == original.id)
+                #expect(revived.title == "Custom Diagram Title")
+                #expect(revived.text == "Recognized OCR Text From Vision")
+                #expect(revived.qrCodeText == "https://example.com/qr")
+                #expect(revived.copyCount == 2)
+                #expect(revived.deletedAt == nil)
+                #expect(revived.searchText.localizedCaseInsensitiveContains("Custom Diagram Title"))
+                #expect(revived.searchText.localizedCaseInsensitiveContains("Recognized OCR Text From Vision"))
+                #expect(revived.searchText.localizedCaseInsensitiveContains("Reference"))
+
+                #expect(try store.fetchTrashedItems().isEmpty)
+                let activeItems = try store.fetchAll()
+                #expect(activeItems.count == 1)
+                let fetched = try #require(activeItems.first)
+                #expect(fetched.id == original.id)
+                #expect(fetched.title == "Custom Diagram Title")
+                #expect(fetched.text == "Recognized OCR Text From Vision")
+                #expect(fetched.qrCodeText == "https://example.com/qr")
+            }
+        }
+
+        @Test
         func subSecondCopiedAtPrecisionRoundTrip() throws {
             try TestSupport.withTemporaryHistoryStore { store, _ in
                 let baseEpoch = 1_700_000_000.000
