@@ -16,6 +16,7 @@ struct IgnoredApplicationsList: View {
     private static let iconSpacing: CGFloat = 6
     private static let rowTrailingPadding: CGFloat = 6
     private static let firstRowHeight: CGFloat = 46
+    private static let dividerHeight: CGFloat = 0.5
     private static let dividerLeadingInset: CGFloat = rowLeadingPadding + iconSize + iconSpacing
     private static let toolbarBackground = Color(nsColor: adaptiveToolbarBackground)
 
@@ -47,7 +48,8 @@ struct IgnoredApplicationsList: View {
         if entries.count == 1 {
             return Self.firstRowHeight
         }
-        return Self.firstRowHeight + CGFloat(entries.count - 2) * Self.rowHeight + Self.firstRowHeight
+        let dividersHeight = CGFloat(entries.count - 1) * Self.dividerHeight
+        return Self.firstRowHeight + CGFloat(entries.count - 2) * Self.rowHeight + Self.firstRowHeight + dividersHeight
     }
 
     var body: some View {
@@ -174,7 +176,7 @@ struct IgnoredApplicationsList: View {
                 ? NSColor(white: 0x2F / 255.0, alpha: 1.0)
                 : NSColor.separatorColor
         })
-        .frame(height: 0.5)
+        .frame(height: Self.dividerHeight)
         .padding(.leading, Self.dividerLeadingInset)
     }
 
