@@ -823,6 +823,12 @@ private struct HistoryOrder {
             return groupComparison
         }
 
+        // Keeps the comparator transitive when a sequence's start date coincides
+        // with an unrelated item's copy timestamp.
+        if (lhs.copySequenceID != nil) != (rhs.copySequenceID != nil) {
+            return lhs.copySequenceID != nil ? .orderedDescending : .orderedAscending
+        }
+
         if lhs.copySequenceID != nil,
            lhs.copySequenceID == rhs.copySequenceID {
             return compare(rhs.copySequenceOrder ?? 0, lhs.copySequenceOrder ?? 0)
