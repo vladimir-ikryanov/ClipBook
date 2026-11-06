@@ -354,6 +354,10 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
         kind == .file && filePaths.count > 1
     }
 
+    var isMissingSingleFileItem: Bool {
+        kind == .file && filePaths.count == 1 && !FileManager.default.fileExists(atPath: filePaths[0])
+    }
+
     var isImageFileItem: Bool {
         kind == .file && !filePaths.isEmpty && filePaths.allSatisfy { Self.isImageFile(at: $0) }
     }

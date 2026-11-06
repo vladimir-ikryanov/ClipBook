@@ -18,6 +18,27 @@ nonisolated struct PasteboardReadRequest: Sendable {
     /// The image already in the history with the given digest, if any. It is
     /// asked from the read queue.
     var findStoredImage: @Sendable (_ digest: String) -> StoredImage?
+    /// The application in front at the moment of the read.
+    var frontmostApplication: @Sendable () -> FrontmostApplication? = { FrontmostApplication.current }
+}
+
+/// The application in front when something was copied: what the history records
+/// as the source of the copy, and what the ignored applications are matched against.
+nonisolated struct FrontmostApplication: Sendable {
+    var bundlePath: String?
+    var localizedName: String?
+    var bundleIdentifier: String?
+
+    static var current: FrontmostApplication? {
+        guard let application = NSWorkspace.shared.frontmostApplication else {
+            return nil
+        }
+        return FrontmostApplication(
+            bundlePath: application.bundleURL?.standardizedFileURL.path,
+            localizedName: application.localizedName,
+            bundleIdentifier: application.bundleIdentifier
+        )
+    }
 }
 
 /// An image already in the history: its file and the content read from it.
@@ -86,14 +107,13 @@ nonisolated struct RecognizedImageContent: Sendable {
 nonisolated enum PasteboardReader {
     static let ghostType = NSPasteboard.PasteboardType("com.ikryanov.clipbook.v2.ghost")
 
-    static func read(_ request: PasteboardReadRequest) -> PasteboardReadResult {
-        let pasteboard = NSPasteboard.general
+    static func read(_ request: PasteboardReadRequest, from pasteboard: NSPasteboard = .general) -> PasteboardReadResult {
         let changeCount = pasteboard.changeCount
         guard changeCount != request.lastChangeCount || request.retriesUnchangedPasteboard else {
             return PasteboardReadResult(changeCount: changeCount, outcome: .unchanged)
         }
 
-        let frontmostApplication = NSWorkspace.shared.frontmostApplication
+        let frontmostApplication = request.frontmostApplication()
         guard shouldCapture(pasteboard, from: frontmostApplication, request: request) else {
             return PasteboardReadResult(changeCount: changeCount, outcome: .skipped)
         }
@@ -112,7 +132,7 @@ nonisolated enum PasteboardReader {
 
     private static func shouldCapture(
         _ pasteboard: NSPasteboard,
-        from frontmostApplication: NSRunningApplication?,
+        from frontmostApplication: FrontmostApplication?,
         request: PasteboardReadRequest
     ) -> Bool {
         guard pasteboard.string(forType: ghostType) == nil else {
@@ -131,7 +151,7 @@ nonisolated enum PasteboardReader {
 
         if let frontmostApplication,
            AppPreferences.isApplicationIgnored(
-               bundlePath: frontmostApplication.bundleURL?.standardizedFileURL.path,
+               bundlePath: frontmostApplication.bundlePath,
                localizedName: frontmostApplication.localizedName,
                entries: request.ignoredApplicationEntries
            ) {

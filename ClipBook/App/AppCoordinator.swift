@@ -2711,7 +2711,7 @@ final class AppCoordinator: ObservableObject {
     }
   }
   
-  private func loadHistory() {
+  func loadHistory() {
     do {
       model.tags = try historyStore.fetchTags()
       model.items = try historyStore.fetchAll()

@@ -4005,16 +4005,6 @@ private extension NSImage {
 }
 
 private extension ClipboardItem {
-  var isMissingSingleFileItem: Bool {
-    guard kind == .file,
-          filePaths.count == 1,
-          let filePath = filePaths.first else {
-      return false
-    }
-
-    return !FileManager.default.fileExists(atPath: filePath)
-  }
-
   var canTransformText: Bool {
     switch kind {
     case .text, .richText, .link, .email, .color:

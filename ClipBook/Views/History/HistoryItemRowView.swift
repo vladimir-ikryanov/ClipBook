@@ -71,7 +71,7 @@ private final class VerticallyCenteredTextFieldCell: NormalBackgroundTextFieldCe
 
 // The color of the symbols a row draws in place of line breaks, tabs and leading spaces,
 // and the look of the dots it draws in place of hidden content.
-private enum HistoryPreviewSymbolAppearance {
+enum HistoryPreviewSymbolAppearance {
   static func color(for view: NSView) -> NSColor {
     view.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? .darkGray : .lightGray
   }
@@ -105,7 +105,7 @@ private enum HistoryPreviewSymbolAppearance {
   }
 }
 
-private enum HistorySearchMatchHighlighter {
+enum HistorySearchMatchHighlighter {
   static let highlightColor = NSColor.systemBlue
 
   static func attributedString(
