@@ -637,8 +637,10 @@ final class SQLiteHistoryStore: HistoryStore {
         """)
         // Each step rewrites rows one by one; one transaction commits them once.
         try performInTransaction {
-            try migrateLegacyTagNames()
-            try migrateContentKeys()
+            if try schemaVersion() < 2 {
+                try migrateLegacyTagNames()
+                try migrateContentKeys()
+            }
             try migrateRichTextSearchText()
             try migrateStableContentKeys()
             try migrateFormattingColumns()

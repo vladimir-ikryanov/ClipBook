@@ -322,6 +322,54 @@ enum SQLiteHistoryStoreAndArchiveTests {
             )
         }
 
+        @Test(arguments: [2, 3, 4])
+        func legacyMigrationStepsDoNotRerunOnDatabaseAtOrAboveV2(version: Int) throws {
+            try TestSupport.withTemporaryDirectory { directory in
+                let dbURL = directory.appendingPathComponent("History.sqlite")
+                do { _ = SQLiteHistoryStore(directory: directory) }
+
+                // A row with string tags is what migrateLegacyTagNames rewrites.
+                let legacyID = UUID()
+                let legacyPayload = try JSONSerialization.data(withJSONObject: [
+                    "id": legacyID.uuidString,
+                    "kind": ClipboardKind.text.rawValue,
+                    "text": "Legacy tagged text",
+                    "filePaths": [String](),
+                    "copiedAt": "2023-11-14T22:15:23Z",
+                    "byteSize": 18,
+                    "isFavorite": false,
+                    "tags": ["LegacyTag"],
+                    "searchText": "Legacy tagged text",
+                    "copyCount": 1
+                ] as [String: Any], options: [.sortedKeys])
+
+                // A row with an empty key is what migrateContentKeys fills in.
+                let keylessID = UUID()
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .iso8601
+                let keylessPayload = try encoder.encode(
+                    ClipboardItem.fixture(id: keylessID, kind: .text, text: "Keyless text")
+                )
+
+                try Self.executeSQL(at: dbURL, """
+                    INSERT INTO clips (id, kind, copiedAt, favorite, sourceApp, searchText, contentKey, payload)
+                    VALUES ('\(legacyID.uuidString)', 'text', 1700000000, 0, NULL, 'Legacy tagged text', 'Legacy tagged text', \(Self.sqlHex(legacyPayload)));
+                    INSERT INTO clips (id, kind, copiedAt, favorite, sourceApp, searchText, contentKey, payload)
+                    VALUES ('\(keylessID.uuidString)', 'text', 1700000100, 0, NULL, 'Keyless text', '', \(Self.sqlHex(keylessPayload)));
+                    PRAGMA user_version = \(version);
+                    """)
+
+                let store = SQLiteHistoryStore(directory: directory)
+
+                #expect(try store.fetchTags().isEmpty)
+                #expect(try Self.queryText(at: dbURL, "SELECT hex(payload) FROM clips WHERE id = '\(legacyID.uuidString)';") == Self.hexString(legacyPayload))
+                #expect(try Self.queryText(at: dbURL, "SELECT contentKey FROM clips WHERE id = '\(keylessID.uuidString)';") == "")
+                #expect(try Self.queryText(at: dbURL, "SELECT hex(payload) FROM clips WHERE id = '\(keylessID.uuidString)';") == Self.hexString(keylessPayload))
+                let (schemaVersion, _) = try Self.inspectDatabaseState(at: dbURL)
+                #expect(schemaVersion >= 4)
+            }
+        }
+
         private static func hexString(_ data: Data) -> String {
             data.map { String(format: "%02X", $0) }.joined()
         }
