@@ -121,7 +121,9 @@ extension ColorText {
               let lightness = lightness.value(percentScale: 100) else {
             return nil
         }
-        return hslToRGB(hue: hue, saturation: max(saturation, 0) / 100, lightness: lightness / 100)
+        let clampedSaturation = min(max(saturation, 0), 100) / 100
+        let clampedLightness = min(max(lightness, 0), 100) / 100
+        return hslToRGB(hue: hue, saturation: clampedSaturation, lightness: clampedLightness)
     }
 
     private static func hwbColor(hue: Token, whiteness: Token, blackness: Token) -> RGB? {
@@ -269,7 +271,7 @@ extension ColorText {
                     return nil
                 }
                 let tokens = body.split(separator: ",", omittingEmptySubsequences: false).map {
-                    Token($0.trimmingCharacters(in: .whitespaces))
+                    Token($0.trimmingCharacters(in: .whitespacesAndNewlines))
                 }
                 // The comma syntax has no "none" keyword.
                 guard tokens.count == 3 || tokens.count == 4,
