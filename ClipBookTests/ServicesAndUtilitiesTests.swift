@@ -220,5 +220,105 @@ enum ServicesAndUtilitiesTests {
             window.ignoresMouseEvents = true
             return window
         }
+
+        @Test
+        @MainActor
+        func outsideClickDecision() throws {
+            TestSupport.ensureAppKitInitialized()
+            let window = Self.makeOutsideClickTestWindow()
+            defer { window.close() }
+            let inside = NSPoint(x: window.frame.midX, y: window.frame.midY)
+            let outside = NSPoint(x: window.frame.maxX + 50, y: window.frame.maxY + 50)
+
+            // A window that is not visible is never dismissed.
+            #expect(!OutsideClickDismissalMonitor.isOutsideClick(in: nil, of: window, at: outside))
+
+            window.orderFront(nil)
+            try #require(window.isVisible)
+            #expect(OutsideClickDismissalMonitor.isOutsideClick(in: nil, of: window, at: outside))
+            #expect(OutsideClickDismissalMonitor.isOutsideClick(in: window, of: window, at: outside))
+            #expect(!OutsideClickDismissalMonitor.isOutsideClick(in: nil, of: window, at: inside))
+
+            // A click in some other window is not this window's business.
+            let other = Self.makeOutsideClickTestWindow()
+            defer { other.close() }
+            #expect(!OutsideClickDismissalMonitor.isOutsideClick(in: other, of: window, at: outside))
+        }
+
+        @Test
+        @MainActor
+        func outsideClickDecisionWithSheets() throws {
+            TestSupport.ensureAppKitInitialized()
+            let parent = Self.makeOutsideClickTestWindow()
+            let sheet = Self.makeOutsideClickTestWindow()
+            let other = Self.makeOutsideClickTestWindow()
+            defer {
+                parent.endSheet(sheet)
+                sheet.close()
+                parent.close()
+                other.close()
+            }
+            parent.orderFront(nil)
+            try #require(parent.isVisible)
+            parent.beginSheet(sheet)
+            try #require(sheet.sheetParent === parent)
+            try #require(parent.attachedSheet === sheet)
+            let outside = NSPoint(x: sheet.frame.maxX + 50, y: sheet.frame.maxY + 50)
+
+            // The sheet is dismissed by clicks in its own parent window, but not in unrelated ones.
+            #expect(OutsideClickDismissalMonitor.isOutsideClick(in: parent, of: sheet, at: outside))
+            #expect(!OutsideClickDismissalMonitor.isOutsideClick(in: other, of: sheet, at: outside))
+            // A window with a sheet attached is never dismissed.
+            #expect(!OutsideClickDismissalMonitor.isOutsideClick(in: parent, of: parent, at: outside))
+        }
+
+        @Test
+        @MainActor
+        func outsideClickDismissalMonitorStopsAfterInvalidateAndDeinit() throws {
+            TestSupport.ensureAppKitInitialized()
+            let window = Self.makeOutsideClickTestWindow()
+            defer { window.close() }
+            window.orderFront(nil)
+            try #require(window.isVisible)
+            // Park the window away from the real cursor, which decides what is "outside".
+            let cursor = NSEvent.mouseLocation
+            window.setFrameOrigin(NSPoint(x: cursor.x + 2000, y: cursor.y + 2000))
+            try #require(!window.frame.contains(cursor))
+
+            func click() throws {
+                let event = try #require(NSEvent.mouseEvent(
+                    with: .leftMouseDown,
+                    location: .zero,
+                    modifierFlags: [],
+                    timestamp: ProcessInfo.processInfo.systemUptime,
+                    windowNumber: 0,
+                    context: nil,
+                    eventNumber: 0,
+                    clickCount: 1,
+                    pressure: 1
+                ))
+                NSApp.sendEvent(event)
+            }
+
+            var dismissalCount = 0
+            var monitor: OutsideClickDismissalMonitor? = OutsideClickDismissalMonitor(window: window) {
+                dismissalCount += 1
+            }
+            try click()
+            #expect(dismissalCount == 1)
+
+            monitor?.invalidate()
+            monitor?.invalidate()
+            try click()
+            #expect(dismissalCount == 1)
+
+            // Releasing a monitor that was not invalidated removes it as well.
+            monitor = OutsideClickDismissalMonitor(window: window) {
+                dismissalCount += 1
+            }
+            monitor = nil
+            try click()
+            #expect(dismissalCount == 1)
+        }
     }
 }
