@@ -233,6 +233,18 @@ struct AppPreferences: Codable, Equatable {
     var pasteNextRichShortcut = Self.defaultPasteNextRichShortcut
     var pasteNextAndDeleteShortcut = Self.defaultPasteNextAndDeleteShortcut
     var pasteNextRichAndDeleteShortcut = Self.defaultPasteNextRichAndDeleteShortcut
+    /// The shortcuts that are registered system-wide. `AppCoordinator.configureShortcuts()` registers
+    /// each of them, so a shortcut added there belongs here too.
+    var globalShortcuts: [String] {
+        [
+            showHistoryShortcut,
+            pauseShortcut,
+            pasteNextShortcut,
+            pasteNextRichShortcut,
+            pasteNextAndDeleteShortcut,
+            pasteNextRichAndDeleteShortcut
+        ]
+    }
     var closeHistoryShortcut = Self.defaultCloseHistoryShortcut
     var closeHistorySecondaryShortcut = Self.defaultCloseHistorySecondaryShortcut
     var closeHistoryTertiaryShortcut = Self.defaultCloseHistoryTertiaryShortcut

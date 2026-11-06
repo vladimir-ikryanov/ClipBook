@@ -105,9 +105,6 @@ struct ShortcutSettingsView: View {
                 shortcutRows(for: itemActionShortcuts)
             }
         }
-        .onChange(of: model.preferences) { _ in
-            coordinator.savePreferences()
-        }
         .onDisappear {
             recordingShortcuts.keyPaths.removeAll()
             coordinator.setGlobalShortcutsSuspended(false)

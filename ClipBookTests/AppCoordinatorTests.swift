@@ -257,4 +257,130 @@ enum AppCoordinatorTests {
 
 // Saving applies appearance and language, which are process-wide.
 extension SharedProcessStateTests {
+    @Suite
+    struct PreferencesSavingTests {
+        struct ShortcutRow: Sendable, CustomTestStringConvertible {
+            let identifier: GlobalShortcutIdentifier
+            let edit: @MainActor @Sendable (inout AppPreferences) -> Void
+
+            var testDescription: String { "\(identifier)" }
+        }
+
+        private static let shortcutRows = [
+            ShortcutRow(identifier: .showHistory) { $0.showHistoryShortcut = "ctrl+shift+cmd+a" },
+            ShortcutRow(identifier: .pauseCapture) { $0.pauseShortcut = "ctrl+shift+cmd+b" },
+            ShortcutRow(identifier: .pasteNext) { $0.pasteNextShortcut = "ctrl+shift+cmd+c" },
+            ShortcutRow(identifier: .pasteNextRich) { $0.pasteNextRichShortcut = "ctrl+shift+cmd+d" },
+            ShortcutRow(identifier: .pasteNextAndDelete) { $0.pasteNextAndDeleteShortcut = "ctrl+shift+cmd+e" },
+            ShortcutRow(identifier: .pasteNextRichAndDelete) { $0.pasteNextRichAndDeleteShortcut = "ctrl+shift+cmd+f" }
+        ]
+
+        @Test
+        func everyGlobalShortcutHasARowAndAListedPreference() {
+            #expect(Set(Self.shortcutRows.map(\.identifier)) == Set(GlobalShortcutIdentifier.allCases))
+            #expect(AppPreferences().globalShortcuts.count == GlobalShortcutIdentifier.allCases.count)
+        }
+
+        /// Every global shortcut is registered by `configureShortcuts()`, and `savePreferences()`
+        /// registers them again when `AppPreferences.globalShortcuts` changes.
+        @Test(arguments: shortcutRows)
+        @MainActor
+        func changingAGlobalShortcutRegistersTheHotKeysAgain(row: ShortcutRow) throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+            harness.coordinator.savePreferences()
+            #expect(harness.globalShortcuts.hasHandler(for: row.identifier))
+            let passes = harness.globalShortcuts.unregisterAllCallCount
+
+            row.edit(&harness.model.preferences)
+            harness.coordinator.savePreferences()
+
+            #expect(harness.globalShortcuts.unregisterAllCallCount == passes + 1)
+            #expect(harness.globalShortcuts.hasHandler(for: row.identifier))
+        }
+
+        struct ChangeRow: Sendable, CustomTestStringConvertible {
+            let label: String
+            let edit: @MainActor @Sendable (inout AppPreferences) -> Void
+            let expected: AppCoordinator.PreferenceChanges
+
+            var testDescription: String { label }
+        }
+
+        private static let none = AppCoordinator.PreferenceChanges(
+            appearance: false, language: false, launchAtLogin: false, automaticUpdateChecks: false, globalShortcuts: false
+        )
+
+        private static let changeRows: [ChangeRow] = {
+            func only(_ keyPath: WritableKeyPath<AppCoordinator.PreferenceChanges, Bool>) -> AppCoordinator.PreferenceChanges {
+                var changes = none
+                changes[keyPath: keyPath] = true
+                return changes
+            }
+            return [
+                ChangeRow(label: "nothing", edit: { _ in }, expected: none),
+                ChangeRow(label: "an unrelated setting", edit: { $0.warnOnClearHistory.toggle() }, expected: none),
+                ChangeRow(label: "appearance", edit: { $0.appearance = $0.appearance == .dark ? .light : .dark }, expected: only(\.appearance)),
+                ChangeRow(label: "language", edit: { $0.language = $0.language == "de" ? "en" : "de" }, expected: only(\.language)),
+                ChangeRow(label: "launch at login", edit: { $0.launchAtLogin.toggle() }, expected: only(\.launchAtLogin)),
+                ChangeRow(label: "update checks", edit: { $0.checkForUpdatesAutomatically.toggle() }, expected: only(\.automaticUpdateChecks)),
+                ChangeRow(label: "a global shortcut", edit: { $0.pauseShortcut = "ctrl+shift+cmd+b" }, expected: only(\.globalShortcuts)),
+            ]
+        }()
+
+        @Test(arguments: changeRows)
+        @MainActor
+        func preferenceChangesListOnlyWhatChanged(row: ChangeRow) {
+            let previous = AppPreferences()
+            var current = previous
+            row.edit(&current)
+            #expect(AppCoordinator.preferenceChanges(from: previous, to: current) == row.expected)
+        }
+
+        @Test
+        @MainActor
+        func everythingCountsAsChangedBeforeTheFirstSave() {
+            #expect(
+                AppCoordinator.preferenceChanges(from: nil, to: AppPreferences())
+                    == AppCoordinator.PreferenceChanges(
+                        appearance: true, language: true, launchAtLogin: true, automaticUpdateChecks: true, globalShortcuts: true
+                    )
+            )
+        }
+
+        @Test
+        @MainActor
+        func savePreferencesReappliesOnlyChangedSettings() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+            let coordinator = harness.coordinator
+
+            let checksForUpdates = harness.model.preferences.checkForUpdatesAutomatically
+
+            // The first save applies everything.
+            coordinator.savePreferences()
+            #expect(harness.updateService.automaticChecksEnabledValues == [checksForUpdates])
+            let shortcutPasses = harness.globalShortcuts.unregisterAllCallCount
+
+            // An unrelated setting leaves the update check and the hotkeys alone.
+            harness.model.preferences.warnOnClearHistory.toggle()
+            coordinator.savePreferences()
+            coordinator.savePreferences()
+            #expect(harness.updateService.automaticChecksEnabledValues == [checksForUpdates])
+            #expect(harness.globalShortcuts.unregisterAllCallCount == shortcutPasses)
+
+            // Changing the update check applies it once.
+            harness.model.preferences.checkForUpdatesAutomatically = !checksForUpdates
+            coordinator.savePreferences()
+            coordinator.savePreferences()
+            #expect(harness.updateService.automaticChecksEnabledValues == [checksForUpdates, !checksForUpdates])
+            #expect(harness.globalShortcuts.unregisterAllCallCount == shortcutPasses)
+
+            // Changing a global shortcut registers the hotkeys again, once.
+            harness.model.preferences.pauseShortcut = "shift+cmd+o"
+            coordinator.savePreferences()
+            coordinator.savePreferences()
+            #expect(harness.globalShortcuts.unregisterAllCallCount == shortcutPasses + 1)
+        }
+    }
 }
