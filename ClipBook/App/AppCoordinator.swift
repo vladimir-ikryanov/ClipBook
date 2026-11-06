@@ -1928,11 +1928,7 @@ final class AppCoordinator: ObservableObject {
 
     do {
       guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-        try historyStore.delete(item.id)
-        let currentItem = model.items.first { $0.id == item.id } ?? item
-        removeLinkPreviewFiles(for: currentItem)
-        removeAssetFiles(for: [currentItem], remainingItems: model.items.filter { $0.id != item.id })
-        model.remove(item.id)
+        try moveToTrash([item])
         return
       }
 

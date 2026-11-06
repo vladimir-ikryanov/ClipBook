@@ -108,6 +108,23 @@ enum AppCoordinatorTests {
 
         @Test
         @MainActor
+        func editingContentToBlankTrashesTheItemAndUndoRestoresIt() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+            let item = Self.textItem("Soon blank", at: 200)
+            try harness.seedHistory([item])
+
+            harness.coordinator.editContent(item, text: "   \n  ")
+            #expect(harness.currentItem(item.id) == nil)
+            #expect(try harness.trashedIDs() == [item.id])
+
+            harness.coordinator.undoHistoryChange()
+            #expect(harness.currentItem(item.id) != nil)
+            #expect(try harness.trashedIDs().isEmpty)
+        }
+
+        @Test
+        @MainActor
         func sensitiveItemsAreDeletedPermanentlyInsteadOfTrashed() throws {
             let harness = try TestSupport.makeTestCoordinator()
             defer { harness.cleanup() }
