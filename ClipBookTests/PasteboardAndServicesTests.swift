@@ -574,6 +574,32 @@ enum PasteboardAndServicesTests {
 
         @Test
         @MainActor
+        func copyingAnImageFileAgainKeepsTheTextReadFromItBefore() async throws {
+            try await TestSupport.withTemporaryDirectory { directory in
+                let imageURL = directory.appendingPathComponent("scan.png")
+                try TestSupport.makePNGData().write(to: imageURL)
+
+                try await PasteboardAndServicesTests.withMonitor { fixture in
+                    await fixture.deliver(Self.fileContent([imageURL.path]), changeCount: 1)
+                    var stored = try #require(fixture.delegate.items.first)
+                    _ = await TestSupport.waitUntil { !fixture.delegate.recognizedEvents.isEmpty }
+
+                    // What the coordinator does with the recognized text.
+                    stored.text = "Text read from the scan"
+                    try fixture.store.upsert(stored)
+
+                    fixture.clock.advance(by: 60)
+                    await fixture.deliver(Self.fileContent([imageURL.path]), changeCount: 2)
+                    let recopied = try #require(fixture.delegate.items.first)
+                    #expect(recopied.id == stored.id)
+                    #expect(recopied.text == "Text read from the scan")
+                    #expect(recopied.copyCount == stored.copyCount + 1)
+                }
+            }
+        }
+
+        @Test
+        @MainActor
         func captureNotifiesDelegateInOrder() async throws {
             try await PasteboardAndServicesTests.withMonitor { fixture in
                 for (index, text) in ["First", "Second", "Third"].enumerated() {
