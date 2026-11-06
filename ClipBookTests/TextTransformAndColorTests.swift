@@ -181,6 +181,15 @@ enum TextTransformAndColorTests {
             Row(input: "oklch(0 0 0deg / 50%)", red: 0, green: 0, blue: 0, alpha: 0.5, tolerance: 0.02),
         ]
 
+        @Test(arguments: parsedRows)
+        func parsesColorText(row: Row) throws {
+            let color = try #require(ColorText(row.input, allowsBareHex: row.allowsBareHex))
+            #expect(abs(color.red - row.red) <= row.tolerance)
+            #expect(abs(color.green - row.green) <= row.tolerance)
+            #expect(abs(color.blue - row.blue) <= row.tolerance)
+            #expect(abs(color.alpha - row.alpha) <= row.tolerance)
+        }
+
         @Test(arguments: [
             (input: "ff8000", allowsBareHex: false),
             (input: "#fff", allowsBareHex: true),
@@ -191,6 +200,14 @@ enum TextTransformAndColorTests {
         ])
         func rejectsTextThatIsNotAColor(input: String, allowsBareHex: Bool) {
             #expect(ColorText(input, allowsBareHex: allowsBareHex) == nil)
+        }
+
+        @Test
+        func outOfGamutColorsAreClampedIntoRange() throws {
+            let wide = try #require(ColorText("oklch(0.7 0.35 145deg)", allowsBareHex: false))
+            #expect((0.0...1.0).contains(wide.red))
+            #expect((0.0...1.0).contains(wide.green))
+            #expect((0.0...1.0).contains(wide.blue))
         }
     }
 }
