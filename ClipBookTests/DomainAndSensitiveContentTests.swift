@@ -76,6 +76,30 @@ enum DomainAndSensitiveContentTests {
             }
         }
 
+        @Test
+        func filePreviewTextAndMissingSingleFileCheck() throws {
+            try TestSupport.withTemporaryDirectory { tempDir in
+                let existingFileURL = tempDir.appendingPathComponent("diagram.png")
+                try Data([0x89, 0x50, 0x4E, 0x47]).write(to: existingFileURL)
+                let missingFileURL = tempDir.appendingPathComponent("deleted.png")
+
+                let fileItemWithOCR = ClipboardItem.fixture(
+                    kind: .file,
+                    text: "Recognized OCR text inside image file",
+                    filePaths: [existingFileURL.path]
+                )
+                #expect(fileItemWithOCR.previewText == existingFileURL.path)
+                #expect(!fileItemWithOCR.isMissingSingleFileItem)
+
+                let missingFileItem = ClipboardItem.fixture(
+                    kind: .file,
+                    text: nil,
+                    filePaths: [missingFileURL.path]
+                )
+                #expect(missingFileItem.isMissingSingleFileItem)
+            }
+        }
+
         @Test(
             arguments: [
                 ("@scope/pkg@1.0.0", false, ClipboardKind.text),
