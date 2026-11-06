@@ -100,8 +100,11 @@ enum SensitiveContent {
         return "\(cardNumberMask) \(ending)"
     }
 
-    // A row shows the beginning of the text only, so that is all it is searched
-    // for secrets. The preview shows everything and searches much further.
+    // The text a row shows is searched for secrets up to `itemCharacterLimit`
+    // characters, and the preview, which shows far more, up to
+    // `previewCharacterLimit`. Whether an item holds a secret at all is decided
+    // over the preview's reach: the preview masks only an item that holds one,
+    // so a secret past a row's reach would otherwise show in it unmasked.
     private static let itemCharacterLimit = 4_000
     static let previewCharacterLimit = 200_000
     // A secret that begins inside a limit may end after it, so the search goes
@@ -154,7 +157,7 @@ enum SensitiveContent {
                 return false
             }
             return !detectedSecrets(
-                in: searchedText(item.previewText, limit: itemCharacterLimit),
+                in: searchedText(item.previewText, limit: previewCharacterLimit),
                 for: item
             ).isEmpty
         }

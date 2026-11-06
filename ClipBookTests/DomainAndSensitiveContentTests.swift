@@ -442,6 +442,17 @@ enum DomainAndSensitiveContentTests {
             #expect(!Self.shown(String(repeating: " ", count: 6_000) + token).text.contains(token))
         }
 
+        @Test
+        func aSecretFarIntoALongItemMasksTheItem() {
+            let token = Self.openAITokenSample
+            let farText = String(repeating: "a", count: 50_000) + " " + token
+            let far = Self.shown(farText)
+            #expect(far.isMasked)
+            // A row shows only the beginning, so its text is searched no further than that.
+            #expect(far.text == farText)
+            #expect(!Self.shown(farText, characterLimit: SensitiveContent.previewCharacterLimit).text.contains(token))
+        }
+
         private static func maskedRichText(_ text: String) -> NSAttributedString {
             let item = ClipboardItem.fixture(kind: .richText, text: text)
             let attributed = NSAttributedString(string: text, attributes: [.toolTip: "kept"])

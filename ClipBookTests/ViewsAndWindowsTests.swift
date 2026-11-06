@@ -225,6 +225,30 @@ enum ViewsAndWindowsTests {
             #expect(fixture.dismissCount == 1)
         }
 
+        /// The preview masks only an item found to hold a secret, so a secret far into a long item has
+        /// to make the item count as holding one.
+        @Test(arguments: [3_000, 50_000])
+        @MainActor
+        func previewMasksASecretWhereverItIs(offset: Int) {
+            TestSupport.ensureAppKitInitialized()
+            let token = ["ghp", "_", "1234567890abcdefghijklmnopqrstuvwxyzAB"].joined()
+            let controller = ItemPreviewDialogController(
+                item: ClipboardItem.fixture(kind: .text, text: String(repeating: "a", count: offset) + " " + token + " end"),
+                maximumContentSize: NSSize(width: 800, height: 600),
+                detectsSensitiveContent: true,
+                revealsSensitiveContent: false,
+                loadFormatting: { $0 }
+            )
+            _ = controller.view
+
+            func textViews(in view: NSView) -> [NSTextView] {
+                ((view as? NSTextView).map { [$0] } ?? []) + view.subviews.flatMap(textViews(in:))
+            }
+            let shown = textViews(in: controller.view).map(\.string).joined()
+            #expect(!shown.isEmpty)
+            #expect(!shown.contains(token))
+        }
+
         @Test
         @MainActor
         func windowFrameIsSavedOnceTheWindowHasBeenShown() throws {
