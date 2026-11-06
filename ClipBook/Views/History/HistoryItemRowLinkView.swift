@@ -326,6 +326,8 @@ enum LinkPreviewHTMLParser {
   }
 
   private nonisolated static func attributes(in tag: String) -> [String: String] {
+    // The "/" of a self-closing tag is not part of an unquoted value: <link href=/icon.png/>.
+    let tag = tag.hasSuffix("/>") ? String(tag.dropLast(2)) + ">" : tag
     guard let regex = try? NSRegularExpression(pattern: attributePattern, options: [.caseInsensitive]) else {
       return [:]
     }
