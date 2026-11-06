@@ -75,6 +75,77 @@ enum PasteboardAndServicesTests {
         }
 
         @Test
+        func readsRTFOnlyContentAsRichText() throws {
+            let rtfData = try TestSupport.makeRTFData(text: "RTF fallback body")
+            let outcome = try PasteboardAndServicesTests.readOutcome { pasteboard in
+                pasteboard.setData(rtfData, forType: .rtf)
+            }
+            let richText = try #require(outcome.payload?.richText)
+            #expect(richText.plainText == "RTF fallback body")
+            #expect(richText.rtf == rtfData)
+        }
+
+        @Test
+        func readsHTMLOnlyContentAsRichTextWithMarkupStripped() throws {
+            let markup = "<meta charset='utf-8'><style>p { color: red }</style><p>Tom &amp; <b>Jerry</b></p>"
+            let outcome = try PasteboardAndServicesTests.readOutcome { pasteboard in
+                pasteboard.setString(markup, forType: .html)
+            }
+            let richText = try #require(outcome.payload?.richText)
+            #expect(richText.plainText == "Tom & Jerry")
+            #expect(richText.rtf == nil)
+            #expect(richText.html == markup)
+        }
+
+        @Test(arguments: [
+            (html: "<p>Hi</p><script>alert(1)</script><style>p { color: red }</style>Bye", text: "Hi\nBye"),
+            (html: "<SCRIPT type='x'>x</Script >y", text: "y"),
+            (html: "<scripture>Genesis</scripture>", text: "Genesis"),
+            (html: "a<script>never closed", text: "anever closed"),
+            (html: "<b>1 &lt; 2</b>", text: "1 < 2"),
+            (html: "<p>One</p><p>Two</p>", text: "One\nTwo"),
+            (html: "<div>A<br>B<br/>C</div>", text: "A\nB\nC"),
+            (html: "<head><title>Title</title></head><body>Body</body>", text: "Body"),
+            (html: "<header>Top</header>", text: "Top"),
+            (html: "<ul>\n  <li>a</li>\n  <li>b</li>\n</ul>", text: "a\nb"),
+            (html: "<p>Tom   and\n   Jerry</p>", text: "Tom and Jerry"),
+            (html: "<pre>line1\n    line2\n\nline4</pre>", text: "line1\nline2\n\nline4"),
+            (html: "<table><tr><td>Name</td><td>Age</td></tr><tr><td>Ann</td><td>30</td></tr></table>", text: "Name\tAge\nAnn\t30"),
+            (html: "<!-- a <b>hidden</b> <script>x</script> -->Shown", text: "Shown")
+        ])
+        func htmlOnlyContentKeepsItsParagraphsAndLosesScriptsStylesAndTags(html: String, text: String) throws {
+            let outcome = try PasteboardAndServicesTests.readOutcome { pasteboard in
+                pasteboard.setString(html, forType: .html)
+            }
+            #expect(try #require(outcome.payload?.richText).plainText == text)
+        }
+
+        @Test(arguments: [
+            String(repeating: "<", count: 200_000) + "text",
+            String(repeating: "<script ", count: 50_000) + "text",
+            String(repeating: "<style>", count: 50_000) + "text"
+        ])
+        func htmlThatNeverClosesItsTagsIsReadInLinearTime(html: String) throws {
+            let clock = ContinuousClock()
+            var outcome: PasteboardReadResult.Outcome?
+            let elapsed = try clock.measure {
+                outcome = try PasteboardAndServicesTests.readOutcome { pasteboard in
+                    pasteboard.setString(html, forType: .html)
+                }
+            }
+            #expect(elapsed < .seconds(5), "Reading took \(elapsed)")
+            #expect(outcome?.payload?.richText?.plainText?.hasSuffix("text") == true)
+        }
+
+        @Test
+        func whitespaceOnlyHTMLIsEmpty() throws {
+            let outcome = try PasteboardAndServicesTests.readOutcome { pasteboard in
+                pasteboard.setString("<div><span>   </span></div>", forType: .html)
+            }
+            #expect(outcome.isEmpty, "\(outcome)")
+        }
+
+        @Test
         func anUnchangedPasteboardIsReadOnlyWhenARetryIsAsked() throws {
             try TestSupport.withTemporaryDirectory { directory in
                 try TestSupport.withUniquePasteboard { pasteboard in
@@ -551,6 +622,33 @@ enum PasteboardAndServicesTests {
             }
         }
 
+        @Test(arguments: [
+            (text: "https://example.com/path", kind: ClipboardKind.link),
+            (text: "user@example.com", kind: ClipboardKind.email),
+            (text: "#FF5733", kind: ClipboardKind.color),
+            (text: "General rich text paragraph", kind: ClipboardKind.richText)
+        ])
+        @MainActor
+        func formattingIsKeptOnlyForRichText(text: String, kind: ClipboardKind) async throws {
+            let rtf = try TestSupport.makeRTFData(text: "Rich")
+            let html = "<a href=\"https://example.com\">https://example.com</a>"
+            try await PasteboardAndServicesTests.withMonitor { fixture in
+                await fixture.deliver(.richText(plainText: text, rtf: rtf, html: html), changeCount: 1)
+
+                let captured = try #require(fixture.delegate.items.first)
+                #expect(captured.kind == kind)
+                if kind == .richText {
+                    #expect(captured.hasFormatting)
+                    #expect(captured.byteSize == rtf.count + html.utf8.count + text.utf8.count)
+                } else {
+                    #expect(captured.rtfData == nil)
+                    #expect(captured.html == nil)
+                    #expect(!captured.hasFormatting)
+                    #expect(captured.byteSize == text.utf8.count)
+                }
+            }
+        }
+
         @Test
         @MainActor
         func capturedItemsAreStampedWithTheMonitorsClock() async throws {
@@ -570,6 +668,34 @@ enum PasteboardAndServicesTests {
 
         private static func fileContent(_ paths: [String]) -> PasteboardContent.Payload {
             .files(paths: paths, byteSize: 1, recognizedContent: .empty)
+        }
+
+        @Test
+        @MainActor
+        func textIsReadOnlyFromASingleCopiedImageFile() async throws {
+            try await TestSupport.withTemporaryDirectory { directory in
+                let imageURL = directory.appendingPathComponent("photo.png")
+                try TestSupport.makePNGData().write(to: imageURL)
+
+                try await PasteboardAndServicesTests.withMonitor { fixture in
+                    // Neither a document nor several files is read for text.
+                    await fixture.deliver(Self.fileContent([directory.appendingPathComponent("notes.txt").path]), changeCount: 1)
+                    fixture.clock.advance(by: 1)
+                    await fixture.deliver(Self.fileContent([imageURL.path, directory.appendingPathComponent("other.png").path]), changeCount: 2)
+                    #expect(fixture.delegate.capturedHistory.count == 2)
+
+                    // One image file is, and its result is delivered for that item. The reads
+                    // run one after the other, so nothing is left over from the first two.
+                    fixture.clock.advance(by: 1)
+                    await fixture.deliver(Self.fileContent([imageURL.path]), changeCount: 3)
+                    let imageItem = try #require(fixture.delegate.items.first)
+                    #expect(imageItem.filePaths == [imageURL.path])
+
+                    let arrived = await TestSupport.waitUntil { !fixture.delegate.recognizedEvents.isEmpty }
+                    #expect(arrived)
+                    #expect(fixture.delegate.recognizedEvents.map(\.id) == [imageItem.id])
+                }
+            }
         }
 
         @Test
