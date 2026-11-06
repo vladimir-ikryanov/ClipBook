@@ -21,17 +21,55 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   private var isQuitConfirmed = false
   private var isQuitConfirmationPresented = false
   private var statusCancellables: Set<AnyCancellable> = []
-  
+  /// Scratch storage of a hosted test run, removed when the process terminates.
+  private let testSupportDirectory: URL?
+  private let testDefaultsSuiteName: String?
+  #if DEBUG
+  var scratchStorageForTests: (directory: URL?, suiteName: String?) {
+    (testSupportDirectory, testDefaultsSuiteName)
+  }
+  #endif
+
+  // Hosted unit tests launch the app process before running any test, so they
+  // get a scratch directory and preferences domain and skip starting the
+  // clipboard monitor and menu bar item.
+  private static let isRunningTests: Bool = {
+    #if DEBUG
+    let env = ProcessInfo.processInfo.environment
+    return env["XCTestConfigurationFilePath"] != nil
+      || env["XCTestSessionIdentifier"] != nil
+    #else
+    return false
+    #endif
+  }()
+
   override init() {
     let fileManager = FileManager.default
-    let supportDirectory = AppDirectories.applicationSupport(fileManager: fileManager)
-    preferencesStore = PreferencesStore()
+    let supportDirectory: URL
+    let userDefaults: UserDefaults
+    if Self.isRunningTests {
+      // The Debug build has a bundle identifier of its own, and a test run still
+      // keeps its preferences and history apart from the Debug build a developer
+      // uses.
+      let runID = UUID().uuidString
+      let suiteName = "com.ikryanov.clipbook.apptests.\(runID)"
+      supportDirectory = fileManager.temporaryDirectory.appendingPathComponent("ClipBookTests.\(runID)", isDirectory: true)
+      userDefaults = UserDefaults(suiteName: suiteName) ?? .standard
+      testSupportDirectory = supportDirectory
+      testDefaultsSuiteName = suiteName
+    } else {
+      supportDirectory = AppDirectories.applicationSupport(fileManager: fileManager)
+      userDefaults = .standard
+      testSupportDirectory = nil
+      testDefaultsSuiteName = nil
+    }
+    preferencesStore = PreferencesStore(userDefaults: userDefaults)
     historyStore = SQLiteHistoryStore(directory: supportDirectory)
     model = AppModel()
     pasteService = PasteService { [historyStore] item in
       (try? historyStore.loadingFormatting(of: item)) ?? item
     }
-    globalShortcuts = GlobalShortcutService()
+    globalShortcuts = GlobalShortcutService(isEnabled: !Self.isRunningTests)
     updateService = SparkleUpdateService()
     licensingService = LicensingService()
     clipboardMonitor = PasteboardMonitor(historyStore: historyStore, fileManager: fileManager, supportDirectory: supportDirectory)
@@ -62,6 +100,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   func applicationDidFinishLaunching(_ notification: Notification) {
+    guard !Self.isRunningTests else {
+      return
+    }
     NSApp.setActivationPolicy(.accessory)
     coordinator.menuBarIconFrame = { [weak self] in
       self?.statusItemFrame
@@ -133,7 +174,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   func applicationWillTerminate(_ notification: Notification) {
+    guard !Self.isRunningTests else {
+      // The coordinator never started in a test run, so stopping it would only
+      // save default preferences and register the test build as a login item.
+      removeTestStorage()
+      return
+    }
     coordinator.stop()
+  }
+
+  private func removeTestStorage() {
+    if let testDefaultsSuiteName {
+      UserDefaults(suiteName: testDefaultsSuiteName)?.removePersistentDomain(forName: testDefaultsSuiteName)
+    }
+    if let testSupportDirectory {
+      try? FileManager.default.removeItem(at: testSupportDirectory)
+    }
   }
   
   // Nil when the icon isn't on any screen, which is where macOS leaves an icon

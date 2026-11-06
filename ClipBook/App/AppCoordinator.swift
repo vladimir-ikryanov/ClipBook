@@ -32,6 +32,9 @@ final class AppCoordinator: ObservableObject {
   private let licensingService: LicensingService
   private let fileManager: FileManager
   private let supportDirectory: URL
+  /// What `savePreferences()` last applied. Comparing against it keeps a change to one
+  /// setting from registering the hotkeys again or touching the login item.
+  private var lastAppliedPreferences: AppPreferences?
   let filePreviewCache: FilePreviewCache
   #if (CLIPBOOK_COMMERCIAL && canImport(ClipBookCommercialLicensing)) || CLIPBOOK_COMMERCIAL_IN_TREE
   private static let v1PreferencesDomain = "com.ikryanov.clipbook"
@@ -489,17 +492,57 @@ final class AppCoordinator: ObservableObject {
     clipboardMonitor.isPaused = model.isPaused
   }
   
+  /// The settings whose effects `savePreferences()` applies again.
+  struct PreferenceChanges: Equatable {
+    var appearance: Bool
+    var language: Bool
+    var launchAtLogin: Bool
+    var automaticUpdateChecks: Bool
+    var globalShortcuts: Bool
+  }
+
+  /// What changed from `previous` to `current`. Everything counts as changed
+  /// when nothing has been applied yet.
+  static func preferenceChanges(from previous: AppPreferences?, to current: AppPreferences) -> PreferenceChanges {
+    func changed<Value: Equatable>(_ keyPath: KeyPath<AppPreferences, Value>) -> Bool {
+      previous?[keyPath: keyPath] != current[keyPath: keyPath]
+    }
+
+    return PreferenceChanges(
+      appearance: changed(\.appearance),
+      language: changed(\.language),
+      launchAtLogin: changed(\.launchAtLogin),
+      automaticUpdateChecks: changed(\.checkForUpdatesAutomatically),
+      globalShortcuts: changed(\.globalShortcuts)
+    )
+  }
+
   func savePreferences() {
-    preferencesStore.save(model.preferences)
-    applyAppearance()
-    applyLanguage()
+    let current = model.preferences
+    let changes = Self.preferenceChanges(from: lastAppliedPreferences, to: current)
+
+    preferencesStore.save(current)
+    if changes.appearance {
+      applyAppearance()
+    }
+    if changes.language {
+      applyLanguage()
+    }
     clipboardMonitor.updatePreferences(model.preferences)
     if !model.preferences.showPreviewForLinks {
       cancelLinkPreviewTasks()
     }
-    LaunchAtLoginService.setEnabled(model.preferences.launchAtLogin)
-    updateService.setAutomaticallyChecksForUpdates(model.preferences.checkForUpdatesAutomatically)
-    configureShortcuts()
+    if changes.launchAtLogin {
+      LaunchAtLoginService.setEnabled(current.launchAtLogin)
+    }
+    if changes.automaticUpdateChecks {
+      updateService.setAutomaticallyChecksForUpdates(current.checkForUpdatesAutomatically)
+    }
+    if changes.globalShortcuts {
+      configureShortcuts()
+    }
+    // After applyLanguage, which can normalize `language`, so the next call sees no change.
+    lastAppliedPreferences = model.preferences
   }
 
   func persistPreferences() {
@@ -872,12 +915,15 @@ final class AppCoordinator: ObservableObject {
     return items.first
   }
 
-  private func historyItemsForPasteNext(in items: [ClipboardItem]) -> [ClipboardItem] {
-    guard model.preferences.pinFavoritesToTop else {
+  /// Internal so tests can reach the paste-next ordering rule without pasting.
+  func historyItemsForPasteNext(in items: [ClipboardItem]) -> [ClipboardItem] {
+    guard model.preferences.pinFavoritesToTop,
+          !model.selectedHistoryFilterContentTypes.contains(.favorites) else {
       return items
     }
 
-    return items.filter { !$0.isFavorite }
+    let nonFavorites = items.filter { !$0.isFavorite }
+    return nonFavorites.isEmpty ? items : nonFavorites
   }
 
   private func nextHistoryItemID(after itemID: ClipboardItem.ID, in items: [ClipboardItem]) -> ClipboardItem.ID? {
@@ -1045,7 +1091,7 @@ final class AppCoordinator: ObservableObject {
       // as Copy & Merge keeps the app of the item it appends to. The app in
       // front while merging has nothing to do with the content.
       let item = ClipboardItem(
-        kind: .text,
+        kind: ClipboardKind.classifyText(text, treatDigitNumbersAsColor: model.preferences.treatDigitNumbersAsColor),
         text: text,
         sourceAppName: items[0].sourceAppName,
         sourceBundleIdentifier: items[0].sourceBundleIdentifier,
@@ -1882,11 +1928,7 @@ final class AppCoordinator: ObservableObject {
 
     do {
       guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-        try historyStore.delete(item.id)
-        let currentItem = model.items.first { $0.id == item.id } ?? item
-        removeLinkPreviewFiles(for: currentItem)
-        removeAssetFiles(for: [currentItem], remainingItems: model.items.filter { $0.id != item.id })
-        model.remove(item.id)
+        try moveToTrash([item])
         return
       }
 
@@ -2711,7 +2753,7 @@ final class AppCoordinator: ObservableObject {
     }
   }
   
-  private func loadHistory() {
+  func loadHistory() {
     do {
       model.tags = try historyStore.fetchTags()
       model.items = try historyStore.fetchAll()
@@ -2728,15 +2770,37 @@ final class AppCoordinator: ObservableObject {
     }
   }
 
+  // `ProcessInfo.systemUptime` pauses while the Mac is asleep, so subtracting
+  // it from `Date()` drifts forward by the time spent asleep, and the next
+  // launch takes that for a reboot. `kern.boottime` is the actual boot time.
+  nonisolated static func systemBootTime() -> Date {
+    var bootTime = timeval()
+    var size = MemoryLayout<timeval>.stride
+    if sysctlbyname("kern.boottime", &bootTime, &size, nil, 0) == 0, bootTime.tv_sec > 0 {
+      return Date(timeIntervalSince1970: Double(bootTime.tv_sec) + Double(bootTime.tv_usec) / 1_000_000)
+    }
+    return Date(timeIntervalSinceNow: -ProcessInfo.processInfo.systemUptime)
+  }
+
+  /// Whether the Mac restarted since `previousBootTime` was recorded. One-sided:
+  /// a reboot makes the boot time later. A stored value ahead of the current one
+  /// is a clock adjustment or a time derived from `systemUptime`, which runs
+  /// ahead of the real boot time by the time spent asleep.
+  nonisolated static func isReboot(previousBootTime: TimeInterval?, currentBootTime: TimeInterval) -> Bool {
+    guard let previousBootTime else {
+      return false
+    }
+    return currentBootTime - previousBootTime > 60
+  }
+
   private func clearHistoryAfterRebootIfNeeded() {
-    let currentBootTime = Date(timeIntervalSinceNow: -ProcessInfo.processInfo.systemUptime).timeIntervalSince1970
+    let currentBootTime = Self.systemBootTime().timeIntervalSince1970
     let defaults = UserDefaults.standard
     let previousBootTime = defaults.object(forKey: lastKnownBootTimeKey) as? Double
     defaults.set(currentBootTime, forKey: lastKnownBootTimeKey)
 
     guard model.preferences.clearHistoryOnReboot,
-          let previousBootTime,
-          abs(previousBootTime - currentBootTime) > 60 else {
+          Self.isReboot(previousBootTime: previousBootTime, currentBootTime: currentBootTime) else {
       return
     }
 

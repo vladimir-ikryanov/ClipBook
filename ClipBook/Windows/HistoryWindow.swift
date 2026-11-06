@@ -295,6 +295,11 @@ final class HistoryWindow: NSObject, NSWindowDelegate {
   // The frame is stored in one change of the preferences rather than one per
   // field, since everything that follows the preferences hears each change.
   func saveWindowFrame() {
+    // If the window was never opened during the session, its frame is still the
+    // default rect from init and would overwrite the saved position on quit.
+    guard didRestoreWindowFrame else {
+      return
+    }
     let frame = window.frame
     var preferences = model.preferences
     preferences.historyWindowX = frame.origin.x

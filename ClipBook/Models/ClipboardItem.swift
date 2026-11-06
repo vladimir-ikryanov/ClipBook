@@ -320,6 +320,11 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
     }
 
     var previewText: String {
+        // Single-file image items store recognized OCR text in `text` for search,
+        // while their preview text remains the file path.
+        if kind == .file, !filePaths.isEmpty {
+            return filePaths.joined(separator: "\n")
+        }
         if let text, !text.isEmpty {
             return text
         }
@@ -352,6 +357,10 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
 
     var isMultipleFileItem: Bool {
         kind == .file && filePaths.count > 1
+    }
+
+    var isMissingSingleFileItem: Bool {
+        kind == .file && filePaths.count == 1 && !FileManager.default.fileExists(atPath: filePaths[0])
     }
 
     var isImageFileItem: Bool {

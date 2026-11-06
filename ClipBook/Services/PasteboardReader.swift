@@ -18,6 +18,27 @@ nonisolated struct PasteboardReadRequest: Sendable {
     /// The image already in the history with the given digest, if any. It is
     /// asked from the read queue.
     var findStoredImage: @Sendable (_ digest: String) -> StoredImage?
+    /// The application in front at the moment of the read.
+    var frontmostApplication: @Sendable () -> FrontmostApplication? = { FrontmostApplication.current }
+}
+
+/// The application in front when something was copied: what the history records
+/// as the source of the copy, and what the ignored applications are matched against.
+nonisolated struct FrontmostApplication: Sendable {
+    var bundlePath: String?
+    var localizedName: String?
+    var bundleIdentifier: String?
+
+    static var current: FrontmostApplication? {
+        guard let application = NSWorkspace.shared.frontmostApplication else {
+            return nil
+        }
+        return FrontmostApplication(
+            bundlePath: application.bundleURL?.standardizedFileURL.path,
+            localizedName: application.localizedName,
+            bundleIdentifier: application.bundleIdentifier
+        )
+    }
 }
 
 /// An image already in the history: its file and the content read from it.
@@ -86,14 +107,13 @@ nonisolated struct RecognizedImageContent: Sendable {
 nonisolated enum PasteboardReader {
     static let ghostType = NSPasteboard.PasteboardType("com.ikryanov.clipbook.v2.ghost")
 
-    static func read(_ request: PasteboardReadRequest) -> PasteboardReadResult {
-        let pasteboard = NSPasteboard.general
+    static func read(_ request: PasteboardReadRequest, from pasteboard: NSPasteboard = .general) -> PasteboardReadResult {
         let changeCount = pasteboard.changeCount
         guard changeCount != request.lastChangeCount || request.retriesUnchangedPasteboard else {
             return PasteboardReadResult(changeCount: changeCount, outcome: .unchanged)
         }
 
-        let frontmostApplication = NSWorkspace.shared.frontmostApplication
+        let frontmostApplication = request.frontmostApplication()
         guard shouldCapture(pasteboard, from: frontmostApplication, request: request) else {
             return PasteboardReadResult(changeCount: changeCount, outcome: .skipped)
         }
@@ -112,7 +132,7 @@ nonisolated enum PasteboardReader {
 
     private static func shouldCapture(
         _ pasteboard: NSPasteboard,
-        from frontmostApplication: NSRunningApplication?,
+        from frontmostApplication: FrontmostApplication?,
         request: PasteboardReadRequest
     ) -> Bool {
         guard pasteboard.string(forType: ghostType) == nil else {
@@ -131,7 +151,7 @@ nonisolated enum PasteboardReader {
 
         if let frontmostApplication,
            AppPreferences.isApplicationIgnored(
-               bundlePath: frontmostApplication.bundleURL?.standardizedFileURL.path,
+               bundlePath: frontmostApplication.bundlePath,
                localizedName: frontmostApplication.localizedName,
                entries: request.ignoredApplicationEntries
            ) {
@@ -315,8 +335,93 @@ nonisolated enum PasteboardReader {
         guard rtf != nil || html != nil else {
             return nil
         }
+        // Some apps put only HTML on the pasteboard, so its text is the last fallback.
+        let plainText = pasteboard.string(forType: .string)
+            ?? rtf.flatMap { NSAttributedString(rtf: $0, documentAttributes: nil)?.string }
+            ?? html.map { textContent(ofHTML: $0) }
+        guard let plainText,
+              !plainText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return nil
+        }
 
-        return .richText(plainText: pasteboard.string(forType: .string), rtf: rtf, html: html)
+        return .richText(plainText: plainText, rtf: rtf, html: html)
+    }
+
+    /// The text of HTML markup as a browser shows it: scripts, styles and the
+    /// head dropped, a line break where a paragraph, a list item, a row or a
+    /// `<br>` ends, tags stripped, entities decoded.
+    private static func textContent(ofHTML html: String) -> String {
+        let withoutHiddenElements = ["script", "style", "head"].reduce(removingComments(from: html)) {
+            replacingElements(named: $1, in: $0) { _ in "" }
+        }
+        // A preformatted block keeps its line breaks, which the next step would turn into spaces.
+        let withPreformattedBreaks = replacingElements(named: "pre", in: withoutHiddenElements) {
+            $0.replacingOccurrences(of: "\n", with: "<br>")
+        }
+        // The line breaks and the indentation of the markup itself are one space.
+        let collapsed = withPreformattedBreaks.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+        let withLineBreaks = collapsed.replacingOccurrences(
+            of: #"<br\b[^<>]*>|</(?:p|div|li|tr|h[1-6]|ul|ol|table|section|article|blockquote|pre)\s*>"#,
+            with: "\n",
+            options: [.regularExpression, .caseInsensitive]
+        )
+        let withCellBreaks = withLineBreaks.replacingOccurrences(
+            of: #"</t[dh]\s*>"#,
+            with: "\t",
+            options: [.regularExpression, .caseInsensitive]
+        )
+        // A tag ends at the next ">", and no tag contains a "<", so a stray "<"
+        // costs nothing beyond itself.
+        let withoutTags = withCellBreaks.replacingOccurrences(of: "<[^<>]+>", with: "", options: .regularExpression)
+        return ClipboardTextTransform.decodeHTMLEntities(withoutTags)
+            .replacingOccurrences(of: "\t\n", with: "\n")
+            .replacingOccurrences(of: " ?\n ?", with: "\n", options: .regularExpression)
+            .replacingOccurrences(of: #"\n{3,}"#, with: "\n\n", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// `html` without its comments. A comment that is never closed stays as it is.
+    private static func removingComments(from html: String) -> String {
+        var result = ""
+        var copiedUpTo = html.startIndex
+        while let open = html.range(of: "<!--", range: copiedUpTo..<html.endIndex),
+              let close = html.range(of: "-->", range: open.upperBound..<html.endIndex) {
+            result += html[copiedUpTo..<open.lowerBound]
+            copiedUpTo = close.upperBound
+        }
+        return result + html[copiedUpTo...]
+    }
+
+    /// `html` with each element called `name`, tags included, replaced by what
+    /// `replacement` makes of it. An element that is never closed stays as it is.
+    /// The page is copied by whoever wrote it, so each search starts where the
+    /// last one ended: a regular expression would search to the end again from
+    /// every unclosed tag.
+    private static func replacingElements(
+        named name: String,
+        in html: String,
+        with replacement: (String) -> String
+    ) -> String {
+        var result = ""
+        var copiedUpTo = html.startIndex
+        var searchFrom = html.startIndex
+        while let open = html.range(of: "<\(name)", options: .caseInsensitive, range: searchFrom..<html.endIndex) {
+            // "<scripture>" is not a script: the name has to end there.
+            if open.upperBound < html.endIndex,
+               html[open.upperBound].isLetter || html[open.upperBound].isNumber || html[open.upperBound] == "_" {
+                searchFrom = open.upperBound
+                continue
+            }
+            guard let close = html.range(of: "</\(name)", options: .caseInsensitive, range: open.upperBound..<html.endIndex) else {
+                break
+            }
+            let end = html.range(of: ">", range: close.upperBound..<html.endIndex)?.upperBound ?? html.endIndex
+            result += html[copiedUpTo..<open.lowerBound]
+            result += replacement(String(html[open.lowerBound..<end]))
+            copiedUpTo = end
+            searchFrom = end
+        }
+        return result + html[copiedUpTo...]
     }
 
     private static func readText(from pasteboard: NSPasteboard) -> PasteboardContent.Payload? {

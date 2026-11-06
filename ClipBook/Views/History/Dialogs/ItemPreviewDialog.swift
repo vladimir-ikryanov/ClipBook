@@ -583,6 +583,10 @@ final class ItemPreviewDialogController: NSViewController {
     guard isEditing, let editingTextView else {
       return
     }
+    guard hasUnsavedChanges else {
+      cancelEditing()
+      return
+    }
 
     // Saved before the editor is torn down, so the resulting model update is
     // parked as the pending item and applied by endEditing().

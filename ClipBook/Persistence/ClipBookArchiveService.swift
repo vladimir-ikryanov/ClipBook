@@ -123,30 +123,42 @@ final class ClipBookArchiveService {
 
         var importedItemIDs: Set<ClipboardItem.ID> = []
         var importedItemCount = 0
-        // One transaction for the whole archive: a commit per item is the slow
-        // part of a large import, and a failed import leaves nothing behind.
-        try historyStore.performInTransaction {
-            for archiveTag in archiveTags {
-                let tag = try historyStore.createTag(name: archiveTag.name, color: archiveTag.color)
-                tagIDsByArchiveID[archiveTag.id] = tag.id
-                tagNamesByID[tag.id] = tag.name
-            }
+        // The asset files copied so far. A rolled back transaction takes the
+        // database rows with it but not these files, so a failed import removes
+        // them again.
+        var copiedAssetURLs: [URL] = []
+        do {
+            // One transaction for the whole archive: a commit per item is the slow
+            // part of a large import, and a failed import leaves nothing behind.
+            try historyStore.performInTransaction {
+                for archiveTag in archiveTags {
+                    let tag = try historyStore.createTag(name: archiveTag.name, color: archiveTag.color)
+                    tagIDsByArchiveID[archiveTag.id] = tag.id
+                    tagNamesByID[tag.id] = tag.name
+                }
 
-            for archiveItem in archiveItems {
-                let item = try clipboardItem(
-                    from: archiveItem,
-                    archiveURL: archiveURL,
-                    tagIDsByArchiveID: tagIDsByArchiveID,
-                    tagNamesByID: tagNamesByID
-                )
-                try historyStore.upsert(item)
-                importedItemIDs.insert(item.id)
-                importedItemCount += 1
-                progress?(ClipBookArchiveProgress(completedItemCount: importedItemCount, totalItemCount: archiveItems.count))
+                for archiveItem in archiveItems {
+                    let item = try clipboardItem(
+                        from: archiveItem,
+                        archiveURL: archiveURL,
+                        tagIDsByArchiveID: tagIDsByArchiveID,
+                        tagNamesByID: tagNamesByID,
+                        copiedAssetURLs: &copiedAssetURLs
+                    )
+                    try historyStore.upsert(item)
+                    importedItemIDs.insert(item.id)
+                    importedItemCount += 1
+                    progress?(ClipBookArchiveProgress(completedItemCount: importedItemCount, totalItemCount: archiveItems.count))
+                }
+                // Importing an export taken before items were deleted brings them
+                // back, so an item in the Trash that the archive holds leaves it.
+                try historyStore.restoreFromTrash(ids: Array(importedItemIDs))
             }
-            // Importing an export taken before items were deleted brings them
-            // back, so an item in the Trash that the archive holds leaves it.
-            try historyStore.restoreFromTrash(ids: Array(importedItemIDs))
+        } catch {
+            for copiedURL in copiedAssetURLs {
+                try? fileManager.removeItem(at: copiedURL)
+            }
+            throw error
         }
 
         return ClipBookArchiveImportResult(itemIDs: importedItemIDs, tagCount: archiveTags.count)
@@ -201,21 +213,24 @@ final class ClipBookArchiveService {
         from archiveItem: ClipBookArchiveItem,
         archiveURL: URL,
         tagIDsByArchiveID: [String: Tag.ID],
-        tagNamesByID: [Tag.ID: String]
+        tagNamesByID: [Tag.ID: String],
+        copiedAssetURLs: inout [URL]
     ) throws -> ClipboardItem {
         let tagIDs = archiveItem.tagIDs.compactMap { tagIDsByArchiveID[$0] }
         let assetPath = try copyImportedAsset(
             archiveRelativePath: archiveItem.assetPath,
             archiveURL: archiveURL,
             destinationDirectory: supportDirectory.appendingPathComponent("Images", isDirectory: true),
-            fallbackFileName: archiveItem.id.uuidString
+            fallbackFileName: archiveItem.id.uuidString,
+            copiedAssetURLs: &copiedAssetURLs
         )
         let linkPreviewDetails: LinkPreviewDetails?
         if let archiveLinkPreviewDetails = archiveItem.linkPreviewDetails {
             linkPreviewDetails = try importedLinkPreviewDetails(
                 from: archiveLinkPreviewDetails,
                 archiveURL: archiveURL,
-                itemID: archiveItem.id
+                itemID: archiveItem.id,
+                copiedAssetURLs: &copiedAssetURLs
             )
         } else {
             linkPreviewDetails = nil
@@ -278,25 +293,30 @@ final class ClipBookArchiveService {
     private func importedLinkPreviewDetails(
         from details: ClipBookArchiveLinkPreviewDetails,
         archiveURL: URL,
-        itemID: UUID
+        itemID: UUID,
+        copiedAssetURLs: inout [URL]
     ) throws -> LinkPreviewDetails {
         let directory = supportDirectory.appendingPathComponent("LinkPreviews", isDirectory: true)
+        let imagePath = try copyImportedAsset(
+            archiveRelativePath: details.imagePath,
+            archiveURL: archiveURL,
+            destinationDirectory: directory,
+            fallbackFileName: "\(itemID.uuidString)-preview",
+            copiedAssetURLs: &copiedAssetURLs
+        )
+        let faviconPath = try copyImportedAsset(
+            archiveRelativePath: details.faviconPath,
+            archiveURL: archiveURL,
+            destinationDirectory: directory,
+            fallbackFileName: "\(itemID.uuidString)-favicon",
+            copiedAssetURLs: &copiedAssetURLs
+        )
         return LinkPreviewDetails(
             url: details.url,
             title: details.title,
             description: details.description,
-            imagePath: try copyImportedAsset(
-                archiveRelativePath: details.imagePath,
-                archiveURL: archiveURL,
-                destinationDirectory: directory,
-                fallbackFileName: "\(itemID.uuidString)-preview"
-            ),
-            faviconPath: try copyImportedAsset(
-                archiveRelativePath: details.faviconPath,
-                archiveURL: archiveURL,
-                destinationDirectory: directory,
-                fallbackFileName: "\(itemID.uuidString)-favicon"
-            ),
+            imagePath: imagePath,
+            faviconPath: faviconPath,
             fetchedAt: details.fetchedAt
         )
     }
@@ -323,25 +343,43 @@ final class ClipBookArchiveService {
         archiveRelativePath: String?,
         archiveURL: URL,
         destinationDirectory: URL,
-        fallbackFileName: String
+        fallbackFileName: String,
+        copiedAssetURLs: inout [URL]
     ) throws -> String? {
         guard let archiveRelativePath, !archiveRelativePath.isEmpty else {
             return nil
         }
-        guard !archiveRelativePath.contains(".."), !archiveRelativePath.hasPrefix("/") else {
+        // Only a ".." path component climbs out of the archive; a file name
+        // that merely contains two dots, such as "photo..png", is fine.
+        let pathComponents = archiveRelativePath.split(separator: "/", omittingEmptySubsequences: false)
+        guard !pathComponents.contains(".."), !archiveRelativePath.hasPrefix("/") else {
             throw ClipBookArchiveError.invalidAssetPath(archiveRelativePath)
         }
 
         let sourceURL = archiveURL.appendingPathComponent(archiveRelativePath)
+        if (try? sourceURL.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true {
+            throw ClipBookArchiveError.invalidAssetPath(archiveRelativePath)
+        }
         guard fileManager.fileExists(atPath: sourceURL.path) else {
             return nil
+        }
+        let canonicalArchivePath = archiveURL.resolvingSymlinksInPath().standardizedFileURL.path + "/"
+        let resolvedSourceURL = sourceURL.resolvingSymlinksInPath().standardizedFileURL
+        guard resolvedSourceURL.path.hasPrefix(canonicalArchivePath) else {
+            throw ClipBookArchiveError.invalidAssetPath(archiveRelativePath)
+        }
+        // An asset is a file. A directory would pass the checks above and be
+        // copied with everything in it.
+        guard (try? resolvedSourceURL.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true else {
+            throw ClipBookArchiveError.invalidAssetPath(archiveRelativePath)
         }
 
         try fileManager.createDirectory(at: destinationDirectory, withIntermediateDirectories: true)
         let fileExtension = sourceURL.pathExtension
         let fileName = fileExtension.isEmpty ? fallbackFileName : "\(fallbackFileName).\(fileExtension)"
         let destinationURL = uniqueURL(in: destinationDirectory, preferredFileName: fileName)
-        try fileManager.copyItem(at: sourceURL, to: destinationURL)
+        try fileManager.copyItem(at: resolvedSourceURL, to: destinationURL)
+        copiedAssetURLs.append(destinationURL)
         return destinationURL.path
     }
 
