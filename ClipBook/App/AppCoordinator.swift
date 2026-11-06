@@ -1048,7 +1048,7 @@ final class AppCoordinator: ObservableObject {
       // as Copy & Merge keeps the app of the item it appends to. The app in
       // front while merging has nothing to do with the content.
       let item = ClipboardItem(
-        kind: .text,
+        kind: ClipboardKind.classifyText(text, treatDigitNumbersAsColor: model.preferences.treatDigitNumbersAsColor),
         text: text,
         sourceAppName: items[0].sourceAppName,
         sourceBundleIdentifier: items[0].sourceBundleIdentifier,

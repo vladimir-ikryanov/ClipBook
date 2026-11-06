@@ -16,6 +16,43 @@ enum AppCoordinatorTests {
 
         @Test
         @MainActor
+        func mergingTextThatIsALinkJoinsTheExistingLinkItem() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+            let url = "https://example.com/docs"
+            let existingLink = ClipboardItem.fixture(
+                kind: .link,
+                text: url,
+                copiedAt: Self.baseDate.addingTimeInterval(10),
+                firstCopiedAt: Self.baseDate
+            )
+            let part1 = Self.textItem(url, at: 30)
+            let part2 = Self.textItem("   ", at: 20)
+            try harness.seedHistory([Self.textItem("Unrelated clip", at: 40), part1, part2, existingLink])
+
+            harness.coordinator.merge([part1, part2])
+
+            let merged = try #require(harness.model.items.first)
+            #expect(merged.kind == .link)
+            #expect(harness.model.items.filter { $0.kind == .link && $0.contentKey == merged.contentKey }.count == 1)
+        }
+
+        @Test
+        @MainActor
+        func mergingAHexColorWithBlankTextYieldsAColorItem() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+            let part1 = Self.textItem("#ff0000", at: 50)
+            let part2 = Self.textItem("   ", at: 45)
+            try harness.seedHistory([part1, part2])
+
+            harness.coordinator.merge([part1, part2])
+
+            #expect(harness.model.items.first?.kind == .color)
+        }
+
+        @Test
+        @MainActor
         func splitClassifiesLinesAndPlacesAtTop() throws {
             let harness = try TestSupport.makeTestCoordinator()
             defer { harness.cleanup() }
