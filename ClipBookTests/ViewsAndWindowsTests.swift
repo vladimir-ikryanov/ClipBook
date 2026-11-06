@@ -112,6 +112,41 @@ enum ViewsAndWindowsTests {
             #expect(secondColor == .systemBlue)
             #expect(resumeColor == baseColor)
         }
+
+        @Test
+        func linkPreviewHTMLParserMetadataAndEntities() throws {
+            let baseURL = try #require(URL(string: "https://example.com/articles/post"))
+            let html = """
+            <html>
+            <head>
+              <title>Fallback &amp; Title</title>
+              <meta property="og:title" content="Tom &amp; Jerry&nbsp;&mdash;&nbsp;Official &rsquo;Site&rsquo; &copy; 2026 &amp; more">
+              <meta name="twitter:description" content="A &quot;classic&quot; show &amp; tell with bare &amp; ampersand">
+              <meta property="og:image" content="/assets/preview.png">
+              <link rel="shortcut icon" href="/old.ico" type="image/x-icon">
+              <link rel="icon" href="/favicon-custom.png">
+              <link rel="apple-touch-icon" href="/apple-touch.png">
+            </head>
+            </html>
+            """
+
+            let metadata = LinkPreviewHTMLParser.parse(html: html, baseURL: baseURL)
+            #expect(metadata.title == "Tom & Jerry \u{2014} Official \u{2019}Site\u{2019} \u{00A9} 2026 & more")
+            #expect(metadata.description == "A \"classic\" show & tell with bare & ampersand")
+            #expect(metadata.imageURL?.absoluteString == "https://example.com/assets/preview.png")
+
+            let faviconStrings = metadata.faviconURLs.map(\.absoluteString)
+            #expect(faviconStrings.count >= 4)
+            #expect(faviconStrings[0] == "https://example.com/apple-touch.png")
+            #expect(faviconStrings[1] == "https://example.com/favicon-custom.png")
+            #expect(faviconStrings[2] == "https://example.com/old.ico")
+
+            let fallbackHTML = """
+            <html><head><title>Bare &amp; Simple &nbsp; Title</title></head></html>
+            """
+            let fallbackMeta = LinkPreviewHTMLParser.parse(html: fallbackHTML, baseURL: baseURL)
+            #expect(fallbackMeta.title == "Bare & Simple Title")
+        }
     }
 
     @Suite

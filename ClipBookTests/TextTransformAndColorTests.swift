@@ -92,6 +92,11 @@ enum TextTransformAndColorTests {
             Row(.base64Decode, Data("ClipBook".utf8).base64EncodedString(), "ClipBook"),
         ]
 
+        @Test(arguments: trimmingRows + htmlDecodeRows + identifierRows + otherRows)
+        func transformRewritesTextAsExpected(row: Row) {
+            #expect(row.transform.apply(to: row.input) == row.expected)
+        }
+
         @Test
         func everyTransformHasAUniqueTitleAndDescription() {
             let allCases = ClipboardTextTransform.allCases
