@@ -510,11 +510,14 @@ final class AppModel: ObservableObject {
         clearUnavailableHistorySourceApplicationFilter()
         selectedItemIDs.subtract(ids)
         selectedItemIDsInSelectionOrder.removeAll { ids.contains($0) }
-        if selectedItemID.map(ids.contains) == true {
+        let selectedItemWasRemoved = selectedItemID.map(ids.contains) == true
+        if selectedItemWasRemoved, !selectedItemIDs.isEmpty {
+            selectedItemID = selectedItemIDsInSelectionOrder.first { selectedItemIDs.contains($0) } ?? selectedItemIDs.first
+        } else if selectedItemWasRemoved {
             let nextSelectedItem = selectedVisibleIndex.flatMap { visibleIndex in
                 visibleItems[(visibleIndex + 1)...].first { !ids.contains($0.id) }
                     ?? visibleItems[..<visibleIndex].last { !ids.contains($0.id) }
-            }
+            } ?? filteredItems.first
 
             if selectedVisibleIndex != nil {
                 selectedItemID = nextSelectedItem?.id
@@ -596,6 +599,7 @@ final class AppModel: ObservableObject {
         }
 
         let ids = Set(restoredItems.map(\.id))
+        trashedItems.removeAll { ids.contains($0.id) }
         let restoredItems = restoredItems.map { item -> ClipboardItem in
             var item = item.unloadingFormatting()
             item.deletedAt = nil
@@ -629,6 +633,16 @@ final class AppModel: ObservableObject {
 
     func replace(_ item: ClipboardItem) {
         let item = item.unloadingFormatting()
+        // Background OCR or link preview updates finishing after an item was
+        // deleted update it in the Trash rather than putting it back in the history.
+        if let trashedIndex = trashedItems.firstIndex(where: { $0.id == item.id }) {
+            trashedItems[trashedIndex] = item
+            clearUnavailableHistorySourceApplicationFilter()
+            return
+        }
+        guard item.deletedAt == nil else {
+            return
+        }
         guard let index = items.firstIndex(where: { $0.id == item.id }) else {
             insert(item)
             return
@@ -645,8 +659,22 @@ final class AppModel: ObservableObject {
             return
         }
 
-        var replacementsByID = Dictionary(
-            updatedItems.map { ($0.id, $0.unloadingFormatting()) },
+        let trashedIDs = Set(trashedItems.map(\.id))
+        let trashedReplacementsByID = Dictionary(
+            updatedItems.filter { trashedIDs.contains($0.id) }.map { ($0.id, $0.unloadingFormatting()) },
+            uniquingKeysWith: { _, latest in latest }
+        )
+        if !trashedReplacementsByID.isEmpty {
+            trashedItems = trashedItems.map { trashedReplacementsByID[$0.id] ?? $0 }
+        }
+        let activeUpdates = updatedItems.filter { !trashedIDs.contains($0.id) && $0.deletedAt == nil }
+        guard !activeUpdates.isEmpty else {
+            clearUnavailableHistorySourceApplicationFilter()
+            return
+        }
+
+        let replacementsByID = Dictionary(
+            activeUpdates.map { ($0.id, $0.unloadingFormatting()) },
             uniquingKeysWith: { _, latest in latest }
         )
         var replacedIDs = Set<ClipboardItem.ID>()
@@ -660,12 +688,12 @@ final class AppModel: ObservableObject {
             }
 
             replacedIDs.insert(replacement.id)
-            replacementsByID[replacement.id] = nil
             return replacement
         }
 
-        let insertedItems = updatedItems.filter { !replacedIDs.contains($0.id) }.map { $0.unloadingFormatting() }
-        items = Array(insertedItems.reversed()) + replacedItems
+        var seen = replacedIDs
+        let insertedItems = activeUpdates.filter { seen.insert($0.id).inserted }.compactMap { replacementsByID[$0.id] }
+        items = insertedItems + replacedItems
         clearUnavailableHistorySourceApplicationFilter()
     }
 

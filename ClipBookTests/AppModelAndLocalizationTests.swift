@@ -146,6 +146,194 @@ enum AppModelAndLocalizationTests {
             #expect(!model.isHistoryFilterActive)
             #expect(model.filteredItems.count == 5)
         }
+
+        @Test
+        @MainActor
+        func removeExhaustedSourceApplicationFilterSelectsFirstFilteredItem() {
+            let model = AppModel()
+            let safariOnlyItem = ClipboardItem.fixture(
+                kind: .text,
+                text: "Only Safari item",
+                sourceAppName: "Safari",
+                sourceBundleIdentifier: "com.apple.Safari",
+                copiedAt: Date(timeIntervalSince1970: 300)
+            )
+            let notesFirst = ClipboardItem.fixture(
+                kind: .text,
+                text: "Notes item 1",
+                sourceAppName: "Notes",
+                sourceBundleIdentifier: "com.apple.Notes",
+                copiedAt: Date(timeIntervalSince1970: 200)
+            )
+            let notesSecond = ClipboardItem.fixture(
+                kind: .text,
+                text: "Notes item 2",
+                sourceAppName: "Notes",
+                sourceBundleIdentifier: "com.apple.Notes",
+                copiedAt: Date(timeIntervalSince1970: 100)
+            )
+            model.items = [safariOnlyItem, notesFirst, notesSecond]
+
+            let safariSourceID = HistorySourceApplication.id(forName: "Safari")
+            model.selectedHistoryFilterSourceApplicationIDs = [safariSourceID]
+            model.selectedItemID = safariOnlyItem.id
+            model.selectedItemIDs = [safariOnlyItem.id]
+            model.selectedItemIDsInSelectionOrder = [safariOnlyItem.id]
+
+            #expect(model.filteredItems.map(\.id) == [safariOnlyItem.id])
+
+            model.remove(safariOnlyItem.id)
+
+            #expect(model.selectedHistoryFilterSourceApplicationIDs.isEmpty)
+            #expect(model.filteredItems.map(\.id) == [notesFirst.id, notesSecond.id])
+            #expect(model.selectedItemID == notesFirst.id)
+            #expect(model.selectedItemIDs == [notesFirst.id])
+            #expect(model.selectedItemIDsInSelectionOrder == [notesFirst.id])
+        }
+
+        @Test
+        @MainActor
+        func removePrimarySelectedItemPreservesMultiSelection() {
+            let model = AppModel()
+            let first = ClipboardItem.fixture(text: "First", copiedAt: Date(timeIntervalSince1970: 300))
+            let second = ClipboardItem.fixture(text: "Second", copiedAt: Date(timeIntervalSince1970: 200))
+            let third = ClipboardItem.fixture(text: "Third", copiedAt: Date(timeIntervalSince1970: 100))
+            model.items = [first, second, third]
+
+            model.selectedItemID = first.id
+            model.selectedItemIDs = [first.id, second.id, third.id]
+            model.selectedItemIDsInSelectionOrder = [third.id, first.id, second.id]
+
+            model.remove(first.id)
+
+            #expect(model.selectedItemID == third.id)
+            #expect(model.selectedItemIDs == [second.id, third.id])
+            #expect(model.selectedItemIDsInSelectionOrder == [third.id, second.id])
+            #expect(model.selectedItems.map(\.id) == [third.id, second.id])
+        }
+
+        @Test
+        @MainActor
+        func replaceUpdatesTrashedItemsWithoutResurrection() {
+            let model = AppModel()
+            let activeItem = ClipboardItem.fixture(
+                kind: .text,
+                text: "Active item",
+                copiedAt: Date(timeIntervalSince1970: 300)
+            )
+            let trashedItem = ClipboardItem.fixture(
+                kind: .image,
+                text: nil,
+                copiedAt: Date(timeIntervalSince1970: 200),
+                deletedAt: Date(timeIntervalSince1970: 250)
+            )
+            let unloadedTrashedNotInMemory = ClipboardItem.fixture(
+                kind: .link,
+                text: "https://example.com",
+                copiedAt: Date(timeIntervalSince1970: 100),
+                deletedAt: Date(timeIntervalSince1970: 150)
+            )
+
+            model.items = [activeItem]
+            model.trashedItems = [trashedItem]
+
+            var ocrUpdatedTrashed = trashedItem
+            ocrUpdatedTrashed.text = "Recognized OCR in trash"
+            model.replace(ocrUpdatedTrashed)
+
+            #expect(model.items.map(\.id) == [activeItem.id])
+            #expect(model.trashedItems.count == 1)
+            #expect(model.trashedItems.first?.text == "Recognized OCR in trash")
+
+            model.replace(unloadedTrashedNotInMemory)
+            #expect(model.items.map(\.id) == [activeItem.id])
+
+            var batchUpdatedTrashed = ocrUpdatedTrashed
+            batchUpdatedTrashed.title = "Trashed Image Title"
+            let newFirst = ClipboardItem.fixture(text: "New First", copiedAt: Date(timeIntervalSince1970: 500))
+            let newSecond = ClipboardItem.fixture(text: "New Second", copiedAt: Date(timeIntervalSince1970: 400))
+            var updatedActive = activeItem
+            updatedActive.title = "Updated Active"
+
+            model.replace([batchUpdatedTrashed, unloadedTrashedNotInMemory, newFirst, newSecond, updatedActive])
+
+            #expect(model.trashedItems.map(\.id) == [trashedItem.id])
+            #expect(model.trashedItems.first?.title == "Trashed Image Title")
+            #expect(model.items.map(\.id) == [newFirst.id, newSecond.id, activeItem.id])
+            #expect(model.items.last?.title == "Updated Active")
+        }
+
+        @Test
+        @MainActor
+        func replaceInsertsANewItemOnceEvenWhenTheBatchRepeatsIt() {
+            let model = AppModel()
+            let existing = ClipboardItem.fixture(text: "Existing", copiedAt: Date(timeIntervalSince1970: 100))
+            model.items = [existing]
+
+            let newItem = ClipboardItem.fixture(text: "New, first version", copiedAt: Date(timeIntervalSince1970: 300))
+            var newItemLater = newItem
+            newItemLater.text = "New, latest version"
+            let other = ClipboardItem.fixture(text: "Other", copiedAt: Date(timeIntervalSince1970: 200))
+
+            model.replace([newItem, other, newItemLater])
+
+            #expect(model.items.map(\.id) == [newItem.id, other.id, existing.id])
+            #expect(model.items.first?.text == "New, latest version")
+        }
+
+        @Test
+        @MainActor
+        func replaceUpdatesAnExistingItemOnceEvenWhenTheBatchRepeatsIt() {
+            let model = AppModel()
+            let item = ClipboardItem.fixture(text: "Original", copiedAt: Date(timeIntervalSince1970: 200))
+            let other = ClipboardItem.fixture(text: "Other", copiedAt: Date(timeIntervalSince1970: 100))
+            model.items = [item, other, item]
+
+            var firstUpdate = item
+            firstUpdate.title = "First update"
+            var secondUpdate = item
+            secondUpdate.title = "Second update"
+            model.replace([firstUpdate, secondUpdate])
+
+            #expect(model.items.map(\.id) == [item.id, other.id])
+            #expect(model.items.first?.title == "Second update")
+        }
+
+        @Test
+        @MainActor
+        func restoreRemovesFromTrashedItemsAndRestoresSelection() {
+            let model = AppModel()
+            let existingActive = ClipboardItem.fixture(
+                text: "Existing Active",
+                copiedAt: Date(timeIntervalSince1970: 100)
+            )
+            let trashedOne = ClipboardItem.fixture(
+                text: "Trashed One",
+                copiedAt: Date(timeIntervalSince1970: 300),
+                deletedAt: Date(timeIntervalSince1970: 350)
+            )
+            let trashedTwo = ClipboardItem.fixture(
+                text: "Trashed Two",
+                copiedAt: Date(timeIntervalSince1970: 200),
+                deletedAt: Date(timeIntervalSince1970: 250)
+            )
+
+            model.items = [existingActive]
+            model.trashedItems = [trashedOne, trashedTwo]
+
+            let savedSelection = HistorySelection(
+                itemID: trashedOne.id,
+                itemIDs: [trashedOne.id],
+                itemIDsInSelectionOrder: [trashedOne.id]
+            )
+
+            model.restore([trashedOne], selection: savedSelection)
+
+            #expect(model.trashedItems.map(\.id) == [trashedTwo.id])
+            #expect(model.items.contains { $0.id == trashedOne.id && $0.deletedAt == nil })
+            #expect(model.selectedItemID == trashedOne.id)
+            #expect(model.selectedItemIDs == [trashedOne.id])
+        }
     }
 
     @Suite
