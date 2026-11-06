@@ -329,6 +329,24 @@ enum PasteboardAndServicesTests {
     @Suite
     struct PasteServiceTests {
         @Test
+        func copyingAnImageWritesTheFileBytesAndATIFFAlternative() throws {
+            try TestSupport.withTemporaryDirectory { directory in
+                let pngURL = directory.appendingPathComponent("clip.png")
+                let pngData = try TestSupport.makePNGData(pixelWidth: 16, pixelHeight: 16)
+                try pngData.write(to: pngURL)
+
+                try TestSupport.withUniquePasteboard { pasteboard in
+                    let service = PasteService(pasteboard: pasteboard, loadFormatting: { $0 })
+                    try service.copy(ClipboardItem.fixture(kind: .image, text: nil, assetPath: pngURL.path), variant: .standard)
+
+                    let item = try #require(pasteboard.pasteboardItems?.first)
+                    #expect(item.data(forType: .png) == pngData)
+                    #expect(item.data(forType: .tiff) != nil)
+                }
+            }
+        }
+
+        @Test
         func copyingFilesWritesTheirURLs() throws {
             try TestSupport.withTemporaryDirectory { directory in
                 let fileURL = directory.appendingPathComponent("report.pdf")
@@ -343,6 +361,56 @@ enum PasteboardAndServicesTests {
                         options: [.urlReadingFileURLsOnly: true]
                     ) as? [URL]
                     #expect(urls?.map(\.standardizedFileURL.path) == [fileURL.standardizedFileURL.path])
+                }
+            }
+        }
+
+        @Test
+        func copyMarksTheOnlyPasteboardItemForEveryKindAndVariant() throws {
+            try TestSupport.withTemporaryDirectory { directory in
+                let pngURL = directory.appendingPathComponent("clip.png")
+                try TestSupport.makePNGData(pixelWidth: 16, pixelHeight: 16).write(to: pngURL)
+                let pdfURL = directory.appendingPathComponent("report.pdf")
+                try TestSupport.makePDFData().write(to: pdfURL)
+                let rtfData = try TestSupport.makeRTFData(text: "Rich body")
+                let richItem = ClipboardItem.fixture(
+                    kind: .richText,
+                    text: "Rich body",
+                    rtfData: rtfData,
+                    html: "<b>Rich body</b>"
+                )
+                let cases: [(label: String, item: ClipboardItem, variant: PasteVariant, contentType: NSPasteboard.PasteboardType)] = [
+                    ("text standard", .fixture(kind: .text, text: "Plain body"), .standard, .string),
+                    ("text plainText", .fixture(kind: .text, text: "Plain body"), .plainText, .string),
+                    ("link standard", .fixture(kind: .link, text: "https://example.com"), .standard, .string),
+                    ("rich standard", richItem, .standard, .rtf),
+                    ("rich html", richItem, .standard, .html),
+                    ("rich plainText", richItem, .plainText, .string),
+                    ("file filePath", .fixture(kind: .file, text: nil, filePaths: ["/path/to/report.txt"]), .filePath, .string),
+                    ("image standard", .fixture(kind: .image, text: nil, assetPath: pngURL.path), .standard, .png),
+                    ("file standard", .fixture(kind: .file, text: nil, filePaths: [pdfURL.path]), .standard, .fileURL)
+                ]
+
+                try TestSupport.withUniquePasteboard { pasteboard in
+                    let service = PasteService(pasteboard: pasteboard, loadFormatting: { $0 })
+                    for testCase in cases {
+                        try service.copy(testCase.item, variant: testCase.variant)
+
+                        let pasteboardItems = try #require(pasteboard.pasteboardItems, "\(testCase.label)")
+                        #expect(pasteboardItems.count == 1, "\(testCase.label)")
+                        let first = try #require(pasteboardItems.first)
+                        #expect(first.string(forType: PasteboardMonitor.ghostType) == "1", "\(testCase.label)")
+                        #expect(first.types.contains(testCase.contentType), "\(testCase.label)")
+
+                        let outcome = PasteboardAndServicesTests.readOutcome(from: pasteboard, imagesDirectory: directory)
+                        #expect(outcome.isSkipped, "PasteboardReader should skip the \(testCase.label) write: \(outcome)")
+                    }
+
+                    // An item with nothing to write leaves no pasteboard item behind,
+                    // so the marker goes on the pasteboard itself.
+                    try service.copy(ClipboardItem.fixture(kind: .richText, text: nil), variant: .standard)
+                    #expect(pasteboard.string(forType: PasteboardMonitor.ghostType) == "1")
+                    #expect(pasteboard.pasteboardItems?.count == 1)
                 }
             }
         }
