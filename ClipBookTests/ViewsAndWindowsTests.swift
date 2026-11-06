@@ -156,6 +156,17 @@ enum ViewsAndWindowsTests {
         }
 
         @Test
+        func anUnquotedAttributeValueEndsBeforeTheSlashOfASelfClosingTag() throws {
+            let baseURL = try #require(URL(string: "https://example.com/articles/post"))
+            let html = "<head><link rel=icon href=/favicon.png/><meta property=og:image content=/cover.png/></head>"
+
+            let metadata = LinkPreviewHTMLParser.parse(html: html, baseURL: baseURL)
+
+            #expect(metadata.faviconURLs.map(\.absoluteString).first == "https://example.com/favicon.png")
+            #expect(metadata.imageURL?.absoluteString == "https://example.com/cover.png")
+        }
+
+        @Test
         func linkPreviewHTMLParserMetadataAndEntities() throws {
             let baseURL = try #require(URL(string: "https://example.com/articles/post"))
             let html = """
