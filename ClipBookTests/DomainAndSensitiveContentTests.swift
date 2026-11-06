@@ -333,10 +333,137 @@ enum DomainAndSensitiveContentTests {
             }
         }
 
+        @Test
+        func secretsBeyond4000CharactersAreMaskedInThePreview() {
+            let text = String(repeating: "a", count: 4_100) + " " + Self.openAITokenSample
+            let result = Self.shown(text, characterLimit: SensitiveContent.previewCharacterLimit)
+            #expect(result.isMasked)
+            #expect(!result.text.contains(Self.openAITokenSample))
+            #expect(result.text.contains(SensitiveContent.inlineMask))
+        }
+
+        @Test
+        func tokensStraddlingTheRowLimitAreMaskedCompletely() {
+            let text = String(repeating: "b", count: 3_990) + " " + Self.githubClassicTokenSample + " trailing text"
+            let result = Self.shown(text)
+            #expect(result.isMasked)
+            #expect(!result.text.contains(["ghp", "_1234"].joined()))
+            #expect(!result.text.contains("uvwxyzABCD"))
+        }
+
+        @Test
+        func privateKeysStraddlingTheRowLimitAreMaskedCompletely() {
+            let pemBlock = [
+                "-----BEGIN ", "PRIVATE KEY-----\n",
+                "MIIEvQIBADAN", "BgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC1234567890\n",
+                "-----END ", "PRIVATE KEY-----",
+            ].joined()
+            let result = Self.shown(String(repeating: "b", count: 3_990) + " " + pemBlock)
+            #expect(result.isMasked)
+            #expect(!result.text.contains(["BEGIN ", "PRIVATE KEY"].joined()))
+            #expect(!result.text.contains("MIIEvQIBADAN"))
+        }
+
+        @Test
+        func queryParametersInALinkAreMaskedButItsFragmentIsNot() {
+            let url = [
+                "https://api.example.com/callback?token=", "abc12345",
+                "&api_key=", "xyz98765", "#section(1)",
+            ].joined()
+            let result = Self.shown(url, kind: .link)
+            #expect(result.isMasked)
+            #expect(!result.text.contains("abc12345"))
+            #expect(!result.text.contains("xyz98765"))
+            #expect(result.text.contains("#section(1)"))
+        }
+
+        @Test
+        func tokensInAnOAuthFragmentAreMasked() {
+            let url = [
+                "https://app.example.com/auth#access_token=", "abc12345",
+                "&refresh_token=", "xyz98765",
+            ].joined()
+            let result = Self.shown(url, kind: .link)
+            #expect(result.isMasked)
+            #expect(!result.text.contains("abc12345"))
+            #expect(!result.text.contains("xyz98765"))
+        }
+
+        @Test
+        func anAssignmentRightAfterAnEmojiIsMasked() {
+            let result = Self.shown(["🔑api_key=", "secret12345"].joined())
+            #expect(result.isMasked)
+            #expect(result.text.hasPrefix("🔑api_key="))
+            #expect(!result.text.contains("secret12345"))
+        }
+
+        @Test(
+            arguments: [
+                ["password: ", "ab#cdefgh"],
+                ["password=", "P&ss1234xyz"],
+                ["pwd=", "hunter#2024"],
+                ["DB_PASSWORD=", "hunter2#Secret99"],
+            ]
+        )
+        func masksWholePasswordsWithAmpersandOrHash(parts: [String]) {
+            let result = Self.shown(parts.joined())
+            #expect(result.isMasked)
+            #expect(result.text == parts[0] + SensitiveContent.inlineMask)
+        }
+
+        @Test(arguments: [
+            (body: "password=hunter22&remember=1", masked: "password=MASK&remember=1"),
+            (body: "token=abc12345&grant_type=refresh", masked: "token=MASK&grant_type=refresh"),
+            (body: "user=ann&password=hunter22&remember=1", masked: "user=ann&password=MASK&remember=1")
+        ])
+        func aFormBodyKeepsTheFieldsAroundTheSecret(body: String, masked: String) {
+            let expected = masked.replacingOccurrences(of: "MASK", with: SensitiveContent.inlineMask)
+            #expect(Self.shown(body).text == expected)
+        }
+
+        @Test
+        func masksEveryQueryParameterAndStopsAtItsSeparator() {
+            let url = [
+                "https://x.example.com/p?a=1&password=", "hunter2x",
+                "&b=2&token=", "abc12345", "#frag",
+            ].joined()
+            let mask = SensitiveContent.inlineMask
+            let maskedURL = "https://x.example.com/p?a=1&password=\(mask)&b=2&token=\(mask)#frag"
+            #expect(Self.shown(url, kind: .link).text == maskedURL)
+
+            // A URL followed by a password that has a "#" in it: each keeps its own rule.
+            let mixed = [url, " ", "password: ", "ab#cdefgh"].joined()
+            #expect(Self.shown(mixed).text == "\(maskedURL) password: \(mask)")
+        }
+
+        @Test
+        func whitespaceARowDoesNotShowDoesNotCountAgainstItsReach() {
+            let token = Self.openAITokenSample
+            #expect(!Self.shown(String(repeating: " ", count: 6_000) + token).text.contains(token))
+        }
+
         private static func maskedRichText(_ text: String) -> NSAttributedString {
             let item = ClipboardItem.fixture(kind: .richText, text: text)
             let attributed = NSAttributedString(string: text, attributes: [.toolTip: "kept"])
             return SensitiveContent.maskedAttributedText(attributed, for: item, detectsAutomatically: true)
+        }
+
+        @Test
+        func maskedAttributedTextMasksLateAndStraddlingSecrets() {
+            let whitespaceLead = String(repeating: " ", count: 6_000) + String(repeating: "a", count: 198_000) + " "
+            let lateToken = Self.openAITokenSample
+            let late = Self.maskedRichText(whitespaceLead + lateToken + " tail")
+            #expect(!late.string.contains(lateToken))
+            #expect(late.string == whitespaceLead + SensitiveContent.inlineMask + " tail")
+            // The dots keep the formatting of the text they replace.
+            #expect(late.attribute(.toolTip, at: whitespaceLead.utf16.count, effectiveRange: nil) as? String == "kept")
+
+            let straddlingLead = String(repeating: "b", count: SensitiveContent.previewCharacterLimit - 10) + " "
+            let straddlingToken = Self.githubClassicTokenSample
+            let straddling = Self.maskedRichText(straddlingLead + straddlingToken + " trailing text")
+            #expect(!straddling.string.contains(["ghp", "_1234"].joined()))
+            #expect(!straddling.string.contains("uvwxyzABCD"))
+            #expect(straddling.string == straddlingLead + SensitiveContent.inlineMask + " trailing text")
         }
 
         @Test
