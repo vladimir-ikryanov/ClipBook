@@ -572,5 +572,15 @@ extension SharedProcessStateTests {
             let finderWithExtensionURL = workspace.applicationURL(named: "Finder.app")
             #expect(finderWithExtensionURL == finderURL)
         }
+
+        @Test
+        func osTypeFourCharCodePaddingAndTruncation() {
+            #expect(OSType("CLPB") == 0x434C_5042)
+            #expect(OSType("AB") == 0x4142_2020)
+            #expect(OSType("A") == 0x4120_2020)
+            #expect(OSType("") == 0x2020_2020)
+            #expect(OSType("CLIPBOOK") == OSType("CLIP"))
+            #expect(OSType("CLIPBOOK") == 0x434C_4950)
+        }
     }
 }
