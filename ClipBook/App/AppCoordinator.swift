@@ -2728,15 +2728,37 @@ final class AppCoordinator: ObservableObject {
     }
   }
 
+  // `ProcessInfo.systemUptime` pauses while the Mac is asleep, so subtracting
+  // it from `Date()` drifts forward by the time spent asleep, and the next
+  // launch takes that for a reboot. `kern.boottime` is the actual boot time.
+  nonisolated static func systemBootTime() -> Date {
+    var bootTime = timeval()
+    var size = MemoryLayout<timeval>.stride
+    if sysctlbyname("kern.boottime", &bootTime, &size, nil, 0) == 0, bootTime.tv_sec > 0 {
+      return Date(timeIntervalSince1970: Double(bootTime.tv_sec) + Double(bootTime.tv_usec) / 1_000_000)
+    }
+    return Date(timeIntervalSinceNow: -ProcessInfo.processInfo.systemUptime)
+  }
+
+  /// Whether the Mac restarted since `previousBootTime` was recorded. One-sided:
+  /// a reboot makes the boot time later. A stored value ahead of the current one
+  /// is a clock adjustment or a time derived from `systemUptime`, which runs
+  /// ahead of the real boot time by the time spent asleep.
+  nonisolated static func isReboot(previousBootTime: TimeInterval?, currentBootTime: TimeInterval) -> Bool {
+    guard let previousBootTime else {
+      return false
+    }
+    return currentBootTime - previousBootTime > 60
+  }
+
   private func clearHistoryAfterRebootIfNeeded() {
-    let currentBootTime = Date(timeIntervalSinceNow: -ProcessInfo.processInfo.systemUptime).timeIntervalSince1970
+    let currentBootTime = Self.systemBootTime().timeIntervalSince1970
     let defaults = UserDefaults.standard
     let previousBootTime = defaults.object(forKey: lastKnownBootTimeKey) as? Double
     defaults.set(currentBootTime, forKey: lastKnownBootTimeKey)
 
     guard model.preferences.clearHistoryOnReboot,
-          let previousBootTime,
-          abs(previousBootTime - currentBootTime) > 60 else {
+          Self.isReboot(previousBootTime: previousBootTime, currentBootTime: currentBootTime) else {
       return
     }
 

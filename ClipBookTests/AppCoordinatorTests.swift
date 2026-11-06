@@ -109,6 +109,48 @@ enum AppCoordinatorTests {
     }
 
     @Suite
+    struct RebootTests {
+        private static let bootTime: TimeInterval = 1_800_000_000
+
+        @Test
+        func firstLaunchIsNotAReboot() {
+            #expect(!AppCoordinator.isReboot(previousBootTime: nil, currentBootTime: Self.bootTime))
+        }
+
+        /// `previousOffset` is the stored boot time relative to the current one.
+        /// A stored time ahead of the current one, such as `Date() - systemUptime`
+        /// (which runs ahead of the real boot time by the time spent asleep) or a
+        /// clock adjustment, never looks like a reboot.
+        @Test(arguments: [
+            (previousOffset: 86_400.0, isReboot: false),
+            (previousOffset: 3_600.0, isReboot: false),
+            (previousOffset: 1.0, isReboot: false),
+            (previousOffset: 0.0, isReboot: false),
+            (previousOffset: -59.0, isReboot: false),
+            (previousOffset: -60.0, isReboot: false),
+            (previousOffset: -61.0, isReboot: true),
+            (previousOffset: -3_600.0, isReboot: true)
+        ])
+        func onlyALaterBootTimeIsAReboot(previousOffset: Double, isReboot: Bool) {
+            #expect(
+                AppCoordinator.isReboot(previousBootTime: Self.bootTime + previousOffset, currentBootTime: Self.bootTime)
+                    == isReboot
+            )
+        }
+
+        @Test
+        @MainActor
+        func systemBootTimeIsBeforeNowAndNotAfterTheUptimeEstimate() {
+            let boot = AppCoordinator.systemBootTime()
+            let now = Date()
+            #expect(boot.timeIntervalSince1970 > 0)
+            #expect(boot < now)
+            // Uptime pauses during sleep, so `now - uptime` is never earlier than the real boot time.
+            #expect(boot.timeIntervalSince1970 <= now.timeIntervalSince1970 - ProcessInfo.processInfo.systemUptime + 1)
+        }
+    }
+
+    @Suite
     struct AppDelegateTests {
         @Test
         @MainActor
