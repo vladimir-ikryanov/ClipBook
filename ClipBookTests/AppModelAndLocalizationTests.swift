@@ -457,6 +457,82 @@ enum AppModelAndLocalizationTests {
                 ]
             )
         }
+
+        @Test
+        @MainActor
+        func copySequenceOrderingPermutations() {
+            let model = AppModel()
+            var prefs = AppPreferences()
+            prefs.pinFavoritesToTop = false
+            prefs.copySequenceModeEnabled = true
+            model.preferences = prefs
+
+            let sharedGroupDate = Date(timeIntervalSince1970: 1_000)
+
+            // The non-sequence item has the smallest id and the same copiedAt as the
+            // first sequence item. Without a rule that puts sequence items ahead of
+            // non-sequence items in the same group, the pairs would run in a cycle
+            // (C before A by id, A before B by sequence order, B before C by time).
+            let itemC = ClipboardItem.fixture(
+                id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
+                text: "Non-Sequence Same GroupDate",
+                copiedAt: sharedGroupDate,
+                copySequenceID: nil,
+                copySequenceOrder: nil
+            )
+            let itemA = ClipboardItem.fixture(
+                id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
+                text: "Sequence First",
+                copiedAt: sharedGroupDate,
+                copySequenceID: sharedGroupDate,
+                copySequenceOrder: 1
+            )
+            let itemB = ClipboardItem.fixture(
+                id: UUID(uuidString: "00000000-0000-0000-0000-000000000003")!,
+                text: "Sequence Second",
+                copiedAt: Date(timeIntervalSince1970: 1_020),
+                copySequenceID: sharedGroupDate,
+                copySequenceOrder: 2
+            )
+
+            let elements = [itemA, itemB, itemC]
+
+            #expect(Self.ordersBefore(itemA, itemB, in: model))
+            #expect(Self.ordersBefore(itemB, itemC, in: model))
+            #expect(Self.ordersBefore(itemA, itemC, in: model))
+
+            for x in elements {
+                for y in elements where x.id != y.id {
+                    let xy = Self.ordersBefore(x, y, in: model)
+                    let yx = Self.ordersBefore(y, x, in: model)
+                    #expect(xy != yx)
+                }
+            }
+
+            for x in elements {
+                for y in elements where y.id != x.id {
+                    for z in elements where z.id != y.id && z.id != x.id {
+                        if Self.ordersBefore(x, y, in: model) && Self.ordersBefore(y, z, in: model) {
+                            #expect(Self.ordersBefore(x, z, in: model))
+                        }
+                    }
+                }
+            }
+
+            let permutations: [[ClipboardItem]] = [
+                [itemA, itemB, itemC],
+                [itemA, itemC, itemB],
+                [itemB, itemA, itemC],
+                [itemB, itemC, itemA],
+                [itemC, itemA, itemB],
+                [itemC, itemB, itemA],
+            ]
+            let expectedOrder = [itemA.id, itemB.id, itemC.id]
+            for permutation in permutations {
+                model.items = permutation
+                #expect(model.filteredItems.map(\.id) == expectedOrder)
+            }
+        }
     }
 }
 
