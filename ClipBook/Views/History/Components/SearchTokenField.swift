@@ -243,7 +243,13 @@ final class SearchTokenField: NSView, NSTextFieldDelegate {
       removeToken(at: selectedChipIndex)
     case 123:
       selectChip(at: max(0, selectedChipIndex - 1))
-    case 124, 53:
+    case 124:
+      if selectedChipIndex + 1 < chipViews.count {
+        selectChip(at: selectedChipIndex + 1)
+      } else {
+        resumeEditing(with: nil)
+      }
+    case 53:
       resumeEditing(with: nil)
     case 126:
       delegate?.searchTokenField(self, didRequestMoveSelection: .up)

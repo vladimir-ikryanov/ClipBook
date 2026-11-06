@@ -984,6 +984,9 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     searchField.onTokensWidthChange = { [weak self] in
       self?.updateSearchContainerWidth()
     }
+    suggestionsPopup.onSelect = { [weak self] suggestion in
+      self?.acceptSuggestion(suggestion)
+    }
     searchField.translatesAutoresizingMaskIntoConstraints = false
     searchField.heightAnchor.constraint(equalToConstant: SearchTokenField.height).isActive = true
   }
