@@ -442,6 +442,17 @@ enum DomainAndSensitiveContentTests {
             #expect(!Self.shown(String(repeating: " ", count: 6_000) + token).text.contains(token))
         }
 
+        @Test
+        func aSecretFarIntoALongItemMasksTheItem() {
+            let token = Self.openAITokenSample
+            let farText = String(repeating: "a", count: 50_000) + " " + token
+            let far = Self.shown(farText)
+            #expect(far.isMasked)
+            // A row shows only the beginning, so its text is searched no further than that.
+            #expect(far.text == farText)
+            #expect(!Self.shown(farText, characterLimit: SensitiveContent.previewCharacterLimit).text.contains(token))
+        }
+
         private static func maskedRichText(_ text: String) -> NSAttributedString {
             let item = ClipboardItem.fixture(kind: .richText, text: text)
             let attributed = NSAttributedString(string: text, attributes: [.toolTip: "kept"])
@@ -478,6 +489,34 @@ enum DomainAndSensitiveContentTests {
                 detectsAutomatically: true
             )
             #expect(shown.string == Self.openAITokenSample)
+        }
+
+        @Test
+        func itemMaskCacheReflectsSameIDAndSameByteLengthEdits() {
+            let sharedID = UUID()
+            let initialSecret = ["token=", "abc12345"].joined()
+            let editedPlain = ["notes=", "ordinary"].joined()
+            let editedSecret = ["pwd=", "P&ss1234xy"].joined()
+            #expect(initialSecret.utf8.count == editedPlain.utf8.count)
+            #expect(initialSecret.utf8.count == editedSecret.utf8.count)
+
+            let secretItem = ClipboardItem.fixture(id: sharedID, kind: .text, text: initialSecret)
+            #expect(SensitiveContent.isMasked(secretItem, detectsAutomatically: true))
+            #expect(SensitiveContent.isMasked(secretItem, detectsAutomatically: true))
+
+            let plainItem = ClipboardItem.fixture(id: sharedID, kind: .text, text: editedPlain)
+            #expect(!SensitiveContent.isMasked(plainItem, detectsAutomatically: true))
+            #expect(!SensitiveContent.isMasked(plainItem, detectsAutomatically: true))
+
+            let reeditedSecretItem = ClipboardItem.fixture(id: sharedID, kind: .text, text: editedSecret)
+            #expect(SensitiveContent.isMasked(reeditedSecretItem, detectsAutomatically: true))
+
+            let kindSwitchID = UUID()
+            let passwordLike = ["https://P@ss", "w0rd123!"].joined().replacingOccurrences(of: "https://", with: "")
+            let asText = ClipboardItem.fixture(id: kindSwitchID, kind: .text, text: passwordLike)
+            let asLink = ClipboardItem.fixture(id: kindSwitchID, kind: .link, text: passwordLike)
+            #expect(SensitiveContent.isMasked(asText, detectsAutomatically: true))
+            #expect(!SensitiveContent.isMasked(asLink, detectsAutomatically: true))
         }
     }
 }

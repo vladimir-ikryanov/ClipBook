@@ -1,4 +1,5 @@
 import AppKit
+import CryptoKit
 
 /// What the user said about an item, which always wins over what the app
 /// detects on its own. An item the user said nothing about has none.
@@ -100,8 +101,11 @@ enum SensitiveContent {
         return "\(cardNumberMask) \(ending)"
     }
 
-    // A row shows the beginning of the text only, so that is all it is searched
-    // for secrets. The preview shows everything and searches much further.
+    // The text a row shows is searched for secrets up to `itemCharacterLimit`
+    // characters, and the preview, which shows far more, up to
+    // `previewCharacterLimit`. Whether an item holds a secret at all is decided
+    // over the preview's reach: the preview masks only an item that holds one,
+    // so a secret past a row's reach would otherwise show in it unmasked.
     private static let itemCharacterLimit = 4_000
     static let previewCharacterLimit = 200_000
     // A secret that begins inside a limit may end after it, so the search goes
@@ -156,10 +160,31 @@ enum SensitiveContent {
                   SensitiveContentDetector.mayContainSecret(in: item.previewText) else {
                 return false
             }
-            return !detectedSecrets(
-                in: searchedText(item.previewText, limit: itemCharacterLimit),
+            let previewText = item.previewText
+            let utf8Count = previewText.utf8.count
+            let digest = itemMaskPrefixDigest(for: previewText)
+            let detectsPasswordLikeText = item.kind == .text || item.kind == .richText
+            let cacheKey = item.id as NSUUID
+            if let cached = itemMaskCache.object(forKey: cacheKey),
+               cached.utf8Count == utf8Count,
+               cached.detectsPasswordLikeText == detectsPasswordLikeText,
+               cached.prefixDigest == digest {
+                return cached.isMasked
+            }
+            let isMasked = !detectedSecrets(
+                in: searchedText(previewText, limit: previewCharacterLimit),
                 for: item
             ).isEmpty
+            itemMaskCache.setObject(
+                CachedItemMask(
+                    utf8Count: utf8Count,
+                    prefixDigest: digest,
+                    detectsPasswordLikeText: detectsPasswordLikeText,
+                    isMasked: isMasked
+                ),
+                forKey: cacheKey
+            )
+            return isMasked
         }
     }
 
@@ -273,6 +298,61 @@ enum SensitiveContent {
         init(_ secrets: [SensitiveContentDetector.Secret]) {
             self.secrets = secrets
         }
+    }
+
+    // Covers previewCharacterLimit + straddlingMargin even when every scalar is
+    // 4 UTF-8 bytes, without walking grapheme clusters or retaining plaintext.
+    private static let itemMaskDigestByteLimit = 819_200
+
+    private static let itemMaskCache: NSCache<NSUUID, CachedItemMask> = {
+        let cache = NSCache<NSUUID, CachedItemMask>()
+        cache.countLimit = 4_000
+        return cache
+    }()
+
+    private final class CachedItemMask {
+        let utf8Count: Int
+        let prefixDigest: SHA256.Digest
+        let detectsPasswordLikeText: Bool
+        let isMasked: Bool
+
+        init(
+            utf8Count: Int,
+            prefixDigest: SHA256.Digest,
+            detectsPasswordLikeText: Bool,
+            isMasked: Bool
+        ) {
+            self.utf8Count = utf8Count
+            self.prefixDigest = prefixDigest
+            self.detectsPasswordLikeText = detectsPasswordLikeText
+            self.isMasked = isMasked
+        }
+    }
+
+    private static func itemMaskPrefixDigest(for text: String) -> SHA256.Digest {
+        var hasher = SHA256()
+        let prefixBytes = text.utf8.prefix(itemMaskDigestByteLimit)
+        let hashedContiguously = prefixBytes.withContiguousStorageIfAvailable { buffer -> Bool in
+            hasher.update(bufferPointer: UnsafeRawBufferPointer(buffer))
+            return true
+        } ?? false
+        if !hashedContiguously {
+            withUnsafeTemporaryAllocation(of: UInt8.self, capacity: 4_096) { scratch in
+                var count = 0
+                for byte in prefixBytes {
+                    scratch[count] = byte
+                    count += 1
+                    if count == scratch.count {
+                        hasher.update(bufferPointer: UnsafeRawBufferPointer(scratch))
+                        count = 0
+                    }
+                }
+                if count > 0 {
+                    hasher.update(bufferPointer: UnsafeRawBufferPointer(start: scratch.baseAddress, count: count))
+                }
+            }
+        }
+        return hasher.finalize()
     }
 
     private static func detectedSecrets(
