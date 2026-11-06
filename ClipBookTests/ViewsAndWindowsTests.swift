@@ -114,6 +114,48 @@ enum ViewsAndWindowsTests {
         }
 
         @Test
+        @MainActor
+        func maskStyleRespectsHidesSensitiveContentFlag() throws {
+            TestSupport.ensureAppKitInitialized()
+            let view = NSView(frame: NSRect(x: 0, y: 0, width: 200, height: 30))
+            let baseFont = NSFont.systemFont(ofSize: 14, weight: .regular)
+            let literalBullets = "Prefix ●●●●●●●● Suffix"
+            let nsLiteral = literalBullets as NSString
+            let bulletRange = nsLiteral.range(of: "●●●●●●●●")
+
+            let unmaskedAttr = NSMutableAttributedString(
+                string: literalBullets,
+                attributes: [.font: baseFont, .foregroundColor: NSColor.secondaryLabelColor]
+            )
+            HistoryPreviewSymbolAppearance.applyMaskStyle(
+                to: unmaskedAttr,
+                text: literalBullets,
+                font: baseFont,
+                in: view,
+                hidesSensitiveContent: false
+            )
+            let unmaskedFont = try #require(unmaskedAttr.attribute(.font, at: bulletRange.location, effectiveRange: nil) as? NSFont)
+            #expect(abs(unmaskedFont.pointSize - baseFont.pointSize) < 0.01)
+
+            let maskedAttr = NSMutableAttributedString(
+                string: literalBullets,
+                attributes: [.font: baseFont, .foregroundColor: NSColor.secondaryLabelColor]
+            )
+            HistoryPreviewSymbolAppearance.applyMaskStyle(
+                to: maskedAttr,
+                text: literalBullets,
+                font: baseFont,
+                in: view,
+                hidesSensitiveContent: true
+            )
+            let maskedFont = try #require(maskedAttr.attribute(.font, at: bulletRange.location, effectiveRange: nil) as? NSFont)
+            let expectedMaskSize = baseFont.pointSize * 0.42
+            #expect(abs(maskedFont.pointSize - expectedMaskSize) < 0.01)
+            let kern = maskedAttr.attribute(.kern, at: bulletRange.location, effectiveRange: nil) as? CGFloat
+            #expect(kern != nil && (kern ?? 0) > 0)
+        }
+
+        @Test
         func linkPreviewHTMLParserMetadataAndEntities() throws {
             let baseURL = try #require(URL(string: "https://example.com/articles/post"))
             let html = """
@@ -149,6 +191,181 @@ enum ViewsAndWindowsTests {
         }
     }
 
+    /// A link row decodes the pictures of a stored preview in the background. Each test uses
+    /// files of its own, so the shared thumbnail loader has nothing cached for them.
+    @Suite
+    struct LinkRowImageLoadingTests {
+        private static let pageURL = URL(string: "https://site.example/page")!
+
+        private enum Picture: CaseIterable, Sendable {
+            case favicon
+            case preview
+        }
+
+        private enum Change: CaseIterable, Sendable {
+            case maskedWhileLoading
+            case reusedForAnotherItemWhileLoading
+            case previewsTurnedOffWhileLoading
+        }
+
+        private static var screenScale: CGFloat { NSScreen.main?.backingScaleFactor ?? 2 }
+
+        private static var faviconPixelSize: Int {
+            let side = HistoryRow.typeIconSize
+            return ImageAssetThumbnailLoader.maximumPixelSize(forDisplaySize: CGSize(width: side, height: side), scale: screenScale)
+        }
+
+        private static var previewPixelSize: Int {
+            let size = CGSize(width: HistoryRow.linkPreviewImageWidth * 2, height: HistoryRow.linkPreviewImageHeight * 2)
+            return ImageAssetThumbnailLoader.maximumPixelSize(forDisplaySize: size, scale: screenScale)
+        }
+
+        private static func writePNG(named name: String, width: Int, height: Int, in directory: URL) throws -> URL {
+            let rep = try TestSupport.makeBitmap(pixelsWide: width, pixelsHigh: height)
+            let url = directory.appendingPathComponent(name)
+            try #require(rep.representation(using: .png, properties: [:])).write(to: url)
+            return url
+        }
+
+        /// Returns once the row's request for `url` has delivered its result. The loader calls
+        /// the requests for one picture in the order they were made, so a request made after the
+        /// row's is answered after it.
+        @MainActor
+        private static func waitForDecode(of url: URL, maximumPixelSize: Int) async {
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                let cached = ImageAssetThumbnailLoader.shared.thumbnail(for: url, maximumPixelSize: maximumPixelSize) { _ in
+                    continuation.resume()
+                }
+                if cached != nil {
+                    // Decoded already: the row's callback is queued on the main queue ahead of this one.
+                    DispatchQueue.main.async { continuation.resume() }
+                }
+            }
+        }
+
+        @MainActor
+        private static func toolTips(in view: NSView) -> [String] {
+            ([view.toolTip].compactMap { $0 }) + view.subviews.flatMap { toolTips(in: $0) }
+        }
+
+        @MainActor
+        private static func previewImageViews(in view: NSView) -> [NSImageView] {
+            let own = (view as? NSImageView).map { String(describing: type(of: $0)).contains("AspectFill") ? [$0] : [] } ?? []
+            return own + view.subviews.flatMap { previewImageViews(in: $0) }
+        }
+
+        @MainActor
+        private static func makeRow() -> HistoryItemRowLinkView {
+            HistoryItemRowLinkView(frame: NSRect(x: 0, y: 0, width: 480, height: HistoryRow.height))
+        }
+
+        @Test(.timeLimit(.minutes(1)))
+        @MainActor
+        func faviconIsShownOnceDecoded() async throws {
+            TestSupport.ensureAppKitInitialized()
+            try await TestSupport.withTemporaryDirectory { directory in
+                let faviconURL = try Self.writePNG(named: "favicon.png", width: 32, height: 32, in: directory)
+                let preview = LinkPreview(url: Self.pageURL, title: "Site", description: nil, image: nil, favicon: nil, faviconURL: faviconURL)
+                let row = Self.makeRow()
+
+                row.configureForTest(item: .fixture(kind: .link, text: Self.pageURL.absoluteString), linkPreview: preview, showsLinkPreview: true)
+                #expect(!Self.toolTips(in: row).contains("site.example"))
+
+                await Self.waitForDecode(of: faviconURL, maximumPixelSize: Self.faviconPixelSize)
+                #expect(Self.toolTips(in: row).contains("site.example"))
+            }
+        }
+
+        @Test(.timeLimit(.minutes(1)))
+        @MainActor
+        func previewImageIsShownOnceDecoded() async throws {
+            TestSupport.ensureAppKitInitialized()
+            try await TestSupport.withTemporaryDirectory { directory in
+                let imageURL = try Self.writePNG(named: "preview.png", width: 96, height: 48, in: directory)
+                let preview = LinkPreview(url: Self.pageURL, title: "Site", description: nil, image: nil, favicon: nil, imageURL: imageURL)
+                let row = Self.makeRow()
+
+                row.configureForTest(item: .fixture(kind: .link, text: Self.pageURL.absoluteString), linkPreview: preview, showsLinkPreview: true)
+                let imageView = try #require(Self.previewImageViews(in: row).first)
+                #expect(imageView.image == nil)
+
+                await Self.waitForDecode(of: imageURL, maximumPixelSize: Self.previewPixelSize)
+                #expect(imageView.image != nil)
+            }
+        }
+
+        @Test(.timeLimit(.minutes(1)), arguments: Picture.allCases, Change.allCases)
+        @MainActor
+        private func aPictureThatArrivesAfterTheRowChangedIsNotShown(picture: Picture, change: Change) async throws {
+            TestSupport.ensureAppKitInitialized()
+            try await TestSupport.withTemporaryDirectory { directory in
+                let pictureURL = try Self.writePNG(named: "picture.png", width: 32, height: 32, in: directory)
+                let preview: LinkPreview
+                let pixelSize: Int
+                switch picture {
+                case .favicon:
+                    preview = LinkPreview(url: Self.pageURL, title: "Site", description: nil, image: nil, favicon: nil, faviconURL: pictureURL)
+                    pixelSize = Self.faviconPixelSize
+                case .preview:
+                    preview = LinkPreview(url: Self.pageURL, title: "Site", description: nil, image: nil, favicon: nil, imageURL: pictureURL)
+                    pixelSize = Self.previewPixelSize
+                }
+                let itemID = UUID()
+                let row = Self.makeRow()
+
+                row.configureForTest(
+                    item: .fixture(id: itemID, kind: .link, text: Self.pageURL.absoluteString),
+                    linkPreview: preview,
+                    showsLinkPreview: true
+                )
+                // The picture view stays with the row when it is no longer shown.
+                let previewImageView = Self.previewImageViews(in: row).first
+
+                // A row that stays as it is. The loader answers the requests for one picture in
+                // the order they were made, so once the wait below is over, this row has been
+                // answered too, which shows that the wait used the same request as the rows.
+                let controlRow = Self.makeRow()
+                controlRow.configureForTest(
+                    item: .fixture(kind: .link, text: Self.pageURL.absoluteString),
+                    linkPreview: preview,
+                    showsLinkPreview: true
+                )
+                let controlImageView = Self.previewImageViews(in: controlRow).first
+
+                switch change {
+                case .maskedWhileLoading:
+                    row.configureForTest(
+                        item: .fixture(id: itemID, kind: .link, text: Self.pageURL.absoluteString, sensitivity: .sensitive),
+                        linkPreview: preview,
+                        showsLinkPreview: true
+                    )
+                case .reusedForAnotherItemWhileLoading:
+                    row.prepareForReuse()
+                    row.configureForTest(
+                        item: .fixture(kind: .link, text: "https://other.example/page"),
+                        showsLinkPreview: true
+                    )
+                case .previewsTurnedOffWhileLoading:
+                    row.configureForTest(
+                        item: .fixture(id: itemID, kind: .link, text: Self.pageURL.absoluteString),
+                        linkPreview: preview,
+                        showsLinkPreview: false
+                    )
+                }
+
+                await Self.waitForDecode(of: pictureURL, maximumPixelSize: pixelSize)
+                switch picture {
+                case .favicon:
+                    #expect(Self.toolTips(in: controlRow).contains("site.example"), "The loader had not answered the control row")
+                    #expect(!Self.toolTips(in: row).contains("site.example"))
+                case .preview:
+                    #expect(try #require(controlImageView).image != nil, "The loader had not answered the control row")
+                    #expect(try #require(previewImageView).image == nil)
+                }
+            }
+        }
+    }
+
     @Suite
     struct ViewsDialogsAndWindowsTests {
         private static let rowFrame = NSRect(x: 0, y: 0, width: 480, height: HistoryRow.height)
@@ -157,6 +374,81 @@ enum ViewsAndWindowsTests {
         private static func labels(of row: NSView) -> [HistoryFixedTextColorLabel] {
             row.layoutSubtreeIfNeeded()
             return collectLabels(in: row)
+        }
+
+        @Test
+        @MainActor
+        func linkRowMasksASensitiveURLOnLineTwo() throws {
+            TestSupport.ensureAppKitInitialized()
+            let secretToken = ["sk", "-", String(repeating: "aB3dE5fG", count: 4)].joined()
+            let secretURLString = "https://api.example.com/v1/auth?token=\(secretToken)"
+            let item = ClipboardItem.fixture(
+                kind: .link,
+                title: "Production Webhook",
+                text: secretURLString,
+                sensitivity: .sensitive
+            )
+            let preview = LinkPreview(
+                url: try #require(URL(string: secretURLString)),
+                title: "Webhook Dashboard",
+                description: "Internal portal",
+                image: NSImage(size: NSSize(width: 80, height: 40)),
+                favicon: NSImage(size: NSSize(width: 16, height: 16))
+            )
+
+            let row = HistoryItemRowLinkView(frame: Self.rowFrame)
+            row.configureForTest(item: item, linkPreview: preview, showsLinkPreview: true)
+
+            let labels = Self.labels(of: row)
+            #expect(labels.contains { $0.text == "Production Webhook" })
+            #expect(!labels.contains { $0.text.contains(secretToken) })
+            #expect(labels.contains { $0.text.contains(SensitiveContent.inlineMask) })
+        }
+
+        @Test
+        @MainActor
+        func reusedLinkRowShowsLiteralBulletsAsTheyAre() throws {
+            TestSupport.ensureAppKitInitialized()
+            let sensitiveItem = ClipboardItem.fixture(
+                kind: .link,
+                title: "Production Webhook",
+                text: "https://api.example.com/v1/auth?token=sk-secret-token-value",
+                sensitivity: .sensitive
+            )
+            let bulletItem = ClipboardItem.fixture(
+                kind: .link,
+                title: "Bullet Doc",
+                text: "https://example.com/●●●●●●●●",
+                sensitivity: .notSensitive
+            )
+
+            let row = HistoryItemRowLinkView(frame: Self.rowFrame)
+            row.configureForTest(item: sensitiveItem, showsLinkPreview: true)
+            row.prepareForReuse()
+            row.configureForTest(item: bulletItem, quickPasteIndex: 2, showsLinkPreview: true)
+
+            let secondLineLabel = try #require(Self.labels(of: row).first { $0.text.contains("●●●●●●●●") })
+            #expect(!secondLineLabel.hidesSensitiveContent)
+        }
+
+        @Test
+        @MainActor
+        func emailRowMasksASensitiveAddress() {
+            TestSupport.ensureAppKitInitialized()
+            let item = ClipboardItem.fixture(
+                kind: .email,
+                title: "Root Contact",
+                text: "security-admin@example.com",
+                sensitivity: .sensitive
+            )
+
+            let row = HistoryItemRowEmailView(frame: Self.rowFrame)
+            row.configureForTest(item: item)
+
+            let labels = Self.labels(of: row)
+            #expect(labels.contains { $0.text == "Root Contact" })
+            #expect(!labels.contains { $0.text.contains("security-admin@example.com") })
+            #expect(labels.contains { $0.text.contains(SensitiveContent.inlineMask) })
         }
 
         /// A toolbar with its search item built, and a delegate that records what the toolbar reports.

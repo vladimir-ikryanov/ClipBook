@@ -115,5 +115,11 @@ enum SnapshotScenario: String, CaseIterable, Sendable {
 extension SharedProcessStateTests {
     @Suite
     struct ViewSnapshotTests {
+        @Test(arguments: SnapshotScenario.allCases, SnapshotAppearance.allCases)
+        @MainActor
+        func viewMatchesReferenceImage(scenario: SnapshotScenario, appearance: SnapshotAppearance) throws {
+            let snapshot = try scenario.render(in: appearance)
+            SnapshotTesting.assertMatchesReference(snapshot, named: "\(scenario.rawValue)-\(appearance.rawValue)")
+        }
     }
 }

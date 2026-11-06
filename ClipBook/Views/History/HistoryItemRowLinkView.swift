@@ -103,7 +103,7 @@ final class HistoryItemRowLinkView: HistoryItemRowView {
       for: url,
       maximumPixelSize: maximumPixelSize
     ) { [weak self] image in
-      guard let self, self.isConfigured(for: item), let image else {
+      guard let self, self.isConfigured(for: item), !self.hidesSensitiveContent, self.showsLinkPreview, let image else {
         return
       }
 
@@ -125,7 +125,7 @@ final class HistoryItemRowLinkView: HistoryItemRowView {
       for: url,
       maximumPixelSize: maximumPixelSize
     ) { [weak self] image in
-      guard let self, self.isConfigured(for: item), let image else {
+      guard let self, self.isConfigured(for: item), !self.hidesSensitiveContent, self.showsLinkPreview, let image else {
         return
       }
 

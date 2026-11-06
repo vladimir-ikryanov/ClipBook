@@ -155,10 +155,11 @@ enum HistoryPreviewSymbolAppearance {
     to attributedString: NSMutableAttributedString,
     text: String,
     font: NSFont,
-    in view: NSView
+    in view: NSView,
+    hidesSensitiveContent: Bool
   ) {
     // 0x97 is the middle UTF-8 byte of "●" (U+25CF, 0xE2 0x97 0x8F); skip regex scanning when no mask dot is present.
-    guard text.utf8.contains(0x97) else {
+    guard hidesSensitiveContent, text.utf8.contains(0x97) else {
       return
     }
     let ranges = SensitiveContent.maskRanges(in: text)
@@ -273,10 +274,12 @@ final class HistoryFixedTextColorLabel: NSTextField {
     let paragraphStyle: NSParagraphStyle?
     let lineBreakMode: NSLineBreakMode
     let appearanceName: NSAppearance.Name
+    let hidesSensitiveContent: Bool
   }
 
   private var renderedState: RenderedState?
   private var isUpdating = false
+  var hidesSensitiveContent = false
 
   /// The text the label shows. `stringValue` can differ from it: hidden content gets a
   /// trailing space in the font of the text.
@@ -316,7 +319,8 @@ final class HistoryFixedTextColorLabel: NSTextField {
     font: NSFont,
     textColor: NSColor,
     searchQuery: String,
-    lineBreakMode: NSLineBreakMode
+    lineBreakMode: NSLineBreakMode,
+    hidesSensitiveContent: Bool
   ) {
     isUpdating = true
     self.text = text
@@ -325,6 +329,7 @@ final class HistoryFixedTextColorLabel: NSTextField {
     searchHighlightQuery = searchQuery
     preferredParagraphStyle = nil
     self.lineBreakMode = lineBreakMode
+    self.hidesSensitiveContent = hidesSensitiveContent
     isUpdating = false
     applyPreferredTextColor()
   }
@@ -349,7 +354,8 @@ final class HistoryFixedTextColorLabel: NSTextField {
       searchQuery: searchHighlightQuery,
       paragraphStyle: preferredParagraphStyle,
       lineBreakMode: lineBreakMode,
-      appearanceName: effectiveAppearance.name
+      appearanceName: effectiveAppearance.name,
+      hidesSensitiveContent: hidesSensitiveContent
     )
     guard state != renderedState else {
       return
@@ -373,7 +379,8 @@ final class HistoryFixedTextColorLabel: NSTextField {
       to: attributedString,
       text: text,
       font: font ?? .systemFont(ofSize: NSFont.systemFontSize),
-      in: self
+      in: self,
+      hidesSensitiveContent: hidesSensitiveContent
     )
     attributedStringValue = attributedString
   }
@@ -639,6 +646,7 @@ private final class HistoryTextPreviewField: NSTextField {
     let textColor: NSColor
     let lineBreakMode: NSLineBreakMode
     let appearanceName: NSAppearance.Name
+    let hidesSensitiveContent: Bool
   }
 
   private static let defaultPrimaryFont = HistoryRow.makePrimaryFont()
@@ -661,6 +669,7 @@ private final class HistoryTextPreviewField: NSTextField {
   private var textFont = defaultPrimaryFont
   private var lineCount = 1
   private var wrappingMode: NSLineBreakMode = .byWordWrapping
+  private var hidesSensitiveContent = false
   private var textHeight: CGFloat = 0
   private var isUpdating = false
   var preferredTextColor: NSColor = .labelColor {
@@ -703,6 +712,7 @@ private final class HistoryTextPreviewField: NSTextField {
     textColor: NSColor,
     maximumNumberOfLines: Int,
     wrappingMode: NSLineBreakMode,
+    hidesSensitiveContent: Bool,
     widthHint: CGFloat? = nil,
     cachesPreview: Bool = true
   ) {
@@ -714,6 +724,7 @@ private final class HistoryTextPreviewField: NSTextField {
     self.widthHint = widthHint
     self.searchQuery = searchQuery
     self.wrappingMode = wrappingMode
+    self.hidesSensitiveContent = hidesSensitiveContent
     if font != textFont || maximumNumberOfLines != lineCount || textHeight == 0 {
       textFont = font
       lineCount = maximumNumberOfLines
@@ -784,7 +795,8 @@ private final class HistoryTextPreviewField: NSTextField {
       font: textFont,
       textColor: preferredTextColor,
       lineBreakMode: textLineBreakMode,
-      appearanceName: effectiveAppearance.name
+      appearanceName: effectiveAppearance.name,
+      hidesSensitiveContent: hidesSensitiveContent
     )
     guard state != renderedState else {
       return
@@ -826,7 +838,8 @@ private final class HistoryTextPreviewField: NSTextField {
       to: attributedString,
       text: displayText,
       font: textFont,
-      in: self
+      in: self,
+      hidesSensitiveContent: hidesSensitiveContent
     )
     attributedString.endEditing()
 
@@ -1077,7 +1090,7 @@ class HistoryItemRowView: NSTableCellView {
 
   /// The line shown under a title the user gave the item, in place of the item's own lines.
   func makeTitledSummaryLine(for item: ClipboardItem) -> NSView {
-    makeSecondaryLabel(text: item.contentTitle)
+    makeSecondaryLabel(text: contentText(item.contentTitle))
   }
 
   // MARK: - Layout API for subclasses
@@ -1161,7 +1174,7 @@ class HistoryItemRowView: NSTableCellView {
   }
 
   func makeItemTitleLabel(text: String) -> HistoryFixedTextColorLabel {
-    let field = makeLabel(text: text, font: HistoryRow.makeItemTitleFont(), textColor: .labelColor)
+    let field = makeLabel(text: text, font: HistoryRow.makeItemTitleFont(), textColor: .labelColor, hidesSensitiveContent: false)
     registerSelectionTitleField(field)
     return field
   }
@@ -1189,6 +1202,7 @@ class HistoryItemRowView: NSTableCellView {
       textColor: textColor,
       maximumNumberOfLines: isCompact ? 1 : maximumNumberOfLines,
       wrappingMode: wrappingMode,
+      hidesSensitiveContent: hidesSensitiveContent,
       widthHint: rowTableWidth,
       cachesPreview: !showsRevealedSensitiveContent
     )
@@ -1236,7 +1250,8 @@ class HistoryItemRowView: NSTableCellView {
     text: String,
     font: NSFont,
     textColor: NSColor,
-    lineBreakMode: NSLineBreakMode = .byTruncatingTail
+    lineBreakMode: NSLineBreakMode = .byTruncatingTail,
+    hidesSensitiveContent: Bool? = nil
   ) -> HistoryFixedTextColorLabel {
     if nextLabelIndex == labels.count {
       labels.append(HistoryFixedTextColorLabel(labelWithString: ""))
@@ -1248,7 +1263,8 @@ class HistoryItemRowView: NSTableCellView {
       font: font,
       textColor: textColor,
       searchQuery: searchQuery,
-      lineBreakMode: lineBreakMode
+      lineBreakMode: lineBreakMode,
+      hidesSensitiveContent: hidesSensitiveContent ?? self.hidesSensitiveContent
     )
     field.maximumNumberOfLines = 1
     field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
