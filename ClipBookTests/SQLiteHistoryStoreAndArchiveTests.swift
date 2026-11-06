@@ -566,6 +566,181 @@ enum SQLiteHistoryStoreAndArchiveTests {
             }
         }
 
+        @Test
+        func archivePathSecurityChecks() throws {
+            try TestSupport.withTemporaryDirectory { rootDir in
+                let fileManager = FileManager.default
+                let (_, store, service) = try Self.makeImportTarget(in: rootDir)
+
+                let secretOutsideFile = rootDir.appendingPathComponent("outside-secret.png")
+                try Data("secret".utf8).write(to: secretOutsideFile)
+
+                let invalidCases: [(name: String, assetPath: String, setup: (URL) throws -> Void)] = [
+                    (
+                        name: "dot-dot path traversal",
+                        assetPath: "assets/images/../../../outside-secret.png",
+                        setup: { _ in }
+                    ),
+                    (
+                        name: "absolute path",
+                        assetPath: secretOutsideFile.path,
+                        setup: { _ in }
+                    ),
+                    (
+                        name: "symlinked asset file",
+                        assetPath: "assets/images/symlinked.png",
+                        setup: { archiveDir in
+                            let linkURL = archiveDir.appendingPathComponent("assets/images/symlinked.png")
+                            try fileManager.createSymbolicLink(at: linkURL, withDestinationURL: secretOutsideFile)
+                        }
+                    ),
+                    (
+                        name: "symlinked parent directory",
+                        assetPath: "assets/linked-dir/outside-secret.png",
+                        setup: { archiveDir in
+                            let linkedDirURL = archiveDir.appendingPathComponent("assets/linked-dir")
+                            try fileManager.createSymbolicLink(at: linkedDirURL, withDestinationURL: rootDir)
+                        }
+                    ),
+                    (
+                        name: "directory instead of file",
+                        assetPath: "assets/images/folder.png",
+                        setup: { archiveDir in
+                            let folderURL = archiveDir.appendingPathComponent("assets/images/folder.png")
+                            try fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true)
+                            try Data("inner".utf8).write(to: folderURL.appendingPathComponent("inner.txt"))
+                        }
+                    ),
+                    (
+                        name: "dot-dot component inside the archive",
+                        assetPath: "assets/images/../images/inner.png",
+                        setup: { archiveDir in
+                            try Data("inner".utf8).write(to: archiveDir.appendingPathComponent("assets/images/inner.png"))
+                        }
+                    )
+                ]
+
+                for (index, testCase) in invalidCases.enumerated() {
+                    let badArchiveURL = rootDir.appendingPathComponent("Bad-\(index).clipbookarchive", isDirectory: true)
+                    try Self.writeCustomArchive(
+                        at: badArchiveURL,
+                        items: [
+                            (id: UUID(), kind: "image", text: nil, assetPath: testCase.assetPath)
+                        ],
+                        setupFiles: testCase.setup
+                    )
+
+                    let thrownError = #expect(throws: ClipBookArchiveError.self, Comment(rawValue: testCase.name)) {
+                        _ = try service.import(from: badArchiveURL, into: store)
+                    }
+                    var isInvalidAssetPath = false
+                    if case .invalidAssetPath? = thrownError {
+                        isInvalidAssetPath = true
+                    }
+                    #expect(isInvalidAssetPath, Comment(rawValue: testCase.name))
+                }
+            }
+        }
+
+        @Test
+        func archiveImportAcceptsDoubleDotInsideFileName() throws {
+            try TestSupport.withTemporaryDirectory { rootDir in
+                let (_, store, service) = try Self.makeImportTarget(in: rootDir)
+
+                let itemID = UUID()
+                let imageBytes = Data([0x89, 0x50, 0x4E, 0x47, 0x01, 0x02])
+                let archiveURL = rootDir.appendingPathComponent("Dots.clipbookarchive", isDirectory: true)
+                try Self.writeCustomArchive(
+                    at: archiveURL,
+                    items: [(id: itemID, kind: "image", text: nil, assetPath: "assets/images/photo..png")],
+                    setupFiles: { archiveDir in
+                        try imageBytes.write(to: archiveDir.appendingPathComponent("assets/images/photo..png"))
+                    }
+                )
+
+                let result = try service.import(from: archiveURL, into: store)
+                #expect(result.itemIDs == [itemID])
+                let imported = try #require(try store.fetchAll().first)
+                let importedPath = try #require(imported.assetPath)
+                #expect(try Data(contentsOf: URL(fileURLWithPath: importedPath)) == imageBytes)
+            }
+        }
+
+        @Test
+        func failedImportRemovesAssetFilesAlreadyCopied() throws {
+            try TestSupport.withTemporaryDirectory { rootDir in
+                let fileManager = FileManager.default
+                let (supportDir, store, service) = try Self.makeImportTarget(in: rootDir)
+
+                // The first item copies its image, the second one is invalid
+                // (its asset is a directory), so the whole import rolls back.
+                let archiveURL = rootDir.appendingPathComponent("Rollback.clipbookarchive", isDirectory: true)
+                try Self.writeCustomArchive(
+                    at: archiveURL,
+                    items: [
+                        (id: UUID(), kind: "image", text: nil, assetPath: "assets/images/first.png"),
+                        (id: UUID(), kind: "image", text: nil, assetPath: "assets/images/folder.png")
+                    ],
+                    setupFiles: { archiveDir in
+                        try Data([0x01, 0x02, 0x03]).write(to: archiveDir.appendingPathComponent("assets/images/first.png"))
+                        try fileManager.createDirectory(
+                            at: archiveDir.appendingPathComponent("assets/images/folder.png"),
+                            withIntermediateDirectories: true
+                        )
+                    }
+                )
+
+                #expect(throws: ClipBookArchiveError.self) {
+                    _ = try service.import(from: archiveURL, into: store)
+                }
+
+                #expect(try store.fetchAll().isEmpty)
+                let imagesDirectory = supportDir.appendingPathComponent("Images", isDirectory: true)
+                let leftovers = (try? fileManager.contentsOfDirectory(atPath: imagesDirectory.path)) ?? []
+                #expect(leftovers.isEmpty)
+            }
+        }
+
+        @Test(arguments: [
+            (imagePath: "assets/link-previews/good.png", faviconPath: "assets/link-previews/../../../outside.png"),
+            (imagePath: "assets/link-previews/../../../outside.png", faviconPath: "assets/link-previews/good.png"),
+            (imagePath: "assets/link-previews/good.png", faviconPath: "assets/link-previews/folder.png")
+        ])
+        func linkPreviewPicturesAreCheckedLikeAssetsAndRolledBack(imagePath: String, faviconPath: String) throws {
+            try TestSupport.withTemporaryDirectory { rootDir in
+                let fileManager = FileManager.default
+                let (supportDir, store, service) = try Self.makeImportTarget(in: rootDir)
+                let itemID = UUID()
+                let archiveURL = rootDir.appendingPathComponent("Previews.clipbookarchive", isDirectory: true)
+                try Self.writeCustomArchive(
+                    at: archiveURL,
+                    items: [(id: itemID, kind: "link", text: "https://example.com/page", assetPath: nil)],
+                    linkPreviews: [itemID: (imagePath: imagePath, faviconPath: faviconPath)],
+                    setupFiles: { archiveDir in
+                        try Data([0x01, 0x02, 0x03]).write(to: archiveDir.appendingPathComponent("assets/link-previews/good.png"))
+                        try Data("secret".utf8).write(to: rootDir.appendingPathComponent("outside.png"))
+                        try fileManager.createDirectory(
+                            at: archiveDir.appendingPathComponent("assets/link-previews/folder.png"),
+                            withIntermediateDirectories: true
+                        )
+                    }
+                )
+
+                let thrownError = #expect(throws: ClipBookArchiveError.self) {
+                    _ = try service.import(from: archiveURL, into: store)
+                }
+                var isInvalidAssetPath = false
+                if case .invalidAssetPath? = thrownError {
+                    isInvalidAssetPath = true
+                }
+                #expect(isInvalidAssetPath)
+
+                #expect(try store.fetchAll().isEmpty)
+                let previewsDirectory = supportDir.appendingPathComponent("LinkPreviews", isDirectory: true)
+                #expect(((try? fileManager.contentsOfDirectory(atPath: previewsDirectory.path)) ?? []).isEmpty)
+            }
+        }
+
         /// An empty support directory under `rootDir` with a store and an archive service on it.
         private static func makeImportTarget(
             in rootDir: URL
