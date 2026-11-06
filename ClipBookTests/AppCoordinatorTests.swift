@@ -151,6 +151,47 @@ enum AppCoordinatorTests {
     }
 
     @Suite
+    struct PasteNextTests {
+        @Test
+        @MainActor
+        func skipsPinnedFavoritesUnlessFavoritesFilterIsActive() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+
+            let favorite = ClipboardItem.fixture(text: "Favorite", isFavorite: true)
+            let first = ClipboardItem.fixture(text: "First")
+            let second = ClipboardItem.fixture(text: "Second")
+            let items = [favorite, first, second]
+
+            harness.model.preferences.pinFavoritesToTop = true
+            #expect(harness.coordinator.historyItemsForPasteNext(in: items).map(\.id) == [first.id, second.id])
+
+            harness.model.selectedHistoryFilterContentTypes = [.favorites]
+            #expect(harness.coordinator.historyItemsForPasteNext(in: items).map(\.id) == items.map(\.id))
+
+            harness.model.selectedHistoryFilterContentTypes = []
+            harness.model.preferences.pinFavoritesToTop = false
+            #expect(harness.coordinator.historyItemsForPasteNext(in: items).map(\.id) == items.map(\.id))
+        }
+
+        @Test
+        @MainActor
+        func fallsBackToAllItemsWhenOnlyFavoritesExist() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+
+            let favorites = [
+                ClipboardItem.fixture(text: "Favorite A", isFavorite: true),
+                ClipboardItem.fixture(text: "Favorite B", isFavorite: true)
+            ]
+            harness.model.preferences.pinFavoritesToTop = true
+
+            #expect(harness.coordinator.historyItemsForPasteNext(in: favorites).map(\.id) == favorites.map(\.id))
+            #expect(harness.coordinator.historyItemsForPasteNext(in: []).isEmpty)
+        }
+    }
+
+    @Suite
     struct AppDelegateTests {
         @Test
         @MainActor
