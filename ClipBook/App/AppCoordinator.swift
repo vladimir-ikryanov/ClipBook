@@ -872,12 +872,15 @@ final class AppCoordinator: ObservableObject {
     return items.first
   }
 
-  private func historyItemsForPasteNext(in items: [ClipboardItem]) -> [ClipboardItem] {
-    guard model.preferences.pinFavoritesToTop else {
+  /// Internal so tests can reach the paste-next ordering rule without pasting.
+  func historyItemsForPasteNext(in items: [ClipboardItem]) -> [ClipboardItem] {
+    guard model.preferences.pinFavoritesToTop,
+          !model.selectedHistoryFilterContentTypes.contains(.favorites) else {
       return items
     }
 
-    return items.filter { !$0.isFavorite }
+    let nonFavorites = items.filter { !$0.isFavorite }
+    return nonFavorites.isEmpty ? items : nonFavorites
   }
 
   private func nextHistoryItemID(after itemID: ClipboardItem.ID, in items: [ClipboardItem]) -> ClipboardItem.ID? {
