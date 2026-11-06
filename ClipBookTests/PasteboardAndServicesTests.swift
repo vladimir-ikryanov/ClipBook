@@ -387,6 +387,54 @@ enum PasteboardAndServicesTests {
     struct PasteboardMonitorTests {
         @Test
         @MainActor
+        func contentCopiedWhilePausedIsNotCaptured() async throws {
+            try await PasteboardAndServicesTests.withMonitor { fixture in
+                let (monitor, pasteboard, delegate) = (fixture.monitor, fixture.pasteboard, fixture.delegate)
+
+                pasteboard.clearContents()
+                pasteboard.setString("Before pause", forType: .string)
+                await monitor.pollAndWaitForDelivery()
+                #expect(delegate.items.map(\.text) == ["Before pause"])
+
+                monitor.isPaused = true
+                pasteboard.clearContents()
+                pasteboard.setString("Copied while paused", forType: .string)
+                #expect(monitor.poll() == nil)
+
+                monitor.isPaused = false
+                await monitor.pollAndWaitForDelivery()
+                #expect(delegate.items.map(\.text) == ["Before pause"])
+
+                pasteboard.clearContents()
+                pasteboard.setString("After resume", forType: .string)
+                await monitor.pollAndWaitForDelivery()
+                #expect(delegate.items.map(\.text) == ["After resume", "Before pause"])
+            }
+        }
+
+        @Test
+        @MainActor
+        func pausingDropsDeferredRetryOfEarlierChange() async throws {
+            try await PasteboardAndServicesTests.withMonitor { fixture in
+                let (monitor, pasteboard, delegate) = (fixture.monitor, fixture.pasteboard, fixture.delegate)
+
+                // A change that yields nothing readable arms the deferred retry.
+                pasteboard.clearContents()
+                await monitor.pollAndWaitForDelivery()
+                #expect(delegate.items.isEmpty)
+
+                monitor.isPaused = true
+                pasteboard.setString("Copied while paused", forType: .string)
+                monitor.isPaused = false
+
+                // Without the reset the armed retry re-reads the pasteboard here.
+                await monitor.pollAndWaitForDelivery()
+                #expect(delegate.items.isEmpty)
+            }
+        }
+
+        @Test
+        @MainActor
         func contentThatArrivesLateIsCapturedByTheDeferredRetry() async throws {
             try await PasteboardAndServicesTests.withMonitor { fixture in
                 let (monitor, pasteboard, delegate) = (fixture.monitor, fixture.pasteboard, fixture.delegate)
@@ -412,6 +460,23 @@ enum PasteboardAndServicesTests {
                 await fixture.monitor.pollAndWaitForDelivery()
 
                 #expect(fixture.delegate.items.map(\.text) == ["Copied"])
+            }
+        }
+
+        @Test
+        @MainActor
+        func pausingAbandonsAReadThatIsInFlight() async throws {
+            try await PasteboardAndServicesTests.withMonitor { fixture in
+                fixture.pasteboard.clearContents()
+                fixture.pasteboard.setString("Copied just before pausing", forType: .string)
+
+                let read = fixture.monitor.poll()
+                fixture.monitor.isPaused = true
+                fixture.monitor.isPaused = false
+                await read?.value
+                await PasteboardMonitor.deliveryOfCaptures()
+
+                #expect(fixture.delegate.items.isEmpty)
             }
         }
 
