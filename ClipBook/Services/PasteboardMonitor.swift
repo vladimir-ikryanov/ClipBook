@@ -235,7 +235,7 @@ final class PasteboardMonitor {
                 ownsAssetFile = !reusesStoredFile
                 textRecognitionImage = reusesStoredFile ? nil : URL(fileURLWithPath: assetPath)
             case .files(let paths, _, _):
-                if let path = paths.first, ClipboardItem.isImageFile(at: path) {
+                if paths.count == 1, let path = paths.first, ClipboardItem.isImageFile(at: path) {
                     textRecognitionImage = URL(fileURLWithPath: path)
                 }
             case .richText, .text:
@@ -310,12 +310,12 @@ final class PasteboardMonitor {
             return ClipboardItem(
                 kind: kind,
                 text: plainText,
-                rtfData: rtf,
-                html: html,
+                rtfData: kind == .richText ? rtf : nil,
+                html: kind == .richText ? html : nil,
                 sourceAppName: content.sourceAppName,
                 sourceBundleIdentifier: content.sourceBundleIdentifier,
                 copiedAt: copiedAt,
-                byteSize: (rtf?.count ?? 0) + (html?.utf8.count ?? 0) + (plainText?.utf8.count ?? 0),
+                byteSize: (kind == .richText ? (rtf?.count ?? 0) + (html?.utf8.count ?? 0) : 0) + (plainText?.utf8.count ?? 0),
                 searchText: ClipboardItem.makeSearchText(title: nil, text: plainText, filePaths: [], tagNames: [], sourceAppName: content.sourceAppName)
             )
         case .text(let text):
