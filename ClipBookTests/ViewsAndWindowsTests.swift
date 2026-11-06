@@ -175,6 +175,74 @@ enum ViewsAndWindowsTests {
             return (toolbar, delegate, try #require(searchItem.view))
         }
 
+        @Test
+        @MainActor
+        func historyToolbarSuggestionSelectionAndRanking() throws {
+            TestSupport.ensureAppKitInitialized()
+            let tagPrefix = ClipBook.Tag(id: 1, name: "SwiftUI", color: "#3B84ED")
+            let tagInfix = ClipBook.Tag(id: 2, name: "RxSwift", color: "#E03E3E")
+            let sourceApp = HistorySourceApplication(name: "Swift Playgrounds", bundleIdentifier: "com.apple.Playgrounds")
+
+            let suggestions = SearchSuggestionProvider.suggestions(
+                for: "swift",
+                tags: [tagInfix, tagPrefix],
+                sourceApplications: [sourceApp],
+                activeKinds: []
+            )
+            #expect(suggestions.count == 3)
+            #expect(suggestions[0].token.kind == .sourceApplication(sourceApp.id))
+            #expect(suggestions[1].token.kind == .tag(tagPrefix.id))
+            #expect(suggestions[2].token.kind == .tag(tagInfix.id))
+
+            let (toolbar, delegate, _) = try Self.makeSearchToolbar()
+            let onSelect = try #require(toolbar.suggestionsPopup.onSelect)
+            onSelect(suggestions[1])
+            #expect(delegate.selectedTags.map(\.0) == [tagPrefix.id])
+            #expect(delegate.selectedTags.map(\.1) == [true])
+            #expect(toolbar.searchField.tokens.contains { $0.kind == .tag(tagPrefix.id) })
+        }
+
+        @Test
+        @MainActor
+        func searchTokenFieldChipNavigation() throws {
+            TestSupport.ensureAppKitInitialized()
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 400, height: 80),
+                styleMask: [.titled],
+                backing: .buffered,
+                defer: false
+            )
+            window.isReleasedWhenClosed = false
+            defer { window.orderOut(nil) }
+
+            let (toolbar, _, searchView) = try Self.makeSearchToolbar()
+            searchView.frame = NSRect(x: 0, y: 0, width: 360, height: 52)
+            window.contentView?.addSubview(searchView)
+
+            let field = toolbar.searchField
+            field.setTokens([
+                SearchToken(kind: .contentType(.links), title: "Link", image: nil),
+                SearchToken(kind: .contentType(.images), title: "Image", image: nil)
+            ])
+            field.text = ""
+            field.layoutSubtreeIfNeeded()
+
+            #expect(field.control(NSControl(), textView: NSTextView(), doCommandBy: #selector(NSResponder.moveLeft(_:))))
+            #expect(field.selectedChipIndex == 1)
+
+            // Left arrow (keyCode 123) selects chip 0.
+            field.keyDown(with: try TestSupport.keyDownEvent(keyCode: 123, windowNumber: window.windowNumber))
+            #expect(field.selectedChipIndex == 0)
+
+            // Right arrow (keyCode 124) moves from chip 0 to chip 1, then back to the text field.
+            let rightArrow = try TestSupport.keyDownEvent(keyCode: 124, windowNumber: window.windowNumber)
+            field.keyDown(with: rightArrow)
+            #expect(field.selectedChipIndex == 1)
+
+            field.keyDown(with: rightArrow)
+            #expect(field.selectedChipIndex == nil)
+        }
+
         @MainActor
         private static func allItems(in menu: NSMenu) -> [NSMenuItem] {
             menu.items.flatMap { [$0] + ($0.submenu.map(allItems(in:)) ?? []) }
