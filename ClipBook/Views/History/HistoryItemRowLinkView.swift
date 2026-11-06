@@ -421,7 +421,7 @@ enum LinkPreviewHTMLParser {
   }
 
   private nonisolated static func cleanedText(_ text: String) -> String {
-    let unescaped = CFXMLCreateStringByUnescapingEntities(nil, text as CFString, nil) as String? ?? text
+    let unescaped = ClipboardTextTransform.decodeHTMLEntities(text)
     return unescaped
       .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
       .trimmingCharacters(in: .whitespacesAndNewlines)
