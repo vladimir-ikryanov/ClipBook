@@ -59,6 +59,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // a separate "AutoFill (ClipBook)" helper process that stays alive for as
     // long as the app runs.
     UserDefaults.standard.register(defaults: ["NSAutoFillHeuristicsEnabled": false])
+    // On macOS 27 a table view puts the row views that scroll out of sight in
+    // a private set as well as in its reuse queue, and a row view leaves that
+    // set only when the queue hands it out again. `reloadData()` empties the
+    // queue but not the set, so every reload left the row views that were
+    // waiting for reuse, with their cells, retained for good: some on each
+    // search keystroke, compact mode toggle or change of the history. With
+    // the switch off a reload keeps the queue, so those views are used again
+    // for the rows it shows, which also saves building a screenful of rows on
+    // each reload. Turning the set itself off (`NSTableViewKeepViewsInTable`)
+    // stops the leak too, but costs about a fifth more work per scrolled row.
+    // AppKit reads the switch once, on the first reload of a table view, so
+    // it has to be registered before that.
+    UserDefaults.standard.register(defaults: ["NSTableViewCanClearReuseQueue": false])
   }
 
   func applicationDidFinishLaunching(_ notification: Notification) {
