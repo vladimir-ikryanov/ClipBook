@@ -82,13 +82,24 @@ final class ItemPreviewDetailsView: NSView {
     var key: FieldKey?
     // An icon can stand for the value, which then shows only in the tooltip.
     var showsValue: Bool
+    // How a value too long for its room gives way. A path keeps its start and
+    // the file name at its end, so it loses its middle instead.
+    var lineBreakMode: NSLineBreakMode
 
-    init(title: String, value: String, icon: NSImage? = nil, key: FieldKey? = nil, showsValue: Bool = true) {
+    init(
+      title: String,
+      value: String,
+      icon: NSImage? = nil,
+      key: FieldKey? = nil,
+      showsValue: Bool = true,
+      lineBreakMode: NSLineBreakMode = .byTruncatingTail
+    ) {
       self.title = title
       self.value = value
       self.icon = icon
       self.key = key
       self.showsValue = showsValue
+      self.lineBreakMode = lineBreakMode
     }
   }
 
@@ -392,13 +403,20 @@ final class ItemPreviewDetailsView: NSView {
     valueFieldsByKey = [:]
     // The history row already shows the source app of the item next to it,
     // so the pane of the history window leaves it out of its details.
-    let fields = Self.fields(for: item, includesSource: style == .floating)
+    // Only the list beside the history has a row wide enough for the path of
+    // a file; the bar under the list would spend a whole line of its own on it.
+    let fields = Self.fields(
+      for: item,
+      includesSource: style == .floating,
+      includesFilePath: style == .docked && arrangement == .list
+    )
     if arrangement == .list {
       for (index, field) in fields.enumerated() {
         let rowView = ItemPreviewDetailsListRowView(
           title: field.title,
           value: field.value,
           icon: field.icon,
+          lineBreakMode: field.lineBreakMode,
           isShaded: index.isMultiple(of: 2)
         )
         if let key = field.key {
@@ -485,8 +503,11 @@ final class ItemPreviewDetailsView: NSView {
 
   // MARK: - Fields
 
-  private static func fields(for item: ClipboardItem, includesSource: Bool) -> [Field] {
+  private static func fields(for item: ClipboardItem, includesSource: Bool, includesFilePath: Bool) -> [Field] {
     var fields = [Field(title: L10n.string("Type"), value: typeName(for: item))]
+    if includesFilePath, let filePathField = filePathField(for: item) {
+      fields.append(filePathField)
+    }
     fields.append(contentsOf: contentFields(for: item))
     fields.append(
       Field(
@@ -551,6 +572,20 @@ final class ItemPreviewDetailsView: NSView {
       return L10n.string("Files")
     }
     return item.kind.title
+  }
+
+  // Where the file of a single file item lives, with the home folder written
+  // as a tilde. Several files have no one path to show.
+  private static func filePathField(for item: ClipboardItem) -> Field? {
+    guard item.kind == .file, item.filePaths.count == 1, let filePath = item.filePaths.first else {
+      return nil
+    }
+
+    return Field(
+      title: L10n.string("Path"),
+      value: (filePath as NSString).abbreviatingWithTildeInPath,
+      lineBreakMode: .byTruncatingMiddle
+    )
   }
 
   private static func dimensionsField(width: Int, height: Int) -> Field {
@@ -632,7 +667,7 @@ private final class ItemPreviewDetailsListRowView: NSView {
   private let iconView: NSImageView?
   private let isShaded: Bool
 
-  init(title: String, value: String, icon: NSImage?, isShaded: Bool) {
+  init(title: String, value: String, icon: NSImage?, lineBreakMode: NSLineBreakMode, isShaded: Bool) {
     titleField = NSTextField(labelWithString: title)
     titleField.font = .systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold)
     titleField.textColor = .secondaryLabelColor
@@ -642,7 +677,7 @@ private final class ItemPreviewDetailsListRowView: NSView {
     valueField.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
     valueField.textColor = .labelColor
     valueField.alignment = .right
-    valueField.lineBreakMode = .byTruncatingTail
+    valueField.lineBreakMode = lineBreakMode
 
     if let icon {
       let iconView = NSImageView()
