@@ -127,18 +127,23 @@ struct OnboardingView: View {
       OnboardingSubtitle(L10n.string("ClipBook runs in the background and remembers everything you copy, so you can find and copy/paste it again."))
         .padding(.top, 8)
 
-      VStack(spacing: 8) {
+      // The count sits under the Copy buttons, on the same trailing edge.
+      VStack(alignment: .trailing, spacing: 0) {
         ForEach(OnboardingSample.allCases) { sample in
+          if sample != OnboardingSample.allCases.first {
+            Divider()
+          }
           sampleRow(sample)
         }
-      }
-      .padding(.top, 18)
 
-      Text(L10n.string("%@ of %@ saved", String(model.savedSamples.count), String(OnboardingSample.allCases.count)))
-        .font(.system(size: 13))
-        .foregroundStyle(.secondary)
-        .monospacedDigit()
-        .padding(.top, 12)
+        Text(L10n.string("%@ of %@ saved", String(model.savedSamples.count), String(OnboardingSample.allCases.count)))
+          .font(.system(size: 13))
+          .foregroundStyle(.secondary)
+          .monospacedDigit()
+          .padding(.top, 12)
+      }
+      .frame(maxWidth: 360)
+      .padding(.top, 32)
     }
   }
 
@@ -165,7 +170,6 @@ struct OnboardingView: View {
             .font(.system(size: 12, weight: .semibold))
         }
         .foregroundStyle(OnboardingPalette.success)
-        .padding(.horizontal, 8)
         .frame(minHeight: SampleRowMetrics.controlHeight)
         .transition(.opacity)
       } else {
@@ -179,9 +183,7 @@ struct OnboardingView: View {
         .focusable(false)
       }
     }
-    .padding(SampleRowMetrics.inset)
-    .background(OnboardingPalette.fill, in: RoundedRectangle(cornerRadius: SampleRowMetrics.cornerRadius, style: .continuous))
-    .frame(maxWidth: 420)
+    .padding(.vertical, SampleRowMetrics.verticalInset)
   }
 
   @ViewBuilder
@@ -472,13 +474,10 @@ struct OnboardingView: View {
   }
 }
 
-/// The rows of the things to copy. The controls inside a row are inset the
-/// same distance from every edge, and their corners are concentric with the
-/// row's.
+/// The rows of the things to copy, with a divider between them.
 private enum SampleRowMetrics {
-  static let cornerRadius: CGFloat = 16
-  static let inset: CGFloat = 10
-  static let innerCornerRadius: CGFloat = cornerRadius - inset
+  static let verticalInset: CGFloat = 10
+  static let innerCornerRadius: CGFloat = 6
   static let controlHeight: CGFloat = 26
   static let imageHeight: CGFloat = 58
 }
