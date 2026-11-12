@@ -80,7 +80,7 @@ struct PreviewOption<Preview: View>: View {
 
 /// Shows the label as it is while the mouse is held down. The plain style
 /// dims it, which looks like the selection is being taken away.
-private struct PreviewOptionButtonStyle: ButtonStyle {
+struct PreviewOptionButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
     }

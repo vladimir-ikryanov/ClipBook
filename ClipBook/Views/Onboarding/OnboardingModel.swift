@@ -8,6 +8,7 @@ enum OnboardingStep: Int, CaseIterable, Identifiable {
   case openHistory
   case pasteBack
   case accessibility
+  case listMode
   case ready
 
   var id: Int {
@@ -26,6 +27,8 @@ enum OnboardingStep: Int, CaseIterable, Identifiable {
       return L10n.string("Paste")
     case .accessibility:
       return L10n.string("Accessibility")
+    case .listMode:
+      return L10n.string("List mode")
     case .ready:
       return L10n.string("Finish")
     }
@@ -250,6 +253,24 @@ final class OnboardingModel: ObservableObject {
     withAnimation(.easeOut(duration: 0.2)) {
       pastedText = text
     }
+  }
+
+  // MARK: - List mode
+
+  var isCompactHistory: Bool {
+    appModel.preferences.compactHistory
+  }
+
+  /// Applies the list mode right away, so the history shows it the next time
+  /// it opens, as it does when the mode is changed in Settings.
+  func setCompactHistory(_ isCompact: Bool) {
+    guard appModel.preferences.compactHistory != isCompact else {
+      return
+    }
+    withAnimation(.easeOut(duration: 0.15)) {
+      appModel.preferences.compactHistory = isCompact
+    }
+    coordinator.persistPreferences()
   }
 
   // MARK: - Accessibility

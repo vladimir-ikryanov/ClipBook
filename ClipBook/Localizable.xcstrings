@@ -581,6 +581,98 @@
         }
       }
     },
+    "Choose a list mode" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Listenmodus"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a list mode"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige un modo de lista"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli una modalità elenco"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リストモードを選択"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha um modo de lista"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择列表模式"
+          }
+        }
+      }
+    },
+    "Comfortable rows show more of each item. Compact rows fit more items in the window." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Komfortable Zeilen zeigen mehr von jedem Eintrag. Mit kompakten Zeilen passen mehr Einträge ins Fenster."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comfortable rows show more of each item. Compact rows fit more items in the window."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las filas cómodas muestran más de cada elemento. Las filas compactas muestran más elementos en la ventana."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le righe confortevoli mostrano di più di ogni elemento. Con quelle compatte, la finestra ne contiene di più."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "標準の行は各項目の内容をより多く表示します。コンパクトな行ではウインドウにより多くの項目が収まります。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linhas confortáveis mostram mais de cada item. Com linhas compactas, cabem mais itens na janela."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "舒适的行显示每个项目的更多内容。紧凑的行可在窗口中显示更多项目。"
+          }
+        }
+      }
+    },
     "© %@ ClipBook. All rights reserved." : {
       "extractionState" : "manual",
       "localizations" : {

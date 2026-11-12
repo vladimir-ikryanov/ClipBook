@@ -23,7 +23,7 @@ struct HistoryDensityPicker: View {
 
 /// A small drawing of the history window with regular or compact rows,
 /// zoomed in so the difference in row height is easy to see.
-private struct HistoryDensityPreview: View {
+struct HistoryDensityPreview: View {
     let isCompact: Bool
     /// An unselected preview keeps its window opaque and paints it gray
     /// instead of fading it into the settings background.
@@ -35,7 +35,9 @@ private struct HistoryDensityPreview: View {
     private let lineWidthFractions: [CGFloat] = [0.9, 0.65, 1, 0.75, 0.85, 0.6]
 
     private var rowCount: Int { isCompact ? 5 : 3 }
-    private var iconSize: CGFloat { isCompact ? 4.5 : 7 }
+    /// Small enough that the selected row keeps some room around the icon,
+    /// as the real rows do.
+    private var iconSize: CGFloat { isCompact ? 3.5 : 7 }
     private var lineHeight: CGFloat { isCompact ? 1.5 : 2 }
     private var listSize: CGSize {
         CGSize(width: windowSize.width - windowPadding * 2, height: windowSize.height - windowPadding * 2)

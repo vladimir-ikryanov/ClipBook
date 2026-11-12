@@ -70,6 +70,8 @@ struct OnboardingView: View {
       case .granted:
         accessibilityGrantedStep
       }
+    case .listMode:
+      listModeStep
     case .ready:
       readyStep
     }
@@ -355,6 +357,20 @@ struct OnboardingView: View {
     }
   }
 
+  private var listModeStep: some View {
+    VStack(spacing: 0) {
+      OnboardingTitle(L10n.string("Choose a list mode"))
+
+      OnboardingSubtitle(L10n.string("Comfortable rows show more of each item. Compact rows fit more items in the window."))
+        .padding(.top, 10)
+
+      OnboardingListModePicker(isCompact: model.isCompactHistory) { isCompact in
+        model.setCompactHistory(isCompact)
+      }
+      .padding(.top, 40)
+    }
+  }
+
   private var readyStep: some View {
     VStack(spacing: 0) {
       Text(verbatim: "🎉")
@@ -448,6 +464,8 @@ struct OnboardingView: View {
       return model.pastedText == nil ? .secondary(L10n.string("Skip")) : .primary(L10n.string("Continue"))
     case .accessibility:
       return model.accessibilityState == .granted ? .primary(L10n.string("Continue")) : .secondary(L10n.string("Not now"))
+    case .listMode:
+      return .primary(L10n.string("Continue"))
     case .ready:
       return .primary(L10n.string("Done"))
     }
