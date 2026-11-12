@@ -1085,7 +1085,9 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
   private func makeSortMenu() -> NSMenu {
     sortMenuIsForCopySequenceMode = isCopySequenceModeEnabled
     let menu = NSMenu()
-    if !isCopySequenceModeEnabled {
+    // The items of a single tag keep the order the user gives them, so
+    // there is nothing to sort there.
+    if !isCopySequenceModeEnabled && !isArrangedByTag {
       let sortByItem = NSMenuItem(title: L10n.string("Sort By"), action: nil, keyEquivalent: "")
       sortByItem.image = Self.symbolImage(symbolName: "arrow.up.arrow.down", label: L10n.string("Sort By"))
       sortByItem.submenu = makeSortByMenu()
@@ -1108,6 +1110,12 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
 
     menu.showsItemImagesRegardlessOfSystemSetting()
     return menu
+  }
+
+  /// Whether the list follows the order the user gives the items of the one
+  /// tag it is filtered to, see `AppModel.orderingTagID`.
+  private var isArrangedByTag: Bool {
+    selectedFilterTagIDs.count == 1 && !selectedFilterContentTypes.contains(.trash)
   }
 
   private var hasActiveFilter: Bool {

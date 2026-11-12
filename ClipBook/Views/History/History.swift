@@ -9,9 +9,11 @@ protocol HistoryDelegate: AnyObject {
   func listPane(_ pane: History, actionsMenuFor selectedItems: [ClipboardItem], focusedItem: ClipboardItem?) -> NSMenu
   func listPane(_ pane: History, shouldLoadLinkPreviewFor item: ClipboardItem)
   func listPane(_ pane: History, didChangeMultipleSelectionWith change: HistoryMultipleSelectionChange)
-  /// The user dropped pinned favorites, listed in their current order, right
-  /// before the favorite `targetItemID` names, or at the end when it is nil.
-  func listPane(_ pane: History, moveFavorites itemIDs: [UUID], before targetItemID: UUID?)
+  /// The user dropped rows they can arrange, listed in their current order:
+  /// pinned favorites, or any items while the list follows a tag's own order.
+  /// They go right before the item `targetItemID` names, or at the end when
+  /// it is nil.
+  func listPane(_ pane: History, moveItems itemIDs: [UUID], before targetItemID: UUID?)
   /// The user clicked the eye of an item whose content is hidden or shown for now.
   func listPane(_ pane: History, didRequestTogglingSensitiveContentVisibilityOf item: ClipboardItem)
 }
@@ -49,6 +51,9 @@ final class History: NSView {
   var searchQuery = ""
   private(set) var tableRows: [HistoryTableRow] = []
   private var groupsPinnedFavorites = false
+  /// Whether the list follows the order the user gives the items, so every
+  /// row can be dragged to another place.
+  private var arrangesEveryItem = false
   var showCommandNumberShortcut = true
   var showPreviewForLinks = true
   var detectsSensitiveContent = true
@@ -231,6 +236,7 @@ final class History: NSView {
     preferPastingAsPlainText: Bool,
     groupPinnedFavorites: Bool,
     sectionDate: ((ClipboardItem) -> Date?)?,
+    arrangesEveryItem: Bool = false,
     isShowingTrash: Bool = false,
     showsTiles: Bool = false,
     showsCompactRows: Bool = false,
@@ -257,6 +263,7 @@ final class History: NSView {
     showsDividers = showDividers
     preferDraggingAsPlainText = preferPastingAsPlainText
     groupsPinnedFavorites = groupPinnedFavorites
+    self.arrangesEveryItem = arrangesEveryItem
     if changesRowStyle {
       self.showsCompactRows = showsCompactRows
       tableView.showsCompactRows = showsCompactRows
@@ -1370,7 +1377,7 @@ final class History: NSView {
   /// The rows of the favorites pinned at the top of the list, which sit right
   /// under the "Favorites" header at row 0. Nil when favorites are not pinned
   /// there or none is listed.
-  var pinnedFavoriteRows: Range<Int>? {
+  private var pinnedFavoriteRows: Range<Int>? {
     guard groupsPinnedFavorites, case .sectionHeader = tableRows.first else {
       return nil
     }
@@ -1382,8 +1389,19 @@ final class History: NSView {
     return end > 1 ? 1..<end : nil
   }
 
+  /// The rows the user can drag into another order: every row while the list
+  /// follows the order the user gives the items, otherwise the pinned
+  /// favorites. Nil when there are none.
+  var reorderableRows: Range<Int>? {
+    guard arrangesEveryItem else {
+      return pinnedFavoriteRows
+    }
+
+    return tableRows.isEmpty ? nil : 0..<tableRows.count
+  }
+
   private func reorderableItemID(forRow row: Int) -> UUID? {
-    guard let pinnedFavoriteRows, pinnedFavoriteRows.contains(row),
+    guard let reorderableRows, reorderableRows.contains(row),
           case .item(let item, _) = tableRows[row] else {
       return nil
     }

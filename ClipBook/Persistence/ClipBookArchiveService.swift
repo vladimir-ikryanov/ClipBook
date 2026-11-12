@@ -193,6 +193,9 @@ final class ClipBookArchiveService {
             copySequenceID: item.copySequenceID,
             copySequenceOrder: item.copySequenceOrder,
             favoriteOrder: item.favoriteOrder,
+            tagOrders: item.tagOrders.isEmpty
+                ? nil
+                : Dictionary(uniqueKeysWithValues: item.tagOrders.map { (String($0.key), $0.value) }),
             sensitivity: item.sensitivity?.rawValue
         )
     }
@@ -204,6 +207,12 @@ final class ClipBookArchiveService {
         tagNamesByID: [Tag.ID: String]
     ) throws -> ClipboardItem {
         let tagIDs = archiveItem.tagIDs.compactMap { tagIDsByArchiveID[$0] }
+        var tagOrders: [Tag.ID: Int] = [:]
+        for (archiveTagID, order) in archiveItem.tagOrders ?? [:] {
+            if let tagID = tagIDsByArchiveID[archiveTagID] {
+                tagOrders[tagID] = order
+            }
+        }
         let assetPath = try copyImportedAsset(
             archiveRelativePath: archiveItem.assetPath,
             archiveURL: archiveURL,
@@ -257,6 +266,7 @@ final class ClipBookArchiveService {
             copySequenceID: archiveItem.copySequenceID,
             copySequenceOrder: archiveItem.copySequenceOrder,
             favoriteOrder: archiveItem.favoriteOrder,
+            tagOrders: tagOrders,
             sensitivity: archiveItem.sensitivity.flatMap(ItemSensitivity.init(rawValue:))
         )
     }
@@ -418,6 +428,9 @@ private struct ClipBookArchiveItem: Codable {
     var copySequenceOrder: Int?
     // Absent from archives written before favorites could be arranged.
     var favoriteOrder: Int?
+    // The item's place in each of its tags, by the tag's ID in the archive.
+    // Absent from archives written before the items of a tag could be arranged.
+    var tagOrders: [String: Int]?
     // Absent from archives written before items could be marked as sensitive.
     var sensitivity: String?
 }

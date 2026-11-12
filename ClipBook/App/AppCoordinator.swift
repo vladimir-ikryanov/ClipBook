@@ -1854,6 +1854,47 @@ final class AppCoordinator: ObservableObject {
     }
   }
 
+  /// Moves the items of the tag with the given IDs, keeping their relative
+  /// order, so they sit right before the item `targetItemID` names among the
+  /// items of the tag, or at the end when it is nil. Like favorites, every
+  /// item of the tag ends up with an explicit place, so the arrangement holds
+  /// whatever other filter or search narrowed the list during the drag.
+  func moveItems(_ itemIDs: [UUID], inTag tagID: Tag.ID, before targetItemID: UUID?) {
+    let movingIDs = Set(itemIDs)
+    let taggedItems = model.itemsInTagOrder(tagID)
+    let movingItems = taggedItems.filter { movingIDs.contains($0.id) }
+    var arrangedItems = taggedItems.filter { !movingIDs.contains($0.id) }
+    guard !movingItems.isEmpty else {
+      return
+    }
+
+    let insertionIndex = targetItemID.flatMap { targetID in
+      arrangedItems.firstIndex { $0.id == targetID }
+    } ?? arrangedItems.count
+    arrangedItems.insert(contentsOf: movingItems, at: insertionIndex)
+
+    var updatedItems: [ClipboardItem] = []
+    for (order, item) in arrangedItems.enumerated() where item.tagOrders[tagID] != order {
+      var updated = item
+      updated.tagOrders[tagID] = order
+      updatedItems.append(updated)
+    }
+    guard !updatedItems.isEmpty else {
+      return
+    }
+
+    do {
+      try historyStore.performInTransaction {
+        for item in updatedItems {
+          try historyStore.upsert(item)
+        }
+      }
+      model.replace(updatedItems)
+    } catch {
+      model.lastError = error.localizedDescription
+    }
+  }
+
   func rename(_ item: ClipboardItem, title: String?) {
     guard allowsUsingHistoryItems() else {
       return

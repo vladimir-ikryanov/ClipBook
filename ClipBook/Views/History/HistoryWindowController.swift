@@ -474,6 +474,7 @@ final class HistoryContentViewController: NSViewController {
   private func reloadList() {
     needsListReload = false
     let items = model.filteredItems
+    let isArrangedByTag = model.orderingTagID != nil
     listPaneView.reload(
       items: items,
       availableTags: model.availableTags,
@@ -486,8 +487,11 @@ final class HistoryContentViewController: NSViewController {
       detectSensitiveContent: model.preferences.detectSensitiveContent,
       showDividers: model.preferences.showHistoryDividers,
       preferPastingAsPlainText: model.preferences.preferPastingAsPlainText,
-      groupPinnedFavorites: model.preferences.pinFavoritesToTop && !model.isShowingTrash,
-      sectionDate: historySectionDate(for: model.historySortOption),
+      // The items of a tag follow the order the user gives them, which the
+      // pinned favorites and the dates of the items would only break up.
+      groupPinnedFavorites: model.preferences.pinFavoritesToTop && !model.isShowingTrash && !isArrangedByTag,
+      sectionDate: isArrangedByTag ? nil : historySectionDate(for: model.historySortOption),
+      arrangesEveryItem: isArrangedByTag,
       isShowingTrash: model.isShowingTrash,
       showsTiles: showsImageTiles,
       showsCompactRows: model.preferences.compactHistory
@@ -2358,8 +2362,12 @@ extension HistoryContentViewController: HistoryDelegate {
     }
   }
 
-  func listPane(_ pane: History, moveFavorites itemIDs: [UUID], before targetItemID: UUID?) {
-    coordinator.moveFavorites(itemIDs, before: targetItemID)
+  func listPane(_ pane: History, moveItems itemIDs: [UUID], before targetItemID: UUID?) {
+    if let tagID = model.orderingTagID {
+      coordinator.moveItems(itemIDs, inTag: tagID, before: targetItemID)
+    } else {
+      coordinator.moveFavorites(itemIDs, before: targetItemID)
+    }
   }
 
   func listPane(_ pane: History, didRequestTogglingSensitiveContentVisibilityOf item: ClipboardItem) {

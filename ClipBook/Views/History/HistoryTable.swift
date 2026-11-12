@@ -290,7 +290,7 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
     handleTableSelectionDidChange(clickedRow: clickedRow)
   }
 
-  // MARK: - Reordering pinned favorites
+  // MARK: - Reordering pinned favorites and the items of a tag
 
   func tableView(
     _ tableView: NSTableView,
@@ -298,7 +298,7 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
     proposedRow row: Int,
     proposedDropOperation dropOperation: NSTableView.DropOperation
   ) -> NSDragOperation {
-    guard let dropRow = favoritesDropRow(for: info, proposedRow: row, proposedDropOperation: dropOperation) else {
+    guard let dropRow = reorderDropRow(for: info, proposedRow: row, proposedDropOperation: dropOperation) else {
       return []
     }
 
@@ -314,16 +314,16 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
   ) -> Bool {
     let draggedItemIDs = self.tableView.reorderDraggedItemIDs
     guard self.tableView.isOwnDrag(info), !draggedItemIDs.isEmpty,
-          let pinnedFavoriteRows else {
+          let reorderableRows else {
       return false
     }
 
-    // The favorite the dragged ones land in front of is the first one at or
+    // The item the dragged ones land in front of is the first one at or
     // below the drop line that is not itself on the move. None means the end
-    // of the favorites.
+    // of the rows that can be arranged.
     let draggedIDs = Set(draggedItemIDs)
     var targetItemID: UUID?
-    for candidateRow in max(row, pinnedFavoriteRows.lowerBound)..<pinnedFavoriteRows.upperBound {
+    for candidateRow in max(row, reorderableRows.lowerBound)..<reorderableRows.upperBound {
       guard case .item(let item, _) = tableRows[candidateRow], !draggedIDs.contains(item.id) else {
         continue
       }
@@ -331,20 +331,20 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
       break
     }
 
-    delegate?.listPane(self, moveFavorites: draggedItemIDs, before: targetItemID)
+    delegate?.listPane(self, moveItems: draggedItemIDs, before: targetItemID)
     return true
   }
 
   /// The row the insertion line goes above for a drop of the table's own
-  /// favorites, or nil when the drag cannot land here: it is not a reorder of
-  /// pinned favorites, or the pointer is below the favorites section.
-  private func favoritesDropRow(
+  /// rows, or nil when the drag cannot land here: it is not a reorder, or the
+  /// pointer is below the pinned favorites.
+  private func reorderDropRow(
     for info: NSDraggingInfo,
     proposedRow row: Int,
     proposedDropOperation dropOperation: NSTableView.DropOperation
   ) -> Int? {
     guard tableView.isOwnDrag(info), !tableView.reorderDraggedItemIDs.isEmpty,
-          let pinnedFavoriteRows, row >= 0 else {
+          let reorderableRows, row >= 0 else {
       return nil
     }
 
@@ -358,8 +358,8 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
 
     // Above the "Favorites" header still means the first place in the section,
     // and above the row that follows the section means the last.
-    dropRow = max(dropRow, pinnedFavoriteRows.lowerBound)
-    guard dropRow <= pinnedFavoriteRows.upperBound else {
+    dropRow = max(dropRow, reorderableRows.lowerBound)
+    guard dropRow <= reorderableRows.upperBound else {
       return nil
     }
 

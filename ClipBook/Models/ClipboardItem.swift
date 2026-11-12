@@ -75,6 +75,11 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
             if !tags.isEmpty {
                 expiresAt = nil
             }
+            // An item taken out of a tag loses its place there, so tagging it
+            // again puts it back among the items that were never arranged.
+            if tagOrders.keys.contains(where: { !tags.contains($0) }) {
+                tagOrders = tagOrders.filter { tags.contains($0.key) }
+            }
         }
     }
     var searchText: String
@@ -86,6 +91,11 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
     /// given when the user drags favorites into an order. A favorite that was
     /// never arranged has none and follows the history's own sort instead.
     var favoriteOrder: Int?
+    /// The item's place among the items of each of its tags, by tag ID, given
+    /// when the user drags the items of a tag into an order. A tag the items
+    /// were never arranged in has no entry, and the item follows the history's
+    /// own sort there instead.
+    var tagOrders: [Int: Int] = [:]
     /// Whether the user asked to hide the content of the item in the history,
     /// or to show it although it looks like a secret. None leaves it to the
     /// app to tell.
@@ -123,6 +133,7 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
         copySequenceID: Date? = nil,
         copySequenceOrder: Int? = nil,
         favoriteOrder: Int? = nil,
+        tagOrders: [Int: Int] = [:],
         sensitivity: ItemSensitivity? = nil,
         expiresAt: Date? = nil
     ) {
@@ -159,6 +170,7 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
         self.copySequenceID = copySequenceID
         self.copySequenceOrder = copySequenceOrder
         self.favoriteOrder = favoriteOrder
+        self.tagOrders = tagOrders.filter { tags.contains($0.key) }
         self.sensitivity = sensitivity
         self.expiresAt = expiresAt
     }
@@ -189,6 +201,7 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
         case copySequenceID
         case copySequenceOrder
         case favoriteOrder
+        case tagOrders
         case sensitivity
         case expiresAt
     }
@@ -224,6 +237,8 @@ struct ClipboardItem: Identifiable, Codable, Hashable {
         copySequenceID = try container.decodeIfPresent(Date.self, forKey: .copySequenceID)
         copySequenceOrder = try container.decodeIfPresent(Int.self, forKey: .copySequenceOrder)
         favoriteOrder = try container.decodeIfPresent(Int.self, forKey: .favoriteOrder)
+        // Absent from items stored before the items of a tag could be arranged.
+        tagOrders = (try? container.decodeIfPresent([Int: Int].self, forKey: .tagOrders)) ?? [:]
         // Read leniently, so a value written by a later version is ignored
         // instead of making the item unreadable.
         sensitivity = (try? container.decodeIfPresent(String.self, forKey: .sensitivity))

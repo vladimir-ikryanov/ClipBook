@@ -239,7 +239,8 @@ final class AppModel: ObservableObject {
 
         var contentTypes = selectedHistoryFilterContentTypes
         contentTypes.remove(.trash)
-        return makeFilteredItems(from: items, contentTypes: contentTypes, order: historyOrder)
+        let tagID = selectedHistoryFilterTagIDs.count == 1 ? selectedHistoryFilterTagIDs.first : nil
+        return makeFilteredItems(from: items, contentTypes: contentTypes, order: historyOrder(tagID: tagID))
     }
 
     private func makeFilteredItems() -> [ClipboardItem] {
@@ -309,8 +310,28 @@ final class AppModel: ObservableObject {
     /// Every favorite in the order the pinned favorites section lists them,
     /// with no filter or search applied.
     var favoritesInDisplayOrder: [ClipboardItem] {
-        let order = historyOrder
+        let order = historyOrder(tagID: nil)
         return items.filter(\.isFavorite).sorted(by: order.ordersBefore(_:_:))
+    }
+
+    /// The tag whose own order the list follows: the one tag the history is
+    /// filtered to. The items of a tag are a set the user keeps, like a
+    /// folder of replies, so they stay in the order the user gives them
+    /// instead of moving with every copy and paste. Nil when no tag or
+    /// several tags are selected, or the Trash is shown.
+    var orderingTagID: Tag.ID? {
+        guard !isShowingTrash, selectedHistoryFilterTagIDs.count == 1 else {
+            return nil
+        }
+
+        return selectedHistoryFilterTagIDs.first
+    }
+
+    /// Every item of the tag in the order the list shows them while the
+    /// history is filtered to that tag, with no other filter or search applied.
+    func itemsInTagOrder(_ tagID: Tag.ID) -> [ClipboardItem] {
+        let order = historyOrder(tagID: tagID)
+        return items.filter { $0.tags.contains(tagID) }.sorted(by: order.ordersBefore(_:_:))
     }
 
     var selectedItem: ClipboardItem? {
@@ -691,7 +712,12 @@ final class AppModel: ObservableObject {
     }
 
     private var historyOrder: HistoryOrder {
+        historyOrder(tagID: orderingTagID)
+    }
+
+    private func historyOrder(tagID: Tag.ID?) -> HistoryOrder {
         HistoryOrder(
+            tagID: tagID,
             pinsFavoritesToTop: preferences.pinFavoritesToTop,
             isCopySequenceModeEnabled: preferences.copySequenceModeEnabled,
             sortOption: historySortOption,
@@ -723,12 +749,19 @@ final class AppModel: ObservableObject {
 /// them from the model copies all of the preferences, and sorting a history of
 /// a few thousand items compares them tens of thousands of times.
 private struct HistoryOrder {
+    /// The tag whose own order the items follow, which overrides every other
+    /// setting here, see `AppModel.orderingTagID`.
+    let tagID: Tag.ID?
     let pinsFavoritesToTop: Bool
     let isCopySequenceModeEnabled: Bool
     let sortOption: HistorySortOption
     let isSortReversed: Bool
 
     func ordersBefore(_ lhs: ClipboardItem, _ rhs: ClipboardItem) -> Bool {
+        if let tagID {
+            return Self.tagOrderOrdersBefore(lhs, rhs, tagID: tagID)
+        }
+
         if pinsFavoritesToTop {
             if lhs.isFavorite != rhs.isFavorite {
                 return lhs.isFavorite
@@ -766,6 +799,27 @@ private struct HistoryOrder {
             return false
         case (let lhsOrder?, let rhsOrder?):
             return lhsOrder == rhsOrder ? nil : lhsOrder < rhsOrder
+        }
+    }
+
+    /// Arranged items of a tag keep the order the user gave them. An item that
+    /// was never arranged in the tag stays above the arranged ones, so an item
+    /// tagged just now shows up at the top, and those items follow when they
+    /// were first copied rather than last: pasting one of them copies it
+    /// again, and that should not move it.
+    private static func tagOrderOrdersBefore(_ lhs: ClipboardItem, _ rhs: ClipboardItem, tagID: Tag.ID) -> Bool {
+        switch (lhs.tagOrders[tagID], rhs.tagOrders[tagID]) {
+        case (nil, .some):
+            return true
+        case (.some, nil):
+            return false
+        case (let lhsOrder?, let rhsOrder?) where lhsOrder != rhsOrder:
+            return lhsOrder < rhsOrder
+        default:
+            if lhs.firstCopiedAt != rhs.firstCopiedAt {
+                return lhs.firstCopiedAt > rhs.firstCopiedAt
+            }
+            return lhs.id.uuidString < rhs.id.uuidString
         }
     }
 
