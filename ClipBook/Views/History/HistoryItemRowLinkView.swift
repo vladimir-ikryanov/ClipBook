@@ -159,7 +159,7 @@ final class HistoryItemRowLinkView: HistoryItemRowView {
   }
 }
 
-private final class LinkPreviewAspectFillImageView: NSImageView {
+class LinkPreviewAspectFillImageView: NSImageView {
   override func draw(_ dirtyRect: NSRect) {
     guard let image, image.size.width > 0, image.size.height > 0 else {
       super.draw(dirtyRect)

@@ -55,6 +55,10 @@ final class ItemPreviewDialogController: NSViewController {
   // a size smaller than in the preview dialog.
   private static let paneTextScale: CGFloat = 12 / 13
   private static let textBottomSpacing: CGFloat = 10
+  // With the content inset, the card sits 10 from the edges of the pane, in
+  // line with the rows of the details listed under it.
+  private static let linkCardMargin: CGFloat = 4
+  private static let linkCardMaximumWidth: CGFloat = 520
 
   private enum PreviewContent {
     case image(NSImage)
@@ -63,6 +67,7 @@ final class ItemPreviewDialogController: NSViewController {
     case color(NSColor, String)
     case svg(SVGImageRenderer.Rendering)
     case webPage(URL)
+    case linkCard(LinkPreview)
     case text(NSAttributedString)
   }
 
@@ -133,8 +138,9 @@ final class ItemPreviewDialogController: NSViewController {
   // Called in the pane when the content the focus was in goes away, so the
   // focus can go back to the history list instead of being left nowhere.
   var onContentFocusLost: (() -> Void)?
-  // A web page in the pane would load for every link the selection passes
-  // over, so the pane shows pages only when link previews are wanted.
+  // Whether a link is previewed as its page: loaded in the sheet, and as the
+  // picture, title and description the page gives for sharing in the pane,
+  // which is usually too small to lay a page out in.
   var showsWebPages = true {
     didSet {
       guard showsWebPages != oldValue, item.kind == .link else {
@@ -186,9 +192,21 @@ final class ItemPreviewDialogController: NSViewController {
   var detailsArrangement: ItemPreviewDetailsView.Arrangement {
     get { detailsView.arrangement }
     set {
+      let oldValue = detailsView.arrangement
       detailsView.arrangement = newValue
       updateDetailsFade()
+      // The link card is laid out for where the pane is, which the arrangement follows.
+      if newValue != oldValue, item.kind == .link {
+        reinstallContentView()
+      }
     }
+  }
+
+  // Listed details mean the pane is beside the list, tall and narrow, so the
+  // card puts its picture above the text. Under the list the pane is wide but
+  // short, so the picture goes next to the text, as tall as the pane.
+  private var linkCardLayout: LinkPreviewCardView.Layout {
+    detailsArrangement == .list ? .vertical : .horizontal
   }
 
   // Listed details have no line above them, so the preview fades out into
@@ -210,10 +228,6 @@ final class ItemPreviewDialogController: NSViewController {
   func detailsHeight(forWidth width: CGFloat) -> CGFloat {
     detailsView.preferredHeight(forWidth: width)
   }
-
-  // A page loads only once the selection has rested on its link for a moment,
-  // so moving through the list in the pane does not start a load per link.
-  private static let paneWebPageLoadDelay: TimeInterval = 0.3
 
   init(
     item: ClipboardItem,
@@ -393,7 +407,11 @@ final class ItemPreviewDialogController: NSViewController {
 
     // Metadata changes such as toggling the favorite state must not rebuild the
     // content view, otherwise the preview scrolls back to the top.
+    let linkCardChanged = presentation == .pane
+      && item.kind == .link
+      && previousItem.linkPreviewDetails != item.linkPreviewDetails
     guard !Self.hasEqualPreviewContent(previousItem, item)
+            || linkCardChanged
             || previousSensitiveContent.hidesContent != sensitiveContent.hidesContent else {
       return
     }
@@ -709,7 +727,12 @@ final class ItemPreviewDialogController: NSViewController {
     // Rich text is shown with its formatting, which history items come without.
     let item = item.kind == .richText ? loadFormatting(item) : item
     guard sensitiveContent.hidesContent else {
-      return Self.makeContent(for: item, showsSVGMarkup: showsSVGMarkup, showsWebPages: showsWebPages)
+      return Self.makeContent(
+        for: item,
+        showsSVGMarkup: showsSVGMarkup,
+        showsWebPages: showsWebPages,
+        showsLinkCards: presentation == .pane
+      )
     }
 
     // The page of a link would show what its address hides, so a link with hidden
@@ -749,7 +772,8 @@ final class ItemPreviewDialogController: NSViewController {
   private static func makeContent(
     for item: ClipboardItem,
     showsSVGMarkup: Bool,
-    showsWebPages: Bool
+    showsWebPages: Bool,
+    showsLinkCards: Bool
   ) -> PreviewContent {
     // Text that is an SVG document is previewed as the picture it draws, unless
     // the user switched the preview to its markup.
@@ -771,8 +795,17 @@ final class ItemPreviewDialogController: NSViewController {
       }
       return .text(plainTextContent(item.previewText))
     case .link:
-      if showsWebPages, let browserURL = item.browserURL, Self.isWebPageURL(browserURL) {
+      guard showsWebPages, let browserURL = item.browserURL, Self.isWebPageURL(browserURL) else {
+        return .text(plainTextContent(item.previewText))
+      }
+      guard showsLinkCards else {
         return .webPage(browserURL)
+      }
+      // Until the page details arrive, or when the page gives none, the link
+      // is shown as its address.
+      if let linkPreview = item.linkPreview,
+         linkPreview.title != nil || linkPreview.description != nil || linkPreview.imageURL != nil {
+        return .linkCard(linkPreview)
       }
       return .text(plainTextContent(item.previewText))
     case .richText:
@@ -820,9 +853,10 @@ final class ItemPreviewDialogController: NSViewController {
       && lhs.htmlDigest == rhs.htmlDigest
       && lhs.assetPath == rhs.assetPath
       && lhs.filePaths == rhs.filePaths
-    // The link preview details are deliberately left out: the preview shows the
+    // The link preview details are deliberately left out: the sheet shows the
     // page itself, so metadata arriving later must not rebuild the content view
-    // and reload the page underneath the user.
+    // and reload the page underneath the user. The pane shows those details,
+    // and checks them on its own.
   }
 
   // Every font in the text, rich text included, is made smaller or larger by
@@ -960,7 +994,7 @@ final class ItemPreviewDialogController: NSViewController {
           height: Self.webPageDialogSize.height - reservedDetailsHeight
         )
       )
-    case .text:
+    case .linkCard, .text:
       let dialogHeight = item.kind == .email ? Self.emailDialogHeight : Self.compactDialogHeight
       return clampedContentSize(
         NSSize(
@@ -1036,6 +1070,8 @@ final class ItemPreviewDialogController: NSViewController {
       return makeSVGContentView(rendering: rendering, frame: frame)
     case .webPage(let url):
       return makeWebPageContentView(url: url, frame: frame)
+    case .linkCard(let linkPreview):
+      return makeLinkCardContentView(linkPreview: linkPreview, frame: frame)
     case .text(let attributedText):
       return makeTextContentView(attributedText: attributedText, frame: frame)
     }
@@ -1308,19 +1344,60 @@ final class ItemPreviewDialogController: NSViewController {
       )
     ])
 
-    guard presentation == .pane else {
-      webView.load(URLRequest(url: url))
+    webView.load(URLRequest(url: url))
+    return containerView
+  }
+
+  // Beside the list, the card is as wide as the pane up to a point, so a wide
+  // pane does not blow its picture up to fill the whole height, and it scrolls
+  // when the pane is too short for it. Under the list it fills the pane.
+  private func makeLinkCardContentView(linkPreview: LinkPreview, frame: NSRect) -> NSView {
+    let layout = linkCardLayout
+    let cardView = LinkPreviewCardView(preview: linkPreview, layout: layout)
+    cardView.translatesAutoresizingMaskIntoConstraints = false
+    let margin = Self.linkCardMargin
+
+    guard layout == .vertical else {
+      let containerView = TextBackgroundView(frame: frame)
+      containerView.addSubview(cardView)
+      // The preview ends right at the details bar, without the inset it has at
+      // the other edges, so the card makes up for it to keep the same gap below.
+      let endsAtDetailsBar = presentation == .pane && !detailsView.isHidden
+      let bottomMargin = margin + (endsAtDetailsBar ? Self.contentInset : 0)
+      NSLayoutConstraint.activate([
+        cardView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: margin),
+        cardView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -bottomMargin),
+        cardView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: margin),
+        cardView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -margin)
+      ])
       return containerView
     }
 
-    DispatchQueue.main.asyncAfter(deadline: .now() + Self.paneWebPageLoadDelay) { [weak webView] in
-      // The preview has moved on when the web view is gone or no longer shown.
-      guard let webView, webView.navigationDelegate != nil else {
-        return
-      }
-      webView.load(URLRequest(url: url))
-    }
-    return containerView
+    let documentView = ItemPreviewFlippedView()
+    documentView.translatesAutoresizingMaskIntoConstraints = false
+    documentView.addSubview(cardView)
+
+    let scrollView = OverlayScrollView(frame: frame)
+    scrollView.hasVerticalScroller = true
+    scrollView.drawsBackground = true
+    scrollView.backgroundColor = .textBackgroundColor
+    scrollView.borderType = .noBorder
+    scrollView.documentView = documentView
+
+    let fillsWidth = cardView.widthAnchor.constraint(equalTo: documentView.widthAnchor, constant: -margin * 2)
+    fillsWidth.priority = .defaultHigh
+    NSLayoutConstraint.activate([
+      cardView.topAnchor.constraint(equalTo: documentView.topAnchor, constant: margin),
+      cardView.bottomAnchor.constraint(equalTo: documentView.bottomAnchor, constant: -margin),
+      cardView.centerXAnchor.constraint(equalTo: documentView.centerXAnchor),
+      cardView.widthAnchor.constraint(lessThanOrEqualToConstant: Self.linkCardMaximumWidth),
+      fillsWidth,
+      documentView.leadingAnchor.constraint(equalTo: scrollView.contentView.leadingAnchor),
+      documentView.topAnchor.constraint(equalTo: scrollView.contentView.topAnchor),
+      documentView.widthAnchor.constraint(equalTo: scrollView.contentView.widthAnchor)
+    ])
+
+    return scrollView
   }
 
   // Called when a load ends, successfully or not. A failed load leaves the web
