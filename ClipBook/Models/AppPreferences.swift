@@ -85,7 +85,10 @@ enum CopyAndMergeSeparatorPreference: String, Codable, CaseIterable, Identifiabl
 
 struct AppPreferences: Codable, Equatable {
     static let defaultShowHistoryShortcut = "shift+cmd+v"
-    static let defaultPauseShortcut = "shift+cmd+p"
+    static let defaultPauseShortcut = ""
+    /// Earlier versions assigned this to pausing capture by default, and it
+    /// often conflicted with shortcuts of other apps.
+    static let legacyDefaultPauseShortcut = "shift+cmd+p"
     static let defaultPasteNextShortcut = "control+v"
     static let defaultPasteNextRichShortcut = "shift+control+v"
     static let defaultPasteNextAndDeleteShortcut = "option+control+v"
@@ -264,6 +267,9 @@ struct AppPreferences: Codable, Equatable {
     var toggleSensitiveContentShortcut = Self.defaultToggleSensitiveContentShortcut
     var licenseKey = ""
     var hasMigratedV1LicenseKey = false
+    /// Whether the legacy default pause shortcut has been cleared. Fresh
+    /// preferences never had it, so there is nothing to clear.
+    var hasClearedLegacyPauseShortcut = true
     var hasCompletedOnboarding = false
     var hasProvidedTrialExpiredFeedback = false
     /// When the history was first opened after the trial ended, which is when
@@ -409,6 +415,15 @@ struct AppPreferences: Codable, Equatable {
             try container.decodeIfPresent(String.self, forKey: .pauseShortcut),
             default: defaults.pauseShortcut
         )
+        // The legacy default is cleared once. If the user assigns it again
+        // afterwards, it is kept.
+        hasClearedLegacyPauseShortcut = try container.decodeIfPresent(Bool.self, forKey: .hasClearedLegacyPauseShortcut) ?? false
+        if !hasClearedLegacyPauseShortcut {
+            if ShortcutConflicts.isSameShortcut(pauseShortcut, Self.legacyDefaultPauseShortcut) {
+                pauseShortcut = ""
+            }
+            hasClearedLegacyPauseShortcut = true
+        }
         pasteNextShortcut = Self.sanitizedGlobalShortcut(
             try container.decodeIfPresent(String.self, forKey: .pasteNextShortcut),
             default: defaults.pasteNextShortcut
