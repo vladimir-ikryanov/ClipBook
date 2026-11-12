@@ -10,6 +10,12 @@ final class HistoryItemRowFilesView: HistoryItemRowView {
   }
 
   override func configureContent(item: ClipboardItem, quickPasteIndex: Int?) {
+    // A compact row shows the count alone: the details and previews read the files.
+    guard !isCompact else {
+      setLines(primary: makePrimaryLabel(text: "\(item.filePaths.count) items"), secondary: nil)
+      return
+    }
+
     setLines(
       primary: makePrimaryLabel(text: "\(item.filePaths.count) items"),
       secondary: makeSecondaryLabel(text: makeFileSetDetailsText(for: item))

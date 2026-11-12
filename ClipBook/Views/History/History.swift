@@ -56,6 +56,8 @@ final class History: NSView {
   // forgotten when the history window goes away.
   private var sensitiveContentRevealedItemIDs: Set<UUID> = []
   var showsDividers = false
+  /// Shows every item on one short line, so more of them fit in the window.
+  private(set) var showsCompactRows = false
   var preferDraggingAsPlainText = true
   /// A read-only history (after the trial) can't be dragged out of, which
   /// would copy its items. Favorites can still be rearranged.
@@ -231,6 +233,7 @@ final class History: NSView {
     sectionDate: ((ClipboardItem) -> Date?)?,
     isShowingTrash: Bool = false,
     showsTiles: Bool = false,
+    showsCompactRows: Bool = false,
     onSelectFirstItem: @escaping (ClipboardItem) -> Void
   ) {
     let previousRows = tableRows
@@ -239,7 +242,9 @@ final class History: NSView {
     // Typing in the search field mostly takes rows out of the list. The rows
     // that stay are set up again, since they highlight the matches of the query.
     let changesSearchQuery = searchQuery != self.searchQuery
-    let removedRowIndexes = changesLayout || changesSearchQuery
+    // Every row changes its height and content with the compact mode.
+    let changesRowStyle = showsCompactRows != self.showsCompactRows
+    let removedRowIndexes = changesLayout || changesSearchQuery || changesRowStyle
       ? nil
       : removedRowIndexes(from: previousRows, to: newRows)
 
@@ -252,6 +257,11 @@ final class History: NSView {
     showsDividers = showDividers
     preferDraggingAsPlainText = preferPastingAsPlainText
     groupsPinnedFavorites = groupPinnedFavorites
+    if changesRowStyle {
+      self.showsCompactRows = showsCompactRows
+      tableView.showsCompactRows = showsCompactRows
+      tableView.rowHeight = HistoryRow.height(isCompact: showsCompactRows)
+    }
     tableRows = newRows
     if changesLayout {
       setShowsTiles(showsTiles)
@@ -270,6 +280,10 @@ final class History: NSView {
       selectedItemIDs: selectedItemIDs,
       onSelectFirstItem: onSelectFirstItem
     )
+    // The rows above the selection change their height, which moves it.
+    if changesRowStyle {
+      scrollSelectionIntoView()
+    }
   }
 
   func revealsSensitiveContent(of item: ClipboardItem) -> Bool {

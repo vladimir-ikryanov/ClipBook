@@ -81,6 +81,8 @@ enum HistoryRow {
   /// Every item row has the same height, so the list scans as an even grid whatever
   /// the rows hold.
   static let height: CGFloat = 50
+  /// A compact row shows one line, with a smaller type box next to it.
+  static let compactHeight: CGFloat = 32
   static let sectionHeaderHeight: CGFloat = 36
   static let sectionHeaderFirstHeight: CGFloat = 28
   static let sectionHeaderHorizontalInset: CGFloat = 9
@@ -88,6 +90,7 @@ enum HistoryRow {
   static let sectionHeaderFirstTopInset: CGFloat = 6
   static let rowSpacing: CGFloat = 0
   static let selectionCornerRadius: CGFloat = 16
+  static let compactSelectionCornerRadius: CGFloat = 10
   static let selectionHorizontalInset: CGFloat = 9
   static let selectionAccentColor = NSColor.gray.withAlphaComponent(0.2)
 
@@ -98,13 +101,14 @@ enum HistoryRow {
       : NSColor.gray.withAlphaComponent(0.12)
   }
 
-  // The row content sits inside the selection shape with the same inset on both sides.
-  static let contentHorizontalInset: CGFloat = selectionHorizontalInset + 8
   static let contentVerticalInset: CGFloat = 4
   static let typeIconBoxSize: CGFloat = 34
   static let typeIconBoxCornerRadius: CGFloat = 9
   static let typeIconBoxColor = NSColor.gray.withAlphaComponent(0.15)
   static let typeIconSize: CGFloat = 18
+  static let compactTypeIconBoxSize: CGFloat = 24
+  static let compactTypeIconBoxCornerRadius: CGFloat = 6
+  static let compactTypeIconSize: CGFloat = 14
   static let typeIconContentSpacing: CGFloat = 10
   static let mainSpacing: CGFloat = 8
   // The gap between the content (text and any preview next to it) and the accessory controls.
@@ -128,8 +132,30 @@ enum HistoryRow {
   static let selectionOrderBadgeSize: CGFloat = 22
   static let selectionOrderColumnWidth: CGFloat = selectionOrderBadgeSize + typeIconContentSpacing
   static let selectionOrderColumnAnimationDuration: TimeInterval = 0.2
-  static let dividerLeftInset: CGFloat = contentHorizontalInset + typeIconBoxSize + typeIconContentSpacing
   static let dividerRightInset: CGFloat = selectionHorizontalInset
+
+  static func height(isCompact: Bool) -> CGFloat {
+    isCompact ? compactHeight : height
+  }
+
+  static func typeIconBoxSize(isCompact: Bool) -> CGFloat {
+    isCompact ? compactTypeIconBoxSize : typeIconBoxSize
+  }
+
+  static func selectionCornerRadius(isCompact: Bool) -> CGFloat {
+    isCompact ? compactSelectionCornerRadius : selectionCornerRadius
+  }
+
+  /// The type box sits as far from the selection's leading edge as from its top and
+  /// bottom, and the content keeps the same inset on the trailing side.
+  static func contentHorizontalInset(isCompact: Bool) -> CGFloat {
+    selectionHorizontalInset + (height(isCompact: isCompact) - typeIconBoxSize(isCompact: isCompact)) / 2
+  }
+
+  /// The divider starts under the text, past the type box.
+  static func dividerLeftInset(isCompact: Bool) -> CGFloat {
+    contentHorizontalInset(isCompact: isCompact) + typeIconBoxSize(isCompact: isCompact) + typeIconContentSpacing
+  }
 
   static func dividerColor(for view: NSView) -> NSColor {
     view.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
@@ -166,14 +192,14 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
 
   func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
     guard tableRows.indices.contains(row) else {
-      return HistoryRow.height
+      return HistoryRow.height(isCompact: showsCompactRows)
     }
 
     switch tableRows[row] {
     case .sectionHeader:
       return row == 0 ? HistoryRow.sectionHeaderFirstHeight : HistoryRow.sectionHeaderHeight
     case .item:
-      return HistoryRow.height
+      return HistoryRow.height(isCompact: showsCompactRows)
     }
   }
 
@@ -201,6 +227,7 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
         showsLinkPreview: showPreviewForLinks,
         detectsSensitiveContent: detectsSensitiveContent,
         revealsSensitiveContent: revealsSensitiveContent(of: item),
+        isCompact: showsCompactRows,
         onToggleSensitiveContentVisibility: { [weak self] in
           guard let self else {
             return
@@ -229,6 +256,7 @@ extension History: NSTableViewDataSource, NSTableViewDelegate {
     }
 
     let rowView = makeItemRowView(in: tableView)
+    rowView.isCompact = showsCompactRows
     rowView.showsDivider = shouldShowDivider(aboveRow: row)
     let selectedRows = self.tableView.selectedRowIndexes
     rowView.joinsSelectedRowAbove = rowCanJoinSelectedNeighbors(row, selectedRows: selectedRows)
@@ -588,6 +616,13 @@ private final class HistorySectionHeaderRowView: NSTableRowView {
 }
 
 private final class RoundedSelectionRowView: NSTableRowView {
+  var isCompact = false {
+    didSet {
+      if oldValue != isCompact {
+        needsDisplay = true
+      }
+    }
+  }
   var showsDivider = false {
     didSet {
       if oldValue != showsDivider {
@@ -696,7 +731,11 @@ private final class RoundedSelectionRowView: NSTableRowView {
     if roundsMaxY {
       corners.formUnion([.minXMaxY, .maxXMaxY])
     }
-    return NSBezierPath.continuousRoundedRect(rect, cornerRadius: HistoryRow.selectionCornerRadius, corners: corners)
+    return NSBezierPath.continuousRoundedRect(
+      rect,
+      cornerRadius: HistoryRow.selectionCornerRadius(isCompact: isCompact),
+      corners: corners
+    )
   }
 
   private var selectionColorForCurrentState: NSColor {
@@ -731,10 +770,11 @@ private final class RoundedSelectionRowView: NSTableRowView {
     let dividerY = isFlipped
       ? HistoryRow.rowSpacing / 2
       : bounds.height - HistoryRow.rowSpacing / 2 - dividerHeight
+    let dividerLeftInset = HistoryRow.dividerLeftInset(isCompact: isCompact)
     let dividerRect = NSRect(
-      x: HistoryRow.dividerLeftInset,
+      x: dividerLeftInset,
       y: dividerY,
-      width: max(0, bounds.width - HistoryRow.dividerLeftInset - HistoryRow.dividerRightInset),
+      width: max(0, bounds.width - dividerLeftInset - HistoryRow.dividerRightInset),
       height: dividerHeight
     )
     guard dirtyRect.intersects(dividerRect) else {
@@ -778,6 +818,8 @@ final class HistoryTableView: NSTableView {
   /// list, nil for a row that stays where it is.
   var reorderItemIDForRow: ((Int) -> UUID?)?
   var onDragSessionEnded: ((NSDragOperation) -> Void)?
+  /// True while the rows are compact, which moves their type box closer to the edge.
+  var showsCompactRows = false
   private(set) var isDragSessionActive = false
   /// The items of the drag under way, in row order, when every dragged row
   /// may be reordered. Empty for any other drag.
@@ -1000,7 +1042,9 @@ final class HistoryTableView: NSTableView {
     let spacing: CGFloat = 8
     return payload.entries.enumerated().map { index, entry in
       let draggingItem = NSDraggingItem(pasteboardWriter: writer(entry))
-      let originX = rowRect.minX + HistoryRow.contentHorizontalInset + CGFloat(index) * (iconSize.width + spacing)
+      let originX = rowRect.minX
+        + HistoryRow.contentHorizontalInset(isCompact: showsCompactRows)
+        + CGFloat(index) * (iconSize.width + spacing)
       let frame = NSRect(
         x: min(originX, rowRect.maxX - iconSize.width),
         y: rowRect.midY - iconSize.height / 2,
@@ -1014,7 +1058,7 @@ final class HistoryTableView: NSTableView {
 
   private func fallbackDragFrame(in rowRect: NSRect) -> NSRect {
     NSRect(
-      x: rowRect.minX + HistoryRow.contentHorizontalInset,
+      x: rowRect.minX + HistoryRow.contentHorizontalInset(isCompact: showsCompactRows),
       y: rowRect.midY - Self.fallbackDragImageSize.height / 2,
       width: Self.fallbackDragImageSize.width,
       height: Self.fallbackDragImageSize.height

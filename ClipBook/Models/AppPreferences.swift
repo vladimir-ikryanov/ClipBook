@@ -194,6 +194,10 @@ struct AppPreferences: Codable, Equatable {
     /// Shows the history as tiles while it is filtered to images only, so the
     /// pictures are big enough to tell apart.
     var showImagesAsTiles = true
+    /// Shows every history item on one short line: its type icon or a small
+    /// preview, and its name or the first line of its content. The preview
+    /// pane shows the rest, so more items fit in the window.
+    var compactHistory = false
     /// The height of the preview pane at the bottom of the history window,
     /// and the share of the window width it takes on the right. Nil until
     /// the user resizes the pane.
@@ -353,6 +357,7 @@ struct AppPreferences: Codable, Equatable {
         showPreviewPane = try container.decodeIfPresent(Bool.self, forKey: .showPreviewPane) ?? defaults.showPreviewPane
         showPreviewPaneDetails = try container.decodeIfPresent(Bool.self, forKey: .showPreviewPaneDetails) ?? defaults.showPreviewPaneDetails
         showImagesAsTiles = try container.decodeIfPresent(Bool.self, forKey: .showImagesAsTiles) ?? defaults.showImagesAsTiles
+        compactHistory = try container.decodeIfPresent(Bool.self, forKey: .compactHistory) ?? defaults.compactHistory
         previewPaneHeight = try container.decodeIfPresent(Double.self, forKey: .previewPaneHeight)
         previewPaneWidthRatio = try container.decodeIfPresent(Double.self, forKey: .previewPaneWidthRatio)
         treatDigitNumbersAsColor = try container.decodeIfPresent(Bool.self, forKey: .treatDigitNumbersAsColor) ?? defaults.treatDigitNumbersAsColor

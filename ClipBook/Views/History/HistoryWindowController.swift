@@ -489,7 +489,8 @@ final class HistoryContentViewController: NSViewController {
       groupPinnedFavorites: model.preferences.pinFavoritesToTop && !model.isShowingTrash,
       sectionDate: historySectionDate(for: model.historySortOption),
       isShowingTrash: model.isShowingTrash,
-      showsTiles: showsImageTiles
+      showsTiles: showsImageTiles,
+      showsCompactRows: model.preferences.compactHistory
     ) { [weak self] firstItem in
       self?.model.selectedItemID = firstItem.id
       self?.model.selectedItemIDs = [firstItem.id]
@@ -517,8 +518,17 @@ final class HistoryContentViewController: NSViewController {
     coordinator.persistPreferences()
   }
 
+  /// Shows the history rows on one short line, or back on two.
+  private func toggleCompactHistory() {
+    var preferences = model.preferences
+    preferences.compactHistory.toggle()
+    model.preferences = preferences
+    coordinator.persistPreferences()
+  }
+
   private func updateToolbarFilterState() {
     historyToolbar?.updateImageTiles(isAvailable: showsOnlyImages, isShown: showsImageTiles)
+    historyToolbar?.updateCompactHistory(isEnabled: model.preferences.compactHistory)
     historyToolbar?.updateFilterState(
       selectedContentTypes: model.selectedHistoryFilterContentTypes,
       tags: model.availableTags,
@@ -2484,6 +2494,10 @@ extension HistoryContentViewController: HistoryToolbarDelegate {
     toggleDetails()
   }
 
+  func historyToolbarDidRequestToggleCompactHistory(_ toolbar: HistoryToolbar) {
+    toggleCompactHistory()
+  }
+
   func historyToolbarDidRequestCommandDialog(_ toolbar: HistoryToolbar) {
     showCommandPalette()
   }
@@ -2628,6 +2642,7 @@ extension HistoryContentViewController: HistoryToolbarDelegate {
     let selectedItems = model.selectedItems
     if model.isShowingTrash {
       return trashItemCommands(for: selectedItems) + [
+        compactHistoryCommand(section: 2),
         settingsCommand(section: 2, shortcut: preferences.openSettingsShortcut),
         emptyTrashCommand(section: 3)
       ]
@@ -2702,6 +2717,7 @@ extension HistoryContentViewController: HistoryToolbarDelegate {
         shortcut: preferences.toggleFavoriteShortcut,
         section: 1
       ),
+      compactHistoryCommand(section: 2),
       settingsCommand(section: 3, shortcut: preferences.openSettingsShortcut),
       deleteMultipleItemsCommand(items, shortcut: preferences.deleteItemShortcut, section: 4),
       deleteAllCommand(section: 4)
@@ -3603,6 +3619,20 @@ extension HistoryContentViewController: HistoryToolbarDelegate {
     }
   }
 
+  private func compactHistoryCommand(section: Int) -> CommandPaletteCommand {
+    command(
+      title: "Compact Mode",
+      shortcut: nil,
+      systemImageName: "rectangle.compress.vertical",
+      section: section,
+      isChecked: model.preferences.compactHistory,
+      isAvailableInReadOnlyHistory: true
+    ) { [weak self] in
+      self?.closeCommandPalette()
+      self?.toggleCompactHistory()
+    }
+  }
+
   private func previewCommands(for item: ClipboardItem, section: Int) -> [CommandPaletteCommand] {
     var commands = [
       command(title: "Preview", shortcut: "space", systemImageName: "eye", section: section, isAvailableInReadOnlyHistory: true) { [weak self] in
@@ -3632,6 +3662,7 @@ extension HistoryContentViewController: HistoryToolbarDelegate {
       self?.closeCommandPalette()
       self?.toggleDetails()
     })
+    commands.append(compactHistoryCommand(section: section))
     if canShowInHistory {
       commands.append(command(
         title: "Show in History",
@@ -4132,6 +4163,7 @@ private struct HistoryListPreferences: Equatable {
   let pinFavoritesToTop: Bool
   let copySequenceModeEnabled: Bool
   let showImagesAsTiles: Bool
+  let compactHistory: Bool
 
   init(_ preferences: AppPreferences) {
     showCommandNumberShortcut = preferences.showCommandNumberShortcut
@@ -4142,6 +4174,7 @@ private struct HistoryListPreferences: Equatable {
     pinFavoritesToTop = preferences.pinFavoritesToTop
     copySequenceModeEnabled = preferences.copySequenceModeEnabled
     showImagesAsTiles = preferences.showImagesAsTiles
+    compactHistory = preferences.compactHistory
   }
 }
 

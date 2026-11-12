@@ -33,6 +33,7 @@ protocol HistoryToolbarDelegate: AnyObject {
   func historyToolbarDidRequestTogglePreviewPane(_ toolbar: HistoryToolbar)
   func historyToolbarDidRequestToggleDetails(_ toolbar: HistoryToolbar)
   func historyToolbarDidRequestToggleImageTiles(_ toolbar: HistoryToolbar)
+  func historyToolbarDidRequestToggleCompactHistory(_ toolbar: HistoryToolbar)
   func historyToolbarDidRequestCommandDialog(_ toolbar: HistoryToolbar)
 }
 
@@ -129,6 +130,7 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
   private var canShowImageTiles = false
   private var showsImageTiles = false
   private var showsDetails = false
+  private var showsCompactHistory = false
   private var togglePreviewShortcut = ""
   private var toggleDetailsShortcut = ""
   private var previewPanePosition: HistoryPreviewPanePosition = .bottom
@@ -1101,6 +1103,8 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     }
     menu.addItem(makePreviewPaneMenuItem())
     menu.addItem(makeDetailsMenuItem())
+    menu.addItem(.separator())
+    menu.addItem(makeCompactHistoryMenuItem())
 
     menu.showsItemImagesRegardlessOfSystemSetting()
     return menu
@@ -1565,6 +1569,27 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     }
   }
 
+  /// The More menu shows whether the history rows are compact.
+  func updateCompactHistory(isEnabled: Bool) {
+    guard isEnabled != showsCompactHistory else {
+      return
+    }
+
+    showsCompactHistory = isEnabled
+    if let item = sortItem as? NSMenuToolbarItem {
+      item.menu = makeSortMenu()
+    }
+  }
+
+  private func makeCompactHistoryMenuItem() -> NSMenuItem {
+    let title = L10n.string("Compact Mode")
+    let item = NSMenuItem(title: title, action: #selector(toggleCompactHistory), keyEquivalent: "")
+    item.target = self
+    item.state = showsCompactHistory ? .on : .off
+    item.image = Self.symbolImage(symbolName: "rectangle.compress.vertical", label: title)
+    return item
+  }
+
   private func makeImageTilesMenuItem() -> NSMenuItem {
     let title = showsImageTiles ? L10n.string("Show as List") : L10n.string("Show as Tiles")
     let item = NSMenuItem(title: title, action: #selector(toggleImageTiles), keyEquivalent: "")
@@ -1795,6 +1820,10 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
 
   @objc private func toggleDetails() {
     delegate?.historyToolbarDidRequestToggleDetails(self)
+  }
+
+  @objc private func toggleCompactHistory() {
+    delegate?.historyToolbarDidRequestToggleCompactHistory(self)
   }
 
   @objc private func showCommandDialog() {

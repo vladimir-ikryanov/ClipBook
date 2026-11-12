@@ -19,6 +19,10 @@ struct GeneralSettingsView: View {
                 .onChange(of: model.preferences.appearance) { _ in
                     coordinator.savePreferences()
                 }
+            HistoryDensityPicker(isCompact: $model.preferences.compactHistory)
+                .onChange(of: model.preferences.compactHistory) { _ in
+                    coordinator.savePreferences()
+                }
             PickerRow(title: L10n.string("Language"), description: L10n.string("Change the language of the user interface.")) {
                 Picker("", selection: $model.preferences.language) {
                     Text("English").tag("en")

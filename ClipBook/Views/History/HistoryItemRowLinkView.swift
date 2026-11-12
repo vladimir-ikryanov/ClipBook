@@ -71,6 +71,12 @@ final class HistoryItemRowLinkView: HistoryItemRowView {
       configureFavicon(at: faviconURL, for: item, toolTip: linkPreview.url.host ?? item.kind.title)
     }
 
+    // A compact row shows the address alone, next to the favicon.
+    guard !isCompact else {
+      setLines(primary: makeURLPreviewField(for: item), secondary: nil)
+      return
+    }
+
     if let secondaryText = linkPreview.title ?? linkPreview.description {
       setLines(
         primary: makePrimaryLabel(text: item.contentTitle),

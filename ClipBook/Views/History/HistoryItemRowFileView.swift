@@ -15,7 +15,9 @@ final class HistoryItemRowFileView: HistoryItemRowView {
       : makePrimaryLabel(text: item.contentTitle)
     // A long name is cut in its middle, so the extension at its end stays readable.
     nameField.lineBreakMode = .byTruncatingMiddle
-    setLines(primary: nameField, secondary: makeFileDetailsLine(for: item, isMissing: isMissing))
+    // A compact row has no room for the details, and finding them reads the file.
+    let detailsLine = isCompact ? nil : makeFileDetailsLine(for: item, isMissing: isMissing)
+    setLines(primary: nameField, secondary: detailsLine)
   }
 
   // The file preview takes the place of the type symbol: a picture is fit into the box, any

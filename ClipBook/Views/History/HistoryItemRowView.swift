@@ -571,6 +571,11 @@ class HistoryItemRowView: NSTableCellView {
   private var detectsSensitiveContent = false
   /// True while the row shows dots in place of the item's sensitive content.
   private(set) var hidesSensitiveContent = false
+  /// True while the row shows the item on one short line: the type box, smaller, and the
+  /// item's name or the first line of its content, with no details or preview next to it.
+  private(set) var isCompact = false
+  private var typeIconWidthConstraint: NSLayoutConstraint?
+  private var typeIconHeightConstraint: NSLayoutConstraint?
   private var onToggleSensitiveContentVisibility: (() -> Void)?
 
   // The views a configuration asks for. They are put in the layout once the subclass has
@@ -636,8 +641,9 @@ class HistoryItemRowView: NSTableCellView {
     if let rowView = superview {
       let leadingOffset = frame.minX - rowView.bounds.minX
       let trailingOffset = rowView.bounds.maxX - frame.maxX
-      rowStackLeadingConstraint?.constant = max(0, HistoryRow.contentHorizontalInset - leadingOffset)
-      rowStackTrailingConstraint?.constant = -max(0, HistoryRow.contentHorizontalInset - trailingOffset)
+      let inset = HistoryRow.contentHorizontalInset(isCompact: isCompact)
+      rowStackLeadingConstraint?.constant = max(0, inset - leadingOffset)
+      rowStackTrailingConstraint?.constant = -max(0, inset - trailingOffset)
     }
     super.layout()
   }
@@ -652,6 +658,7 @@ class HistoryItemRowView: NSTableCellView {
     showsLinkPreview: Bool = false,
     detectsSensitiveContent: Bool = false,
     revealsSensitiveContent: Bool = false,
+    isCompact: Bool = false,
     onToggleSensitiveContentVisibility: (() -> Void)? = nil
   ) {
     selectionTitleFields = []
@@ -669,6 +676,7 @@ class HistoryItemRowView: NSTableCellView {
     self.onToggleSensitiveContentVisibility = onToggleSensitiveContentVisibility
     let isMasked = SensitiveContent.isMasked(item, detectsAutomatically: detectsSensitiveContent)
     hidesSensitiveContent = isMasked && !revealsSensitiveContent
+    setCompact(isCompact)
 
     configureAccessoryControls(item: item, quickPasteIndex: quickPasteIndex, isMasked: isMasked)
     typeIconView.configure(kind: item.kind, systemImageName: typeIconSystemImageName(for: item))
@@ -715,18 +723,24 @@ class HistoryItemRowView: NSTableCellView {
 
   /// Shows one line centered in the row, or two lines when `secondary` is given. An item
   /// with a title shows the title first and a one-line summary of its content second.
+  /// A compact row shows the first line alone: the title, or else `primary`.
   func setLines(primary: NSView, secondary: NSView?) {
     if let item = configuredItem, let title = item.itemTitle {
-      pendingLines = [makeItemTitleLabel(text: title), makeTitledSummaryLine(for: item)]
+      let titleLabel = makeItemTitleLabel(text: title)
+      pendingLines = isCompact ? [titleLabel] : [titleLabel, makeTitledSummaryLine(for: item)]
       return
     }
 
-    pendingLines = [primary] + (secondary.map { [$0] } ?? [])
+    pendingLines = isCompact ? [primary] : [primary] + (secondary.map { [$0] } ?? [])
   }
 
   /// Shows a preview between the text and the accessory controls. A subclass passes the
-  /// same view for every item it shows one for.
+  /// same view for every item it shows one for. A compact row shows none.
   func setTrailingView(_ view: NSView) {
+    guard !isCompact else {
+      return
+    }
+
     view.translatesAutoresizingMaskIntoConstraints = false
     view.setContentHuggingPriority(.required, for: .horizontal)
     view.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -754,8 +768,8 @@ class HistoryItemRowView: NSTableCellView {
     return max(
       0,
       tableWidth
-        - HistoryRow.contentHorizontalInset * 2
-        - HistoryRow.typeIconBoxSize
+        - HistoryRow.contentHorizontalInset(isCompact: isCompact) * 2
+        - HistoryRow.typeIconBoxSize(isCompact: isCompact)
         - HistoryRow.typeIconContentSpacing
         - minimumTextWidth
         - HistoryRow.mainSpacing
@@ -792,9 +806,9 @@ class HistoryItemRowView: NSTableCellView {
   }
 
   /// A text preview with line breaks and tabs shown as symbols. It reserves the height of
-  /// `maximumNumberOfLines` lines and centers shorter text in it. Text that spans more lines
-  /// wraps with `wrappingMode`: by word for prose, by character for a URL, so its lines fill
-  /// the width instead of breaking at its punctuation.
+  /// `maximumNumberOfLines` lines, one in a compact row, and centers shorter text in it.
+  /// Text that spans more lines wraps with `wrappingMode`: by word for prose, by character
+  /// for a URL, so its lines fill the width instead of breaking at its punctuation.
   func makeTextPreviewField(
     text: String,
     maximumNumberOfLines: Int = HistoryRow.textPreviewMaximumNumberOfLines,
@@ -812,7 +826,7 @@ class HistoryItemRowView: NSTableCellView {
       searchQuery: searchQuery,
       font: font,
       textColor: textColor,
-      maximumNumberOfLines: maximumNumberOfLines,
+      maximumNumberOfLines: isCompact ? 1 : maximumNumberOfLines,
       wrappingMode: wrappingMode
     )
     return field
@@ -1001,6 +1015,20 @@ class HistoryItemRowView: NSTableCellView {
 
   // MARK: - Private
 
+  private func setCompact(_ isCompact: Bool) {
+    guard isCompact != self.isCompact else {
+      return
+    }
+
+    self.isCompact = isCompact
+    let boxSize = HistoryRow.typeIconBoxSize(isCompact: isCompact)
+    typeIconWidthConstraint?.constant = boxSize
+    typeIconHeightConstraint?.constant = boxSize
+    typeIconView.isCompact = isCompact
+    // The content insets change with the mode, and `layout` sets them.
+    needsLayout = true
+  }
+
   private func configure() {
     typeIconView.translatesAutoresizingMaskIntoConstraints = false
     configureSelectionOrderColumn()
@@ -1033,18 +1061,23 @@ class HistoryItemRowView: NSTableCellView {
 
     let leadingConstraint = rowStack.leadingAnchor.constraint(
       equalTo: leadingAnchor,
-      constant: HistoryRow.contentHorizontalInset
+      constant: HistoryRow.contentHorizontalInset(isCompact: false)
     )
     let trailingConstraint = rowStack.trailingAnchor.constraint(
       equalTo: trailingAnchor,
-      constant: -HistoryRow.contentHorizontalInset
+      constant: -HistoryRow.contentHorizontalInset(isCompact: false)
     )
     rowStackLeadingConstraint = leadingConstraint
     rowStackTrailingConstraint = trailingConstraint
 
+    let typeIconWidthConstraint = typeIconView.widthAnchor.constraint(equalToConstant: HistoryRow.typeIconBoxSize)
+    let typeIconHeightConstraint = typeIconView.heightAnchor.constraint(equalToConstant: HistoryRow.typeIconBoxSize)
+    self.typeIconWidthConstraint = typeIconWidthConstraint
+    self.typeIconHeightConstraint = typeIconHeightConstraint
+
     NSLayoutConstraint.activate([
-      typeIconView.widthAnchor.constraint(equalToConstant: HistoryRow.typeIconBoxSize),
-      typeIconView.heightAnchor.constraint(equalToConstant: HistoryRow.typeIconBoxSize),
+      typeIconWidthConstraint,
+      typeIconHeightConstraint,
       leadingConstraint,
       trailingConstraint,
       rowStack.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -1451,20 +1484,48 @@ private final class HistoryItemTypeIconView: NSView {
     case image(NSImage, style: HistoryTypeIconImageStyle, alpha: CGFloat)
   }
 
-  // The box background sits inside the view so it stays a little smaller than pictures,
-  // file icons and color swatches, which use the whole view.
-  private static let boxInset: CGFloat = 2
-  // The swatch is a solid disc inside a translucent ring of the same color. The ring's
-  // outer edge sits on the box outline, so the whole circle is exactly the box size.
-  private static let swatchBorderWidth: CGFloat = 2
+  // The sizes of the box's parts, for a regular row and for a compact one.
+  private struct Metrics {
+    // The box background sits inside the view so it stays a little smaller than pictures,
+    // file icons and color swatches, which use the whole view.
+    let boxInset: CGFloat
+    let boxCornerRadius: CGFloat
+    // The swatch is a solid disc inside a translucent ring of the same color. The ring's
+    // outer edge sits on the box outline, so the whole circle is exactly the box size.
+    let swatchBorderWidth: CGFloat
+    let smallImageSize: CGFloat
+    let backdropPadding: CGFloat
+    // The lock of an item with sensitive content sits in the bottom right corner of the
+    // box background, over the edge of whatever the box shows, so both can be told at a
+    // glance.
+    let lockBadgeSize: CGFloat
+    let lockBadgeInset: CGFloat
+    let lockBadgeSymbolSize: CGFloat
+
+    static let regular = Metrics(
+      boxInset: 2,
+      boxCornerRadius: HistoryRow.typeIconBoxCornerRadius,
+      swatchBorderWidth: 2,
+      smallImageSize: HistoryRow.typeIconSize,
+      backdropPadding: 4,
+      lockBadgeSize: 14,
+      lockBadgeInset: 5,
+      lockBadgeSymbolSize: 12.5
+    )
+
+    static let compact = Metrics(
+      boxInset: 1,
+      boxCornerRadius: HistoryRow.compactTypeIconBoxCornerRadius,
+      swatchBorderWidth: 1.5,
+      smallImageSize: HistoryRow.compactTypeIconSize,
+      backdropPadding: 2,
+      lockBadgeSize: 11,
+      lockBadgeInset: 0,
+      lockBadgeSymbolSize: 10
+    )
+  }
+
   private static let swatchBorderAlpha: CGFloat = 0.5
-  private static let smallImageSize: CGFloat = 18
-  private static let backdropPadding: CGFloat = 4
-  // The lock of an item with sensitive content sits in the bottom right corner of the box
-  // background, over the edge of whatever the box shows, so both can be told at a glance.
-  private static let lockBadgeSize: CGFloat = 14
-  private static let lockBadgeInset: CGFloat = 5
-  private static let lockBadgeSymbolSize: CGFloat = 12.5
   private static let kindIconDarkColor = NSColor(
     srgbRed: 0x7E / 255.0,
     green: 0x7F / 255.0,
@@ -1481,6 +1542,21 @@ private final class HistoryItemTypeIconView: NSView {
   private let symbolImageView = NSImageView()
   private let lockBadgeView = NSImageView()
   private var content: Content?
+  private var metrics = Metrics.regular
+
+  var isCompact = false {
+    didSet {
+      guard isCompact != oldValue else {
+        return
+      }
+
+      metrics = isCompact ? .compact : .regular
+      configureLockBadgeImage()
+      configureKindIconImage()
+      layoutSubviewFrames()
+      needsDisplay = true
+    }
+  }
 
   var showsLockBadge = false {
     didSet {
@@ -1499,17 +1575,22 @@ private final class HistoryItemTypeIconView: NSView {
 
   override func setFrameSize(_ newSize: NSSize) {
     super.setFrameSize(newSize)
+    layoutSubviewFrames()
+  }
+
+  private func layoutSubviewFrames() {
+    let size = frame.size
     symbolImageView.frame = NSRect(
-      x: (newSize.width - Self.smallImageSize) / 2,
-      y: (newSize.height - Self.smallImageSize) / 2,
-      width: Self.smallImageSize,
-      height: Self.smallImageSize
+      x: (size.width - metrics.smallImageSize) / 2,
+      y: (size.height - metrics.smallImageSize) / 2,
+      width: metrics.smallImageSize,
+      height: metrics.smallImageSize
     )
     lockBadgeView.frame = NSRect(
-      x: newSize.width - Self.lockBadgeSize - Self.lockBadgeInset,
-      y: Self.lockBadgeInset,
-      width: Self.lockBadgeSize,
-      height: Self.lockBadgeSize
+      x: size.width - metrics.lockBadgeSize - metrics.lockBadgeInset,
+      y: metrics.lockBadgeInset,
+      width: metrics.lockBadgeSize,
+      height: metrics.lockBadgeSize
     )
   }
 
@@ -1536,7 +1617,7 @@ private final class HistoryItemTypeIconView: NSView {
 
         backdropColor.setFill()
         boxPath.fill()
-        let inset = Self.boxInset + Self.backdropPadding
+        let inset = metrics.boxInset + metrics.backdropPadding
         drawImage(image, in: bounds.insetBy(dx: inset, dy: inset), alpha: alpha)
       }
     }
@@ -1583,17 +1664,21 @@ private final class HistoryItemTypeIconView: NSView {
     translatesAutoresizingMaskIntoConstraints = false
     addSubview(symbolImageView)
 
-    lockBadgeView.image = HistorySymbolIcon.make(
-      systemName: "lock.circle.fill",
-      paletteColors: [.white, .systemGreen],
-      pointSize: Self.lockBadgeSymbolSize,
-      weight: .regular
-    )
+    configureLockBadgeImage()
     lockBadgeView.imageScaling = .scaleNone
     lockBadgeView.imageAlignment = .alignCenter
     lockBadgeView.translatesAutoresizingMaskIntoConstraints = true
     lockBadgeView.isHidden = true
     addSubview(lockBadgeView)
+  }
+
+  private func configureLockBadgeImage() {
+    lockBadgeView.image = HistorySymbolIcon.make(
+      systemName: "lock.circle.fill",
+      paletteColors: [.white, .systemGreen],
+      pointSize: metrics.lockBadgeSymbolSize,
+      weight: .regular
+    )
   }
 
   private var showsSymbol: Bool {
@@ -1613,8 +1698,8 @@ private final class HistoryItemTypeIconView: NSView {
 
   private var boxPath: NSBezierPath {
     NSBezierPath.continuousRoundedRect(
-      bounds.insetBy(dx: Self.boxInset, dy: Self.boxInset),
-      cornerRadius: HistoryRow.typeIconBoxCornerRadius
+      bounds.insetBy(dx: metrics.boxInset, dy: metrics.boxInset),
+      cornerRadius: metrics.boxCornerRadius
     )
   }
 
@@ -1624,16 +1709,16 @@ private final class HistoryItemTypeIconView: NSView {
   }
 
   private func drawSwatch(_ color: NSColor) {
-    let fillInset = Self.boxInset + Self.swatchBorderWidth
+    let fillInset = metrics.boxInset + metrics.swatchBorderWidth
     let fillPath = NSBezierPath(ovalIn: bounds.insetBy(dx: fillInset, dy: fillInset))
     color.setFill()
     fillPath.fill()
 
     // The ring is stroked along its middle so it fills the band just outside the disc.
-    let ringInset = Self.boxInset + Self.swatchBorderWidth / 2
+    let ringInset = metrics.boxInset + metrics.swatchBorderWidth / 2
     let ringPath = NSBezierPath(ovalIn: bounds.insetBy(dx: ringInset, dy: ringInset))
     color.withAlphaComponent(Self.swatchBorderAlpha).setStroke()
-    ringPath.lineWidth = Self.swatchBorderWidth
+    ringPath.lineWidth = metrics.swatchBorderWidth
     ringPath.stroke()
   }
 
@@ -1673,7 +1758,7 @@ private final class HistoryItemTypeIconView: NSView {
     symbolImageView.image = HistorySymbolIcon.make(
       systemName: systemImageName.isEmpty ? kind.systemImage : systemImageName,
       tintColor: kindIconTintColor,
-      pointSize: HistoryRow.typeIconSize,
+      pointSize: isCompact ? HistoryRow.compactTypeIconSize : HistoryRow.typeIconSize,
       weight: .regular
     )
   }

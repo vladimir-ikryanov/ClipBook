@@ -3,10 +3,10 @@ import AppKit
 final class HistoryItemRowImageView: HistoryItemRowView {
   override func configureContent(item: ClipboardItem, quickPasteIndex: Int?) {
     configureImagePreview(for: item)
-    setLines(
-      primary: makePrimaryLabel(text: item.contentTitle),
-      secondary: makeSecondaryLabel(text: ByteCountFormatter.string(fromByteCount: Int64(item.byteSize), countStyle: .file))
-    )
+    let sizeLine = isCompact
+      ? nil
+      : makeSecondaryLabel(text: ByteCountFormatter.string(fromByteCount: Int64(item.byteSize), countStyle: .file))
+    setLines(primary: makePrimaryLabel(text: item.contentTitle), secondary: sizeLine)
   }
 
   // The thumbnail takes the place of the type symbol. A cached one shows at once; otherwise
