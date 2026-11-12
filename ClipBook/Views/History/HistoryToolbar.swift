@@ -213,8 +213,10 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     )
     updateActionButtons()
 
+    // A "#" query that picks a tag is not searched for, so the history holds
+    // no query while the field holds it.
     let singleLineSearchQuery = Self.singleLineSearchQuery(from: searchQuery)
-    if searchField.text != singleLineSearchQuery {
+    if historySearchQuery(for: searchField.text) != singleLineSearchQuery {
       searchField.text = singleLineSearchQuery
     }
 
@@ -440,7 +442,7 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
       field.text = singleLineSearchQuery
     }
 
-    delegate?.historyToolbar(self, didChangeSearchQuery: field.text)
+    delegate?.historyToolbar(self, didChangeSearchQuery: historySearchQuery(for: field.text))
     updateSearchContainerWidth()
     updateSearchSuggestions()
   }
@@ -552,6 +554,14 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
       in: window,
       appearance: searchContainer.appearance ?? searchContainer.effectiveAppearance
     )
+  }
+
+  /// The text the history is searched for. While the user types "#" and
+  /// picks a tag, the list stays as it is instead of showing the items that
+  /// hold the "#" text, which are usually none.
+  private func historySearchQuery(for text: String) -> String {
+    let activeKinds = Set(searchField.tokens.map(\.kind))
+    return SearchSuggestionProvider.isTagQuery(text, tags: filterTags, activeKinds: activeKinds) ? "" : text
   }
 
   private func acceptSuggestion(_ suggestion: SearchSuggestion) {

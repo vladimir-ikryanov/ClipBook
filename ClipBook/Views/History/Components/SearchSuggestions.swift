@@ -15,6 +15,10 @@ struct SearchSuggestion {
 /// are left out.
 enum SearchSuggestionProvider {
   static let defaultLimit = 8
+  /// "#" alone lists the tags rather than matching them, so it shows more of
+  /// them than a typed query brings up. Typing after it narrows the list.
+  static let tagListLimit = 12
+  static let tagQueryPrefix: Character = "#"
 
   static func suggestions(
     for query: String,
@@ -26,6 +30,10 @@ enum SearchSuggestionProvider {
     let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !query.isEmpty else {
       return []
+    }
+
+    if let tagQuery = tagQuery(from: query) {
+      return tagSuggestions(for: tagQuery, tags: tags, activeKinds: activeKinds)
     }
 
     var suggestions: [SearchSuggestion] = []
@@ -70,6 +78,59 @@ enum SearchSuggestionProvider {
     )
 
     return Array(suggestions.prefix(limit))
+  }
+
+  /// The part of the query after a leading "#", which asks for tags only, or
+  /// nil when the query does not start with one.
+  static func tagQuery(from query: String) -> String? {
+    let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard query.first == tagQueryPrefix else {
+      return nil
+    }
+
+    return String(query.dropFirst()).trimmingCharacters(in: .whitespaces)
+  }
+
+  /// Whether the query asks for tags and at least one of them matches it.
+  /// The history is not searched for such a query while the user picks a
+  /// tag, and a query no tag matches, such as a color like "#FF0000", is
+  /// searched for as usual.
+  static func isTagQuery(_ query: String, tags: [Tag], activeKinds: Set<SearchTokenKind>) -> Bool {
+    guard let tagQuery = tagQuery(from: query) else {
+      return false
+    }
+
+    return !tagSuggestions(for: tagQuery, tags: tags, activeKinds: activeKinds).isEmpty
+  }
+
+  /// The tags whose name holds `tagQuery`, those that start with it first,
+  /// or every tag in the order the filter menu lists them when it is empty.
+  private static func tagSuggestions(
+    for tagQuery: String,
+    tags: [Tag],
+    activeKinds: Set<SearchTokenKind>
+  ) -> [SearchSuggestion] {
+    let availableTags = tags.filter { !activeKinds.contains(.tag($0.id)) }
+    guard !tagQuery.isEmpty else {
+      return availableTags.prefix(tagListLimit).map { tag in
+        SearchSuggestion(
+          token: SearchToken(kind: .tag(tag.id), title: tag.name, image: SearchSuggestionIcon.tagImage(for: tag)),
+          matchRange: nil
+        )
+      }
+    }
+
+    let suggestions = ranked(
+      availableTags.compactMap { tag in
+        makeSuggestion(
+          title: tag.name,
+          query: tagQuery,
+          kind: .tag(tag.id),
+          image: SearchSuggestionIcon.tagImage(for: tag)
+        )
+      }
+    )
+    return Array(suggestions.prefix(tagListLimit))
   }
 
   /// Keeps prefix matches ahead of matches found later in the title while
