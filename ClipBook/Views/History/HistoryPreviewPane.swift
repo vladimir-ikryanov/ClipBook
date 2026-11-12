@@ -242,9 +242,6 @@ private final class HistoryPreviewPaneSurfaceView: NSView {
 
   override func updateLayer() {
     layer?.backgroundColor = HistoryAppearance.backgroundCGColor(for: self)
-    let isDark = effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-    layer?.borderWidth = isDark ? 1 : 0
-    layer?.borderColor = NSColor(white: 1, alpha: 0.1).cgColor
   }
 
   override func viewDidChangeEffectiveAppearance() {
