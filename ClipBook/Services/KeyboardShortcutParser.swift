@@ -11,9 +11,50 @@ struct KeyboardShortcutParser {
         let modifiers: UInt32
     }
 
+    /// Resolves a stored shortcut such as "cmd+shift+v" to the key code and
+    /// Carbon modifiers to listen for. A character key resolves to the key that
+    /// types that character in the current keyboard layout, so ⌘⇧V means the
+    /// key labeled V in Dvorak or AZERTY rather than the key at the position of
+    /// V in US QWERTY.
     static func parse(_ shortcut: String) -> Parsed? {
+        guard let (key, modifiers) = components(of: shortcut) else {
+            return nil
+        }
+
+        let keyCode: UInt32?
+        if isCharacterToken(key) {
+            keyCode = KeyboardLayoutMap.shared.keyCode(
+                for: key,
+                command: modifiers & UInt32(cmdKey) != 0
+            ) ?? keyCodes[key]
+        } else {
+            keyCode = keyCodes[key]
+        }
+
+        guard let keyCode else {
+            return nil
+        }
+
+        return Parsed(keyCode: keyCode, modifiers: modifiers)
+    }
+
+    /// Whether the shortcut includes at least one modifier key. A bare key such
+    /// as Return must never be registered system-wide: the hotkey would swallow
+    /// that key in every application, including ClipBook's own history panel.
+    ///
+    /// It does not look at the keyboard layout, so it is safe to call while
+    /// preferences are decoded away from the main thread.
+    static func hasModifiers(_ shortcut: String) -> Bool {
+        guard let (_, modifiers) = components(of: shortcut) else {
+            return false
+        }
+
+        return modifiers != 0
+    }
+
+    private static func components(of shortcut: String) -> (key: String, modifiers: UInt32)? {
         let parts = shortcut.lowercased().split(separator: "+").map(String.init)
-        guard let key = parts.last, let keyCode = keyCodes[key] else {
+        guard let key = parts.last, isCharacterToken(key) || keyCodes[key] != nil else {
             return nil
         }
 
@@ -31,18 +72,18 @@ struct KeyboardShortcutParser {
             modifiers |= UInt32(controlKey)
         }
 
-        return Parsed(keyCode: keyCode, modifiers: modifiers)
+        return (key, modifiers)
     }
 
-    /// Whether the shortcut includes at least one modifier key. A bare key such
-    /// as Return must never be registered system-wide: the hotkey would swallow
-    /// that key in every application, including ClipBook's own history panel.
-    static func hasModifiers(_ shortcut: String) -> Bool {
-        guard let parsed = parse(shortcut) else {
+    /// A key token that names the character the key types, as opposed to a
+    /// named key such as "return" or "f1". "+" separates the parts of a stored
+    /// shortcut, so it cannot be a token.
+    private static func isCharacterToken(_ key: String) -> Bool {
+        guard key.unicodeScalars.count == 1, let scalar = key.unicodeScalars.first else {
             return false
         }
 
-        return parsed.modifiers != 0
+        return scalar.isASCII && scalar.value > 0x20 && scalar.value < 0x7F && key != "+"
     }
 
     static func menuItemKeyEquivalent(for shortcut: String) -> (keyEquivalent: String, modifierFlags: NSEvent.ModifierFlags)? {
@@ -128,8 +169,42 @@ struct KeyboardShortcutParser {
 
     /// Returns the storage token for a virtual key code, or `nil` when the key
     /// cannot be used in a shortcut.
-    static func keyToken(for keyCode: UInt16) -> String? {
-        keyTokensByCode[UInt32(keyCode)]
+    ///
+    /// A character key is stored as the character it types in the current
+    /// keyboard layout, so a Dvorak user pressing ⌘⇧V records "cmd+shift+v".
+    /// `command` tells whether Command is held, which matters for layouts such
+    /// as "Dvorak – QWERTY ⌘" that switch to QWERTY while it is down.
+    static func keyToken(for keyCode: UInt16, command: Bool = false) -> String? {
+        let code = UInt32(keyCode)
+        if let character = KeyboardLayoutMap.shared.character(for: code, command: command),
+           isCharacterToken(character),
+           KeyboardLayoutMap.shared.keyCode(for: character, command: command) == code {
+            return character
+        }
+
+        guard let token = keyTokensByCode[code] else {
+            return nil
+        }
+        guard isCharacterToken(token) else {
+            return token
+        }
+
+        // The key types something that cannot be stored (for example "à"), so
+        // fall back to its US QWERTY name, but only when no other key of the
+        // layout types that character, or the shortcut would land on that key.
+        let resolved = KeyboardLayoutMap.shared.keyCode(for: token, command: command) ?? keyCodes[token]
+        return resolved == code ? token : nil
+    }
+
+    /// Key codes of the keys that type a character, scanned to map characters
+    /// to keys in the current layout. 93 and 94 are the JIS ¥ and _ keys.
+    fileprivate static let characterKeyCodes: [UInt32] = keyCodes
+        .filter { isCharacterToken($0.key) }
+        .map(\.value)
+        .sorted() + [93, 94]
+
+    fileprivate static func usKeyCode(for character: String) -> UInt32? {
+        keyCodes[character]
     }
 
     /// Returns the label shown for a key token, e.g. "↩" for "return".
@@ -223,4 +298,147 @@ struct KeyboardShortcutParser {
         "f16": NSF16FunctionKey, "f17": NSF17FunctionKey, "f18": NSF18FunctionKey,
         "f19": NSF19FunctionKey, "f20": NSF20FunctionKey
     ]
+}
+
+/// Maps characters to the keys that type them in the current ASCII-capable
+/// keyboard layout (the layout macOS uses for shortcuts, which is US while a
+/// Russian or Greek layout is selected) and back.
+///
+/// Text Input Sources must be queried on the main thread. Lookups made from
+/// another thread before the map is loaded return nil, and callers fall back
+/// to US QWERTY key codes.
+final class KeyboardLayoutMap {
+    static let shared = KeyboardLayoutMap()
+
+    /// Posted on the main thread when the keys that type characters change,
+    /// for example after switching from Dvorak to U.S.
+    static let didChangeNotification = Notification.Name("ClipBookKeyboardLayoutDidChange")
+
+    private struct Maps: Equatable {
+        var keyCodesByCharacter: [String: UInt32] = [:]
+        var charactersByKeyCode: [UInt32: String] = [:]
+    }
+
+    private let lock = NSLock()
+    private var plain: Maps?
+    private var command: Maps?
+
+    private init() {
+        DistributedNotificationCenter.default().addObserver(
+            forName: NSNotification.Name(kTISNotifySelectedKeyboardInputSourceChanged as String),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.reload()
+        }
+    }
+
+    func keyCode(for character: String, command: Bool) -> UInt32? {
+        maps(command: command)?.keyCodesByCharacter[character]
+    }
+
+    func character(for keyCode: UInt32, command: Bool) -> String? {
+        maps(command: command)?.charactersByKeyCode[keyCode]
+    }
+
+    private func maps(command: Bool) -> Maps? {
+        lock.lock()
+        let cached = command ? self.command : plain
+        lock.unlock()
+        if let cached {
+            return cached
+        }
+        guard Thread.isMainThread else {
+            return nil
+        }
+
+        let loaded = Self.loadMaps()
+        store(plain: loaded.plain, command: loaded.command)
+        return command ? loaded.command : loaded.plain
+    }
+
+    private func reload() {
+        let (plain, command) = Self.loadMaps()
+        lock.lock()
+        let changed = plain != self.plain || command != self.command
+        lock.unlock()
+        store(plain: plain, command: command)
+        if changed {
+            NotificationCenter.default.post(name: Self.didChangeNotification, object: self)
+        }
+    }
+
+    private func store(plain: Maps?, command: Maps?) {
+        lock.lock()
+        self.plain = plain
+        self.command = command
+        lock.unlock()
+    }
+
+    private static func loadMaps() -> (plain: Maps?, command: Maps?) {
+        guard let source = TISCopyCurrentASCIICapableKeyboardLayoutInputSource()?.takeRetainedValue(),
+              let layoutData = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData) else {
+            return (nil, nil)
+        }
+
+        let data = Unmanaged<CFData>.fromOpaque(layoutData).takeUnretainedValue() as Data
+        return data.withUnsafeBytes { buffer -> (Maps?, Maps?) in
+            guard let base = buffer.baseAddress else {
+                return (nil, nil)
+            }
+
+            let layout = base.assumingMemoryBound(to: UCKeyboardLayout.self)
+            return (
+                makeMaps(layout: layout, modifierState: 0),
+                makeMaps(layout: layout, modifierState: UInt32(cmdKey >> 8) & 0xFF)
+            )
+        }
+    }
+
+    private static func makeMaps(layout: UnsafePointer<UCKeyboardLayout>, modifierState: UInt32) -> Maps {
+        var maps = Maps()
+        for keyCode in KeyboardShortcutParser.characterKeyCodes {
+            guard let character = translate(keyCode: keyCode, layout: layout, modifierState: modifierState) else {
+                continue
+            }
+
+            maps.charactersByKeyCode[keyCode] = character
+            // When several keys type the same character, prefer the one at the
+            // character's US position, then the lowest key code.
+            let usKeyCode = KeyboardShortcutParser.usKeyCode(for: character)
+            if let existing = maps.keyCodesByCharacter[character], existing == usKeyCode || keyCode != usKeyCode {
+                continue
+            }
+            maps.keyCodesByCharacter[character] = keyCode
+        }
+        return maps
+    }
+
+    private static func translate(
+        keyCode: UInt32,
+        layout: UnsafePointer<UCKeyboardLayout>,
+        modifierState: UInt32
+    ) -> String? {
+        var deadKeyState: UInt32 = 0
+        var length = 0
+        var characters = [UniChar](repeating: 0, count: 4)
+        let status = UCKeyTranslate(
+            layout,
+            UInt16(keyCode),
+            UInt16(kUCKeyActionDisplay),
+            modifierState,
+            UInt32(LMGetKbdType()),
+            OptionBits(kUCKeyTranslateNoDeadKeysMask),
+            &deadKeyState,
+            characters.count,
+            &length,
+            &characters
+        )
+        guard status == noErr, length > 0 else {
+            return nil
+        }
+
+        let character = String(utf16CodeUnits: characters, count: length).lowercased()
+        return character.isEmpty ? nil : character
+    }
 }

@@ -328,7 +328,7 @@ private final class ShortcutEventView: NSView {
     /// keys to be released would never finish for combinations that hold down
     /// Command, because macOS does not deliver key up events while it is held.
     private func record(_ event: NSEvent) -> Bool {
-        guard !event.isARepeat, let key = ShortcutFormatter.keyToken(for: event.keyCode) else {
+        guard !event.isARepeat, let key = ShortcutFormatter.keyToken(for: event.keyCode, command: event.modifierFlags.contains(.command)) else {
             return false
         }
 
@@ -441,8 +441,8 @@ private enum ShortcutFormatter {
         KeyboardShortcutParser.keyDisplayText(for: key)
     }
 
-    static func keyToken(for keyCode: UInt16) -> String? {
-        KeyboardShortcutParser.keyToken(for: keyCode)
+    static func keyToken(for keyCode: UInt16, command: Bool) -> String? {
+        KeyboardShortcutParser.keyToken(for: keyCode, command: command)
     }
 }
 
