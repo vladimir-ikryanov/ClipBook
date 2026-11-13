@@ -84,4 +84,247 @@ struct SnapshotComparisonTests {
         #expect(decoded.bytes[2] <= 2)
         #expect(decoded.bytes[3] == 255)
     }
+
+    private static func makeSnapshot(
+        width: Int = 8,
+        height: Int = 6,
+        color: NSColor = NSColor(srgbRed: 0.2, green: 0.4, blue: 0.8, alpha: 1)
+    ) throws -> RenderedViewSnapshot {
+        let rep = try TestSupport.makeBitmap(pixelsWide: width, pixelsHigh: height)
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+        color.setFill()
+        NSRect(x: 0, y: 0, width: width, height: height).fill()
+        NSGraphicsContext.restoreGraphicsState()
+
+        let pngData = try #require(rep.representation(using: .png, properties: [:]))
+        let image = NSImage(size: NSSize(width: width, height: height))
+        image.addRepresentation(rep)
+        return RenderedViewSnapshot(image: image, bitmap: rep, pngData: pngData)
+    }
+
+    @Test
+    func referenceFileURLIncludesMajorOSFolderAndPrefixedBasename() {
+        let root = URL(fileURLWithPath: "/tmp/snapshots", isDirectory: true)
+        let dir = SnapshotTesting.referenceDirectory(rootDirectory: root, majorOSVersion: 27)
+        let fileURL = SnapshotTesting.referenceFileURL(named: "EmptyHistory-dark", rootDirectory: root, majorOSVersion: 27)
+
+        #expect(dir.path == "/tmp/snapshots/macOS-27")
+        #expect(fileURL.path == "/tmp/snapshots/macOS-27/macOS-27-EmptyHistory-dark.png")
+    }
+
+    @Test
+    func allTwelveMacOS27ReferenceImagesExistOnDisk() {
+        var count = 0
+        for scenario in SnapshotScenario.allCases {
+            for appearance in SnapshotAppearance.allCases {
+                let url = SnapshotTesting.referenceFileURL(
+                    named: "\(scenario.rawValue)-\(appearance.rawValue)",
+                    majorOSVersion: 27
+                )
+                #expect(FileManager.default.fileExists(atPath: url.path))
+                count += 1
+            }
+        }
+        #expect(count == 12)
+    }
+
+    @Test
+    func exportDirectoryParsesFilePathsIncludingSpacesAndRejectsEmpty() {
+        #expect(SnapshotTesting.exportDirectory(from: [:]) == nil)
+        #expect(SnapshotTesting.exportDirectory(from: ["SNAPSHOT_EXPORT_DIR": ""]) == nil)
+
+        let spacedPath = "/tmp/clipbook snapshot export/dir with spaces"
+        let exported = SnapshotTesting.exportDirectory(from: ["SNAPSHOT_EXPORT_DIR": spacedPath])
+        #expect(exported?.isFileURL == true)
+        #expect(exported?.path == spacedPath)
+    }
+
+    @Test
+    @MainActor
+    func isRecordingWritesReferenceImageAndOptionalExport() throws {
+        try TestSupport.withTemporaryDirectory { tempDir in
+            let root = tempDir.appendingPathComponent("refs", isDirectory: true)
+            let exportDir = tempDir.appendingPathComponent("exports", isDirectory: true)
+            let snapshot = try Self.makeSnapshot()
+
+            let outcomeWithoutExport = SnapshotTesting.evaluate(
+                snapshot,
+                named: "Sample",
+                rootDirectory: root,
+                majorOSVersion: 28,
+                isRecording: true,
+                exportDirectory: nil
+            )
+            let expectedRef = SnapshotTesting.referenceFileURL(named: "Sample", rootDirectory: root, majorOSVersion: 28)
+            #expect(outcomeWithoutExport == .recorded(expectedRef))
+            #expect(FileManager.default.fileExists(atPath: expectedRef.path))
+            #expect(!FileManager.default.fileExists(atPath: exportDir.path))
+
+            let outcomeWithExport = SnapshotTesting.evaluate(
+                snapshot,
+                named: "Sample",
+                rootDirectory: root,
+                majorOSVersion: 28,
+                isRecording: true,
+                exportDirectory: exportDir
+            )
+            let expectedExport = exportDir
+                .appendingPathComponent("macOS-28", isDirectory: true)
+                .appendingPathComponent("macOS-28-Sample.png")
+            #expect(outcomeWithExport == .recorded(expectedRef))
+            #expect(FileManager.default.fileExists(atPath: expectedExport.path))
+        }
+    }
+
+    @Test
+    @MainActor
+    func unrecordedOSExportsWhenConfiguredAndPropagatesInvalidPathErrors() throws {
+        try TestSupport.withTemporaryDirectory { tempDir in
+            let root = tempDir.appendingPathComponent("refs", isDirectory: true)
+            try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+            let snapshot = try Self.makeSnapshot()
+
+            let smokeOnly = SnapshotTesting.evaluate(
+                snapshot,
+                named: "Smoke",
+                rootDirectory: root,
+                majorOSVersion: 99,
+                isRecording: false,
+                exportDirectory: nil
+            )
+            #expect(smokeOnly == .unrecordedOS(majorVersion: 99, exportedURL: nil))
+
+            let exportDir = tempDir.appendingPathComponent("export out", isDirectory: true)
+            let exported = SnapshotTesting.evaluate(
+                snapshot,
+                named: "Smoke",
+                rootDirectory: root,
+                majorOSVersion: 99,
+                isRecording: false,
+                exportDirectory: exportDir
+            )
+            let expectedExportURL = exportDir
+                .appendingPathComponent("macOS-99", isDirectory: true)
+                .appendingPathComponent("macOS-99-Smoke.png")
+            #expect(exported == .unrecordedOS(majorVersion: 99, exportedURL: expectedExportURL))
+            #expect(FileManager.default.fileExists(atPath: expectedExportURL.path))
+
+            let blockingFile = tempDir.appendingPathComponent("not-a-directory")
+            try Data("occupied".utf8).write(to: blockingFile)
+            let failedExport = SnapshotTesting.evaluate(
+                snapshot,
+                named: "Smoke",
+                rootDirectory: root,
+                majorOSVersion: 99,
+                isRecording: false,
+                exportDirectory: blockingFile
+            )
+            guard case .failed(let message) = failedExport else {
+                Issue.record("Expected .failed when export path is a regular file, got \(failedExport)")
+                return
+            }
+            #expect(message.contains("macOS-99-Smoke.png"))
+        }
+    }
+
+    @Test
+    @MainActor
+    func recordedOSHandlesMissingMatchedAndFailedBranches() throws {
+        try TestSupport.withTemporaryDirectory { tempDir in
+            let root = tempDir.appendingPathComponent("refs", isDirectory: true)
+            let osDir = SnapshotTesting.referenceDirectory(rootDirectory: root, majorOSVersion: 27)
+            try FileManager.default.createDirectory(at: osDir, withIntermediateDirectories: true)
+            let exportDir = tempDir.appendingPathComponent("exports", isDirectory: true)
+
+            let blueSnapshot = try Self.makeSnapshot(width: 8, height: 6, color: NSColor(srgbRed: 0.1, green: 0.2, blue: 0.9, alpha: 1))
+            let expectedRef = SnapshotTesting.referenceFileURL(named: "Card", rootDirectory: root, majorOSVersion: 27)
+
+            let missingOutcome = SnapshotTesting.evaluate(
+                blueSnapshot,
+                named: "Card",
+                rootDirectory: root,
+                majorOSVersion: 27,
+                isRecording: false,
+                exportDirectory: exportDir
+            )
+            #expect(missingOutcome == .recorded(expectedRef))
+            #expect(FileManager.default.fileExists(atPath: expectedRef.path))
+
+            let matchedExportDir = tempDir.appendingPathComponent("matched-exports", isDirectory: true)
+            let matchedOutcome = SnapshotTesting.evaluate(
+                blueSnapshot,
+                named: "Card",
+                rootDirectory: root,
+                majorOSVersion: 27,
+                isRecording: false,
+                exportDirectory: matchedExportDir
+            )
+            #expect(matchedOutcome == .matched)
+            #expect(!FileManager.default.fileExists(atPath: matchedExportDir.path))
+
+            let redSnapshot = try Self.makeSnapshot(width: 8, height: 6, color: NSColor(srgbRed: 0.9, green: 0.1, blue: 0.1, alpha: 1))
+            let diffFailureExports = tempDir.appendingPathComponent("diff-exports", isDirectory: true)
+            let diffOutcome = SnapshotTesting.evaluate(
+                redSnapshot,
+                named: "Card",
+                rootDirectory: root,
+                majorOSVersion: 27,
+                isRecording: false,
+                exportDirectory: diffFailureExports
+            )
+            guard case .failed(let diffMessage) = diffOutcome else {
+                Issue.record("Expected .failed on pixel mismatch, got \(diffOutcome)")
+                return
+            }
+            #expect(diffMessage.contains("pixels differ"))
+            #expect(
+                FileManager.default.fileExists(
+                    atPath: diffFailureExports.appendingPathComponent("macOS-27/macOS-27-Card.png").path
+                )
+            )
+
+            let widerSnapshot = try Self.makeSnapshot(width: 12, height: 6)
+            let sizeFailureExports = tempDir.appendingPathComponent("size-exports", isDirectory: true)
+            let sizeOutcome = SnapshotTesting.evaluate(
+                widerSnapshot,
+                named: "Card",
+                rootDirectory: root,
+                majorOSVersion: 27,
+                isRecording: false,
+                exportDirectory: sizeFailureExports
+            )
+            guard case .failed(let sizeMessage) = sizeOutcome else {
+                Issue.record("Expected .failed on dimension mismatch, got \(sizeOutcome)")
+                return
+            }
+            #expect(sizeMessage.contains("12x6"))
+            #expect(
+                FileManager.default.fileExists(
+                    atPath: sizeFailureExports.appendingPathComponent("macOS-27/macOS-27-Card.png").path
+                )
+            )
+
+            try Data("corrupt-png".utf8).write(to: expectedRef)
+            let corruptExports = tempDir.appendingPathComponent("corrupt-exports", isDirectory: true)
+            let decodeOutcome = SnapshotTesting.evaluate(
+                blueSnapshot,
+                named: "Card",
+                rootDirectory: root,
+                majorOSVersion: 27,
+                isRecording: false,
+                exportDirectory: corruptExports
+            )
+            guard case .failed(let decodeMessage) = decodeOutcome else {
+                Issue.record("Expected .failed on corrupt reference PNG, got \(decodeOutcome)")
+                return
+            }
+            #expect(decodeMessage.contains("Could not decode"))
+            #expect(
+                FileManager.default.fileExists(
+                    atPath: corruptExports.appendingPathComponent("macOS-27/macOS-27-Card.png").path
+                )
+            )
+        }
+    }
 }

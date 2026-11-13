@@ -17,7 +17,7 @@ enum SnapshotAppearance: String, CaseIterable, Sendable {
     }
 }
 
-/// Views with a reference image in `ClipBookTests/Snapshots`.
+/// Views with a reference image in `ClipBookTests/Snapshots/macOS-<major>`.
 enum SnapshotScenario: String, CaseIterable, Sendable {
     case textRow = "HistoryItemRowTextView"
     case linkRow = "HistoryItemRowLinkView-normal"

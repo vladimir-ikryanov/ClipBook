@@ -22,12 +22,15 @@ usage() {
   printf '%s\n' "                           DomainAndSensitiveContentTests/SensitiveContentTests. A"
   printf '%s\n' "                           single test needs its parentheses, as in Suite/test()."
   printf '%s\n' "  --no-parallel            Disable parallel test execution."
-  printf '%s\n' "  --record-snapshots       Re-record the reference images in ClipBookTests/Snapshots."
-  printf '%s\n' "                           The run reports failures; review the image diff, then re-run."
+  printf '%s\n' "  --record-snapshots       Re-record the reference images in"
+  printf '%s\n' "                           ClipBookTests/Snapshots/macOS-<major>. The run reports"
+  printf '%s\n' "                           failures; review the image diff, then re-run."
   printf '%s\n' "  --clean                  Clean the build before testing."
   printf '%s\n' "  RESULT_BUNDLE_PATH=PATH  Write the .xcresult bundle, including test"
   printf '%s\n' "                           attachments such as view snapshots, to PATH, which"
   printf '%s\n' "                           must not exist yet."
+  printf '%s\n' "  SNAPSHOT_EXPORT_DIR=PATH Export rendered PNGs for recorded, failed, or"
+  printf '%s\n' "                           unrecorded-OS view snapshots under PATH/macOS-<major>/."
   printf '%s\n' "  -h, --help               Show this help."
 }
 
@@ -88,6 +91,15 @@ fi
 
 if [[ -n "${RESULT_BUNDLE_PATH:-}" ]]; then
   XCODEBUILD_ARGS+=(-resultBundlePath "$RESULT_BUNDLE_PATH")
+fi
+
+unset TEST_RUNNER_SNAPSHOT_EXPORT_DIR
+if [[ -n "${SNAPSHOT_EXPORT_DIR:-}" ]]; then
+  case "$SNAPSHOT_EXPORT_DIR" in
+    /*) ;;
+    *) SNAPSHOT_EXPORT_DIR="$PWD/$SNAPSHOT_EXPORT_DIR" ;;
+  esac
+  export TEST_RUNNER_SNAPSHOT_EXPORT_DIR="$SNAPSHOT_EXPORT_DIR"
 fi
 
 for pattern in ${FILTER_PATTERNS[@]+"${FILTER_PATTERNS[@]}"}; do
