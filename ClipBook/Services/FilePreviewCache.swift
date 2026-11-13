@@ -146,7 +146,19 @@ final class FilePreviewCache {
   }
 
   func prune(keepingFilePaths filePaths: Set<String>) {
-    removeCacheEntries { metadata in
+    prune(keepingFilePaths: { filePaths })
+  }
+
+  func prune(keepingFilePaths makeFilePaths: () -> Set<String>) {
+    guard let metadataURLs = try? fileManager.contentsOfDirectory(
+      at: directory,
+      includingPropertiesForKeys: nil
+    ), metadataURLs.contains(where: { $0.pathExtension == "json" }) else {
+      return
+    }
+
+    let filePaths = makeFilePaths()
+    removeCacheEntries(in: metadataURLs) { metadata in
       !filePaths.contains(metadata.sourcePath)
     }
   }
@@ -336,6 +348,10 @@ final class FilePreviewCache {
       return
     }
 
+    removeCacheEntries(in: metadataURLs, where: shouldRemove)
+  }
+
+  private func removeCacheEntries(in metadataURLs: [URL], where shouldRemove: (Metadata) -> Bool) {
     for metadataURL in metadataURLs where metadataURL.pathExtension == "json" {
       guard let data = try? Data(contentsOf: metadataURL),
             let metadata = try? decoder.decode(Metadata.self, from: data),

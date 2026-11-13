@@ -6,7 +6,10 @@ import Combine
 import SQLite3
 
 final class PreferencesStore {
-    private let userDefaults: UserDefaults
+    static let kernelBootTimeKey = "ClipBookLastKnownKernelBootTime"
+    static let legacyUptimeBootTimeKey = "ClipBookLastKnownBootTime"
+
+    let userDefaults: UserDefaults
     private let key = "ClipBookPreferencesV2"
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
@@ -27,5 +30,14 @@ final class PreferencesStore {
         if let data = try? encoder.encode(preferences) {
             userDefaults.set(data, forKey: key)
         }
+    }
+
+    func lastKnownKernelBootTime() -> Double? {
+        userDefaults.object(forKey: Self.kernelBootTimeKey) as? Double
+    }
+
+    func recordBootTimes(kernelBootTime: TimeInterval, uptimeRelativeBootTime: TimeInterval) {
+        userDefaults.set(kernelBootTime, forKey: Self.kernelBootTimeKey)
+        userDefaults.set(uptimeRelativeBootTime, forKey: Self.legacyUptimeBootTimeKey)
     }
 }

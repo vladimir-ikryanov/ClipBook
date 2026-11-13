@@ -682,7 +682,7 @@ enum ViewsAndWindowsTests {
 
             // Restoring the original text leaves nothing to save either.
             controller.beginEditing()
-            let textView = try #require(Self.findEditableTextView(in: controller.view))
+            let textView = try #require(findEditableTextView(in: controller.view))
             #expect(textView.string == "Bold Text")
             textView.string = "Changed"
             controller.restoreEditingText()
@@ -692,7 +692,7 @@ enum ViewsAndWindowsTests {
 
             // A real edit is saved exactly once, with the new text.
             controller.beginEditing()
-            let editor = try #require(Self.findEditableTextView(in: controller.view))
+            let editor = try #require(findEditableTextView(in: controller.view))
             editor.string = "Edited text"
             controller.saveEditing()
             #expect(!controller.isEditing)
@@ -701,6 +701,25 @@ enum ViewsAndWindowsTests {
             #expect(saved.first?.1 == "Edited text")
         }
 
+        @MainActor
+        private static func collectLabels(in root: NSView) -> [HistoryFixedTextColorLabel] {
+            var results: [HistoryFixedTextColorLabel] = []
+            if let label = root as? HistoryFixedTextColorLabel, !label.isHidden, label.superview != nil {
+                results.append(label)
+            }
+            for subview in root.subviews where !subview.isHidden {
+                results.append(contentsOf: collectLabels(in: subview))
+            }
+            return results
+        }
+    }
+}
+
+// Saving applies appearance and language, which are process-wide, and key-window
+// presentation mutates process-global NSApp focus state.
+extension SharedProcessStateTests {
+    @Suite(.serialized)
+    struct HistoryWindowBehaviorTests {
         @Test
         @MainActor
         func commandPaletteRunsCommandShortcuts() async throws {
@@ -708,6 +727,7 @@ enum ViewsAndWindowsTests {
 
             let harness = try TestSupport.makeTestCoordinator()
             defer { harness.cleanup() }
+            harness.model.preferences.hideOnFocusLoss = false
             let item = ClipboardItem.fixture(kind: .text, text: "Editable clip")
             try harness.seedHistory([item])
 
@@ -744,7 +764,7 @@ enum ViewsAndWindowsTests {
                       let contentView = sheet.contentView else {
                     return false
                 }
-                return Self.findEditableTextView(in: contentView) != nil
+                return findEditableTextView(in: contentView) != nil
             }
             #expect(editorOpened)
             if let editSheet = historyWindow.window.attachedSheet {
@@ -774,6 +794,7 @@ enum ViewsAndWindowsTests {
             defer { harness.cleanup() }
 
             let historyWindow = HistoryWindow(model: harness.model, coordinator: harness.coordinator)
+            historyWindow.window.alphaValue = 0
             defer { historyWindow.window.orderOut(nil) }
 
             historyWindow.show()
@@ -810,36 +831,8 @@ enum ViewsAndWindowsTests {
             #expect(harness.model.preferences.historyWindowX == 222)
             #expect(harness.model.preferences.historyWindowY == 333)
         }
-
-        @MainActor
-        private static func findEditableTextView(in root: NSView) -> NSTextView? {
-            if let textView = root as? NSTextView, textView.isEditable {
-                return textView
-            }
-            for subview in root.subviews {
-                if let found = findEditableTextView(in: subview) {
-                    return found
-                }
-            }
-            return nil
-        }
-
-        @MainActor
-        private static func collectLabels(in root: NSView) -> [HistoryFixedTextColorLabel] {
-            var results: [HistoryFixedTextColorLabel] = []
-            if let label = root as? HistoryFixedTextColorLabel, !label.isHidden, label.superview != nil {
-                results.append(label)
-            }
-            for subview in root.subviews where !subview.isHidden {
-                results.append(contentsOf: collectLabels(in: subview))
-            }
-            return results
-        }
     }
-}
 
-// Saving applies appearance and language, which are process-wide.
-extension SharedProcessStateTests {
     @Suite
     struct SettingsViewWiringTests {
         @Test(.timeLimit(.minutes(1)))
@@ -911,4 +904,17 @@ private final class ToolbarDelegateSpy: HistoryToolbarDelegate {
     func historyToolbarDidRequestToggleImageTiles(_ toolbar: HistoryToolbar) {}
     func historyToolbarDidRequestToggleCompactHistory(_ toolbar: HistoryToolbar) {}
     func historyToolbarDidRequestCommandDialog(_ toolbar: HistoryToolbar) {}
+}
+
+@MainActor
+private func findEditableTextView(in root: NSView) -> NSTextView? {
+    if let textView = root as? NSTextView, textView.isEditable {
+        return textView
+    }
+    for subview in root.subviews {
+        if let found = findEditableTextView(in: subview) {
+            return found
+        }
+    }
+    return nil
 }

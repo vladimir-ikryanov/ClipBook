@@ -911,9 +911,15 @@ final class AppModel: ObservableObject {
             insert(item)
             return
         }
-        items[index] = item
-        items = items.enumerated().compactMap { offset, currentItem in
-            currentItem.id == item.id && offset != index ? nil : currentItem
+        if items[(index + 1)...].contains(where: { $0.id == item.id }) {
+            items = items.enumerated().compactMap { offset, currentItem in
+                if offset == index {
+                    return item
+                }
+                return currentItem.id == item.id ? nil : currentItem
+            }
+        } else {
+            items[index] = item
         }
         clearUnavailableHistorySourceApplicationFilter()
     }

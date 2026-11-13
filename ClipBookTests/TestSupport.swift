@@ -92,8 +92,7 @@ final class TestCoordinatorHarness {
     func cleanup() {
         guard !isCleanedUp else { return }
         isCleanedUp = true
-        clipboardMonitor.stop()
-        globalShortcuts.unregisterAll()
+        coordinator.stopBackgroundWorkForTesting()
         pasteboard.releaseGlobally()
         TestSupport.removeDefaultsSuite(named: userDefaultsSuiteName)
         try? FileManager.default.removeItem(at: supportDirectory)
@@ -309,6 +308,8 @@ enum TestSupport {
         // unregister the Debug build, which is never registered, rather than add
         // it as a login item.
         initialPreferences.launchAtLogin = false
+        // Keep link-preview network fetches off unless a test explicitly enables them.
+        initialPreferences.showPreviewForLinks = false
         preferencesStore.save(initialPreferences)
 
         let model = AppModel()
@@ -560,6 +561,7 @@ struct TestSupportTests {
         defer { harness.cleanup() }
         #expect(!harness.model.preferences.warnOnClearHistory)
         #expect(!harness.model.preferences.soundEffectsEnabled)
+        #expect(!harness.model.preferences.showPreviewForLinks)
 
         harness.cleanup()
         #expect(!FileManager.default.fileExists(atPath: harness.supportDirectory.path))

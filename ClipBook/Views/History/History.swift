@@ -66,7 +66,19 @@ final class History: NSView {
   var isSyncingSelection = false
   private var selectionAnchorRow: Int?
   var selectionLeadRow: Int?
-  private var selectionOrderIDs: [UUID] = []
+  private var selectionOrderIDs: [UUID] = [] {
+    didSet {
+      guard selectionOrderIDs != oldValue else {
+        return
+      }
+      var indexByID = [UUID: Int](minimumCapacity: selectionOrderIDs.count)
+      for (index, id) in selectionOrderIDs.enumerated() where indexByID[id] == nil {
+        indexByID[id] = index
+      }
+      selectionOrderIndexByID = indexByID
+    }
+  }
+  private var selectionOrderIndexByID: [UUID: Int] = [:]
   var isKeyboardMultipleSelectionMode = false {
     didSet {
       tableView.isKeyboardMultipleSelectionMode = isKeyboardMultipleSelectionMode
@@ -956,7 +968,7 @@ final class History: NSView {
 
   func selectionOrderBadgeNumber(forItemID id: UUID) -> Int? {
     guard isMultipleSelectionOrderBadgeMode,
-          let index = selectionOrderIDs.firstIndex(of: id) else {
+          let index = selectionOrderIndexByID[id] else {
       return nil
     }
 
@@ -996,14 +1008,15 @@ final class History: NSView {
     let selectedIDs = Set(selectedItemsByRow.map { $0.item.id })
 
     var orderedIDs = selectionOrderIDs.filter { selectedIDs.contains($0) }
+    var seen = Set(orderedIDs)
     if let focusedRow,
        let focusedItem = selectedItemsByRow.first(where: { $0.row == focusedRow })?.item,
-       !orderedIDs.contains(focusedItem.id) {
+       seen.insert(focusedItem.id).inserted {
       orderedIDs.append(focusedItem.id)
     }
 
-    for item in selectedItemsByRow.map({ $0.item }) where !orderedIDs.contains(item.id) {
-      orderedIDs.append(item.id)
+    for entry in selectedItemsByRow where seen.insert(entry.item.id).inserted {
+      orderedIDs.append(entry.item.id)
     }
 
     return orderedIDs
@@ -1450,7 +1463,8 @@ final class History: NSView {
     // are appended in anchor-to-clicked-row order.
     let rangeIDs = Set(orderedRangeIDs)
     var orderedIDs = selectionOrderIDs.filter { rangeIDs.contains($0) }
-    for id in orderedRangeIDs where !orderedIDs.contains(id) {
+    var seen = Set(orderedIDs)
+    for id in orderedRangeIDs where seen.insert(id).inserted {
       orderedIDs.append(id)
     }
 

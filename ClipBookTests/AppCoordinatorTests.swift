@@ -202,6 +202,89 @@ enum AppCoordinatorTests {
             // Uptime pauses during sleep, so `now - uptime` is never earlier than the real boot time.
             #expect(boot.timeIntervalSince1970 <= now.timeIntervalSince1970 - ProcessInfo.processInfo.systemUptime + 1)
         }
+
+        @Test
+        @MainActor
+        func clearHistoryAfterRebootUsesInjectedDefaultsWithoutTouchingStandardDefaults() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+
+            let standardKernelBefore = UserDefaults.standard.object(forKey: PreferencesStore.kernelBootTimeKey) as? Double
+            let standardLegacyBefore = UserDefaults.standard.object(forKey: PreferencesStore.legacyUptimeBootTimeKey) as? Double
+
+            #expect(harness.preferencesStore.lastKnownKernelBootTime() == nil)
+            harness.model.preferences.clearHistoryOnReboot = true
+            let item = ClipboardItem.fixture(text: "First launch clip")
+            try harness.seedHistory([item])
+
+            harness.coordinator.clearHistoryAfterRebootIfNeeded(
+                kernelBootTime: 1_700_000_000,
+                uptimeRelativeBootTime: 1_700_000_120
+            )
+
+            #expect((UserDefaults.standard.object(forKey: PreferencesStore.kernelBootTimeKey) as? Double) == standardKernelBefore)
+            #expect((UserDefaults.standard.object(forKey: PreferencesStore.legacyUptimeBootTimeKey) as? Double) == standardLegacyBefore)
+            #expect(harness.preferencesStore.lastKnownKernelBootTime() == 1_700_000_000)
+            #expect(harness.preferencesStore.userDefaults.object(forKey: PreferencesStore.kernelBootTimeKey) as? Double == 1_700_000_000)
+            #expect(harness.preferencesStore.userDefaults.object(forKey: PreferencesStore.legacyUptimeBootTimeKey) as? Double == 1_700_000_120)
+            #expect(harness.model.items.map(\.id) == [item.id])
+        }
+
+        @Test
+        @MainActor
+        func sleepDriftKeepsLegacyBootTimeWarmWithoutClearingHistory() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+
+            harness.model.preferences.clearHistoryOnReboot = true
+            let item = ClipboardItem.fixture(text: "Survives sleep")
+            try harness.seedHistory([item])
+
+            harness.coordinator.clearHistoryAfterRebootIfNeeded(
+                kernelBootTime: 1_700_000_000,
+                uptimeRelativeBootTime: 1_700_000_000
+            )
+            harness.coordinator.clearHistoryAfterRebootIfNeeded(
+                kernelBootTime: 1_700_000_000,
+                uptimeRelativeBootTime: 1_700_007_200
+            )
+
+            #expect(harness.model.items.map(\.id) == [item.id])
+            #expect(harness.preferencesStore.userDefaults.object(forKey: PreferencesStore.kernelBootTimeKey) as? Double == 1_700_000_000)
+            let legacyBootTime = try #require(
+                harness.preferencesStore.userDefaults.object(forKey: PreferencesStore.legacyUptimeBootTimeKey) as? Double
+            )
+            #expect(legacyBootTime == 1_700_007_200)
+            #expect(abs(legacyBootTime - 1_700_007_200) <= 60)
+        }
+
+        @Test
+        @MainActor
+        func advancingKernelBootTimePastThresholdClearsNonFavoritedHistoryWhenEnabled() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+
+            harness.model.preferences.clearHistoryOnReboot = true
+            harness.model.preferences.keepFavoritesOnClearHistory = true
+            let favorite = ClipboardItem.fixture(text: "Pinned", isFavorite: true)
+            let regular = ClipboardItem.fixture(text: "Ephemeral")
+            try harness.seedHistory([favorite, regular])
+
+            harness.coordinator.clearHistoryAfterRebootIfNeeded(
+                kernelBootTime: 1_700_000_000,
+                uptimeRelativeBootTime: 1_700_007_200
+            )
+            #expect(harness.model.items.count == 2)
+
+            harness.coordinator.clearHistoryAfterRebootIfNeeded(
+                kernelBootTime: 1_700_020_000,
+                uptimeRelativeBootTime: 1_700_020_000
+            )
+
+            #expect(harness.model.items.map(\.id) == [favorite.id])
+            #expect(harness.preferencesStore.lastKnownKernelBootTime() == 1_700_020_000)
+            #expect(harness.preferencesStore.userDefaults.object(forKey: PreferencesStore.legacyUptimeBootTimeKey) as? Double == 1_700_020_000)
+        }
     }
 
     @Suite

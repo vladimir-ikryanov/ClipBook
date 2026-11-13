@@ -540,6 +540,7 @@ extension SharedProcessStateTests {
     @Suite
     struct LocalizationAndExtensionTests {
         @Test
+        @MainActor
         func l10nSetLanguageAndFallback() {
             defer {
                 L10n.setLanguage("en")
