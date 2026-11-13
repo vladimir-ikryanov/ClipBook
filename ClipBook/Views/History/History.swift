@@ -261,10 +261,16 @@ final class History: NSView {
     let newIdentities = built.identities
     // Every row changes its height and content with the compact mode.
     let changesRowStyle = showsCompactRows != self.showsCompactRows
-    let removedRowIndexes = changesLayout || changesRowStyle || previousIdentities.count - newIdentities.count > Self.largeRemovalReloadThreshold
+    let changesRowConfiguration = changesRowStyle
+      || availableTags != self.availableTags
+      || showCommandNumberShortcut != self.showCommandNumberShortcut
+      || showPreviewForLinks != self.showPreviewForLinks
+      || detectSensitiveContent != self.detectsSensitiveContent
+      || showDividers != self.showsDividers
+    let removedRowIndexes = changesLayout || changesRowConfiguration || previousIdentities.count - newIdentities.count > Self.largeRemovalReloadThreshold
       ? nil
       : self.removedRowIndexes(from: previousIdentities, to: newIdentities, allowEmpty: changesSearchTerms)
-    let insertedRowIndexes = changesLayout || changesRowStyle || removedRowIndexes != nil || previousIdentities.isEmpty || newIdentities.count - previousIdentities.count > Self.largeInsertionReloadThreshold
+    let insertedRowIndexes = changesLayout || changesRowConfiguration || removedRowIndexes != nil || previousIdentities.isEmpty || newIdentities.count - previousIdentities.count > Self.largeInsertionReloadThreshold
       ? nil
       : self.removedRowIndexes(from: newIdentities, to: previousIdentities)
 
@@ -290,15 +296,22 @@ final class History: NSView {
     }
     applyTableReload(removedRowIndexes: removedRowIndexes, insertedRowIndexes: insertedRowIndexes)
     // Typing in the search field mostly takes rows out of the list or puts them back.
-    // The rows that stay keep their views, so they highlight the new query's matches here.
-    if !showsTiles,
-       removedRowIndexes != nil || insertedRowIndexes != nil,
-       changesSearchTerms {
+    // The rows that stay keep their views, so stale items reload and the rest highlight
+    // the new query's matches in place.
+    if !showsTiles, removedRowIndexes != nil || insertedRowIndexes != nil {
+      var staleRows = IndexSet()
       tableView.enumerateAvailableRowViews { _, row in
         guard let cell = tableView.view(atColumn: 0, row: row, makeIfNecessary: false) as? HistoryItemRowView else {
           return
         }
-        cell.updateSearchQuery(searchQuery)
+        if case .item(let item, _) = tableRows[safe: row], cell.configuredItem != item {
+          staleRows.insert(row)
+        } else if changesSearchTerms {
+          cell.updateSearchQuery(searchQuery)
+        }
+      }
+      if !staleRows.isEmpty {
+        tableView.reloadData(forRowIndexes: staleRows, columnIndexes: IndexSet(integer: 0))
       }
     }
     updateScrollContentInsets()
@@ -452,6 +465,10 @@ final class History: NSView {
       var changedHeaderHeightRows = IndexSet(integersIn: 0..<min(2, tableRows.count))
       if let secondHeaderRow = tableRows.indices.dropFirst().first(where: tableRows.isSectionHeader(at:)) {
         changedHeaderHeightRows.insert(secondHeaderRow)
+      }
+      if let insertedRowIndexes,
+         let shiftedFirstRow = tableRows.indices.first(where: { !insertedRowIndexes.contains($0) }) {
+        changedHeaderHeightRows.insert(shiftedFirstRow)
       }
       tableView.enumerateAvailableRowViews { _, row in
         guard tableRows.indices.contains(row),

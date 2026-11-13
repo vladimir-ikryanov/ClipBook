@@ -361,6 +361,9 @@ enum HistoryTextPreviewFormatter {
   static let tabSymbol = "→"
   static let leadingSpaceSymbol = "·"
   static let layoutCharacterLimit = 2_000
+  private static let maskSpanExpression = try! NSRegularExpression(
+    pattern: #"\x{25CF}{8,}|\x{25CF}{4} \x{25CF}{4} \x{25CF}{4} \d{4}(?!\d)"#
+  )
   private static var previewCache: [String: Preview] = [:]
 
   // The text shown in a row, with the ranges of the symbols put in place of whitespace.
@@ -385,14 +388,14 @@ enum HistoryTextPreviewFormatter {
   // Line breaks are shown as return symbols instead of actual breaks, so multi-line text
   // flows as one compact wrapped paragraph in the row view.
   static func preview(from text: String, characterLimit: Int? = layoutCharacterLimit) -> Preview {
-    if characterLimit == layoutCharacterLimit, let cached = previewCache[text] {
+    let bounded = boundedString(from: trimmingLeadingWhitespace(text), characterLimit: characterLimit)
+    if characterLimit == layoutCharacterLimit, let cached = previewCache[bounded] {
       return cached
     }
     var preview = Preview()
-    let lines = boundedString(from: trimmingLeadingWhitespace(text), characterLimit: characterLimit)
-      .split(omittingEmptySubsequences: false) { character in
-        character.isNewline
-      }
+    let lines = bounded.split(omittingEmptySubsequences: false) { character in
+      character.isNewline
+    }
     for (lineIndex, line) in lines.enumerated() {
       if lineIndex > 0 {
         preview.appendSymbol(returnSymbol)
@@ -405,7 +408,7 @@ enum HistoryTextPreviewFormatter {
       if previewCache.count > 2_048 {
         previewCache.removeAll(keepingCapacity: true)
       }
-      previewCache[text] = preview
+      previewCache[bounded] = preview
     }
     return preview
   }
@@ -467,6 +470,10 @@ enum HistoryTextPreviewFormatter {
     guard index < text.endIndex else {
       return (preview, false)
     }
+    index = advancingPastSplitMask(in: text, at: index)
+    guard index < text.endIndex else {
+      return (preview, false)
+    }
 
     let cutLength = text.utf16.distance(from: text.utf16.startIndex, to: index.samePosition(in: text.utf16) ?? text.utf16.endIndex)
     var result = Preview()
@@ -481,6 +488,40 @@ enum HistoryTextPreviewFormatter {
     return (result, true)
   }
 
+  private static func advancingPastSplitMask<S: StringProtocol>(in text: S, at index: String.Index) -> String.Index {
+    guard index > text.startIndex, index < text.endIndex else {
+      return index
+    }
+    var windowStart = text.index(index, offsetBy: -24, limitedBy: text.startIndex) ?? text.startIndex
+    while windowStart > text.startIndex, text[text.index(before: windowStart)] == "\u{25CF}" {
+      windowStart = text.index(before: windowStart)
+    }
+    var windowEnd = text.index(index, offsetBy: 20, limitedBy: text.endIndex) ?? text.endIndex
+    while windowEnd < text.endIndex, text[windowEnd] == "\u{25CF}" {
+      windowEnd = text.index(after: windowEnd)
+    }
+    let windowSlice = text[windowStart..<windowEnd]
+    guard windowSlice.utf8.contains(0x97) else {
+      return index
+    }
+    let windowString = String(windowSlice)
+    let cutOffset = text.distance(from: windowStart, to: index)
+    let windowCutIndex = windowString.index(windowString.startIndex, offsetBy: cutOffset)
+    var advancedIndex = windowCutIndex
+    let fullRange = NSRange(windowString.startIndex..<windowString.endIndex, in: windowString)
+    for match in maskSpanExpression.matches(in: windowString, range: fullRange) {
+      if let span = Range(match.range, in: windowString),
+         span.lowerBound < advancedIndex && advancedIndex < span.upperBound {
+        advancedIndex = span.upperBound
+      }
+    }
+    guard advancedIndex > windowCutIndex else {
+      return index
+    }
+    let delta = windowString.distance(from: windowCutIndex, to: advancedIndex)
+    return text.index(index, offsetBy: delta)
+  }
+
   // Leading spaces and line breaks are left out of the preview. Text made only of
   // whitespace is kept as is, so its row still shows what it holds.
   private static func trimmingLeadingWhitespace(_ text: String) -> Substring {
@@ -493,8 +534,12 @@ enum HistoryTextPreviewFormatter {
 
   private static func boundedString(from text: Substring, characterLimit: Int?) -> String {
     guard let characterLimit, characterLimit > 0,
-          let limitIndex = text.index(text.startIndex, offsetBy: characterLimit, limitedBy: text.endIndex),
-          limitIndex != text.endIndex else {
+          var limitIndex = text.index(text.startIndex, offsetBy: characterLimit, limitedBy: text.endIndex),
+          limitIndex < text.endIndex else {
+      return String(text)
+    }
+    limitIndex = advancingPastSplitMask(in: text, at: limitIndex)
+    guard limitIndex < text.endIndex else {
       return String(text)
     }
 
@@ -538,6 +583,7 @@ enum HistoryTextPreviewFormatter {
 private final class HistoryTextPreviewField: NSTextField {
   private struct RenderedState: Equatable {
     let displayText: String
+    let symbolRanges: [NSRange]
     let searchQuery: String
     let font: NSFont
     let textColor: NSColor
@@ -682,6 +728,7 @@ private final class HistoryTextPreviewField: NSTextField {
   private func applyPreviewAttributedStringIfNeeded() {
     let state = RenderedState(
       displayText: displayText,
+      symbolRanges: symbolRanges,
       searchQuery: searchQuery,
       font: textFont,
       textColor: preferredTextColor,
@@ -783,7 +830,7 @@ class HistoryItemRowView: NSTableCellView {
   private(set) var searchQuery = ""
   private(set) var linkPreview: LinkPreview?
   private(set) var showsLinkPreview = false
-  private var configuredItem: ClipboardItem?
+  private(set) var configuredItem: ClipboardItem?
   private var detectsSensitiveContent = false
   /// True while the row shows dots in place of the item's sensitive content.
   private(set) var hidesSensitiveContent = false
@@ -1081,7 +1128,7 @@ class HistoryItemRowView: NSTableCellView {
     let field = textPreviewFields[nextTextPreviewFieldIndex]
     nextTextPreviewFieldIndex += 1
     field.update(
-      previewText: contentText(text),
+      previewText: contentText(Self.boundedRowPreviewInput(text)),
       searchQuery: searchQuery,
       font: font,
       textColor: textColor,
@@ -1090,6 +1137,27 @@ class HistoryItemRowView: NSTableCellView {
       widthHint: rowTableWidth
     )
     return field
+  }
+
+  // Covers SensitiveContent's row secret scan window plus enough trailing text
+  // for layoutCharacterLimit ellipsis truncation even when a long secret shrinks
+  // to an inline mask, avoiding full-string copies of oversized items.
+  private static let rowPreviewInputWindow = 10_240
+
+  private static func boundedRowPreviewInput(_ text: String) -> String {
+    guard text.utf8.count > rowPreviewInputWindow else {
+      return text
+    }
+    guard let firstVisibleIndex = text.firstIndex(where: { !$0.isWhitespace }) else {
+      guard let end = text.index(text.startIndex, offsetBy: rowPreviewInputWindow, limitedBy: text.endIndex) else {
+        return text
+      }
+      return String(text[..<end])
+    }
+    guard let end = text.index(firstVisibleIndex, offsetBy: rowPreviewInputWindow, limitedBy: text.endIndex) else {
+      return text
+    }
+    return String(text[..<end])
   }
 
   /// The item's content as the row shows it: with its sensitive parts replaced by dots
