@@ -18,7 +18,8 @@ nonisolated struct HistorySearchTerms: Equatable, Sendable {
     init(values: [String]) {
         self.values = values
         self.asciiTerms = values.map { term in
-            guard !term.isEmpty, term.utf8.allSatisfy({ $0 > 0 && $0 < 0x80 }) else {
+            guard !term.isEmpty,
+                  term.utf8.allSatisfy({ !($0 < 0x09 || ($0 > 0x0D && $0 < 0x20) || $0 == 0x7F || $0 >= 0x80) }) else {
                 return nil
             }
             var lowered: [UInt8] = []
@@ -46,14 +47,24 @@ nonisolated struct HistorySearchTerms: Equatable, Sendable {
 
 /// Checks whether an item's search text contains every term of a search query.
 nonisolated enum HistorySearchMatcher {
+    static let compareOptions: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive]
+
+    private static let enUSLocale = Locale(identifier: "en_US")
+    private static let asciiContractionDigraphs: [(digraph: String, prefix: String)] = [
+        ("aa", "a"), ("ch", "c"), ("cs", "c"), ("dz", "d"), ("gy", "g"), ("lj", "l"),
+        ("ll", "l"), ("ly", "l"), ("nj", "n"), ("ny", "n"), ("rr", "r"), ("sh", "s"),
+        ("sz", "s"), ("th", "t"), ("ty", "t"), ("xh", "x"), ("zh", "z"), ("zs", "z")
+    ]
+
     private struct FoldTables: Sendable {
         let digits: [UInt64]
         let letters: [UInt64]
     }
 
     // Bitmap lookup tables over all Unicode scalar values (0...0x10FFFF) for
-    // non-ASCII scalars that Foundation's case-insensitive search can equate
-    // with ASCII digits or ASCII letters/punctuation.
+    // scalars that Foundation's case- and diacritic-insensitive search can
+    // equate with ASCII digits or ASCII letters/punctuation, or ignore inside
+    // an ASCII match.
     private static let foldTables: FoldTables = {
         let wordCount = (0x110000 + 63) / 64
         var digits = [UInt64](repeating: 0, count: wordCount)
@@ -76,12 +87,12 @@ nonisolated enum HistorySearchMatcher {
                         let baseScalar = UInt32(wordIndex * 64)
                         for bit in 0..<64 {
                             let value = baseScalar + UInt32(bit)
-                            guard value >= 0x80, value <= 0x10FFFF,
+                            guard value <= 0x10FFFF,
                                   let scalar = Unicode.Scalar(value) else {
                                 continue
                             }
                             let properties = scalar.properties
-                            if properties.numericType != nil {
+                            if value >= 0x80, properties.numericType != nil {
                                 digitMask |= (UInt64(1) << bit)
                             }
                             if Self.computesFoldsToASCIILetters(scalar, properties: properties) {
@@ -104,24 +115,51 @@ nonisolated enum HistorySearchMatcher {
         _ scalar: Unicode.Scalar,
         properties: Unicode.Scalar.Properties
     ) -> Bool {
-        guard properties.isCased || properties.changesWhenNFKCCaseFolded else {
+        let value = scalar.value
+        if value < 0x80 {
+            return value < 0x09 || (value > 0x0D && value < 0x20) || value == 0x7F
+        }
+        switch value {
+        case 0x3400...0x9FFF, 0xAC00...0xD7AF, 0xF900...0xFAFF, 0x20000...0x3FFFF:
+            return false
+        default:
+            break
+        }
+
+        let categoryAllowed: Bool
+        switch properties.generalCategory {
+        case .nonspacingMark, .enclosingMark, .spacingMark, .format, .control,
+             .modifierLetter, .modifierSymbol, .otherLetter, .mathSymbol:
+            categoryAllowed = true
+        default:
+            categoryAllowed = false
+        }
+        guard properties.isCased
+            || properties.changesWhenNFKCCaseFolded
+            || properties.isDefaultIgnorableCodePoint
+            || categoryAllowed else {
             return false
         }
+
         if properties.lowercaseMapping.utf8.contains(where: { $0 < 0x80 })
             || properties.uppercaseMapping.utf8.contains(where: { $0 < 0x80 })
             || properties.titlecaseMapping.utf8.contains(where: { $0 < 0x80 }) {
             return true
         }
         let string = String(scalar)
-        if properties.changesWhenCaseFolded,
-           string.folding(options: .caseInsensitive, locale: nil).utf8.contains(where: { $0 < 0x80 }) {
+        if string.folding(options: Self.compareOptions, locale: nil).utf8.contains(where: { $0 < 0x80 }) {
             return true
         }
-        if properties.changesWhenNFKCCaseFolded {
-            let decomposed = string.decomposedStringWithCanonicalMapping
-            if !decomposed.isEmpty, decomposed.unicodeScalars.allSatisfy({ $0.value < 0x80 }) {
-                return true
-            }
+        if properties.changesWhenNFKCCaseFolded
+            && string.decomposedStringWithCompatibilityMapping.utf8.contains(where: { $0 < 0x80 }) {
+            return true
+        }
+        if string.compare("a", options: Self.compareOptions, locale: enUSLocale) != .orderedAscending
+            && string.compare("zzzzzzzz", options: Self.compareOptions, locale: enUSLocale) != .orderedDescending {
+            return true
+        }
+        if "a\(scalar)b".range(of: "ab", options: Self.compareOptions, range: nil, locale: enUSLocale) != nil {
+            return true
         }
         return false
     }
@@ -142,7 +180,7 @@ nonisolated enum HistorySearchMatcher {
 
     static func foldsToASCIILetters(_ scalar: Unicode.Scalar) -> Bool {
         let value = scalar.value
-        guard value >= 0x80, value <= 0x10FFFF else {
+        guard value <= 0x10FFFF else {
             return false
         }
         let wordIndex = Int(value >> 6)
@@ -155,8 +193,11 @@ nonisolated enum HistorySearchMatcher {
         if let cached = localeAllowsPrefilterCache.withLock({ $0[identifier] }) {
             return cached
         }
-        let allowed = "I".range(of: "i", options: .caseInsensitive, range: nil, locale: locale) != nil
-            && "i".range(of: "I", options: .caseInsensitive, range: nil, locale: locale) != nil
+        let allowed = "I".range(of: "i", options: Self.compareOptions, range: nil, locale: locale) != nil
+            && "i".range(of: "I", options: Self.compareOptions, range: nil, locale: locale) != nil
+            && asciiContractionDigraphs.allSatisfy { digraph, prefix in
+                digraph.range(of: prefix, options: Self.compareOptions, range: nil, locale: locale) != nil
+            }
         localeAllowsPrefilterCache.withLock { $0[identifier] = allowed }
         return allowed
     }
@@ -168,7 +209,7 @@ nonisolated enum HistorySearchMatcher {
 
     @inline(__always)
     private static func isAllASCII(_ bytes: UnsafeBufferPointer<UInt8>) -> Bool {
-        for byte in bytes where byte >= 0x80 {
+        for byte in bytes where byte < 0x09 || (byte > 0x0D && byte < 0x20) || byte == 0x7F || byte >= 0x80 {
             return false
         }
         return true
@@ -202,15 +243,21 @@ nonisolated enum HistorySearchMatcher {
         return false
     }
 
-    static func matches(_ text: String, _ terms: HistorySearchTerms, locale: Locale) -> Bool {
+    static func matches(
+        _ text: String,
+        _ terms: HistorySearchTerms,
+        locale: Locale = .current,
+        allowsPrefilter: Bool? = nil
+    ) -> Bool {
         let values = terms.values
         guard !values.isEmpty else {
             return true
         }
 
-        guard allowsASCIIPrefilter(for: locale) else {
+        let canUsePrefilter = allowsPrefilter ?? allowsASCIIPrefilter(for: locale)
+        guard canUsePrefilter else {
             for term in values {
-                if text.range(of: term, options: .caseInsensitive, range: nil, locale: locale) == nil {
+                if text.range(of: term, options: Self.compareOptions, range: nil, locale: locale) == nil {
                     return false
                 }
             }
@@ -229,7 +276,7 @@ nonisolated enum HistorySearchMatcher {
             for index in values.indices {
                 let term = values[index]
                 guard let asciiTerm = asciiTerms[index] else {
-                    if original.range(of: term, options: .caseInsensitive, range: nil, locale: locale) == nil {
+                    if original.range(of: term, options: Self.compareOptions, range: nil, locale: locale) == nil {
                         return false
                     }
                     continue
@@ -258,9 +305,6 @@ nonisolated enum HistorySearchMatcher {
                             let lettersTable = foldTables.letters
                             for scalar in original.unicodeScalars {
                                 let value = scalar.value
-                                guard value >= 0x80 else {
-                                    continue
-                                }
                                 let wordIndex = Int(value >> 6)
                                 let bit = UInt64(1) << (value & 63)
                                 if (lettersTable[wordIndex] & bit) != 0 {
@@ -281,7 +325,7 @@ nonisolated enum HistorySearchMatcher {
                     }
                 }
 
-                if original.range(of: term, options: .caseInsensitive, range: nil, locale: locale) == nil {
+                if original.range(of: term, options: Self.compareOptions, range: nil, locale: locale) == nil {
                     return false
                 }
             }

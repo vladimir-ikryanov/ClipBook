@@ -177,7 +177,7 @@ private enum HistorySearchMatchHighlighter {
       while searchRange.length > 0 {
         let range = nsText.range(
           of: term,
-          options: .caseInsensitive,
+          options: HistorySearchMatcher.compareOptions,
           range: searchRange,
           locale: locale
         )

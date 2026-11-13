@@ -399,10 +399,10 @@ final class AppModel: ObservableObject {
             return result
         }
 
-        let installedResult = (hasSearch && searchResult?.terms == terms) ? searchResult : nil
+        let locale = Locale.current
+        let installedResult = (hasSearch && searchResult?.terms == terms && searchResult?.locale == locale) ? searchResult : nil
         let isPositionalMatch = installedResult?.revision == sortedListRevision
             && installedResult?.matches.count == sortedIndexes.count
-        let locale = Locale.current
 
         var result: [ClipboardItem] = []
         if isPositionalMatch, let installedResult, !hasContentTypes, !hasTags, !hasSources {
@@ -416,6 +416,7 @@ final class AppModel: ObservableObject {
             return result
         }
 
+        let allowsPrefilter = hasSearch ? HistorySearchMatcher.allowsASCIIPrefilter(for: locale) : false
         items.withUnsafeBufferPointer { buffer in
             for (position, itemIndex) in sortedIndexes.enumerated() {
                 if hasSearch {
@@ -431,12 +432,22 @@ final class AppModel: ObservableObject {
                             if !installedResult.matches[corpusIndex] {
                                 continue
                             }
-                        } else if !HistorySearchMatcher.matches(searchText, terms, locale: locale) {
+                        } else if !HistorySearchMatcher.matches(
+                            searchText,
+                            terms,
+                            locale: locale,
+                            allowsPrefilter: allowsPrefilter
+                        ) {
                             continue
                         }
                     } else {
                         let searchText = buffer[itemIndex].searchText
-                        if !HistorySearchMatcher.matches(searchText, terms, locale: locale) {
+                        if !HistorySearchMatcher.matches(
+                            searchText,
+                            terms,
+                            locale: locale,
+                            allowsPrefilter: allowsPrefilter
+                        ) {
                             continue
                         }
                     }
@@ -495,7 +506,10 @@ final class AppModel: ObservableObject {
         let terms = HistorySearchTerms(query: searchQuery)
         if !terms.isEmpty {
             let locale = Locale.current
-            result = result.filter { HistorySearchMatcher.matches($0.searchText, terms, locale: locale) }
+            let allowsPrefilter = HistorySearchMatcher.allowsASCIIPrefilter(for: locale)
+            result = result.filter {
+                HistorySearchMatcher.matches($0.searchText, terms, locale: locale, allowsPrefilter: allowsPrefilter)
+            }
         }
 
         if let order {

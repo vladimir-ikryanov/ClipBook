@@ -143,13 +143,14 @@ nonisolated final class HistorySearchJob: Sendable {
 
         HistorySearchMatcher.warmUp()
 
+        let allowsPrefilter = HistorySearchMatcher.allowsASCIIPrefilter(for: locale)
         let count = corpus.texts.count
         var matches = [Bool](repeating: false, count: count)
         var matchCount = 0
         let previousMatches: [Bool]? = (
             previous?.corpus === corpus
                 && previous?.locale == locale
-                && HistorySearchMatcher.allowsASCIIPrefilter(for: locale)
+                && allowsPrefilter
                 && previous.map { Self.isStrictASCIIPrefixRefinement(terms: terms, of: $0.terms) } == true
         ) ? previous?.matches : nil
 
@@ -183,7 +184,12 @@ nonisolated final class HistorySearchJob: Sendable {
                                    texts[index].utf8.allSatisfy({ $0 < 0x80 }) {
                                     continue
                                 }
-                                let matched = HistorySearchMatcher.matches(texts[index], terms, locale: locale)
+                                let matched = HistorySearchMatcher.matches(
+                                    texts[index],
+                                    terms,
+                                    locale: locale,
+                                    allowsPrefilter: allowsPrefilter
+                                )
                                 buffer[index] = matched
                                 if matched {
                                     localMatchCount += 1
@@ -194,7 +200,12 @@ nonisolated final class HistorySearchJob: Sendable {
                                 if (index - start) % checkStride == 0, self.isCancelled {
                                     return
                                 }
-                                let matched = HistorySearchMatcher.matches(texts[index], terms, locale: locale)
+                                let matched = HistorySearchMatcher.matches(
+                                    texts[index],
+                                    terms,
+                                    locale: locale,
+                                    allowsPrefilter: allowsPrefilter
+                                )
                                 buffer[index] = matched
                                 if matched {
                                     localMatchCount += 1
