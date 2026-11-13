@@ -4,6 +4,7 @@ struct ShortcutSettingsView: View {
     @ObservedObject var model: AppModel
     @EnvironmentObject private var coordinator: AppCoordinator
     @State private var recordingShortcuts = RecordingShortcuts()
+    @State private var isAccessibilityTrusted = AccessibilityPermission.isTrusted
 
     /// The shortcuts whose recorder is waiting for a combination. Clicking
     /// another recorder starts it before the previous one stops, so there can
@@ -112,6 +113,60 @@ struct ShortcutSettingsView: View {
             recordingShortcuts.keyPaths.removeAll()
             coordinator.setGlobalShortcutsSuspended(false)
         }
+        // Coming back from System Settings, where the permission is granted.
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            isAccessibilityTrusted = AccessibilityPermission.isTrusted
+        }
+    }
+
+    /// Only showing the history can be a modifier key pressed twice: the
+    /// paste-next shortcuts are pressed many times in a row, and the shortcuts
+    /// of the history window are plain key events.
+    private func allowsDoubleTap(_ keyPath: WritableKeyPath<AppPreferences, String>) -> Bool {
+        keyPath == \.showHistoryShortcut
+    }
+
+    private func description(for keyPath: WritableKeyPath<AppPreferences, String>) -> String? {
+        guard allowsDoubleTap(keyPath) else {
+            return nil
+        }
+
+        return L10n.string("Press a modifier key twice, such as ⌘ ⌘, to use it as the shortcut.")
+    }
+
+    /// A modifier key pressed twice is read from the key events of other apps,
+    /// which macOS shares only with apps allowed to use Accessibility.
+    private var accessibilityNote: AttributedString {
+        var note = AttributedString(L10n.string("Works in other apps only with Accessibility permission.") + " ")
+        var link = AttributedString(L10n.string("Open System Settings"))
+        link.link = AccessibilityPermission.settingsURL
+        note.append(link)
+        return note
+    }
+
+    private func accessory(for keyPath:WritableKeyPath<AppPreferences, String>) -> AnyView? {
+        guard allowsDoubleTap(keyPath),
+              !isAccessibilityTrusted,
+              DoubleTapModifier(shortcut: model.preferences[keyPath: keyPath]) != nil else {
+            return nil
+        }
+
+        return AnyView(
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                // The link ends the sentence and wraps with it, so the text
+                // keeps the full width of the row.
+                Text(accessibilityNote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .environment(\.openURL, OpenURLAction { _ in
+                        AccessibilityPermission.openSettings()
+                        return .handled
+                    })
+            }
+            .font(.caption)
+        )
     }
 
     private func shortcutRows(for entries: [ShortcutEntry], requiresModifiers: Bool = false) -> some View {
@@ -121,6 +176,9 @@ struct ShortcutSettingsView: View {
                 text: binding(for: entry.keyPath),
                 defaultText: entry.defaultValue,
                 requiresModifiers: requiresModifiers,
+                allowsDoubleTap: allowsDoubleTap(entry.keyPath),
+                description: description(for: entry.keyPath),
+                accessory: accessory(for: entry.keyPath),
                 conflictingActionTitle: { shortcut in
                     conflictingActionTitle(for: shortcut, assignedTo: entry.keyPath)
                 },

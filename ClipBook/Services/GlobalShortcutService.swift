@@ -13,6 +13,7 @@ final class GlobalShortcutService {
     private var handlers: [UInt32: () -> Void] = [:]
     private var registrations: [Registration] = []
     private var hotKeys: [EventHotKeyRef] = []
+    private var doubleTapMonitors: [DoubleTapModifierMonitor] = []
     private var eventHandler: EventHandlerRef?
     private var layoutObserver: NSObjectProtocol?
 
@@ -40,6 +41,14 @@ final class GlobalShortcutService {
     }
 
     func register(_ identifier: GlobalShortcutIdentifier, shortcut: String, handler: @escaping () -> Void) {
+        // A modifier tapped twice, such as ⌘ ⌘, cannot be a Carbon hot key.
+        if let modifier = DoubleTapModifier(shortcut: shortcut) {
+            doubleTapMonitors.append(DoubleTapModifierMonitor(modifier: modifier) {
+                DispatchQueue.main.async(execute: handler)
+            })
+            return
+        }
+
         // A modifier-less hotkey (e.g. a bare Return) is captured system-wide and
         // steals that key from every application, so it is never registered.
         guard KeyboardShortcutParser.hasModifiers(shortcut) else {
@@ -57,6 +66,8 @@ final class GlobalShortcutService {
 
     func unregisterAll() {
         removeHotKeys()
+        doubleTapMonitors.forEach { $0.invalidate() }
+        doubleTapMonitors.removeAll()
         registrations.removeAll()
         handlers.removeAll()
     }

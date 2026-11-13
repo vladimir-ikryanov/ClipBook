@@ -9,6 +9,13 @@ struct ShortcutRow: View {
     /// Global shortcuts are captured system-wide, so they must include a
     /// modifier key: a bare key would be stolen from every application.
     var requiresModifiers = false
+    /// Whether a modifier key tapped twice, such as ⌘ ⌘, can be recorded.
+    var allowsDoubleTap = false
+    /// Shown in small print under the title.
+    var description: String?
+    /// Shown under the description, for example to ask for a permission the
+    /// shortcut needs.
+    var accessory: AnyView?
     /// Returns the title of the action already using the given shortcut, or
     /// `nil` when the shortcut is free to assign.
     var conflictingActionTitle: (String) -> String? = { _ in nil }
@@ -19,13 +26,25 @@ struct ShortcutRow: View {
     @State private var conflictMessageID = 0
 
     var body: some View {
-        HStack {
-            Text(title)
-            Spacer()
+        HStack(spacing: 20) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                if let description {
+                    Text(description)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if let accessory {
+                    accessory
+                }
+            }
+            Spacer(minLength: 0)
             ShortcutRecorder(
                 shortcut: $text,
                 defaultShortcut: defaultText,
                 isDisabled: locked,
+                allowsDoubleTap: allowsDoubleTap,
                 hasConflict: conflictMessage != nil,
                 commit: commit,
                 onRecordingStarted: { conflictMessage = nil },
@@ -105,6 +124,7 @@ private struct ShortcutRecorder: View {
     @Binding var shortcut: String
     let defaultShortcut: String
     let isDisabled: Bool
+    let allowsDoubleTap: Bool
     let hasConflict: Bool
     /// Assigns the shortcut, returning whether it was accepted.
     let commit: (String) -> Bool
@@ -202,7 +222,12 @@ private struct ShortcutRecorder: View {
         .onChange(of: isRecording) { onRecordingChanged($0) }
         .opacity(isDisabled ? 0.55 : 1)
         .background(
-            ShortcutEventReader(isRecording: $isRecording, draft: $draft, onCancel: stopRecording) { recordedShortcut in
+            ShortcutEventReader(
+                isRecording: $isRecording,
+                draft: $draft,
+                allowsDoubleTap: allowsDoubleTap,
+                onCancel: stopRecording
+            ) { recordedShortcut in
                 _ = commit(recordedShortcut)
                 stopRecording()
             }
@@ -236,6 +261,7 @@ private struct ShortcutRecorder: View {
 private struct ShortcutEventReader: NSViewRepresentable {
     @Binding var isRecording: Bool
     @Binding var draft: ShortcutDraft?
+    let allowsDoubleTap: Bool
     let onCancel: () -> Void
     let onCommit: (String) -> Void
 
@@ -249,6 +275,7 @@ private struct ShortcutEventReader: NSViewRepresentable {
 
     func updateNSView(_ nsView: ShortcutEventView, context: Context) {
         nsView.isRecording = isRecording
+        nsView.allowsDoubleTap = allowsDoubleTap
         nsView.onDraftChange = { draft = $0 }
         nsView.onCancel = onCancel
         nsView.onCommit = onCommit
@@ -262,7 +289,15 @@ private struct ShortcutEventReader: NSViewRepresentable {
 }
 
 private final class ShortcutEventView: NSView {
-    var isRecording = false
+    var isRecording = false {
+        didSet {
+            if isRecording != oldValue {
+                doubleTapDetector.reset()
+            }
+        }
+    }
+    var allowsDoubleTap = false
+    private var doubleTapDetector = DoubleTapModifierDetector()
     var onDraftChange: ((ShortcutDraft?) -> Void)?
     var onCancel: (() -> Void)?
     var onCommit: ((String) -> Void)?
@@ -320,6 +355,12 @@ private final class ShortcutEventView: NSView {
             return
         }
 
+        if allowsDoubleTap, let modifier = doubleTapDetector.handleFlagsChanged(event) {
+            onDraftChange?(nil)
+            onCommit?(modifier.storageText)
+            return
+        }
+
         let modifiers = event.shortcutModifierTokens
         onDraftChange?(modifiers.isEmpty ? nil : ShortcutDraft(modifiers: modifiers, key: nil))
     }
@@ -328,6 +369,7 @@ private final class ShortcutEventView: NSView {
     /// keys to be released would never finish for combinations that hold down
     /// Command, because macOS does not deliver key up events while it is held.
     private func record(_ event: NSEvent) -> Bool {
+        doubleTapDetector.reset()
         guard !event.isARepeat, let key = ShortcutFormatter.keyToken(for: event.keyCode, command: event.modifierFlags.contains(.command)) else {
             return false
         }
@@ -421,6 +463,10 @@ private enum ShortcutFormatter {
     static func displayText(for shortcut: String) -> String {
         guard !shortcut.isEmpty else {
             return L10n.string("Not set")
+        }
+
+        if let doubleTap = DoubleTapModifier(shortcut: shortcut) {
+            return doubleTap.displayText
         }
 
         let parts = shortcut.lowercased().split(separator: "+").map(String.init)

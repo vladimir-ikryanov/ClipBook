@@ -9,9 +9,10 @@ enum AccessibilityPermission {
         AXIsProcessTrusted()
     }
 
+    /// The Accessibility list in System Settings.
+    static let settingsURL = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
+
     static func openSettings() {
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
-            NSWorkspace.shared.open(url)
-        }
+        NSWorkspace.shared.open(settingsURL)
     }
 }

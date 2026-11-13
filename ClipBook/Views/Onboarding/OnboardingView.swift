@@ -635,6 +635,11 @@ struct OnboardingKeyboardKey {
   let width: CGFloat
 
   static func keys(for shortcut: String) -> [OnboardingKeyboardKey] {
+    if let doubleTap = DoubleTapModifier(shortcut: shortcut) {
+      let key = modifierKey(for: doubleTap)
+      return [key, key]
+    }
+
     let parts = shortcut.lowercased().split(separator: "+").map(String.init)
     guard let key = parts.last, !shortcut.isEmpty else {
       return [OnboardingKeyboardKey(word: nil, symbol: L10n.string("Not set"), width: 1.6)]
@@ -657,6 +662,19 @@ struct OnboardingKeyboardKey {
     let label = KeyboardShortcutParser.keyDisplayText(for: key)
     keys.append(OnboardingKeyboardKey(word: nil, symbol: label, width: label.count > 1 ? 1.6 : 1))
     return keys
+  }
+
+  private static func modifierKey(for modifier: DoubleTapModifier) -> OnboardingKeyboardKey {
+    switch modifier {
+    case .control:
+      return OnboardingKeyboardKey(word: "control", symbol: "⌃", width: 1.3)
+    case .option:
+      return OnboardingKeyboardKey(word: "option", symbol: "⌥", width: 1.3)
+    case .shift:
+      return OnboardingKeyboardKey(word: "shift", symbol: nil, width: 2.2)
+    case .command:
+      return OnboardingKeyboardKey(word: "command", symbol: "⌘", width: 1.3)
+    }
   }
 }
 

@@ -128,6 +128,10 @@ enum OnboardingShortcut {
       return [L10n.string("Not set")]
     }
 
+    if let doubleTap = DoubleTapModifier(shortcut: shortcut) {
+      return [doubleTap.symbol, doubleTap.symbol]
+    }
+
     let parts = shortcut.lowercased().split(separator: "+").map(String.init)
     guard let key = parts.last else {
       return [L10n.string("Not set")]
@@ -151,7 +155,11 @@ enum OnboardingShortcut {
   }
 
   static func displayText(for shortcut: String) -> String {
-    displayParts(for: shortcut).joined()
+    if let doubleTap = DoubleTapModifier(shortcut: shortcut) {
+      return doubleTap.displayText
+    }
+
+    return displayParts(for: shortcut).joined()
   }
 }
 

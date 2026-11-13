@@ -25,6 +25,12 @@ enum ShortcutConflicts {
             return false
         }
 
+        let doubleTapLhs = DoubleTapModifier(shortcut: lhs)
+        let doubleTapRhs = DoubleTapModifier(shortcut: rhs)
+        if doubleTapLhs != nil || doubleTapRhs != nil {
+            return doubleTapLhs == doubleTapRhs
+        }
+
         // Compare the parsed key and modifiers so that different spellings of
         // the same combination, e.g. "cmd+shift+c" and "shift+cmd+c", match.
         if let parsedLhs = KeyboardShortcutParser.parse(lhs),

@@ -17378,6 +17378,53 @@
         }
       }
     },
+    "Press a modifier key twice, such as ⌘ ⌘, to use it as the shortcut." : {
+      "comment" : "Shown under the Show clipboard history shortcut in Settings. The shortcut can be a modifier key pressed twice in quick succession.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drücke eine Modifikatortaste zweimal, etwa ⌘ ⌘, um sie als Kurzbefehl zu verwenden."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Press a modifier key twice, such as ⌘ ⌘, to use it as the shortcut."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulsa dos veces una tecla modificadora, como ⌘ ⌘, para usarla como atajo."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premi due volte un tasto modificatore, ad esempio ⌘ ⌘, per usarlo come scorciatoia."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⌘ ⌘ のように修飾キーを2回押すと、それをショートカットにできます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressione uma tecla modificadora duas vezes, como ⌘ ⌘, para usá-la como atalho."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连按两次修饰键（如 ⌘ ⌘）即可将其用作快捷键。"
+          }
+        }
+      }
+    },
     "Press Between Items" : {
       "localizations" : {
         "de" : {
@@ -24580,6 +24627,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "窗户"
+          }
+        }
+      }
+    },
+    "Works in other apps only with Accessibility permission." : {
+      "comment" : "Shown under the Show clipboard history shortcut when it is a modifier key pressed twice and ClipBook is not allowed to use Accessibility.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funktioniert in anderen Apps nur mit der Bedienungshilfen-Berechtigung."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Works in other apps only with Accessibility permission."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo funciona en otras apps con el permiso de Accesibilidad."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funziona nelle altre app solo con il permesso di Accessibilità."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ほかのアプリでは、アクセシビリティの許可がある場合にのみ機能します。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só funciona em outros apps com a permissão de Acessibilidade."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅在获得辅助功能权限后才能在其他 App 中使用。"
           }
         }
       }

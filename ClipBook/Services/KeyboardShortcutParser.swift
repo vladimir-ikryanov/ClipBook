@@ -38,13 +38,19 @@ struct KeyboardShortcutParser {
         return Parsed(keyCode: keyCode, modifiers: modifiers)
     }
 
-    /// Whether the shortcut includes at least one modifier key. A bare key such
-    /// as Return must never be registered system-wide: the hotkey would swallow
-    /// that key in every application, including ClipBook's own history panel.
+    /// Whether the shortcut includes at least one modifier key, which a modifier
+    /// tapped twice does too. A bare key such as Return must never be
+    /// registered system-wide: the hotkey would swallow that key in every
+    /// application, including ClipBook's own history panel.
     ///
     /// It does not look at the keyboard layout, so it is safe to call while
     /// preferences are decoded away from the main thread.
     static func hasModifiers(_ shortcut: String) -> Bool {
+        // A modifier tapped twice, such as ⌘ ⌘, is made of modifiers only.
+        if DoubleTapModifier(shortcut: shortcut) != nil {
+            return true
+        }
+
         guard let (_, modifiers) = components(of: shortcut) else {
             return false
         }
