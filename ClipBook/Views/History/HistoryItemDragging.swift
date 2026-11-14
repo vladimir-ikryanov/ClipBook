@@ -62,17 +62,12 @@ enum HistoryItemDragging {
   private static let fileIconSize = NSSize(width: 32, height: 32)
 
   /// The writer for a dragged row, carrying the row's item ID next to the
-  /// content. Pasteboard items and the image promise provider take the type
-  /// directly; anything else is wrapped.
+  /// content. Pasteboard items take the type directly; anything else is
+  /// wrapped.
   static func writer(_ writer: NSPasteboardWriting, carrying itemID: UUID) -> NSPasteboardWriting {
     if let pasteboardItem = writer as? NSPasteboardItem {
       pasteboardItem.setString(itemID.uuidString, forType: .historyItemID)
       return pasteboardItem
-    }
-
-    if let promiseProvider = writer as? ImageAssetFilePromiseProvider {
-      promiseProvider.historyItemID = itemID
-      return promiseProvider
     }
 
     return HistoryItemIDPasteboardWriter(wrapping: writer, itemID: itemID)
@@ -114,11 +109,11 @@ enum HistoryItemDragging {
       return nil
     }
 
-    let provider = ImageAssetFilePromiseProvider(
+    let pasteboardItem = ImageAssetDragItem.make(
       assetURL: assetURL,
-      fileName: promisedImageFileName(for: item)
+      fileName: draggedImageFileName(for: item)
     )
-    return HistoryRowDragPayload(entries: [HistoryRowDragEntry(writer: provider, icon: nil)], containsFileURLs: false)
+    return singleEntryPayload(pasteboardItem)
   }
 
   private static func filePayload(for item: ClipboardItem) -> HistoryRowDragPayload? {
@@ -210,9 +205,9 @@ enum HistoryItemDragging {
     HistoryRowDragPayload(entries: [HistoryRowDragEntry(writer: writer, icon: nil)], containsFileURLs: false)
   }
 
-  /// The name the promised PNG gets at the destination: the item's own title
+  /// The name the dragged PNG gets at the destination: the item's own title
   /// when it has one, otherwise a timestamped name in the style of screenshots.
-  private static func promisedImageFileName(for item: ClipboardItem) -> String {
+  private static func draggedImageFileName(for item: ClipboardItem) -> String {
     let baseName: String
     if let title = item.itemTitle {
       baseName = title
