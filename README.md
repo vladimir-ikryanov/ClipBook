@@ -46,3 +46,15 @@ This archives a universal binary, packages it as a DMG, notarizes it, and update
 the Sparkle appcast under `Releases`. Notarization needs a `notarytool` keychain
 profile; pass `--skip-notarization` to produce local artifacts without one. Run
 `./release.sh --help` for the full list of options.
+
+## License
+
+ClipBook’s source code is provided for transparency and personal use. However, its use in commercial or redistributed products is restricted without a license. Please refer to the [LICENSE](LICENSE.md) file for details.
+
+## Terms of Use
+
+By using ClipBook, you agree to the [Terms of Use](https://clipbook.app/terms/) and [Privacy Policy](https://clipbook.app/privacy/).
+
+## Support
+
+For questions or support, please [contact me](mailto:vladimir.ikryanov@clipbook.app).
