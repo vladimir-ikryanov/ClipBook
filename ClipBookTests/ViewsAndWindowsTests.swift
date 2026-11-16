@@ -701,6 +701,155 @@ enum ViewsAndWindowsTests {
             #expect(saved.first?.1 == "Edited text")
         }
 
+        @Test
+        @MainActor
+        func itemPreviewDetailsViewReusesSameShapeSubviewsAndTruncatesDockedListPaths() throws {
+            TestSupport.ensureAppKitInitialized()
+
+            func allDescendants(in root: NSView) -> [NSView] {
+                var visited = Set<ObjectIdentifier>()
+                var ordered: [NSView] = []
+                func walk(_ view: NSView) {
+                    let id = ObjectIdentifier(view)
+                    guard visited.insert(id).inserted else { return }
+                    ordered.append(view)
+                    if #available(macOS 26.0, *),
+                       let glassView = view as? NSGlassEffectView,
+                       let contentView = glassView.contentView {
+                        walk(contentView)
+                    }
+                    for subview in view.subviews {
+                        walk(subview)
+                    }
+                }
+                walk(root)
+                return ordered
+            }
+
+            let baseDate = Date(timeIntervalSince1970: 1_700_000_000)
+            let longText = String(repeating: "x", count: 4_096)
+            let textItemA = ClipboardItem.fixture(
+                kind: .text,
+                text: "Hello world",
+                sourceAppName: "Notes",
+                sourceBundleIdentifier: "com.apple.Notes",
+                copiedAt: baseDate,
+                firstCopiedAt: baseDate,
+                byteSize: 11,
+                copyCount: 1
+            )
+            let textItemB = ClipboardItem.fixture(
+                kind: .text,
+                text: longText,
+                sourceAppName: "Notes",
+                sourceBundleIdentifier: "com.apple.Notes",
+                copiedAt: baseDate,
+                firstCopiedAt: baseDate,
+                byteSize: 4_096,
+                copyCount: 2
+            )
+
+            let floatingDetails = ItemPreviewDetailsView(item: textItemA, style: .floating)
+            floatingDetails.frame = NSRect(x: 0, y: 0, width: 640, height: 80)
+            floatingDetails.layoutSubtreeIfNeeded()
+
+            let initialViews = allDescendants(in: floatingDetails)
+            let initialStacks = initialViews.compactMap { $0 as? NSStackView }.map(ObjectIdentifier.init)
+            let initialTextFields = initialViews.compactMap { $0 as? NSTextField }
+            let initialTextFieldIDs = initialTextFields.map(ObjectIdentifier.init)
+
+            let sizeA = ByteCountFormatter.string(fromByteCount: 11, countStyle: .file)
+            let sizeB = ByteCountFormatter.string(fromByteCount: 4_096, countStyle: .file)
+            let numberFormatter = NumberFormatter()
+            numberFormatter.locale = L10n.currentLocale
+            numberFormatter.numberStyle = .decimal
+            let charsB = try #require(numberFormatter.string(from: 4_096))
+
+            #expect(initialTextFields.contains { $0.stringValue == "11" })
+            #expect(initialTextFields.contains { $0.stringValue == sizeA })
+
+            floatingDetails.update(item: textItemB)
+            floatingDetails.layoutSubtreeIfNeeded()
+
+            let updatedViews = allDescendants(in: floatingDetails)
+            let updatedStacks = updatedViews.compactMap { $0 as? NSStackView }.map(ObjectIdentifier.init)
+            let updatedTextFields = updatedViews.compactMap { $0 as? NSTextField }
+            #expect(!initialStacks.isEmpty)
+            #expect(updatedStacks == initialStacks)
+            #expect(updatedTextFields.map(ObjectIdentifier.init) == initialTextFieldIDs)
+            #expect(updatedTextFields.contains { $0.stringValue == charsB })
+            #expect(updatedTextFields.contains { $0.stringValue == sizeB })
+            #expect(!updatedTextFields.contains { $0.stringValue == "11" })
+
+            let pathA = "/Users/alice/Documents/Projects/ClipBook/Archive/report-alpha.pdf"
+            let pathB = "/Users/alice/Documents/Projects/ClipBook/Archive/report-beta.pdf"
+            let expectedPathA = (pathA as NSString).abbreviatingWithTildeInPath
+            let expectedPathB = (pathB as NSString).abbreviatingWithTildeInPath
+
+            let singleFileA = ClipboardItem.fixture(
+                kind: .file,
+                text: nil,
+                filePaths: [pathA],
+                copiedAt: baseDate,
+                firstCopiedAt: baseDate,
+                byteSize: 1_024,
+                copyCount: 1
+            )
+            let singleFileB = ClipboardItem.fixture(
+                kind: .file,
+                text: nil,
+                filePaths: [pathB],
+                copiedAt: baseDate,
+                firstCopiedAt: baseDate,
+                byteSize: 8_192,
+                copyCount: 2
+            )
+            let multiFile = ClipboardItem.fixture(
+                kind: .file,
+                text: nil,
+                filePaths: [pathA, pathB],
+                copiedAt: baseDate,
+                firstCopiedAt: baseDate,
+                byteSize: 9_216,
+                copyCount: 2
+            )
+
+            let dockedDetails = ItemPreviewDetailsView(item: singleFileA, style: .docked)
+            dockedDetails.arrangement = .list
+            dockedDetails.frame = NSRect(x: 0, y: 0, width: 320, height: 180)
+            dockedDetails.layoutSubtreeIfNeeded()
+
+            let pathTitle = L10n.string("Path")
+            let dockedFieldsInitial = allDescendants(in: dockedDetails).compactMap { $0 as? NSTextField }
+            let pathTitleField = try #require(dockedFieldsInitial.first { $0.stringValue == pathTitle })
+            let pathRowView = try #require(pathTitleField.superview)
+            let fieldsContainer = try #require(pathRowView.superview)
+            let initialListRowIDs = fieldsContainer.subviews.map(ObjectIdentifier.init)
+            let pathValueField = try #require(
+                pathRowView.subviews.compactMap { $0 as? NSTextField }.first { $0 !== pathTitleField }
+            )
+            #expect(pathValueField.stringValue == expectedPathA)
+            #expect(pathValueField.lineBreakMode == .byTruncatingMiddle)
+
+            dockedDetails.update(item: singleFileB)
+            dockedDetails.layoutSubtreeIfNeeded()
+
+            #expect(fieldsContainer.subviews.map(ObjectIdentifier.init) == initialListRowIDs)
+            #expect(pathValueField.superview === pathRowView)
+            #expect(pathValueField.stringValue == expectedPathB)
+            #expect(pathValueField.lineBreakMode == .byTruncatingMiddle)
+            #expect(pathRowView.toolTip == expectedPathB)
+
+            dockedDetails.update(item: multiFile)
+            dockedDetails.layoutSubtreeIfNeeded()
+
+            let multiFields = allDescendants(in: dockedDetails).compactMap { $0 as? NSTextField }
+            #expect(fieldsContainer.subviews.count == initialListRowIDs.count - 1)
+            #expect(!multiFields.contains { $0.stringValue == pathTitle })
+            #expect(!multiFields.contains { $0.stringValue.contains("report-") })
+            #expect(multiFields.contains { $0.stringValue == L10n.string("Files") })
+        }
+
         @MainActor
         private static func collectLabels(in root: NSView) -> [HistoryFixedTextColorLabel] {
             var results: [HistoryFixedTextColorLabel] = []

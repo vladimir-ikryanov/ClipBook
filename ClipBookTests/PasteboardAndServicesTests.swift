@@ -807,6 +807,40 @@ enum PasteboardAndServicesTests {
                 #expect(fixture.delegate.capturedHistory.map(\.item.text) == ["First", "Second", "Third"])
             }
         }
+
+        @Test
+        @MainActor
+        func imageCaptureSearchTextIncludesRecognizedContentAndSourceAppWithoutAssetPath() async throws {
+            try await TestSupport.withTemporaryDirectory { directory in
+                let id = UUID()
+                let assetPath = directory.appendingPathComponent("\(id.uuidString).png").path
+                try await PasteboardAndServicesTests.withMonitor { fixture in
+                    await fixture.deliver(
+                        .image(
+                            id: id,
+                            assetPath: assetPath,
+                            byteSize: 128,
+                            recognizedContent: RecognizedImageContent(
+                                text: "OCR Invoice",
+                                qrCodeText: "https://qr.example"
+                            ),
+                            digest: "abc",
+                            reusesStoredFile: false
+                        ),
+                        changeCount: 1
+                    )
+
+                    let captured = try #require(fixture.delegate.items.first)
+                    #expect(captured.id == id)
+                    #expect(captured.kind == .image)
+                    #expect(captured.searchText.contains("OCR Invoice"))
+                    #expect(captured.searchText.contains("https://qr.example"))
+                    #expect(captured.searchText.contains("Notes"))
+                    #expect(!captured.searchText.contains(id.uuidString))
+                    #expect(!captured.searchText.localizedCaseInsensitiveContains("png"))
+                }
+            }
+        }
     }
 }
 

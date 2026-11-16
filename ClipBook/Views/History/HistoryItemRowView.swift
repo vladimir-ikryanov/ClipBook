@@ -637,7 +637,7 @@ enum HistoryTextPreviewFormatter {
 // The text preview keeps a fixed height for its line count. Text that fits on one line is
 // drawn centered in that space; longer text wraps and is cut with an ellipsis at the end.
 // A row keeps its preview fields and updates them for each item it shows.
-private final class HistoryTextPreviewField: NSTextField {
+final class HistoryTextPreviewField: NSTextField {
   private struct RenderedState: Equatable {
     let displayText: String
     let symbolRanges: [NSRange]
