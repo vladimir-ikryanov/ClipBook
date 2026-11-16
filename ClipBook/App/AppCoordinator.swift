@@ -644,6 +644,7 @@ final class AppCoordinator: ObservableObject {
       }
       removeAssetFiles(for: deletedItems, remainingItems: model.items.filter { keepingItems && shouldKeepWhenClearingHistory($0) })
       model.remove(Set(deletedItems.map(\.id)))
+      HistoryRowTextCache.removeAll()
     } catch {
       model.lastError = error.localizedDescription
     }
@@ -1133,6 +1134,7 @@ final class AppCoordinator: ObservableObject {
     removeFilePreviewFiles(for: items, remainingItems: remainingItems)
     removeAssetFiles(for: items, remainingItems: remainingItems)
     model.remove(deletedItemIDs)
+    HistoryRowTextCache.removeAll()
   }
 
   // MARK: - Trash

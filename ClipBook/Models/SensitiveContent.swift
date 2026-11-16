@@ -116,7 +116,10 @@ enum SensitiveContent {
         case .notSensitive:
             return false
         case .none:
-            guard detectsAutomatically else {
+            // Most rows hold ordinary text that no pattern can match, and
+            // ruling that out is cheaper than the cache lookup below.
+            guard detectsAutomatically,
+                  SensitiveContentDetector.mayContainSecret(in: item.previewText) else {
                 return false
             }
             return !detectedSecrets(
@@ -296,6 +299,37 @@ enum SensitiveContentDetector {
         var range: NSRange
         /// The last four digits of a secret that is a card number.
         var cardNumberEnding: String?
+    }
+
+    /// False only when no pattern below can match `text`, so it is checked
+    /// with a single pass over its bytes. Every pattern needs an ASCII digit,
+    /// one of `-`, `_`, `:` or `=`, or one of the prefixes `AI` (AIza), `IA`
+    /// (AKIA, ASIA), `G.` (SG.) or `yJ` (eyJ): the bearer and basic tokens
+    /// and the passwords that stand alone are taken only with a digit in
+    /// them. A pattern added here has to keep that true or be added below.
+    /// Only the start of a long text is looked at, and it is let through.
+    static func mayContainSecret(in text: String) -> Bool {
+        var previousByte: UInt8 = 0
+        var inspectedBytes = 0
+        for byte in text.utf8 {
+            if (byte >= 0x30 && byte <= 0x39)
+                || byte == 0x2D || byte == 0x5F
+                || byte == 0x3A || byte == 0x3D {
+                return true
+            }
+            if (previousByte == 0x41 && byte == 0x49)
+                || (previousByte == 0x49 && byte == 0x41)
+                || (previousByte == 0x47 && byte == 0x2E)
+                || (previousByte == 0x79 && byte == 0x4A) {
+                return true
+            }
+            previousByte = byte
+            inspectedBytes += 1
+            if inspectedBytes >= 16_000 {
+                return true
+            }
+        }
+        return false
     }
 
     /// The secrets in `text`, in order and without overlaps.
