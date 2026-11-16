@@ -120,6 +120,8 @@ final class HistoryContentViewController: NSViewController {
   // The settings the pane's controller was made with, which it can't change.
   private var previewPaneControllerConfiguration: PreviewPaneControllerConfiguration?
   private var previewPaneUpdateWorkItem: DispatchWorkItem?
+  // When the pending update of the pane runs, as system uptime.
+  private var previewPaneUpdateDeadline: TimeInterval = 0
   private var commandPalette: CommandPalette?
   private var commandPaletteOutsideClickMonitor: OutsideClickDismissalMonitor?
   private var isModalSheetPresentationPending = false
@@ -721,8 +723,7 @@ final class HistoryContentViewController: NSViewController {
          listedItemCount > Self.largeResultRowCount || (isTypingBurst && listedItemCount > Self.largeClearRowCount) {
         previousTermsChangingKeystrokeTime = lastTermsChangingKeystrokeTime
         lastTermsChangingKeystrokeTime = now
-        previewPaneUpdateWorkItem?.cancel()
-        previewPaneUpdateWorkItem = nil
+        deferPendingPreviewPaneUpdateUntilTypingPauses()
         pendingSearchQuery = query
         scheduleHeldSearchUpdate(.clear(query: query, shouldResetSelection: shouldResetSelection), delay: Self.typingPause)
         updateToolbarState()
@@ -748,8 +749,7 @@ final class HistoryContentViewController: NSViewController {
 
     previousTermsChangingKeystrokeTime = lastTermsChangingKeystrokeTime
     lastTermsChangingKeystrokeTime = ProcessInfo.processInfo.systemUptime
-    previewPaneUpdateWorkItem?.cancel()
-    previewPaneUpdateWorkItem = nil
+    deferPendingPreviewPaneUpdateUntilTypingPauses()
     searchQueryDebounceWorkItem?.cancel()
     searchQueryDebounceWorkItem = nil
     cancelPendingSearchJob()
@@ -1794,11 +1794,21 @@ final class HistoryContentViewController: NSViewController {
   }
 
   // The selection changes in many ways, often several at once, so the pane
-  // catches up once the list has drawn its own update.
+  // catches up once the list has drawn its own update. Requests made while an
+  // update is pending join it rather than putting it off, so moving through the
+  // list as fast as a key repeats still updates the pane. Only typing in the
+  // search field puts it off, until typing pauses.
   private func setNeedsPreviewPaneUpdate() {
+    let now = ProcessInfo.processInfo.systemUptime
+    let typingRemaining = Self.typingPause - (now - lastTermsChangingKeystrokeTime)
+    let isTyping = typingRemaining > 0
+    let deadline = now + (isTyping ? typingRemaining + 0.03 : 0.03)
+    if previewPaneUpdateWorkItem != nil, !isTyping || previewPaneUpdateDeadline >= deadline {
+      return
+    }
+
     previewPaneUpdateWorkItem?.cancel()
-    let typingRemaining = Self.typingPause - (ProcessInfo.processInfo.systemUptime - lastTermsChangingKeystrokeTime)
-    let delay = typingRemaining > 0 ? typingRemaining + 0.03 : 0.03
+    previewPaneUpdateDeadline = deadline
     let workItem = DispatchWorkItem { [weak self] in
       guard let self else {
         return
@@ -1808,7 +1818,16 @@ final class HistoryContentViewController: NSViewController {
       self.updatePreviewPane()
     }
     previewPaneUpdateWorkItem = workItem
-    DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
+    DispatchQueue.main.asyncAfter(deadline: .now() + (deadline - now), execute: workItem)
+  }
+
+  // A keystroke that changes the search keeps a pending update of the pane for
+  // when typing pauses, rather than dropping it.
+  private func deferPendingPreviewPaneUpdateUntilTypingPauses() {
+    guard previewPaneUpdateWorkItem != nil else {
+      return
+    }
+    setNeedsPreviewPaneUpdate()
   }
 
   private func updatePreviewPane() {

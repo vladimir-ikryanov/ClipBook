@@ -4,6 +4,8 @@ final class HistoryItemRowImageView: HistoryItemRowView {
   // An image's title holds its pixel size, which is read from the image file. Asset files
   // are never rewritten under the same name, so each title is read once.
   private static var titlesByAssetPath: [String: String] = [:]
+  // The title `ClipboardItem.contentTitle` gives an image whose size it could not read.
+  private static let untitledImageTitle = "Image"
 
   override func configureContent(item: ClipboardItem, quickPasteIndex: Int?) {
     let title = Self.title(for: item)
@@ -22,6 +24,11 @@ final class HistoryItemRowImageView: HistoryItemRowView {
       return cached
     }
     let title = item.contentTitle
+    // Without its size the file could not be read, perhaps not yet, so it is read
+    // again the next time rather than showing no size for good.
+    guard title != untitledImageTitle else {
+      return title
+    }
     if titlesByAssetPath.count > 1_024 {
       titlesByAssetPath.removeAll(keepingCapacity: true)
     }

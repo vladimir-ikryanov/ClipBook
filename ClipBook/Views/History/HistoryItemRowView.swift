@@ -41,33 +41,84 @@ private class NormalBackgroundTextFieldCell: NSTextFieldCell {
   }
 }
 
-// Draws the text in the vertical middle of the field, so a preview that needs one line sits
-// centered in the space reserved for two, and a longer one fills both lines.
-private final class VerticallyCenteredTextFieldCell: NormalBackgroundTextFieldCell {
-  private struct MeasureKey: Hashable {
-    let text: String
+/// What rows remember about the text they show, so a row shown again is set up and drawn
+/// without measuring or formatting its text again. The previews hold the text itself, so
+/// they are bounded by size, given up under memory pressure and emptied once items are
+/// deleted for good; the heights are keyed by a hash of the text rather than the text.
+enum HistoryRowTextCache {
+  struct HeightKey: Hashable {
+    let textHash: Int
+    let textLength: Int
     let font: NSFont?
     let lineBreakMode: NSLineBreakMode
     let width: Int
     let height: Int
   }
 
-  private static var cachedHeights: [MeasureKey: CGFloat] = [:]
+  private final class PreviewBox {
+    let preview: HistoryTextPreviewFormatter.Preview
 
+    init(_ preview: HistoryTextPreviewFormatter.Preview) {
+      self.preview = preview
+    }
+  }
+
+  private static let previews: NSCache<NSString, PreviewBox> = {
+    let cache = NSCache<NSString, PreviewBox>()
+    cache.countLimit = 2_048
+    // In UTF-16 code units of the text and its preview.
+    cache.totalCostLimit = 2_000_000
+    return cache
+  }()
+
+  private static var heights: [HeightKey: CGFloat] = [:]
+
+  static func preview(for text: String) -> HistoryTextPreviewFormatter.Preview? {
+    previews.object(forKey: text as NSString)?.preview
+  }
+
+  static func setPreview(_ preview: HistoryTextPreviewFormatter.Preview, for text: String) {
+    let key = text as NSString
+    previews.setObject(PreviewBox(preview), forKey: key, cost: key.length + preview.length)
+  }
+
+  static func height(for key: HeightKey) -> CGFloat? {
+    heights[key]
+  }
+
+  static func setHeight(_ height: CGFloat, for key: HeightKey) {
+    if heights.count > 2_048 {
+      heights.removeAll(keepingCapacity: true)
+    }
+    heights[key] = height
+  }
+
+  /// Forgets every text, so items deleted for good leave nothing of their content behind.
+  static func removeAll() {
+    previews.removeAllObjects()
+    heights.removeAll()
+  }
+}
+
+// Draws the text in the vertical middle of the field, so a preview that needs one line sits
+// centered in the space reserved for two, and a longer one fills both lines.
+private final class VerticallyCenteredTextFieldCell: NormalBackgroundTextFieldCell {
   override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
     super.drawInterior(withFrame: centeredFrame(in: cellFrame), in: controlView)
   }
 
   private func centeredFrame(in cellFrame: NSRect) -> NSRect {
-    let key = MeasureKey(
-      text: attributedStringValue.string,
+    let text = attributedStringValue.string
+    let key = HistoryRowTextCache.HeightKey(
+      textHash: text.hashValue,
+      textLength: text.utf16.count,
       font: font,
       lineBreakMode: lineBreakMode,
       width: Int(cellFrame.width * 2),
       height: Int(cellFrame.height * 2)
     )
     let contentHeight: CGFloat
-    if let cached = Self.cachedHeights[key] {
+    if let cached = HistoryRowTextCache.height(for: key) {
       contentHeight = cached
     } else {
       let measuringBounds = NSRect(
@@ -77,10 +128,7 @@ private final class VerticallyCenteredTextFieldCell: NormalBackgroundTextFieldCe
         height: cellFrame.height
       )
       let measured = min(ceil(cellSize(forBounds: measuringBounds).height), cellFrame.height)
-      if Self.cachedHeights.count > 2_048 {
-        Self.cachedHeights.removeAll(keepingCapacity: true)
-      }
-      Self.cachedHeights[key] = measured
+      HistoryRowTextCache.setHeight(measured, for: key)
       contentHeight = measured
     }
     guard contentHeight < cellFrame.height else {
@@ -364,8 +412,6 @@ enum HistoryTextPreviewFormatter {
   private static let maskSpanExpression = try! NSRegularExpression(
     pattern: #"\x{25CF}{8,}|\x{25CF}{4} \x{25CF}{4} \x{25CF}{4} \d{4}(?!\d)"#
   )
-  private static var previewCache: [String: Preview] = [:]
-
   // The text shown in a row, with the ranges of the symbols put in place of whitespace.
   // The same characters typed in the text itself are not in the ranges, so they keep
   // the color of the text.
@@ -387,9 +433,16 @@ enum HistoryTextPreviewFormatter {
 
   // Line breaks are shown as return symbols instead of actual breaks, so multi-line text
   // flows as one compact wrapped paragraph in the row view.
-  static func preview(from text: String, characterLimit: Int? = layoutCharacterLimit) -> Preview {
+  // Only previews of the row's own length are remembered, and only when `cachesResult`:
+  // a secret the user asked to see is made into a preview each time rather than kept.
+  static func preview(
+    from text: String,
+    characterLimit: Int? = layoutCharacterLimit,
+    cachesResult: Bool = true
+  ) -> Preview {
     let bounded = boundedString(from: trimmingLeadingWhitespace(text), characterLimit: characterLimit)
-    if characterLimit == layoutCharacterLimit, let cached = previewCache[bounded] {
+    let usesCache = cachesResult && characterLimit == layoutCharacterLimit
+    if usesCache, let cached = HistoryRowTextCache.preview(for: bounded) {
       return cached
     }
     var preview = Preview()
@@ -404,11 +457,8 @@ enum HistoryTextPreviewFormatter {
         appendDisplayLine(line, to: &preview)
       }
     }
-    if characterLimit == layoutCharacterLimit {
-      if previewCache.count > 2_048 {
-        previewCache.removeAll(keepingCapacity: true)
-      }
-      previewCache[bounded] = preview
+    if usesCache {
+      HistoryRowTextCache.setPreview(preview, for: bounded)
     }
     return preview
   }
@@ -653,12 +703,13 @@ private final class HistoryTextPreviewField: NSTextField {
     textColor: NSColor,
     maximumNumberOfLines: Int,
     wrappingMode: NSLineBreakMode,
-    widthHint: CGFloat? = nil
+    widthHint: CGFloat? = nil,
+    cachesPreview: Bool = true
   ) {
     isUpdating = true
     if previewText != self.previewText {
       self.previewText = previewText
-      fullPreview = HistoryTextPreviewFormatter.preview(from: previewText)
+      fullPreview = HistoryTextPreviewFormatter.preview(from: previewText, cachesResult: cachesPreview)
     }
     self.widthHint = widthHint
     self.searchQuery = searchQuery
@@ -834,6 +885,9 @@ class HistoryItemRowView: NSTableCellView {
   private var detectsSensitiveContent = false
   /// True while the row shows dots in place of the item's sensitive content.
   private(set) var hidesSensitiveContent = false
+  /// True while the row shows sensitive content the user asked to see, which is then
+  /// kept out of the shared text caches.
+  private var showsRevealedSensitiveContent = false
   /// True while the row shows the item on one short line: the type box, smaller, and the
   /// item's name or the first line of its content, with no details or preview next to it.
   private(set) var isCompact = false
@@ -942,8 +996,9 @@ class HistoryItemRowView: NSTableCellView {
     self.showsLinkPreview = showsLinkPreview
     self.detectsSensitiveContent = detectsSensitiveContent
     self.onToggleSensitiveContentVisibility = onToggleSensitiveContentVisibility
-    let isMasked = Self.isItemMasked(item, detectsAutomatically: detectsSensitiveContent)
+    let isMasked = SensitiveContent.isMasked(item, detectsAutomatically: detectsSensitiveContent)
     hidesSensitiveContent = isMasked && !revealsSensitiveContent
+    showsRevealedSensitiveContent = isMasked && revealsSensitiveContent
     setCompact(isCompact)
 
     configureAccessoryControls(item: item, quickPasteIndex: quickPasteIndex, isMasked: isMasked)
@@ -1134,7 +1189,8 @@ class HistoryItemRowView: NSTableCellView {
       textColor: textColor,
       maximumNumberOfLines: isCompact ? 1 : maximumNumberOfLines,
       wrappingMode: wrappingMode,
-      widthHint: rowTableWidth
+      widthHint: rowTableWidth,
+      cachesPreview: !showsRevealedSensitiveContent
     )
     return field
   }
@@ -1651,6 +1707,8 @@ class HistoryItemRowView: NSTableCellView {
       pointSize: NSFont.systemFontSize,
       weight: .regular
     )
+    // The cached symbol carries no description, unlike `FavoriteView.make`'s.
+    imageView.setAccessibilityLabel("Favorite")
     imageView.setContentHuggingPriority(.required, for: .horizontal)
     favoriteView = imageView
     let quickPasteIndex = accessoryControlsView.arrangedSubviews.firstIndex(of: quickPasteField)
@@ -1709,50 +1767,6 @@ class HistoryItemRowView: NSTableCellView {
 
   private func hasVisibleAccessoryControls(item: ClipboardItem, quickPasteIndex: Int?) -> Bool {
     item.isFavorite || item.expiresAt != nil || quickPasteIndex != nil || !itemTags.isEmpty || item.hasSourceApp
-  }
-
-  private static func isItemMasked(_ item: ClipboardItem, detectsAutomatically: Bool) -> Bool {
-    guard item.kind.canHoldSensitiveContent else {
-      return false
-    }
-    switch item.sensitivity {
-    case .sensitive:
-      return true
-    case .notSensitive:
-      return false
-    case .none:
-      guard detectsAutomatically, mayContainAutoDetectedSecret(in: item.previewText) else {
-        return false
-      }
-      return SensitiveContent.isMasked(item, detectsAutomatically: true)
-    }
-  }
-
-  // Every SensitiveContentDetector pattern contains at least one ASCII digit (0-9),
-  // delimiter (-, _, :, =), or 2-byte prefix ("AI" for AIza, "IA" for AKIA/ASIA,
-  // "G." for SG., "yJ" for eyJ) within the 4,000-character row detection prefix.
-  private static func mayContainAutoDetectedSecret(in text: String) -> Bool {
-    var previousByte: UInt8 = 0
-    var inspectedBytes = 0
-    for byte in text.utf8 {
-      if (byte >= 0x30 && byte <= 0x39)
-          || byte == 0x2D || byte == 0x5F
-          || byte == 0x3A || byte == 0x3D {
-        return true
-      }
-      if (previousByte == 0x41 && byte == 0x49)
-          || (previousByte == 0x49 && byte == 0x41)
-          || (previousByte == 0x47 && byte == 0x2E)
-          || (previousByte == 0x79 && byte == 0x4A) {
-        return true
-      }
-      previousByte = byte
-      inspectedBytes += 1
-      if inspectedBytes >= 16_000 {
-        return true
-      }
-    }
-    return false
   }
 
   private var hasVisibleNonQuickPasteAccessoryControls: Bool {
@@ -1825,11 +1839,37 @@ private final class SourceAppIconView: NSView {
     NSSize(width: HistoryRow.sourceAppIconSize, height: HistoryRow.sourceAppIconSize)
   }
 
+  // Scaled down to fit and centered, as an image view scaling proportionally down
+  // would draw it, so an icon that is not square keeps its shape.
   override func draw(_ dirtyRect: NSRect) {
     guard let image else {
       return
     }
-    image.draw(in: bounds)
+    let imageSize = image.size
+    guard imageSize.width > 0, imageSize.height > 0 else {
+      return
+    }
+    let scale = min(1, bounds.width / imageSize.width, bounds.height / imageSize.height)
+    let size = NSSize(width: imageSize.width * scale, height: imageSize.height * scale)
+    let rect = NSRect(
+      x: bounds.midX - size.width / 2,
+      y: bounds.midY - size.height / 2,
+      width: size.width,
+      height: size.height
+    )
+    image.draw(in: rect)
+  }
+
+  override func isAccessibilityElement() -> Bool {
+    image != nil
+  }
+
+  override func accessibilityRole() -> NSAccessibility.Role? {
+    .image
+  }
+
+  override func accessibilityLabel() -> String? {
+    toolTip
   }
 }
 
