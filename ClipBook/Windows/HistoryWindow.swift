@@ -176,6 +176,16 @@ final class HistoryWindow: NSObject, NSWindowDelegate {
         self?.setScreenCaptureSharingType(showDuringScreenSharing ? .readOnly : .none)
       }
       .store(in: &cancellables)
+
+    // A modal dialog run while the history is open, such as the "Delete All"
+    // confirmation shown over the command palette, takes key from a sheet or
+    // another window rather than from the history window itself. Any window
+    // becoming key is when a modal session has just started or ended.
+    NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)
+      .sink { [weak self] _ in
+        self?.updateWindowLevel()
+      }
+      .store(in: &cancellables)
   }
 
   private static func makeWindow() -> HistoryContentWindow {
@@ -507,10 +517,6 @@ final class HistoryWindow: NSObject, NSWindowDelegate {
     clearSearchAfterHideWorkItem = nil
   }
   
-  func windowDidBecomeKey(_ notification: Notification) {
-    updateWindowLevel()
-  }
-
   func windowDidResignKey(_ notification: Notification) {
     updateWindowLevel()
     // Focus has not moved yet when this fires, and how long the window server
