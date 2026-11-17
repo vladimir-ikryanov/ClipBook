@@ -87,8 +87,8 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
   weak var delegate: HistoryToolbarDelegate?
 
   private let searchLogoView = NSImageView()
-  private let searchField = SearchTokenField()
-  private let suggestionsPopup = SearchSuggestionsPopup()
+  let searchField = SearchTokenField()
+  let suggestionsPopup = SearchSuggestionsPopup()
   private lazy var searchContainer = makeSearchContainer()
   private lazy var searchCursorView = SearchTextCursorView(
     textFrameInWindow: { [weak self] in
@@ -995,6 +995,9 @@ final class HistoryToolbar: NSObject, NSToolbarDelegate, SearchTokenFieldDelegat
     searchField.delegate = self
     searchField.onTokensWidthChange = { [weak self] in
       self?.updateSearchContainerWidth()
+    }
+    suggestionsPopup.onSelect = { [weak self] suggestion in
+      self?.acceptSuggestion(suggestion)
     }
     searchField.translatesAutoresizingMaskIntoConstraints = false
     searchField.heightAnchor.constraint(equalToConstant: SearchTokenField.height).isActive = true

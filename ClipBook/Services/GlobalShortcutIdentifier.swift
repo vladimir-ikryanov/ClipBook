@@ -3,7 +3,7 @@ import AppKit
 import Carbon
 import Combine
 
-enum GlobalShortcutIdentifier: UInt32 {
+enum GlobalShortcutIdentifier: UInt32, CaseIterable {
     case showHistory = 1
     case pauseCapture = 2
     case pasteNext = 3

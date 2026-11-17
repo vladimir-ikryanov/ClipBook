@@ -142,7 +142,7 @@ final class SQLiteHistoryStore: HistoryStore {
             // The title is the name the user gave the item, which a copy never
             // carries, so copying the same content again keeps it.
             existingItem.title = item.title ?? existingItem.title
-            existingItem.text = item.text
+            existingItem.text = item.text ?? existingItem.text
             // An item captured before QR codes were read keeps whatever it has
             // until a capture brings a payload with it.
             existingItem.qrCodeText = item.qrCodeText ?? existingItem.qrCodeText
@@ -639,8 +639,10 @@ final class SQLiteHistoryStore: HistoryStore {
         """)
         // Each step rewrites rows one by one; one transaction commits them once.
         try performInTransaction {
-            try migrateLegacyTagNames()
-            try migrateContentKeys()
+            if try schemaVersion() < 2 {
+                try migrateLegacyTagNames()
+                try migrateContentKeys()
+            }
             try migrateRichTextSearchText()
             try migrateStableContentKeys()
             try migrateFormattingColumns()

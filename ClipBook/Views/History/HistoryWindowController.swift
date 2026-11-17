@@ -2549,17 +2549,10 @@ final class HistoryContentViewController: NSViewController {
     }
 
     let tagID = selection.tag.id
-    let allItemsHaveTag = selection.items.allSatisfy { $0.tags.contains(tagID) }
-
-    if allItemsHaveTag {
-      for item in selection.items where item.tags.contains(tagID) {
-        coordinator.toggleTag(selection.tag, for: item)
-      }
-      return
-    }
-
-    for item in selection.items where !item.tags.contains(tagID) {
-      coordinator.addTag(selection.tag, to: item)
+    if selection.items.allSatisfy({ $0.tags.contains(tagID) }) {
+      coordinator.removeTag(selection.tag, from: selection.items)
+    } else {
+      coordinator.addTag(selection.tag, to: selection.items)
     }
   }
 
@@ -2619,26 +2612,9 @@ final class HistoryContentViewController: NSViewController {
       }
 
       if let existingTag = self.model.availableTags.first(where: { $0.name.localizedCaseInsensitiveCompare(tagName) == .orderedSame }) {
-        for item in items {
-          self.coordinator.addTag(existingTag, to: item)
-        }
+        self.coordinator.addTag(existingTag, to: items)
       } else {
-        guard let firstItem = items.first else {
-          window.endSheet(sheetWindow)
-          self.isNewTagSheetPresented = false
-          return
-        }
-
-        self.coordinator.createTag(name: tagName, color: color, for: firstItem)
-        guard let createdTag = self.model.availableTags.first(where: { $0.name.localizedCaseInsensitiveCompare(tagName) == .orderedSame }) else {
-          window.endSheet(sheetWindow)
-          self.isNewTagSheetPresented = false
-          return
-        }
-
-        for item in items.dropFirst() {
-          self.coordinator.addTag(createdTag, to: item)
-        }
+        self.coordinator.createTag(name: tagName, color: color, for: items)
       }
       window.endSheet(sheetWindow)
       self.isNewTagSheetPresented = false
@@ -4496,16 +4472,6 @@ private extension NSImage {
 }
 
 private extension ClipboardItem {
-  var isMissingSingleFileItem: Bool {
-    guard kind == .file,
-          filePaths.count == 1,
-          let filePath = filePaths.first else {
-      return false
-    }
-
-    return !FileManager.default.fileExists(atPath: filePath)
-  }
-
   var canTransformText: Bool {
     switch kind {
     case .text, .richText, .link, .email, .color:

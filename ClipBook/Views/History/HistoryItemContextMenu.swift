@@ -1126,18 +1126,6 @@ final class HistoryItemContextMenu {
   }
 }
 
-private extension ClipboardItem {
-  var isMissingSingleFileItem: Bool {
-    guard kind == .file,
-          filePaths.count == 1,
-          let filePath = filePaths.first else {
-      return false
-    }
-
-    return !FileManager.default.fileExists(atPath: filePath)
-  }
-}
-
 private extension NSColor {
   convenience init?(tagHexString: String) {
     let hex = tagHexString.trimmingCharacters(in: CharacterSet(charactersIn: "#"))

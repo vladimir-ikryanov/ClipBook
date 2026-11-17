@@ -1,4 +1,5 @@
 import AppKit
+import CryptoKit
 
 /// What the user said about an item, which always wins over what the app
 /// detects on its own. An item the user said nothing about has none.
@@ -100,10 +101,47 @@ enum SensitiveContent {
         return "\(cardNumberMask) \(ending)"
     }
 
-    // A row shows the beginning of the text only, so that is all it is searched
-    // for secrets. The preview shows everything and searches much further.
+    // The text a row shows is searched for secrets up to `itemCharacterLimit`
+    // characters, and the preview, which shows far more, up to
+    // `previewCharacterLimit`. Whether an item holds a secret at all is decided
+    // over the preview's reach: the preview masks only an item that holds one,
+    // so a secret past a row's reach would otherwise show in it unmasked.
     private static let itemCharacterLimit = 4_000
     static let previewCharacterLimit = 200_000
+    // A secret that begins inside a limit may end after it, so the search goes
+    // on this far past it. The longest tokens and keys are shorter.
+    private static let straddlingMargin = 4_096
+
+    /// The part of `text` to search when the first `limit` characters of it are
+    /// shown. The whitespace a text begins with is not shown, so it does not
+    /// count against the limit.
+    private static func searchedText(_ text: String, limit: Int) -> String {
+        let window = text.prefix(while: \.isWhitespace).count + limit + straddlingMargin
+        // The byte count is known without walking through the text, and no text
+        // has fewer bytes than characters.
+        guard text.utf8.count > window else {
+            return text
+        }
+        return String(text.prefix(window))
+    }
+
+    /// Puts the masks in place of `secrets` in a text of `length` characters,
+    /// the last first so the ranges before it hold. `replace` does it for the
+    /// kind of text at hand.
+    private static func maskSecrets(
+        _ secrets: [SensitiveContentDetector.Secret],
+        inTextOfLength length: Int,
+        replacing replace: (NSRange, String) -> Void
+    ) {
+        let bounds = NSRange(location: 0, length: length)
+        for secret in secrets.reversed() {
+            // A range outside the text would raise an exception.
+            let clamped = NSIntersectionRange(secret.range, bounds)
+            if clamped.length > 0 {
+                replace(clamped, mask(for: secret))
+            }
+        }
+    }
 
     static func isMasked(_ item: ClipboardItem, detectsAutomatically: Bool) -> Bool {
         guard item.kind.canHoldSensitiveContent else {
@@ -122,10 +160,31 @@ enum SensitiveContent {
                   SensitiveContentDetector.mayContainSecret(in: item.previewText) else {
                 return false
             }
-            return !detectedSecrets(
-                in: String(item.previewText.prefix(itemCharacterLimit)),
+            let previewText = item.previewText
+            let utf8Count = previewText.utf8.count
+            let digest = itemMaskPrefixDigest(for: previewText)
+            let detectsPasswordLikeText = item.kind == .text || item.kind == .richText
+            let cacheKey = item.id as NSUUID
+            if let cached = itemMaskCache.object(forKey: cacheKey),
+               cached.utf8Count == utf8Count,
+               cached.detectsPasswordLikeText == detectsPasswordLikeText,
+               cached.prefixDigest == digest {
+                return cached.isMasked
+            }
+            let isMasked = !detectedSecrets(
+                in: searchedText(previewText, limit: previewCharacterLimit),
                 for: item
             ).isEmpty
+            itemMaskCache.setObject(
+                CachedItemMask(
+                    utf8Count: utf8Count,
+                    prefixDigest: digest,
+                    detectsPasswordLikeText: detectsPasswordLikeText,
+                    isMasked: isMasked
+                ),
+                forKey: cacheKey
+            )
+            return isMasked
         }
     }
 
@@ -147,7 +206,7 @@ enum SensitiveContent {
             // remembered for the rows.
             let detectsPasswordLikeText = item.kind == .text || item.kind == .richText
             return !SensitiveContentDetector.secrets(
-                in: String(item.previewText.prefix(previewCharacterLimit)),
+                in: searchedText(item.previewText, limit: previewCharacterLimit),
                 detectsPasswordLikeText: detectsPasswordLikeText
             ).isEmpty
         }
@@ -175,15 +234,13 @@ enum SensitiveContent {
                 return text
             }
 
-            let secrets = detectedSecrets(in: String(text.prefix(characterLimit)), for: item)
+            let secrets = detectedSecrets(in: searchedText(text, limit: characterLimit), for: item)
             guard !secrets.isEmpty else {
                 return text
             }
 
             let masked = NSMutableString(string: text)
-            for secret in secrets.reversed() {
-                masked.replaceCharacters(in: secret.range, with: mask(for: secret))
-            }
+            maskSecrets(secrets, inTextOfLength: masked.length) { masked.replaceCharacters(in: $0, with: $1) }
             return masked as String
         }
     }
@@ -211,8 +268,9 @@ enum SensitiveContent {
                 return attributedText
             }
 
+            // Only the preview shows rich text, so all of its reach is searched.
             let secrets = detectedSecrets(
-                in: String(attributedText.string.prefix(previewCharacterLimit)),
+                in: searchedText(attributedText.string, limit: previewCharacterLimit),
                 for: item
             )
             guard !secrets.isEmpty else {
@@ -220,9 +278,7 @@ enum SensitiveContent {
             }
 
             let masked = NSMutableAttributedString(attributedString: attributedText)
-            for secret in secrets.reversed() {
-                masked.replaceCharacters(in: secret.range, with: mask(for: secret))
-            }
+            maskSecrets(secrets, inTextOfLength: masked.length) { masked.replaceCharacters(in: $0, with: $1) }
             return masked
         }
     }
@@ -242,6 +298,61 @@ enum SensitiveContent {
         init(_ secrets: [SensitiveContentDetector.Secret]) {
             self.secrets = secrets
         }
+    }
+
+    // Covers previewCharacterLimit + straddlingMargin even when every scalar is
+    // 4 UTF-8 bytes, without walking grapheme clusters or retaining plaintext.
+    private static let itemMaskDigestByteLimit = 819_200
+
+    private static let itemMaskCache: NSCache<NSUUID, CachedItemMask> = {
+        let cache = NSCache<NSUUID, CachedItemMask>()
+        cache.countLimit = 4_000
+        return cache
+    }()
+
+    private final class CachedItemMask {
+        let utf8Count: Int
+        let prefixDigest: SHA256.Digest
+        let detectsPasswordLikeText: Bool
+        let isMasked: Bool
+
+        init(
+            utf8Count: Int,
+            prefixDigest: SHA256.Digest,
+            detectsPasswordLikeText: Bool,
+            isMasked: Bool
+        ) {
+            self.utf8Count = utf8Count
+            self.prefixDigest = prefixDigest
+            self.detectsPasswordLikeText = detectsPasswordLikeText
+            self.isMasked = isMasked
+        }
+    }
+
+    private static func itemMaskPrefixDigest(for text: String) -> SHA256.Digest {
+        var hasher = SHA256()
+        let prefixBytes = text.utf8.prefix(itemMaskDigestByteLimit)
+        let hashedContiguously = prefixBytes.withContiguousStorageIfAvailable { buffer -> Bool in
+            hasher.update(bufferPointer: UnsafeRawBufferPointer(buffer))
+            return true
+        } ?? false
+        if !hashedContiguously {
+            withUnsafeTemporaryAllocation(of: UInt8.self, capacity: 4_096) { scratch in
+                var count = 0
+                for byte in prefixBytes {
+                    scratch[count] = byte
+                    count += 1
+                    if count == scratch.count {
+                        hasher.update(bufferPointer: UnsafeRawBufferPointer(scratch))
+                        count = 0
+                    }
+                }
+                if count > 0 {
+                    hasher.update(bufferPointer: UnsafeRawBufferPointer(start: scratch.baseAddress, count: count))
+                }
+            }
+        }
+        return hasher.finalize()
     }
 
     private static func detectedSecrets(
@@ -365,32 +476,37 @@ enum SensitiveContentDetector {
             ranges.append(range)
         }
 
-        assignmentExpression.enumerateMatches(in: text, range: fullRange) { match, _, _ in
-            // The value is in the group of the way it is written: in double
-            // quotes, in single quotes or bare.
-            guard let match,
-                  match.range(at: 1).location != NSNotFound,
-                  var valueRange = (2...4).map(match.range(at:)).first(where: { $0.location != NSNotFound }) else {
-                return
-            }
-
-            // In the query of a URL the value ends where the next parameter
-            // begins.
-            let nameRange = match.range(at: 1)
-            let isBare = match.range(at: 4).location != NSNotFound
-            let nameStart = startOfName(endingAt: nameRange.location, in: string)
-            if isBare, nameStart > 0,
-               "?&".contains(string.substring(with: NSRange(location: nameStart - 1, length: 1))) {
-                let separator = string.range(of: "&", range: valueRange)
-                if separator.location != NSNotFound {
-                    valueRange.length = separator.location - valueRange.location
+        // The value of a name in the query or the fragment of a URL ends where the
+        // next parameter begins, which a value anywhere else does not. Each kind
+        // has a pattern of its own: one that took the "&" into the value would
+        // swallow the parameters after it, and one that left it out would not
+        // match a password such as "P&ss1234".
+        let hasQuerySeparator = string.rangeOfCharacter(from: Self.querySeparators).location != NSNotFound
+        for (expression, isQuery) in [(assignmentExpression, false), (queryAssignmentExpression, true)]
+        where !isQuery || hasQuerySeparator {
+            expression.enumerateMatches(in: text, range: fullRange) { match, _, _ in
+                // The value is in the group of the way it is written: in double
+                // quotes, in single quotes or bare.
+                guard let match,
+                      match.range(at: 1).location != NSNotFound,
+                      let valueRange = (2...4).map(match.range(at:)).first(where: { $0.location != NSNotFound }) else {
+                    return
                 }
-            }
 
-            let name = string.substring(with: nameRange).lowercased()
-            let value = string.substring(with: valueRange)
-            if value.count >= 4, isSecretValue(value, assignedTo: name) {
-                ranges.append(valueRange)
+                let nameRange = match.range(at: 1)
+                let isBare = match.range(at: 4).location != NSNotFound
+                let nameStart = startOfName(endingAt: nameRange.location, in: string)
+                let isQueryParameter = isBare && nameStart > 0
+                    && "?&#".contains(string.substring(with: string.rangeOfComposedCharacterSequence(at: nameStart - 1)))
+                guard isQueryParameter == isQuery else {
+                    return
+                }
+
+                let name = string.substring(with: nameRange).lowercased()
+                let value = string.substring(with: valueRange)
+                if value.count >= 4, isSecretValue(value, assignedTo: name) {
+                    ranges.append(valueRange)
+                }
             }
         }
 
@@ -461,10 +577,23 @@ enum SensitiveContentDetector {
     // beginning of the name is found by hand: a pattern that starts with the
     // rest of the name takes a time that grows with the square of the length
     // of a long run of letters and digits, such as encoded data.
-    private static let assignmentExpression = makeExpression(
-        #"(?i)((?:password|passwd|passphrase|pwd|secret|token|api[_\-]?key|access[_\-]?key|private[_\-]?key|credential)"#
-            + #"[A-Za-z0-9_\-]*)["']?\s*[:=]\s*(?:"([^"\n]{4,})"|'([^'\n]{4,})'|([^\s"',;]{4,}))"#
+    private static func makeAssignmentExpression(bareValue: String) -> NSRegularExpression {
+        makeExpression(
+            #"(?i)((?:password|passwd|passphrase|pwd|secret|token|api[_\-]?key|access[_\-]?key|private[_\-]?key|credential)"#
+                + #"[A-Za-z0-9_\-]*)["']?\s*[:=]\s*(?:"([^"\n]{4,})"|'([^'\n]{4,})'|("# + bareValue + #"))"#
+        )
+    }
+
+    // Anywhere but in the query of a URL a bare value runs to the next space
+    // or quote, so "P&ss1234" and "ab#cdefgh" are whole. A "&" that starts the
+    // next field of a form body, as in "password=hunter22&remember=1", ends it.
+    private static let assignmentExpression = makeAssignmentExpression(
+        bareValue: #"(?:[^\s"',;&]|&(?![A-Za-z0-9_\-]+=)){4,}"#
     )
+
+    // In the query or the fragment of a URL a bare value ends at "&" or "#".
+    private static let querySeparators = CharacterSet(charactersIn: "?&#")
+    private static let queryAssignmentExpression = makeAssignmentExpression(bareValue: #"[^\s"',;&#]{4,}"#)
 
     private static let cardNumberExpression = makeExpression(#"(?<![\d.])[3-6]\d(?:[ \-]?\d){11,17}(?![\d.])"#)
 
@@ -515,10 +644,13 @@ enum SensitiveContentDetector {
     /// Where the name that ends with the word at `location` begins.
     private static func startOfName(endingAt location: Int, in string: NSString) -> Int {
         var start = location
-        while start > 0, location - start < maximumNameLength,
-              let scalar = Unicode.Scalar(string.character(at: start - 1)),
-              nameCharacters.contains(scalar) {
-            start -= 1
+        while start > 0, location - start < maximumNameLength {
+            let charRange = string.rangeOfComposedCharacterSequence(at: start - 1)
+            let scalars = string.substring(with: charRange).unicodeScalars
+            guard scalars.count == 1, let scalar = scalars.first, nameCharacters.contains(scalar) else {
+                break
+            }
+            start = charRange.location
         }
         return start
     }

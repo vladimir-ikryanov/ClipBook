@@ -306,6 +306,10 @@ private final class CommandPaletteView: NSView, NSTableViewDataSource, NSTableVi
       return true
     }
 
+    if executeCommand(matchingShortcutOf: event) {
+      return true
+    }
+
     return super.performKeyEquivalent(with: event)
   }
 
@@ -730,6 +734,11 @@ private final class CommandPaletteView: NSView, NSTableViewDataSource, NSTableVi
     return command
   }
 
+  /// Delete (⌫) or Forward Delete (⌦), with any modifiers.
+  private static func isDeleteKeyEvent(_ event: NSEvent) -> Bool {
+    event.type == .keyDown && (event.keyCode == 51 || event.keyCode == 117)
+  }
+
   private static func isAlternateExecutionEvent(_ event: NSEvent) -> Bool {
     event.type == .keyDown
       && event.keyCode == 36
@@ -775,7 +784,38 @@ private final class CommandPaletteView: NSView, NSTableViewDataSource, NSTableVi
       return true
     }
 
-    return false
+    return executeCommand(matchingShortcutOf: event)
+  }
+
+  /// Runs the command whose shortcut matches `event`, if any. Shortcuts without
+  /// modifiers (such as Space for Preview or Return for Paste) belong to typing
+  /// in the search field and running the selected row.
+  private func executeCommand(matchingShortcutOf event: NSEvent) -> Bool {
+    if KeyboardShortcutParser.event(event, matches: "cmd+c"),
+       let textView = window?.firstResponder as? NSTextView,
+       textView.selectedRange().length > 0 {
+      return false
+    }
+
+    // While a query is typed, the delete keys edit it as in any text field, so
+    // ⌘⌫ clears the query instead of deleting the selected item. With nothing
+    // typed they run the command whose shortcut they are.
+    if Self.isDeleteKeyEvent(event), !searchField.stringValue.isEmpty {
+      return false
+    }
+
+    guard let command = commands.first(where: { command in
+      guard let shortcut = command.shortcut,
+            KeyboardShortcutParser.hasModifiers(shortcut) else {
+        return false
+      }
+      return KeyboardShortcutParser.event(event, matches: shortcut)
+    }) else {
+      return false
+    }
+
+    onExecute?(command, false)
+    return true
   }
 
   fileprivate static func shortcutDisplayTokens(for shortcut: String?) -> [String] {

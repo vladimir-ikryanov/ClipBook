@@ -32,12 +32,14 @@ final class AppCoordinator: ObservableObject {
   private let licensingService: LicensingService
   private let fileManager: FileManager
   private let supportDirectory: URL
+  /// What `savePreferences()` last applied. Comparing against it keeps a change to one
+  /// setting from registering the hotkeys again or touching the login item.
+  private var lastAppliedPreferences: AppPreferences?
   let filePreviewCache: FilePreviewCache
   #if (CLIPBOOK_COMMERCIAL && canImport(ClipBookCommercialLicensing)) || CLIPBOOK_COMMERCIAL_IN_TREE
   private static let v1PreferencesDomain = "com.ikryanov.clipbook"
   private static let v1LicenseKeyPreferenceKey = "license_key"
   #endif
-  private let lastKnownBootTimeKey = "ClipBookLastKnownBootTime"
   private let linkPreviewFetcher = LinkPreviewFetcher()
   private var linkPreviewTasksByItemID: [UUID: Task<Void, Never>] = [:]
   private var pendingLinkPreviewModelUpdatesByItemID: [UUID: ClipboardItem] = [:]
@@ -144,11 +146,15 @@ final class AppCoordinator: ObservableObject {
     if shouldSavePreferences {
       preferencesStore.save(model.preferences)
     }
-    loadHistory()
+    let didLoadHistory = loadHistory(sweepsCaches: false)
     clearHistoryAfterRebootIfNeeded()
     applyRetention()
     scheduleRetentionChecks()
     deleteExpiredItems()
+    if didLoadHistory {
+      pruneFilePreviewCache()
+      removeOrphanedStoredFiles()
+    }
     observeWakeForExpiredItems()
     observeTrashVisibility()
     configurePanel()
@@ -176,9 +182,17 @@ final class AppCoordinator: ObservableObject {
     if model.preferences.clearHistoryOnQuit {
       clearHistory()
     }
+    stopBackgroundWorkForTesting()
+  }
+
+  /// Stops background tasks, timers, pasteboard polling, and global shortcuts
+  /// without saving window frames, applying preferences, or clearing history.
+  func stopBackgroundWorkForTesting() {
     cancelLinkPreviewTasks()
     retentionTimer?.invalidate()
+    retentionTimer = nil
     expiryTimer?.invalidate()
+    expiryTimer = nil
     clipboardMonitor.stop()
     globalShortcuts.unregisterAll()
   }
@@ -384,9 +398,13 @@ final class AppCoordinator: ObservableObject {
           let expiredItems = self.expiredItems(among: result.itemIDs)
           self.isRetentionPromptPresented = !expiredItems.isEmpty
           self.clipboardMonitor.start(preferences: self.model.preferences)
-          self.loadHistory()
+          let didLoadHistory = self.loadHistory(sweepsCaches: false)
           self.isHistoryArchiveOperationRunning = false
           self.deleteExpiredItems()
+          if didLoadHistory {
+            self.pruneFilePreviewCache()
+            self.removeOrphanedStoredFiles()
+          }
           completion(.success(result))
           if !expiredItems.isEmpty {
             self.confirmKeepingExpiredImportedItems(expiredItems)
@@ -489,17 +507,57 @@ final class AppCoordinator: ObservableObject {
     clipboardMonitor.isPaused = model.isPaused
   }
   
+  /// The settings whose effects `savePreferences()` applies again.
+  struct PreferenceChanges: Equatable {
+    var appearance: Bool
+    var language: Bool
+    var launchAtLogin: Bool
+    var automaticUpdateChecks: Bool
+    var globalShortcuts: Bool
+  }
+
+  /// What changed from `previous` to `current`. Everything counts as changed
+  /// when nothing has been applied yet.
+  static func preferenceChanges(from previous: AppPreferences?, to current: AppPreferences) -> PreferenceChanges {
+    func changed<Value: Equatable>(_ keyPath: KeyPath<AppPreferences, Value>) -> Bool {
+      previous?[keyPath: keyPath] != current[keyPath: keyPath]
+    }
+
+    return PreferenceChanges(
+      appearance: changed(\.appearance),
+      language: changed(\.language),
+      launchAtLogin: changed(\.launchAtLogin),
+      automaticUpdateChecks: changed(\.checkForUpdatesAutomatically),
+      globalShortcuts: changed(\.globalShortcuts)
+    )
+  }
+
   func savePreferences() {
-    preferencesStore.save(model.preferences)
-    applyAppearance()
-    applyLanguage()
+    let current = model.preferences
+    let changes = Self.preferenceChanges(from: lastAppliedPreferences, to: current)
+
+    preferencesStore.save(current)
+    if changes.appearance {
+      applyAppearance()
+    }
+    if changes.language {
+      applyLanguage()
+    }
     clipboardMonitor.updatePreferences(model.preferences)
     if !model.preferences.showPreviewForLinks {
       cancelLinkPreviewTasks()
     }
-    LaunchAtLoginService.setEnabled(model.preferences.launchAtLogin)
-    updateService.setAutomaticallyChecksForUpdates(model.preferences.checkForUpdatesAutomatically)
-    configureShortcuts()
+    if changes.launchAtLogin {
+      LaunchAtLoginService.setEnabled(current.launchAtLogin)
+    }
+    if changes.automaticUpdateChecks {
+      updateService.setAutomaticallyChecksForUpdates(current.checkForUpdatesAutomatically)
+    }
+    if changes.globalShortcuts {
+      configureShortcuts()
+    }
+    // After applyLanguage, which can normalize `language`, so the next call sees no change.
+    lastAppliedPreferences = model.preferences
   }
 
   func persistPreferences() {
@@ -873,12 +931,15 @@ final class AppCoordinator: ObservableObject {
     return items.first
   }
 
-  private func historyItemsForPasteNext(in items: [ClipboardItem]) -> [ClipboardItem] {
-    guard model.preferences.pinFavoritesToTop else {
+  /// Internal so tests can reach the paste-next ordering rule without pasting.
+  func historyItemsForPasteNext(in items: [ClipboardItem]) -> [ClipboardItem] {
+    guard model.preferences.pinFavoritesToTop,
+          !model.selectedHistoryFilterContentTypes.contains(.favorites) else {
       return items
     }
 
-    return items.filter { !$0.isFavorite }
+    let nonFavorites = items.filter { !$0.isFavorite }
+    return nonFavorites.isEmpty ? items : nonFavorites
   }
 
   private func nextHistoryItemID(after itemID: ClipboardItem.ID, in items: [ClipboardItem]) -> ClipboardItem.ID? {
@@ -1046,7 +1107,7 @@ final class AppCoordinator: ObservableObject {
       // as Copy & Merge keeps the app of the item it appends to. The app in
       // front while merging has nothing to do with the content.
       let item = ClipboardItem(
-        kind: .text,
+        kind: ClipboardKind.classifyText(text, treatDigitNumbersAsColor: model.preferences.treatDigitNumbersAsColor),
         text: text,
         sourceAppName: items[0].sourceAppName,
         sourceBundleIdentifier: items[0].sourceBundleIdentifier,
@@ -1121,18 +1182,23 @@ final class AppCoordinator: ObservableObject {
     try historyStore.delete(ids: items.map(\.id))
     // A menu or a row may hold a copy of an item from before its link preview
     // was saved, so the files are taken from the item as the history has it now.
-    let currentItemsByID = Dictionary(
-      (model.items + model.trashedItems).filter { deletedItemIDs.contains($0.id) }.map { ($0.id, $0) },
-      uniquingKeysWith: { first, _ in first }
-    )
+    var currentItemsByID: [ClipboardItem.ID: ClipboardItem] = [:]
+    for item in model.items where deletedItemIDs.contains(item.id) && currentItemsByID[item.id] == nil {
+      currentItemsByID[item.id] = item
+    }
+    for item in model.trashedItems where deletedItemIDs.contains(item.id) && currentItemsByID[item.id] == nil {
+      currentItemsByID[item.id] = item
+    }
     let items = items.map { currentItemsByID[$0.id] ?? $0 }
-    // An item in the Trash keeps its files, so they are spared as long as it
-    // or an item in the history still names them.
-    let remainingItems = model.items.filter { !deletedItemIDs.contains($0.id) }
-      + ((try? historyStore.fetchTrashedItems()) ?? []).filter { !deletedItemIDs.contains($0.id) }
     items.forEach(removeLinkPreviewFiles)
-    removeFilePreviewFiles(for: items, remainingItems: remainingItems)
-    removeAssetFiles(for: items, remainingItems: remainingItems)
+    if items.contains(where: { !$0.filePaths.isEmpty || $0.assetPath != nil }) {
+      // An item in the Trash keeps its files, so they are spared as long as it
+      // or an item in the history still names them.
+      let remainingItems = model.items.filter { !deletedItemIDs.contains($0.id) }
+        + ((try? historyStore.fetchTrashedItems()) ?? []).filter { !deletedItemIDs.contains($0.id) }
+      removeFilePreviewFiles(for: items, remainingItems: remainingItems)
+      removeAssetFiles(for: items, remainingItems: remainingItems)
+    }
     model.remove(deletedItemIDs)
     HistoryRowTextCache.removeAll()
   }
@@ -1756,8 +1822,10 @@ final class AppCoordinator: ObservableObject {
         )
       }
 
-      for newItem in newItems {
-        try historyStore.upsert(newItem)
+      try historyStore.performInTransaction {
+        for newItem in newItems {
+          try historyStore.upsert(newItem)
+        }
       }
       model.items.insert(contentsOf: newItems, at: 0)
       model.selectedItemID = newItems.first?.id
@@ -1805,19 +1873,30 @@ final class AppCoordinator: ObservableObject {
   }
 
   func setFavorite(_ isFavorite: Bool, for items: [ClipboardItem]) {
-    guard !items.isEmpty else {
+    var updatedItems: [ClipboardItem] = []
+    for item in items where item.isFavorite != isFavorite {
+      var updated = item
+      updated.isFavorite = isFavorite
+      if !isFavorite {
+        updated.favoriteOrder = nil
+      }
+      updatedItems.append(updated)
+    }
+    guard !updatedItems.isEmpty else {
       return
     }
 
     do {
-      for item in items where item.isFavorite != isFavorite {
-        var updated = item
-        updated.isFavorite = isFavorite
-        if !isFavorite {
-          updated.favoriteOrder = nil
+      if updatedItems.count == 1, let single = updatedItems.first {
+        try historyStore.upsert(single)
+        model.replace(single)
+      } else {
+        try historyStore.performInTransaction {
+          for updated in updatedItems {
+            try historyStore.upsert(updated)
+          }
         }
-        try historyStore.upsert(updated)
-        model.replace(updated)
+        model.replace(updatedItems)
       }
     } catch {
       model.lastError = error.localizedDescription
@@ -1934,11 +2013,7 @@ final class AppCoordinator: ObservableObject {
 
     do {
       guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-        try historyStore.delete(item.id)
-        let currentItem = model.items.first { $0.id == item.id } ?? item
-        removeLinkPreviewFiles(for: currentItem)
-        removeAssetFiles(for: [currentItem], remainingItems: model.items.filter { $0.id != item.id })
-        model.remove(item.id)
+        try moveToTrash([item])
         return
       }
 
@@ -1998,7 +2073,7 @@ final class AppCoordinator: ObservableObject {
   }
 
   func toggleTag(_ tag: Tag, for item: ClipboardItem) {
-    updateTags(for: item) { tags in
+    updateTags(for: [item]) { tags in
       if tags.contains(tag.id) {
         tags.removeAll { $0 == tag.id }
       } else {
@@ -2008,11 +2083,18 @@ final class AppCoordinator: ObservableObject {
   }
 
   func addTag(_ tag: Tag, to item: ClipboardItem) {
-    updateTags(for: item) { tags in
-      guard !tags.contains(tag.id) else {
-        return
-      }
+    addTag(tag, to: [item])
+  }
+
+  func addTag(_ tag: Tag, to items: [ClipboardItem]) {
+    updateTags(for: items.filter { !$0.tags.contains(tag.id) }) { tags in
       tags.append(tag.id)
+    }
+  }
+
+  func removeTag(_ tag: Tag, from items: [ClipboardItem]) {
+    updateTags(for: items.filter { $0.tags.contains(tag.id) }) { tags in
+      tags.removeAll { $0 == tag.id }
     }
   }
 
@@ -2033,9 +2115,14 @@ final class AppCoordinator: ObservableObject {
   }
 
   func createTag(name: String, color: NSColor, for item: ClipboardItem) {
-    if let tag = createTag(name: name, color: color) {
-      addTag(tag, to: item)
+    createTag(name: name, color: color, for: [item])
+  }
+
+  func createTag(name: String, color: NSColor, for items: [ClipboardItem]) {
+    guard !items.isEmpty, let tag = createTag(name: name, color: color) else {
+      return
     }
+    addTag(tag, to: items)
   }
 
   func updateTag(_ tag: Tag, name: String, color: NSColor) {
@@ -2054,44 +2141,84 @@ final class AppCoordinator: ObservableObject {
 
   func deleteTag(_ tag: Tag) {
     do {
-      try historyStore.deleteTag(id: tag.id)
-      model.tags.removeAll { $0.id == tag.id }
-      model.selectedHistoryFilterTagIDs.remove(tag.id)
-
-      for item in model.items where item.tags.contains(tag.id) {
+      let remainingTagNamesByID = Dictionary(
+        uniqueKeysWithValues: model.tags.lazy.filter { $0.id != tag.id }.map { ($0.id, $0.name) }
+      )
+      let updatedItems = model.items.compactMap { item -> ClipboardItem? in
+        guard item.tags.contains(tag.id) else {
+          return nil
+        }
         var updated = item
         updated.tags.removeAll { $0 == tag.id }
-        updated = updated.rebuildingSearchText(tagNames: model.tagNames(for: updated.tags))
-        try historyStore.upsert(updated)
-        model.replace(updated)
+        return updated.rebuildingSearchText(tagNames: updated.tags.compactMap { remainingTagNamesByID[$0] })
+      }
+
+      try historyStore.performInTransaction {
+        try historyStore.deleteTag(id: tag.id)
+        for updated in updatedItems {
+          try historyStore.upsert(updated)
+        }
+      }
+      model.tags.removeAll { $0.id == tag.id }
+      model.selectedHistoryFilterTagIDs.remove(tag.id)
+      if !updatedItems.isEmpty {
+        model.replace(updatedItems)
       }
     } catch {
       model.lastError = error.localizedDescription
     }
   }
 
-  private func updateTags(for item: ClipboardItem, update: (inout [Int]) -> Void) {
+  private func updateTags(for items: [ClipboardItem], update: (inout [Int]) -> Void) {
+    guard !items.isEmpty else {
+      return
+    }
+
     do {
-      var updated = item
-      update(&updated.tags)
       let tagNamesByID = Dictionary(uniqueKeysWithValues: model.tags.map { ($0.id, $0.name) })
-      updated.tags.sort {
-        (tagNamesByID[$0] ?? "").localizedCaseInsensitiveCompare(tagNamesByID[$1] ?? "") == .orderedAscending
+      let updatedItems = items.map { item -> ClipboardItem in
+        var updated = item
+        update(&updated.tags)
+        updated.tags.sort {
+          (tagNamesByID[$0] ?? "").localizedCaseInsensitiveCompare(tagNamesByID[$1] ?? "") == .orderedAscending
+        }
+        return updated.rebuildingSearchText(tagNames: updated.tags.compactMap { tagNamesByID[$0] })
       }
-      updated = updated.rebuildingSearchText(tagNames: model.tagNames(for: updated.tags))
-      try historyStore.upsert(updated)
-      model.replace(updated)
+
+      if updatedItems.count == 1, let single = updatedItems.first {
+        try historyStore.upsert(single)
+        model.replace(single)
+      } else {
+        try historyStore.performInTransaction {
+          for updated in updatedItems {
+            try historyStore.upsert(updated)
+          }
+        }
+        model.replace(updatedItems)
+      }
     } catch {
       model.lastError = error.localizedDescription
     }
   }
 
   private func rebuildSearchTextForItemsReferencingTag(_ tagID: Tag.ID) throws {
-    for item in model.items where item.tags.contains(tagID) {
-      let updated = item.rebuildingSearchText(tagNames: model.tagNames(for: item.tags))
-      try historyStore.upsert(updated)
-      model.replace(updated)
+    let tagNamesByID = Dictionary(uniqueKeysWithValues: model.tags.map { ($0.id, $0.name) })
+    let updatedItems = model.items.compactMap { item -> ClipboardItem? in
+      guard item.tags.contains(tagID) else {
+        return nil
+      }
+      return item.rebuildingSearchText(tagNames: item.tags.compactMap { tagNamesByID[$0] })
     }
+    guard !updatedItems.isEmpty else {
+      return
+    }
+
+    try historyStore.performInTransaction {
+      for updated in updatedItems {
+        try historyStore.upsert(updated)
+      }
+    }
+    model.replace(updatedItems)
   }
 
   func openInBrowser(_ item: ClipboardItem) {
@@ -2449,8 +2576,18 @@ final class AppCoordinator: ObservableObject {
   }
 
   private func pruneFilePreviewCache() {
-    let trashedItems = (try? historyStore.fetchTrashedItems()) ?? []
-    filePreviewCache.prune(keepingFilePaths: Set((model.items + trashedItems).flatMap(\.filePaths)))
+    filePreviewCache.prune {
+      var keptFilePaths = Set<String>()
+      for item in model.items {
+        keptFilePaths.formUnion(item.filePaths)
+      }
+      if let trashedItems = try? historyStore.fetchTrashedItems() {
+        for item in trashedItems {
+          keptFilePaths.formUnion(item.filePaths)
+        }
+      }
+      return keptFilePaths
+    }
   }
 
   private func cancelLinkPreviewTasks() {
@@ -2763,32 +2900,68 @@ final class AppCoordinator: ObservableObject {
     }
   }
   
-  private func loadHistory() {
+  @discardableResult
+  func loadHistory(sweepsCaches: Bool = true) -> Bool {
     do {
       model.tags = try historyStore.fetchTags()
       model.items = try historyStore.fetchAll()
       if model.isShowingTrash {
         model.trashedItems = try historyStore.fetchTrashedItems()
       }
-      pruneFilePreviewCache()
-      removeOrphanedStoredFiles()
+      if sweepsCaches {
+        pruneFilePreviewCache()
+        removeOrphanedStoredFiles()
+      }
       model.selectedItemID = model.items.first?.id
       model.selectedItemIDs = model.selectedItemID.map { [$0] } ?? []
       model.selectedItemIDsInSelectionOrder = model.selectedItemID.map { [$0] } ?? []
+      return true
     } catch {
       model.lastError = error.localizedDescription
+      return false
     }
   }
 
-  private func clearHistoryAfterRebootIfNeeded() {
-    let currentBootTime = Date(timeIntervalSinceNow: -ProcessInfo.processInfo.systemUptime).timeIntervalSince1970
-    let defaults = UserDefaults.standard
-    let previousBootTime = defaults.object(forKey: lastKnownBootTimeKey) as? Double
-    defaults.set(currentBootTime, forKey: lastKnownBootTimeKey)
+  // `ProcessInfo.systemUptime` pauses while the Mac is asleep, so subtracting
+  // it from `Date()` drifts forward by the time spent asleep, and the next
+  // launch takes that for a reboot. `kern.boottime` is the actual boot time.
+  nonisolated static func systemBootTime() -> Date {
+    var bootTime = timeval()
+    var size = MemoryLayout<timeval>.stride
+    if sysctlbyname("kern.boottime", &bootTime, &size, nil, 0) == 0, bootTime.tv_sec > 0 {
+      return Date(timeIntervalSince1970: Double(bootTime.tv_sec) + Double(bootTime.tv_usec) / 1_000_000)
+    }
+    return Date(timeIntervalSinceNow: -ProcessInfo.processInfo.systemUptime)
+  }
+
+  /// Whether the Mac restarted since `previousBootTime` was recorded. One-sided:
+  /// a reboot makes the boot time later. A stored value ahead of the current one
+  /// is a clock adjustment or a time derived from `systemUptime`, which runs
+  /// ahead of the real boot time by the time spent asleep.
+  nonisolated static func isReboot(previousBootTime: TimeInterval?, currentBootTime: TimeInterval) -> Bool {
+    guard let previousBootTime else {
+      return false
+    }
+    return currentBootTime - previousBootTime > 60
+  }
+
+  func clearHistoryAfterRebootIfNeeded(
+    kernelBootTime: TimeInterval = AppCoordinator.systemBootTime().timeIntervalSince1970,
+    uptimeRelativeBootTime: TimeInterval = Date(timeIntervalSinceNow: -ProcessInfo.processInfo.systemUptime).timeIntervalSince1970
+  ) {
+    // The first launch after updating from a build that stored only the uptime
+    // estimate falls back to it. The estimate is never earlier than the real
+    // boot time, so the one-sided check below still ignores time spent asleep,
+    // and a restart since that launch still counts as a reboot.
+    let previousBootTime = preferencesStore.lastKnownKernelBootTime()
+      ?? preferencesStore.lastKnownUptimeRelativeBootTime()
+    preferencesStore.recordBootTimes(
+      kernelBootTime: kernelBootTime,
+      uptimeRelativeBootTime: uptimeRelativeBootTime
+    )
 
     guard model.preferences.clearHistoryOnReboot,
-          let previousBootTime,
-          abs(previousBootTime - currentBootTime) > 60 else {
+          Self.isReboot(previousBootTime: previousBootTime, currentBootTime: kernelBootTime) else {
       return
     }
 

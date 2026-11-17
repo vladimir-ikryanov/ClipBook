@@ -103,7 +103,7 @@ final class HistoryItemRowLinkView: HistoryItemRowView {
       for: url,
       maximumPixelSize: maximumPixelSize
     ) { [weak self] image in
-      guard let self, self.isConfigured(for: item), let image else {
+      guard let self, self.isConfigured(for: item), !self.hidesSensitiveContent, self.showsLinkPreview, let image else {
         return
       }
 
@@ -125,7 +125,7 @@ final class HistoryItemRowLinkView: HistoryItemRowView {
       for: url,
       maximumPixelSize: maximumPixelSize
     ) { [weak self] image in
-      guard let self, self.isConfigured(for: item), let image else {
+      guard let self, self.isConfigured(for: item), !self.hidesSensitiveContent, self.showsLinkPreview, let image else {
         return
       }
 
@@ -284,14 +284,14 @@ final class LinkPreviewFetcher {
   }
 }
 
-private struct LinkPreviewMetadata {
+struct LinkPreviewMetadata {
   let title: String?
   let description: String?
   let imageURL: URL?
   let faviconURLs: [URL]
 }
 
-private enum LinkPreviewHTMLParser {
+enum LinkPreviewHTMLParser {
   private nonisolated static let titlePattern = #"<title\b[^>]*>(.*?)</title>"#
   private nonisolated static let metaPattern = #"<meta\b[^>]*>"#
   private nonisolated static let linkPattern = #"<link\b[^>]*>"#
@@ -332,6 +332,8 @@ private enum LinkPreviewHTMLParser {
   }
 
   private nonisolated static func attributes(in tag: String) -> [String: String] {
+    // The "/" of a self-closing tag is not part of an unquoted value: <link href=/icon.png/>.
+    let tag = tag.hasSuffix("/>") ? String(tag.dropLast(2)) + ">" : tag
     guard let regex = try? NSRegularExpression(pattern: attributePattern, options: [.caseInsensitive]) else {
       return [:]
     }
@@ -427,7 +429,7 @@ private enum LinkPreviewHTMLParser {
   }
 
   private nonisolated static func cleanedText(_ text: String) -> String {
-    let unescaped = CFXMLCreateStringByUnescapingEntities(nil, text as CFString, nil) as String? ?? text
+    let unescaped = ClipboardTextTransform.decodeHTMLEntities(text)
     return unescaped
       .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
       .trimmingCharacters(in: .whitespacesAndNewlines)

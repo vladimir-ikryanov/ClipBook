@@ -6,12 +6,13 @@ import UniformTypeIdentifiers
 final class PasteService {
   private static let interKeyDelay: TimeInterval = 0.06
 
-  private let pasteboard = NSPasteboard.general
+  private let pasteboard: NSPasteboard
   // History items come without their formatting; this reads it for the one
   // item being pasted or copied.
   private let loadFormatting: (ClipboardItem) -> ClipboardItem
 
-  init(loadFormatting: @escaping (ClipboardItem) -> ClipboardItem) {
+  init(pasteboard: NSPasteboard = .general, loadFormatting: @escaping (ClipboardItem) -> ClipboardItem) {
+    self.pasteboard = pasteboard
     self.loadFormatting = loadFormatting
   }
 
@@ -139,7 +140,6 @@ final class PasteService {
   
   func copy(_ item: ClipboardItem, variant: PasteVariant) throws {
     pasteboard.clearContents()
-    pasteboard.setString("1", forType: PasteboardMonitor.ghostType)
     
     switch variant {
     case .plainText:
@@ -153,6 +153,13 @@ final class PasteService {
       pasteboard.setString(item.filePaths.joined(separator: "\n"), forType: .string)
     default:
       try writeItem(item)
+    }
+    // Marked after the item is written so `writeObjects` for images and files
+    // does not leave the ghost marker on a separate, empty first pasteboard item.
+    if let firstItem = pasteboard.pasteboardItems?.first {
+      firstItem.setString("1", forType: PasteboardMonitor.ghostType)
+    } else {
+      pasteboard.setString("1", forType: PasteboardMonitor.ghostType)
     }
   }
 

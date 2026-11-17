@@ -430,12 +430,13 @@ enum ClipboardTextTransform: CaseIterable {
       return Self.matches(in: text, pattern: #"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}"#, options: [.caseInsensitive])
         .joined(separator: "\n")
     case .extractNumbers:
-      return Self.matches(in: text, pattern: #"-?(?:\d+(?:\.\d+)?|\.\d+)"#).joined(separator: "\n")
+      return Self.matches(in: text, pattern: #"(?:(?<![\p{L}\p{N}.-])-)?(?:\d+(?:\.\d+)?|(?<![\p{N}.])\.\d+)"#)
+        .joined(separator: "\n")
     case .extractURLs:
       return Self.matches(in: text, pattern: #"https?://[^\s<>"']+|www\.[^\s<>"']+"#, options: [.caseInsensitive])
         .joined(separator: "\n")
     case .htmlDecode:
-      return Self.htmlDecoded(text)
+      return Self.decodeHTMLEntities(text)
     case .htmlEncode:
       return Self.htmlEncoded(text)
     case .hexDecode:
@@ -578,7 +579,12 @@ enum ClipboardTextTransform: CaseIterable {
   }
 
   private static func words(in text: String) -> [String] {
-    let separatedCamelCase = text.replacingOccurrences(
+    let separatedAcronyms = text.replacingOccurrences(
+      of: #"([\p{Lu}]+)([\p{Lu}][\p{Ll}])"#,
+      with: "$1 $2",
+      options: .regularExpression
+    )
+    let separatedCamelCase = separatedAcronyms.replacingOccurrences(
       of: #"([\p{Ll}\p{Nd}])([\p{Lu}])"#,
       with: "$1 $2",
       options: .regularExpression
@@ -745,39 +751,66 @@ enum ClipboardTextTransform: CaseIterable {
       .replacingOccurrences(of: ">", with: "&gt;")
   }
 
-  private static func htmlDecoded(_ text: String) -> String {
-    var decoded = text
-      .replacingOccurrences(of: "&quot;", with: "\"")
-      .replacingOccurrences(of: "&#39;", with: "'")
-      .replacingOccurrences(of: "&apos;", with: "'")
-      .replacingOccurrences(of: "&lt;", with: "<")
-      .replacingOccurrences(of: "&gt;", with: ">")
-      .replacingOccurrences(of: "&amp;", with: "&")
+  nonisolated static func decodeHTMLEntities(_ text: String) -> String {
+    let namedEntities: [String: String] = [
+      "nbsp": "\u{00A0}",
+      "mdash": "—",
+      "ndash": "–",
+      "hellip": "…",
+      "copy": "©",
+      "reg": "®",
+      "trade": "™",
+      "lsquo": "‘",
+      "rsquo": "’",
+      "ldquo": "“",
+      "rdquo": "”",
+      "bull": "•",
+      "quot": "\"",
+      "apos": "'",
+      "lt": "<",
+      "gt": ">",
+      "amp": "&"
+    ]
 
-    decoded = replacingNumericHTMLEntities(in: decoded, pattern: #"&#(\d+);"#, radix: 10)
-    decoded = replacingNumericHTMLEntities(in: decoded, pattern: #"&#x([0-9a-fA-F]+);"#, radix: 16)
-    return decoded
-  }
-
-  private static func replacingNumericHTMLEntities(in text: String, pattern: String, radix: Int) -> String {
-    guard let regex = try? NSRegularExpression(pattern: pattern) else {
+    // Single pass: every entity is decoded exactly once, so the output of one
+    // decode (e.g. the "&lt;" in "&#38;lt;") is never decoded again.
+    guard text.contains("&"),
+          let regex = try? NSRegularExpression(pattern: #"&(?:#([0-9]+)|#x([0-9a-fA-F]+)|([A-Za-z][A-Za-z0-9]*));"#) else {
       return text
     }
 
-    let matches = regex.matches(in: text, range: NSRange(text.startIndex..<text.endIndex, in: text))
-    var result = text
-    for match in matches.reversed() {
-      guard let wholeRange = Range(match.range(at: 0), in: result),
-            let valueRange = Range(match.range(at: 1), in: text),
-            let value = UInt32(text[valueRange], radix: radix),
-            let scalar = UnicodeScalar(value) else {
+    let nsText = text as NSString
+    var result = ""
+    var cursor = 0
+    for match in regex.matches(in: text, range: NSRange(location: 0, length: nsText.length)) {
+      let replacement: String?
+      if match.range(at: 1).location != NSNotFound {
+        replacement = htmlEntityScalar(nsText.substring(with: match.range(at: 1)), radix: 10)
+      } else if match.range(at: 2).location != NSNotFound {
+        replacement = htmlEntityScalar(nsText.substring(with: match.range(at: 2)), radix: 16)
+      } else {
+        replacement = namedEntities[nsText.substring(with: match.range(at: 3))]
+      }
+
+      guard let replacement else {
         continue
       }
 
-      result.replaceSubrange(wholeRange, with: String(scalar))
+      result += nsText.substring(with: NSRange(location: cursor, length: match.range.location - cursor))
+      result += replacement
+      cursor = match.range.location + match.range.length
     }
 
+    result += nsText.substring(from: cursor)
     return result
+  }
+
+  private nonisolated static func htmlEntityScalar(_ digits: String, radix: Int) -> String? {
+    guard let value = UInt32(digits, radix: radix), let scalar = UnicodeScalar(value) else {
+      return nil
+    }
+
+    return String(scalar)
   }
 
   private static func smartQuotes(_ text: String) -> String {
@@ -825,7 +858,9 @@ enum ClipboardTextTransform: CaseIterable {
     result = replacingMatches(in: result, pattern: #"(?m)^\s*[-*+]\s+"#, with: "")
     result = replacingMatches(in: result, pattern: #"(?m)^\s*\d+\.\s+"#, with: "")
     result = replacingMatches(in: result, pattern: #"`{1,3}"#, with: "")
-    result = replacingMatches(in: result, pattern: #"[*_~]{1,3}"#, with: "")
+    result = replacingMatches(in: result, pattern: #"\*{1,3}([^\n*]+?)\*{1,3}"#, with: "$1")
+    result = replacingMatches(in: result, pattern: #"(?<![\p{L}\p{N}])_{1,3}([^\n_]+?)_{1,3}(?![\p{L}\p{N}])"#, with: "$1")
+    result = replacingMatches(in: result, pattern: #"~~([^\n~]+?)~~"#, with: "$1")
     return result
   }
 
