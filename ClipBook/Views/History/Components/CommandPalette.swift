@@ -734,6 +734,11 @@ private final class CommandPaletteView: NSView, NSTableViewDataSource, NSTableVi
     return command
   }
 
+  /// Delete (⌫) or Forward Delete (⌦), with any modifiers.
+  private static func isDeleteKeyEvent(_ event: NSEvent) -> Bool {
+    event.type == .keyDown && (event.keyCode == 51 || event.keyCode == 117)
+  }
+
   private static func isAlternateExecutionEvent(_ event: NSEvent) -> Bool {
     event.type == .keyDown
       && event.keyCode == 36
@@ -789,6 +794,13 @@ private final class CommandPaletteView: NSView, NSTableViewDataSource, NSTableVi
     if KeyboardShortcutParser.event(event, matches: "cmd+c"),
        let textView = window?.firstResponder as? NSTextView,
        textView.selectedRange().length > 0 {
+      return false
+    }
+
+    // While a query is typed, the delete keys edit it as in any text field, so
+    // ⌘⌫ clears the query instead of deleting the selected item. With nothing
+    // typed they run the command whose shortcut they are.
+    if Self.isDeleteKeyEvent(event), !searchField.stringValue.isEmpty {
       return false
     }
 

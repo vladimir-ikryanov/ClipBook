@@ -936,6 +936,45 @@ extension SharedProcessStateTests {
 
         @Test
         @MainActor
+        func commandPaletteLeavesDeleteKeysToATypedQuery() throws {
+            TestSupport.ensureAppKitInitialized()
+
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+            harness.model.preferences.hideOnFocusLoss = false
+            let item = ClipboardItem.fixture(kind: .text, text: "Deletable clip")
+            try harness.seedHistory([item])
+
+            let historyWindow = HistoryWindow(model: harness.model, coordinator: harness.coordinator)
+            historyWindow.window.alphaValue = 0
+            historyWindow.show()
+            defer {
+                if let sheet = historyWindow.window.attachedSheet {
+                    historyWindow.window.endSheet(sheet)
+                }
+                historyWindow.window.orderOut(nil)
+            }
+
+            historyWindow.window.sendEvent(try TestSupport.keyDownEvent(keyCode: 40, modifiers: [.command]))
+            let paletteSheet = try #require(historyWindow.window.attachedSheet as? CommandPaletteSheetWindow)
+            let contentView = try #require(paletteSheet.contentView)
+            let searchField = try #require(findEditableTextField(in: contentView))
+            let commandDelete = try TestSupport.keyDownEvent(keyCode: 51, modifiers: [.command])
+
+            // With a query typed, ⌘⌫ is left to the search field and the item stays.
+            searchField.stringValue = "Del"
+            #expect(!paletteSheet.performKeyEquivalent(with: commandDelete))
+            #expect(harness.currentItem(item.id) != nil)
+            #expect(historyWindow.window.attachedSheet === paletteSheet)
+
+            // With nothing typed, ⌘⌫ runs Delete as the palette lists it.
+            searchField.stringValue = ""
+            #expect(paletteSheet.performKeyEquivalent(with: commandDelete))
+            #expect(harness.currentItem(item.id) == nil)
+        }
+
+        @Test
+        @MainActor
         func windowFrameIsSavedOnceTheWindowHasBeenShown() throws {
             TestSupport.ensureAppKitInitialized()
 
@@ -1062,6 +1101,19 @@ private func findEditableTextView(in root: NSView) -> NSTextView? {
     }
     for subview in root.subviews {
         if let found = findEditableTextView(in: subview) {
+            return found
+        }
+    }
+    return nil
+}
+
+@MainActor
+private func findEditableTextField(in root: NSView) -> NSTextField? {
+    if let field = root as? NSTextField, field.isEditable {
+        return field
+    }
+    for subview in root.subviews {
+        if let found = findEditableTextField(in: subview) {
             return found
         }
     }
