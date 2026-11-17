@@ -285,6 +285,52 @@ enum AppCoordinatorTests {
             #expect(harness.preferencesStore.lastKnownKernelBootTime() == 1_700_020_000)
             #expect(harness.preferencesStore.userDefaults.object(forKey: PreferencesStore.legacyUptimeBootTimeKey) as? Double == 1_700_020_000)
         }
+
+        /// The first launch after updating from a build that stored only the
+        /// uptime estimate: a restart since then clears the history.
+        @Test
+        @MainActor
+        func firstLaunchAfterUpdateDetectsARebootFromTheLegacyBootTime() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+
+            harness.model.preferences.clearHistoryOnReboot = true
+            let item = ClipboardItem.fixture(text: "From before the restart")
+            try harness.seedHistory([item])
+            // Written by the earlier build: the boot time plus two hours of sleep.
+            harness.preferencesStore.userDefaults.set(1_700_007_200.0, forKey: PreferencesStore.legacyUptimeBootTimeKey)
+            #expect(harness.preferencesStore.lastKnownKernelBootTime() == nil)
+
+            harness.coordinator.clearHistoryAfterRebootIfNeeded(
+                kernelBootTime: 1_700_100_000,
+                uptimeRelativeBootTime: 1_700_100_000
+            )
+
+            #expect(harness.model.items.isEmpty)
+            #expect(harness.preferencesStore.lastKnownKernelBootTime() == 1_700_100_000)
+        }
+
+        /// The legacy estimate runs ahead of the real boot time by the time spent
+        /// asleep, so without a restart it never looks like a reboot.
+        @Test
+        @MainActor
+        func firstLaunchAfterUpdateIgnoresSleepInTheLegacyBootTime() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+
+            harness.model.preferences.clearHistoryOnReboot = true
+            let item = ClipboardItem.fixture(text: "Survives the update")
+            try harness.seedHistory([item])
+            harness.preferencesStore.userDefaults.set(1_700_007_200.0, forKey: PreferencesStore.legacyUptimeBootTimeKey)
+
+            harness.coordinator.clearHistoryAfterRebootIfNeeded(
+                kernelBootTime: 1_700_000_000,
+                uptimeRelativeBootTime: 1_700_010_800
+            )
+
+            #expect(harness.model.items.map(\.id) == [item.id])
+            #expect(harness.preferencesStore.lastKnownKernelBootTime() == 1_700_000_000)
+        }
     }
 
     @Suite

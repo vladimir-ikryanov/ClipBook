@@ -36,6 +36,13 @@ final class PreferencesStore {
         userDefaults.object(forKey: Self.kernelBootTimeKey) as? Double
     }
 
+    /// The boot time earlier builds stored, estimated as `Date() - systemUptime`.
+    /// Uptime pauses while the Mac sleeps, so the estimate is never earlier than
+    /// the real boot time.
+    func lastKnownUptimeRelativeBootTime() -> Double? {
+        userDefaults.object(forKey: Self.legacyUptimeBootTimeKey) as? Double
+    }
+
     func recordBootTimes(kernelBootTime: TimeInterval, uptimeRelativeBootTime: TimeInterval) {
         userDefaults.set(kernelBootTime, forKey: Self.kernelBootTimeKey)
         userDefaults.set(uptimeRelativeBootTime, forKey: Self.legacyUptimeBootTimeKey)

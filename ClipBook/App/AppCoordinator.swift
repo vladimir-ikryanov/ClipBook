@@ -2940,7 +2940,12 @@ final class AppCoordinator: ObservableObject {
     kernelBootTime: TimeInterval = AppCoordinator.systemBootTime().timeIntervalSince1970,
     uptimeRelativeBootTime: TimeInterval = Date(timeIntervalSinceNow: -ProcessInfo.processInfo.systemUptime).timeIntervalSince1970
   ) {
+    // The first launch after updating from a build that stored only the uptime
+    // estimate falls back to it. The estimate is never earlier than the real
+    // boot time, so the one-sided check below still ignores time spent asleep,
+    // and a restart since that launch still counts as a reboot.
     let previousBootTime = preferencesStore.lastKnownKernelBootTime()
+      ?? preferencesStore.lastKnownUptimeRelativeBootTime()
     preferencesStore.recordBootTimes(
       kernelBootTime: kernelBootTime,
       uptimeRelativeBootTime: uptimeRelativeBootTime
