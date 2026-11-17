@@ -1286,6 +1286,15 @@ final class AppCoordinator: ObservableObject {
       return
     }
     guard !items.isEmpty else {
+      // The history shows that the Trash is empty, but Settings does not,
+      // so the button would otherwise seem to do nothing.
+      if fromSettings {
+        let alert = NSAlert()
+        alert.alertStyle = .informational
+        alert.messageText = L10n.string("Trash is empty")
+        alert.informativeText = L10n.string("There are no items to delete.")
+        present(alert) { _ in }
+      }
       return
     }
 
