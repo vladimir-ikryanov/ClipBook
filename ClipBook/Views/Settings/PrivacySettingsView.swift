@@ -28,6 +28,7 @@ struct PrivacySettingsView: View {
                 .font(.headline)
                 .foregroundStyle(.primary)
                 .padding(.horizontal, 14)
+                .settingsSearchAnchor(L10n.string("Ignored applications"))
 
             Text(L10n.string("Do not capture clipboard changes while these apps are active. Adding an app offers to delete the items already copied from it."))
                 .font(.subheadline)

@@ -3,12 +3,40 @@ import SwiftUI
 
 /// The settings sidebar in the style of System Settings: the app row at the
 /// top, where System Settings shows the Apple Account, followed by groups of
-/// panes with icon tiles.
+/// panes with icon tiles. While searching, it lists the matching panes and
+/// settings instead, each with the path to it.
 struct SettingsSidebar: View {
     @Binding var selection: SettingsSection
+    var searchText: String = ""
+    var onSelectSearchResult: (SettingsSearchResult) -> Void = { _ in }
+
+    @State private var selectedResultID: String?
     @FocusState private var isFocused: Bool
 
+    private var isSearching: Bool {
+        !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
+        Group {
+            if isSearching {
+                resultsList
+            } else {
+                sectionsList
+            }
+        }
+        .focused($isFocused)
+        .onAppear {
+            isFocused = true
+        }
+        .onChange(of: searchText) { _ in
+            selectedResultID = nil
+        }
+    }
+
+    // MARK: - Sections
+
+    private var sectionsList: some View {
         List(selection: $selection) {
             if SettingsSection.visibleSections.contains(.about) {
                 Section {
@@ -27,10 +55,6 @@ struct SettingsSidebar: View {
             }
         }
         .listStyle(.sidebar)
-        .focused($isFocused)
-        .onAppear {
-            isFocused = true
-        }
     }
 
     private func sectionRow(_ section: SettingsSection) -> some View {
@@ -57,6 +81,57 @@ struct SettingsSidebar: View {
         }
         .padding(.vertical, 4)
         .modifier(SidebarSelectionStyle(isSelected: selection == .about))
+    }
+
+    // MARK: - Search results
+
+    private var resultsList: some View {
+        let results = SettingsSearch.results(for: searchText)
+
+        return List(selection: $selectedResultID) {
+            ForEach(results) { result in
+                resultRow(result)
+                    .tag(result.id)
+            }
+        }
+        .listStyle(.sidebar)
+        .overlay {
+            if results.isEmpty {
+                Text(L10n.string("No Results"))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .onChange(of: selectedResultID) { id in
+            guard let id,
+                  let result = SettingsSearch.results(for: searchText).first(where: { $0.id == id }) else {
+                return
+            }
+            onSelectSearchResult(result)
+        }
+    }
+
+    private func resultRow(_ result: SettingsSearchResult) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            SettingsIconTile(section: result.section)
+                .padding(.top, 1)
+
+            VStack(alignment: .leading, spacing: 1) {
+                // Long titles wrap instead of being truncated, as in System
+                // Settings; the sidebar list limits rows to one line otherwise.
+                Text(result.title)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let subtitle = result.subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .padding(.vertical, 2)
+        .modifier(SidebarSelectionStyle(isSelected: result.id == selectedResultID))
     }
 }
 

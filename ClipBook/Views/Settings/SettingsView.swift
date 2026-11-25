@@ -3,6 +3,8 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var model: AppModel
     @EnvironmentObject private var coordinator: AppCoordinator
+    @State private var searchText = ""
+    @State private var searchHighlight: SettingsSearchHighlight?
 
     private var sidebarSelection: Binding<SettingsSection> {
         Binding(
@@ -16,7 +18,11 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationSplitView {
-            SettingsSidebar(selection: sidebarSelection)
+            SettingsSidebar(
+                selection: sidebarSelection,
+                searchText: searchText,
+                onSelectSearchResult: showSearchResult
+            )
                 .navigationSplitViewColumnWidth(min: 190, ideal: 215, max: 260)
         } detail: {
             if #available(macOS 27.0, *) {
@@ -33,6 +39,19 @@ struct SettingsView: View {
                     }
             } else {
                 detailView
+            }
+        }
+        // Like System Settings, the search field sits at the top of the
+        // sidebar, which then lists the matching panes and settings.
+        .searchable(text: $searchText, placement: .sidebar, prompt: Text(L10n.string("Search")))
+        // The highlight of a found setting fades out after a moment.
+        .task(id: searchHighlight) {
+            guard searchHighlight != nil else {
+                return
+            }
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            if !Task.isCancelled {
+                searchHighlight = nil
             }
         }
         .background(.regularMaterial)
@@ -64,9 +83,17 @@ struct SettingsView: View {
         SettingsDetailView(
             selection: coordinator.settingsSection,
             model: model,
-            showsHeader: true
+            showsHeader: true,
+            highlight: searchHighlight
         )
         .environmentObject(coordinator)
+    }
+
+    /// Opens the pane of a search result and, for a setting, scrolls to it
+    /// and highlights it.
+    private func showSearchResult(_ result: SettingsSearchResult) {
+        coordinator.settingsSection = result.section
+        searchHighlight = result.anchor.map { SettingsSearchHighlight(anchor: $0) }
     }
 
     /// Custom title used on macOS 26 and earlier.

@@ -268,6 +268,7 @@ struct RetentionRow: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
+        .settingsSearchAnchor(clipType.title)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .onAppear {
             syncFromValue()

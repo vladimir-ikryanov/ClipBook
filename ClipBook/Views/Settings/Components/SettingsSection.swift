@@ -112,4 +112,19 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
             ?? ReleaseConfiguration.marketingVersion
     }
+
+    /// Whether the section's name contains the query, ignoring case and
+    /// diacritics. Settings inside the pane are found by SettingsSearch.
+    func nameMatches(_ query: String) -> Bool {
+        let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else {
+            return true
+        }
+
+        var names = [title, detailTitle]
+        if self == .about {
+            names.append("ClipBook")
+        }
+        return names.contains { $0.localizedStandardContains(query) }
+    }
 }

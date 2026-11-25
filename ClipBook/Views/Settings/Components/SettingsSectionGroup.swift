@@ -38,6 +38,7 @@ struct SettingsSectionGroup<Content: View>: View {
                     .font(.headline)
                     .foregroundStyle(.primary)
                     .padding(.horizontal, 11)
+                    .settingsSearchAnchor(title)
             }
             _VariadicView.Tree(DividedVStack()) {
                 content
