@@ -531,3 +531,89 @@ extension SharedProcessStateTests {
         }
     }
 }
+
+// Turning the setting on saves the preferences, which applies appearance and language.
+extension SharedProcessStateTests {
+    @Suite
+    struct MissingFileRemovalTests {
+        /// A file item for a new file in the harness's directory, and the file's URL.
+        @MainActor
+        private static func fileItem(
+            in harness: TestCoordinatorHarness,
+            named name: String,
+            isFavorite: Bool = false
+        ) throws -> (ClipboardItem, URL) {
+            let url = harness.supportDirectory.appendingPathComponent(name)
+            try Data("content".utf8).write(to: url)
+            let item = ClipboardItem.fixture(kind: .file, text: url.path, filePaths: [url.path], isFavorite: isFavorite)
+            return (item, url)
+        }
+
+        @Test
+        @MainActor
+        func turningTheSettingOnMovesItemsOfDeletedFilesToTheTrash() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+            let (deleted, deletedURL) = try Self.fileItem(in: harness, named: "Deleted.txt")
+            let (kept, _) = try Self.fileItem(in: harness, named: "Kept.txt")
+            try harness.seedHistory([deleted, kept])
+            try FileManager.default.removeItem(at: deletedURL)
+
+            harness.coordinator.setRemovesMissingFiles(true)
+
+            #expect(harness.model.preferences.removeMissingFiles)
+            #expect(harness.preferencesStore.load().removeMissingFiles)
+            #expect(harness.currentItem(deleted.id) == nil)
+            #expect(harness.currentItem(kept.id) != nil)
+            #expect(try harness.trashedIDs() == [deleted.id])
+        }
+
+        @Test
+        @MainActor
+        func itemsOfDeletedFilesStayWhileTheSettingIsOff() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+            let (item, url) = try Self.fileItem(in: harness, named: "Deleted.txt")
+            try harness.seedHistory([item])
+            try FileManager.default.removeItem(at: url)
+
+            harness.coordinator.setRemovesMissingFiles(false)
+
+            #expect(harness.currentItem(item.id) != nil)
+            #expect(try harness.trashedIDs().isEmpty)
+        }
+
+        @Test
+        @MainActor
+        func favoritesStayWhenFavoritesAreKept() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+            harness.model.preferences.keepFavoritesOnClearHistory = true
+            let (favorite, url) = try Self.fileItem(in: harness, named: "Favorite.txt", isFavorite: true)
+            try harness.seedHistory([favorite])
+            try FileManager.default.removeItem(at: url)
+
+            harness.coordinator.setRemovesMissingFiles(true)
+
+            #expect(harness.currentItem(favorite.id) != nil)
+            #expect(try harness.trashedIDs().isEmpty)
+        }
+
+        /// The removal isn't the user's change, so Undo leaves it alone.
+        @Test
+        @MainActor
+        func undoDoesNotBringBackItemsOfDeletedFiles() throws {
+            let harness = try TestSupport.makeTestCoordinator()
+            defer { harness.cleanup() }
+            let (item, url) = try Self.fileItem(in: harness, named: "Deleted.txt")
+            try harness.seedHistory([item])
+            try FileManager.default.removeItem(at: url)
+
+            harness.coordinator.setRemovesMissingFiles(true)
+            harness.coordinator.undoHistoryChange()
+
+            #expect(harness.currentItem(item.id) == nil)
+            #expect(try harness.trashedIDs() == [item.id])
+        }
+    }
+}

@@ -324,4 +324,57 @@ enum ServicesAndUtilitiesTests {
             #expect(dismissalCount == 1)
         }
     }
+
+    @Suite
+    struct MissingFileDetectorTests {
+        private static let volumes = [
+            MissingFileDetector.Volume(path: "/", isLocal: true),
+            MissingFileDetector.Volume(path: "/Volumes/Backup", isLocal: true),
+            MissingFileDetector.Volume(path: "/Volumes/Server", isLocal: false),
+        ]
+
+        /// A detector for `volumes` on which no file exists.
+        private static let detector = MissingFileDetector(volumes: volumes) { _ in false }
+
+        @Test(arguments: [
+            "/Users/me/Documents/Report.pdf",
+            "/Volumes/Backup/Photos/Beach.jpg",
+        ])
+        func aFileGoneFromALocalVolumeIsMissing(path: String) {
+            #expect(Self.detector.isMissing(path))
+        }
+
+        @Test(arguments: [
+            // A network volume.
+            "/Volumes/Server/Shared/Plan.key",
+            // Drives that aren't connected, and a share that isn't mounted.
+            "/Volumes/Travel/Notes.txt",
+            "/Volumes/BackupOld/Notes.txt",
+            "/Network/Servers/nas/Notes.txt",
+            "/net/nas/Notes.txt",
+            // Not a full path.
+            "Notes.txt",
+        ])
+        func aFileThatMayComeBackIsNotMissing(path: String) {
+            #expect(!Self.detector.isMissing(path))
+        }
+
+        @Test
+        func aFileThatExistsIsNotMissing() {
+            let detector = MissingFileDetector(volumes: Self.volumes) { _ in true }
+            #expect(!detector.isMissing("/Users/me/Documents/Report.pdf"))
+        }
+
+        @Test
+        func anItemIsMissingOnlyWhenAllOfItsFilesAreGone() {
+            let gone = "/Users/me/Gone.txt"
+            let here = "/Users/me/Here.txt"
+            let detector = MissingFileDetector(volumes: Self.volumes) { $0 == here }
+
+            #expect(detector.isMissingAllFiles(of: .fixture(kind: .file, filePaths: [gone])))
+            #expect(!detector.isMissingAllFiles(of: .fixture(kind: .file, filePaths: [gone, here])))
+            #expect(!detector.isMissingAllFiles(of: .fixture(kind: .file, filePaths: [])))
+            #expect(!detector.isMissingAllFiles(of: .fixture(kind: .text, filePaths: [gone])))
+        }
+    }
 }
