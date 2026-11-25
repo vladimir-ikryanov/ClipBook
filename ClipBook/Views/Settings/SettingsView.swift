@@ -17,7 +17,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationSplitView {
             SettingsSidebar(selection: sidebarSelection)
-                .navigationSplitViewColumnWidth(min: 150, ideal: 170, max: 170)
+                .navigationSplitViewColumnWidth(min: 190, ideal: 215, max: 260)
         } detail: {
             if #available(macOS 27.0, *) {
                 // On macOS 27 a custom title item in the navigation placement
@@ -63,7 +63,8 @@ struct SettingsView: View {
     private var detailView: some View {
         SettingsDetailView(
             selection: coordinator.settingsSection,
-            model: model
+            model: model,
+            showsHeader: true
         )
         .environmentObject(coordinator)
     }
