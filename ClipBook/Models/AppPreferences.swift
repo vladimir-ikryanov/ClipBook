@@ -228,6 +228,9 @@ struct AppPreferences: Codable, Equatable {
     var emailRetentionDays = Self.unlimitedRetentionDays
     var colorRetentionDays = Self.unlimitedRetentionDays
     var keepFavoritesOnClearHistory = true
+    /// Whether file items go to the Trash once all of their files are gone,
+    /// deleted or moved elsewhere. See `MissingFileDetector`.
+    var removeMissingFiles = false
     /// How many days deleted items stay in the Trash. Zero turns the Trash
     /// off, and deleting an item then deletes it for good.
     var trashRetentionDays = Self.defaultTrashRetentionDays
@@ -415,6 +418,7 @@ struct AppPreferences: Codable, Equatable {
         emailRetentionDays = try container.decodeIfPresent(Int.self, forKey: .emailRetentionDays) ?? defaults.emailRetentionDays
         colorRetentionDays = try container.decodeIfPresent(Int.self, forKey: .colorRetentionDays) ?? defaults.colorRetentionDays
         keepFavoritesOnClearHistory = try container.decodeIfPresent(Bool.self, forKey: .keepFavoritesOnClearHistory) ?? defaults.keepFavoritesOnClearHistory
+        removeMissingFiles = try container.decodeIfPresent(Bool.self, forKey: .removeMissingFiles) ?? defaults.removeMissingFiles
         trashRetentionDays = try container.decodeIfPresent(Int.self, forKey: .trashRetentionDays) ?? defaults.trashRetentionDays
         warnOnClearHistory = try container.decodeIfPresent(Bool.self, forKey: .warnOnClearHistory) ?? defaults.warnOnClearHistory
         clearHistoryOnQuit = try container.decodeIfPresent(Bool.self, forKey: .clearHistoryOnQuit) ?? defaults.clearHistoryOnQuit

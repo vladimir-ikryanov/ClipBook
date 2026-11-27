@@ -30,6 +30,10 @@ struct StorageSettingsView: View {
         RetentionRow(clipType: .color, value: retentionDays(for: .color))
       }
     }
+
+    SettingsSectionGroup() {
+      SettingsToggle(title: L10n.string("Remove files that no longer exist"), description: L10n.string("Once a copied file is deleted or moved, its item goes to the Trash. Files on disconnected drives and network volumes stay in the history."), isOn: removesMissingFiles)
+    }
     
     SettingsSectionGroup() {
       PickerRow(title: L10n.string("Keep deleted items in Trash"), description: L10n.string("Deleted items can be put back until this period ends. Type Trash in the search field to see them.")) {
@@ -55,6 +59,15 @@ struct StorageSettingsView: View {
       SettingsToggle(title: L10n.string("Clear history on quit"), description: L10n.string("Delete unprotected items when ClipBook quits."), isOn: $model.preferences.clearHistoryOnQuit)
       SettingsToggle(title: L10n.string("Clear history after Mac reboot"), description: L10n.string("Delete unprotected items after a system restart."), isOn: $model.preferences.clearHistoryOnReboot)
     }
+  }
+
+  // Turning it on removes the items right away, which the coordinator takes
+  // care of.
+  private var removesMissingFiles: Binding<Bool> {
+    Binding(
+      get: { model.preferences.removeMissingFiles },
+      set: { coordinator.setRemovesMissingFiles($0) }
+    )
   }
 
   // A shorter period deletes the items that have been in the Trash longer,

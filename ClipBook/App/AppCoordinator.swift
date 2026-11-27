@@ -224,6 +224,7 @@ final class AppCoordinator: ObservableObject {
     if activatesApp {
       NSApp.activate(ignoringOtherApps: true)
     }
+    removeMissingFileItems()
     historyWindow?.show(ignoresNextResignKey: ignoresNextResignKey, beside: visibleOnboardingWindow?.window)
     presentTrialSheetIfNeeded()
     historyPanelDidShow.send()
@@ -278,6 +279,7 @@ final class AppCoordinator: ObservableObject {
     recordTrialUsage()
     interruptCopySequenceTracking()
     resetPasteNextPointer()
+    removeMissingFileItems()
     historyWindow?.show(beside: visibleOnboardingWindow?.window)
     presentTrialSheetIfNeeded()
     historyPanelDidShow.send()
@@ -1208,8 +1210,9 @@ final class AppCoordinator: ObservableObject {
   /// Moves the items to the Trash, where they keep their files and can be
   /// put back until the Trash period runs out. With the Trash turned off they
   /// are deleted for good. So is an item whose content the history hides,
-  /// since a secret the user deletes is expected to be gone.
-  private func moveToTrash(_ items: [ClipboardItem]) throws {
+  /// since a secret the user deletes is expected to be gone. A move the user
+  /// didn't make leaves Undo alone, so it still undoes the user's own change.
+  private func moveToTrash(_ items: [ClipboardItem], registersUndo: Bool = true) throws {
     guard !items.isEmpty else {
       return
     }
@@ -1247,6 +1250,9 @@ final class AppCoordinator: ObservableObject {
     model.remove(trashedIDSet)
     model.insertIntoTrash(trashedItems)
 
+    guard registersUndo else {
+      return
+    }
     historyUndoManager.registerUndo(withTarget: self) { coordinator in
       coordinator.restoreFromTrash(ids: trashedItemIDs, selection: selection)
     }
@@ -1416,6 +1422,49 @@ final class AppCoordinator: ObservableObject {
     model.preferences.trashRetentionDays = days
     savePreferences()
     purgeExpiredTrashedItems()
+  }
+
+  // MARK: - Missing files
+
+  /// Turns the removal of file items whose files are gone on or off. Turning
+  /// it on removes them right away.
+  func setRemovesMissingFiles(_ isOn: Bool) {
+    guard isOn != model.preferences.removeMissingFiles else {
+      return
+    }
+
+    model.preferences.removeMissingFiles = isOn
+    savePreferences()
+    removeMissingFileItems()
+  }
+
+  /// Moves the file items whose files are all gone to the Trash, when the
+  /// setting is on. It runs with the retention check and before the history
+  /// shows, so a file deleted in the Finder is gone from the list the next
+  /// time it opens. Favorites and tagged items stay when the user keeps them,
+  /// as they do when older items expire.
+  private func removeMissingFileItems() {
+    guard model.preferences.removeMissingFiles, !isHistoryArchiveOperationRunning else {
+      return
+    }
+
+    let keepsFavoritesAndTaggedItems = model.preferences.keepFavoritesOnClearHistory
+    let detector = MissingFileDetector()
+    let missingItems = model.items.filter { item in
+      if keepsFavoritesAndTaggedItems, item.isFavorite || !item.tags.isEmpty {
+        return false
+      }
+      return detector.isMissingAllFiles(of: item)
+    }
+    guard !missingItems.isEmpty else {
+      return
+    }
+
+    do {
+      try moveToTrash(missingItems, registersUndo: false)
+    } catch {
+      model.lastError = error.localizedDescription
+    }
   }
 
   /// Deletes the items that have been in the Trash longer than its period,
@@ -1702,16 +1751,18 @@ final class AppCoordinator: ObservableObject {
     }
   }
 
-  /// Removes items that outlived their "Keep history" period. Nothing is
-  /// deleted while the user is still deciding on a new period, since they
-  /// may cancel it, nor while an archive is being imported, since its items
-  /// are checked once it is in.
+  /// Removes items that outlived their "Keep history" period and, when that
+  /// setting is on, file items whose files are gone. Nothing is deleted while
+  /// the user is still deciding on a new period, since they may cancel it,
+  /// nor while an archive is being imported, since its items are checked
+  /// once it is in.
   private func applyRetention() {
     guard !isRetentionPromptPresented, !isHistoryArchiveOperationRunning else {
       return
     }
 
     purgeExpiredTrashedItems()
+    removeMissingFileItems()
     let policy = HistoryRetentionPolicy(preferences: model.preferences)
     guard !policy.isEmpty else {
       return
