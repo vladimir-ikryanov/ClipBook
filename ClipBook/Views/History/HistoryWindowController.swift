@@ -1528,6 +1528,14 @@ final class HistoryContentViewController: NSViewController {
     case 126:
       listPaneView.moveSelection(.up)
       return true
+    // The tiles go left and right too, so the preview follows them the same
+    // way it follows up and down.
+    case 123 where listPaneView.showsTiles:
+      listPaneView.moveSelection(by: .previous)
+      return true
+    case 124 where listPaneView.showsTiles:
+      listPaneView.moveSelection(by: .next)
+      return true
     default:
       return false
     }
