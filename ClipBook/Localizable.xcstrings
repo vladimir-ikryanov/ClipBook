@@ -581,6 +581,26 @@
         }
       }
     },
+    "Activate or manage your ClipBook license." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ative ou gerencie sua licença do ClipBook."
+          }
+        }
+      }
+    },
+    "Back up your history and tags, or bring them from another Mac." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faça backup do histórico e das etiquetas ou traga-os de outro Mac."
+          }
+        }
+      }
+    },
     "Choose a list mode" : {
       "localizations" : {
         "de" : {
@@ -627,6 +647,56 @@
         }
       }
     },
+    "Choose how ClipBook starts, looks, and opens." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha como o ClipBook inicia, sua aparência e onde ele abre."
+          }
+        }
+      }
+    },
+    "Choose how long items stay in your history and in the Trash." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha por quanto tempo os itens ficam no histórico e na Lixeira."
+          }
+        }
+      }
+    },
+    "Choose how sensitive content is handled and which apps ClipBook ignores." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha como o conteúdo sensível é tratado e quais apps o ClipBook ignora."
+          }
+        }
+      }
+    },
+    "Choose what the history shows and what clicks and keys do with items." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha o que o histórico mostra e o que cliques e teclas fazem com os itens."
+          }
+        }
+      }
+    },
+    "Choose which actions play a sound." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha quais ações tocam um som."
+          }
+        }
+      }
+    },
     "Comfortable rows show more of each item. Compact rows fit more items in the window." : {
       "localizations" : {
         "de" : {
@@ -669,6 +739,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "舒适的行显示每个项目的更多内容。紧凑的行可在窗口中显示更多项目。"
+          }
+        }
+      }
+    },
+    "Create and edit tags to organize your clipboard items." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crie e edite etiquetas para organizar os itens do histórico."
+          }
+        }
+      }
+    },
+    "Set the keyboard shortcuts for the history window and its items." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defina os atalhos de teclado da janela do histórico e dos itens."
           }
         }
       }
@@ -24163,6 +24253,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "使用默认粘贴快捷方式进行纯文本粘贴操作。"
+          }
+        }
+      }
+    },
+    "Version %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versión %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versione %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バージョン %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versão %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "版本 %@"
           }
         }
       }
