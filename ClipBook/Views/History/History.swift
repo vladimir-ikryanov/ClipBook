@@ -116,6 +116,18 @@ final class History: NSView {
   var rowsView: HistoryRowsView {
     showsTiles ? tileGrid : tableView
   }
+  /// Whether the list paints its own background. Next to the preview pane it
+  /// doesn't, and shows the window background, which has the toolbar's color.
+  var drawsBackground = true {
+    didSet {
+      guard drawsBackground != oldValue else {
+        return
+      }
+
+      scrollView.drawsBackground = drawsBackground
+      tableView.backgroundColor = drawsBackground ? HistoryAppearance.backgroundColor : .clear
+    }
+  }
   private let scrollView = OverlayScrollView()
   private static let scrollBottomPadding: CGFloat = 4
   private static let firstRowPaddingBelowNotice: CGFloat = 8

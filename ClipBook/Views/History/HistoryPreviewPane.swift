@@ -434,10 +434,15 @@ final class HistoryPreviewSplitView: NSView {
   /// list can scroll its last row clear of it.
   var onListBottomFadeChange: ((CGFloat) -> Void)?
 
+  /// Called with whether the list should paint its own background: it
+  /// doesn't while it sits next to the pane. See updateListBackground(isSideBySide:).
+  var onListBackgroundChange: ((_ drawsOwnBackground: Bool) -> Void)?
+
   private var resizeStartLength: CGFloat = 0
   // Fades the rows out just above a pane at the bottom of the window, so the
   // list runs into the pane rather than being cut off along its edge.
   private let listFadeView = HistoryListFadeView()
+  private var isListSideBySide = false
   private static let listFadeHeight: CGFloat = 32
   private var listBottomFade: CGFloat = 0
 
@@ -486,6 +491,7 @@ final class HistoryPreviewSplitView: NSView {
       previewPane.position = position
       onPositionChange?(position)
     }
+    updateListBackground(isSideBySide: isPreviewShown && position == .right)
 
     let inset = HistoryPreviewPane.inset
     guard isPreviewShown else {
@@ -539,6 +545,21 @@ final class HistoryPreviewSplitView: NSView {
       // Side by side, the pane has no edge running across the list.
       setListBottomFade(0)
     }
+  }
+
+  // Side by side, the list stops below the toolbar. On macOS 26 and later the
+  // toolbar then shows the plain window background, while a scroll view that
+  // draws its background shows a material, tinted by the desktop picture,
+  // that doesn't match it. The list leaves its background to the window
+  // there, so it has the toolbar's color. Measured on macOS 27 in dark mode:
+  // #252525 for the toolbar and the window, #27292A for the list's material.
+  private func updateListBackground(isSideBySide: Bool) {
+    guard isSideBySide != isListSideBySide else {
+      return
+    }
+
+    isListSideBySide = isSideBySide
+    onListBackgroundChange?(!isSideBySide)
   }
 
   private func placeListAbovePane() {

@@ -1700,6 +1700,9 @@ final class HistoryContentViewController: NSViewController {
     splitView.onListBottomFadeChange = { [weak self] height in
       self?.listPaneView.additionalBottomContentInset = height
     }
+    splitView.onListBackgroundChange = { [weak self] drawsOwnBackground in
+      self?.listPaneView.drawsBackground = drawsOwnBackground
+    }
     splitView.detailsPaneHeight = { [weak self] width in
       self?.previewPaneController?.detailsHeight(forWidth: width) ?? 0
     }
