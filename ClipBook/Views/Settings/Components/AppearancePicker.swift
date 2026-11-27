@@ -35,6 +35,7 @@ struct PreviewOptionPicker<Options: View>: View {
             }
         }
         .padding(.vertical, 8)
+        .settingsSearchAnchor(title)
     }
 }
 

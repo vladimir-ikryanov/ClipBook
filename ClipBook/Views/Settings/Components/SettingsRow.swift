@@ -26,5 +26,6 @@ struct SettingsRow<Trailing: View>: View {
             trailing
         }
         .padding(.vertical, 9)
+        .settingsSearchAnchor(title)
     }
 }

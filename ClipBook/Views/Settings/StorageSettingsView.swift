@@ -14,6 +14,7 @@ struct StorageSettingsView: View {
         .font(.headline)
         .foregroundStyle(.primary)
         .padding(.horizontal, 14)
+        .settingsSearchAnchor(L10n.string("Keep history"))
 
       Text(L10n.string("Select how long to keep individual history items. Items older than this period will be automatically removed from the history. Choose Never to stop capturing a type of content."))
         .font(.subheadline)

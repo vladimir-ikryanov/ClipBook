@@ -55,6 +55,7 @@ struct ShortcutRow: View {
             }
         }
         .padding(.vertical, 7)
+        .settingsSearchAnchor(title)
     }
 
     @ViewBuilder
